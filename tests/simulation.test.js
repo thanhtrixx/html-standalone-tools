@@ -245,8 +245,8 @@ async function runSimulationTests() {
     `Maturity payout returned principal + interest to flexible pool`
   );
 
-  // Test 6: Unified Auto 6M Threshold Allocation (ADR-0005)
-  // Starting with 450M in pool -> should trigger TWO 200M Auto 6M deposits, leaving 50M
+  // Test 6: Unified Auto Term Threshold Allocation & Consolidated Sweep (ADR-0005)
+  // Starting with 450M in pool -> should trigger ONE consolidated Auto Term deposit for 450M, leaving 0M in pool
   const bigPoolPortfolio = [
     {
       "Account Name": "Initial Big Pool",
@@ -259,44 +259,73 @@ async function runSimulationTests() {
     },
   ];
 
-  const auto6mSimRes = simulate(
+  const autoTermSimRes = simulate(
     {
       targetDateStr: formatDate(oneYearLater),
       monthlySalary: 0,
       salaryGrowthRate: 0,
       inflationRate: 0,
       poolAnnualRate: 0,
-      term6MAnnualRate: 0.058, // 5.8%
+      autoTermAnnualRate: 0.058, // 5.8%
+      autoTermThreshold: 200000000,
+      autoTermMonths: 6,
       savingsGoal: 0,
     },
     bigPoolPortfolio
   );
 
-  const auto6mCreationLogs = auto6mSimRes.simulationLogs.filter(
-    (l) => l.type === "NEW_6M"
+  const day0Logs = autoTermSimRes.simulationLogs.filter(
+    (l) =>
+      (l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM") &&
+      l.date === formatDate(today)
   );
   assert(
-    auto6mCreationLogs.length >= 2,
-    `Created multiple Auto 6M accounts when pool >= 400M (created: ${auto6mCreationLogs.length})`
+    day0Logs.length === 1,
+    `On day 0, created exactly one consolidated Auto Term deposit (created: ${day0Logs.length})`
   );
   assert(
-    auto6mSimRes.totals.created6MCount >= 2,
-    `Auto 6M total count matches (${auto6mSimRes.totals.created6MCount})`
+    day0Logs[0].amount === 450000000,
+    `Auto Term deposit locked full pool balance of 450M VND (locked: ${day0Logs[0].amount})`
+  );
+  assert(
+    autoTermSimRes.totals.created6MCount >= 2,
+    `Auto Term rolled over upon maturity over 1-year timeline (total: ${autoTermSimRes.totals.created6MCount})`
   );
 
-  // First day snapshot pool balance should be 450M - 400M = 50M
-  const firstDaySnap = auto6mSimRes.dailySnapshots[0];
+  // First day snapshot pool balance should be 450M - 450M = 0
+  const firstDaySnap = autoTermSimRes.dailySnapshots[0];
   assert(
-    Math.round(firstDaySnap.poolBalance) === 50000000,
-    `Pool balance reduced to 50M after locking two 200M chunks (got: ${firstDaySnap.poolBalance})`
+    Math.round(firstDaySnap.poolBalance) === 0,
+    `Pool balance reduced to 0 after locking full 450M balance (got: ${firstDaySnap.poolBalance})`
   );
   assert(
-    Math.round(firstDaySnap.fixedSavingsBalance) === 400000000,
-    `Active fixed savings holds 400M across the two Auto 6M accounts (got: ${firstDaySnap.fixedSavingsBalance})`
+    Math.round(firstDaySnap.fixedSavingsBalance) === 450000000,
+    `Active fixed savings holds 450M in the single Auto Term account (got: ${firstDaySnap.fixedSavingsBalance})`
   );
   assert(
     Math.round(firstDaySnap.totalWealth) === 450000000,
     `Total wealth is preserved across accounts (450M)`
+  );
+
+  // Subtest 6b: Disabling Auto Term when threshold = 0
+  const disabledAutoTermSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0.05,
+      autoTermThreshold: 0, // Disabled
+      savingsGoal: 0,
+    },
+    bigPoolPortfolio
+  );
+  const disabledLogs = disabledAutoTermSim.simulationLogs.filter(
+    (l) => l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM"
+  );
+  assert(
+    disabledLogs.length === 0,
+    "Disabling auto-allocation (threshold = 0) creates 0 term accounts and keeps funds liquid in pool"
   );
 
   // Test 7: Scheduled Withdrawals and Flexible Pool Deficit Handling (ADR-0001)

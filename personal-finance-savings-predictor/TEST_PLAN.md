@@ -39,7 +39,7 @@ npm run test:build    # Compacted build pipeline tests
 | **R17** | Scenario Comparison         | Compare current vs projected 2-year scenario                     | P3       |
 | **R18** | Export Chart Image          | Download growth chart as PNG                                     | P3       |
 | **R19** | Print Summary               | Print-friendly layout via `window.print()`                       | P2       |
-| **R20** | Auto 6M Rule                | Create 6M term when pool ≥ 200M VND                              | P0       |
+| **R20** | Auto Term Allocation Rule   | Sweep full pool into single term deposit when pool ≥ threshold   | P0       |
 | **R21** | Vietnamese Language Support | Language selector + full i18n translations for Vietnamese        | P1       |
 
 ---
@@ -458,15 +458,23 @@ try {
 }
 ```
 
-### 🔹 R20: Auto 6M Rule
+### 🔹 R20: Auto Term Allocation Rule
 
 ```javascript
-// Test: Auto 6M term creation when pool >= 200M VND
-console.log("%🏦 R20: Auto 6M Rule", "color: #6366f1; font-weight: bold");
-// Set up high initial pool
-workingCSVData[3].Principal = "250000000"; // Set Non-Term Pool to 250M
+// Test: Auto Term creation when pool >= threshold (default 200M VND)
+console.log(
+  "%🏦 R20: Auto Term Allocation Rule",
+  "color: #6366f1; font-weight: bold"
+);
+// Set up high initial pool (450M)
+workingCSVData[3].Principal = "450000000"; // Set Non-Term Pool to 450M
 document.getElementById("inputPoolRate").value = "0.5";
-document.getElementById("input6MRate").value = "6.0";
+if (document.getElementById("inputAutoTermRate"))
+  document.getElementById("inputAutoTermRate").value = "5.8";
+if (document.getElementById("inputAutoTermThreshold"))
+  document.getElementById("inputAutoTermThreshold").value = "200000000";
+if (document.getElementById("inputAutoTermMonths"))
+  document.getElementById("inputAutoTermMonths").value = "6";
 document.getElementById("inputSalary").value = "0"; // No salary
 document.getElementById("inputTargetDate").value = "";
 const tToday = new Date();
@@ -477,14 +485,22 @@ const tTarget = new Date(
 );
 document.getElementById("inputTargetDate").value = formatDate(tTarget);
 runSimulation();
-const auto6mLogs = simulationLogs.filter((l) => l.type === "NEW_6M");
+const autoTermLogs = simulationLogs.filter(
+  (l) => l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM"
+);
 console.assert(
-  auto6mLogs.length > 0,
-  "Auto 6M should be created when pool >= 200M"
+  autoTermLogs.length === 1,
+  "Exactly one consolidated Auto Term deposit created for 450M"
+);
+console.assert(
+  autoTermLogs[0].amount === 450000000,
+  "Auto Term deposit holds full 450M balance"
 );
 console.log(
-  "✅ Auto 6M rule:",
-  auto6mLogs.length > 0 ? `PASS (${auto6mLogs.length} accounts)` : "FAIL"
+  "✅ Auto Term Allocation rule:",
+  autoTermLogs.length === 1 && autoTermLogs[0].amount === 450000000
+    ? "PASS"
+    : "FAIL"
 );
 // Restore
 workingCSVData[3].Principal = "15000000";

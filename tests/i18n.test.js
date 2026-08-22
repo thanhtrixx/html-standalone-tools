@@ -258,6 +258,9 @@ async function runI18nTests() {
   getOrCreateEl("inputInflation").value = "4";
   getOrCreateEl("inputSavingsGoal").value = "1000000000";
   getOrCreateEl("inputPoolRate").value = "0.5";
+  getOrCreateEl("inputAutoTermThreshold").value = "200000000";
+  getOrCreateEl("inputAutoTermMonths").value = "6";
+  getOrCreateEl("inputAutoTermRate").value = "5.8";
   getOrCreateEl("input6MRate").value = "5.8";
 
   // Run in English

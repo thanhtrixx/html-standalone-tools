@@ -35,7 +35,7 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
     │       ├── 0002-anniversary-based-salary-escalation.md
     │       ├── 0003-locale-aware-number-and-date-formatting.md
     │       ├── 0004-pure-simulation-engine-separation.md
-    │       └── 0005-unified-threshold-auto-6m-allocation.md
+    │       └── 0005-unified-threshold-auto-term-allocation.md
     ├── ACTION_PLAN.md                          # Implementation roadmap & checklist
     ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs
     └── TEST_PLAN.md                            # Automated console & manual test suite

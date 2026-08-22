@@ -639,19 +639,53 @@
           <div>
             <label
               class="block text-xs font-medium text-slate-400 mb-1"
-              for="input6MRate"
-              data-i18n="lbl_6m_rate"
-              >6M Term Rate (%/yr)</label
+              for="inputAutoTermThreshold"
+              data-i18n="lbl_auto_term_threshold"
+              >Auto Term Threshold (VND)</label
             >
             <input
               type="number"
-              id="input6MRate"
+              id="inputAutoTermThreshold"
+              value="200000000"
+              min="0"
+              step="10000000"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputAutoTermMonths"
+              data-i18n="lbl_auto_term_months"
+              >Auto Term Duration (Months)</label
+            >
+            <input
+              type="number"
+              id="inputAutoTermMonths"
+              value="6"
+              min="1"
+              max="60"
+              step="1"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputAutoTermRate"
+              data-i18n="lbl_auto_term_rate"
+              >Auto Term Rate (%/yr)</label
+            >
+            <input
+              type="number"
+              id="inputAutoTermRate"
               value="5.8"
               min="0"
               max="15"
               step="0.1"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+            <input type="hidden" id="input6MRate" value="5.8" />
           </div>
         </div>
         <div class="mt-4 flex flex-wrap items-center gap-3">
@@ -843,7 +877,7 @@
         <div
           class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
           role="region"
-          aria-label="Pool and auto 6m accounts"
+          aria-label="Pool and auto term accounts"
         >
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition"
@@ -851,8 +885,8 @@
           <div class="flex items-center justify-between text-slate-400 mb-2">
             <span
               class="text-xs font-medium uppercase tracking-wider"
-              data-i18n="hdr_pool_auto6m"
-              >Pool & Auto 6M</span
+              data-i18n="hdr_pool_auto_term"
+              >Pool & Auto Term</span
             ><i class="fa-solid fa-vault text-purple-400 text-lg"></i>
           </div>
           <div
@@ -867,7 +901,7 @@
           <div
             class="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-800/80 flex justify-between items-center"
           >
-            <span data-i18n="lbl_auto6m">Auto 6M:</span
+            <span data-i18n="lbl_auto_term">Auto Term:</span
             ><span id="metricCreated6MCount" class="font-bold text-amber-400"
               >0</span
             >
@@ -1018,7 +1052,9 @@
                   ><i
                     class="fa-solid fa-arrows-rotate text-emerald-400 mr-2"
                   ></i
-                  ><span data-i18n="lbl_auto6m_interest">Auto 6M</span></span
+                  ><span data-i18n="lbl_auto_term_interest"
+                    >Auto Term</span
+                  ></span
                 ><span
                   id="txtAuto6MInterest"
                   class="font-mono font-bold text-slate-200"
@@ -1529,7 +1565,10 @@
           lbl_inflation: "Inflation Rate (%/yr)",
           lbl_savings_goal: "Savings Goal (VND)",
           lbl_pool_rate: "Pool Rate (%/yr)",
-          lbl_6m_rate: "6M Term Rate (%/yr)",
+          lbl_auto_term_threshold: "Auto Term Threshold (VND)",
+          lbl_auto_term_months: "Auto Term Duration (Months)",
+          lbl_auto_term_rate: "Auto Term Rate (%/yr)",
+          lbl_6m_rate: "Auto Term Rate (%/yr)",
           btn_run_sim: "Run Simulation",
           btn_reset: "Reset",
           preset_1y: "1 Year",
@@ -1552,9 +1591,11 @@
           yield_suffix: "yield",
           hdr_total_salary: "Total Salary",
           lbl_monthly_deposits: "monthly deposits",
-          hdr_pool_auto6m: "Pool & Auto 6M",
+          hdr_pool_auto6m: "Pool & Auto Term",
+          hdr_pool_auto_term: "Pool & Auto Term",
           lbl_pool: "Pool:",
-          lbl_auto6m: "Auto 6M:",
+          lbl_auto6m: "Auto Term:",
+          lbl_auto_term: "Auto Term:",
           auto_account_count: "{count} account(s)",
           lbl_real_prefix: "real: ",
 
@@ -1584,7 +1625,8 @@
           hdr_earnings_breakdown: "Earnings Breakdown",
           lbl_csv_interest: "CSV Interest",
           lbl_pool_interest: "Pool Interest",
-          lbl_auto6m_interest: "Auto 6M",
+          lbl_auto6m_interest: "Auto Term",
+          lbl_auto_term_interest: "Auto Term",
           lbl_salary_deposited: "Salary",
           lbl_withdrawals: "Withdrawals",
 
@@ -1627,7 +1669,7 @@
 
           // Savings Table
           hdr_savings_accounts: "Savings Accounts",
-          lbl_savings_sub: "CSV + Auto 6M + Withdrawals",
+          lbl_savings_sub: "CSV + Auto Term + Withdrawals",
           th_account: "Account",
           th_principal: "Principal",
           th_rate: "Rate",
@@ -1637,19 +1679,23 @@
           status_withdrawal: "Withdrawal",
           status_matured: "Matured / Pool",
           status_active: "Active",
-          badge_auto6m: "(Auto 6M)",
+          badge_auto6m: "(Auto Term)",
+          badge_auto_term: "(Auto Term)",
           no_milestones: "No major milestones recorded.",
 
           // Simulation Milestones Logs
           hdr_sim_logs: "Simulation Milestones",
-          lbl_logs_sub: "Salary, Maturities & 6M Re-investments",
+          lbl_logs_sub: "Salary, Maturities & Auto Term Allocations",
           log_salary_title: "Monthly Salary Deposited",
           log_salary_details: "{amount} to Pool (rate: {rate}%/yr)",
           log_maturity_title: "Matured: {name}",
           log_maturity_details: "{principal} + {interest} to Pool",
-          log_auto6m_title: "Created Auto 6M Saving #{count}",
+          log_auto6m_title: "Created Auto Term Saving #{count} ({months}M)",
           log_auto6m_details:
-            "Pool hit >= 200M. Locked 200M VND into 6M term @ {rate}%/yr",
+            "Locked {amount} into {months}M term @ {rate}%/yr",
+          log_auto_term_title: "Created Auto Term Saving #{count} ({months}M)",
+          log_auto_term_details:
+            "Locked {amount} into {months}M term @ {rate}%/yr",
           log_withdrawal_title: "Withdrawal: {name}",
           log_withdrawal_details: "{amount} deducted from Flexible Pool",
           log_deficit_title: "Flexible Pool Deficit",
@@ -1753,7 +1799,10 @@
           lbl_inflation: "Tỷ Lệ Lạm Phát (%/năm)",
           lbl_savings_goal: "Mục Tiêu Tiết Kiệm (₫)",
           lbl_pool_rate: "Lãi Suất Linh Hoạt (%/năm)",
-          lbl_6m_rate: "Lãi Suất Kỳ Hạn 6M (%/năm)",
+          lbl_auto_term_threshold: "Ngưỡng Gửi Tự Động (₫)",
+          lbl_auto_term_months: "Kỳ Hạn Gửi Tự Động (Tháng)",
+          lbl_auto_term_rate: "Lãi Suất Kỳ Hạn Tự Động (%/năm)",
+          lbl_6m_rate: "Lãi Suất Kỳ Hạn Tự Động (%/năm)",
           btn_run_sim: "Chạy Giả Lập",
           btn_reset: "Đặt Lại",
           preset_1y: "1 Năm",
@@ -1776,9 +1825,11 @@
           yield_suffix: "tỷ suất",
           hdr_total_salary: "Tổng Lương Nạp",
           lbl_monthly_deposits: "lần gửi hàng tháng",
-          hdr_pool_auto6m: "Tiền Linh Hoạt & Tự Động 6M",
+          hdr_pool_auto6m: "Tiền Linh Hoạt & Gửi Tự Động",
+          hdr_pool_auto_term: "Tiền Linh Hoạt & Gửi Tự Động",
           lbl_pool: "Linh hoạt:",
-          lbl_auto6m: "Tự động 6M:",
+          lbl_auto6m: "Gửi tự động:",
+          lbl_auto_term: "Gửi tự động:",
           auto_account_count: "{count} sổ tự động",
           lbl_real_prefix: "thực tế: ",
 
@@ -1808,7 +1859,8 @@
           hdr_earnings_breakdown: "Phân Tích Thu Nhập",
           lbl_csv_interest: "Lãi Sổ Ban Đầu",
           lbl_pool_interest: "Lãi Tiền Linh Hoạt",
-          lbl_auto6m_interest: "Lãi Tự Động 6M",
+          lbl_auto6m_interest: "Lãi Gửi Tự Động",
+          lbl_auto_term_interest: "Lãi Gửi Tự Động",
           lbl_salary_deposited: "Tổng Lương Nạp",
           lbl_withdrawals: "Rút Tiền",
 
@@ -1851,7 +1903,7 @@
 
           // Savings Table
           hdr_savings_accounts: "Danh Sách Sổ Tiết Kiệm",
-          lbl_savings_sub: "Từ CSV + Tự Động 6M + Rút Tiền",
+          lbl_savings_sub: "Từ CSV + Gửi Tự Động + Rút Tiền",
           th_account: "Tên Tài Khoản",
           th_principal: "Tiền Gốc",
           th_rate: "Lãi Suất",
@@ -1861,19 +1913,23 @@
           status_withdrawal: "Rút tiền",
           status_matured: "Đáo hạn / Linh hoạt",
           status_active: "Đang gửi",
-          badge_auto6m: "(Tự động 6M)",
+          badge_auto6m: "(Tự động)",
+          badge_auto_term: "(Tự động)",
           no_milestones: "Chưa có cột mốc nào được ghi nhận.",
 
           // Simulation Milestones Logs
           hdr_sim_logs: "Cột Mốc Giả Lập",
-          lbl_logs_sub: "Lương nạp, đáo hạn & tái đầu tư 6M",
+          lbl_logs_sub: "Lương nạp, đáo hạn & tái đầu tư tự động",
           log_salary_title: "Nạp Lương Hàng Tháng",
           log_salary_details: "{amount} vào Tiền Linh Hoạt (tăng: {rate}%/năm)",
           log_maturity_title: "Đáo Hạn: {name}",
           log_maturity_details: "{principal} + {interest} vào Tiền Linh Hoạt",
-          log_auto6m_title: "Tạo Sổ Tiết Kiệm Tự Động 6M #{count}",
+          log_auto6m_title: "Tạo Sổ Tiết Kiệm Tự Động #{count} ({months}T)",
           log_auto6m_details:
-            "Số dư >= 200M. Khóa 200M VND vào kỳ hạn 6M @ {rate}%/năm",
+            "Khóa {amount} vào kỳ hạn {months} tháng @ {rate}%/năm",
+          log_auto_term_title: "Tạo Sổ Tiết Kiệm Tự Động #{count} ({months}T)",
+          log_auto_term_details:
+            "Khóa {amount} vào kỳ hạn {months} tháng @ {rate}%/năm",
           log_withdrawal_title: "Rút Tiền: {name}",
           log_withdrawal_details: "Trừ {amount} từ Tiền Linh Hoạt",
           log_deficit_title: "Cảnh Báo Thâm Hụt Tiền Linh Hoạt",
@@ -2028,12 +2084,36 @@
       window.currentLang = "en";
 
       // --- SCHEMA VERSIONING & MIGRATION (R2) ---
-      const SCHEMA_VERSION = 1;
+      const SCHEMA_VERSION = 2;
       function migrateParams(raw) {
         if (!raw || typeof raw !== "object") return null;
-        let p = raw;
+        let p = { ...raw };
         const from = raw.schemaVersion || 0;
-        if (from < 1) p = { ...raw, schemaVersion: SCHEMA_VERSION }; // v0 legacy -> v1
+        if (from < 1) {
+          p = { ...p, schemaVersion: 1 };
+        }
+        if (from < 2) {
+          const rate =
+            p.autoTermRate !== undefined
+              ? p.autoTermRate
+              : p.sixMRate !== undefined
+                ? p.sixMRate
+                : "5.8";
+          const threshold =
+            p.autoTermThreshold !== undefined
+              ? p.autoTermThreshold
+              : "200000000";
+          const months =
+            p.autoTermMonths !== undefined ? p.autoTermMonths : "6";
+          p = {
+            ...p,
+            autoTermRate: rate,
+            autoTermThreshold: threshold,
+            autoTermMonths: months,
+            sixMRate: rate,
+            schemaVersion: 2,
+          };
+        }
         return p;
       }
       window.SCHEMA_VERSION = SCHEMA_VERSION;
@@ -2223,7 +2303,14 @@
         document.getElementById("inputInflation").value = "0";
         document.getElementById("inputSavingsGoal").value = "0";
         document.getElementById("inputPoolRate").value = "0.5";
-        document.getElementById("input6MRate").value = "5.8";
+        if (document.getElementById("inputAutoTermThreshold"))
+          document.getElementById("inputAutoTermThreshold").value = "200000000";
+        if (document.getElementById("inputAutoTermMonths"))
+          document.getElementById("inputAutoTermMonths").value = "6";
+        if (document.getElementById("inputAutoTermRate"))
+          document.getElementById("inputAutoTermRate").value = "5.8";
+        if (document.getElementById("input6MRate"))
+          document.getElementById("input6MRate").value = "5.8";
         setStorage("theme", "dark");
         document.documentElement.classList.remove("light");
         updateThemeBtn();
@@ -2425,9 +2512,37 @@
           salaryGrowthRate = 0,
           inflationRate = 0,
           poolAnnualRate = 0,
-          term6MAnnualRate = 0,
           savingsGoal = 0,
         } = params;
+
+        const effectiveAutoTermRate =
+          params.autoTermRate !== undefined && params.autoTermRate !== ""
+            ? params.autoTermRate
+            : params.autoTermAnnualRate !== undefined &&
+                params.autoTermAnnualRate !== ""
+              ? params.autoTermAnnualRate
+              : params.term6MAnnualRate !== undefined &&
+                  params.term6MAnnualRate !== ""
+                ? params.term6MAnnualRate
+                : 0.058;
+        const autoTermAnnualRateDec =
+          Number(effectiveAutoTermRate) > 1
+            ? Number(effectiveAutoTermRate) / 100
+            : Number(effectiveAutoTermRate) || 0.058;
+        const rawThreshold = params.autoTermThreshold;
+        const autoTermThreshold =
+          rawThreshold === undefined ||
+          rawThreshold === "" ||
+          isNaN(Number(rawThreshold))
+            ? 200000000
+            : Number(rawThreshold);
+        const rawMonths = params.autoTermMonths;
+        const autoTermMonths =
+          rawMonths === undefined ||
+          rawMonths === "" ||
+          isNaN(parseInt(rawMonths, 10))
+            ? 6
+            : parseInt(rawMonths, 10);
 
         if (!targetDateStr) return null;
 
@@ -2611,26 +2726,28 @@
             yearlyCashflows[yearKey].interest += dailyPoolInterest;
           }
 
-          // 4. Unified Auto 6M Allocation (ADR-0005)
-          while (currentPoolBalance >= 200000000) {
-            const lockedAmount = 200000000;
-            currentPoolBalance -= lockedAmount;
+          // 4. Unified Auto Term Allocation (ADR-0005)
+          if (
+            autoTermThreshold > 0 &&
+            !isNaN(autoTermThreshold) &&
+            currentPoolBalance >= autoTermThreshold
+          ) {
+            const lockedAmount = currentPoolBalance;
+            currentPoolBalance = 0;
             created6MCount++;
             const autoStartDate = new Date(currentDate.getTime());
-            const autoEndDate = new Date(
-              autoStartDate.getTime() + 180 * 24 * 60 * 60 * 1000
-            );
+            const autoEndDate = addMonths(autoStartDate, autoTermMonths);
             const totalDays = Math.max(
               1,
               getDaysDiff(autoStartDate, autoEndDate)
             );
             const estInterest =
-              lockedAmount * term6MAnnualRate * (totalDays / 365);
+              lockedAmount * autoTermAnnualRateDec * (totalDays / 365);
             allSavings.push({
-              id: "auto_6m_" + created6MCount,
-              name: `Auto 6M Saving #${created6MCount}`,
+              id: "auto_term_" + created6MCount,
+              name: `Auto Term Saving #${created6MCount} (${autoTermMonths}M)`,
               principal: lockedAmount,
-              rate: term6MAnnualRate * 100,
+              rate: autoTermAnnualRateDec * 100,
               startDate: autoStartDate,
               endDate: autoEndDate,
               totalDays: totalDays,
@@ -2644,7 +2761,8 @@
               type: "NEW_6M",
               index: created6MCount,
               amount: lockedAmount,
-              rate: term6MAnnualRate,
+              rate: autoTermAnnualRateDec,
+              months: autoTermMonths,
             });
           }
 
@@ -2738,9 +2856,30 @@
           const poolAnnualRate =
             (parseFloat(document.getElementById("inputPoolRate").value) || 0) /
             100;
-          const term6MAnnualRate =
-            (parseFloat(document.getElementById("input6MRate").value) || 0) /
+          const rawRate = document.getElementById("inputAutoTermRate")
+            ? document.getElementById("inputAutoTermRate").value
+            : document.getElementById("input6MRate")
+              ? document.getElementById("input6MRate").value
+              : "5.8";
+          const autoTermRate =
+            (rawRate === "" || isNaN(Number(rawRate)) ? 5.8 : Number(rawRate)) /
             100;
+
+          const rawThreshold = document.getElementById("inputAutoTermThreshold")
+            ? document.getElementById("inputAutoTermThreshold").value
+            : "200000000";
+          const autoTermThreshold =
+            rawThreshold === "" || isNaN(Number(rawThreshold))
+              ? 200000000
+              : Number(rawThreshold);
+
+          const rawMonths = document.getElementById("inputAutoTermMonths")
+            ? document.getElementById("inputAutoTermMonths").value
+            : "6";
+          const autoTermMonths =
+            rawMonths === "" || isNaN(parseInt(rawMonths, 10))
+              ? 6
+              : parseInt(rawMonths, 10);
           const savingsGoal =
             parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
 
@@ -2755,7 +2894,13 @@
             salaryGrowthRate,
             inflationRate,
             poolAnnualRate,
-            term6MAnnualRate,
+            term6MAnnualRate: autoTermRate,
+            autoTermAnnualRate: autoTermRate,
+            autoTermRate,
+            autoTermThreshold: isNaN(autoTermThreshold)
+              ? 200000000
+              : autoTermThreshold,
+            autoTermMonths,
             savingsGoal,
           };
 
@@ -3505,7 +3650,22 @@
             inflation: document.getElementById("inputInflation").value,
             goal: document.getElementById("inputSavingsGoal").value,
             poolRate: document.getElementById("inputPoolRate").value,
-            sixMRate: document.getElementById("input6MRate").value,
+            autoTermThreshold: document.getElementById("inputAutoTermThreshold")
+              ? document.getElementById("inputAutoTermThreshold").value
+              : "200000000",
+            autoTermMonths: document.getElementById("inputAutoTermMonths")
+              ? document.getElementById("inputAutoTermMonths").value
+              : "6",
+            autoTermRate: document.getElementById("inputAutoTermRate")
+              ? document.getElementById("inputAutoTermRate").value
+              : document.getElementById("input6MRate")
+                ? document.getElementById("input6MRate").value
+                : "5.8",
+            sixMRate: document.getElementById("inputAutoTermRate")
+              ? document.getElementById("inputAutoTermRate").value
+              : document.getElementById("input6MRate")
+                ? document.getElementById("input6MRate").value
+                : "5.8",
           };
           const payload = utf8ToBase64(
             JSON.stringify({ p: params, csv: workingCSVData })
@@ -3545,8 +3705,33 @@
               document.getElementById("inputSavingsGoal").value = p.goal;
             if (p.poolRate)
               document.getElementById("inputPoolRate").value = p.poolRate;
-            if (p.sixMRate)
-              document.getElementById("input6MRate").value = p.sixMRate;
+            if (
+              p.autoTermThreshold !== undefined &&
+              document.getElementById("inputAutoTermThreshold")
+            )
+              document.getElementById("inputAutoTermThreshold").value =
+                p.autoTermThreshold;
+            if (
+              p.autoTermMonths !== undefined &&
+              document.getElementById("inputAutoTermMonths")
+            )
+              document.getElementById("inputAutoTermMonths").value =
+                p.autoTermMonths;
+            if (
+              p.autoTermRate !== undefined &&
+              document.getElementById("inputAutoTermRate")
+            )
+              document.getElementById("inputAutoTermRate").value =
+                p.autoTermRate;
+            if (p.sixMRate) {
+              if (document.getElementById("input6MRate"))
+                document.getElementById("input6MRate").value = p.sixMRate;
+              if (
+                document.getElementById("inputAutoTermRate") &&
+                !p.autoTermRate
+              )
+                document.getElementById("inputAutoTermRate").value = p.sixMRate;
+            }
           }
           if (payload.csv && payload.csv.length > 0) {
             workingCSVData = payload.csv;
@@ -3705,8 +3890,33 @@
           parseFloat(document.getElementById("inputInflation").value) || 0;
         const poolRate =
           parseFloat(document.getElementById("inputPoolRate").value) || 0;
-        const rate6M =
-          parseFloat(document.getElementById("input6MRate").value) || 0;
+        const rawCompRate = document.getElementById("inputAutoTermRate")
+          ? document.getElementById("inputAutoTermRate").value
+          : document.getElementById("input6MRate")
+            ? document.getElementById("input6MRate").value
+            : "5.8";
+        const rateAutoTerm =
+          (rawCompRate === "" || isNaN(Number(rawCompRate))
+            ? 5.8
+            : Number(rawCompRate)) / 100;
+
+        const rawCompThreshold = document.getElementById(
+          "inputAutoTermThreshold"
+        )
+          ? document.getElementById("inputAutoTermThreshold").value
+          : "200000000";
+        const thresholdAutoTerm =
+          rawCompThreshold === "" || isNaN(Number(rawCompThreshold))
+            ? 200000000
+            : Number(rawCompThreshold);
+
+        const rawCompMonths = document.getElementById("inputAutoTermMonths")
+          ? document.getElementById("inputAutoTermMonths").value
+          : "6";
+        const monthsAutoTerm =
+          rawCompMonths === "" || isNaN(parseInt(rawCompMonths, 10))
+            ? 6
+            : parseInt(rawCompMonths, 10);
         const goal =
           parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
 
@@ -3721,7 +3931,13 @@
           salaryGrowthRate: salaryGrowth / 100,
           inflationRate: inflation / 100,
           poolAnnualRate: poolRate / 100,
-          term6MAnnualRate: rate6M / 100,
+          term6MAnnualRate: rateAutoTerm / 100,
+          autoTermAnnualRate: rateAutoTerm / 100,
+          autoTermRate: rateAutoTerm / 100,
+          autoTermThreshold: isNaN(thresholdAutoTerm)
+            ? 200000000
+            : thresholdAutoTerm,
+          autoTermMonths: monthsAutoTerm,
           savingsGoal: goal,
         };
 
@@ -3732,7 +3948,13 @@
           salaryGrowthRate: salaryGrowth / 100,
           inflationRate: inflation / 100,
           poolAnnualRate: poolRate / 100,
-          term6MAnnualRate: rate6M / 100,
+          term6MAnnualRate: rateAutoTerm / 100,
+          autoTermAnnualRate: rateAutoTerm / 100,
+          autoTermRate: rateAutoTerm / 100,
+          autoTermThreshold: isNaN(thresholdAutoTerm)
+            ? 200000000
+            : thresholdAutoTerm,
+          autoTermMonths: monthsAutoTerm,
           savingsGoal: goal,
         };
 
@@ -3808,7 +4030,22 @@
           inflation: document.getElementById("inputInflation").value,
           goal: document.getElementById("inputSavingsGoal").value,
           poolRate: document.getElementById("inputPoolRate").value,
-          sixMRate: document.getElementById("input6MRate").value,
+          autoTermThreshold: document.getElementById("inputAutoTermThreshold")
+            ? document.getElementById("inputAutoTermThreshold").value
+            : "200000000",
+          autoTermMonths: document.getElementById("inputAutoTermMonths")
+            ? document.getElementById("inputAutoTermMonths").value
+            : "6",
+          autoTermRate: document.getElementById("inputAutoTermRate")
+            ? document.getElementById("inputAutoTermRate").value
+            : document.getElementById("input6MRate")
+              ? document.getElementById("input6MRate").value
+              : "5.8",
+          sixMRate: document.getElementById("inputAutoTermRate")
+            ? document.getElementById("inputAutoTermRate").value
+            : document.getElementById("input6MRate")
+              ? document.getElementById("input6MRate").value
+              : "5.8",
         };
         setStorage("params", params);
       }
@@ -3837,8 +4074,34 @@
               document.getElementById("inputSavingsGoal").value = params.goal;
             if (params.poolRate)
               document.getElementById("inputPoolRate").value = params.poolRate;
-            if (params.sixMRate)
-              document.getElementById("input6MRate").value = params.sixMRate;
+            if (
+              params.autoTermThreshold !== undefined &&
+              document.getElementById("inputAutoTermThreshold")
+            )
+              document.getElementById("inputAutoTermThreshold").value =
+                params.autoTermThreshold;
+            if (
+              params.autoTermMonths !== undefined &&
+              document.getElementById("inputAutoTermMonths")
+            )
+              document.getElementById("inputAutoTermMonths").value =
+                params.autoTermMonths;
+            if (
+              params.autoTermRate !== undefined &&
+              document.getElementById("inputAutoTermRate")
+            )
+              document.getElementById("inputAutoTermRate").value =
+                params.autoTermRate;
+            if (params.sixMRate) {
+              if (document.getElementById("input6MRate"))
+                document.getElementById("input6MRate").value = params.sixMRate;
+              if (
+                document.getElementById("inputAutoTermRate") &&
+                !params.autoTermRate
+              )
+                document.getElementById("inputAutoTermRate").value =
+                  params.sixMRate;
+            }
           }
         } catch (e) {
           console.warn("Load from storage failed:", e);

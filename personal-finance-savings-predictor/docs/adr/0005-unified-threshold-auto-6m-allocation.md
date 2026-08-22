@@ -1,3 +1,0 @@
-# 5. Unified Threshold Auto 6M Allocation & Reinvestment
-
-All cash inflows (monthly salary deposits, matured CSV fixed term proceeds, and expired Auto 6M payouts) sweep directly into the Flexible Pool. On each simulation day, after processing all inflows and scheduled withdrawals, a single unified threshold check is performed: while the Flexible Pool balance is $\ge 200,000,000\text{ VND}$, $200,000,000\text{ VND}$ chunks are locked into new 6-month Fixed Term Deposits. This removes duplicate thresholding logic across term maturity and daily accrual steps and ensures consistent compound rollover behavior.

@@ -342,7 +342,7 @@ async function runHelperTests() {
   );
 
   // Test 9: Schema versioning & parameter migration (R2)
-  assert(ctx.SCHEMA_VERSION === 1, `SCHEMA_VERSION constant is defined as 1`);
+  assert(ctx.SCHEMA_VERSION === 2, `SCHEMA_VERSION constant is defined as 2`);
   const nullMigrated = ctx.migrateParams(null);
   assert(nullMigrated === null, `migrateParams(null) safely returns null`);
   const stringMigrated = ctx.migrateParams("invalid-param-payload");
@@ -351,18 +351,26 @@ async function runHelperTests() {
     `migrateParams("invalid") safely returns null`
   );
   const legacyV0Params = { salary: "25000000", goal: "500000000" };
-  const v1Migrated = ctx.migrateParams(legacyV0Params);
+  const v2Migrated = ctx.migrateParams(legacyV0Params);
   assert(
-    v1Migrated !== null &&
-      v1Migrated.schemaVersion === 1 &&
-      v1Migrated.salary === "25000000",
-    `migrateParams stamps legacy v0 payload with schemaVersion: 1`
+    v2Migrated !== null &&
+      v2Migrated.schemaVersion === 2 &&
+      v2Migrated.salary === "25000000" &&
+      v2Migrated.autoTermThreshold === "200000000" &&
+      v2Migrated.autoTermMonths === "6",
+    `migrateParams stamps legacy v0 payload with schemaVersion: 2 and auto term defaults`
   );
-  const alreadyV1 = { schemaVersion: 1, salary: "35000000" };
+  const alreadyV1 = {
+    schemaVersion: 1,
+    salary: "35000000",
+    sixMRate: "6.0",
+  };
+  const v1ToV2 = ctx.migrateParams(alreadyV1);
   assert(
-    ctx.migrateParams(alreadyV1).salary === "35000000" &&
-      ctx.migrateParams(alreadyV1).schemaVersion === 1,
-    `migrateParams passes through already versioned v1 payload`
+    v1ToV2.salary === "35000000" &&
+      v1ToV2.schemaVersion === 2 &&
+      v1ToV2.autoTermRate === "6.0",
+    `migrateParams upgrades v1 payload to v2 preserving rate settings`
   );
 
   // Test 10: Multibyte UTF-8 Base64 round-trip (R8)

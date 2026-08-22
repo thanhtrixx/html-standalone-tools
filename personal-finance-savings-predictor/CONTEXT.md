@@ -14,9 +14,9 @@ _Avoid_: Checking account, cash wallet, non-term savings
 A time-locked savings account with a fixed start date, maturity date, principal amount, and fixed annualized interest rate paid upon maturity.
 _Avoid_: Certificate of deposit, CD, locked account, time deposit
 
-**Auto 6M Deposit**:
-A 6-month Fixed Term Deposit automatically instantiated whenever the Flexible Pool balance meets or exceeds the allocation threshold (200,000,000 VND). Upon maturity, principal and interest return to the Flexible Pool for immediate re-evaluation.
-_Avoid_: Rollover deposit, auto-renew account, recurring term
+**Auto Term Deposit**:
+A fixed-term savings deposit automatically instantiated whenever the Flexible Pool balance meets or exceeds the configurable Auto Term Threshold (default 200,000,000 VND). The entire available liquid pool balance is locked into a single term deposit of configurable duration (default 6 months) and annual rate, reducing the liquid Flexible Pool balance to 0. Upon maturity, principal and interest return to the Flexible Pool for immediate re-evaluation.
+_Avoid_: Auto 6M chunking, rollover deposit, auto-renew account, recurring term
 
 ### Cash Flows & Adjustments
 

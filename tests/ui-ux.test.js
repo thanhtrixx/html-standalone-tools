@@ -648,7 +648,8 @@ async function runUIUXTests() {
   app.printSummary();
   assert(printTriggered, "R19: printSummary invoked window.print()");
 
-  // Test R20: Auto 6M Rule
+  // Test R20: Auto Term Allocation Rule
+  app.document.getElementById("inputSalary").value = "0";
   app.syncCSVData([
     {
       "Account Name": "High Liquidity Pool",
@@ -662,10 +663,12 @@ async function runUIUXTests() {
   ]);
   app.runSimulation();
 
-  const auto6mLog = app.simulationLogs.find((l) => l.type === "NEW_6M");
+  const autoTermLog = app.simulationLogs.find(
+    (l) => l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM"
+  );
   assert(
-    auto6mLog !== undefined,
-    "R20: Auto 6M rule triggered 6-month term creation when pool >= 200M VND"
+    autoTermLog !== undefined && Math.round(autoTermLog.amount / 1e6) === 250,
+    "R20: Auto Term rule triggered single consolidated term creation for full ~250M pool balance when pool >= 200M VND"
   );
 
   // Test R21: Vietnamese Language Support & i18n Parity

@@ -21,10 +21,11 @@
 
 _Focus: Fix mathematical double-counting, status evaluation bugs, and expose simulation state globally for console unit testing._
 
-- [x] **Task 1.1 — Fix Auto 6M Allocation & Reinvestment (R20, ADR-0005)**
-  - [x] Deduct locked amount from `Flexible Pool` when creating an Auto 6M Fixed Term Deposit.
+- [x] **Task 1.1 — Implement Auto Term Allocation & Consolidated Sweep (R20, ADR-0005)**
+  - [x] Sweep full `Flexible Pool` balance into a single Fixed Term Deposit when pool $\ge$ Auto Term Threshold ($>0$).
+  - [x] Support configurable Auto Term Duration ($N$ months) and Auto Term Rate.
   - [x] Upon term maturity, credit full proceeds (principal + interest) back to Flexible Pool and re-evaluate threshold on the same date.
-  - [x] Verify pool balance and deposit count match expected math.
+  - [x] Allow disabling auto-allocation when threshold is set to 0.
 
 - [x] **Task 1.2 — Fix Scheduled Withdrawal Event Processing & Deficit Warnings (R6, ADR-0001)**
   - [x] Initialize status of withdrawal rows as `'ACTIVE'` during CSV parsing.
