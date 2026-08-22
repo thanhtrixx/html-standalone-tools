@@ -357,6 +357,72 @@ async function runI18nTests() {
     `VI comparison goal text pure: "${viCompGoal}"`
   );
 
+  // Test 8: Auto Term Log Placeholder Interpolation (R20, Bug Fix)
+  // Set up portfolio with 250M pool to trigger Auto Term creation
+  sandbox.syncCSVData([
+    {
+      "Account Name": "High Liquidity Pool",
+      Principal: "250000000",
+      "Start Date": "2026-01-01",
+      "End Date": "2027-01-01",
+      Interest: "0.5",
+      Type: "Non-Term Pool",
+      Bank: "MBBank",
+    },
+  ]);
+  getOrCreateEl("inputAutoTermThreshold").value = "200000000";
+  getOrCreateEl("inputAutoTermMonths").value = "6";
+  getOrCreateEl("inputAutoTermRate").value = "9.0";
+
+  // EN check
+  sandbox.changeLanguage("en");
+  sandbox.runSimulation();
+  const enAutoLogHTML = (getOrCreateEl("simulationLogContainer").children || [])
+    .map((c) => c.innerHTML || "")
+    .join(" ");
+
+  assert(
+    !enAutoLogHTML.includes("{months}") &&
+      !enAutoLogHTML.includes("{amount}") &&
+      !enAutoLogHTML.includes("{count}") &&
+      !enAutoLogHTML.includes("{rate}"),
+    "EN Auto Term logs have no unreplaced placeholders ({months}, {amount}, {count}, {rate})"
+  );
+  assert(
+    enAutoLogHTML.includes("Created Auto Term Saving #1 (6M)") &&
+      enAutoLogHTML.includes("6M term @ 9.0%/yr"),
+    `EN Auto Term log interpolated correctly: "${enAutoLogHTML.substring(0, 150)}..."`
+  );
+
+  // VI check
+  sandbox.changeLanguage("vi");
+  sandbox.runSimulation();
+  const viAutoLogHTML = (getOrCreateEl("simulationLogContainer").children || [])
+    .map((c) => c.innerHTML || "")
+    .join(" ");
+
+  assert(
+    !viAutoLogHTML.includes("{months}") &&
+      !viAutoLogHTML.includes("{amount}") &&
+      !viAutoLogHTML.includes("{count}") &&
+      !viAutoLogHTML.includes("{rate}"),
+    "VI Auto Term logs have no unreplaced placeholders ({months}, {amount}, {count}, {rate})"
+  );
+  assert(
+    viAutoLogHTML.includes("Tạo Sổ Tiết Kiệm Tự Động #1 (6T)") &&
+      viAutoLogHTML.includes("kỳ hạn 6 tháng @ 9.0%/năm"),
+    `VI Auto Term log interpolated correctly: "${viAutoLogHTML.substring(0, 150)}..."`
+  );
+
+  // Test 9: Universal Unreplaced Placeholder Check across all DOM containers
+  const placeholderRegex = /\{[a-zA-Z0-9_]+\}/;
+  const enHasUnreplaced = placeholderRegex.test(enAutoLogHTML);
+  const viHasUnreplaced = placeholderRegex.test(viAutoLogHTML);
+  assert(
+    !enHasUnreplaced && !viHasUnreplaced,
+    "Zero unreplaced template placeholders across all rendered simulation log containers"
+  );
+
   console.log(
     `\n📊 i18n Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

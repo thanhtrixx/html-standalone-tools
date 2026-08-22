@@ -2015,7 +2015,11 @@
           key;
         if (replacements && typeof replacements === "object") {
           Object.keys(replacements).forEach((k) => {
-            str = str.replace(new RegExp(`\\{${k}\\}`, "g"), replacements[k]);
+            const val =
+              replacements[k] !== undefined && replacements[k] !== null
+                ? replacements[k]
+                : "";
+            str = str.replace(new RegExp(`\\{${k}\\}`, "g"), val);
           });
         }
         return str;
@@ -3072,8 +3076,8 @@
           else
             statusBadge = `<span class="px-2 py-0.5 text-[10px] rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${t("status_active")}</span>`;
           const typeBadge =
-            acc.type === "AUTO_6M"
-              ? `<span class="text-[10px] text-amber-400 font-medium ml-1">${t("badge_auto6m")}</span>`
+            acc.type === "AUTO_6M" || acc.type === "AUTO_TERM"
+              ? `<span class="text-[10px] text-amber-400 font-medium ml-1">${t("badge_auto_term")}</span>`
               : "";
           const bankBadge = acc.bank
             ? `<span class="text-[10px] text-slate-500 ml-1">(${acc.bank})</span>`
@@ -3119,12 +3123,25 @@
               principal: formatCurrency(log.principal),
               interest: formatCurrency(log.interest),
             });
-          } else if (log.type === "NEW_6M") {
+          } else if (log.type === "NEW_6M" || log.type === "NEW_AUTO_TERM") {
             iconClass = "fa-arrows-rotate text-amber-400";
             bgClass = "bg-amber-950/20 border-amber-800/40";
-            title = t("log_auto6m_title", { count: log.index || 1 });
-            details = t("log_auto6m_details", {
-              rate: ((log.rate || 0.058) * 100).toFixed(1),
+            const count = log.index || 1;
+            const months = log.months || 6;
+            const amountStr = formatCurrency(
+              log.amount !== undefined ? log.amount : 200000000
+            );
+            const rateStr = (
+              (log.rate !== undefined ? log.rate : 0.058) * 100
+            ).toFixed(1);
+            title = t("log_auto_term_title", {
+              count,
+              months,
+            });
+            details = t("log_auto_term_details", {
+              amount: amountStr,
+              months,
+              rate: rateStr,
             });
           } else if (log.type === "WITHDRAWAL") {
             iconClass = "fa-arrow-down text-rose-400";
