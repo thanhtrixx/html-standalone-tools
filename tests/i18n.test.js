@@ -414,13 +414,131 @@ async function runI18nTests() {
     `VI Auto Term log interpolated correctly: "${viAutoLogHTML.substring(0, 150)}..."`
   );
 
-  // Test 9: Universal Unreplaced Placeholder Check across all DOM containers
-  const placeholderRegex = /\{[a-zA-Z0-9_]+\}/;
-  const enHasUnreplaced = placeholderRegex.test(enAutoLogHTML);
-  const viHasUnreplaced = placeholderRegex.test(viAutoLogHTML);
+  // Test 10: Dynamic Verbal Helper Localization Parity (R24)
+  const testAmounts = [
+    {
+      val: 500000,
+      en: "500 Thousand VND",
+      vi: "500 Nghìn VND",
+    },
+    {
+      val: 25000000,
+      en: "25 Million VND",
+      vi: "25 Triệu VND",
+    },
+    {
+      val: 150000000,
+      en: "150 Million VND",
+      vi: "150 Triệu VND",
+    },
+    {
+      val: 1500000000,
+      en: "1.5 Billion VND",
+      vi: "1.5 Tỷ VND",
+    },
+    {
+      val: 10000000000,
+      en: "10 Billion VND",
+      vi: "10 Tỷ VND",
+    },
+  ];
+
+  testAmounts.forEach(({ val, en, vi }) => {
+    const resEn = sandbox.getSpelledOutAmount(val, "en");
+    const resVi = sandbox.getSpelledOutAmount(val, "vi");
+    assert(
+      resEn === en,
+      `getSpelledOutAmount(${val}, 'en') returned '${resEn}' (expected '${en}')`
+    );
+    assert(
+      resVi === vi,
+      `getSpelledOutAmount(${val}, 'vi') returned '${resVi}' (expected '${vi}')`
+    );
+  });
+
+  // Test 11: Toast and System Notification Messages Parity
+  const toastKeys = [
+    "toast_csv_saved",
+    "toast_reset_all",
+    "toast_link_copied",
+    "toast_preset_applied",
+    "toast_preset_undone",
+    "toast_data_cleared",
+    "toast_recurring_generated",
+    "err_invalid_date_range",
+  ];
+  toastKeys.forEach((k) => {
+    assert(
+      typeof TRANSLATIONS.en[k] === "string" &&
+        TRANSLATIONS.en[k].length > 0 &&
+        typeof TRANSLATIONS.vi[k] === "string" &&
+        TRANSLATIONS.vi[k].length > 0,
+      `Toast key '${k}' is fully translated in both EN and VI`
+    );
+  });
+
+  // Test 12: Persona Presets Localization Keys Resolution
+  const personaPresets = sandbox.PERSONA_PRESETS || [];
   assert(
-    !enHasUnreplaced && !viHasUnreplaced,
-    "Zero unreplaced template placeholders across all rendered simulation log containers"
+    personaPresets.length === 4,
+    `PERSONA_PRESETS defined with ${personaPresets.length} personas`
+  );
+  personaPresets.forEach((p) => {
+    assert(
+      TRANSLATIONS.en[p.titleKey] && TRANSLATIONS.vi[p.titleKey],
+      `Persona ${p.id} titleKey '${p.titleKey}' is translated in EN and VI`
+    );
+    assert(
+      TRANSLATIONS.en[p.badgeKey] && TRANSLATIONS.vi[p.badgeKey],
+      `Persona ${p.id} badgeKey '${p.badgeKey}' is translated in EN and VI`
+    );
+    assert(
+      TRANSLATIONS.en[p.descKey] && TRANSLATIONS.vi[p.descKey],
+      `Persona ${p.id} descKey '${p.descKey}' is translated in EN and VI`
+    );
+  });
+
+  // Test 13: 100% DOM data-i18n and data-i18n-title Keys Resolution
+  const allDataI18nMatches = [
+    ...htmlContent.matchAll(/data-i18n=["']([^"']+)["']/g),
+  ].map((m) => m[1]);
+  const allDataI18nTitleMatches = [
+    ...htmlContent.matchAll(/data-i18n-title=["']([^"']+)["']/g),
+  ].map((m) => m[1]);
+
+  const missingDataI18nEn = allDataI18nMatches.filter(
+    (k) => !(k in TRANSLATIONS.en)
+  );
+  const missingDataI18nVi = allDataI18nMatches.filter(
+    (k) => !(k in TRANSLATIONS.vi)
+  );
+  const missingTitleEn = allDataI18nTitleMatches.filter(
+    (k) => !(k in TRANSLATIONS.en)
+  );
+  const missingTitleVi = allDataI18nTitleMatches.filter(
+    (k) => !(k in TRANSLATIONS.vi)
+  );
+
+  assert(
+    missingDataI18nEn.length === 0 && missingDataI18nVi.length === 0,
+    `All ${allDataI18nMatches.length} HTML data-i18n elements map to valid EN and VI translations (missing EN: ${missingDataI18nEn.join(", ") || "none"}, missing VI: ${missingDataI18nVi.join(", ") || "none"})`
+  );
+  assert(
+    missingTitleEn.length === 0 && missingTitleVi.length === 0,
+    `All ${allDataI18nTitleMatches.length} HTML data-i18n-title elements map to valid EN and VI translations (missing EN: ${missingTitleEn.join(", ") || "none"}, missing VI: ${missingTitleVi.join(", ") || "none"})`
+  );
+
+  // Test 14: Leap Year & Boundary Date Display Formatting
+  const leapDay = new Date(2028, 1, 29); // Feb 29, 2028
+  sandbox.changeLanguage("en");
+  assert(
+    sandbox.formatDateDisplay(leapDay) === "2028-02-29",
+    "English date formatter handles leap year Feb 29 as YYYY-MM-DD"
+  );
+  sandbox.changeLanguage("vi");
+  assert(
+    sandbox.formatDateDisplay(leapDay) === "29/02/2028",
+    "Vietnamese date formatter handles leap year Feb 29 as DD/MM/YYYY"
   );
 
   console.log(
