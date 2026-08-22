@@ -1251,6 +1251,68 @@ async function runUIUXTests() {
     "R27: filterSavingsCategory('all') restored all portfolio rows"
   );
 
+  // Test R28: Modal Layering & Dialog Safeguards (ADR-0014, Issue #12)
+  const rawHtml = fs.readFileSync(
+    path.join(__dirname, "../personal-finance-savings-predictor/index.html"),
+    "utf8"
+  );
+  assert(
+    !rawHtml.includes('id="themeOverlay"'),
+    "R28: Obsolete themeOverlay element is completely removed from index.html"
+  );
+
+  const onboardingEl = app.document.getElementById("onboardingOverlay");
+  const csvModalDialog = app.document.getElementById("csvModal");
+  const presetsModalDialog = app.document.getElementById("presetsModal");
+
+  // Step 1: Open Onboarding
+  app.showOnboarding();
+  assert(
+    !onboardingEl.classList.contains("hidden"),
+    "R28: showOnboarding() opened onboarding dialog"
+  );
+
+  // Step 2: Open CSV modal - should close onboarding
+  app.toggleCSVModal(true);
+  assert(
+    !csvModalDialog.classList.contains("hidden"),
+    "R28: toggleCSVModal(true) opened CSV modal"
+  );
+  assert(
+    onboardingEl.classList.contains("hidden"),
+    "R28: toggleCSVModal(true) dismissed overlapping onboarding overlay"
+  );
+
+  // Step 3: Open presets modal - should close CSV modal
+  app.togglePresetsModal(true);
+  assert(
+    !presetsModalDialog.classList.contains("hidden"),
+    "R28: togglePresetsModal(true) opened presets modal"
+  );
+  assert(
+    csvModalDialog.classList.contains("hidden"),
+    "R28: togglePresetsModal(true) dismissed overlapping CSV modal"
+  );
+
+  // Step 4: dismissAllModals() closes everything
+  app.dismissAllModals();
+  assert(
+    onboardingEl.classList.contains("hidden") &&
+      csvModalDialog.classList.contains("hidden") &&
+      presetsModalDialog.classList.contains("hidden"),
+    "R28: dismissAllModals() cleanly dismissed all active dialog overlays"
+  );
+
+  // Step 5: resetAll() clears storage and preserves clean modal state
+  app.showOnboarding();
+  app.resetAll(true);
+  assert(
+    onboardingEl.classList.contains("hidden") &&
+      csvModalDialog.classList.contains("hidden") &&
+      presetsModalDialog.classList.contains("hidden"),
+    "R28: resetAll() preserves clean dialog state without spurious modal popups"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
