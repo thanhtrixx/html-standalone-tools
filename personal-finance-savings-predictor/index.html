@@ -1482,6 +1482,20 @@
       </div>
     </main>
     <script>
+      // Canvas fallback for headless/test environments
+      if (
+        typeof CanvasRenderingContext2D !== "undefined" &&
+        !CanvasRenderingContext2D.prototype.measureText
+      ) {
+        CanvasRenderingContext2D.prototype.measureText = function (text) {
+          return {
+            width: (text || "").length * 8,
+            actualBoundingBoxAscent: 10,
+            actualBoundingBoxDescent: 2,
+          };
+        };
+      }
+
       // --- TRANSLATIONS DICTIONARY (R21) ---
       const TRANSLATIONS = {
         en: {
@@ -1992,6 +2006,7 @@
       ];
 
       // Global state
+      window.DEFAULT_CSV_DATA = DEFAULT_CSV_DATA;
       let workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
       window.workingCSVData = workingCSVData;
       function syncCSVData(data) {
@@ -2048,10 +2063,17 @@
 
       function parseDate(dateStr) {
         if (!dateStr) return new Date();
-        const p = dateStr.trim().split("-");
-        return p.length === 3
-          ? new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]))
-          : new Date(dateStr);
+        const p = typeof dateStr === "string" ? dateStr.trim().split("-") : [];
+        if (p.length === 3) {
+          const y = parseInt(p[0]);
+          const m = parseInt(p[1]) - 1;
+          const d = parseInt(p[2]);
+          if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+            return new Date(y, m, d);
+          }
+        }
+        const parsed = new Date(dateStr);
+        return isNaN(parsed.getTime()) ? new Date() : parsed;
       }
 
       // Machine-readable ISO format YYYY-MM-DD
@@ -2325,6 +2347,7 @@
       }
       function loadDefaultSampleData() {
         workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
+        window.workingCSVData = workingCSVData;
         renderCSVEditorTable();
         updateCSVCountBadge();
         saveToStorage();
@@ -2345,6 +2368,7 @@
           return;
         localStorage.clear();
         workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
+        window.workingCSVData = workingCSVData;
         document.getElementById("inputTargetDate").value = "";
         document.getElementById("inputSalary").value = "25000000";
         document.getElementById("inputSalaryGrowth").value = "0";
@@ -3491,8 +3515,10 @@
             document.getElementById("inputPoolRate").value = p.poolRate;
           if (p.sixMRate)
             document.getElementById("input6MRate").value = p.sixMRate;
-          if (payload.csv && payload.csv.length > 0)
+          if (payload.csv && payload.csv.length > 0) {
             workingCSVData = payload.csv;
+            window.workingCSVData = workingCSVData;
+          }
           updateCSVCountBadge();
           return true;
         } catch (e) {
@@ -3502,6 +3528,7 @@
 
       function toggleRealVsNominal() {
         showRealValues = !showRealValues;
+        window.showRealValues = showRealValues;
         const btn = document.getElementById("realToggleBtn");
         btn.innerHTML = showRealValues
           ? `<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_nominal">${t("btn_nominal")}</span>`
@@ -3754,7 +3781,10 @@
       function loadFromStorage() {
         try {
           const csv = getStorage("workingCSVData", null);
-          if (csv) workingCSVData = csv;
+          if (csv) {
+            workingCSVData = csv;
+            window.workingCSVData = workingCSVData;
+          }
           const params = getStorage("params", null);
           if (params) {
             if (params.targetDate)

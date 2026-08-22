@@ -2,7 +2,17 @@
 
 > **Target:** `index.html`  
 > **Goal:** Validate all Phase 1–5 features work correctly  
-> **Method:** Browser console tests + manual verification
+> **Method:** Automated Node test suites (`npm test`) + Browser console / UI tests
+
+```bash
+# Automated Test Suites (137 tests passing)
+npm test              # Run all 5 suites
+npm run test:sim      # Simulation engine unit tests
+npm run test:helpers  # Formatters & CSV editor tests
+npm run test:ui       # UI/UX integration tests (R1-R21)
+npm run test:i18n     # Bilingual translation parity tests
+npm run test:build    # Compacted build pipeline tests
+```
 
 ---
 
