@@ -268,6 +268,20 @@ function createDOMEnvironment() {
           }
           return sandbox._presetChips;
         }
+        if (sel === ".savings-filter-tab") {
+          const categories = [
+            "all",
+            "active_fixed",
+            "auto_term",
+            "matured",
+            "withdrawals",
+          ];
+          return categories.map((cat) => {
+            const el = getEl("filterTab_" + cat);
+            el.setAttribute("data-category", cat);
+            return el;
+          });
+        }
         return [];
       },
       createElement: (tag) =>
@@ -1183,6 +1197,58 @@ async function runUIUXTests() {
   assert(
     heatmapTooltip.classList.contains("hidden"),
     "R26: hideHeatmapTooltip hid popover"
+  );
+
+  // Test R27: Full-Width Savings Accounts Hub & Category Filtering (ADR-0013, Issue #10)
+  const savingsHubSection = app.document.getElementById("savingsHubSection");
+  assert(
+    savingsHubSection !== null,
+    "R27: #savingsHubSection full-width container exists in DOM"
+  );
+
+  const kpiLocked = app.document.getElementById("kpiLockedPrincipal");
+  const kpiActive = app.document.getElementById("kpiActiveAccounts");
+  const kpiSweeps = app.document.getElementById("kpiAutoSweeps");
+  const kpiRate = app.document.getElementById("kpiWeightedRate");
+  assert(
+    kpiLocked && kpiActive && kpiSweeps && kpiRate,
+    "R27: Portfolio KPI summary elements exist (Locked, Active, Sweeps, Rate)"
+  );
+
+  // Trigger full simulation to populate portfolio
+  app.runSimulation();
+  assert(
+    kpiActive.innerText !== "0",
+    `R27: KPI Active Accounts populated (${kpiActive.innerText})`
+  );
+  assert(
+    kpiRate.innerText.includes("%/yr"),
+    `R27: KPI Weighted Rate formatted (${kpiRate.innerText})`
+  );
+
+  const savingsTableBody = app.document.getElementById("savingsTableBody");
+  const initialRowCount = savingsTableBody.children.length;
+  assert(
+    initialRowCount >= 1,
+    `R27: Savings Accounts table populated (${initialRowCount} rows in 'all' view)`
+  );
+
+  // Test category filtering
+  app.filterSavingsCategory("withdrawals");
+  assert(
+    app.activeSavingsCategory === "withdrawals",
+    "R27: filterSavingsCategory('withdrawals') set category to 'withdrawals'"
+  );
+  const withdrawalRowCount = savingsTableBody.children.length;
+  assert(
+    withdrawalRowCount >= 1,
+    `R27: Savings table filtered to withdrawals view (${withdrawalRowCount} rows)`
+  );
+
+  app.filterSavingsCategory("all");
+  assert(
+    savingsTableBody.children.length === initialRowCount,
+    "R27: filterSavingsCategory('all') restored all portfolio rows"
   );
 
   console.log(

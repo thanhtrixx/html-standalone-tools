@@ -2104,36 +2104,206 @@
           </button>
         </div>
       </section>
-      <!-- Detailed Tables Section -->
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Savings Portfolio Table -->
+      <!-- Savings Accounts Hub & Milestones Section (ADR-0013, Issue #10) -->
+      <section class="space-y-6">
+        <!-- Dedicated Full-Width Savings Hub Card -->
         <div
-          class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col"
+          class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col space-y-4"
+          id="savingsHubSection"
         >
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-slate-200 text-base flex items-center">
-              <i class="fa-solid fa-list-check text-indigo-400 mr-2"></i>
-              <span data-i18n="hdr_savings_accounts">Savings Accounts</span>
-              (<span id="txtTotalSavingsCount">0</span>)
-            </h3>
-            <span class="text-xs text-slate-400" data-i18n="lbl_savings_sub"
-              >CSV + Auto 6M + Withdrawals</span
-            >
+          <!-- Hub Header & KPI Summary Pills -->
+          <div
+            class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-800 pb-4"
+          >
+            <div>
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-vault text-indigo-400 text-lg"></i>
+                <h3
+                  class="font-bold text-slate-200 text-base"
+                  data-i18n="hdr_savings_accounts"
+                >
+                  Savings Accounts Hub
+                </h3>
+              </div>
+              <p
+                class="text-xs text-slate-400 mt-0.5"
+                data-i18n="lbl_savings_sub"
+              >
+                Portfolio positions, auto-term sweeps & scheduled cashflows
+              </p>
+            </div>
+
+            <!-- Top Portfolio KPI Summary Pills -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <!-- KPI 1: Total Locked Principal -->
+              <div
+                class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
+              >
+                <span
+                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                  data-i18n="kpi_locked_principal"
+                  >Locked Principal</span
+                >
+                <span
+                  class="text-xs sm:text-sm font-bold font-mono text-emerald-400 truncate"
+                  id="kpiLockedPrincipal"
+                  >0 VND</span
+                >
+              </div>
+              <!-- KPI 2: Active Accounts -->
+              <div
+                class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
+              >
+                <span
+                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                  data-i18n="kpi_active_accounts"
+                  >Active Accounts</span
+                >
+                <span
+                  class="text-xs sm:text-sm font-bold font-mono text-indigo-400"
+                  id="kpiActiveAccounts"
+                  >0</span
+                >
+              </div>
+              <!-- KPI 3: Auto Sweeps -->
+              <div
+                class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
+              >
+                <span
+                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                  data-i18n="kpi_auto_sweeps"
+                  >Auto Sweeps</span
+                >
+                <span
+                  class="text-xs sm:text-sm font-bold font-mono text-amber-400"
+                  id="kpiAutoSweeps"
+                  >0</span
+                >
+              </div>
+              <!-- KPI 4: Weighted Average Rate -->
+              <div
+                class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
+              >
+                <span
+                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                  data-i18n="kpi_weighted_rate"
+                  >Weighted Rate</span
+                >
+                <span
+                  class="text-xs sm:text-sm font-bold font-mono text-cyan-400"
+                  id="kpiWeightedRate"
+                  >0.00%/yr</span
+                >
+              </div>
+            </div>
           </div>
-          <div class="overflow-x-auto flex-1 max-h-[350px]">
-            <table class="w-full text-left text-xs border-collapse">
+
+          <!-- Category Filter Tabs Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+            <div
+              class="flex flex-wrap items-center gap-1.5 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800"
+              role="tablist"
+              aria-label="Savings Category Filters"
+            >
+              <button
+                type="button"
+                id="filterTab_all"
+                onclick="filterSavingsCategory('all')"
+                class="savings-filter-tab px-3 py-1 text-xs font-semibold rounded-lg transition bg-indigo-600 text-white shadow-sm"
+                data-category="all"
+              >
+                <span data-i18n="filter_all">All</span> (<span
+                  id="count_filter_all"
+                  >0</span
+                >)
+              </button>
+              <button
+                type="button"
+                id="filterTab_active_fixed"
+                onclick="filterSavingsCategory('active_fixed')"
+                class="savings-filter-tab px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white"
+                data-category="active_fixed"
+              >
+                <span data-i18n="filter_active_fixed">Active Fixed</span> (<span
+                  id="count_filter_active_fixed"
+                  >0</span
+                >)
+              </button>
+              <button
+                type="button"
+                id="filterTab_auto_term"
+                onclick="filterSavingsCategory('auto_term')"
+                class="savings-filter-tab px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white"
+                data-category="auto_term"
+              >
+                <span data-i18n="filter_auto_term">Auto Term</span> (<span
+                  id="count_filter_auto_term"
+                  >0</span
+                >)
+              </button>
+              <button
+                type="button"
+                id="filterTab_matured"
+                onclick="filterSavingsCategory('matured')"
+                class="savings-filter-tab px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white"
+                data-category="matured"
+              >
+                <span data-i18n="filter_matured">Matured</span> (<span
+                  id="count_filter_matured"
+                  >0</span
+                >)
+              </button>
+              <button
+                type="button"
+                id="filterTab_withdrawals"
+                onclick="filterSavingsCategory('withdrawals')"
+                class="savings-filter-tab px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white"
+                data-category="withdrawals"
+              >
+                <span data-i18n="filter_withdrawals">Withdrawals</span> (<span
+                  id="count_filter_withdrawals"
+                  >0</span
+                >)
+              </button>
+            </div>
+            <button
+              type="button"
+              onclick="toggleCSVModal(true)"
+              class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-pen-to-square text-[11px]"></i>
+              <span data-i18n="btn_manage">Manage CSV</span>
+            </button>
+          </div>
+
+          <!-- Full-Width Accounts Table -->
+          <div
+            class="overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-950/40"
+          >
+            <table
+              class="w-full text-left text-xs border-collapse min-w-[650px]"
+            >
               <thead
-                class="sticky top-0 bg-slate-900/90 text-slate-400 border-b border-slate-800"
+                class="bg-slate-950/90 text-slate-400 border-b border-slate-800"
               >
                 <tr>
-                  <th class="py-2 px-3" data-i18n="th_account">Account</th>
-                  <th class="py-2 px-3" data-i18n="th_principal">Principal</th>
-                  <th class="py-2 px-3" data-i18n="th_rate">Rate</th>
-                  <th class="py-2 px-3" data-i18n="th_end_date">End Date</th>
-                  <th class="py-2 px-3 text-right" data-i18n="th_est_interest">
+                  <th class="py-2.5 px-3.5" data-i18n="th_account">
+                    Account Name
+                  </th>
+                  <th class="py-2.5 px-3.5" data-i18n="th_principal">
+                    Principal
+                  </th>
+                  <th class="py-2.5 px-3.5" data-i18n="th_rate">Rate</th>
+                  <th class="py-2.5 px-3.5" data-i18n="th_end_date">
+                    End Date
+                  </th>
+                  <th
+                    class="py-2.5 px-3.5 text-right"
+                    data-i18n="th_est_interest"
+                  >
                     Est. Interest
                   </th>
-                  <th class="py-2 px-3 text-center" data-i18n="th_status">
+                  <th class="py-2.5 px-3.5 text-center" data-i18n="th_status">
                     Status
                   </th>
                 </tr>
@@ -2145,23 +2315,31 @@
             </table>
           </div>
         </div>
-        <!-- Simulation Logs -->
+
+        <!-- Simulation Milestones Activity Stream Card -->
         <div
-          class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col"
+          class="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col space-y-4"
         >
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-bold text-slate-200 text-base flex items-center">
+          <div
+            class="flex items-center justify-between border-b border-slate-800 pb-3"
+          >
+            <div class="flex items-center space-x-2">
               <i
-                class="fa-solid fa-clock-rotate-left text-emerald-400 mr-2"
+                class="fa-solid fa-clock-rotate-left text-emerald-400 text-base"
               ></i>
-              <span data-i18n="hdr_sim_logs">Simulation Milestones</span>
-            </h3>
-            <span class="text-xs text-slate-400" data-i18n="lbl_logs_sub"
-              >Salary, Maturities & 6M Re-investments</span
-            >
+              <h3
+                class="font-bold text-slate-200 text-base"
+                data-i18n="hdr_sim_logs"
+              >
+                Simulation Milestones
+              </h3>
+            </div>
+            <span class="text-xs text-slate-400" data-i18n="lbl_logs_sub">
+              Salary deposits, maturities & sweep allocations
+            </span>
           </div>
           <div
-            class="overflow-y-auto flex-1 max-h-[350px] space-y-2 pr-1"
+            class="overflow-y-auto max-h-[360px] space-y-2 pr-1"
             id="simulationLogContainer"
             role="log"
             aria-live="polite"
@@ -2688,10 +2866,22 @@
           comp_later: "{months} mo later",
           comp_same_date: "Same date",
 
-          // Savings Table
-          hdr_savings_accounts: "Savings Accounts",
-          lbl_savings_sub: "CSV + Auto Term + Withdrawals",
-          th_account: "Account",
+          // Savings Table & Hub (Issue #10)
+          hdr_savings_accounts: "Savings Accounts Hub",
+          lbl_savings_sub:
+            "Portfolio positions, auto-term sweeps & scheduled cashflows",
+          kpi_locked_principal: "Total Locked Principal",
+          kpi_active_accounts: "Active Accounts",
+          kpi_auto_sweeps: "Auto Sweeps",
+          kpi_weighted_rate: "Weighted Avg Rate",
+          filter_all: "All",
+          filter_active_fixed: "Active Fixed",
+          filter_auto_term: "Auto Term",
+          filter_matured: "Matured",
+          filter_withdrawals: "Withdrawals",
+          empty_savings_filter:
+            "No accounts found matching the selected filter.",
+          th_account: "Account Name",
           th_principal: "Principal",
           th_rate: "Rate",
           th_end_date: "End Date",
@@ -2702,6 +2892,7 @@
           status_active: "Active",
           badge_auto6m: "(Auto Term)",
           badge_auto_term: "(Auto Term)",
+          badge_fixed: "Fixed",
           no_milestones: "No major milestones recorded.",
 
           // Simulation Milestones Logs
@@ -2997,10 +3188,22 @@
           comp_later: "Trễ hơn {months} tháng",
           comp_same_date: "Cùng ngày",
 
-          // Savings Table
-          hdr_savings_accounts: "Danh Sách Sổ Tiết Kiệm",
-          lbl_savings_sub: "Từ CSV + Gửi Tự Động + Rút Tiền",
-          th_account: "Tên Tài Khoản",
+          // Savings Table & Hub (Issue #10)
+          hdr_savings_accounts: "Trung Tâm Sổ Tiết Kiệm",
+          lbl_savings_sub:
+            "Danh mục tiền gửi, gửi tự động & dòng tiền rút định kỳ",
+          kpi_locked_principal: "Tổng Gốc Đang Khóa",
+          kpi_active_accounts: "Sổ Đang Mở",
+          kpi_auto_sweeps: "Sổ Gửi Tự Động",
+          kpi_weighted_rate: "Lãi Suất TB Có Trọng Số",
+          filter_all: "Tất Cả",
+          filter_active_fixed: "Cố Định Đang Mở",
+          filter_auto_term: "Gửi Tự Động",
+          filter_matured: "Đã Đáo Hạn",
+          filter_withdrawals: "Rút Tiền",
+          empty_savings_filter:
+            "Không tìm thấy sổ tiết kiệm nào phù hợp bộ lọc.",
+          th_account: "Tên Sổ Tiết Kiệm",
           th_principal: "Tiền Gốc",
           th_rate: "Lãi Suất",
           th_end_date: "Ngày Đáo Hạn",
@@ -3011,6 +3214,7 @@
           status_active: "Đang gửi",
           badge_auto6m: "(Tự động)",
           badge_auto_term: "(Tự động)",
+          badge_fixed: "Cố định",
           no_milestones: "Chưa có cột mốc nào được ghi nhận.",
 
           // Simulation Milestones Logs
@@ -5150,36 +5354,199 @@
         }
       }
 
-      // --- TABLE & LOG RENDERING ---
+      // --- SAVINGS ACCOUNTS HUB & CATEGORY FILTERING (ADR-0013, Issue #10) ---
+      window.activeSavingsCategory = "all";
+      window.currentAllSavings = [];
+
+      function filterSavingsCategory(category) {
+        window.activeSavingsCategory = category;
+        const tabs = document.querySelectorAll(".savings-filter-tab");
+        tabs.forEach((tab) => {
+          if (tab.getAttribute("data-category") === category) {
+            tab.className =
+              "savings-filter-tab px-3 py-1 text-xs font-semibold rounded-lg transition bg-indigo-600 text-white shadow-sm";
+          } else {
+            tab.className =
+              "savings-filter-tab px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white";
+          }
+        });
+        renderFilteredSavingsTable();
+      }
+      window.filterSavingsCategory = filterSavingsCategory;
+
       function renderSavingsTable(allSavings, targetDate) {
-        const tbody = document.getElementById("savingsTableBody");
-        tbody.innerHTML = "";
+        window.currentAllSavings = allSavings || [];
+        updateSavingsHubKPIs(window.currentAllSavings);
+        renderFilteredSavingsTable();
+      }
+      window.renderSavingsTable = renderSavingsTable;
+
+      function updateSavingsHubKPIs(allSavings) {
+        let lockedPrincipal = 0;
+        let activeCount = 0;
+        let autoSweepsCount = 0;
+        let weightedRateSum = 0;
+        let weightedPrincipalSum = 0;
+
+        let countAll = 0;
+        let countActiveFixed = 0;
+        let countAutoTerm = 0;
+        let countMatured = 0;
+        let countWithdrawals = 0;
+
         allSavings.forEach((acc) => {
+          countAll++;
+          const isWithdrawal =
+            acc.type === "Withdrawal" || acc.status === "WITHDRAWAL";
+          const isAutoTerm = acc.type === "AUTO_6M" || acc.type === "AUTO_TERM";
+          const isMatured =
+            acc.status === "MATURED" || acc.status === "COMPLETED";
+          const isActive = !isMatured && !isWithdrawal;
+
+          if (isWithdrawal) countWithdrawals++;
+          else if (isMatured) countMatured++;
+          else if (isAutoTerm) {
+            countAutoTerm++;
+            if (isActive) {
+              lockedPrincipal += acc.principal;
+              activeCount++;
+              autoSweepsCount++;
+              weightedRateSum += acc.principal * acc.rate;
+              weightedPrincipalSum += acc.principal;
+            }
+          } else {
+            // Active CSV or manual fixed deposit
+            countActiveFixed++;
+            if (isActive) {
+              lockedPrincipal += acc.principal;
+              activeCount++;
+              weightedRateSum += acc.principal * acc.rate;
+              weightedPrincipalSum += acc.principal;
+            }
+          }
+        });
+
+        const avgWeightedRate =
+          weightedPrincipalSum > 0 ? weightedRateSum / weightedPrincipalSum : 0;
+
+        const elLocked = document.getElementById("kpiLockedPrincipal");
+        const elActive = document.getElementById("kpiActiveAccounts");
+        const elSweeps = document.getElementById("kpiAutoSweeps");
+        const elRate = document.getElementById("kpiWeightedRate");
+
+        if (elLocked) elLocked.textContent = formatCurrency(lockedPrincipal);
+        if (elActive) elActive.textContent = String(activeCount);
+        if (elSweeps) elSweeps.textContent = String(autoSweepsCount);
+        if (elRate) elRate.textContent = `${avgWeightedRate.toFixed(2)}%/yr`;
+
+        // Update category filter counts
+        const elCountAll = document.getElementById("count_filter_all");
+        const elCountActiveFixed = document.getElementById(
+          "count_filter_active_fixed"
+        );
+        const elCountAutoTerm = document.getElementById(
+          "count_filter_auto_term"
+        );
+        const elCountMatured = document.getElementById("count_filter_matured");
+        const elCountWithdrawals = document.getElementById(
+          "count_filter_withdrawals"
+        );
+
+        if (elCountAll) elCountAll.textContent = String(countAll);
+        if (elCountActiveFixed)
+          elCountActiveFixed.textContent = String(countActiveFixed);
+        if (elCountAutoTerm)
+          elCountAutoTerm.textContent = String(countAutoTerm);
+        if (elCountMatured) elCountMatured.textContent = String(countMatured);
+        if (elCountWithdrawals)
+          elCountWithdrawals.textContent = String(countWithdrawals);
+      }
+      window.updateSavingsHubKPIs = updateSavingsHubKPIs;
+
+      function renderFilteredSavingsTable() {
+        const tbody = document.getElementById("savingsTableBody");
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        const allSavings = window.currentAllSavings || [];
+        const category = window.activeSavingsCategory || "all";
+
+        const filtered = allSavings.filter((acc) => {
+          const isWithdrawal =
+            acc.type === "Withdrawal" || acc.status === "WITHDRAWAL";
+          const isAutoTerm = acc.type === "AUTO_6M" || acc.type === "AUTO_TERM";
+          const isMatured =
+            acc.status === "MATURED" || acc.status === "COMPLETED";
+          const isActive = !isMatured && !isWithdrawal;
+
+          if (category === "all") return true;
+          if (category === "active_fixed") return isActive && !isAutoTerm;
+          if (category === "auto_term") return isAutoTerm;
+          if (category === "matured") return isMatured;
+          if (category === "withdrawals") return isWithdrawal;
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          const emptyTr = document.createElement("tr");
+          emptyTr.innerHTML = `
+            <td colspan="6" class="py-8 text-center text-slate-500 text-xs">
+              <i class="fa-solid fa-inbox text-lg mb-2 block text-slate-600"></i>
+              ${t("empty_savings_filter")}
+            </td>`;
+          tbody.appendChild(emptyTr);
+          return;
+        }
+
+        filtered.forEach((acc) => {
+          const isWithdrawal =
+            acc.type === "Withdrawal" || acc.status === "WITHDRAWAL";
+          const isAutoTerm = acc.type === "AUTO_6M" || acc.type === "AUTO_TERM";
+          const isMatured =
+            acc.status === "MATURED" || acc.status === "COMPLETED";
+
           let statusBadge;
-          if (acc.type === "Withdrawal" || acc.status === "WITHDRAWAL")
-            statusBadge = `<span class="px-2 py-0.5 text-[10px] rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">${t("status_withdrawal")}</span>`;
-          else if (acc.status === "MATURED" || acc.status === "COMPLETED")
-            statusBadge = `<span class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${t("status_matured")}</span>`;
-          else
-            statusBadge = `<span class="px-2 py-0.5 text-[10px] rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${t("status_active")}</span>`;
-          const typeBadge =
-            acc.type === "AUTO_6M" || acc.type === "AUTO_TERM"
-              ? `<span class="text-[10px] text-amber-400 font-medium ml-1">${t("badge_auto_term")}</span>`
-              : "";
+          if (isWithdrawal) {
+            statusBadge = `<span class="px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">${t("status_withdrawal")}</span>`;
+          } else if (isMatured) {
+            statusBadge = `<span class="px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-slate-700/40 text-slate-300 border border-slate-600/40">${t("status_matured")}</span>`;
+          } else {
+            statusBadge = `<span class="px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">${t("status_active")}</span>`;
+          }
+
+          let typeBadge;
+          if (isWithdrawal) {
+            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/25 ml-1.5">${t("status_withdrawal")}</span>`;
+          } else if (isAutoTerm) {
+            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] font-medium rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/25 ml-1.5">${t("badge_auto_term")}</span>`;
+          } else {
+            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] font-medium rounded-md bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 ml-1.5">${t("badge_fixed")}</span>`;
+          }
+
           const bankBadge = acc.bank
             ? `<span class="text-[10px] text-slate-500 ml-1">(${acc.bank})</span>`
             : "";
+
           const tr = document.createElement("tr");
           tr.className = "hover:bg-slate-800/40 transition";
-          tr.innerHTML = `<td class="py-2.5 px-3 font-medium text-slate-200">${acc.name}${typeBadge}${bankBadge}</td>
-       <td class="py-2.5 px-3 font-mono">${formatCurrency(acc.principal)}</td>
-       <td class="py-2.5 px-3">${acc.rate}%</td>
-       <td class="py-2.5 px-3 text-slate-400">${formatDateDisplay(acc.endDate)}</td>
-       <td class="py-2.5 px-3 text-right font-mono ${acc.type === "Withdrawal" ? "text-rose-400" : "text-emerald-400"}">${acc.type === "Withdrawal" ? "-" : ""}${formatCurrency(acc.earnedInterest)}</td>
-       <td class="py-2.5 px-3 text-center">${statusBadge}</td>`;
+          tr.innerHTML = `
+            <td class="py-2.5 px-3.5 font-medium text-slate-200">
+              <div class="flex items-center flex-wrap gap-1">
+                <span>${acc.name}</span>
+                ${typeBadge}
+                ${bankBadge}
+              </div>
+            </td>
+            <td class="py-2.5 px-3.5 font-mono font-medium">${formatCurrency(acc.principal)}</td>
+            <td class="py-2.5 px-3.5 font-mono ${isWithdrawal ? "text-slate-500" : "text-indigo-300"}">${isWithdrawal ? "-" : acc.rate + "%"}</td>
+            <td class="py-2.5 px-3.5 text-slate-400 font-mono">${formatDateDisplay(acc.endDate)}</td>
+            <td class="py-2.5 px-3.5 text-right font-mono font-medium ${isWithdrawal ? "text-rose-400" : "text-emerald-400"}">${isWithdrawal ? "-" : ""}${formatCurrency(acc.earnedInterest)}</td>
+            <td class="py-2.5 px-3.5 text-center">${statusBadge}</td>
+          `;
           tbody.appendChild(tr);
         });
       }
+      window.renderFilteredSavingsTable = renderFilteredSavingsTable;
 
       function renderSimulationLogs(logs) {
         const container = document.getElementById("simulationLogContainer");
