@@ -1,8 +1,8 @@
 # 📋 Personal Finance Savings Predictor — Requirements & Specification
 
-> **Target File:** `index.html`  
+> **Target File:** `index.html` (Compacted output: `dist/index.html`)  
 > **Source Documents:** [`CONTEXT.md`](./CONTEXT.md), [`docs/adr/`](./docs/adr/)  
-> **Architecture:** Standalone Single-File Zero-Build HTML application
+> **Architecture:** Compacted Standalone Single-File HTML application
 
 ---
 

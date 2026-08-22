@@ -1,6 +1,6 @@
 # Context Map
 
-This repository is a collection of standalone, client-side HTML tools. Each tool is isolated in its own folder with a dedicated single-file zero-build application, domain glossary, and decision records.
+This repository is a collection of standalone, client-side HTML tools. Each tool is isolated in its own folder with a dedicated source application, compacted production deliverable (`dist/`), domain glossary, and decision records.
 
 ## Contexts
 
