@@ -1,6 +1,6 @@
 # 🧪 Personal Finance Savings Predictor — Requirements & Test Plan
 
-> **Target:** `personal_finance_savings_predictor.html`  
+> **Target:** `index.html`  
 > **Goal:** Validate all Phase 1–5 features work correctly  
 > **Method:** Browser console tests + manual verification
 
