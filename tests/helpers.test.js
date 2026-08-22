@@ -427,6 +427,36 @@ async function runHelperTests() {
     `loadFromURL restored Unicode CSV account name: "${ctx.workingCSVData[0]["Account Name"]}"`
   );
 
+  // Test 8b: Percent-encoded URL Hash (simulating messaging apps / chat links)
+  const encodedHash = encodeURIComponent(hash);
+  ctx.location.hash = encodedHash;
+  ctx.document.getElementById("inputSalary").value = "0";
+  const percentLoadSuccess = ctx.loadFromURL();
+  assert(
+    percentLoadSuccess === true,
+    `loadFromURL() successfully decompressed percent-encoded LZ-String URL hash`
+  );
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 45000000,
+    `loadFromURL() restored inputSalary from percent-encoded hash: 45,000,000`
+  );
+
+  // Test 8c: Empty CSV array serialization & restoration
+  ctx.syncCSVData([]);
+  ctx.shareSimulation();
+  ctx.workingCSVData = [{ "Account Name": "Temp Account" }];
+  const emptyCsvLoad = ctx.loadFromURL();
+  assert(
+    emptyCsvLoad === true,
+    `loadFromURL() successfully loaded empty portfolio state`
+  );
+  assert(
+    ctx.workingCSVData.length === 0,
+    `loadFromURL() restored empty CSV data array without default fallback`
+  );
+
   // Test 9: Schema versioning & parameter migration (R2, R22)
   assert(ctx.SCHEMA_VERSION === 4, `SCHEMA_VERSION constant is defined as 4`);
   const nullMigrated = ctx.migrateParams(null);

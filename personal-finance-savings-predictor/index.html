@@ -6920,14 +6920,87 @@
       })();
       window.LZString = LZString;
 
+      // --- CLIPBOARD HELPER (Fallback for non-secure / file:// / mobile contexts) ---
+      function copyTextToClipboard(text, onSuccess, onFallback) {
+        if (
+          typeof navigator !== "undefined" &&
+          navigator.clipboard &&
+          typeof navigator.clipboard.writeText === "function"
+        ) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              if (onSuccess) onSuccess();
+            })
+            .catch(() => {
+              if (fallbackExecCommandCopy(text)) {
+                if (onSuccess) onSuccess();
+              } else if (onFallback) {
+                onFallback();
+              }
+            });
+        } else {
+          if (fallbackExecCommandCopy(text)) {
+            if (onSuccess) onSuccess();
+          } else if (onFallback) {
+            onFallback();
+          }
+        }
+      }
+
+      function fallbackExecCommandCopy(text) {
+        try {
+          if (typeof document === "undefined" || !document.body) return false;
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-999999px";
+          textArea.style.top = "-999999px";
+          textArea.setAttribute("readonly", "");
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          const successful = document.execCommand("copy");
+          textArea.remove();
+          return !!successful;
+        } catch (err) {
+          return false;
+        }
+      }
+
       // --- SHAREABLE LINKS (Task 2.2, R8, ADR-0010 LZ-String Compression) ---
       function shareSimulation() {
         try {
+          const salaryVal = document.getElementById("inputSalary")
+            ? parseFormattedNumber(
+                document.getElementById("inputSalary").value
+              ).toString()
+            : "0";
+          const goalVal = document.getElementById("inputSavingsGoal")
+            ? parseFormattedNumber(
+                document.getElementById("inputSavingsGoal").value
+              ).toString()
+            : "0";
+          const thresholdVal = document.getElementById("inputAutoTermThreshold")
+            ? parseFormattedNumber(
+                document.getElementById("inputAutoTermThreshold").value
+              ).toString()
+            : "200000000";
+          const bufferVal = document.getElementById("inputEmergencyBuffer")
+            ? parseFormattedNumber(
+                document.getElementById("inputEmergencyBuffer").value
+              ).toString()
+            : "30000000";
+
           const params = {
             schemaVersion: SCHEMA_VERSION,
-            targetDate: document.getElementById("inputTargetDate").value,
-            salary: document.getElementById("inputSalary").value,
-            salaryGrowth: document.getElementById("inputSalaryGrowth").value,
+            targetDate: document.getElementById("inputTargetDate")
+              ? document.getElementById("inputTargetDate").value
+              : "",
+            salary: salaryVal,
+            salaryGrowth: document.getElementById("inputSalaryGrowth")
+              ? document.getElementById("inputSalaryGrowth").value
+              : "0",
             annualBonusMultiplier: document.getElementById(
               "inputAnnualBonusMultiplier"
             )
@@ -6936,15 +7009,15 @@
             annualBonusMonth: document.getElementById("selectAnnualBonusMonth")
               ? document.getElementById("selectAnnualBonusMonth").value
               : "1",
-            inflation: document.getElementById("inputInflation").value,
-            goal: document.getElementById("inputSavingsGoal").value,
-            poolRate: document.getElementById("inputPoolRate").value,
-            autoTermThreshold: document.getElementById("inputAutoTermThreshold")
-              ? document.getElementById("inputAutoTermThreshold").value
-              : "200000000",
-            emergencyBuffer: document.getElementById("inputEmergencyBuffer")
-              ? document.getElementById("inputEmergencyBuffer").value
-              : "30000000",
+            inflation: document.getElementById("inputInflation")
+              ? document.getElementById("inputInflation").value
+              : "0",
+            goal: goalVal,
+            poolRate: document.getElementById("inputPoolRate")
+              ? document.getElementById("inputPoolRate").value
+              : "0.5",
+            autoTermThreshold: thresholdVal,
+            emergencyBuffer: bufferVal,
             autoTermMonths: document.getElementById("inputAutoTermMonths")
               ? document.getElementById("inputAutoTermMonths").value
               : "6",
@@ -6959,19 +7032,93 @@
                 ? document.getElementById("input6MRate").value
                 : "5.8",
           };
-          const jsonStr = JSON.stringify({ p: params, csv: workingCSVData });
+
+          const fullPayload = {
+            p: params,
+            csv: workingCSVData || [],
+            ui: {
+              real: !!showRealValues,
+              lang: window.currentLang || "en",
+              tab:
+                typeof currentActiveTab !== "undefined"
+                  ? currentActiveTab
+                  : "timeline",
+              cat: window.activeSavingsCategory || "all",
+              metric: window.heatmapMetricMode || "wealth",
+              chartRange: document.getElementById("chartDateRange")
+                ? document.getElementById("chartDateRange").value
+                : "all",
+              comparisonActive: !!window.comparisonActive,
+              compParams:
+                window.comparisonActive &&
+                document.getElementById("compareSection")
+                  ? {
+                      salary: document.getElementById("inputCompSalary")
+                        ? parseFormattedNumber(
+                            document.getElementById("inputCompSalary").value
+                          ).toString()
+                        : undefined,
+                      salaryGrowth: document.getElementById(
+                        "inputCompSalaryGrowth"
+                      )
+                        ? document.getElementById("inputCompSalaryGrowth").value
+                        : undefined,
+                      inflation: document.getElementById("inputCompInflation")
+                        ? document.getElementById("inputCompInflation").value
+                        : undefined,
+                      goal: document.getElementById("inputCompSavingsGoal")
+                        ? parseFormattedNumber(
+                            document.getElementById("inputCompSavingsGoal")
+                              .value
+                          ).toString()
+                        : undefined,
+                      poolRate: document.getElementById("inputCompPoolRate")
+                        ? document.getElementById("inputCompPoolRate").value
+                        : undefined,
+                      autoTermThreshold: document.getElementById(
+                        "inputCompAutoTermThreshold"
+                      )
+                        ? parseFormattedNumber(
+                            document.getElementById(
+                              "inputCompAutoTermThreshold"
+                            ).value
+                          ).toString()
+                        : undefined,
+                      emergencyBuffer: document.getElementById(
+                        "inputCompEmergencyBuffer"
+                      )
+                        ? parseFormattedNumber(
+                            document.getElementById("inputCompEmergencyBuffer")
+                              .value
+                          ).toString()
+                        : undefined,
+                      autoTermRate: document.getElementById(
+                        "inputCompAutoTermRate"
+                      )
+                        ? document.getElementById("inputCompAutoTermRate").value
+                        : undefined,
+                    }
+                  : null,
+            },
+          };
+
+          const jsonStr = JSON.stringify(fullPayload);
           // Compress with LZ-String for compact URLs
           const payload = LZString.compressToEncodedURIComponent(jsonStr);
           window.location.hash = payload;
-          const url =
-            window.location.origin + window.location.pathname + "#" + payload;
-          navigator.clipboard
-            .writeText(url)
-            .then(() => showToast(t("toast_link_copied"), "success"))
-            .catch(() => {
+          const baseUrl = window.location.href
+            ? window.location.href.split("#")[0]
+            : (window.location.origin || "") + (window.location.pathname || "");
+          const url = baseUrl + "#" + payload;
+
+          copyTextToClipboard(
+            url,
+            () => showToast(t("toast_link_copied"), "success"),
+            () => {
               prompt(t("toast_copy_prompt"), url);
               showToast(t("toast_link_copied"), "success");
-            });
+            }
+          );
         } catch (e) {
           showToast(t("toast_sim_error", { msg: e.message }), "error");
         }
@@ -6979,43 +7126,70 @@
 
       function loadFromURL() {
         try {
-          const hash = window.location.hash.substring(1);
+          let hash = window.location.hash;
           if (!hash) return false;
+          if (hash.startsWith("#")) hash = hash.substring(1);
+          if (!hash) return false;
+
           let rawJson = null;
 
-          // 1. Try LZ-String decompression first
+          // Robust dual-mode decoding: try decoded URI component first, then raw hash
+          const candidates = [hash];
           try {
-            if (
-              typeof LZString !== "undefined" &&
-              LZString.decompressFromEncodedURIComponent
-            ) {
-              const decomp = LZString.decompressFromEncodedURIComponent(hash);
-              if (
-                decomp &&
-                (decomp.startsWith("{") || decomp.startsWith("["))
-              ) {
-                rawJson = decomp;
-              }
-            }
-          } catch (lzErr) {}
+            const decoded = decodeURIComponent(hash);
+            if (decoded !== hash) candidates.unshift(decoded);
+          } catch (e) {}
 
-          // 2. Fallback to legacy Base64 decoding
-          if (!rawJson) {
+          for (let cand of candidates) {
+            if (!cand) continue;
+            if (cand.startsWith("#")) cand = cand.substring(1);
+            if (!cand) continue;
+
+            // 1. Try LZ-String decompression first
             try {
-              rawJson = base64ToUtf8(hash);
-            } catch (b64Err) {}
+              if (
+                typeof LZString !== "undefined" &&
+                LZString.decompressFromEncodedURIComponent
+              ) {
+                const decomp = LZString.decompressFromEncodedURIComponent(cand);
+                if (
+                  decomp &&
+                  (decomp.startsWith("{") || decomp.startsWith("["))
+                ) {
+                  rawJson = decomp;
+                  break;
+                }
+              }
+            } catch (lzErr) {}
+
+            // 2. Fallback to legacy Base64 decoding
+            if (!rawJson) {
+              try {
+                const b64Decoded = base64ToUtf8(cand);
+                if (
+                  b64Decoded &&
+                  (b64Decoded.startsWith("{") || b64Decoded.startsWith("["))
+                ) {
+                  rawJson = b64Decoded;
+                  break;
+                }
+              } catch (b64Err) {}
+            }
           }
 
           if (!rawJson) return false;
           const payload = JSON.parse(rawJson);
           const p = migrateParams(payload.p);
           if (p) {
-            if (p.targetDate)
+            if (p.targetDate && document.getElementById("inputTargetDate"))
               document.getElementById("inputTargetDate").value = p.targetDate;
-            if (p.salary)
+            if (p.salary && document.getElementById("inputSalary"))
               document.getElementById("inputSalary").value =
-                formatNumberWithSeparators(p.salary);
-            if (p.salaryGrowth !== undefined)
+                formatNumberWithSeparators(parseFormattedNumber(p.salary));
+            if (
+              p.salaryGrowth !== undefined &&
+              document.getElementById("inputSalaryGrowth")
+            )
               document.getElementById("inputSalaryGrowth").value =
                 p.salaryGrowth;
             if (
@@ -7030,25 +7204,35 @@
             )
               document.getElementById("selectAnnualBonusMonth").value =
                 p.annualBonusMonth;
-            if (p.inflation !== undefined)
+            if (
+              p.inflation !== undefined &&
+              document.getElementById("inputInflation")
+            )
               document.getElementById("inputInflation").value = p.inflation;
-            if (p.goal !== undefined)
+            if (
+              p.goal !== undefined &&
+              document.getElementById("inputSavingsGoal")
+            )
               document.getElementById("inputSavingsGoal").value =
-                formatNumberWithSeparators(p.goal);
-            if (p.poolRate)
+                formatNumberWithSeparators(parseFormattedNumber(p.goal));
+            if (p.poolRate && document.getElementById("inputPoolRate"))
               document.getElementById("inputPoolRate").value = p.poolRate;
             if (
               p.autoTermThreshold !== undefined &&
               document.getElementById("inputAutoTermThreshold")
             )
               document.getElementById("inputAutoTermThreshold").value =
-                formatNumberWithSeparators(p.autoTermThreshold);
+                formatNumberWithSeparators(
+                  parseFormattedNumber(p.autoTermThreshold)
+                );
             if (
               p.emergencyBuffer !== undefined &&
               document.getElementById("inputEmergencyBuffer")
             )
               document.getElementById("inputEmergencyBuffer").value =
-                formatNumberWithSeparators(p.emergencyBuffer);
+                formatNumberWithSeparators(
+                  parseFormattedNumber(p.emergencyBuffer)
+                );
             if (
               p.autoTermMonths !== undefined &&
               document.getElementById("inputAutoTermMonths")
@@ -7072,11 +7256,129 @@
             }
             updateAllVerbalHelpers();
           }
-          if (payload.csv && payload.csv.length > 0) {
+
+          if (Array.isArray(payload.csv)) {
             workingCSVData = payload.csv;
             window.workingCSVData = workingCSVData;
           }
           updateCSVCountBadge();
+
+          // Restore UI state if present in payload.ui
+          if (payload.ui && typeof payload.ui === "object") {
+            const ui = payload.ui;
+            if (
+              ui.lang &&
+              (ui.lang === "en" || ui.lang === "vi") &&
+              ui.lang !== window.currentLang
+            ) {
+              changeLanguage(ui.lang);
+            }
+            if (ui.real !== undefined && ui.real !== showRealValues) {
+              showRealValues = !!ui.real;
+              window.showRealValues = showRealValues;
+              const btn = document.getElementById("realToggleBtn");
+              if (btn) {
+                btn.innerHTML = showRealValues
+                  ? `<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_nominal">${t("btn_nominal")}</span>`
+                  : `<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_real">${t("btn_real")}</span>`;
+                btn.classList.toggle("text-emerald-400", showRealValues);
+                btn.classList.toggle("text-slate-400", !showRealValues);
+              }
+            }
+            if (ui.tab && typeof switchAnalyticsTab === "function") {
+              switchAnalyticsTab(ui.tab);
+            }
+            if (ui.cat && typeof filterSavingsCategory === "function") {
+              filterSavingsCategory(ui.cat);
+            }
+            if (ui.metric && typeof setHeatmapMetricMode === "function") {
+              setHeatmapMetricMode(ui.metric);
+            }
+            if (
+              ui.chartRange &&
+              document.getElementById("chartDateRange") &&
+              typeof filterChartDateRange === "function"
+            ) {
+              document.getElementById("chartDateRange").value = ui.chartRange;
+              filterChartDateRange();
+            }
+            if (ui.comparisonActive !== undefined) {
+              const compSec = document.getElementById("compareSection");
+              if (compSec) {
+                if (ui.comparisonActive) {
+                  compSec.classList.remove("hidden");
+                  window.comparisonActive = true;
+                  if (ui.compParams) {
+                    if (
+                      ui.compParams.salary !== undefined &&
+                      document.getElementById("inputCompSalary")
+                    )
+                      document.getElementById("inputCompSalary").value =
+                        formatNumberWithSeparators(
+                          parseFormattedNumber(ui.compParams.salary)
+                        );
+                    if (
+                      ui.compParams.salaryGrowth !== undefined &&
+                      document.getElementById("inputCompSalaryGrowth")
+                    )
+                      document.getElementById("inputCompSalaryGrowth").value =
+                        ui.compParams.salaryGrowth;
+                    if (
+                      ui.compParams.inflation !== undefined &&
+                      document.getElementById("inputCompInflation")
+                    )
+                      document.getElementById("inputCompInflation").value =
+                        ui.compParams.inflation;
+                    if (
+                      ui.compParams.goal !== undefined &&
+                      document.getElementById("inputCompSavingsGoal")
+                    )
+                      document.getElementById("inputCompSavingsGoal").value =
+                        formatNumberWithSeparators(
+                          parseFormattedNumber(ui.compParams.goal)
+                        );
+                    if (
+                      ui.compParams.poolRate !== undefined &&
+                      document.getElementById("inputCompPoolRate")
+                    )
+                      document.getElementById("inputCompPoolRate").value =
+                        ui.compParams.poolRate;
+                    if (
+                      ui.compParams.autoTermThreshold !== undefined &&
+                      document.getElementById("inputCompAutoTermThreshold")
+                    )
+                      document.getElementById(
+                        "inputCompAutoTermThreshold"
+                      ).value = formatNumberWithSeparators(
+                        parseFormattedNumber(ui.compParams.autoTermThreshold)
+                      );
+                    if (
+                      ui.compParams.emergencyBuffer !== undefined &&
+                      document.getElementById("inputCompEmergencyBuffer")
+                    )
+                      document.getElementById(
+                        "inputCompEmergencyBuffer"
+                      ).value = formatNumberWithSeparators(
+                        parseFormattedNumber(ui.compParams.emergencyBuffer)
+                      );
+                    if (
+                      ui.compParams.autoTermRate !== undefined &&
+                      document.getElementById("inputCompAutoTermRate")
+                    )
+                      document.getElementById("inputCompAutoTermRate").value =
+                        ui.compParams.autoTermRate;
+                    updateAllVerbalHelpers();
+                  }
+                } else {
+                  compSec.classList.add("hidden");
+                  window.comparisonActive = false;
+                  window.scenarioBResult = null;
+                }
+              }
+            }
+          }
+
+          updatePresetChipActiveStates();
           return true;
         } catch (e) {
           return false;
@@ -7601,7 +7903,9 @@
         const params = {
           schemaVersion: SCHEMA_VERSION,
           targetDate: document.getElementById("inputTargetDate").value,
-          salary: document.getElementById("inputSalary").value,
+          salary: parseFormattedNumber(
+            document.getElementById("inputSalary").value
+          ).toString(),
           salaryGrowth: document.getElementById("inputSalaryGrowth").value,
           annualBonusMultiplier: document.getElementById(
             "inputAnnualBonusMultiplier"
@@ -7612,13 +7916,19 @@
             ? document.getElementById("selectAnnualBonusMonth").value
             : "1",
           inflation: document.getElementById("inputInflation").value,
-          goal: document.getElementById("inputSavingsGoal").value,
+          goal: parseFormattedNumber(
+            document.getElementById("inputSavingsGoal").value
+          ).toString(),
           poolRate: document.getElementById("inputPoolRate").value,
           autoTermThreshold: document.getElementById("inputAutoTermThreshold")
-            ? document.getElementById("inputAutoTermThreshold").value
+            ? parseFormattedNumber(
+                document.getElementById("inputAutoTermThreshold").value
+              ).toString()
             : "200000000",
           emergencyBuffer: document.getElementById("inputEmergencyBuffer")
-            ? document.getElementById("inputEmergencyBuffer").value
+            ? parseFormattedNumber(
+                document.getElementById("inputEmergencyBuffer").value
+              ).toString()
             : "30000000",
           autoTermMonths: document.getElementById("inputAutoTermMonths")
             ? document.getElementById("inputAutoTermMonths").value
@@ -7639,7 +7949,7 @@
       function loadFromStorage() {
         try {
           const csv = getStorage("workingCSVData", null);
-          if (csv) {
+          if (Array.isArray(csv)) {
             workingCSVData = csv;
             window.workingCSVData = workingCSVData;
           }
@@ -7651,7 +7961,7 @@
                 params.targetDate;
             if (params.salary)
               document.getElementById("inputSalary").value =
-                formatNumberWithSeparators(params.salary);
+                formatNumberWithSeparators(parseFormattedNumber(params.salary));
             if (params.salaryGrowth !== undefined)
               document.getElementById("inputSalaryGrowth").value =
                 params.salaryGrowth;
@@ -7672,7 +7982,7 @@
                 params.inflation;
             if (params.goal !== undefined)
               document.getElementById("inputSavingsGoal").value =
-                formatNumberWithSeparators(params.goal);
+                formatNumberWithSeparators(parseFormattedNumber(params.goal));
             if (params.poolRate)
               document.getElementById("inputPoolRate").value = params.poolRate;
             if (
@@ -7680,13 +7990,17 @@
               document.getElementById("inputAutoTermThreshold")
             )
               document.getElementById("inputAutoTermThreshold").value =
-                formatNumberWithSeparators(params.autoTermThreshold);
+                formatNumberWithSeparators(
+                  parseFormattedNumber(params.autoTermThreshold)
+                );
             if (
               params.emergencyBuffer !== undefined &&
               document.getElementById("inputEmergencyBuffer")
             )
               document.getElementById("inputEmergencyBuffer").value =
-                formatNumberWithSeparators(params.emergencyBuffer);
+                formatNumberWithSeparators(
+                  parseFormattedNumber(params.emergencyBuffer)
+                );
             if (
               params.autoTermMonths !== undefined &&
               document.getElementById("inputAutoTermMonths")
@@ -7710,6 +8024,7 @@
                   params.sixMRate;
             }
             updateAllVerbalHelpers();
+            updatePresetChipActiveStates();
           }
         } catch (e) {
           console.warn("Load from storage failed:", e);
@@ -7730,7 +8045,8 @@
         updateThemeBtn();
 
         // Load from URL hash if present, else localStorage
-        if (!loadFromURL()) {
+        const loadedFromHash = loadFromURL();
+        if (!loadedFromHash) {
           loadFromStorage();
         }
 
@@ -7741,10 +8057,28 @@
           document.getElementById("inputTargetDate").value = formatDate(target);
         }
 
-        // Init UI & Run Simulation
+        // Init UI & Run Simulation / Comparison
         updateCSVCountBadge();
         updatePresetChipActiveStates();
-        runSimulation();
+        if (window.comparisonActive && typeof runComparison === "function") {
+          runComparison();
+        } else {
+          runSimulation();
+        }
+
+        // Reactive in-page hash changes (ADR-0010 enhanced)
+        window.addEventListener("hashchange", function () {
+          if (loadFromURL()) {
+            if (
+              window.comparisonActive &&
+              typeof runComparison === "function"
+            ) {
+              runComparison();
+            } else if (typeof runSimulation === "function") {
+              runSimulation();
+            }
+          }
+        });
 
         // Show onboarding on first visit
         if (!getStorage("showedOnboarding", false)) {
