@@ -196,6 +196,132 @@ async function runTests() {
   // Clean up test release dir
   fs.rmSync(testReleaseDir, { recursive: true, force: true });
 
+  // Test 8: Preservation of Key Interactive DOM Selectors in Compacted Deliverable
+  const requiredDomIds = [
+    "inputSalary",
+    "inputSavingsGoal",
+    "inputTargetDate",
+    "savingsHubSection",
+    "compareSection",
+    "onboardingOverlay",
+    "csvModal",
+    "presetsModal",
+    "heatmapGrid",
+    "heatmapTooltip",
+    "chartGrowth",
+    "chartGoalRing",
+    "kpiLockedPrincipal",
+    "kpiActiveAccounts",
+    "kpiWeightedRate",
+  ];
+  requiredDomIds.forEach((id) => {
+    assert(
+      compactedHtml.includes(`id="${id}"`) ||
+        compactedHtml.includes(`id='${id}'`),
+      `Compacted HTML preserves critical DOM element ID '${id}'`
+    );
+  });
+
+  // Test 9: Bilingual Translation Dictionary in Compacted Output
+  const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
+  const testSandbox = {
+    window: {},
+    tailwind: {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    document: {
+      getElementById: () => ({
+        addEventListener: () => {},
+        value: "",
+        classList: { add: () => {}, remove: () => {} },
+        innerHTML: "",
+        innerText: "",
+      }),
+      querySelector: () => null,
+      querySelectorAll: () => [],
+      addEventListener: () => {},
+    },
+    console: console,
+    localStorage: { getItem: () => null, setItem: () => {} },
+    Chart: Object.assign(function () {}, {
+      getChart: () => null,
+      register: () => {},
+    }),
+    navigator: { clipboard: { writeText: async () => {} } },
+    location: { href: "http://localhost/", search: "" },
+  };
+  testSandbox.window = testSandbox;
+  vm.createContext(testSandbox);
+  vm.runInContext(combinedScripts, testSandbox);
+
+  assert(
+    testSandbox.TRANSLATIONS &&
+      testSandbox.TRANSLATIONS.en &&
+      testSandbox.TRANSLATIONS.vi,
+    "Compacted script defines complete TRANSLATIONS object with EN and VI"
+  );
+  assert(
+    Object.keys(testSandbox.TRANSLATIONS.en).length ===
+      Object.keys(testSandbox.TRANSLATIONS.vi).length,
+    `Compacted translations retain perfect key parity (${Object.keys(testSandbox.TRANSLATIONS.en).length} keys)`
+  );
+
+  // Test 10: Pure Simulation Calculation Integrity in Compacted Sandbox
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sixMonthsLater = new Date(today.getTime());
+  sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+
+  const compactedSimRes = testSandbox.simulate(
+    {
+      targetDateStr: testSandbox.formatDate(sixMonthsLater),
+      monthlySalary: 30000000,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0.05,
+      autoTermThreshold: 0,
+      savingsGoal: 0,
+    },
+    [
+      {
+        "Account Name": "Starting Pool",
+        Principal: "100000000",
+        "Start Date": testSandbox.formatDate(today),
+        "End Date": testSandbox.formatDate(sixMonthsLater),
+        Type: "Non-Term Pool",
+      },
+    ]
+  );
+  assert(
+    compactedSimRes !== null && compactedSimRes.totals.totalWealth > 250000000,
+    `Simulation executed from compacted deliverable produces expected wealth (${Math.round(compactedSimRes ? compactedSimRes.totals.totalWealth : 0).toLocaleString()} VND)`
+  );
+
+  // Test 11: Multi-Format Test Report Artifacts Verification
+  const reportDir = path.join(__dirname, "..", "test-reports");
+  const reportHtml = path.join(reportDir, "index.html");
+  const reportJson = path.join(reportDir, "results.json");
+  const reportXml = path.join(reportDir, "junit.xml");
+
+  if (fs.existsSync(reportHtml)) {
+    assert(
+      fs.statSync(reportHtml).size > 100,
+      "test-reports/index.html interactive report exists and is non-empty"
+    );
+  }
+  if (fs.existsSync(reportJson)) {
+    assert(
+      fs.statSync(reportJson).size > 100,
+      "test-reports/results.json structured report exists and is non-empty"
+    );
+  }
+  if (fs.existsSync(reportXml)) {
+    assert(
+      fs.statSync(reportXml).size > 100,
+      "test-reports/junit.xml JUnit XML report exists and is non-empty"
+    );
+  }
+
   console.log(`\n📊 Test Summary: ${passCount} Passed, ${failCount} Failed\n`);
   if (failCount > 0) {
     process.exit(1);
