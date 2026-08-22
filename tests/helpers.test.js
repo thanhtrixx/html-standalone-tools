@@ -27,7 +27,19 @@ function loadEnvironment() {
         set value(v) {
           _val = v == null ? "" : String(v);
         },
-        innerText: "",
+        _innerText: "",
+        get innerText() {
+          return this._innerText;
+        },
+        set innerText(v) {
+          this._innerText = String(v);
+        },
+        get textContent() {
+          return this._innerText;
+        },
+        set textContent(v) {
+          this._innerText = String(v);
+        },
         innerHTML: "",
         children: [],
         parentElement: null,
@@ -749,6 +761,86 @@ async function runHelperTests() {
     typeof ctx.showHeatmapTooltip === "function" &&
       typeof ctx.hideHeatmapTooltip === "function",
     `showHeatmapTooltip and hideHeatmapTooltip helpers are globally defined`
+  );
+
+  // Test 18: Full-Width Savings Hub KPIs & Category Filtering (ADR-0013, Issue #10)
+  assert(
+    typeof ctx.filterSavingsCategory === "function",
+    `filterSavingsCategory helper is globally defined`
+  );
+  ctx.filterSavingsCategory("auto_term");
+  assert(
+    ctx.activeSavingsCategory === "auto_term",
+    `filterSavingsCategory('auto_term') set activeSavingsCategory to 'auto_term'`
+  );
+  ctx.filterSavingsCategory("all");
+  assert(
+    ctx.activeSavingsCategory === "all",
+    `filterSavingsCategory('all') reset activeSavingsCategory to 'all'`
+  );
+
+  assert(
+    typeof ctx.updateSavingsHubKPIs === "function",
+    `updateSavingsHubKPIs helper is globally defined`
+  );
+
+  const mockPortfolio = [
+    {
+      id: "1",
+      name: "Fixed 1",
+      principal: 100000000,
+      rate: 6.0,
+      status: "ACTIVE",
+      type: "CSV",
+    },
+    {
+      id: "2",
+      name: "Fixed 2",
+      principal: 200000000,
+      rate: 7.5,
+      status: "ACTIVE",
+      type: "CSV",
+    },
+    {
+      id: "3",
+      name: "Auto Term #1",
+      principal: 150000000,
+      rate: 6.5,
+      status: "ACTIVE",
+      type: "AUTO_6M",
+    },
+    {
+      id: "4",
+      name: "Matured 1",
+      principal: 50000000,
+      rate: 5.0,
+      status: "MATURED",
+      type: "CSV",
+    },
+    {
+      id: "5",
+      name: "Withdrawal 1",
+      principal: 30000000,
+      rate: 0,
+      status: "WITHDRAWAL",
+      type: "Withdrawal",
+    },
+  ];
+  ctx.updateSavingsHubKPIs(mockPortfolio);
+  // Total active locked principal = 100M + 200M + 150M = 450M
+  // Active accounts = 3, Auto sweeps = 1
+  // Weighted rate = (100*6 + 200*7.5 + 150*6.5) / 450 = (600 + 1500 + 975) / 450 = 3075 / 450 = 6.833%
+  assert(
+    ctx.document.getElementById("kpiActiveAccounts").innerText === "3",
+    `updateSavingsHubKPIs computed active accounts count (3)`
+  );
+  assert(
+    ctx.document.getElementById("kpiAutoSweeps").innerText === "1",
+    `updateSavingsHubKPIs computed auto sweeps count (1)`
+  );
+  assert(
+    ctx.document.getElementById("kpiWeightedRate").innerText.startsWith("6.83"),
+    `updateSavingsHubKPIs computed weighted average rate (6.83%/yr)`
   );
 
   console.log(

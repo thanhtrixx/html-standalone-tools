@@ -77,3 +77,7 @@ _Avoid_: Stepper buttons, increment arrows, manual slider
 **Continuous Multi-Year Heatmap Matrix**:
 A comprehensive multi-year calendar grid rendering all simulation years simultaneously in rows (columns = Jan–Dec) with global normalized color shading, annual deltas, and dual-mode density/velocity metrics.
 _Avoid_: Single-year calendar, dropdown heatmap, separate year tables
+
+**Savings Accounts Hub**:
+A dedicated full-width portfolio table view featuring aggregated KPI summary pills (Total Locked Principal, Active Accounts, Auto Sweeps, Weighted Average Rate) and instant category filtering tabs (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`).
+_Avoid_: Split-column table, cramped list, static accounts table
