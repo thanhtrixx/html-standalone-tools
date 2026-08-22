@@ -109,7 +109,17 @@ function loadEnvironment() {
     addEventListener: () => {},
     removeEventListener: () => {},
     document: {
-      getElementById: (id) => getEl(id),
+      getElementById: (id) => {
+        if (
+          id === "documentElement" ||
+          id === "body" ||
+          htmlContent.includes(`id="${id}"`) ||
+          htmlContent.includes(`id='${id}'`)
+        ) {
+          return getEl(id);
+        }
+        return null;
+      },
       querySelector: (sel) => getEl(sel.replace(/^[#.]/, "")),
       querySelectorAll: () => [],
       createElement: (tag) => getEl("dyn_" + tag + "_" + Math.random()),
