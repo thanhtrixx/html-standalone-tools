@@ -1,10 +1,10 @@
 /public
 /node_modules
-package-lock.json
 /resources/_gen
 yarn.lock
 dist
 **/dist
+release-assets
 
 ### IntelliJ IDEA ###
 .idea

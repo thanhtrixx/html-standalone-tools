@@ -152,6 +152,40 @@ async function runTests() {
     "Inline JavaScript in compacted HTML is syntactically valid and simulate() function is available"
   );
 
+  // Test 7: Verify Release packager creates assets and zip archive
+  const testReleaseDir = path.join(__dirname, "test_release_assets");
+  const { main: packReleaseMain } = require("../scripts/pack-release");
+  process.argv = [
+    "node",
+    "scripts/pack-release.js",
+    `--out-dir=${testReleaseDir}`,
+    "--version=v9.9.9",
+  ];
+  await packReleaseMain();
+
+  const stagedHtml = path.join(
+    testReleaseDir,
+    "personal-finance-savings-predictor.html"
+  );
+  const stagedZip = path.join(
+    testReleaseDir,
+    "html-standalone-tools-v9.9.9.zip"
+  );
+
+  assert(
+    fs.existsSync(stagedHtml),
+    "Release packager staged standalone tool HTML"
+  );
+  assert(
+    fs.existsSync(stagedZip),
+    "Release packager created unified ZIP bundle"
+  );
+  assert(fs.statSync(stagedHtml).size > 0, "Staged tool HTML is non-empty");
+  assert(fs.statSync(stagedZip).size > 0, "Staged ZIP bundle is non-empty");
+
+  // Clean up test release dir
+  fs.rmSync(testReleaseDir, { recursive: true, force: true });
+
   console.log(`\n📊 Test Summary: ${passCount} Passed, ${failCount} Failed\n`);
   if (failCount > 0) {
     process.exit(1);
