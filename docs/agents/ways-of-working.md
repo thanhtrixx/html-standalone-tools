@@ -6,7 +6,34 @@ This document defines the standard engineering workflow and delivery lifecycle f
 
 ## 🔁 The Three-Phase Delivery Lifecycle
 
+```mermaid
+flowchart TD
+    subgraph P1["1. Spec &amp; Decomposition"]
+        QA["Q&amp;A / Grill"] --> ADR["ADR / CONTEXT.md"]
+        ADR --> Issues["GitHub Issues<br/>(Epic + Vertical Slices)"]
+    end
+
+    subgraph P2["2. GitHub Flow &amp; TDD"]
+        Branch["Branch per Issue<br/>(feat/issue-&lt;n&gt;-...)"] --> TDD["Write Tests (TDD)"]
+        TDD --> Impl["Implementation"]
+        Impl --> Verify["npm run build &amp;&amp; npm test<br/>(100% Green)"]
+    end
+
+    subgraph P3["3. PR, Review &amp; Merge"]
+        PR["Create PR<br/>(gh pr create --body &quot;Closes #&lt;n&gt;&quot;)"] --> Review["Code &amp; Spec Review"]
+        Review --> Merge["Merge PR"]
+        Merge --> VerifyAC["Verify ACs [x]"]
+        VerifyAC --> Close["Close Issue<br/>(gh issue close)"]
+    end
+
+    Issues --> Branch
+    Verify --> PR
 ```
+
+<details>
+<summary>ASCII Diagram (Backout Plan / Text Fallback)</summary>
+
+```text
 [1. Spec & Decomposition]
        │
        ▼
@@ -24,6 +51,8 @@ This document defines the standard engineering workflow and delivery lifecycle f
        ▼                                      ▼
   Code & Spec Review ──► Merge PR ──► Verify ACs `[x]` ──► Close Issue (`gh issue close`)
 ```
+
+</details>
 
 ---
 
@@ -121,3 +150,4 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
 - **Observable Behavior Over Implementation Details**: Tests must assert observable outputs (simulation logs, calculations, DOM state, URL payloads), not private variables.
 - **Zero-Regression Standard**: All existing tests must pass on every commit and PR.
 - **Documentation Integrity**: ADRs, `CONTEXT.md`, and translation key parity (`TRANSLATIONS.en` vs `TRANSLATIONS.vi`) must be maintained in sync with code changes.
+- **Diagram Standard**: Use Mermaid as the default format for rendering diagrams in documentation. Maintain an ASCII diagram inside a collapsible backout block (`<details>`) as a fallback for plain-text viewing and rendering recovery.
