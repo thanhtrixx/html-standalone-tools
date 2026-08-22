@@ -5211,12 +5211,20 @@
           const { totals, finalSnapshot, goalReached, goalReachedDate } = res;
 
           // --- UPDATE METRICS DISPLAY ---
-          document.getElementById("metricTotalBalance").innerText =
-            formatCurrency(totals.totalWealth);
-          document.getElementById("metricTargetDateText").innerText =
-            formatDateDisplay(parseDate(targetDateStr));
-          document.getElementById("metricTotalInterest").innerText =
-            formatCurrency(totals.totalInterest);
+          const elTotalBal = document.getElementById("metricTotalBalance");
+          if (elTotalBal)
+            elTotalBal.innerText = formatCurrency(totals.totalWealth);
+
+          const elTargetDate = document.getElementById("metricTargetDateText");
+          if (elTargetDate)
+            elTargetDate.innerText = formatDateDisplay(
+              parseDate(targetDateStr)
+            );
+
+          const elTotalInt = document.getElementById("metricTotalInterest");
+          if (elTotalInt)
+            elTotalInt.innerText = formatCurrency(totals.totalInterest);
+
           const intRatio =
             totals.cumulativeSalary > 0
               ? (
@@ -5224,44 +5232,61 @@
                   100
                 ).toFixed(1)
               : 0;
-          document.getElementById("metricInterestPercentage").innerText =
-            `+${intRatio}% ${t("yield_suffix")}`;
-          document.getElementById("metricTotalSalary").innerText =
-            formatCurrency(totals.cumulativeSalary);
-          document.getElementById("metricSalaryCount").innerText =
-            `${totals.salaryCount} ${t("lbl_monthly_deposits")}`;
-          document.getElementById("metricPoolBalance").innerText =
-            formatCurrency(totals.poolBalance);
-          document.getElementById("metricCreated6MCount").innerText = t(
-            "auto_account_count",
-            { count: totals.created6MCount }
-          );
+          const elIntPct = document.getElementById("metricInterestPercentage");
+          if (elIntPct)
+            elIntPct.innerText = `+${intRatio}% ${t("yield_suffix")}`;
+
+          const elTotalSal = document.getElementById("metricTotalSalary");
+          if (elTotalSal)
+            elTotalSal.innerText = formatCurrency(totals.cumulativeSalary);
+
+          const elSalCount = document.getElementById("metricSalaryCount");
+          if (elSalCount)
+            elSalCount.innerText = `${totals.salaryCount} ${t("lbl_monthly_deposits")}`;
+
+          const elPoolBal = document.getElementById("metricPoolBalance");
+          if (elPoolBal)
+            elPoolBal.innerText = formatCurrency(totals.poolBalance);
+
+          const elCreated6M = document.getElementById("metricCreated6MCount");
+          if (elCreated6M)
+            elCreated6M.innerText = t("auto_account_count", {
+              count: totals.created6MCount,
+            });
 
           // Inflation-adjusted (real) value display (R5)
+          const elRealVal = document.getElementById("metricRealValue");
+          const elRealLine = document.getElementById("realLineIndicator");
           if (inflationRate > 0) {
-            document.getElementById("metricRealValue").style.display = "";
-            document.getElementById("metricRealValue").innerText =
-              `${t("lbl_real_prefix")}${formatCurrency(totals.inflationAdjusted)}`;
-            document
-              .getElementById("realLineIndicator")
-              .classList.remove("opacity-0");
+            if (elRealVal) {
+              elRealVal.style.display = "";
+              elRealVal.innerText = `${t("lbl_real_prefix")}${formatCurrency(totals.inflationAdjusted)}`;
+            }
+            if (elRealLine) elRealLine.classList.remove("opacity-0");
           } else {
-            document.getElementById("metricRealValue").style.display = "none";
-            document
-              .getElementById("realLineIndicator")
-              .classList.add("opacity-0");
+            if (elRealVal) elRealVal.style.display = "none";
+            if (elRealLine) elRealLine.classList.add("opacity-0");
           }
 
           // Earnings Breakdown
-          document.getElementById("txtInitialInterest").innerText =
-            formatCurrency(totals.totalInterestInitialCSV);
-          document.getElementById("txtPoolInterest").innerText = formatCurrency(
-            totals.totalInterestPool
-          );
-          document.getElementById("txtAuto6MInterest").innerText =
-            formatCurrency(totals.totalInterest6M);
-          document.getElementById("txtSalaryDeposited").innerText =
-            formatCurrency(totals.cumulativeSalary);
+          const txtInitInt = document.getElementById("txtInitialInterest");
+          if (txtInitInt)
+            txtInitInt.innerText = formatCurrency(
+              totals.totalInterestInitialCSV
+            );
+
+          const txtPoolInt = document.getElementById("txtPoolInterest");
+          if (txtPoolInt)
+            txtPoolInt.innerText = formatCurrency(totals.totalInterestPool);
+
+          const txtAutoInt = document.getElementById("txtAuto6MInterest");
+          if (txtAutoInt)
+            txtAutoInt.innerText = formatCurrency(totals.totalInterest6M);
+
+          const txtSalDep = document.getElementById("txtSalaryDeposited");
+          if (txtSalDep)
+            txtSalDep.innerText = formatCurrency(totals.cumulativeSalary);
+
           const txtWithdrawalsEl = document.getElementById("txtWithdrawals");
           if (
             txtWithdrawalsEl &&
@@ -5278,45 +5303,63 @@
               totals.totalWithdrawals
             );
           }
-          document.getElementById("txtTotalSavingsCount").innerText =
-            res.allSavings.length;
+          const txtTotalSavingsEl = document.getElementById(
+            "txtTotalSavingsCount"
+          );
+          if (txtTotalSavingsEl) {
+            txtTotalSavingsEl.innerText = res.allSavings.length;
+          }
 
           // Goal Progress Section Visibility & Milestone Date
           const goalSection = document.getElementById("goalProgressSection");
-          if (savingsGoal > 0) {
-            goalSection.classList.remove("hidden");
-            const pct = Math.min(100, (totals.totalWealth / savingsGoal) * 100);
-            document.getElementById("goalProgressBar").style.width = pct + "%";
-            document.getElementById("goalCurrentText").innerText =
-              formatCurrency(totals.totalWealth);
-            document.getElementById("goalTargetText").innerText = t(
-              "goal_label",
-              { amount: formatCurrency(savingsGoal) }
-            );
-            if (goalReached && goalReachedDate) {
-              const displayDate = formatDateDisplay(parseDate(goalReachedDate));
-              document.getElementById("goalMonthsToGo").innerText = t(
-                "goal_reached_milestone",
-                { date: displayDate }
+          if (goalSection) {
+            if (savingsGoal > 0) {
+              goalSection.classList.remove("hidden");
+              const pct = Math.min(
+                100,
+                (totals.totalWealth / savingsGoal) * 100
               );
-              if (!window._lastToastGoalReached) {
-                showToast(
-                  t("toast_goal_reached", {
-                    goal: formatCurrency(savingsGoal),
-                    date: displayDate,
-                  }),
-                  "success"
+              const elGoalBar = document.getElementById("goalProgressBar");
+              if (elGoalBar) elGoalBar.style.width = pct + "%";
+
+              const elGoalCurrent = document.getElementById("goalCurrentText");
+              if (elGoalCurrent)
+                elGoalCurrent.innerText = formatCurrency(totals.totalWealth);
+
+              const elGoalTarget = document.getElementById("goalTargetText");
+              if (elGoalTarget)
+                elGoalTarget.innerText = t("goal_label", {
+                  amount: formatCurrency(savingsGoal),
+                });
+
+              const elGoalMonths = document.getElementById("goalMonthsToGo");
+              if (goalReached && goalReachedDate) {
+                const displayDate = formatDateDisplay(
+                  parseDate(goalReachedDate)
                 );
-                window._lastToastGoalReached = true;
+                if (elGoalMonths)
+                  elGoalMonths.innerText = t("goal_reached_milestone", {
+                    date: displayDate,
+                  });
+                if (!window._lastToastGoalReached) {
+                  showToast(
+                    t("toast_goal_reached", {
+                      goal: formatCurrency(savingsGoal),
+                      date: displayDate,
+                    }),
+                    "success"
+                  );
+                  window._lastToastGoalReached = true;
+                }
+              } else {
+                if (elGoalMonths)
+                  elGoalMonths.innerText = t("goal_not_reached");
+                window._lastToastGoalReached = false;
               }
+              renderGoalRing(totals.totalWealth, savingsGoal);
             } else {
-              document.getElementById("goalMonthsToGo").innerText =
-                t("goal_not_reached");
-              window._lastToastGoalReached = false;
+              goalSection.classList.add("hidden");
             }
-            renderGoalRing(totals.totalWealth, savingsGoal);
-          } else {
-            goalSection.classList.add("hidden");
           }
 
           // Expose cashflows for analytics tabs

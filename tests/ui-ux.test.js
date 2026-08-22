@@ -201,7 +201,17 @@ function createDOMEnvironment() {
     document: {
       documentElement: getEl("documentElement"),
       body: getEl("body"),
-      getElementById: (id) => getEl(id),
+      getElementById: (id) => {
+        if (
+          id === "documentElement" ||
+          id === "body" ||
+          htmlContent.includes(`id="${id}"`) ||
+          htmlContent.includes(`id='${id}'`)
+        ) {
+          return getEl(id);
+        }
+        return null;
+      },
       querySelector: (sel) => {
         if (sel === "#toastContainer") return getEl("toastContainer");
         return getEl(sel.replace(/^[#.]/, ""));
@@ -1024,7 +1034,7 @@ async function runUIUXTests() {
     !isNaN(
       Number(
         (
-          app.document.getElementById("txtTotalBalance").textContent || ""
+          app.document.getElementById("metricTotalBalance").textContent || ""
         ).replace(/[^0-9]/g, "")
       )
     ),
