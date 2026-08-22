@@ -15,6 +15,59 @@ function loadSimulateEngine() {
   ];
   const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
 
+  // Minimal 2D canvas context stub — satisfies chart renderers without a real DOM
+  function makeCanvasStub() {
+    const ctx2d = {
+      clearRect() {},
+      fillRect() {},
+      strokeRect() {},
+      beginPath() {},
+      closePath() {},
+      moveTo() {},
+      lineTo() {},
+      arc() {},
+      fill() {},
+      stroke() {},
+      save() {},
+      restore() {},
+      scale() {},
+      translate() {},
+      drawImage() {},
+      getImageData: () => ({ data: [] }),
+      putImageData() {},
+      createLinearGradient: () => ({
+        addColorStop() {},
+      }),
+      createRadialGradient: () => ({
+        addColorStop() {},
+      }),
+      measureText: () => ({ width: 0 }),
+      fillText() {},
+      strokeText() {},
+      setTransform() {},
+      canvas: { width: 300, height: 150, style: {}, toDataURL: () => "" },
+    };
+    return {
+      value: "",
+      innerText: "",
+      innerHTML: "",
+      width: 300,
+      height: 150,
+      style: {},
+      toDataURL: () => "",
+      getContext: () => ctx2d,
+      classList: {
+        add() {},
+        remove() {},
+        toggle() {},
+        contains: () => false,
+      },
+      setAttribute() {},
+      getAttribute: () => null,
+      addEventListener() {},
+    };
+  }
+
   const sandbox = {
     window: {},
     tailwind: {},
@@ -24,22 +77,10 @@ function loadSimulateEngine() {
     location: { href: "http://localhost/", search: "" },
     navigator: { clipboard: { writeText: async () => {} } },
     document: {
-      getElementById: () => ({
-        value: "",
-        innerText: "",
-        innerHTML: "",
-        classList: {
-          add() {},
-          remove() {},
-          toggle() {},
-          contains: () => false,
-        },
-        setAttribute() {},
-        getAttribute: () => null,
-        addEventListener() {},
-      }),
+      getElementById: () => makeCanvasStub(),
       querySelector: () => null,
       querySelectorAll: () => [],
+      createElement: () => makeCanvasStub(),
       addEventListener: () => {},
     },
     localStorage: { getItem: () => null, setItem: () => {} },

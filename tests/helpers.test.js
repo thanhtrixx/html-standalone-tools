@@ -82,6 +82,38 @@ function loadEnvironment() {
           if (ch) ch.parentElement = this;
           this.children.push(ch);
         },
+        // Canvas stub — satisfies chart renderers (renderGrowthChart etc.) without a real DOM
+        getContext() {
+          return {
+            clearRect() {},
+            fillRect() {},
+            strokeRect() {},
+            beginPath() {},
+            closePath() {},
+            moveTo() {},
+            lineTo() {},
+            arc() {},
+            fill() {},
+            stroke() {},
+            save() {},
+            restore() {},
+            scale() {},
+            translate() {},
+            drawImage() {},
+            getImageData: () => ({ data: [] }),
+            putImageData() {},
+            createLinearGradient: () => ({ addColorStop() {} }),
+            createRadialGradient: () => ({ addColorStop() {} }),
+            measureText: () => ({ width: 0 }),
+            fillText() {},
+            strokeText() {},
+            setTransform() {},
+            canvas: { width: 300, height: 150, style: {}, toDataURL: () => "" },
+          };
+        },
+        toDataURL: () => "",
+        width: 300,
+        height: 150,
       };
       domElements[id] = el;
     }
