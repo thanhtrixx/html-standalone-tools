@@ -1,0 +1,3 @@
+# 4. Locale-Aware Number and Date Formatting
+
+When switching languages, the application dynamically switches number and date formatting conventions to match target regional expectations. In Vietnamese (`vi`), amounts format with dot thousand separators, comma decimal separators, and the `₫` suffix (e.g. `200.000.000 ₫`), with dates formatted as `DD/MM/YYYY`. In English (`en`), standard comma thousand separators, dot decimal separators, and `VND` suffix (e.g. `200,000,000 VND`) with `YYYY-MM-DD` dates are used. This avoids ambiguous currency presentations while preserving localized readability.
