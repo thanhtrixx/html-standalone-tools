@@ -53,6 +53,7 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R25** | Quick Presets & Debounced Live Recalc    | 1-click numerical preset chips and additive modifier chips under inputs (Salary, Goal, Threshold, Buffer) with active state highlighting and debounced live recalculation.                                          | P1       | CONTEXT.md         |
 | **R26** | Multi-Year Calendar Heatmap & Tooltips   | Continuous multi-year matrix (no dropdown), Annual Delta & YoY % columns, Total Wealth vs Net Inflow mode toggle, and interactive popover breakdown tooltips.                                                       | P1       | ADR-0012           |
 | **R27** | Full-Width Savings Accounts Hub & Filter | Dedicated full-width card layout with 4 portfolio KPI pills (Locked Principal, Active, Auto Sweeps, Weighted Rate) and instant category filter tabs (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`). | P1       | ADR-0013           |
+| **R28** | Modal Layering & Dialog Safeguards       | Centralized modal lifecycle controller (`dismissAllModals()`), single-active-modal invariant, backdrop dismissals, and clean first-time onboarding walkthrough without popup clashing.                              | P1       | ADR-0014           |
 
 ---
 

@@ -81,3 +81,9 @@ _Avoid_: Single-year calendar, dropdown heatmap, separate year tables
 **Savings Accounts Hub**:
 A dedicated full-width portfolio table view featuring aggregated KPI summary pills (Total Locked Principal, Active Accounts, Auto Sweeps, Weighted Average Rate) and instant category filtering tabs (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`).
 _Avoid_: Split-column table, cramped list, static accounts table
+
+### Modal & Dialog Architecture
+
+**Modal Lifecycle Controller**:
+Centralized dialog manager preventing modal stacking and ensuring strict single-active-dialog invariants, background scroll locking, standardized backdrop dismissals, and unified Escape key interception.
+_Avoid_: Layered dialogs, stacked popups, independent modal listeners

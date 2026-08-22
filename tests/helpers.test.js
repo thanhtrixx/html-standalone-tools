@@ -843,6 +843,35 @@ async function runHelperTests() {
     `updateSavingsHubKPIs computed weighted average rate (6.83%/yr)`
   );
 
+  // Test 19: Modal Lifecycle Controller & Dialog Safeguards (ADR-0014, Issue #12)
+  assert(
+    typeof ctx.dismissAllModals === "function",
+    `dismissAllModals helper is globally defined`
+  );
+  ctx.showOnboarding();
+  const onboardModal = ctx.document.getElementById("onboardingOverlay");
+  assert(
+    onboardModal.classList.contains("flex") &&
+      !onboardModal.classList.contains("hidden"),
+    `showOnboarding opened onboarding modal`
+  );
+  ctx.toggleCSVModal(true);
+  const csvModalEl = ctx.document.getElementById("csvModal");
+  assert(
+    !csvModalEl.classList.contains("hidden"),
+    `toggleCSVModal(true) opened CSV modal`
+  );
+  assert(
+    onboardModal.classList.contains("hidden"),
+    `toggleCSVModal(true) enforced single-active-modal by closing onboarding overlay`
+  );
+  ctx.dismissAllModals();
+  assert(
+    csvModalEl.classList.contains("hidden") &&
+      onboardModal.classList.contains("hidden"),
+    `dismissAllModals() cleanly closed all active modals`
+  );
+
   console.log(
     `\n📊 Helper Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

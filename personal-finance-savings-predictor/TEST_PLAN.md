@@ -47,6 +47,7 @@ npm run test:build    # Compacted build pipeline tests (13 tests)
 | **R25** | Quick Presets & Live Recalc | Quick preset chips and additive modifier chips under inputs with active state highlighting and debounced live simulation updates                                                                      | P1       |
 | **R26** | Multi-Year Calendar Heatmap | Continuous multi-year matrix (no dropdown), Annual Delta & YoY % columns, Total Wealth vs Net Inflow mode toggle, and popover breakdown tooltips (ADR-0012)                                           | P1       |
 | **R27** | Full-Width Savings Hub      | Dedicated full-width layout, live KPI pills (Locked Principal, Active, Sweeps, Weighted Rate), and instant category filters (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`) (ADR-0013) | P1       |
+| **R28** | Modal Layering & Safeguards | Centralized modal lifecycle controller (`dismissAllModals()`), single-active-modal invariant, backdrop dismissals, and clean first-time onboarding walkthrough without popup clashing (ADR-0014)      | P1       |
 
 ---
 

@@ -291,10 +291,14 @@
       aria-live="polite"
       aria-label="Notifications"
     ></div>
-    <!-- Onboarding Overlay -->
+    <!-- Onboarding Overlay (ADR-0014, Issue #12) -->
     <div
       id="onboardingOverlay"
-      class="fixed inset-0 bg-black/60 z-[90] hidden items-center justify-center p-4"
+      class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[90] hidden items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Welcome Onboarding Tour"
+      onclick="if (event.target === this) closeOnboarding();"
     >
       <div
         class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full shadow-2xl p-6 relative"
@@ -391,27 +395,6 @@
             Skip tour
           </button>
         </div>
-      </div>
-    </div>
-    <!-- Theme: Dark (default) / Light via class toggle on :root -->
-    <div
-      id="themeOverlay"
-      class="fixed inset-0 bg-black/30 z-[85] hidden items-center justify-center"
-    >
-      <div class="glass-card rounded-2xl p-6 text-center">
-        <h2 class="text-2xl font-bold mb-2" data-i18n="overlay_dark_title">
-          🌙 Dark Mode
-        </h2>
-        <p class="text-slate-400 text-sm" data-i18n="overlay_dark_desc">
-          Your default dark theme for reduced eye strain.
-        </p>
-        <button
-          onclick="toggleTheme()"
-          class="mt-4 px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
-          data-i18n="btn_ok"
-        >
-          OK
-        </button>
       </div>
     </div>
     <header
@@ -2346,12 +2329,14 @@
           ></div>
         </div>
       </section>
-      <!-- CSV Data Management Modal -->
+      <!-- CSV Data Management Modal (ADR-0014, Issue #12) -->
       <div
         id="csvModal"
-        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[90] flex items-center justify-center p-4 hidden"
         role="dialog"
+        aria-modal="true"
         aria-label="CSV Data Management"
+        onclick="if (event.target === this) toggleCSVModal(false);"
       >
         <div
           class="glass-card bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl"
@@ -2618,13 +2603,14 @@
           </div>
         </div>
       </div>
-      <!-- Strategy Persona Presets Modal (Issue #6) -->
+      <!-- Strategy Persona Presets Modal (ADR-0014, Issue #12) -->
       <div
         id="presetsModal"
-        class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden"
+        class="fixed inset-0 z-[90] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="presetsModalTitle"
+        onclick="if (event.target === this) togglePresetsModal(false);"
       >
         <div
           class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
@@ -3943,6 +3929,7 @@
           } catch (e) {}
         }
         localStorage.clear();
+        if (typeof dismissAllModals === "function") dismissAllModals();
         syncCSVData(JSON.parse(JSON.stringify(DEFAULT_CSV_DATA)));
         document.getElementById("inputTargetDate").value = formatDate(
           addMonths(new Date(), 24)
@@ -4408,9 +4395,20 @@
         if (!modal) return;
         const isHidden = modal.classList.contains("hidden");
         const nextShow = show !== undefined ? show : isHidden;
-        modal.classList.toggle("hidden", !nextShow);
         if (nextShow) {
+          if (typeof dismissAllModals === "function") dismissAllModals();
           renderPresetCards();
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "hidden";
+          }
+        } else {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "";
+          }
         }
       }
       window.togglePresetsModal = togglePresetsModal;
@@ -4475,15 +4473,26 @@
       }
       function toggleCSVModal(show) {
         const m = document.getElementById("csvModal");
-        if (show) {
+        if (!m) return;
+        const isHidden = m.classList.contains("hidden");
+        const nextShow = show !== undefined ? show : isHidden;
+        if (nextShow) {
+          if (typeof dismissAllModals === "function") dismissAllModals();
           renderCSVEditorTable();
           m.classList.remove("hidden");
           m.classList.add("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "hidden";
+          }
         } else {
           m.classList.add("hidden");
           m.classList.remove("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "";
+          }
         }
       }
+      window.toggleCSVModal = toggleCSVModal;
       function renderCSVEditorTable() {
         const tbody = document.getElementById("csvEditorTableBody");
         tbody.innerHTML = "";
@@ -7112,27 +7121,61 @@
           : `<i class="fa-solid fa-moon mr-2"></i><span>${label}</span>`;
       }
 
-      // --- ONBOARDING TOUR (Task 2.4, R10) ---
+      // --- CENTRALIZED MODAL LIFECYCLE CONTROLLER (ADR-0014, Issue #12) ---
+      function dismissAllModals() {
+        const onboard = document.getElementById("onboardingOverlay");
+        if (onboard && !onboard.classList.contains("hidden")) {
+          onboard.classList.add("hidden");
+          onboard.classList.remove("flex");
+        }
+        const csvModal = document.getElementById("csvModal");
+        if (csvModal && !csvModal.classList.contains("hidden")) {
+          csvModal.classList.add("hidden");
+          csvModal.classList.remove("flex");
+        }
+        const presetsModal = document.getElementById("presetsModal");
+        if (presetsModal && !presetsModal.classList.contains("hidden")) {
+          presetsModal.classList.add("hidden");
+          presetsModal.classList.remove("flex");
+        }
+        if (typeof document !== "undefined" && document.body) {
+          document.body.style.overflow = "";
+        }
+      }
+      window.dismissAllModals = dismissAllModals;
+
+      // --- ONBOARDING TOUR (Task 2.4, R10, ADR-0014) ---
       let onboardStep = 0,
         totalOnboardSteps = 5;
       window.onboardStep = onboardStep;
       function showOnboarding() {
+        dismissAllModals();
         onboardStep = 0;
         window.onboardStep = 0;
         const overlay = document.getElementById("onboardingOverlay");
+        if (!overlay) return;
         overlay.classList.remove("hidden");
         overlay.classList.add("flex");
-        document.body.style.overflow = "hidden";
+        if (typeof document !== "undefined" && document.body) {
+          document.body.style.overflow = "hidden";
+        }
         updateOnboardUI();
       }
+      window.showOnboarding = showOnboarding;
+
       function closeOnboarding() {
         const overlay = document.getElementById("onboardingOverlay");
-        overlay.classList.add("hidden");
-        overlay.classList.remove("flex");
-        document.body.style.overflow = "";
+        if (overlay) {
+          overlay.classList.add("hidden");
+          overlay.classList.remove("flex");
+        }
+        if (typeof document !== "undefined" && document.body) {
+          document.body.style.overflow = "";
+        }
         setStorage("showedOnboarding", true);
         showToast(t("toast_onboard_complete"), "success");
       }
+      window.closeOnboarding = closeOnboarding;
       function onboardNav(dir) {
         onboardStep += dir;
         if (onboardStep < 0) onboardStep = totalOnboardSteps - 1;
@@ -7494,15 +7537,7 @@
           saveToStorage();
           showToast(t("toast_csv_saved"), "success");
         } else if (e.key === "Escape") {
-          const csvModal = document.getElementById("csvModal");
-          if (csvModal && !csvModal.classList.contains("hidden"))
-            toggleCSVModal(false);
-          const presetsModal = document.getElementById("presetsModal");
-          if (presetsModal && !presetsModal.classList.contains("hidden"))
-            togglePresetsModal(false);
-          const onboard = document.getElementById("onboardingOverlay");
-          if (onboard && !onboard.classList.contains("hidden"))
-            closeOnboarding();
+          dismissAllModals();
         } else if (e.key === "Enter") {
           const activeEl = document.activeElement || e.target;
           if (
