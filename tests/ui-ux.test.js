@@ -1365,6 +1365,100 @@ async function runUIUXTests() {
     "R28: resetAll() preserves clean dialog state without spurious modal popups"
   );
 
+  // Test R29: End-to-End Simulation Lifecycle & Boundary Error Handling
+  app.document.getElementById("inputTargetDate").value = "";
+  let simNullHandled = false;
+  try {
+    app.runSimulation();
+    simNullHandled = true;
+  } catch (e) {
+    simNullHandled = false;
+  }
+  assert(
+    simNullHandled,
+    "R29: runSimulation() handles empty target date gracefully without throwing unhandled exceptions"
+  );
+
+  // Extreme inputs test
+  app.document.getElementById("inputTargetDate").value = "2030-12-31";
+  app.document.getElementById("inputSalary").value = "500,000,000"; // 500M/mo
+  app.document.getElementById("inputSavingsGoal").value = "100,000,000,000"; // 100 Billion
+  app.runSimulation();
+  const extremeWealth =
+    app.document.getElementById("metricTotalBalance").innerText;
+  assert(
+    extremeWealth && !extremeWealth.includes("NaN"),
+    `R29: Simulation handles extreme 100B parameters without NaN (${extremeWealth})`
+  );
+
+  // Test R30: Scenario Comparison Negative Deltas & State Cleanup
+  app.toggleCompareMode(true);
+  app.cloneScenarioAtoB();
+  // Set Scenario B salary to lower than Scenario A
+  app.document.getElementById("inputCompSalary").value = "10000000"; // 10M vs 500M
+  app.runComparison();
+  const compDeltaBadge = app.document.getElementById("compDeltaWealth");
+  assert(
+    compDeltaBadge !== null && compDeltaBadge.innerText.includes("-"),
+    `R30: Scenario B with lower wealth correctly renders negative delta badge: ${compDeltaBadge ? compDeltaBadge.innerText : "none"}`
+  );
+  // Turn off compare mode
+  app.toggleCompareMode(false);
+  assert(
+    app.window.comparisonActive === false &&
+      app.document
+        .getElementById("compareSection")
+        .classList.contains("hidden"),
+    "R30: Toggling compare mode off completely resets comparisonActive flag and hides section"
+  );
+
+  // Test R31: Dynamic Bilingual Switching & Verbal Helper Synchronization
+  app.changeLanguage("vi");
+  app.document.getElementById("inputSalary").value = "50.000.000";
+  app.updateVerbalHelperForInput(
+    app.document.getElementById("inputSalary"),
+    "vi"
+  );
+  const viSalaryHelper =
+    app.document.getElementById("helperSalary").textContent;
+  assert(
+    viSalaryHelper === "50 Triệu VND",
+    `R31: Vietnamese verbal helper synchronized on input: '${viSalaryHelper}'`
+  );
+
+  app.changeLanguage("en");
+  app.document.getElementById("inputSalary").value = "50,000,000";
+  app.updateVerbalHelperForInput(
+    app.document.getElementById("inputSalary"),
+    "en"
+  );
+  const enSalaryHelper =
+    app.document.getElementById("helperSalary").textContent;
+  assert(
+    enSalaryHelper === "50 Million VND",
+    `R31: English verbal helper synchronized on input: '${enSalaryHelper}'`
+  );
+
+  // Test R32: Dynamic URL Hash Hydration & Hash Change Event Interception
+  app.document.getElementById("inputSalary").value = "30000000";
+  app.document.getElementById("inputSavingsGoal").value = "1000000000";
+  app.shareSimulation();
+  const currentHash = app.location.hash;
+  assert(
+    typeof currentHash === "string" && currentHash.length > 10,
+    "R32: shareSimulation() generates valid URL hash string"
+  );
+
+  // Clear inputs and hydrate from hash
+  app.document.getElementById("inputSalary").value = "0";
+  app.loadFromURL();
+  assert(
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSalary").value
+    ) === 30000000,
+    "R32: loadFromURL() hydrides state correctly from active location.hash"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
