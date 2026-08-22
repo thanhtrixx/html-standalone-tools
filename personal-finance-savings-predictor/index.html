@@ -2027,6 +2027,18 @@
       window.dailySnapshots = [];
       window.currentLang = "en";
 
+      // --- SCHEMA VERSIONING & MIGRATION (R2) ---
+      const SCHEMA_VERSION = 1;
+      function migrateParams(raw) {
+        if (!raw || typeof raw !== "object") return null;
+        let p = raw;
+        const from = raw.schemaVersion || 0;
+        if (from < 1) p = { ...raw, schemaVersion: SCHEMA_VERSION }; // v0 legacy -> v1
+        return p;
+      }
+      window.SCHEMA_VERSION = SCHEMA_VERSION;
+      window.migrateParams = migrateParams;
+
       // --- LOCALSTORAGE HELPERS ---
       function getStorage(key, defaultVal) {
         try {
@@ -2048,7 +2060,9 @@
       function formatCurrency(val) {
         const lang =
           window.currentLang ||
-          (typeof getStorage === "function" ? getStorage("lang") : "en") ||
+          (typeof getStorage === "function"
+            ? getStorage("lang", "en")
+            : "en") ||
           "en";
         if (isNaN(val) || val === null) {
           return lang === "vi" ? "0 ₫" : "0 VND";
@@ -2528,8 +2542,8 @@
                 growthRate: salaryGrowthRate,
               });
 
-              // Anniversary-based escalation
-              const yearDiff = getMonthDiff(todayDateOnly, currentDate) / 12;
+              // Anniversary-based escalation (ADR-0002)
+              const yearDiff = getMonthDiff(simStartDate, currentDate) / 12;
               if (
                 yearDiff > 0 &&
                 Math.abs(yearDiff - Math.round(yearDiff)) < 0.01 &&
@@ -2603,7 +2617,9 @@
             currentPoolBalance -= lockedAmount;
             created6MCount++;
             const autoStartDate = new Date(currentDate.getTime());
-            const autoEndDate = addMonths(autoStartDate, 6);
+            const autoEndDate = new Date(
+              autoStartDate.getTime() + 180 * 24 * 60 * 60 * 1000
+            );
             const totalDays = Math.max(
               1,
               getDaysDiff(autoStartDate, autoEndDate)
@@ -3462,10 +3478,27 @@
           .classList.toggle("hidden", !yoyVisible);
       }
 
-      // --- SHAREABLE LINKS (Task 2.2, R8) ---
+      // --- UTF-8 SAFE BASE64 SERIALIZATION (R8, Global ADR-0002) ---
+      function utf8ToBase64(str) {
+        const b = new TextEncoder().encode(str);
+        let s = "";
+        for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+        return btoa(s);
+      }
+      function base64ToUtf8(b64) {
+        const b = atob(b64);
+        const u = new Uint8Array(b.length);
+        for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i);
+        return new TextDecoder().decode(u);
+      }
+      window.utf8ToBase64 = utf8ToBase64;
+      window.base64ToUtf8 = base64ToUtf8;
+
+      // --- SHAREABLE LINKS (Task 2.2, R8, Global ADR-0002) ---
       function shareSimulation() {
         try {
           const params = {
+            schemaVersion: SCHEMA_VERSION,
             targetDate: document.getElementById("inputTargetDate").value,
             salary: document.getElementById("inputSalary").value,
             salaryGrowth: document.getElementById("inputSalaryGrowth").value,
@@ -3474,12 +3507,8 @@
             poolRate: document.getElementById("inputPoolRate").value,
             sixMRate: document.getElementById("input6MRate").value,
           };
-          const payload = btoa(
-            unescape(
-              encodeURIComponent(
-                JSON.stringify({ p: params, csv: workingCSVData })
-              )
-            )
+          const payload = utf8ToBase64(
+            JSON.stringify({ p: params, csv: workingCSVData })
           );
           window.location.hash = payload;
           const url =
@@ -3500,21 +3529,25 @@
         try {
           const hash = window.location.hash.substring(1);
           if (!hash) return false;
-          const payload = JSON.parse(decodeURIComponent(escape(atob(hash))));
-          const p = payload.p;
-          if (p.targetDate)
-            document.getElementById("inputTargetDate").value = p.targetDate;
-          if (p.salary) document.getElementById("inputSalary").value = p.salary;
-          if (p.salaryGrowth !== undefined)
-            document.getElementById("inputSalaryGrowth").value = p.salaryGrowth;
-          if (p.inflation !== undefined)
-            document.getElementById("inputInflation").value = p.inflation;
-          if (p.goal !== undefined)
-            document.getElementById("inputSavingsGoal").value = p.goal;
-          if (p.poolRate)
-            document.getElementById("inputPoolRate").value = p.poolRate;
-          if (p.sixMRate)
-            document.getElementById("input6MRate").value = p.sixMRate;
+          const payload = JSON.parse(base64ToUtf8(hash));
+          const p = migrateParams(payload.p);
+          if (p) {
+            if (p.targetDate)
+              document.getElementById("inputTargetDate").value = p.targetDate;
+            if (p.salary)
+              document.getElementById("inputSalary").value = p.salary;
+            if (p.salaryGrowth !== undefined)
+              document.getElementById("inputSalaryGrowth").value =
+                p.salaryGrowth;
+            if (p.inflation !== undefined)
+              document.getElementById("inputInflation").value = p.inflation;
+            if (p.goal !== undefined)
+              document.getElementById("inputSavingsGoal").value = p.goal;
+            if (p.poolRate)
+              document.getElementById("inputPoolRate").value = p.poolRate;
+            if (p.sixMRate)
+              document.getElementById("input6MRate").value = p.sixMRate;
+          }
           if (payload.csv && payload.csv.length > 0) {
             workingCSVData = payload.csv;
             window.workingCSVData = workingCSVData;
@@ -3768,6 +3801,7 @@
       function saveToStorage() {
         setStorage("workingCSVData", workingCSVData);
         const params = {
+          schemaVersion: SCHEMA_VERSION,
           targetDate: document.getElementById("inputTargetDate").value,
           salary: document.getElementById("inputSalary").value,
           salaryGrowth: document.getElementById("inputSalaryGrowth").value,
@@ -3785,7 +3819,8 @@
             workingCSVData = csv;
             window.workingCSVData = workingCSVData;
           }
-          const params = getStorage("params", null);
+          const rawParams = getStorage("params", null);
+          const params = migrateParams(rawParams);
           if (params) {
             if (params.targetDate)
               document.getElementById("inputTargetDate").value =

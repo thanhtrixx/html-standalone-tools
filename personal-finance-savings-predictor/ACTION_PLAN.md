@@ -21,12 +21,12 @@
 
 _Focus: Fix mathematical double-counting, status evaluation bugs, and expose simulation state globally for console unit testing._
 
-- [x] **Task 1.1 — Fix Auto 6M Allocation & Reinvestment (R20, ADR-0002)**
+- [x] **Task 1.1 — Fix Auto 6M Allocation & Reinvestment (R20, ADR-0005)**
   - [x] Deduct locked amount from `Flexible Pool` when creating an Auto 6M Fixed Term Deposit.
   - [x] Upon term maturity, credit full proceeds (principal + interest) back to Flexible Pool and re-evaluate threshold on the same date.
   - [x] Verify pool balance and deposit count match expected math.
 
-- [x] **Task 1.2 — Fix Scheduled Withdrawal Event Processing & Deficit Warnings (R6, ADR-0002)**
+- [x] **Task 1.2 — Fix Scheduled Withdrawal Event Processing & Deficit Warnings (R6, ADR-0001)**
   - [x] Initialize status of withdrawal rows as `'ACTIVE'` during CSV parsing.
   - [x] Process withdrawal dates in daily simulation timeline loop.
   - [x] Record `WITHDRAWAL` log entries, allow Flexible Pool deficit if scheduled outflows exceed liquid balance, and emit `DEFICIT_WARNING` event.
@@ -53,7 +53,7 @@ _Focus: Fix state persistence timing, versioned storage migration, URL hash seri
   - [x] Call `saveToStorage()` synchronously in `runSimulation()`.
   - [x] Support schema versioning (`SCHEMA_VERSION = 1`) with graceful migration for legacy data.
 
-- [x] **Task 2.2 — URL Hash Serialization for Link Sharing (R8, ADR-0001)**
+- [x] **Task 2.2 — URL Hash Serialization for Link Sharing (R8, Global ADR-0002)**
   - [x] Update `shareSimulation()` to encode JSON payload as URL-safe Base64 into `window.location.hash`.
   - [x] Auto-load simulation parameters and CSV from URL hash on page visit.
 
@@ -89,7 +89,7 @@ _Focus: Chart dataset preservation on filtering, Heatmap event handling, YoY dat
 
 ## 🌐 Phase 4: Bilingual Localization & Currency Formatting (i18n)
 
-_Focus: Implement Requirement R21 and ADR-0004 with language switching, translation dictionary, and localized number/date formatting._
+_Focus: Implement Requirement R21 and ADR-0003 with language switching, translation dictionary, and localized number/date formatting._
 
 - [x] **Task 4.1 — Language Selector Dropdown**
   - [x] Add `<select id="langSelector" onchange="changeLanguage(this.value)">` with `en` and `vi` options.
@@ -97,7 +97,7 @@ _Focus: Implement Requirement R21 and ADR-0004 with language switching, translat
 - [x] **Task 4.2 — Comprehensive Translation Dictionary (`TRANSLATIONS`)**
   - [x] Provide full English and Vietnamese dictionary strings for all titles, labels, metrics, sections, and onboarding steps.
 
-- [x] **Task 4.3 — Locale-Aware Number & Date Formatting (ADR-0004)**
+- [x] **Task 4.3 — Locale-Aware Number & Date Formatting (ADR-0003)**
   - [x] In `vi`: Dot thousands, comma decimals, `₫` suffix, `DD/MM/YYYY` dates.
   - [x] In `en`: Comma thousands, dot decimals, `VND` suffix, `YYYY-MM-DD` dates.
 

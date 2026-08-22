@@ -90,8 +90,9 @@ function loadEnvironment() {
     confirm: () => true,
     btoa: (str) => Buffer.from(str, "binary").toString("base64"),
     atob: (b64) => Buffer.from(b64, "base64").toString("binary"),
-    escape: global.escape || escape,
-    unescape: global.unescape || unescape,
+    TextEncoder: global.TextEncoder,
+    TextDecoder: global.TextDecoder,
+    Uint8Array: global.Uint8Array,
     setTimeout: (fn, ms) => setTimeout(fn, ms),
     clearTimeout: (id) => clearTimeout(id),
     Date: global.Date,
@@ -338,6 +339,43 @@ async function runHelperTests() {
     ctx.workingCSVData.length === 1 &&
       ctx.workingCSVData[0]["Account Name"].includes("Unicode Test"),
     `loadFromURL restored Unicode CSV account name: "${ctx.workingCSVData[0]["Account Name"]}"`
+  );
+
+  // Test 9: Schema versioning & parameter migration (R2)
+  assert(ctx.SCHEMA_VERSION === 1, `SCHEMA_VERSION constant is defined as 1`);
+  const nullMigrated = ctx.migrateParams(null);
+  assert(nullMigrated === null, `migrateParams(null) safely returns null`);
+  const stringMigrated = ctx.migrateParams("invalid-param-payload");
+  assert(
+    stringMigrated === null,
+    `migrateParams("invalid") safely returns null`
+  );
+  const legacyV0Params = { salary: "25000000", goal: "500000000" };
+  const v1Migrated = ctx.migrateParams(legacyV0Params);
+  assert(
+    v1Migrated !== null &&
+      v1Migrated.schemaVersion === 1 &&
+      v1Migrated.salary === "25000000",
+    `migrateParams stamps legacy v0 payload with schemaVersion: 1`
+  );
+  const alreadyV1 = { schemaVersion: 1, salary: "35000000" };
+  assert(
+    ctx.migrateParams(alreadyV1).salary === "35000000" &&
+      ctx.migrateParams(alreadyV1).schemaVersion === 1,
+    `migrateParams passes through already versioned v1 payload`
+  );
+
+  // Test 10: Multibyte UTF-8 Base64 round-trip (R8)
+  const testUnicodeStr = JSON.stringify({
+    title: "Tiết Kiệm Lãi Suất ₫ 250.000.000 (Ngân Hàng Ngoại Thương)",
+    symbol: "₫",
+    vietnamese: "Đà Nẵng, Cần Thơ, TP Hồ Chí Minh, Hà Nội",
+  });
+  const encodedB64 = ctx.utf8ToBase64(testUnicodeStr);
+  const decodedStr = ctx.base64ToUtf8(encodedB64);
+  assert(
+    decodedStr === testUnicodeStr,
+    `utf8ToBase64 / base64ToUtf8 preserves multibyte characters and ₫ currency symbols without loss`
   );
 
   console.log(
