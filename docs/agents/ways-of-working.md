@@ -141,7 +141,9 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
    - The PR automatically triggers the GitHub Actions CI pipeline:
      - Prettier code style validation (`npm run lint:check`).
      - Standalone compaction build (`npm run build`).
-     - Complete automated test suite (`npm test`).
+     - Unified automated test suite (`npm test`).
+     - Renders an interactive test summary directly in GitHub Step Summary (`$GITHUB_STEP_SUMMARY`).
+     - Uploads multi-format test report artifacts (`test-reports/` containing `index.html`, `results.json`, `junit.xml`) with `if: always()`.
    - PR runs feature auto-cancellation (`cancel-in-progress: true`) on subsequent pushes to conserve runner time.
    - **All checks must be 100% green before approval.**
 4. **Review & Merge Gate**:
@@ -159,6 +161,7 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
 1. **Automated CD Pipeline (`release.yml`)**:
    - Merging to `main` automatically triggers the release workflow:
      - Full build and test validation suite runs.
+     - Preserves test report files as workflow artifacts (`test-reports-release`).
      - Next Semantic Version tag (`v*.*.*`) is computed from Conventional Commits.
      - Release assets are packaged (named standalone `.html` files + unified `.zip` bundle).
      - Annotated GitHub Release is published with generated changelog notes.
