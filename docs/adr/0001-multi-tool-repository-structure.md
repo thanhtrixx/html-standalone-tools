@@ -1,0 +1,3 @@
+# 1. Multi-Tool Standalone Repository Structure
+
+This repository is organized as a multi-tool collection where each standalone tool resides in its own isolated top-level directory. Each tool folder contains its own self-contained single-file HTML application, domain glossary (`CONTEXT.md`), tool-specific architecture decision records (`docs/adr/`), test plans, and implementation guides. Tools maintain strict boundary isolation: no shared runtime state, global dependencies, or coupled storage keys. System-wide standards and contexts are indexed at the repository root via `CONTEXT-MAP.md` and root `docs/adr/`.

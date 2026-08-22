@@ -12,4 +12,4 @@ Canonical 5-role defaults. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-Single-context (`CONTEXT.md` and `docs/adr/`). See `docs/agents/domain.md`.
+Multi-context (`CONTEXT-MAP.md` and per-tool `CONTEXT.md` / `docs/adr/`). See `docs/agents/domain.md`.
