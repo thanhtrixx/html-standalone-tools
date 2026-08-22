@@ -44,6 +44,7 @@ npm run test:build    # Compacted build pipeline tests (13 tests)
 | **R22** | Annual Bonus & Cashflows    | Annual bonus multiplier (13th month salary) and recurring withdrawal schedule generator (ADR-0008)                                 | P1       |
 | **R23** | Strategy Persona Presets    | Strategy persona preset templates with 5-second undo safeguard (ADR-0010)                                                          | P1       |
 | **R24** | Currency Masking & Helpers  | Locale-aware thousand-separator masking (`.` for `vi`, `,` for `en`) with caret stability and dynamic verbal labels (ADR-0011)     | P1       |
+| **R25** | Quick Presets & Live Recalc | Quick preset chips and additive modifier chips under inputs with active state highlighting and debounced live simulation updates   | P1       |
 
 ---
 

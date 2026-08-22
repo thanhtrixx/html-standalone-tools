@@ -663,6 +663,72 @@ async function runHelperTests() {
     `applyCurrencyMask correctly formats mock input value to '250,000,000'`
   );
 
+  // Test 16: Quick Preset Chips & Delta Modifiers (Issue #11)
+  assert(
+    typeof ctx.setSalaryValue === "function",
+    `setSalaryValue helper is globally defined`
+  );
+  ctx.setSalaryValue(35000000);
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 35000000,
+    `setSalaryValue(35000000) set inputSalary to 35M VND`
+  );
+
+  assert(
+    typeof ctx.addSalaryDelta === "function",
+    `addSalaryDelta helper is globally defined`
+  );
+  ctx.addSalaryDelta(5000000);
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 40000000,
+    `addSalaryDelta(5000000) incremented salary from 35M to 40M VND`
+  );
+
+  assert(
+    typeof ctx.setSavingsGoalValue === "function",
+    `setSavingsGoalValue helper is globally defined`
+  );
+  ctx.setSavingsGoalValue(1000000000);
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSavingsGoal").value
+    ) === 1000000000,
+    `setSavingsGoalValue(1000000000) set savings goal to 1B VND`
+  );
+
+  assert(
+    typeof ctx.setAutoTermThresholdValue === "function",
+    `setAutoTermThresholdValue helper is globally defined`
+  );
+  ctx.setAutoTermThresholdValue(150000000);
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputAutoTermThreshold").value
+    ) === 150000000,
+    `setAutoTermThresholdValue(150000000) set Auto Term Threshold to 150M VND`
+  );
+
+  assert(
+    typeof ctx.setEmergencyBufferValue === "function",
+    `setEmergencyBufferValue helper is globally defined`
+  );
+  ctx.setEmergencyBufferValue(50000000);
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputEmergencyBuffer").value
+    ) === 50000000,
+    `setEmergencyBufferValue(50000000) set Emergency Buffer to 50M VND`
+  );
+
+  assert(
+    typeof ctx.updatePresetChipActiveStates === "function",
+    `updatePresetChipActiveStates helper is globally defined`
+  );
+
   console.log(
     `\n📊 Helper Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

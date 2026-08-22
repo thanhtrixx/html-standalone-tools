@@ -67,3 +67,7 @@ _Avoid_: Number spinner, raw unformatted input, unmasked text
 **Dynamic Verbal Helper**:
 Real-time localized verbal representation of monetary quantities (e.g. `25 Triệu VND` / `25 Million VND`, `1.5 Tỷ VND` / `1.5 Billion VND`) displayed beneath currency inputs.
 _Avoid_: Tooltip translation, spelled-out popup, static text hint
+
+**Quick Preset Chips**:
+Interactive 1-click numerical target and additive delta modifier chips beneath simulation parameters allowing rapid value setting and increments with debounced live recalculation.
+_Avoid_: Stepper buttons, increment arrows, manual slider

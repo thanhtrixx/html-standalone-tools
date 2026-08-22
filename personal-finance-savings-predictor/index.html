@@ -584,6 +584,83 @@
             >
               25 Million VND
             </div>
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              <button
+                type="button"
+                data-preset-field="salary"
+                data-preset-val="10000000"
+                onclick="setSalaryValue(10000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                10M
+              </button>
+              <button
+                type="button"
+                data-preset-field="salary"
+                data-preset-val="20000000"
+                onclick="setSalaryValue(20000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                20M
+              </button>
+              <button
+                type="button"
+                data-preset-field="salary"
+                data-preset-val="25000000"
+                onclick="setSalaryValue(25000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                25M
+              </button>
+              <button
+                type="button"
+                data-preset-field="salary"
+                data-preset-val="35000000"
+                onclick="setSalaryValue(35000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                35M
+              </button>
+              <button
+                type="button"
+                data-preset-field="salary"
+                data-preset-val="50000000"
+                onclick="setSalaryValue(50000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                50M
+              </button>
+              <button
+                type="button"
+                data-preset-field="salary"
+                data-preset-val="100000000"
+                onclick="setSalaryValue(100000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                100M
+              </button>
+              <button
+                type="button"
+                onclick="addSalaryDelta(1000000)"
+                class="px-1.5 py-0.5 text-[10px] bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded border border-indigo-700/50 transition font-medium"
+              >
+                +1M
+              </button>
+              <button
+                type="button"
+                onclick="addSalaryDelta(5000000)"
+                class="px-1.5 py-0.5 text-[10px] bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded border border-indigo-700/50 transition font-medium"
+              >
+                +5M
+              </button>
+              <button
+                type="button"
+                onclick="addSalaryDelta(10000000)"
+                class="px-1.5 py-0.5 text-[10px] bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded border border-indigo-700/50 transition font-medium"
+              >
+                +10M
+              </button>
+            </div>
           </div>
           <div>
             <label
@@ -707,6 +784,71 @@
               id="helperSavingsGoal"
               class="text-[11px] text-indigo-400 font-medium mt-1 min-h-[16px]"
             ></div>
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              <button
+                type="button"
+                data-preset-field="goal"
+                data-preset-val="0"
+                onclick="setSavingsGoalValue(0)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                data-preset-field="goal"
+                data-preset-val="300000000"
+                onclick="setSavingsGoalValue(300000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                300M
+              </button>
+              <button
+                type="button"
+                data-preset-field="goal"
+                data-preset-val="500000000"
+                onclick="setSavingsGoalValue(500000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                500M
+              </button>
+              <button
+                type="button"
+                data-preset-field="goal"
+                data-preset-val="1000000000"
+                onclick="setSavingsGoalValue(1000000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                1B
+              </button>
+              <button
+                type="button"
+                data-preset-field="goal"
+                data-preset-val="2000000000"
+                onclick="setSavingsGoalValue(2000000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                2B
+              </button>
+              <button
+                type="button"
+                data-preset-field="goal"
+                data-preset-val="5000000000"
+                onclick="setSavingsGoalValue(5000000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                5B
+              </button>
+              <button
+                type="button"
+                data-preset-field="goal"
+                data-preset-val="10000000000"
+                onclick="setSavingsGoalValue(10000000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                10B
+              </button>
+            </div>
           </div>
           <div>
             <label
@@ -746,6 +888,62 @@
             >
               200 Million VND
             </div>
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              <button
+                type="button"
+                data-preset-field="autoTermThreshold"
+                data-preset-val="50000000"
+                onclick="setAutoTermThresholdValue(50000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                50M
+              </button>
+              <button
+                type="button"
+                data-preset-field="autoTermThreshold"
+                data-preset-val="100000000"
+                onclick="setAutoTermThresholdValue(100000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                100M
+              </button>
+              <button
+                type="button"
+                data-preset-field="autoTermThreshold"
+                data-preset-val="150000000"
+                onclick="setAutoTermThresholdValue(150000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                150M
+              </button>
+              <button
+                type="button"
+                data-preset-field="autoTermThreshold"
+                data-preset-val="200000000"
+                onclick="setAutoTermThresholdValue(200000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                200M
+              </button>
+              <button
+                type="button"
+                data-preset-field="autoTermThreshold"
+                data-preset-val="300000000"
+                onclick="setAutoTermThresholdValue(300000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                300M
+              </button>
+              <button
+                type="button"
+                data-preset-field="autoTermThreshold"
+                data-preset-val="500000000"
+                onclick="setAutoTermThresholdValue(500000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                500M
+              </button>
+            </div>
           </div>
           <div>
             <label
@@ -771,36 +969,55 @@
             <div class="flex flex-wrap gap-1 mt-1.5">
               <button
                 type="button"
+                data-preset-field="emergencyBuffer"
+                data-preset-val="0"
                 onclick="setEmergencyBufferValue(0)"
-                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
               >
                 0
               </button>
               <button
                 type="button"
+                data-preset-field="emergencyBuffer"
+                data-preset-val="10000000"
                 onclick="setEmergencyBufferValue(10000000)"
-                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
               >
                 10M
               </button>
               <button
                 type="button"
+                data-preset-field="emergencyBuffer"
+                data-preset-val="20000000"
+                onclick="setEmergencyBufferValue(20000000)"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                20M
+              </button>
+              <button
+                type="button"
+                data-preset-field="emergencyBuffer"
+                data-preset-val="30000000"
                 onclick="setEmergencyBufferValue(30000000)"
-                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
               >
                 30M
               </button>
               <button
                 type="button"
+                data-preset-field="emergencyBuffer"
+                data-preset-val="50000000"
                 onclick="setEmergencyBufferValue(50000000)"
-                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
               >
                 50M
               </button>
               <button
                 type="button"
+                data-preset-field="emergencyBuffer"
+                data-preset-val="100000000"
                 onclick="setEmergencyBufferValue(100000000)"
-                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
               >
                 100M
               </button>
@@ -3028,13 +3245,88 @@
       }
       window.triggerReactiveSimulation = triggerReactiveSimulation;
 
+      function setSalaryValue(val) {
+        const el = document.getElementById("inputSalary");
+        if (el) {
+          el.value = formatNumberWithSeparators(val);
+          updateVerbalHelperForInput(el);
+          updatePresetChipActiveStates();
+          triggerReactiveSimulation();
+        }
+      }
+      window.setSalaryValue = setSalaryValue;
+
+      function addSalaryDelta(delta) {
+        const el = document.getElementById("inputSalary");
+        if (el) {
+          const current = parseFormattedNumber(el.value);
+          const next = Math.max(0, current + delta);
+          el.value = formatNumberWithSeparators(next);
+          updateVerbalHelperForInput(el);
+          updatePresetChipActiveStates();
+          triggerReactiveSimulation();
+        }
+      }
+      window.addSalaryDelta = addSalaryDelta;
+
+      function setSavingsGoalValue(val) {
+        const el = document.getElementById("inputSavingsGoal");
+        if (el) {
+          el.value = formatNumberWithSeparators(val);
+          updateVerbalHelperForInput(el);
+          updatePresetChipActiveStates();
+          triggerReactiveSimulation();
+        }
+      }
+      window.setSavingsGoalValue = setSavingsGoalValue;
+
+      function setAutoTermThresholdValue(val) {
+        const el = document.getElementById("inputAutoTermThreshold");
+        if (el) {
+          el.value = formatNumberWithSeparators(val);
+          updateVerbalHelperForInput(el);
+          updatePresetChipActiveStates();
+          triggerReactiveSimulation();
+        }
+      }
+      window.setAutoTermThresholdValue = setAutoTermThresholdValue;
+
       window.setEmergencyBufferValue = function (val) {
         const el = document.getElementById("inputEmergencyBuffer");
         if (el) {
-          el.value = val;
+          el.value = formatNumberWithSeparators(val);
+          updateVerbalHelperForInput(el);
+          updatePresetChipActiveStates();
           triggerReactiveSimulation();
         }
       };
+
+      function updatePresetChipActiveStates() {
+        const salaryEl = document.getElementById("inputSalary");
+        const goalEl = document.getElementById("inputSavingsGoal");
+        const threshEl = document.getElementById("inputAutoTermThreshold");
+        const bufferEl = document.getElementById("inputEmergencyBuffer");
+
+        const fieldValues = {
+          salary: salaryEl ? parseFormattedNumber(salaryEl.value) : 0,
+          goal: goalEl ? parseFormattedNumber(goalEl.value) : 0,
+          autoTermThreshold: threshEl
+            ? parseFormattedNumber(threshEl.value)
+            : 0,
+          emergencyBuffer: bufferEl ? parseFormattedNumber(bufferEl.value) : 0,
+        };
+
+        document.querySelectorAll("[data-preset-field]").forEach((chip) => {
+          const field = chip.getAttribute("data-preset-field");
+          const val = parseInt(chip.getAttribute("data-preset-val"), 10);
+          const active = fieldValues[field] === val;
+          chip.classList.toggle("bg-indigo-600", active);
+          chip.classList.toggle("text-white", active);
+          chip.classList.toggle("border-indigo-500", active);
+          chip.classList.toggle("active", active);
+        });
+      }
+      window.updatePresetChipActiveStates = updatePresetChipActiveStates;
 
       window.setAnnualBonusMultiplier = function (val) {
         const el = document.getElementById("inputAnnualBonusMultiplier");
@@ -3185,6 +3477,7 @@
           } catch (e) {}
         }
         updateVerbalHelperForInput(input, l);
+        updatePresetChipActiveStates();
       }
       window.applyCurrencyMask = applyCurrencyMask;
 
@@ -3213,6 +3506,7 @@
             updateVerbalHelperForInput(el, l);
           }
         });
+        updatePresetChipActiveStates();
       }
       window.updateAllVerbalHelpers = updateAllVerbalHelpers;
 
@@ -6692,6 +6986,7 @@
 
         // Init UI & Run Simulation
         updateCSVCountBadge();
+        updatePresetChipActiveStates();
         runSimulation();
 
         // Show onboarding on first visit
