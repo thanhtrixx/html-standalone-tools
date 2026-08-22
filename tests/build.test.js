@@ -135,7 +135,17 @@ async function runTests() {
       },
       console: console,
       localStorage: { getItem: () => null, setItem: () => {} },
-      Chart: { getChart: () => null, register: () => {} },
+      Chart: Object.assign(
+        function Chart(ctx, config) {
+          this.ctx = ctx;
+          this.config = config;
+          this.data = (config && config.data) || { labels: [], datasets: [] };
+          this.options = (config && config.options) || {};
+          this.destroy = function () {};
+          this.update = function () {};
+        },
+        { getChart: () => null, register: () => {} }
+      ),
       navigator: { clipboard: { writeText: async () => {} } },
       location: { href: "http://localhost/", search: "" },
     };

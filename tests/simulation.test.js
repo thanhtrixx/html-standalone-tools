@@ -84,7 +84,17 @@ function loadSimulateEngine() {
       addEventListener: () => {},
     },
     localStorage: { getItem: () => null, setItem: () => {} },
-    Chart: { getChart: () => null, register: () => {} },
+    Chart: Object.assign(
+      function Chart(ctx, config) {
+        this.ctx = ctx;
+        this.config = config;
+        this.data = (config && config.data) || { labels: [], datasets: [] };
+        this.options = (config && config.options) || {};
+        this.destroy = function () {};
+        this.update = function () {};
+      },
+      { getChart: () => null, register: () => {} }
+    ),
   };
   sandbox.window = sandbox;
   vm.createContext(sandbox);
