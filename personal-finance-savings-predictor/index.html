@@ -479,6 +479,16 @@
           >)
         </button>
         <button
+          onclick="togglePresetsModal(true)"
+          id="btnPresetsHeader"
+          class="px-3 py-1.5 text-xs sm:text-sm bg-gradient-to-r from-indigo-600/80 to-purple-600/80 hover:from-indigo-500 hover:to-purple-500 text-white font-medium border border-indigo-500/30 rounded-lg flex items-center shadow-md shadow-indigo-500/20 transition"
+          data-i18n-title="tooltip_presets"
+          title="Strategy Presets"
+        >
+          <i class="fa-solid fa-bolt text-amber-300 mr-2"></i
+          ><span data-i18n="btn_presets">Presets</span>
+        </button>
+        <button
           onclick="toggleTheme()"
           id="themeBtn"
           class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
@@ -587,6 +597,75 @@
             />
           </div>
           <div>
+            <div class="flex items-center justify-between mb-1">
+              <label
+                class="block text-xs font-medium text-slate-400"
+                for="inputAnnualBonusMultiplier"
+                data-i18n="lbl_annual_bonus"
+                >Annual Bonus (13th Month Salary)</label
+              >
+              <div class="flex items-center space-x-1">
+                <button
+                  type="button"
+                  onclick="setAnnualBonusMultiplier(0)"
+                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  0x
+                </button>
+                <button
+                  type="button"
+                  onclick="setAnnualBonusMultiplier(1.0)"
+                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  1x
+                </button>
+                <button
+                  type="button"
+                  onclick="setAnnualBonusMultiplier(1.5)"
+                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  1.5x
+                </button>
+                <button
+                  type="button"
+                  onclick="setAnnualBonusMultiplier(2.0)"
+                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  2x
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                id="inputAnnualBonusMultiplier"
+                value="1.0"
+                min="0"
+                max="10"
+                step="0.1"
+                placeholder="1.0x"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+              />
+              <select
+                id="selectAnnualBonusMonth"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+              >
+                <option value="1" selected>Jan (Tháng 1)</option>
+                <option value="2">Feb (Tháng 2)</option>
+                <option value="3">Mar (Tháng 3)</option>
+                <option value="4">Apr (Tháng 4)</option>
+                <option value="5">May (Tháng 5)</option>
+                <option value="6">Jun (Tháng 6)</option>
+                <option value="7">Jul (Tháng 7)</option>
+                <option value="8">Aug (Tháng 8)</option>
+                <option value="9">Sep (Tháng 9)</option>
+                <option value="10">Oct (Tháng 10)</option>
+                <option value="11">Nov (Tháng 11)</option>
+                <option value="12">Dec (Tháng 12)</option>
+              </select>
+            </div>
+          </div>
+          <div>
             <label
               class="block text-xs font-medium text-slate-400 mb-1"
               for="inputInflation"
@@ -651,6 +730,59 @@
               step="10000000"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputEmergencyBuffer"
+              data-i18n="lbl_emergency_buffer"
+              >Emergency Buffer Reserve (VND)</label
+            >
+            <input
+              type="number"
+              id="inputEmergencyBuffer"
+              value="30000000"
+              min="0"
+              step="5000000"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+            <div class="flex flex-wrap gap-1 mt-1.5">
+              <button
+                type="button"
+                onclick="setEmergencyBufferValue(0)"
+                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                onclick="setEmergencyBufferValue(10000000)"
+                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                10M
+              </button>
+              <button
+                type="button"
+                onclick="setEmergencyBufferValue(30000000)"
+                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                30M
+              </button>
+              <button
+                type="button"
+                onclick="setEmergencyBufferValue(50000000)"
+                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                50M
+              </button>
+              <button
+                type="button"
+                onclick="setEmergencyBufferValue(100000000)"
+                class="px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+              >
+                100M
+              </button>
+            </div>
           </div>
           <div>
             <label
@@ -738,6 +870,16 @@
               10Y
             </button>
           </div>
+          <button
+            type="button"
+            onclick="togglePresetsModal(true)"
+            class="bg-indigo-950/70 hover:bg-indigo-900/80 text-indigo-300 text-xs px-3 py-2 rounded-lg border border-indigo-700/50 transition flex items-center gap-1.5"
+            data-i18n-title="tooltip_presets"
+            title="Strategy Presets"
+          >
+            <i class="fa-solid fa-bolt text-amber-400"></i
+            ><span data-i18n="btn_presets">Presets</span>
+          </button>
           <button
             onclick="resetAll()"
             class="bg-rose-900/50 hover:bg-rose-800/50 text-xs px-3 py-2 rounded-lg border border-rose-700/50 transition"
@@ -908,431 +1050,757 @@
           </div>
         </div>
       </section>
-      <!-- Charts Grid Section -->
-      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Primary Balance Growth Chart -->
+      <!-- Consolidated Tabbed Analytics Hub (Issue #5) -->
+      <section class="space-y-4" id="analyticsHubSection">
         <div
-          class="lg:col-span-2 glass-card rounded-2xl p-5 border border-slate-800 flex flex-col"
+          class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3"
+          role="tablist"
+          aria-label="Analytics Visualizers"
         >
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3
-                class="font-bold text-slate-200 text-base"
-                data-i18n="hdr_wealth_growth"
-              >
-                Wealth Growth
-              </h3>
-              <p class="text-xs text-slate-400" data-i18n="lbl_daily_breakdown">
-                Daily balance breakdown
-              </p>
-            </div>
-            <div class="flex items-center space-x-2">
-              <select
-                id="chartDateRange"
-                onchange="filterChartDateRange()"
-                class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-slate-300"
-                aria-label="Chart date range"
-              >
-                <option value="all">All</option>
-                <option value="3m">3M</option>
-                <option value="6m">6M</option>
-                <option value="1y">1Y</option>
-              </select>
-              <button
-                onclick="toggleRealVsNominal()"
-                id="realToggleBtn"
-                class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
-                title="Toggle inflation-adjusted view"
-              >
-                <i class="fa-solid fa-coins mr-1"></i
-                ><span data-i18n="btn_real">Real</span>
-              </button>
-              <button
-                onclick="exportChartAsImage()"
-                class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
-                title="Download chart as image"
-              >
-                <i class="fa-solid fa-image mr-1"></i
-                ><span data-i18n="btn_image">Image</span>
-              </button>
-            </div>
-          </div>
-          <div class="relative flex-1 min-h-[320px]">
-            <canvas id="chartGrowth"></canvas>
-          </div>
-          <div
-            class="flex items-center space-x-4 text-xs text-slate-400 mt-2 border-t border-slate-800/50 pt-3"
-          >
-            <span class="flex items-center"
-              ><span
-                class="w-3 h-3 rounded-full bg-indigo-500 inline-block mr-1"
-              ></span
-              ><span data-i18n="lbl_legend_total">Total</span></span
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              id="tabBtn_timeline"
+              role="tab"
+              aria-selected="true"
+              aria-controls="tabPanel_timeline"
+              onclick="switchAnalyticsTab('timeline')"
+              class="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5"
             >
-            <span class="flex items-center"
-              ><span
-                class="w-3 h-3 rounded-full bg-emerald-400 inline-block mr-1"
-              ></span
-              ><span data-i18n="lbl_legend_fixed">Fixed</span></span
+              <i class="fa-solid fa-chart-line text-indigo-200"></i>
+              <span data-i18n="btn_tab_timeline">Wealth Timeline</span>
+            </button>
+            <button
+              type="button"
+              id="tabBtn_flow"
+              role="tab"
+              aria-selected="false"
+              aria-controls="tabPanel_flow"
+              onclick="switchAnalyticsTab('flow')"
+              class="px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
             >
-            <span class="flex items-center"
-              ><span
-                class="w-3 h-3 rounded-full bg-purple-400 inline-block mr-1"
-              ></span
-              ><span data-i18n="lbl_legend_pool">Pool</span></span
+              <i class="fa-solid fa-chart-simple text-emerald-400"></i>
+              <span data-i18n="btn_tab_flow">Monthly Flow</span>
+            </button>
+            <button
+              type="button"
+              id="tabBtn_heatmap"
+              role="tab"
+              aria-selected="false"
+              aria-controls="tabPanel_heatmap"
+              onclick="switchAnalyticsTab('heatmap')"
+              class="px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
             >
-            <span class="flex items-center"
-              ><span
-                class="w-3 h-3 rounded-full bg-amber-400 inline-block mr-1 opacity-0"
-                id="realLineIndicator"
-              ></span
-              ><span data-i18n="lbl_legend_real">Real</span></span
+              <i class="fa-solid fa-calendar-days text-amber-400"></i>
+              <span data-i18n="btn_tab_heatmap">Calendar Heatmap</span>
+            </button>
+            <button
+              type="button"
+              id="tabBtn_yoy"
+              role="tab"
+              aria-selected="false"
+              aria-controls="tabPanel_yoy"
+              onclick="switchAnalyticsTab('yoy')"
+              class="px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
             >
+              <i class="fa-solid fa-table-columns text-blue-400"></i>
+              <span data-i18n="btn_tab_yoy">YoY Summary</span>
+            </button>
           </div>
         </div>
-        <!-- Right Column: Allocation + Earnings Breakdown -->
+
+        <!-- Tab 1: Wealth Timeline Panel -->
         <div
-          class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col space-y-6"
+          id="tabPanel_timeline"
+          role="tabpanel"
+          aria-labelledby="tabBtn_timeline"
+          class="space-y-6"
         >
-          <div>
-            <h3
-              class="font-bold text-slate-200 text-base mb-1"
-              data-i18n="hdr_asset_allocation"
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Primary Balance Growth Chart -->
+            <div
+              class="lg:col-span-2 glass-card rounded-2xl p-5 border border-slate-800 flex flex-col"
             >
-              Asset Allocation
-            </h3>
-            <p
-              class="text-xs text-slate-400 mb-4"
-              data-i18n="lbl_at_target_date"
-            >
-              At target date
-            </p>
-            <div class="relative h-[180px] flex items-center justify-center">
-              <canvas id="chartAllocation"></canvas>
-            </div>
-          </div>
-          <div class="border-t border-slate-800 pt-4">
-            <h4
-              class="text-xs font-semibold uppercase text-slate-400 mb-3"
-              data-i18n="hdr_earnings_breakdown"
-            >
-              Earnings Breakdown
-            </h4>
-            <div class="space-y-2 text-xs">
-              <div
-                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
-              >
-                <span class="text-slate-300"
-                  ><i class="fa-solid fa-piggy-bank text-indigo-400 mr-2"></i
-                  ><span data-i18n="lbl_csv_interest">CSV Interest</span></span
-                ><span
-                  id="txtInitialInterest"
-                  class="font-mono font-bold text-slate-200"
-                  >0 VND</span
-                >
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3
+                    class="font-bold text-slate-200 text-base"
+                    data-i18n="hdr_wealth_growth"
+                  >
+                    Wealth Growth
+                  </h3>
+                  <p
+                    class="text-xs text-slate-400"
+                    data-i18n="lbl_daily_breakdown"
+                  >
+                    Daily balance breakdown
+                  </p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <select
+                    id="chartDateRange"
+                    onchange="filterChartDateRange()"
+                    class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-slate-300"
+                    aria-label="Chart date range"
+                  >
+                    <option value="all">All</option>
+                    <option value="3m">3M</option>
+                    <option value="6m">6M</option>
+                    <option value="1y">1Y</option>
+                  </select>
+                  <button
+                    type="button"
+                    onclick="toggleRealVsNominal()"
+                    id="realToggleBtn"
+                    class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+                    title="Toggle inflation-adjusted view"
+                  >
+                    <i class="fa-solid fa-coins mr-1"></i
+                    ><span data-i18n="btn_real">Real</span>
+                  </button>
+                  <button
+                    type="button"
+                    onclick="exportChartAsImage()"
+                    class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+                    title="Download chart as image"
+                  >
+                    <i class="fa-solid fa-image mr-1"></i
+                    ><span data-i18n="btn_image">Image</span>
+                  </button>
+                </div>
+              </div>
+              <div class="relative flex-1 min-h-[320px]">
+                <canvas id="chartGrowth"></canvas>
               </div>
               <div
-                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+                class="flex items-center space-x-4 text-xs text-slate-400 mt-2 border-t border-slate-800/50 pt-3"
               >
-                <span class="text-slate-300"
-                  ><i class="fa-solid fa-water text-purple-400 mr-2"></i
-                  ><span data-i18n="lbl_pool_interest"
-                    >Pool Interest</span
+                <span class="flex items-center"
+                  ><span
+                    class="w-3 h-3 rounded-full bg-indigo-500 inline-block mr-1"
                   ></span
-                ><span
-                  id="txtPoolInterest"
-                  class="font-mono font-bold text-slate-200"
-                  >0 VND</span
+                  ><span data-i18n="lbl_legend_total">Total</span></span
                 >
-              </div>
-              <div
-                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
-              >
-                <span class="text-slate-300"
-                  ><i
-                    class="fa-solid fa-arrows-rotate text-emerald-400 mr-2"
-                  ></i
-                  ><span data-i18n="lbl_auto_term_interest"
-                    >Auto Term</span
+                <span class="flex items-center"
+                  ><span
+                    class="w-3 h-3 rounded-full bg-emerald-400 inline-block mr-1"
                   ></span
-                ><span
-                  id="txtAuto6MInterest"
-                  class="font-mono font-bold text-slate-200"
-                  >0 VND</span
+                  ><span data-i18n="lbl_legend_fixed">Fixed</span></span
                 >
-              </div>
-              <div
-                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
-              >
-                <span class="text-slate-300"
-                  ><i
-                    class="fa-solid fa-hand-holding-dollar text-blue-400 mr-2"
-                  ></i
-                  ><span data-i18n="lbl_salary_deposited">Salary</span></span
-                ><span
-                  id="txtSalaryDeposited"
-                  class="font-mono font-bold text-slate-200"
-                  >0 VND</span
+                <span class="flex items-center"
+                  ><span
+                    class="w-3 h-3 rounded-full bg-purple-400 inline-block mr-1"
+                  ></span
+                  ><span data-i18n="lbl_legend_pool">Pool</span></span
                 >
-              </div>
-              <div
-                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg hidden"
-                id="withdrawalBreakdown"
-              >
-                <span class="text-slate-300"
-                  ><i class="fa-solid fa-arrow-down text-rose-400 mr-2"></i
-                  ><span data-i18n="lbl_withdrawals">Withdrawals</span></span
-                ><span
-                  id="txtWithdrawals"
-                  class="font-mono font-bold text-rose-400"
-                  >0 VND</span
+                <span class="flex items-center"
+                  ><span
+                    class="w-3 h-3 rounded-full bg-amber-400 inline-block mr-1 opacity-0"
+                    id="realLineIndicator"
+                  ></span
+                  ><span data-i18n="lbl_legend_real">Real</span></span
                 >
               </div>
             </div>
-          </div>
-          <!-- Savings Goal Ring Chart -->
-          <div
-            id="goalRingSection"
-            class="border-t border-slate-800 pt-4 hidden"
-          >
-            <h4
-              class="text-xs font-semibold uppercase text-slate-400 mb-3"
-              data-i18n="hdr_goal_progress_ring"
+            <!-- Right Column: Allocation + Earnings Breakdown -->
+            <div
+              class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col space-y-6"
             >
-              Goal Progress
-            </h4>
-            <div class="relative h-[140px] flex items-center justify-center">
-              <canvas id="chartGoalRing2"></canvas>
+              <div>
+                <h3
+                  class="font-bold text-slate-200 text-base mb-1"
+                  data-i18n="hdr_asset_allocation"
+                >
+                  Asset Allocation
+                </h3>
+                <p
+                  class="text-xs text-slate-400 mb-4"
+                  data-i18n="lbl_at_target_date"
+                >
+                  At target date
+                </p>
+                <div
+                  class="relative h-[180px] flex items-center justify-center"
+                >
+                  <canvas id="chartAllocation"></canvas>
+                </div>
+              </div>
+              <div class="border-t border-slate-800 pt-4">
+                <h4
+                  class="text-xs font-semibold uppercase text-slate-400 mb-3"
+                  data-i18n="hdr_earnings_breakdown"
+                >
+                  Earnings Breakdown
+                </h4>
+                <div class="space-y-2 text-xs">
+                  <div
+                    class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+                  >
+                    <span class="text-slate-300"
+                      ><i
+                        class="fa-solid fa-piggy-bank text-indigo-400 mr-2"
+                      ></i
+                      ><span data-i18n="lbl_csv_interest"
+                        >CSV Interest</span
+                      ></span
+                    ><span
+                      id="txtInitialInterest"
+                      class="font-mono font-bold text-slate-200"
+                      >0 VND</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+                  >
+                    <span class="text-slate-300"
+                      ><i class="fa-solid fa-water text-purple-400 mr-2"></i
+                      ><span data-i18n="lbl_pool_interest"
+                        >Pool Interest</span
+                      ></span
+                    ><span
+                      id="txtPoolInterest"
+                      class="font-mono font-bold text-slate-200"
+                      >0 VND</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+                  >
+                    <span class="text-slate-300"
+                      ><i
+                        class="fa-solid fa-arrows-rotate text-emerald-400 mr-2"
+                      ></i
+                      ><span data-i18n="lbl_auto_term_interest"
+                        >Auto Term</span
+                      ></span
+                    ><span
+                      id="txtAuto6MInterest"
+                      class="font-mono font-bold text-slate-200"
+                      >0 VND</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+                  >
+                    <span class="text-slate-300"
+                      ><i
+                        class="fa-solid fa-hand-holding-dollar text-blue-400 mr-2"
+                      ></i
+                      ><span data-i18n="lbl_salary_deposited"
+                        >Salary</span
+                      ></span
+                    ><span
+                      id="txtSalaryDeposited"
+                      class="font-mono font-bold text-slate-200"
+                      >0 VND</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg hidden"
+                    id="withdrawalBreakdown"
+                  >
+                    <span class="text-slate-300"
+                      ><i class="fa-solid fa-arrow-down text-rose-400 mr-2"></i
+                      ><span data-i18n="lbl_withdrawals"
+                        >Withdrawals</span
+                      ></span
+                    ><span
+                      id="txtWithdrawals"
+                      class="font-mono font-bold text-rose-400"
+                      >0 VND</span
+                    >
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-      <!-- Monthly Income Chart -->
-      <section class="glass-card rounded-2xl p-5 border border-slate-800">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3
-              class="font-bold text-slate-200 text-base"
-              data-i18n="hdr_monthly_income"
-            >
-              Monthly Income & Interest Flow
-            </h3>
-            <p
-              class="text-xs text-slate-400"
-              data-i18n="lbl_monthly_income_sub"
-            >
-              Salary deposits and realized compound interest by month
-            </p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button
-              onclick="printSummary()"
-              class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200 no-print"
-              title="Print summary"
-            >
-              <i class="fa-solid fa-print mr-1"></i
-              ><span data-i18n="btn_print">Print</span>
-            </button>
-          </div>
-        </div>
-        <div class="relative h-[260px]">
-          <canvas id="chartMonthlyIncome"></canvas>
-        </div>
-      </section>
-      <!-- Heatmap Calendar -->
-      <section
-        class="glass-card rounded-2xl p-5 border border-slate-800 hidden"
-        id="heatmapSection"
-        aria-label="Monthly heatmap calendar"
-      >
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="font-bold text-slate-200 text-base">
-              <i class="fa-solid fa-calendar-days text-amber-400 mr-2"></i
-              ><span data-i18n="hdr_heatmap">Monthly Heatmap</span>
-            </h3>
-            <p class="text-xs text-slate-400" data-i18n="lbl_heatmap_sub">
-              Color intensity = total monthly balance
-            </p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <select
-              id="heatmapYearSelect"
-              onchange="renderHeatmap()"
-              class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-slate-300"
-            >
-              <option>2026</option>
-            </select>
-            <button
-              onclick="toggleHeatmap()"
-              class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
-            >
-              <i class="fa-solid fa-eye mr-1"></i
-              ><span data-i18n="btn_toggle">Toggle</span>
-            </button>
-          </div>
-        </div>
-        <div class="flex flex-col gap-1" id="heatmapGrid"></div>
+
+        <!-- Tab 2: Monthly Flow Panel -->
         <div
-          class="flex items-center justify-between mt-2 text-xs text-slate-500"
+          id="tabPanel_flow"
+          role="tabpanel"
+          aria-labelledby="tabBtn_flow"
+          class="hidden space-y-4"
         >
-          <span data-i18n="lbl_low">Low</span>
-          <div class="flex gap-0.5">
-            <div class="w-4 h-3 rounded bg-emerald-950"></div>
-            <div class="w-4 h-3 rounded bg-emerald-900"></div>
-            <div class="w-4 h-3 rounded bg-emerald-800"></div>
-            <div class="w-4 h-3 rounded bg-emerald-600"></div>
-            <div class="w-4 h-3 rounded bg-emerald-400"></div>
-            <div class="w-4 h-3 rounded bg-emerald-300"></div>
+          <div class="glass-card rounded-2xl p-5 border border-slate-800">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3
+                  class="font-bold text-slate-200 text-base"
+                  data-i18n="hdr_monthly_income"
+                >
+                  Monthly Income & Interest Flow
+                </h3>
+                <p
+                  class="text-xs text-slate-400"
+                  data-i18n="lbl_monthly_income_sub"
+                >
+                  Salary deposits and realized compound interest by month
+                </p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onclick="printSummary()"
+                  class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200 no-print"
+                  title="Print summary"
+                >
+                  <i class="fa-solid fa-print mr-1"></i
+                  ><span data-i18n="btn_print">Print</span>
+                </button>
+              </div>
+            </div>
+            <div class="relative h-[280px]">
+              <canvas id="chartMonthlyIncome"></canvas>
+            </div>
           </div>
-          <span data-i18n="lbl_high">High</span>
         </div>
-      </section>
-      <!-- YoY Comparison Table -->
-      <section
-        class="glass-card rounded-2xl p-5 border border-slate-800 hidden"
-        id="yoySection"
-        aria-label="Year over year comparison"
-      >
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="font-bold text-slate-200 text-base">
-              <i class="fa-solid fa-table-columns text-indigo-400 mr-2"></i
-              ><span data-i18n="hdr_yoy">Year-over-Year Comparison</span>
-            </h3>
-            <p class="text-xs text-slate-400" data-i18n="lbl_yoy_sub">
-              Annual breakdown with growth rates
-            </p>
-          </div>
-          <div>
-            <button
-              onclick="toggleYoYTable()"
-              class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+
+        <!-- Tab 3: Heatmap Calendar Panel -->
+        <div
+          id="tabPanel_heatmap"
+          role="tabpanel"
+          aria-labelledby="tabBtn_heatmap"
+          class="hidden space-y-4"
+        >
+          <div
+            class="glass-card rounded-2xl p-5 border border-slate-800"
+            id="heatmapSection"
+            aria-label="Monthly heatmap calendar"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-200 text-base">
+                  <i class="fa-solid fa-calendar-days text-amber-400 mr-2"></i
+                  ><span data-i18n="hdr_heatmap">Monthly Heatmap</span>
+                </h3>
+                <p class="text-xs text-slate-400" data-i18n="lbl_heatmap_sub">
+                  Color intensity = total monthly balance
+                </p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <select
+                  id="heatmapYearSelect"
+                  onchange="renderHeatmap()"
+                  class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-slate-300"
+                >
+                  <option>2026</option>
+                </select>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1" id="heatmapGrid"></div>
+            <div
+              class="flex items-center justify-between mt-2 text-xs text-slate-500"
             >
-              <i class="fa-solid fa-eye mr-1"></i
-              ><span data-i18n="btn_toggle">Toggle</span>
-            </button>
+              <span data-i18n="lbl_low">Low</span>
+              <div class="flex gap-0.5">
+                <div class="w-4 h-3 rounded bg-emerald-950"></div>
+                <div class="w-4 h-3 rounded bg-emerald-900"></div>
+                <div class="w-4 h-3 rounded bg-emerald-800"></div>
+                <div class="w-4 h-3 rounded bg-emerald-600"></div>
+                <div class="w-4 h-3 rounded bg-emerald-400"></div>
+                <div class="w-4 h-3 rounded bg-emerald-300"></div>
+              </div>
+              <span data-i18n="lbl_high">High</span>
+            </div>
           </div>
         </div>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-2 px-3" data-i18n="th_year">Year</th>
-                <th class="py-2 px-3" data-i18n="th_salary_in">Salary In</th>
-                <th class="py-2 px-3" data-i18n="th_interest_in">
-                  Interest In
-                </th>
-                <th class="py-2 px-3" data-i18n="th_end_balance">
-                  End Balance
-                </th>
-                <th class="py-2 px-3" data-i18n="th_growth">Growth %</th>
-                <th class="py-2 px-3" data-i18n="th_avg_month">Avg/Month</th>
-              </tr>
-            </thead>
-            <tbody
-              id="yoyTableBody"
-              class="divide-y divide-slate-800/60"
-            ></tbody>
-          </table>
+
+        <!-- Tab 4: YoY Summary Panel -->
+        <div
+          id="tabPanel_yoy"
+          role="tabpanel"
+          aria-labelledby="tabBtn_yoy"
+          class="hidden space-y-4"
+        >
+          <div
+            class="glass-card rounded-2xl p-5 border border-slate-800"
+            id="yoySection"
+            aria-label="Year over year comparison"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-slate-200 text-base">
+                  <i class="fa-solid fa-table-columns text-indigo-400 mr-2"></i
+                  ><span data-i18n="hdr_yoy">Year-over-Year Comparison</span>
+                </h3>
+                <p class="text-xs text-slate-400" data-i18n="lbl_yoy_sub">
+                  Annual breakdown with growth rates
+                </p>
+              </div>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="text-slate-400 border-b border-slate-800">
+                  <tr>
+                    <th class="py-2 px-3" data-i18n="th_year">Year</th>
+                    <th class="py-2 px-3" data-i18n="th_salary_in">
+                      Salary In
+                    </th>
+                    <th class="py-2 px-3" data-i18n="th_interest_in">
+                      Interest In
+                    </th>
+                    <th class="py-2 px-3" data-i18n="th_end_balance">
+                      End Balance
+                    </th>
+                    <th class="py-2 px-3" data-i18n="th_growth">Growth %</th>
+                    <th class="py-2 px-3" data-i18n="th_avg_month">
+                      Avg/Month
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="yoyTableBody"
+                  class="divide-y divide-slate-800/60"
+                ></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
       <!-- Comparison Section -->
       <section
         id="compareSection"
-        class="glass-card rounded-2xl p-5 border border-slate-800 hidden"
-        role="region"
-        aria-label="Scenario comparison"
+        class="glass-card rounded-2xl p-6 border border-slate-800 hidden space-y-5"
       >
         <div
-          class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800"
+          class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3"
         >
           <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-code-compare text-amber-400"></i>
+            <i class="fa-solid fa-code-compare text-indigo-400"></i>
             <h2
               class="font-semibold text-slate-200 text-sm tracking-wide uppercase"
               data-i18n="hdr_scenario_comp"
             >
-              Scenario Comparison
+              Scenario Comparison Workbench
             </h2>
           </div>
-          <button
-            onclick="toggleCompareMode()"
-            class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
-          >
-            <i class="fa-solid fa-xmark mr-1"></i
-            ><span data-i18n="btn_close">Close</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="cloneScenarioAtoB()"
+              class="text-xs px-2.5 py-1.5 rounded-lg border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20 transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-clone text-[10px]"></i>
+              <span data-i18n="btn_clone_a">Clone Scenario A</span>
+            </button>
+            <button
+              type="button"
+              onclick="toggleCompareMode()"
+              class="text-xs px-2.5 py-1.5 rounded-lg border border-slate-700 text-slate-400 hover:text-slate-200 transition flex items-center gap-1"
+            >
+              <i class="fa-solid fa-xmark text-[10px]"></i>
+              <span data-i18n="btn_close">Close</span>
+            </button>
+          </div>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        <!-- Scenario B Parameter Inputs Drawer -->
+        <div class="bg-slate-950/60 rounded-xl p-4 border border-slate-800/80">
+          <h3
+            class="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-sliders text-[11px]"></i>
+            <span data-i18n="hdr_scenario_b"
+              >Scenario B (Alternative Parameters)</span
+            >
+          </h3>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+          >
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompSalary"
+                data-i18n="lbl_salary"
+                >Monthly Salary (VND)</label
+              >
+              <input
+                type="number"
+                id="inputCompSalary"
+                value="30000000"
+                min="0"
+                step="1000000"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompSalaryGrowth"
+                data-i18n="lbl_salary_growth"
+                >Salary Growth (%/yr)</label
+              >
+              <input
+                type="number"
+                id="inputCompSalaryGrowth"
+                value="5"
+                min="0"
+                max="30"
+                step="0.5"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompInflation"
+                data-i18n="lbl_inflation"
+                >Inflation Rate (%/yr)</label
+              >
+              <input
+                type="number"
+                id="inputCompInflation"
+                value="0"
+                min="0"
+                max="30"
+                step="0.5"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompSavingsGoal"
+                data-i18n="lbl_savings_goal"
+                >Savings Goal (VND)</label
+              >
+              <input
+                type="number"
+                id="inputCompSavingsGoal"
+                value="0"
+                min="0"
+                step="10000000"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompPoolRate"
+                data-i18n="lbl_pool_rate"
+                >Pool Rate (%/yr)</label
+              >
+              <input
+                type="number"
+                id="inputCompPoolRate"
+                value="0.5"
+                min="0"
+                max="15"
+                step="0.1"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompAutoTermThreshold"
+                data-i18n="lbl_auto_term_threshold"
+                >Auto Term Threshold (VND)</label
+              >
+              <input
+                type="number"
+                id="inputCompAutoTermThreshold"
+                value="200000000"
+                min="0"
+                step="10000000"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompEmergencyBuffer"
+                data-i18n="lbl_emergency_buffer"
+                >Emergency Buffer Reserve (VND)</label
+              >
+              <input
+                type="number"
+                id="inputCompEmergencyBuffer"
+                value="30000000"
+                min="0"
+                step="5000000"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-medium text-slate-400 mb-1"
+                for="inputCompAutoTermRate"
+                data-i18n="lbl_auto_term_rate"
+                >Auto Term Rate (%/yr)</label
+              >
+              <input
+                type="number"
+                id="inputCompAutoTermRate"
+                value="5.8"
+                min="0"
+                max="15"
+                step="0.1"
+                oninput="triggerReactiveComparison()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparative Output Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Scenario A Card -->
           <div
             class="glass-card rounded-xl p-4 border border-indigo-500/30 compare-card compare-a"
           >
-            <h4 class="text-sm font-bold text-indigo-400 mb-3">
-              <i class="fa-solid fa-chart-line mr-1"></i
-              ><span data-i18n="hdr_scenario_a">Scenario A (Current)</span>
+            <h4
+              class="text-sm font-bold text-indigo-400 mb-3 flex items-center justify-between"
+            >
+              <span
+                ><i class="fa-solid fa-chart-line mr-1"></i
+                ><span data-i18n="hdr_scenario_a"
+                  >Scenario A (Current)</span
+                ></span
+              >
+              <span
+                class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300"
+                >Baseline</span
+              >
             </h4>
-            <div class="space-y-2 text-sm">
+            <div class="space-y-2 text-xs">
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_salary"
                   >Salary:</span
-                ><span id="compASalary" class="text-white">-</span>
+                >
+                <span id="compASalary" class="text-white font-medium">-</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_total"
                   >Total Balance:</span
-                ><span id="compATotal" class="text-emerald-400">-</span>
+                >
+                <span id="compATotal" class="text-indigo-300 font-bold">-</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_interest"
                   >Interest:</span
-                ><span id="compAInterest" class="text-emerald-400">-</span>
+                >
+                <span id="compAInterest" class="text-indigo-400">-</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_goal"
                   >Goal Reached:</span
-                ><span id="compAGoal" class="text-white">-</span>
+                >
+                <span id="compAGoal" class="text-white">-</span>
               </div>
             </div>
           </div>
+
+          <!-- Scenario B Card -->
           <div
             class="glass-card rounded-xl p-4 border border-emerald-500/30 compare-card compare-b"
           >
-            <h4 class="text-sm font-bold text-emerald-400 mb-3">
-              <i class="fa-solid fa-chart-line mr-1"></i
-              ><span data-i18n="hdr_scenario_b">Scenario B (Projected)</span>
+            <h4
+              class="text-sm font-bold text-emerald-400 mb-3 flex items-center justify-between"
+            >
+              <span
+                ><i class="fa-solid fa-chart-line mr-1"></i
+                ><span data-i18n="hdr_scenario_b"
+                  >Scenario B (Projected)</span
+                ></span
+              >
+              <span
+                class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-300"
+                >Projected</span
+              >
             </h4>
-            <div class="space-y-2 text-sm">
+            <div class="space-y-2 text-xs">
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_salary"
                   >Salary:</span
-                ><span id="compBSalary" class="text-white">-</span>
+                >
+                <span id="compBSalary" class="text-white font-medium">-</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_total"
                   >Total Balance:</span
-                ><span id="compBTotal" class="text-emerald-400">-</span>
+                >
+                <span id="compBTotal" class="text-emerald-300 font-bold"
+                  >-</span
+                >
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_interest"
                   >Interest:</span
-                ><span id="compBInterest" class="text-emerald-400">-</span>
+                >
+                <span id="compBInterest" class="text-emerald-400">-</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-400" data-i18n="lbl_comp_goal"
                   >Goal Reached:</span
-                ><span id="compBGoal" class="text-white">-</span>
+                >
+                <span id="compBGoal" class="text-white">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Delta Card -->
+          <div
+            class="glass-card rounded-xl p-4 border border-amber-500/30 compare-card compare-delta"
+          >
+            <h4
+              class="text-sm font-bold text-amber-400 mb-3 flex items-center justify-between"
+            >
+              <span
+                ><i class="fa-solid fa-arrows-split-up-and-left mr-1"></i
+                ><span data-i18n="hdr_scenario_delta"
+                  >Net Delta (B vs A)</span
+                ></span
+              >
+              <span
+                class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300"
+                >Delta</span
+              >
+            </h4>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_delta_wealth"
+                  >Δ Total Wealth:</span
+                >
+                <span id="compDeltaWealth" class="text-white font-bold">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_delta_interest"
+                  >Δ Interest:</span
+                >
+                <span id="compDeltaInterest" class="text-white font-medium"
+                  >-</span
+                >
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_delta_milestone"
+                  >Milestone Diff:</span
+                >
+                <span id="compDeltaMilestone" class="text-white font-medium"
+                  >-</span
+                >
               </div>
             </div>
           </div>
         </div>
-        <div class="mt-4">
+
+        <div>
           <button
+            type="button"
             onclick="runComparison()"
-            class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-lg transition"
+            class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-lg transition flex items-center justify-center space-x-2 shadow-lg shadow-amber-600/20"
           >
-            <i class="fa-solid fa-code-compare mr-2"></i
-            ><span data-i18n="btn_run_comp">Run Comparison</span>
+            <i class="fa-solid fa-code-compare mr-1"></i>
+            <span data-i18n="btn_run_comp">Run Comparison</span>
           </button>
         </div>
       </section>
@@ -1442,8 +1910,9 @@
             <div
               class="flex flex-wrap items-center justify-between gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800"
             >
-              <div class="flex items-center space-x-2">
+              <div class="flex flex-wrap items-center gap-2">
                 <button
+                  type="button"
                   onclick="addEmptyCSVRow()"
                   class="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition flex items-center"
                 >
@@ -1451,6 +1920,25 @@
                   ><span data-i18n="btn_add_row">Add Row</span>
                 </button>
                 <button
+                  type="button"
+                  onclick="addWithdrawalRow()"
+                  class="px-3 py-1.5 text-xs bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 font-medium rounded-lg transition flex items-center"
+                >
+                  <i class="fa-solid fa-arrow-down mr-1.5 text-rose-400"></i
+                  ><span data-i18n="btn_add_withdrawal">+ Add Withdrawal</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="toggleRecurringGenerator()"
+                  class="px-3 py-1.5 text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-medium rounded-lg transition flex items-center"
+                >
+                  <i class="fa-solid fa-arrows-spin mr-1.5 text-emerald-400"></i
+                  ><span data-i18n="btn_generate_recurring"
+                    >+ Recurring Generator</span
+                  >
+                </button>
+                <button
+                  type="button"
                   onclick="loadDefaultSampleData()"
                   class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
                 >
@@ -1458,6 +1946,7 @@
                   ><span data-i18n="btn_reset_sample">Reset Sample CSV</span>
                 </button>
                 <button
+                  type="button"
                   onclick="clearAllData()"
                   class="px-3 py-1.5 text-xs bg-rose-900/50 hover:bg-rose-800/50 text-rose-300 border border-rose-700/50 rounded-lg transition flex items-center"
                 >
@@ -1466,12 +1955,147 @@
                 </button>
               </div>
               <button
+                type="button"
                 onclick="exportCSV()"
                 class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
               >
                 <i class="fa-solid fa-download mr-1.5 text-indigo-400"></i
                 ><span data-i18n="btn_download_csv">Download CSV</span>
               </button>
+            </div>
+
+            <!-- Recurring Cashflow Generator Sub-Panel -->
+            <div
+              id="recurringGenPanel"
+              class="hidden bg-slate-950/90 p-4 rounded-xl border border-indigo-500/30 space-y-3"
+            >
+              <div class="flex items-center justify-between">
+                <h4
+                  class="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-arrows-spin text-indigo-400"></i>
+                  <span data-i18n="hdr_recurring_gen"
+                    >Recurring Cashflow Generator</span
+                  >
+                </h4>
+                <button
+                  type="button"
+                  onclick="toggleRecurringGenerator(false)"
+                  class="text-slate-400 hover:text-slate-200 text-xs"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 text-xs"
+              >
+                <div>
+                  <label
+                    class="block text-[11px] text-slate-400 mb-1"
+                    data-i18n="th_type"
+                    >Type</label
+                  >
+                  <select
+                    id="recurType"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200"
+                  >
+                    <option value="Non-Term Pool" data-i18n="type_non_term">
+                      Non-Term Pool (Deposit)
+                    </option>
+                    <option value="Withdrawal" data-i18n="status_withdrawal">
+                      Withdrawal
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-[11px] text-slate-400 mb-1"
+                    data-i18n="th_account"
+                    >Account Name</label
+                  >
+                  <input
+                    type="text"
+                    id="recurName"
+                    value="Periodic Cashflow"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-[11px] text-slate-400 mb-1"
+                    data-i18n="th_principal"
+                    >Amount (VND)</label
+                  >
+                  <input
+                    type="number"
+                    id="recurAmount"
+                    value="5000000"
+                    min="0"
+                    step="1000000"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-[11px] text-slate-400 mb-1"
+                    data-i18n="lbl_recur_freq"
+                    >Frequency</label
+                  >
+                  <select
+                    id="recurFreq"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200"
+                  >
+                    <option value="1" data-i18n="freq_monthly">
+                      Monthly (1 mo)
+                    </option>
+                    <option value="3" data-i18n="freq_quarterly">
+                      Quarterly (3 mo)
+                    </option>
+                    <option value="6" data-i18n="freq_semiannual">
+                      Semi-Annually (6 mo)
+                    </option>
+                    <option value="12" data-i18n="freq_annual">
+                      Annually (12 mo)
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label
+                    class="block text-[11px] text-slate-400 mb-1"
+                    data-i18n="th_start_date"
+                    >Start Date</label
+                  >
+                  <input
+                    type="date"
+                    id="recurStartDate"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-[11px] text-slate-400 mb-1"
+                    data-i18n="th_end_date"
+                    >End Date</label
+                  >
+                  <input
+                    type="date"
+                    id="recurEndDate"
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-200"
+                  />
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <button
+                  type="button"
+                  onclick="generateRecurringRows()"
+                  class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-indigo-600/20"
+                >
+                  <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
+                  <span data-i18n="btn_insert_recurring"
+                    >Generate & Insert Rows</span
+                  >
+                </button>
+              </div>
             </div>
             <div class="overflow-x-auto border border-slate-800 rounded-xl">
               <table class="w-full text-left text-xs border-collapse">
@@ -1512,6 +2136,71 @@
               data-i18n="btn_save_run"
             >
               Save & Run Simulation
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Strategy Persona Presets Modal (Issue #6) -->
+      <div
+        id="presetsModal"
+        class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="presetsModalTitle"
+      >
+        <div
+          class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        >
+          <div
+            class="flex items-center justify-between p-5 border-b border-slate-800"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-lg"
+              >
+                <i class="fa-solid fa-bolt text-amber-400"></i>
+              </div>
+              <div>
+                <h2
+                  id="presetsModalTitle"
+                  class="text-base font-bold text-white tracking-wide"
+                  data-i18n="hdr_presets_modal"
+                >
+                  Strategy Persona Presets
+                </h2>
+                <p class="text-xs text-slate-400" data-i18n="lbl_presets_sub">
+                  Select a preconfigured financial roadmap to kickstart your
+                  simulation
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onclick="togglePresetsModal(false)"
+              class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            >
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+          <div
+            class="p-5 overflow-y-auto space-y-3.5 flex-1"
+            id="presetsCardsContainer"
+          >
+            <!-- Dynamic Presets list -->
+          </div>
+          <div
+            class="p-4 bg-slate-950/60 border-t border-slate-800 flex flex-wrap justify-between items-center gap-2 text-xs text-slate-400"
+          >
+            <span data-i18n="lbl_presets_undo_hint">
+              💡 Applying a preset includes a 5-second Undo safeguard
+            </span>
+            <button
+              type="button"
+              onclick="togglePresetsModal(false)"
+              class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition"
+              data-i18n="btn_close"
+            >
+              Close
             </button>
           </div>
         </div>
@@ -1562,10 +2251,14 @@
           lbl_target_date: "Target End Date",
           lbl_salary: "Monthly Salary (VND)",
           lbl_salary_growth: "Salary Growth (%/yr)",
+          lbl_annual_bonus: "Annual Bonus (13th Month Salary)",
+          lbl_bonus_multiplier: "Bonus Multiplier (x Monthly Salary)",
+          lbl_bonus_month: "Bonus Month",
           lbl_inflation: "Inflation Rate (%/yr)",
           lbl_savings_goal: "Savings Goal (VND)",
           lbl_pool_rate: "Pool Rate (%/yr)",
           lbl_auto_term_threshold: "Auto Term Threshold (VND)",
+          lbl_emergency_buffer: "Emergency Buffer Reserve (VND)",
           lbl_auto_term_months: "Auto Term Duration (Months)",
           lbl_auto_term_rate: "Auto Term Rate (%/yr)",
           lbl_6m_rate: "Auto Term Rate (%/yr)",
@@ -1598,6 +2291,12 @@
           lbl_auto_term: "Auto Term:",
           auto_account_count: "{count} account(s)",
           lbl_real_prefix: "real: ",
+
+          // Consolidated Analytics Tabs (Issue #5)
+          btn_tab_timeline: "Wealth Timeline",
+          btn_tab_flow: "Monthly Flow",
+          btn_tab_heatmap: "Calendar Heatmap",
+          btn_tab_yoy: "YoY Summary",
 
           // Charts
           hdr_wealth_growth: "Wealth Growth",
@@ -1656,16 +2355,24 @@
           th_avg_month: "Avg/Month",
 
           // Scenario Comparison
-          hdr_scenario_comp: "Scenario Comparison",
+          hdr_scenario_comp: "Scenario Comparison Workbench",
           hdr_scenario_a: "Scenario A (Current)",
           hdr_scenario_b: "Scenario B (Projected)",
+          hdr_scenario_delta: "Net Delta (B vs A)",
+          btn_clone_a: "Clone Scenario A",
           lbl_comp_salary: "Salary:",
           lbl_comp_total: "Total Balance:",
           lbl_comp_interest: "Interest:",
           lbl_comp_goal: "Goal Reached:",
+          lbl_delta_wealth: "Δ Total Wealth:",
+          lbl_delta_interest: "Δ Interest:",
+          lbl_delta_milestone: "Milestone Diff:",
           btn_run_comp: "Run Comparison",
           btn_close: "Close",
           comp_not_yet: "📈 Not yet",
+          comp_earlier: "{months} mo earlier",
+          comp_later: "{months} mo later",
+          comp_same_date: "Same date",
 
           // Savings Table
           hdr_savings_accounts: "Savings Accounts",
@@ -1688,6 +2395,9 @@
           lbl_logs_sub: "Salary, Maturities & Auto Term Allocations",
           log_salary_title: "Monthly Salary Deposited",
           log_salary_details: "{amount} to Pool (rate: {rate}%/yr)",
+          log_bonus_title: "13th-Month Annual Bonus",
+          log_bonus_details:
+            "Bonus deposit of {amount} ({multiplier}x monthly salary)",
           log_maturity_title: "Matured: {name}",
           log_maturity_details: "{principal} + {interest} to Pool",
           log_auto6m_title: "Created Auto Term Saving #{count} ({months}M)",
@@ -1706,6 +2416,15 @@
           hdr_manage_csv: "Manage Saving Accounts CSV Data",
           lbl_manage_csv_sub: "Add, edit, or upload savings accounts",
           btn_add_row: "Add Row",
+          btn_add_withdrawal: "+ Add Withdrawal",
+          btn_generate_recurring: "+ Recurring Generator",
+          hdr_recurring_gen: "Recurring Cashflow Generator",
+          lbl_recur_freq: "Frequency",
+          freq_monthly: "Monthly (1 mo)",
+          freq_quarterly: "Quarterly (3 mo)",
+          freq_semiannual: "Semi-Annually (6 mo)",
+          freq_annual: "Annually (12 mo)",
+          btn_insert_recurring: "Generate & Insert Rows",
           btn_reset_sample: "Reset Sample CSV",
           btn_clear_saved: "Clear Saved Data",
           btn_download_csv: "Download CSV",
@@ -1713,6 +2432,8 @@
           th_type: "Type",
           th_bank: "Bank",
           th_action: "Action",
+          type_non_term: "Non-Term Pool (Deposit)",
+          err_invalid_date_range: "End Date must be on or after Start Date",
           btn_cancel: "Cancel",
           btn_save_run: "Save & Run Simulation",
 
@@ -1730,6 +2451,8 @@
           toast_csv_parse_err: "CSV parse error: {msg}",
           toast_sample_loaded: "Sample CSV loaded",
           toast_csv_saved: "CSV saved & simulation run",
+          toast_recurring_generated:
+            "Generated {count} recurring cashflow entries",
           toast_data_cleared: "All saved data cleared",
           toast_csv_exported: "CSV exported successfully",
           toast_link_copied: "Simulation link copied to clipboard!",
@@ -1746,6 +2469,38 @@
           toast_comp_updated: "Comparison updated",
           confirm_reset_all: "Reset all parameters and CSV data to defaults?",
           confirm_clear_data: "Clear all saved CSV data and parameters?",
+          btn_close: "Close",
+
+          // Strategy Persona Presets (Issue #6)
+          btn_presets: "Presets",
+          tooltip_presets: "Strategy Persona Presets",
+          hdr_presets_modal: "Strategy Persona Presets",
+          lbl_presets_sub:
+            "Select a preconfigured financial roadmap to kickstart your simulation",
+          lbl_presets_undo_hint:
+            "💡 Applying a preset includes a 5-second Undo safeguard",
+          btn_apply_preset: "Apply Preset",
+          btn_undo: "Undo",
+          toast_preset_applied: "Applied '{name}' strategy preset",
+          toast_preset_undone: "Restored previous simulation settings",
+
+          // Presets Content
+          preset_grad_title: "Fresh Graduate",
+          preset_grad_badge: "Career Starter",
+          preset_grad_desc:
+            "Early career starter with rapid salary growth, conservative safety buffer, and achievable initial wealth target.",
+          preset_fire_title: "Aggressive FIRE",
+          preset_fire_badge: "High Accumulator",
+          preset_fire_desc:
+            "High-income accumulator pursuing aggressive compound interest, maximized 12-month term rates, and multi-billion long-term target.",
+          preset_home_title: "Home Downpayment Target",
+          preset_home_badge: "5-Year Plan",
+          preset_home_desc:
+            "5-year structured savings plan balancing monthly salary growth and term interest to accumulate a home purchase deposit.",
+          preset_ladder_title: "Conservative Bank Ladder",
+          preset_ladder_badge: "Staggered Terms",
+          preset_ladder_desc:
+            "Rolling 6-month staggered fixed deposit tranches ensuring continuous quarterly liquidity and stable yields.",
 
           // Onboarding
           onboard_title_1: "Welcome to Savings & Wealth Simulator!",
@@ -1796,10 +2551,14 @@
           lbl_target_date: "Ngày Kết Thúc",
           lbl_salary: "Lương Hàng Tháng (₫)",
           lbl_salary_growth: "Tăng Lương (%/năm)",
+          lbl_annual_bonus: "Thưởng Năm (Lương Tháng 13)",
+          lbl_bonus_multiplier: "Hệ Số Thưởng (x Lương Tháng)",
+          lbl_bonus_month: "Tháng Thưởng",
           lbl_inflation: "Tỷ Lệ Lạm Phát (%/năm)",
           lbl_savings_goal: "Mục Tiêu Tiết Kiệm (₫)",
           lbl_pool_rate: "Lãi Suất Linh Hoạt (%/năm)",
           lbl_auto_term_threshold: "Ngưỡng Gửi Tự Động (₫)",
+          lbl_emergency_buffer: "Quỹ Dự Phòng Khẩn Cấp (₫)",
           lbl_auto_term_months: "Kỳ Hạn Gửi Tự Động (Tháng)",
           lbl_auto_term_rate: "Lãi Suất Kỳ Hạn Tự Động (%/năm)",
           lbl_6m_rate: "Lãi Suất Kỳ Hạn Tự Động (%/năm)",
@@ -1832,6 +2591,12 @@
           lbl_auto_term: "Gửi tự động:",
           auto_account_count: "{count} sổ tự động",
           lbl_real_prefix: "thực tế: ",
+
+          // Consolidated Analytics Tabs (Issue #5)
+          btn_tab_timeline: "Biểu Đồ Tài Sản",
+          btn_tab_flow: "Dòng Tiền Tháng",
+          btn_tab_heatmap: "Bản Đồ Nhiệt",
+          btn_tab_yoy: "Báo Cáo Từng Năm",
 
           // Charts
           hdr_wealth_growth: "Tăng Trưởng Tài Sản",
@@ -1893,13 +2658,21 @@
           hdr_scenario_comp: "So Sánh Kịch Bản",
           hdr_scenario_a: "Kịch Bản A (Hiện Tại)",
           hdr_scenario_b: "Kịch Bản B (Dự Phóng)",
+          hdr_scenario_delta: "Chênh Lệch (B vs A)",
+          btn_clone_a: "Sao chép Kịch Bản A",
           lbl_comp_salary: "Lương:",
           lbl_comp_total: "Tổng Số Dư:",
           lbl_comp_interest: "Tổng Lãi:",
           lbl_comp_goal: "Đạt Mục Tiêu:",
+          lbl_delta_wealth: "Δ Tổng Tài Sản:",
+          lbl_delta_interest: "Δ Lãi Nhận:",
+          lbl_delta_milestone: "Lệch Cột Mốc:",
           btn_run_comp: "Chạy So Sánh",
           btn_close: "Đóng",
           comp_not_yet: "📈 Chưa đạt",
+          comp_earlier: "Sớm hơn {months} tháng",
+          comp_later: "Trễ hơn {months} tháng",
+          comp_same_date: "Cùng ngày",
 
           // Savings Table
           hdr_savings_accounts: "Danh Sách Sổ Tiết Kiệm",
@@ -1922,6 +2695,9 @@
           lbl_logs_sub: "Lương nạp, đáo hạn & tái đầu tư tự động",
           log_salary_title: "Nạp Lương Hàng Tháng",
           log_salary_details: "{amount} vào Tiền Linh Hoạt (tăng: {rate}%/năm)",
+          log_bonus_title: "Thưởng Lương Tháng 13",
+          log_bonus_details:
+            "Nạp tiền thưởng {amount} (hệ số {multiplier}x lương tháng)",
           log_maturity_title: "Đáo Hạn: {name}",
           log_maturity_details: "{principal} + {interest} vào Tiền Linh Hoạt",
           log_auto6m_title: "Tạo Sổ Tiết Kiệm Tự Động #{count} ({months}T)",
@@ -1940,6 +2716,15 @@
           hdr_manage_csv: "Quản Lý Dữ Liệu Sổ Tiết Kiệm (CSV)",
           lbl_manage_csv_sub: "Thêm, sửa hoặc tải lên sổ tiết kiệm",
           btn_add_row: "Thêm Dòng",
+          btn_add_withdrawal: "+ Thêm Rút Tiền",
+          btn_generate_recurring: "+ Tạo Định Kỳ",
+          hdr_recurring_gen: "Công Cụ Tạo Dòng Tiền Định Kỳ",
+          lbl_recur_freq: "Tần Suất",
+          freq_monthly: "Hàng Tháng (1 th)",
+          freq_quarterly: "Hàng Quý (3 th)",
+          freq_semiannual: "Nửa Năm (6 th)",
+          freq_annual: "Hàng Năm (12 th)",
+          btn_insert_recurring: "Tạo & Thêm Dòng Vào Bảng",
           btn_reset_sample: "Mẫu Mặc Định",
           btn_clear_saved: "Xóa Dữ Liệu",
           btn_download_csv: "Tải CSV",
@@ -1947,6 +2732,8 @@
           th_type: "Loại",
           th_bank: "Ngân Hàng",
           th_action: "Thao Tác",
+          type_non_term: "Tiền Linh Hoạt (Nạp)",
+          err_invalid_date_range: "Ngày kết thúc phải từ hoặc sau ngày bắt đầu",
           btn_cancel: "Hủy",
           btn_save_run: "Lưu & Chạy Giả Lập",
 
@@ -1964,6 +2751,7 @@
           toast_csv_parse_err: "Lỗi đọc CSV: {msg}",
           toast_sample_loaded: "Đã nạp dữ liệu mẫu",
           toast_csv_saved: "Đã lưu CSV và chạy giả lập",
+          toast_recurring_generated: "Đã tạo {count} dòng tiền định kỳ",
           toast_data_cleared: "Đã xóa tất cả dữ liệu đã lưu",
           toast_csv_exported: "Đã xuất CSV thành công",
           toast_link_copied: "Đã sao chép liên kết mô phỏng vào clipboard!",
@@ -1981,6 +2769,38 @@
           confirm_reset_all:
             "Đặt lại tất cả thông số và dữ liệu CSV về mặc định?",
           confirm_clear_data: "Xóa toàn bộ dữ liệu đã lưu và thông số?",
+          btn_close: "Đóng",
+
+          // Strategy Persona Presets (Issue #6)
+          btn_presets: "Chiến Lược Mẫu",
+          tooltip_presets: "Chiến Lược Tài Chính Mẫu",
+          hdr_presets_modal: "Chiến Lược Tài Chính Mẫu",
+          lbl_presets_sub:
+            "Chọn lộ trình tài chính định sẵn phù hợp với mục tiêu của bạn",
+          lbl_presets_undo_hint:
+            "💡 Tự động kích hoạt tính năng Hoàn Tác trong 5 giây sau khi áp dụng",
+          btn_apply_preset: "Áp Dụng",
+          btn_undo: "Hoàn tác",
+          toast_preset_applied: "Đã áp dụng chiến lược '{name}'",
+          toast_preset_undone: "Đã khôi phục cài đặt giả lập trước đó",
+
+          // Presets Content
+          preset_grad_title: "Tốt Nghiệp Mới Đi Làm",
+          preset_grad_badge: "Khởi Đầu Sự Nghiệp",
+          preset_grad_desc:
+            "Dành cho người mới đi làm với tỷ lệ tăng lương nhanh, quỹ dự phòng linh hoạt và mục tiêu ban đầu vừa sức.",
+          preset_fire_title: "Độc Lập Tài Chính FIRE",
+          preset_fire_badge: "Tích Lũy Tối Đa",
+          preset_fire_desc:
+            "Tích lũy tài sản nhanh chóng với kỳ hạn 12 tháng lãi suất cao và mục tiêu tự do tài chính hàng tỷ đồng.",
+          preset_home_title: "Mục Tiêu Mua Nhà",
+          preset_home_badge: "Kế Hoạch 5 Năm",
+          preset_home_desc:
+            "Kế hoạch tiết kiệm 5 năm kết hợp tiền gửi linh hoạt và kỳ hạn để chuẩn bị vốn mua nhà an cư.",
+          preset_ladder_title: "Bậc Thang Tiết Kiệm",
+          preset_ladder_badge: "Bậc Thang Kỳ Hạn",
+          preset_ladder_desc:
+            "Chia nhỏ tiền gửi thành nhiều sổ 6 tháng so le nhau đảm bảo dòng tiền đáo hạn đều đặn hàng quý.",
 
           // Onboarding
           onboard_title_1: "Chào mừng đến với Giả Lập Tiết Kiệm & Tài Sản!",
@@ -2076,8 +2896,7 @@
       let growthChart = null,
         allocationChart = null,
         monthlyIncomeChart = null;
-      let goalChart = null,
-        goalRingChart2 = null;
+      let goalChart = null;
       let heatmapChart = null;
       let showRealValues = false;
       let heatmapVisible = false,
@@ -2088,7 +2907,7 @@
       window.currentLang = "en";
 
       // --- SCHEMA VERSIONING & MIGRATION (R2) ---
-      const SCHEMA_VERSION = 2;
+      const SCHEMA_VERSION = 4;
       function migrateParams(raw) {
         if (!raw || typeof raw !== "object") return null;
         let p = { ...raw };
@@ -2118,10 +2937,60 @@
             schemaVersion: 2,
           };
         }
+        if (from < 3) {
+          const buffer =
+            p.emergencyBuffer !== undefined ? p.emergencyBuffer : "30000000";
+          p = {
+            ...p,
+            emergencyBuffer: buffer,
+            schemaVersion: 3,
+          };
+        }
+        if (from < 4) {
+          const bonusMult =
+            p.annualBonusMultiplier !== undefined
+              ? p.annualBonusMultiplier
+              : "1.0";
+          const bonusMonth =
+            p.annualBonusMonth !== undefined ? p.annualBonusMonth : "1";
+          p = {
+            ...p,
+            annualBonusMultiplier: bonusMult,
+            annualBonusMonth: bonusMonth,
+            schemaVersion: 4,
+          };
+        }
         return p;
       }
       window.SCHEMA_VERSION = SCHEMA_VERSION;
       window.migrateParams = migrateParams;
+
+      let reactiveSimTimeout = null;
+      function triggerReactiveSimulation() {
+        clearTimeout(reactiveSimTimeout);
+        reactiveSimTimeout = setTimeout(() => {
+          if (typeof runSimulation === "function") {
+            runSimulation();
+          }
+        }, 150);
+      }
+      window.triggerReactiveSimulation = triggerReactiveSimulation;
+
+      window.setEmergencyBufferValue = function (val) {
+        const el = document.getElementById("inputEmergencyBuffer");
+        if (el) {
+          el.value = val;
+          triggerReactiveSimulation();
+        }
+      };
+
+      window.setAnnualBonusMultiplier = function (val) {
+        const el = document.getElementById("inputAnnualBonusMultiplier");
+        if (el) {
+          el.value = val;
+          triggerReactiveSimulation();
+        }
+      };
 
       // --- LOCALSTORAGE HELPERS ---
       function getStorage(key, defaultVal) {
@@ -2252,7 +3121,7 @@
       }
 
       // --- TOAST NOTIFICATIONS ---
-      function showToast(msg, type = "info") {
+      function showToast(msg, type = "info", options = {}) {
         const container = document.getElementById("toastContainer");
         if (!container) return;
         const el = document.createElement("div");
@@ -2262,21 +3131,56 @@
           error: "bg-red-600",
           warning: "bg-amber-600",
         };
-        el.className = `toast ${colors[type] || colors.info} text-white px-4 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm flex items-center gap-2 max-w-xs`;
+        el.className = `toast ${colors[type] || colors.info} text-white px-4 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm flex items-center gap-2 max-w-sm`;
         const icons = {
           info: "fa-circle-info",
           success: "fa-check-circle",
           error: "fa-circle-exclamation",
           warning: "fa-triangle-exclamation",
         };
-        el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span class="flex-1">${msg}</span><button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100"><i class="fa-solid fa-xmark text-[10px]"></i></button>`;
-        container.appendChild(el);
+        let actionBtnHtml = "";
+        if (
+          options &&
+          options.actionText &&
+          typeof options.onAction === "function"
+        ) {
+          actionBtnHtml = `<button type="button" class="px-2.5 py-1 text-xs font-bold bg-white text-slate-900 rounded-lg hover:bg-slate-200 transition shadow toast-action-btn">${options.actionText}</button>`;
+        }
+        el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span class="flex-1">${msg}</span>${actionBtnHtml}<button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 p-1"><i class="fa-solid fa-xmark text-[10px]"></i></button>`;
+        if (
+          options &&
+          options.actionText &&
+          typeof options.onAction === "function"
+        ) {
+          const btn =
+            typeof el.querySelector === "function"
+              ? el.querySelector(".toast-action-btn")
+              : null;
+          if (btn) {
+            btn.onclick = () => {
+              try {
+                options.onAction();
+              } catch (err) {
+                console.error("Toast action error:", err);
+              }
+              if (typeof el.remove === "function") el.remove();
+            };
+          }
+        }
+        if (container && typeof container.appendChild === "function") {
+          container.appendChild(el);
+        }
+        const duration = (options && options.duration) || 3000;
         setTimeout(() => {
-          el.style.opacity = "0";
-          el.style.transform = "translateX(100%)";
-          el.style.transition = "all .3s";
-          setTimeout(() => el.remove(), 300);
-        }, 3000);
+          if (el.style) {
+            el.style.opacity = "0";
+            el.style.transform = "translateX(100%)";
+            el.style.transition = "all .3s";
+          }
+          setTimeout(() => {
+            if (typeof el.remove === "function") el.remove();
+          }, 300);
+        }, duration);
       }
 
       // --- PARAMETER & PRESET HELPERS ---
@@ -2304,11 +3208,17 @@
         );
         document.getElementById("inputSalary").value = "25000000";
         document.getElementById("inputSalaryGrowth").value = "0";
+        if (document.getElementById("inputAnnualBonusMultiplier"))
+          document.getElementById("inputAnnualBonusMultiplier").value = "1.0";
+        if (document.getElementById("selectAnnualBonusMonth"))
+          document.getElementById("selectAnnualBonusMonth").value = "1";
         document.getElementById("inputInflation").value = "0";
         document.getElementById("inputSavingsGoal").value = "0";
         document.getElementById("inputPoolRate").value = "0.5";
         if (document.getElementById("inputAutoTermThreshold"))
           document.getElementById("inputAutoTermThreshold").value = "200000000";
+        if (document.getElementById("inputEmergencyBuffer"))
+          document.getElementById("inputEmergencyBuffer").value = "30000000";
         if (document.getElementById("inputAutoTermMonths"))
           document.getElementById("inputAutoTermMonths").value = "6";
         if (document.getElementById("inputAutoTermRate"))
@@ -2321,6 +3231,440 @@
         showToast(t("toast_reset_all"), "info");
         runSimulation();
       }
+
+      // --- STRATEGY PERSONA PRESETS (Issue #6) ---
+      const PERSONA_PRESETS = [
+        {
+          id: "fresh_grad",
+          titleKey: "preset_grad_title",
+          badgeKey: "preset_grad_badge",
+          descKey: "preset_grad_desc",
+          icon: "fa-graduation-cap",
+          badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+          iconColor: "text-blue-400",
+          params: {
+            targetYears: 3,
+            salary: 15000000,
+            salaryGrowth: 10.0,
+            annualBonusMultiplier: 1.0,
+            annualBonusMonth: 1,
+            inflation: 4.0,
+            savingsGoal: 200000000,
+            poolRate: 0.5,
+            autoTermThreshold: 50000000,
+            emergencyBuffer: 10000000,
+            autoTermMonths: 6,
+            autoTermRate: 5.8,
+          },
+          csv: [
+            {
+              "Account Name": "Starter Flexible Pool",
+              Principal: 20000000,
+              "Interest Rate (%/yr)": 0.5,
+              "Term (Months)": 0,
+              "Start Date": "2026-08-22",
+              "End Date": "2029-08-22",
+              Type: "Non-Term Pool",
+              Bank: "Techcombank",
+            },
+          ],
+        },
+        {
+          id: "fire_aspirant",
+          titleKey: "preset_fire_title",
+          badgeKey: "preset_fire_badge",
+          descKey: "preset_fire_desc",
+          icon: "fa-fire-flame-curved",
+          badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+          iconColor: "text-amber-400",
+          params: {
+            targetYears: 10,
+            salary: 60000000,
+            salaryGrowth: 8.0,
+            annualBonusMultiplier: 2.0,
+            annualBonusMonth: 12,
+            inflation: 3.5,
+            savingsGoal: 5000000000,
+            poolRate: 0.5,
+            autoTermThreshold: 100000000,
+            emergencyBuffer: 50000000,
+            autoTermMonths: 12,
+            autoTermRate: 6.5,
+          },
+          csv: [
+            {
+              "Account Name": "FIRE Emergency Reserve",
+              Principal: 50000000,
+              "Interest Rate (%/yr)": 0.5,
+              "Term (Months)": 0,
+              "Start Date": "2026-08-22",
+              "End Date": "2036-08-22",
+              Type: "Non-Term Pool",
+              Bank: "VPBank",
+            },
+            {
+              "Account Name": "FIRE Long-Term Deposit 1",
+              Principal: 200000000,
+              "Interest Rate (%/yr)": 6.8,
+              "Term (Months)": 12,
+              "Start Date": "2026-01-15",
+              "End Date": "2027-01-15",
+              Type: "Term Saving",
+              Bank: "MB Bank",
+            },
+            {
+              "Account Name": "FIRE Long-Term Deposit 2",
+              Principal: 150000000,
+              "Interest Rate (%/yr)": 6.5,
+              "Term (Months)": 12,
+              "Start Date": "2026-04-01",
+              "End Date": "2027-04-01",
+              Type: "Term Saving",
+              Bank: "ACB",
+            },
+          ],
+        },
+        {
+          id: "home_downpayment",
+          titleKey: "preset_home_title",
+          badgeKey: "preset_home_badge",
+          descKey: "preset_home_desc",
+          icon: "fa-house-chimney",
+          badgeColor:
+            "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+          iconColor: "text-emerald-400",
+          params: {
+            targetYears: 5,
+            salary: 35000000,
+            salaryGrowth: 5.0,
+            annualBonusMultiplier: 1.5,
+            annualBonusMonth: 1,
+            inflation: 4.0,
+            savingsGoal: 1500000000,
+            poolRate: 0.5,
+            autoTermThreshold: 150000000,
+            emergencyBuffer: 30000000,
+            autoTermMonths: 6,
+            autoTermRate: 5.8,
+          },
+          csv: [
+            {
+              "Account Name": "Home Fund Non-Term Pool",
+              Principal: 30000000,
+              "Interest Rate (%/yr)": 0.5,
+              "Term (Months)": 0,
+              "Start Date": "2026-08-22",
+              "End Date": "2031-08-22",
+              Type: "Non-Term Pool",
+              Bank: "Vietcombank",
+            },
+            {
+              "Account Name": "Downpayment Term Deposit",
+              Principal: 100000000,
+              "Interest Rate (%/yr)": 6.0,
+              "Term (Months)": 12,
+              "Start Date": "2026-03-01",
+              "End Date": "2027-03-01",
+              Type: "Term Saving",
+              Bank: "VietinBank",
+            },
+          ],
+        },
+        {
+          id: "bank_ladder",
+          titleKey: "preset_ladder_title",
+          badgeKey: "preset_ladder_badge",
+          descKey: "preset_ladder_desc",
+          icon: "fa-stairs",
+          badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+          iconColor: "text-purple-400",
+          params: {
+            targetYears: 3,
+            salary: 25000000,
+            salaryGrowth: 3.0,
+            annualBonusMultiplier: 1.0,
+            annualBonusMonth: 1,
+            inflation: 3.0,
+            savingsGoal: 800000000,
+            poolRate: 0.5,
+            autoTermThreshold: 200000000,
+            emergencyBuffer: 30000000,
+            autoTermMonths: 6,
+            autoTermRate: 5.8,
+          },
+          csv: [
+            {
+              "Account Name": "Rolling Ladder Tranche 1",
+              Principal: 50000000,
+              "Interest Rate (%/yr)": 5.8,
+              "Term (Months)": 6,
+              "Start Date": "2026-01-01",
+              "End Date": "2026-07-01",
+              Type: "Term Saving",
+              Bank: "Techcombank",
+            },
+            {
+              "Account Name": "Rolling Ladder Tranche 2",
+              Principal: 50000000,
+              "Interest Rate (%/yr)": 5.8,
+              "Term (Months)": 6,
+              "Start Date": "2026-03-01",
+              "End Date": "2026-09-01",
+              Type: "Term Saving",
+              Bank: "Techcombank",
+            },
+            {
+              "Account Name": "Rolling Ladder Tranche 3",
+              Principal: 50000000,
+              "Interest Rate (%/yr)": 5.8,
+              "Term (Months)": 6,
+              "Start Date": "2026-05-01",
+              "End Date": "2026-11-01",
+              Type: "Term Saving",
+              Bank: "Techcombank",
+            },
+            {
+              "Account Name": "Rolling Ladder Tranche 4",
+              Principal: 50000000,
+              "Interest Rate (%/yr)": 5.8,
+              "Term (Months)": 6,
+              "Start Date": "2026-07-01",
+              "End Date": "2027-01-01",
+              Type: "Term Saving",
+              Bank: "Techcombank",
+            },
+          ],
+        },
+      ];
+      window.PERSONA_PRESETS = PERSONA_PRESETS;
+
+      function renderPresetCards() {
+        const container = document.getElementById("presetsCardsContainer");
+        if (!container) return;
+        container.innerHTML = "";
+        PERSONA_PRESETS.forEach((preset) => {
+          const card = document.createElement("div");
+          card.className =
+            "p-4 bg-slate-950/60 hover:bg-slate-800/60 border border-slate-800 rounded-xl transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4";
+          card.innerHTML = `
+            <div class="flex items-start space-x-3.5 flex-1">
+              <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center ${preset.iconColor} text-lg shrink-0 mt-0.5">
+                <i class="fa-solid ${preset.icon}"></i>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="font-bold text-sm text-white">${t(preset.titleKey)}</h3>
+                  <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full border ${preset.badgeColor}">${t(preset.badgeKey)}</span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed">${t(preset.descKey)}</p>
+                <div class="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-500">
+                  <span>💰 ${formatCurrency(preset.params.salary)}/mo</span>
+                  <span>🎯 ${formatCurrency(preset.params.savingsGoal)}</span>
+                  <span>⏳ ${preset.params.targetYears}Y</span>
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onclick="applyPreset('${preset.id}')"
+              class="w-full sm:w-auto px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-md shadow-indigo-600/30 transition shrink-0 flex items-center justify-center gap-1.5"
+            >
+              <i class="fa-solid fa-play text-[10px]"></i>
+              <span>${t("btn_apply_preset")}</span>
+            </button>
+          `;
+          container.appendChild(card);
+        });
+      }
+      window.renderPresetCards = renderPresetCards;
+
+      function applyPreset(presetId) {
+        const preset = PERSONA_PRESETS.find((p) => p.id === presetId);
+        if (!preset) return;
+
+        // Snapshot previous state for 5-second Undo
+        window._undoState = {
+          targetDate: document.getElementById("inputTargetDate").value,
+          salary: document.getElementById("inputSalary").value,
+          salaryGrowth: document.getElementById("inputSalaryGrowth").value,
+          annualBonusMultiplier: document.getElementById(
+            "inputAnnualBonusMultiplier"
+          )
+            ? document.getElementById("inputAnnualBonusMultiplier").value
+            : "1.0",
+          annualBonusMonth: document.getElementById("selectAnnualBonusMonth")
+            ? document.getElementById("selectAnnualBonusMonth").value
+            : "1",
+          inflation: document.getElementById("inputInflation").value,
+          goal: document.getElementById("inputSavingsGoal").value,
+          poolRate: document.getElementById("inputPoolRate").value,
+          autoTermThreshold: document.getElementById("inputAutoTermThreshold")
+            ? document.getElementById("inputAutoTermThreshold").value
+            : "200000000",
+          emergencyBuffer: document.getElementById("inputEmergencyBuffer")
+            ? document.getElementById("inputEmergencyBuffer").value
+            : "30000000",
+          autoTermMonths: document.getElementById("inputAutoTermMonths")
+            ? document.getElementById("inputAutoTermMonths").value
+            : "6",
+          autoTermRate: document.getElementById("inputAutoTermRate")
+            ? document.getElementById("inputAutoTermRate").value
+            : "5.8",
+          csv: JSON.parse(JSON.stringify(workingCSVData)),
+        };
+
+        // Apply preset params
+        const targetDate = formatDate(
+          addMonths(new Date(), (preset.params.targetYears || 2) * 12)
+        );
+        document.getElementById("inputTargetDate").value = targetDate;
+        document.getElementById("inputSalary").value = String(
+          preset.params.salary
+        );
+        document.getElementById("inputSalaryGrowth").value = String(
+          preset.params.salaryGrowth
+        );
+        if (document.getElementById("inputAnnualBonusMultiplier")) {
+          document.getElementById("inputAnnualBonusMultiplier").value = String(
+            preset.params.annualBonusMultiplier
+          );
+        }
+        if (document.getElementById("selectAnnualBonusMonth")) {
+          document.getElementById("selectAnnualBonusMonth").value = String(
+            preset.params.annualBonusMonth
+          );
+        }
+        document.getElementById("inputInflation").value = String(
+          preset.params.inflation
+        );
+        document.getElementById("inputSavingsGoal").value = String(
+          preset.params.savingsGoal
+        );
+        document.getElementById("inputPoolRate").value = String(
+          preset.params.poolRate
+        );
+        if (document.getElementById("inputAutoTermThreshold")) {
+          document.getElementById("inputAutoTermThreshold").value = String(
+            preset.params.autoTermThreshold
+          );
+        }
+        if (document.getElementById("inputEmergencyBuffer")) {
+          document.getElementById("inputEmergencyBuffer").value = String(
+            preset.params.emergencyBuffer
+          );
+        }
+        if (document.getElementById("inputAutoTermMonths")) {
+          document.getElementById("inputAutoTermMonths").value = String(
+            preset.params.autoTermMonths
+          );
+        }
+        if (document.getElementById("inputAutoTermRate")) {
+          document.getElementById("inputAutoTermRate").value = String(
+            preset.params.autoTermRate
+          );
+        }
+        if (document.getElementById("input6MRate")) {
+          document.getElementById("input6MRate").value = String(
+            preset.params.autoTermRate
+          );
+        }
+
+        // Apply preset CSV
+        syncCSVData(JSON.parse(JSON.stringify(preset.csv)));
+        updateCSVCountBadge();
+
+        togglePresetsModal(false);
+        runSimulation();
+
+        // 5-second Undo safeguard
+        showToast(
+          t("toast_preset_applied", { name: t(preset.titleKey) }),
+          "info",
+          {
+            actionText: t("btn_undo"),
+            onAction: () => undoPresetApply(),
+            duration: 5000,
+          }
+        );
+      }
+      window.applyPreset = applyPreset;
+
+      function undoPresetApply() {
+        if (!window._undoState) return;
+        const u = window._undoState;
+        if (u.targetDate)
+          document.getElementById("inputTargetDate").value = u.targetDate;
+        if (u.salary) document.getElementById("inputSalary").value = u.salary;
+        if (u.salaryGrowth !== undefined)
+          document.getElementById("inputSalaryGrowth").value = u.salaryGrowth;
+        if (
+          u.annualBonusMultiplier !== undefined &&
+          document.getElementById("inputAnnualBonusMultiplier")
+        ) {
+          document.getElementById("inputAnnualBonusMultiplier").value =
+            u.annualBonusMultiplier;
+        }
+        if (
+          u.annualBonusMonth !== undefined &&
+          document.getElementById("selectAnnualBonusMonth")
+        ) {
+          document.getElementById("selectAnnualBonusMonth").value =
+            u.annualBonusMonth;
+        }
+        if (u.inflation !== undefined)
+          document.getElementById("inputInflation").value = u.inflation;
+        if (u.goal !== undefined)
+          document.getElementById("inputSavingsGoal").value = u.goal;
+        if (u.poolRate !== undefined)
+          document.getElementById("inputPoolRate").value = u.poolRate;
+        if (
+          u.autoTermThreshold !== undefined &&
+          document.getElementById("inputAutoTermThreshold")
+        ) {
+          document.getElementById("inputAutoTermThreshold").value =
+            u.autoTermThreshold;
+        }
+        if (
+          u.emergencyBuffer !== undefined &&
+          document.getElementById("inputEmergencyBuffer")
+        ) {
+          document.getElementById("inputEmergencyBuffer").value =
+            u.emergencyBuffer;
+        }
+        if (
+          u.autoTermMonths !== undefined &&
+          document.getElementById("inputAutoTermMonths")
+        ) {
+          document.getElementById("inputAutoTermMonths").value =
+            u.autoTermMonths;
+        }
+        if (
+          u.autoTermRate !== undefined &&
+          document.getElementById("inputAutoTermRate")
+        ) {
+          document.getElementById("inputAutoTermRate").value = u.autoTermRate;
+        }
+        if (u.csv) {
+          syncCSVData(JSON.parse(JSON.stringify(u.csv)));
+          updateCSVCountBadge();
+        }
+        window._undoState = null;
+        runSimulation();
+        showToast(t("toast_preset_undone"), "success");
+      }
+      window.undoPresetApply = undoPresetApply;
+
+      function togglePresetsModal(show) {
+        const modal = document.getElementById("presetsModal");
+        if (!modal) return;
+        const isHidden = modal.classList.contains("hidden");
+        const nextShow = show !== undefined ? show : isHidden;
+        modal.classList.toggle("hidden", !nextShow);
+        if (nextShow) {
+          renderPresetCards();
+        }
+      }
+      window.togglePresetsModal = togglePresetsModal;
 
       // --- CSV EDITOR FUNCTIONS ---
       function updateCSVCountBadge() {
@@ -2410,8 +3754,9 @@
         const tl = typeLabels[lang] || typeLabels.en;
 
         workingCSVData.forEach((row, idx) => {
+          const isWithdrawal = row["Type"] === "Withdrawal";
           const tr = document.createElement("tr");
-          tr.className = "hover:bg-slate-800/40 transition";
+          tr.className = `hover:bg-slate-800/40 transition ${isWithdrawal ? "bg-rose-950/20 border-l-2 border-rose-500" : ""}`;
           tr.innerHTML = `<td class="p-2.5"><input type="text" value="${row["Account Name"] || ""}" onchange="updateCSVRowField(${idx},'Account Name',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="number" value="${row["Principal"] || 0}" onchange="updateCSVRowField(${idx},'Principal',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="date" value="${row["Start Date"] || ""}" onchange="updateCSVRowField(${idx},'Start Date',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
@@ -2450,6 +3795,100 @@
         renderCSVEditorTable();
         updateCSVCountBadge();
       }
+      function addWithdrawalRow() {
+        const defaultName =
+          window.currentLang === "vi"
+            ? "Khoản rút tiền"
+            : "Scheduled Withdrawal";
+        workingCSVData.push({
+          "Account Name": defaultName,
+          Principal: "10000000",
+          "Start Date": formatDate(new Date()),
+          "End Date": formatDate(addMonths(new Date(), 1)),
+          Interest: "0",
+          Type: "Withdrawal",
+          Bank: "Cash",
+        });
+        renderCSVEditorTable();
+        updateCSVCountBadge();
+      }
+      window.addWithdrawalRow = addWithdrawalRow;
+
+      function toggleRecurringGenerator(show) {
+        const panel = document.getElementById("recurringGenPanel");
+        if (!panel) return;
+        if (show === undefined) {
+          panel.classList.toggle("hidden");
+        } else if (show) {
+          panel.classList.remove("hidden");
+        } else {
+          panel.classList.add("hidden");
+        }
+        if (!panel.classList.contains("hidden")) {
+          const sEl = document.getElementById("recurStartDate");
+          const eEl = document.getElementById("recurEndDate");
+          if (sEl && !sEl.value) sEl.value = formatDate(new Date());
+          if (eEl && !eEl.value)
+            eEl.value = formatDate(addMonths(new Date(), 12));
+        }
+      }
+      window.toggleRecurringGenerator = toggleRecurringGenerator;
+
+      function generateRecurringRows() {
+        const type = document.getElementById("recurType")
+          ? document.getElementById("recurType").value
+          : "Non-Term Pool";
+        const name = document.getElementById("recurName")
+          ? document.getElementById("recurName").value
+          : "Periodic Cashflow";
+        const amount = document.getElementById("recurAmount")
+          ? parseFloat(document.getElementById("recurAmount").value) || 0
+          : 5000000;
+        const freqMonths = document.getElementById("recurFreq")
+          ? parseInt(document.getElementById("recurFreq").value, 10) || 1
+          : 1;
+        const startStr = document.getElementById("recurStartDate")
+          ? document.getElementById("recurStartDate").value
+          : "";
+        const endStr = document.getElementById("recurEndDate")
+          ? document.getElementById("recurEndDate").value
+          : "";
+
+        if (!startStr || !endStr) {
+          showToast(t("err_invalid_date_range"), "warning");
+          return;
+        }
+        const startDate = parseDate(startStr);
+        const endDate = parseDate(endStr);
+        if (endDate < startDate) {
+          showToast(t("err_invalid_date_range"), "warning");
+          return;
+        }
+
+        let curDate = new Date(startDate.getTime());
+        let count = 0;
+        while (curDate <= endDate) {
+          const dStr = formatDate(curDate);
+          const nextDStr = formatDate(addMonths(curDate, 1));
+          workingCSVData.push({
+            "Account Name": `${name} (${dStr})`,
+            Principal: String(amount),
+            "Start Date": dStr,
+            "End Date": type === "Withdrawal" ? nextDStr : dStr,
+            Interest: "0",
+            Type: type,
+            Bank: "Cash",
+          });
+          count++;
+          curDate = addMonths(curDate, freqMonths);
+        }
+        renderCSVEditorTable();
+        updateCSVCountBadge();
+        toggleRecurringGenerator(false);
+        showToast(t("toast_recurring_generated", { count }), "success");
+      }
+      window.generateRecurringRows = generateRecurringRows;
+
       function loadDefaultSampleData() {
         workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
         window.workingCSVData = workingCSVData;
@@ -2459,6 +3898,20 @@
         showToast(t("toast_sample_loaded"), "info");
       }
       function saveCSVEditorData() {
+        for (let i = 0; i < workingCSVData.length; i++) {
+          const row = workingCSVData[i];
+          if (row["Start Date"] && row["End Date"]) {
+            const s = parseDate(row["Start Date"]);
+            const e = parseDate(row["End Date"]);
+            if (e < s) {
+              showToast(
+                `${row["Account Name"] || "Row " + (i + 1)}: ${t("err_invalid_date_range")}`,
+                "error"
+              );
+              return;
+            }
+          }
+        }
         saveToStorage();
         toggleCSVModal(false);
         runSimulation();
@@ -2547,6 +4000,27 @@
           isNaN(parseInt(rawMonths, 10))
             ? 6
             : parseInt(rawMonths, 10);
+        const rawBuffer = params.emergencyBuffer;
+        const emergencyBuffer =
+          rawBuffer === undefined ||
+          rawBuffer === "" ||
+          isNaN(Number(rawBuffer))
+            ? 30000000
+            : Math.max(0, Number(rawBuffer));
+        const rawBonusMult = params.annualBonusMultiplier;
+        const annualBonusMultiplier =
+          rawBonusMult === undefined ||
+          rawBonusMult === "" ||
+          isNaN(Number(rawBonusMult))
+            ? 0
+            : Math.max(0, Number(rawBonusMult));
+        const rawBonusMonth = params.annualBonusMonth;
+        const annualBonusMonth =
+          rawBonusMonth === undefined ||
+          rawBonusMonth === "" ||
+          isNaN(parseInt(rawBonusMonth, 10))
+            ? 1
+            : Math.min(12, Math.max(1, parseInt(rawBonusMonth, 10)));
 
         if (!targetDateStr) return null;
 
@@ -2609,6 +4083,7 @@
         let currentPoolBalance = initialPoolStartBalance;
         let cumulativeSalary = 0;
         let salaryCount = 0;
+        let totalAnnualBonus = 0;
         let totalInterestInitialCSV = 0;
         let totalInterestPool = 0;
         let totalInterest6M = 0;
@@ -2646,7 +4121,7 @@
             yearlyCashflows[yearKey] = { salary: 0, interest: 0 };
           }
 
-          // 1. Monthly Salary Inflow (1st of month with anniversary escalation - ADR-0002)
+          // 1. Monthly Salary Inflow & Annual Bonus (ADR-0002)
           if (isMonthStart) {
             if (monthlySalary > 0) {
               currentPoolBalance += currentSalary;
@@ -2660,6 +4135,23 @@
                 amount: currentSalary,
                 growthRate: salaryGrowthRate,
               });
+
+              // Annual Bonus (13th Month Salary)
+              const calMonth = currentDate.getMonth() + 1; // 1-12
+              if (annualBonusMultiplier > 0 && calMonth === annualBonusMonth) {
+                const bonusAmount = currentSalary * annualBonusMultiplier;
+                currentPoolBalance += bonusAmount;
+                cumulativeSalary += bonusAmount;
+                totalAnnualBonus += bonusAmount;
+                monthlyCashflows[monthKey].salary += bonusAmount;
+                yearlyCashflows[yearKey].salary += bonusAmount;
+                simulationLogs.push({
+                  date: dateStr,
+                  type: "ANNUAL_BONUS",
+                  amount: bonusAmount,
+                  multiplier: annualBonusMultiplier,
+                });
+              }
 
               // Anniversary-based escalation (ADR-0002)
               const yearDiff = getMonthDiff(simStartDate, currentDate) / 12;
@@ -2730,14 +4222,15 @@
             yearlyCashflows[yearKey].interest += dailyPoolInterest;
           }
 
-          // 4. Unified Auto Term Allocation (ADR-0005)
+          // 4. Unified Auto Term Allocation with Emergency Buffer Reserve (ADR-0005 & ADR-0006)
+          const sweepThreshold = autoTermThreshold + emergencyBuffer;
           if (
             autoTermThreshold > 0 &&
             !isNaN(autoTermThreshold) &&
-            currentPoolBalance >= autoTermThreshold
+            currentPoolBalance >= sweepThreshold
           ) {
-            const lockedAmount = currentPoolBalance;
-            currentPoolBalance = 0;
+            const lockedAmount = currentPoolBalance - emergencyBuffer;
+            currentPoolBalance = emergencyBuffer;
             created6MCount++;
             const autoStartDate = new Date(currentDate.getTime());
             const autoEndDate = addMonths(autoStartDate, autoTermMonths);
@@ -2767,6 +4260,7 @@
               amount: lockedAmount,
               rate: autoTermAnnualRateDec,
               months: autoTermMonths,
+              bufferRetained: emergencyBuffer,
             });
           }
 
@@ -2833,6 +4327,7 @@
             totalInterest6M,
             cumulativeSalary,
             salaryCount,
+            totalBonus: totalAnnualBonus,
             created6MCount,
             totalWithdrawals,
             inflationAdjusted,
@@ -2854,6 +4349,24 @@
           const salaryGrowthRate =
             (parseFloat(document.getElementById("inputSalaryGrowth").value) ||
               0) / 100;
+          const rawBonusMult = document.getElementById(
+            "inputAnnualBonusMultiplier"
+          )
+            ? document.getElementById("inputAnnualBonusMultiplier").value
+            : "1.0";
+          const annualBonusMultiplier =
+            rawBonusMult === "" || isNaN(Number(rawBonusMult))
+              ? 1.0
+              : Math.max(0, Number(rawBonusMult));
+          const rawBonusMonth = document.getElementById(
+            "selectAnnualBonusMonth"
+          )
+            ? document.getElementById("selectAnnualBonusMonth").value
+            : "1";
+          const annualBonusMonth =
+            rawBonusMonth === "" || isNaN(parseInt(rawBonusMonth, 10))
+              ? 1
+              : parseInt(rawBonusMonth, 10);
           const inflationRate =
             (parseFloat(document.getElementById("inputInflation").value) || 0) /
             100;
@@ -2884,6 +4397,15 @@
             rawMonths === "" || isNaN(parseInt(rawMonths, 10))
               ? 6
               : parseInt(rawMonths, 10);
+          const rawEmergencyBuffer = document.getElementById(
+            "inputEmergencyBuffer"
+          )
+            ? document.getElementById("inputEmergencyBuffer").value
+            : "30000000";
+          const emergencyBuffer =
+            rawEmergencyBuffer === "" || isNaN(Number(rawEmergencyBuffer))
+              ? 30000000
+              : Math.max(0, Number(rawEmergencyBuffer));
           const savingsGoal =
             parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
 
@@ -2896,6 +4418,8 @@
             targetDateStr,
             monthlySalary,
             salaryGrowthRate,
+            annualBonusMultiplier,
+            annualBonusMonth,
             inflationRate,
             poolAnnualRate,
             term6MAnnualRate: autoTermRate,
@@ -2905,6 +4429,7 @@
               ? 200000000
               : autoTermThreshold,
             autoTermMonths,
+            emergencyBuffer,
             savingsGoal,
           };
 
@@ -2970,24 +4495,29 @@
             formatCurrency(totals.totalInterest6M);
           document.getElementById("txtSalaryDeposited").innerText =
             formatCurrency(totals.cumulativeSalary);
-          document
-            .getElementById("txtWithdrawals")
-            .parentElement.classList.toggle(
+          const txtWithdrawalsEl = document.getElementById("txtWithdrawals");
+          if (
+            txtWithdrawalsEl &&
+            txtWithdrawalsEl.parentElement &&
+            txtWithdrawalsEl.parentElement.classList
+          ) {
+            txtWithdrawalsEl.parentElement.classList.toggle(
               "hidden",
               totals.totalWithdrawals === 0
             );
-          document.getElementById("txtWithdrawals").innerText = formatCurrency(
-            totals.totalWithdrawals
-          );
+          }
+          if (txtWithdrawalsEl) {
+            txtWithdrawalsEl.innerText = formatCurrency(
+              totals.totalWithdrawals
+            );
+          }
           document.getElementById("txtTotalSavingsCount").innerText =
             res.allSavings.length;
 
           // Goal Progress Section Visibility & Milestone Date
           const goalSection = document.getElementById("goalProgressSection");
-          const goalRingSection = document.getElementById("goalRingSection");
           if (savingsGoal > 0) {
             goalSection.classList.remove("hidden");
-            goalRingSection.classList.remove("hidden");
             const pct = Math.min(100, (totals.totalWealth / savingsGoal) * 100);
             document.getElementById("goalProgressBar").style.width = pct + "%";
             document.getElementById("goalCurrentText").innerText =
@@ -3020,8 +4550,11 @@
             renderGoalRing(totals.totalWealth, savingsGoal);
           } else {
             goalSection.classList.add("hidden");
-            goalRingSection.classList.add("hidden");
           }
+
+          // Expose cashflows for analytics tabs
+          window.yearlyCashflows = res.yearlyCashflows;
+          window.monthlyCashflows = res.monthlyCashflows;
 
           // Store simResult
           simResult = {
@@ -3114,6 +4647,14 @@
             details = t("log_salary_details", {
               amount: formatCurrency(log.amount),
               rate: ((log.growthRate || 0) * 100).toFixed(1),
+            });
+          } else if (log.type === "ANNUAL_BONUS") {
+            iconClass = "fa-gift text-purple-400";
+            bgClass = "bg-purple-950/20 border-purple-800/40";
+            title = t("log_bonus_title");
+            details = t("log_bonus_details", {
+              amount: formatCurrency(log.amount),
+              multiplier: log.multiplier !== undefined ? log.multiplier : 1.0,
             });
           } else if (log.type === "MATURITY") {
             iconClass = "fa-arrow-up-right-dots text-emerald-400";
@@ -3244,6 +4785,32 @@
             borderDash: [8, 4],
             tension: 0.2,
             pointRadius: 0,
+          });
+        }
+
+        if (
+          window.comparisonActive &&
+          window.scenarioBResult &&
+          window.scenarioBResult.dailySnapshots
+        ) {
+          const bMap = new Map();
+          window.scenarioBResult.dailySnapshots.forEach((s) =>
+            bMap.set(s.date, s.totalWealth)
+          );
+          const compBData = labels.map((d) =>
+            bMap.has(d) ? bMap.get(d) : null
+          );
+          datasets.push({
+            id: "scenarioB",
+            label: t("hdr_scenario_b") || "Scenario B (Projected)",
+            data: compBData,
+            borderColor: "#34d399",
+            backgroundColor: "transparent",
+            borderWidth: 2.2,
+            borderDash: [6, 4],
+            tension: 0.2,
+            pointRadius: 0,
+            fill: false,
           });
         }
 
@@ -3479,20 +5046,75 @@
         });
       }
 
+      // --- CONSOLIDATED TABBED ANALYTICS HUB (Issue #5) ---
+      let currentActiveTab = "timeline";
+      function switchAnalyticsTab(tabId) {
+        currentActiveTab = tabId;
+        const tabs = ["timeline", "flow", "heatmap", "yoy"];
+        tabs.forEach((tId) => {
+          const btn = document.getElementById(`tabBtn_${tId}`);
+          const panel = document.getElementById(`tabPanel_${tId}`);
+          const isActive = tId === tabId;
+          if (panel) {
+            panel.classList.toggle("hidden", !isActive);
+          }
+          if (btn) {
+            if (isActive) {
+              btn.className =
+                "px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5";
+              btn.setAttribute("aria-selected", "true");
+            } else {
+              btn.className =
+                "px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5";
+              btn.setAttribute("aria-selected", "false");
+            }
+          }
+        });
+
+        // Trigger Chart resizes & re-renders upon tab switch
+        if (tabId === "timeline") {
+          if (growthChart && typeof growthChart.resize === "function") {
+            growthChart.resize();
+          }
+          if (allocationChart && typeof allocationChart.resize === "function") {
+            allocationChart.resize();
+          }
+        } else if (tabId === "flow") {
+          if (
+            monthlyIncomeChart &&
+            typeof monthlyIncomeChart.resize === "function"
+          ) {
+            monthlyIncomeChart.resize();
+          }
+        } else if (tabId === "heatmap") {
+          renderHeatmap();
+        } else if (tabId === "yoy") {
+          if (window.dailySnapshots && window.yearlyCashflows) {
+            renderYearlyTable(window.dailySnapshots, window.yearlyCashflows);
+          }
+        }
+      }
+      window.switchAnalyticsTab = switchAnalyticsTab;
+
       function renderGoalRing(currentTotal, goal) {
-        const canvas = document.getElementById("chartGoalRing2");
-        if (!canvas) return;
-        const existing = Chart.getChart(canvas);
+        const canvas = document.getElementById("chartGoalRing");
+        if (
+          !canvas ||
+          typeof canvas.getContext !== "function" ||
+          typeof Chart === "undefined"
+        )
+          return;
+        const existing = Chart.getChart ? Chart.getChart(canvas) : null;
         if (existing) existing.destroy();
-        if (goalRingChart2) {
+        if (goalChart) {
           try {
-            goalRingChart2.destroy();
+            goalChart.destroy();
           } catch (e) {}
-          goalRingChart2 = null;
+          goalChart = null;
         }
 
         const pct = Math.min(100, (currentTotal / goal) * 100);
-        goalRingChart2 = new Chart(canvas.getContext("2d"), {
+        goalChart = new Chart(canvas.getContext("2d"), {
           type: "doughnut",
           data: {
             labels: [t("chart_ring_achieved"), t("chart_ring_remaining")],
@@ -3501,14 +5123,14 @@
                 data: [currentTotal, Math.max(0, goal - currentTotal)],
                 backgroundColor: ["#10b981", "#1e293b"],
                 borderWidth: 0,
-                cutout: "60%",
+                cutout: "70%",
               },
             ],
           },
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            cutout: "60%",
+            cutout: "70%",
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -3530,6 +5152,7 @@
 
       function renderHeatmapChart(snapshots) {
         const grid = document.getElementById("heatmapGrid");
+        if (!grid) return;
         grid.innerHTML = "";
         if (!snapshots || snapshots.length === 0) return;
         const yearSelect = document.getElementById("heatmapYearSelect");
@@ -3581,16 +5204,13 @@
       }
 
       function toggleHeatmap() {
-        heatmapVisible = !heatmapVisible;
-        document
-          .getElementById("heatmapSection")
-          .classList.toggle("hidden", !heatmapVisible);
-        if (heatmapVisible) renderHeatmap();
+        switchAnalyticsTab("heatmap");
       }
 
       // --- YoY TABLE (Task 3.3, R15) ---
       function renderYearlyTable(snapshots, yearlyCashflows) {
         const tbody = document.getElementById("yoyTableBody");
+        if (!tbody) return;
         tbody.innerHTML = "";
         if (!snapshots || snapshots.length === 0) return;
         const yearly = {};
@@ -3634,10 +5254,7 @@
       }
 
       function toggleYoYTable() {
-        yoyVisible = !yoyVisible;
-        document
-          .getElementById("yoySection")
-          .classList.toggle("hidden", !yoyVisible);
+        switchAnalyticsTab("yoy");
       }
 
       // --- UTF-8 SAFE BASE64 SERIALIZATION (R8, Global ADR-0002) ---
@@ -3656,7 +5273,433 @@
       window.utf8ToBase64 = utf8ToBase64;
       window.base64ToUtf8 = base64ToUtf8;
 
-      // --- SHAREABLE LINKS (Task 2.2, R8, Global ADR-0002) ---
+      // --- LZ-STRING COMPRESSION & BASE64 FALLBACK (Issue #6) ---
+      const LZString = (function () {
+        const f = String.fromCharCode;
+        const keyStrUriSafe =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$";
+        const baseReverseDic = {};
+        function getBaseValue(alphabet, character) {
+          if (!baseReverseDic[alphabet]) {
+            baseReverseDic[alphabet] = {};
+            for (let i = 0; i < alphabet.length; i++) {
+              baseReverseDic[alphabet][alphabet.charAt(i)] = i;
+            }
+          }
+          return baseReverseDic[alphabet][character];
+        }
+
+        const LZ = {
+          compressToEncodedURIComponent: function (input) {
+            if (input == null) return "";
+            return LZ._compress(input, 6, function (a) {
+              return keyStrUriSafe.charAt(a);
+            });
+          },
+          decompressFromEncodedURIComponent: function (input) {
+            if (input == null) return "";
+            if (input === "") return null;
+            input = input.replace(/ /g, "+");
+            return LZ._decompress(input.length, 32, function (index) {
+              return getBaseValue(keyStrUriSafe, input.charAt(index));
+            });
+          },
+          _compress: function (uncompressed, bitsPerChar, getCharFromInt) {
+            if (uncompressed == null) return "";
+            let i,
+              value,
+              context_dictionary = {},
+              context_dictionaryToCreate = {},
+              context_c = "",
+              context_wc = "",
+              context_w = "",
+              context_enlargeIn = 2,
+              context_dictSize = 3,
+              context_numBits = 2,
+              context_data = [],
+              context_data_val = 0,
+              context_data_position = 0,
+              ii;
+
+            for (ii = 0; ii < uncompressed.length; ii += 1) {
+              context_c = uncompressed.charAt(ii);
+              if (
+                !Object.prototype.hasOwnProperty.call(
+                  context_dictionary,
+                  context_c
+                )
+              ) {
+                context_dictionary[context_c] = context_dictSize++;
+                context_dictionaryToCreate[context_c] = true;
+              }
+
+              context_wc = context_w + context_c;
+              if (
+                Object.prototype.hasOwnProperty.call(
+                  context_dictionary,
+                  context_wc
+                )
+              ) {
+                context_w = context_wc;
+              } else {
+                if (
+                  Object.prototype.hasOwnProperty.call(
+                    context_dictionaryToCreate,
+                    context_w
+                  )
+                ) {
+                  if (context_w.charCodeAt(0) < 256) {
+                    for (i = 0; i < context_numBits; i++) {
+                      context_data_val = context_data_val << 1;
+                      if (context_data_position == bitsPerChar - 1) {
+                        context_data_position = 0;
+                        context_data.push(getCharFromInt(context_data_val));
+                        context_data_val = 0;
+                      } else {
+                        context_data_position++;
+                      }
+                    }
+                    value = context_w.charCodeAt(0);
+                    for (i = 0; i < 8; i++) {
+                      context_data_val = (context_data_val << 1) | (value & 1);
+                      if (context_data_position == bitsPerChar - 1) {
+                        context_data_position = 0;
+                        context_data.push(getCharFromInt(context_data_val));
+                        context_data_val = 0;
+                      } else {
+                        context_data_position++;
+                      }
+                      value = value >> 1;
+                    }
+                  } else {
+                    value = 1;
+                    for (i = 0; i < context_numBits; i++) {
+                      context_data_val = (context_data_val << 1) | value;
+                      if (context_data_position == bitsPerChar - 1) {
+                        context_data_position = 0;
+                        context_data.push(getCharFromInt(context_data_val));
+                        context_data_val = 0;
+                      } else {
+                        context_data_position++;
+                      }
+                      value = 0;
+                    }
+                    value = context_w.charCodeAt(0);
+                    for (i = 0; i < 16; i++) {
+                      context_data_val = (context_data_val << 1) | (value & 1);
+                      if (context_data_position == bitsPerChar - 1) {
+                        context_data_position = 0;
+                        context_data.push(getCharFromInt(context_data_val));
+                        context_data_val = 0;
+                      } else {
+                        context_data_position++;
+                      }
+                      value = value >> 1;
+                    }
+                  }
+                  context_enlargeIn--;
+                  if (context_enlargeIn == 0) {
+                    context_enlargeIn = Math.pow(2, context_numBits);
+                    context_numBits++;
+                  }
+                  delete context_dictionaryToCreate[context_w];
+                } else {
+                  value = context_dictionary[context_w];
+                  for (i = 0; i < context_numBits; i++) {
+                    context_data_val = (context_data_val << 1) | (value & 1);
+                    if (context_data_position == bitsPerChar - 1) {
+                      context_data_position = 0;
+                      context_data.push(getCharFromInt(context_data_val));
+                      context_data_val = 0;
+                    } else {
+                      context_data_position++;
+                    }
+                    value = value >> 1;
+                  }
+                }
+                context_enlargeIn--;
+                if (context_enlargeIn == 0) {
+                  context_enlargeIn = Math.pow(2, context_numBits);
+                  context_numBits++;
+                }
+                context_dictionary[context_wc] = context_dictSize++;
+                context_w = String(context_c);
+              }
+            }
+
+            if (context_w !== "") {
+              if (
+                Object.prototype.hasOwnProperty.call(
+                  context_dictionaryToCreate,
+                  context_w
+                )
+              ) {
+                if (context_w.charCodeAt(0) < 256) {
+                  for (i = 0; i < context_numBits; i++) {
+                    context_data_val = context_data_val << 1;
+                    if (context_data_position == bitsPerChar - 1) {
+                      context_data_position = 0;
+                      context_data.push(getCharFromInt(context_data_val));
+                      context_data_val = 0;
+                    } else {
+                      context_data_position++;
+                    }
+                  }
+                  value = context_w.charCodeAt(0);
+                  for (i = 0; i < 8; i++) {
+                    context_data_val = (context_data_val << 1) | (value & 1);
+                    if (context_data_position == bitsPerChar - 1) {
+                      context_data_position = 0;
+                      context_data.push(getCharFromInt(context_data_val));
+                      context_data_val = 0;
+                    } else {
+                      context_data_position++;
+                    }
+                    value = value >> 1;
+                  }
+                } else {
+                  value = 1;
+                  for (i = 0; i < context_numBits; i++) {
+                    context_data_val = (context_data_val << 1) | value;
+                    if (context_data_position == bitsPerChar - 1) {
+                      context_data_position = 0;
+                      context_data.push(getCharFromInt(context_data_val));
+                      context_data_val = 0;
+                    } else {
+                      context_data_position++;
+                    }
+                    value = 0;
+                  }
+                  value = context_w.charCodeAt(0);
+                  for (i = 0; i < 16; i++) {
+                    context_data_val = (context_data_val << 1) | (value & 1);
+                    if (context_data_position == bitsPerChar - 1) {
+                      context_data_position = 0;
+                      context_data.push(getCharFromInt(context_data_val));
+                      context_data_val = 0;
+                    } else {
+                      context_data_position++;
+                    }
+                    value = value >> 1;
+                  }
+                }
+                context_enlargeIn--;
+                if (context_enlargeIn == 0) {
+                  context_enlargeIn = Math.pow(2, context_numBits);
+                  context_numBits++;
+                }
+                delete context_dictionaryToCreate[context_w];
+              } else {
+                value = context_dictionary[context_w];
+                for (i = 0; i < context_numBits; i++) {
+                  context_data_val = (context_data_val << 1) | (value & 1);
+                  if (context_data_position == bitsPerChar - 1) {
+                    context_data_position = 0;
+                    context_data.push(getCharFromInt(context_data_val));
+                    context_data_val = 0;
+                  } else {
+                    context_data_position++;
+                  }
+                  value = value >> 1;
+                }
+              }
+              context_enlargeIn--;
+              if (context_enlargeIn == 0) {
+                context_enlargeIn = Math.pow(2, context_numBits);
+                context_numBits++;
+              }
+            }
+
+            value = 2;
+            for (i = 0; i < context_numBits; i++) {
+              context_data_val = (context_data_val << 1) | (value & 1);
+              if (context_data_position == bitsPerChar - 1) {
+                context_data_position = 0;
+                context_data.push(getCharFromInt(context_data_val));
+                context_data_val = 0;
+              } else {
+                context_data_position++;
+              }
+              value = value >> 1;
+            }
+
+            while (true) {
+              context_data_val = context_data_val << 1;
+              if (context_data_position == bitsPerChar - 1) {
+                context_data.push(getCharFromInt(context_data_val));
+                break;
+              } else context_data_position++;
+            }
+            return context_data.join("");
+          },
+          _decompress: function (length, resetValue, getNextValue) {
+            let dictionary = [],
+              next,
+              enlargeIn = 4,
+              dictSize = 4,
+              numBits = 3,
+              entry = "",
+              result = [],
+              i,
+              w,
+              bits,
+              resb,
+              maxpower,
+              power,
+              c,
+              data = { val: getNextValue(0), position: resetValue, index: 1 };
+
+            for (i = 0; i < 3; i += 1) {
+              dictionary[i] = i;
+            }
+
+            bits = 0;
+            maxpower = Math.pow(2, 2);
+            power = 1;
+            while (power != maxpower) {
+              resb = data.val & data.position;
+              data.position >>= 1;
+              if (data.position == 0) {
+                data.position = resetValue;
+                data.val = getNextValue(data.index++);
+              }
+              bits |= (resb > 0 ? 1 : 0) * power;
+              power <<= 1;
+            }
+
+            switch ((next = bits)) {
+              case 0:
+                bits = 0;
+                maxpower = Math.pow(2, 8);
+                power = 1;
+                while (power != maxpower) {
+                  resb = data.val & data.position;
+                  data.position >>= 1;
+                  if (data.position == 0) {
+                    data.position = resetValue;
+                    data.val = getNextValue(data.index++);
+                  }
+                  bits |= (resb > 0 ? 1 : 0) * power;
+                  power <<= 1;
+                }
+                c = f(bits);
+                break;
+              case 1:
+                bits = 0;
+                maxpower = Math.pow(2, 16);
+                power = 1;
+                while (power != maxpower) {
+                  resb = data.val & data.position;
+                  data.position >>= 1;
+                  if (data.position == 0) {
+                    data.position = resetValue;
+                    data.val = getNextValue(data.index++);
+                  }
+                  bits |= (resb > 0 ? 1 : 0) * power;
+                  power <<= 1;
+                }
+                c = f(bits);
+                break;
+              case 2:
+                return "";
+            }
+            dictionary[3] = c;
+            w = c;
+            result.push(c);
+            while (true) {
+              if (data.index > length) {
+                return "";
+              }
+
+              bits = 0;
+              maxpower = Math.pow(2, numBits);
+              power = 1;
+              while (power != maxpower) {
+                resb = data.val & data.position;
+                data.position >>= 1;
+                if (data.position == 0) {
+                  data.position = resetValue;
+                  data.val = getNextValue(data.index++);
+                }
+                bits |= (resb > 0 ? 1 : 0) * power;
+                power <<= 1;
+              }
+
+              switch ((c = bits)) {
+                case 0:
+                  bits = 0;
+                  maxpower = Math.pow(2, 8);
+                  power = 1;
+                  while (power != maxpower) {
+                    resb = data.val & data.position;
+                    data.position >>= 1;
+                    if (data.position == 0) {
+                      data.position = resetValue;
+                      data.val = getNextValue(data.index++);
+                    }
+                    bits |= (resb > 0 ? 1 : 0) * power;
+                    power <<= 1;
+                  }
+
+                  dictionary[dictSize++] = f(bits);
+                  c = dictSize - 1;
+                  enlargeIn--;
+                  break;
+                case 1:
+                  bits = 0;
+                  maxpower = Math.pow(2, 16);
+                  power = 1;
+                  while (power != maxpower) {
+                    resb = data.val & data.position;
+                    data.position >>= 1;
+                    if (data.position == 0) {
+                      data.position = resetValue;
+                      data.val = getNextValue(data.index++);
+                    }
+                    bits |= (resb > 0 ? 1 : 0) * power;
+                    power <<= 1;
+                  }
+                  dictionary[dictSize++] = f(bits);
+                  c = dictSize - 1;
+                  enlargeIn--;
+                  break;
+                case 2:
+                  return result.join("");
+              }
+
+              if (enlargeIn == 0) {
+                enlargeIn = Math.pow(2, numBits);
+                numBits++;
+              }
+
+              if (dictionary[c]) {
+                entry = dictionary[c];
+              } else {
+                if (c === dictSize) {
+                  entry = w + w.charAt(0);
+                } else {
+                  return null;
+                }
+              }
+              result.push(entry);
+
+              dictionary[dictSize++] = w + entry.charAt(0);
+              enlargeIn--;
+
+              w = entry;
+
+              if (enlargeIn == 0) {
+                enlargeIn = Math.pow(2, numBits);
+                numBits++;
+              }
+            }
+          },
+        };
+        return LZ;
+      })();
+      window.LZString = LZString;
+
+      // --- SHAREABLE LINKS (Task 2.2, R8, Global ADR-0002, Issue #6 LZ-String) ---
       function shareSimulation() {
         try {
           const params = {
@@ -3664,12 +5707,23 @@
             targetDate: document.getElementById("inputTargetDate").value,
             salary: document.getElementById("inputSalary").value,
             salaryGrowth: document.getElementById("inputSalaryGrowth").value,
+            annualBonusMultiplier: document.getElementById(
+              "inputAnnualBonusMultiplier"
+            )
+              ? document.getElementById("inputAnnualBonusMultiplier").value
+              : "1.0",
+            annualBonusMonth: document.getElementById("selectAnnualBonusMonth")
+              ? document.getElementById("selectAnnualBonusMonth").value
+              : "1",
             inflation: document.getElementById("inputInflation").value,
             goal: document.getElementById("inputSavingsGoal").value,
             poolRate: document.getElementById("inputPoolRate").value,
             autoTermThreshold: document.getElementById("inputAutoTermThreshold")
               ? document.getElementById("inputAutoTermThreshold").value
               : "200000000",
+            emergencyBuffer: document.getElementById("inputEmergencyBuffer")
+              ? document.getElementById("inputEmergencyBuffer").value
+              : "30000000",
             autoTermMonths: document.getElementById("inputAutoTermMonths")
               ? document.getElementById("inputAutoTermMonths").value
               : "6",
@@ -3684,9 +5738,9 @@
                 ? document.getElementById("input6MRate").value
                 : "5.8",
           };
-          const payload = utf8ToBase64(
-            JSON.stringify({ p: params, csv: workingCSVData })
-          );
+          const jsonStr = JSON.stringify({ p: params, csv: workingCSVData });
+          // Compress with LZ-String for compact URLs
+          const payload = LZString.compressToEncodedURIComponent(jsonStr);
           window.location.hash = payload;
           const url =
             window.location.origin + window.location.pathname + "#" + payload;
@@ -3706,7 +5760,33 @@
         try {
           const hash = window.location.hash.substring(1);
           if (!hash) return false;
-          const payload = JSON.parse(base64ToUtf8(hash));
+          let rawJson = null;
+
+          // 1. Try LZ-String decompression first
+          try {
+            if (
+              typeof LZString !== "undefined" &&
+              LZString.decompressFromEncodedURIComponent
+            ) {
+              const decomp = LZString.decompressFromEncodedURIComponent(hash);
+              if (
+                decomp &&
+                (decomp.startsWith("{") || decomp.startsWith("["))
+              ) {
+                rawJson = decomp;
+              }
+            }
+          } catch (lzErr) {}
+
+          // 2. Fallback to legacy Base64 decoding
+          if (!rawJson) {
+            try {
+              rawJson = base64ToUtf8(hash);
+            } catch (b64Err) {}
+          }
+
+          if (!rawJson) return false;
+          const payload = JSON.parse(rawJson);
           const p = migrateParams(payload.p);
           if (p) {
             if (p.targetDate)
@@ -3716,6 +5796,18 @@
             if (p.salaryGrowth !== undefined)
               document.getElementById("inputSalaryGrowth").value =
                 p.salaryGrowth;
+            if (
+              p.annualBonusMultiplier !== undefined &&
+              document.getElementById("inputAnnualBonusMultiplier")
+            )
+              document.getElementById("inputAnnualBonusMultiplier").value =
+                p.annualBonusMultiplier;
+            if (
+              p.annualBonusMonth !== undefined &&
+              document.getElementById("selectAnnualBonusMonth")
+            )
+              document.getElementById("selectAnnualBonusMonth").value =
+                p.annualBonusMonth;
             if (p.inflation !== undefined)
               document.getElementById("inputInflation").value = p.inflation;
             if (p.goal !== undefined)
@@ -3728,6 +5820,12 @@
             )
               document.getElementById("inputAutoTermThreshold").value =
                 p.autoTermThreshold;
+            if (
+              p.emergencyBuffer !== undefined &&
+              document.getElementById("inputEmergencyBuffer")
+            )
+              document.getElementById("inputEmergencyBuffer").value =
+                p.emergencyBuffer;
             if (
               p.autoTermMonths !== undefined &&
               document.getElementById("inputAutoTermMonths")
@@ -3889,125 +5987,342 @@
         }
       }
 
-      // --- COMPARISON MODE (Task 1.5, R17) ---
+      // --- COMPARISON MODE (Task 1.5, R17, ADR-0007) ---
+      window.comparisonActive = false;
+      window.scenarioBResult = null;
+
+      function cloneScenarioAtoB() {
+        const setVal = (idB, idA) => {
+          const elA = document.getElementById(idA);
+          const elB = document.getElementById(idB);
+          if (elA && elB) elB.value = elA.value;
+        };
+        setVal("inputCompSalary", "inputSalary");
+        setVal("inputCompSalaryGrowth", "inputSalaryGrowth");
+        setVal("inputCompInflation", "inputInflation");
+        setVal("inputCompSavingsGoal", "inputSavingsGoal");
+        setVal("inputCompPoolRate", "inputPoolRate");
+        setVal("inputCompAutoTermThreshold", "inputAutoTermThreshold");
+        setVal("inputCompEmergencyBuffer", "inputEmergencyBuffer");
+        setVal("inputCompAutoTermRate", "inputAutoTermRate");
+        runComparison();
+      }
+      window.cloneScenarioAtoB = cloneScenarioAtoB;
+
+      let reactiveCompTimeout = null;
+      function triggerReactiveComparison() {
+        clearTimeout(reactiveCompTimeout);
+        reactiveCompTimeout = setTimeout(() => {
+          runComparison();
+        }, 150);
+      }
+      window.triggerReactiveComparison = triggerReactiveComparison;
+
       function toggleCompareMode() {
         const sec = document.getElementById("compareSection");
+        if (!sec) return;
         sec.classList.toggle("hidden");
-        if (!sec.classList.contains("hidden")) {
+        window.comparisonActive = !sec.classList.contains("hidden");
+        if (window.comparisonActive) {
           runComparison();
+        } else {
+          window.scenarioBResult = null;
+          runSimulation();
         }
       }
+      window.toggleCompareMode = toggleCompareMode;
+
       function runComparison() {
         const targetDateStr = document.getElementById("inputTargetDate").value;
-        const salary =
-          parseFloat(document.getElementById("inputSalary").value) || 0;
-        const salaryGrowth =
-          parseFloat(document.getElementById("inputSalaryGrowth").value) || 0;
-        const inflation =
-          parseFloat(document.getElementById("inputInflation").value) || 0;
-        const poolRate =
-          parseFloat(document.getElementById("inputPoolRate").value) || 0;
-        const rawCompRate = document.getElementById("inputAutoTermRate")
-          ? document.getElementById("inputAutoTermRate").value
-          : document.getElementById("input6MRate")
-            ? document.getElementById("input6MRate").value
-            : "5.8";
-        const rateAutoTerm =
-          (rawCompRate === "" || isNaN(Number(rawCompRate))
-            ? 5.8
-            : Number(rawCompRate)) / 100;
-
-        const rawCompThreshold = document.getElementById(
-          "inputAutoTermThreshold"
-        )
-          ? document.getElementById("inputAutoTermThreshold").value
-          : "200000000";
-        const thresholdAutoTerm =
-          rawCompThreshold === "" || isNaN(Number(rawCompThreshold))
-            ? 200000000
-            : Number(rawCompThreshold);
-
-        const rawCompMonths = document.getElementById("inputAutoTermMonths")
-          ? document.getElementById("inputAutoTermMonths").value
-          : "6";
-        const monthsAutoTerm =
-          rawCompMonths === "" || isNaN(parseInt(rawCompMonths, 10))
-            ? 6
-            : parseInt(rawCompMonths, 10);
-        const goal =
-          parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
-
         if (!targetDateStr) {
           showToast(t("toast_run_first"), "warning");
           return;
         }
 
+        const salaryA =
+          parseFloat(document.getElementById("inputSalary").value) || 0;
+        const salaryGrowthA =
+          (parseFloat(document.getElementById("inputSalaryGrowth").value) ||
+            0) / 100;
+        const inflationA =
+          (parseFloat(document.getElementById("inputInflation").value) || 0) /
+          100;
+        const poolRateA =
+          (parseFloat(document.getElementById("inputPoolRate").value) || 0) /
+          100;
+        const rawRateA = document.getElementById("inputAutoTermRate")
+          ? document.getElementById("inputAutoTermRate").value
+          : "5.8";
+        const autoTermRateA =
+          (rawRateA === "" || isNaN(Number(rawRateA))
+            ? 5.8
+            : Number(rawRateA)) / 100;
+        const rawThresholdA = document.getElementById("inputAutoTermThreshold")
+          ? document.getElementById("inputAutoTermThreshold").value
+          : "200000000";
+        const autoTermThresholdA =
+          rawThresholdA === "" || isNaN(Number(rawThresholdA))
+            ? 200000000
+            : Number(rawThresholdA);
+        const rawBufferA = document.getElementById("inputEmergencyBuffer")
+          ? document.getElementById("inputEmergencyBuffer").value
+          : "30000000";
+        const emergencyBufferA =
+          rawBufferA === "" || isNaN(Number(rawBufferA))
+            ? 30000000
+            : Math.max(0, Number(rawBufferA));
+        const rawMonthsA = document.getElementById("inputAutoTermMonths")
+          ? document.getElementById("inputAutoTermMonths").value
+          : "6";
+        const autoTermMonthsA =
+          rawMonthsA === "" || isNaN(parseInt(rawMonthsA, 10))
+            ? 6
+            : parseInt(rawMonthsA, 10);
+        const goalA =
+          parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
+        const rawBonusMult = document.getElementById(
+          "inputAnnualBonusMultiplier"
+        )
+          ? document.getElementById("inputAnnualBonusMultiplier").value
+          : "1.0";
+        const annualBonusMultiplier =
+          rawBonusMult === "" || isNaN(Number(rawBonusMult))
+            ? 1.0
+            : Math.max(0, Number(rawBonusMult));
+        const rawBonusMonth = document.getElementById("selectAnnualBonusMonth")
+          ? document.getElementById("selectAnnualBonusMonth").value
+          : "1";
+        const annualBonusMonth =
+          rawBonusMonth === "" || isNaN(parseInt(rawBonusMonth, 10))
+            ? 1
+            : parseInt(rawBonusMonth, 10);
+
         const paramsA = {
           targetDateStr,
-          monthlySalary: salary,
-          salaryGrowthRate: salaryGrowth / 100,
-          inflationRate: inflation / 100,
-          poolAnnualRate: poolRate / 100,
-          term6MAnnualRate: rateAutoTerm / 100,
-          autoTermAnnualRate: rateAutoTerm / 100,
-          autoTermRate: rateAutoTerm / 100,
-          autoTermThreshold: isNaN(thresholdAutoTerm)
+          monthlySalary: salaryA,
+          salaryGrowthRate: salaryGrowthA,
+          annualBonusMultiplier,
+          annualBonusMonth,
+          inflationRate: inflationA,
+          poolAnnualRate: poolRateA,
+          term6MAnnualRate: autoTermRateA,
+          autoTermAnnualRate: autoTermRateA,
+          autoTermRate: autoTermRateA,
+          autoTermThreshold: isNaN(autoTermThresholdA)
             ? 200000000
-            : thresholdAutoTerm,
-          autoTermMonths: monthsAutoTerm,
-          savingsGoal: goal,
+            : autoTermThresholdA,
+          autoTermMonths: autoTermMonthsA,
+          emergencyBuffer: emergencyBufferA,
+          savingsGoal: goalA,
         };
 
-        const projectedSalary = salary * Math.pow(1 + salaryGrowth / 100, 2);
+        const elCompSalary = document.getElementById("inputCompSalary");
+        const salaryB = elCompSalary
+          ? parseFloat(elCompSalary.value) || 0
+          : salaryA * 1.2;
+        const elCompSalaryGrowth = document.getElementById(
+          "inputCompSalaryGrowth"
+        );
+        const salaryGrowthB =
+          (elCompSalaryGrowth
+            ? parseFloat(elCompSalaryGrowth.value) || 0
+            : salaryGrowthA * 100) / 100;
+        const elCompInflation = document.getElementById("inputCompInflation");
+        const inflationB =
+          (elCompInflation
+            ? parseFloat(elCompInflation.value) || 0
+            : inflationA * 100) / 100;
+        const elCompPoolRate = document.getElementById("inputCompPoolRate");
+        const poolRateB =
+          (elCompPoolRate
+            ? parseFloat(elCompPoolRate.value) || 0
+            : poolRateA * 100) / 100;
+        const elCompRate = document.getElementById("inputCompAutoTermRate");
+        const autoTermRateB =
+          (elCompRate &&
+          elCompRate.value !== "" &&
+          !isNaN(Number(elCompRate.value))
+            ? Number(elCompRate.value)
+            : autoTermRateA * 100) / 100;
+        const elCompThreshold = document.getElementById(
+          "inputCompAutoTermThreshold"
+        );
+        const autoTermThresholdB =
+          elCompThreshold &&
+          elCompThreshold.value !== "" &&
+          !isNaN(Number(elCompThreshold.value))
+            ? Number(elCompThreshold.value)
+            : autoTermThresholdA;
+        const elCompBuffer = document.getElementById(
+          "inputCompEmergencyBuffer"
+        );
+        const emergencyBufferB =
+          elCompBuffer &&
+          elCompBuffer.value !== "" &&
+          !isNaN(Number(elCompBuffer.value))
+            ? Math.max(0, Number(elCompBuffer.value))
+            : emergencyBufferA;
+        const goalB = document.getElementById("inputCompSavingsGoal")
+          ? parseFloat(document.getElementById("inputCompSavingsGoal").value) ||
+            0
+          : goalA;
+
         const paramsB = {
           targetDateStr,
-          monthlySalary: projectedSalary,
-          salaryGrowthRate: salaryGrowth / 100,
-          inflationRate: inflation / 100,
-          poolAnnualRate: poolRate / 100,
-          term6MAnnualRate: rateAutoTerm / 100,
-          autoTermAnnualRate: rateAutoTerm / 100,
-          autoTermRate: rateAutoTerm / 100,
-          autoTermThreshold: isNaN(thresholdAutoTerm)
+          monthlySalary: salaryB,
+          salaryGrowthRate: salaryGrowthB,
+          annualBonusMultiplier,
+          annualBonusMonth,
+          inflationRate: inflationB,
+          poolAnnualRate: poolRateB,
+          term6MAnnualRate: autoTermRateB,
+          autoTermAnnualRate: autoTermRateB,
+          autoTermRate: autoTermRateB,
+          autoTermThreshold: isNaN(autoTermThresholdB)
             ? 200000000
-            : thresholdAutoTerm,
-          autoTermMonths: monthsAutoTerm,
-          savingsGoal: goal,
+            : autoTermThresholdB,
+          autoTermMonths: autoTermMonthsA,
+          emergencyBuffer: emergencyBufferB,
+          savingsGoal: goalB,
         };
 
         const resA = simulate(paramsA, workingCSVData);
         const resB = simulate(paramsB, workingCSVData);
 
+        window.scenarioBResult = resB;
+
         if (resA) {
-          document.getElementById("compASalary").innerText =
-            formatCurrency(salary);
-          document.getElementById("compATotal").innerText = formatCurrency(
-            resA.totals.totalWealth
-          );
-          document.getElementById("compAInterest").innerText = formatCurrency(
-            resA.totals.totalInterest
-          );
-          document.getElementById("compAGoal").innerText = resA.goalReached
-            ? "✅ " + formatDateDisplay(parseDate(resA.goalReachedDate))
-            : t("comp_not_yet");
+          if (document.getElementById("compASalary"))
+            document.getElementById("compASalary").innerText =
+              formatCurrency(salaryA);
+          if (document.getElementById("compATotal"))
+            document.getElementById("compATotal").innerText = formatCurrency(
+              resA.totals.totalWealth
+            );
+          if (document.getElementById("compAInterest"))
+            document.getElementById("compAInterest").innerText = formatCurrency(
+              resA.totals.totalInterest
+            );
+          if (document.getElementById("compAGoal"))
+            document.getElementById("compAGoal").innerText = resA.goalReached
+              ? "✅ " + formatDateDisplay(parseDate(resA.goalReachedDate))
+              : t("comp_not_yet");
         }
 
         if (resB) {
-          document.getElementById("compBSalary").innerText =
-            formatCurrency(projectedSalary);
-          document.getElementById("compBTotal").innerText = formatCurrency(
-            resB.totals.totalWealth
-          );
-          document.getElementById("compBInterest").innerText = formatCurrency(
-            resB.totals.totalInterest
-          );
-          document.getElementById("compBGoal").innerText = resB.goalReached
-            ? "✅ " + formatDateDisplay(parseDate(resB.goalReachedDate))
-            : t("comp_not_yet");
+          if (document.getElementById("compBSalary"))
+            document.getElementById("compBSalary").innerText =
+              formatCurrency(salaryB);
+          if (document.getElementById("compBTotal"))
+            document.getElementById("compBTotal").innerText = formatCurrency(
+              resB.totals.totalWealth
+            );
+          if (document.getElementById("compBInterest"))
+            document.getElementById("compBInterest").innerText = formatCurrency(
+              resB.totals.totalInterest
+            );
+          if (document.getElementById("compBGoal"))
+            document.getElementById("compBGoal").innerText = resB.goalReached
+              ? "✅ " + formatDateDisplay(parseDate(resB.goalReachedDate))
+              : t("comp_not_yet");
+        }
+
+        if (resA && resB) {
+          const deltaWealth = resB.totals.totalWealth - resA.totals.totalWealth;
+          const pctWealth =
+            resA.totals.totalWealth > 0
+              ? ((deltaWealth / resA.totals.totalWealth) * 100).toFixed(1)
+              : "0";
+          const elDeltaWealth = document.getElementById("compDeltaWealth");
+          if (elDeltaWealth) {
+            elDeltaWealth.innerText = `${deltaWealth >= 0 ? "+" : ""}${formatCurrency(deltaWealth)} (${deltaWealth >= 0 ? "+" : ""}${pctWealth}%)`;
+            elDeltaWealth.className =
+              deltaWealth >= 0
+                ? "text-emerald-400 font-bold"
+                : "text-rose-400 font-bold";
+          }
+
+          const deltaInterest =
+            resB.totals.totalInterest - resA.totals.totalInterest;
+          const elDeltaInterest = document.getElementById("compDeltaInterest");
+          if (elDeltaInterest) {
+            elDeltaInterest.innerText = `${deltaInterest >= 0 ? "+" : ""}${formatCurrency(deltaInterest)}`;
+            elDeltaInterest.className =
+              deltaInterest >= 0
+                ? "text-emerald-400 font-medium"
+                : "text-rose-400 font-medium";
+          }
+
+          const elDeltaMilestone =
+            document.getElementById("compDeltaMilestone");
+          if (elDeltaMilestone) {
+            if (resA.goalReached && resB.goalReached) {
+              const dateA = parseDate(resA.goalReachedDate);
+              const dateB = parseDate(resB.goalReachedDate);
+              const diffMonths = Math.round(getMonthDiff(dateB, dateA));
+              if (diffMonths > 0) {
+                elDeltaMilestone.innerText =
+                  "🎉 " + t("comp_earlier", { months: diffMonths });
+                elDeltaMilestone.className = "text-emerald-400 font-medium";
+              } else if (diffMonths < 0) {
+                elDeltaMilestone.innerText =
+                  "⏳ " + t("comp_later", { months: Math.abs(diffMonths) });
+                elDeltaMilestone.className = "text-amber-400 font-medium";
+              } else {
+                elDeltaMilestone.innerText = t("comp_same_date");
+                elDeltaMilestone.className = "text-slate-300 font-medium";
+              }
+            } else if (resB.goalReached && !resA.goalReached) {
+              elDeltaMilestone.innerText =
+                "🎉 " + formatDateDisplay(parseDate(resB.goalReachedDate));
+              elDeltaMilestone.className = "text-emerald-400 font-medium";
+            } else {
+              elDeltaMilestone.innerText = t("comp_not_yet");
+              elDeltaMilestone.className = "text-slate-400 font-medium";
+            }
+          }
+
+          // Trigger chart update with Scenario B trajectory
+          if (
+            growthChart &&
+            growthChart.data &&
+            Array.isArray(growthChart.data.datasets) &&
+            growthChart._allLabels
+          ) {
+            const allLabels = growthChart._allLabels;
+            const bMap = new Map();
+            (resB.dailySnapshots || []).forEach((s) =>
+              bMap.set(s.date, s.totalWealth)
+            );
+            const bData = allLabels.map((d) =>
+              bMap.has(d) ? bMap.get(d) : null
+            );
+            growthChart.data.datasets = growthChart.data.datasets.filter(
+              (ds) => ds.id !== "scenarioB"
+            );
+            if (window.comparisonActive) {
+              growthChart.data.datasets.push({
+                id: "scenarioB",
+                label: t("hdr_scenario_b") || "Scenario B (Projected)",
+                data: bData,
+                borderColor: "#34d399",
+                backgroundColor: "transparent",
+                borderWidth: 2.2,
+                borderDash: [6, 4],
+                tension: 0.2,
+                pointRadius: 0,
+                fill: false,
+              });
+            }
+            if (typeof growthChart.update === "function") {
+              growthChart.update();
+            }
+          }
         }
 
         showToast(t("toast_comp_updated"), "success");
       }
+      window.runComparison = runComparison;
 
       // --- KEYBOARD SHORTCUTS (Task 2.5, R11) ---
       document.addEventListener("keydown", function (e) {
@@ -4019,6 +6334,9 @@
           const csvModal = document.getElementById("csvModal");
           if (csvModal && !csvModal.classList.contains("hidden"))
             toggleCSVModal(false);
+          const presetsModal = document.getElementById("presetsModal");
+          if (presetsModal && !presetsModal.classList.contains("hidden"))
+            togglePresetsModal(false);
           const onboard = document.getElementById("onboardingOverlay");
           if (onboard && !onboard.classList.contains("hidden"))
             closeOnboarding();
@@ -4044,12 +6362,23 @@
           targetDate: document.getElementById("inputTargetDate").value,
           salary: document.getElementById("inputSalary").value,
           salaryGrowth: document.getElementById("inputSalaryGrowth").value,
+          annualBonusMultiplier: document.getElementById(
+            "inputAnnualBonusMultiplier"
+          )
+            ? document.getElementById("inputAnnualBonusMultiplier").value
+            : "1.0",
+          annualBonusMonth: document.getElementById("selectAnnualBonusMonth")
+            ? document.getElementById("selectAnnualBonusMonth").value
+            : "1",
           inflation: document.getElementById("inputInflation").value,
           goal: document.getElementById("inputSavingsGoal").value,
           poolRate: document.getElementById("inputPoolRate").value,
           autoTermThreshold: document.getElementById("inputAutoTermThreshold")
             ? document.getElementById("inputAutoTermThreshold").value
             : "200000000",
+          emergencyBuffer: document.getElementById("inputEmergencyBuffer")
+            ? document.getElementById("inputEmergencyBuffer").value
+            : "30000000",
           autoTermMonths: document.getElementById("inputAutoTermMonths")
             ? document.getElementById("inputAutoTermMonths").value
             : "6",
@@ -4084,6 +6413,18 @@
             if (params.salaryGrowth !== undefined)
               document.getElementById("inputSalaryGrowth").value =
                 params.salaryGrowth;
+            if (
+              params.annualBonusMultiplier !== undefined &&
+              document.getElementById("inputAnnualBonusMultiplier")
+            )
+              document.getElementById("inputAnnualBonusMultiplier").value =
+                params.annualBonusMultiplier;
+            if (
+              params.annualBonusMonth !== undefined &&
+              document.getElementById("selectAnnualBonusMonth")
+            )
+              document.getElementById("selectAnnualBonusMonth").value =
+                params.annualBonusMonth;
             if (params.inflation !== undefined)
               document.getElementById("inputInflation").value =
                 params.inflation;
@@ -4097,6 +6438,12 @@
             )
               document.getElementById("inputAutoTermThreshold").value =
                 params.autoTermThreshold;
+            if (
+              params.emergencyBuffer !== undefined &&
+              document.getElementById("inputEmergencyBuffer")
+            )
+              document.getElementById("inputEmergencyBuffer").value =
+                params.emergencyBuffer;
             if (
               params.autoTermMonths !== undefined &&
               document.getElementById("inputAutoTermMonths")
@@ -4159,23 +6506,36 @@
           setTimeout(showOnboarding, 500);
         }
 
-        // Parameter change listeners (debounced)
-        let saveTimeout;
+        // Parameter change listeners (debounced 150ms reactive live simulation)
+        let reactiveSimTimeout = null;
+        function triggerReactiveSimulation() {
+          clearTimeout(reactiveSimTimeout);
+          reactiveSimTimeout = setTimeout(() => {
+            runSimulation();
+          }, 150);
+        }
+        window.triggerReactiveSimulation = triggerReactiveSimulation;
+
         [
           "inputTargetDate",
           "inputSalary",
           "inputSalaryGrowth",
+          "inputAnnualBonusMultiplier",
+          "selectAnnualBonusMonth",
           "inputInflation",
           "inputSavingsGoal",
           "inputPoolRate",
+          "inputAutoTermThreshold",
+          "inputEmergencyBuffer",
+          "inputAutoTermMonths",
+          "inputAutoTermRate",
           "input6MRate",
         ].forEach((id) => {
           const el = document.getElementById(id);
-          if (el)
-            el.addEventListener("change", function () {
-              clearTimeout(saveTimeout);
-              saveTimeout = setTimeout(runSimulation, 600);
-            });
+          if (el) {
+            el.addEventListener("input", triggerReactiveSimulation);
+            el.addEventListener("change", triggerReactiveSimulation);
+          }
         });
 
         // ARIA setup

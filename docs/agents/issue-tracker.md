@@ -9,9 +9,13 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
-- **Close**: `gh issue close <number> --comment "..."`
+- **Claim an issue**: `gh issue edit <number> --add-assignee @me`
+- **GitHub Flow (PR Required)**: Every issue requires creating a dedicated branch (`<type>/issue-<n>-<slug>`), implementing and verifying changes (`npm test`), opening a PR linked via `Closes #<n>`, reviewing, and merging the PR (`gh pr merge`) before closing the issue.
+- **Close**: `gh issue close <number> --comment "..."` (only after corresponding PR is merged and all Acceptance Criteria verified).
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
+
+See `docs/agents/ways-of-working.md` for the full lifecycle.
 
 ## Pull requests as a triage surface
 

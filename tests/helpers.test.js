@@ -18,14 +18,31 @@ function loadEnvironment() {
   const domElements = {};
   function getEl(id) {
     if (!domElements[id]) {
-      domElements[id] = {
+      let _val = "";
+      const el = {
         id,
-        value: "",
+        get value() {
+          return _val;
+        },
+        set value(v) {
+          _val = v == null ? "" : String(v);
+        },
         innerText: "",
         innerHTML: "",
         children: [],
+        parentElement: null,
         style: {},
-        remove() {},
+        remove() {
+          if (
+            this.parentElement &&
+            Array.isArray(this.parentElement.children)
+          ) {
+            const idx = this.parentElement.children.indexOf(this);
+            if (idx >= 0) this.parentElement.children.splice(idx, 1);
+          }
+        },
+        querySelector: (sel) => getEl("dyn_query_" + sel.replace(/^[#.]/, "")),
+        querySelectorAll: () => [],
         classList: {
           classes: new Set(),
           add(c) {
@@ -50,9 +67,11 @@ function loadEnvironment() {
         addEventListener() {},
         removeEventListener() {},
         appendChild(ch) {
+          if (ch) ch.parentElement = this;
           this.children.push(ch);
         },
       };
+      domElements[id] = el;
     }
     return domElements[id];
   }
@@ -341,8 +360,8 @@ async function runHelperTests() {
     `loadFromURL restored Unicode CSV account name: "${ctx.workingCSVData[0]["Account Name"]}"`
   );
 
-  // Test 9: Schema versioning & parameter migration (R2)
-  assert(ctx.SCHEMA_VERSION === 2, `SCHEMA_VERSION constant is defined as 2`);
+  // Test 9: Schema versioning & parameter migration (R2, R22)
+  assert(ctx.SCHEMA_VERSION === 4, `SCHEMA_VERSION constant is defined as 4`);
   const nullMigrated = ctx.migrateParams(null);
   assert(nullMigrated === null, `migrateParams(null) safely returns null`);
   const stringMigrated = ctx.migrateParams("invalid-param-payload");
@@ -351,26 +370,31 @@ async function runHelperTests() {
     `migrateParams("invalid") safely returns null`
   );
   const legacyV0Params = { salary: "25000000", goal: "500000000" };
-  const v2Migrated = ctx.migrateParams(legacyV0Params);
+  const v4Migrated = ctx.migrateParams(legacyV0Params);
   assert(
-    v2Migrated !== null &&
-      v2Migrated.schemaVersion === 2 &&
-      v2Migrated.salary === "25000000" &&
-      v2Migrated.autoTermThreshold === "200000000" &&
-      v2Migrated.autoTermMonths === "6",
-    `migrateParams stamps legacy v0 payload with schemaVersion: 2 and auto term defaults`
+    v4Migrated !== null &&
+      v4Migrated.schemaVersion === 4 &&
+      v4Migrated.salary === "25000000" &&
+      v4Migrated.autoTermThreshold === "200000000" &&
+      v4Migrated.autoTermMonths === "6" &&
+      v4Migrated.emergencyBuffer === "30000000" &&
+      v4Migrated.annualBonusMultiplier === "1.0" &&
+      v4Migrated.annualBonusMonth === "1",
+    `migrateParams stamps legacy v0 payload with schemaVersion: 4, emergency buffer, and annual bonus defaults`
   );
   const alreadyV1 = {
     schemaVersion: 1,
     salary: "35000000",
     sixMRate: "6.0",
   };
-  const v1ToV2 = ctx.migrateParams(alreadyV1);
+  const v1ToV4 = ctx.migrateParams(alreadyV1);
   assert(
-    v1ToV2.salary === "35000000" &&
-      v1ToV2.schemaVersion === 2 &&
-      v1ToV2.autoTermRate === "6.0",
-    `migrateParams upgrades v1 payload to v2 preserving rate settings`
+    v1ToV4.salary === "35000000" &&
+      v1ToV4.schemaVersion === 4 &&
+      v1ToV4.autoTermRate === "6.0" &&
+      v1ToV4.emergencyBuffer === "30000000" &&
+      v1ToV4.annualBonusMultiplier === "1.0",
+    `migrateParams upgrades v1 payload to v4 preserving rate settings and adding emergency buffer & annual bonus`
   );
 
   // Test 10: Multibyte UTF-8 Base64 round-trip (R8)
@@ -384,6 +408,158 @@ async function runHelperTests() {
   assert(
     decodedStr === testUnicodeStr,
     `utf8ToBase64 / base64ToUtf8 preserves multibyte characters and ₫ currency symbols without loss`
+  );
+
+  // Test 11: addWithdrawalRow()
+  const prevCount = ctx.workingCSVData.length;
+  ctx.addWithdrawalRow();
+  const addedWithdrawal = ctx.workingCSVData[ctx.workingCSVData.length - 1];
+  assert(
+    ctx.workingCSVData.length === prevCount + 1 &&
+      addedWithdrawal.Type === "Withdrawal",
+    `addWithdrawalRow() successfully appended a Withdrawal row`
+  );
+
+  // Test 12: generateRecurringRows()
+  ctx.document.getElementById("recurType").value = "Non-Term Pool";
+  ctx.document.getElementById("recurName").value = "Freelance Inflow";
+  ctx.document.getElementById("recurAmount").value = "10000000";
+  ctx.document.getElementById("recurFreq").value = "3"; // Quarterly
+  ctx.document.getElementById("recurStartDate").value = "2026-01-01";
+  ctx.document.getElementById("recurEndDate").value = "2026-10-01"; // Jan, Apr, Jul, Oct (4 entries)
+  const beforeRecur = ctx.workingCSVData.length;
+  ctx.generateRecurringRows();
+  assert(
+    ctx.workingCSVData.length === beforeRecur + 4,
+    `generateRecurringRows() created 4 discrete quarterly rows over Jan-Oct 2026`
+  );
+
+  // Test 13: LZ-String URL Compression & Legacy Base64 Fallback (Issue #6)
+  const realisticPortfolioJson = JSON.stringify({
+    p: {
+      schemaVersion: 4,
+      targetDate: "2030-01-01",
+      salary: "50000000",
+      salaryGrowth: "8.0",
+      annualBonusMultiplier: "1.5",
+      annualBonusMonth: "1",
+      inflation: "3.5",
+      goal: "5000000000",
+      poolRate: "0.5",
+      autoTermThreshold: "100000000",
+      emergencyBuffer: "30000000",
+      autoTermMonths: "6",
+      autoTermRate: "5.8",
+      sixMRate: "5.8",
+    },
+    csv: [
+      {
+        "Account Name": "Tài Khoản Tiết Kiệm Techcombank",
+        Principal: "100000000",
+        "Start Date": "2026-01-01",
+        "End Date": "2026-07-01",
+        Interest: "5.8",
+        Type: "Term Saving",
+        Bank: "Techcombank",
+      },
+      {
+        "Account Name": "Sổ Tiết Kiệm Kỳ Hạn Vietcombank",
+        Principal: "200000000",
+        "Start Date": "2026-03-01",
+        "End Date": "2026-09-01",
+        Interest: "6.0",
+        Type: "Term Saving",
+        Bank: "Vietcombank",
+      },
+      {
+        "Account Name": "Quỹ Dự Phòng Khẩn Cấp Linh Hoạt VPBank",
+        Principal: "50000000",
+        "Start Date": "2026-01-01",
+        "End Date": "2030-01-01",
+        Interest: "0.5",
+        Type: "Non-Term Pool",
+        Bank: "VPBank",
+      },
+      {
+        "Account Name": "Sổ Tiết Kiệm Bậc Thang MB Bank",
+        Principal: "150000000",
+        "Start Date": "2026-05-01",
+        "End Date": "2026-11-01",
+        Interest: "5.9",
+        Type: "Term Saving",
+        Bank: "MB Bank",
+      },
+    ],
+  });
+  const lzCompressed = ctx.LZString.compressToEncodedURIComponent(
+    realisticPortfolioJson
+  );
+  const lzDecompressed =
+    ctx.LZString.decompressFromEncodedURIComponent(lzCompressed);
+  assert(
+    lzDecompressed === realisticPortfolioJson,
+    `LZString compress/decompress roundtrip accurately preserves Unicode JSON`
+  );
+  const b64Size = ctx.utf8ToBase64(realisticPortfolioJson).length;
+  assert(
+    lzCompressed.length < b64Size,
+    `LZString URL hash (${lzCompressed.length} chars) is significantly more compact than Base64 (${b64Size} chars)`
+  );
+
+  // Test legacy Base64 decoding fallback in loadFromURL
+  const legacyB64 = ctx.utf8ToBase64(
+    JSON.stringify({
+      p: { targetDate: "2035-12-31", salary: "80000000", schemaVersion: 1 },
+      csv: [{ "Account Name": "Legacy B64 Sổ", Principal: "200000000" }],
+    })
+  );
+  ctx.location.hash = legacyB64;
+  const legacyLoaded = ctx.loadFromURL();
+  assert(
+    legacyLoaded === true,
+    `loadFromURL() seamlessly decompresses legacy Base64 URL hashes via automatic fallback`
+  );
+  assert(
+    ctx.document.getElementById("inputSalary").value === "80000000",
+    `loadFromURL restored legacy payload inputSalary: "80000000"`
+  );
+
+  // Test 14: Persona Presets Configuration & Undo Safeguard (Issue #6)
+  assert(
+    Array.isArray(ctx.PERSONA_PRESETS) && ctx.PERSONA_PRESETS.length === 4,
+    `PERSONA_PRESETS contains 4 defined strategy presets`
+  );
+  const presetIds = ctx.PERSONA_PRESETS.map((p) => p.id);
+  assert(
+    presetIds.includes("fresh_grad") &&
+      presetIds.includes("fire_aspirant") &&
+      presetIds.includes("home_downpayment") &&
+      presetIds.includes("bank_ladder"),
+    `PERSONA_PRESETS defines all 4 required personas: [${presetIds.join(", ")}]`
+  );
+
+  // Snapshot before preset apply
+  const salaryBeforePreset = ctx.document.getElementById("inputSalary").value;
+  ctx.applyPreset("fresh_grad");
+  assert(
+    ctx.document.getElementById("inputSalary").value === "15000000" &&
+      ctx.document.getElementById("inputSavingsGoal").value === "200000000",
+    `applyPreset("fresh_grad") loaded Fresh Graduate parameters (Salary: 15M, Goal: 200M)`
+  );
+  assert(
+    ctx._undoState !== null,
+    `applyPreset recorded previous state in _undoState for 5-second safeguard`
+  );
+
+  // Trigger undo
+  ctx.undoPresetApply();
+  assert(
+    ctx.document.getElementById("inputSalary").value === salaryBeforePreset,
+    `undoPresetApply() restored previous salary ("${salaryBeforePreset}")`
+  );
+  assert(
+    ctx._undoState === null,
+    `undoPresetApply() cleared _undoState after successful rollback`
   );
 
   console.log(

@@ -96,6 +96,23 @@ To create and integrate a new tool into this repository:
 
 ---
 
+## 🔄 Ways of Working (WoW) & GitHub Flow
+
+This repository follows a strict **GitHub Flow** and **Test-Driven Delivery** process for both human contributors and autonomous AI agents:
+
+1. **Spec & Issue Decomposition**: Requirements are decomposed into small vertical slices with checkable Acceptance Criteria (`- [ ]`) and tracked via GitHub Issues.
+2. **Branch per Issue**: Every feature or fix is developed in an isolated branch branched from `main` (`feat/issue-<n>-<slug>` or `fix/issue-<n>-<slug>`).
+3. **Test-Driven Development (TDD)**: Automated test suites in `tests/` must be authored/updated and passing (`100%`) before PR creation.
+4. **Pull Request & Merge Required Before Closure**:
+   - Open a PR linking the issue (`gh pr create --body "Closes #<n>"`).
+   - Review and merge the PR into `main` (`gh pr merge`).
+   - Verify all Acceptance Criteria against the merged build.
+   - Close the issue only after successful merge and verification.
+
+For full architectural lifecycle and guidelines, see [`docs/agents/ways-of-working.md`](./docs/agents/ways-of-working.md).
+
+---
+
 ## 🔒 Code Quality & Pre-Commit
 
 Pre-commit hooks are configured with **Husky** and **lint-staged** running **Prettier** across all staged source files on commit:

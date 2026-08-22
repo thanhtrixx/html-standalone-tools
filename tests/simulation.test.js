@@ -245,8 +245,8 @@ async function runSimulationTests() {
     `Maturity payout returned principal + interest to flexible pool`
   );
 
-  // Test 6: Unified Auto Term Threshold Allocation & Consolidated Sweep (ADR-0005)
-  // Starting with 450M in pool -> should trigger ONE consolidated Auto Term deposit for 450M, leaving 0M in pool
+  // Test 6: Unified Auto Term Allocation with Emergency Buffer Reserve (ADR-0005 & ADR-0006)
+  // Starting with 450M in pool, threshold 200M, default buffer 30M -> locks 420M in Auto Term, retains 30M in pool
   const bigPoolPortfolio = [
     {
       "Account Name": "Initial Big Pool",
@@ -268,6 +268,7 @@ async function runSimulationTests() {
       poolAnnualRate: 0,
       autoTermAnnualRate: 0.058, // 5.8%
       autoTermThreshold: 200000000,
+      emergencyBuffer: 30000000,
       autoTermMonths: 6,
       savingsGoal: 0,
     },
@@ -284,30 +285,95 @@ async function runSimulationTests() {
     `On day 0, created exactly one consolidated Auto Term deposit (created: ${day0Logs.length})`
   );
   assert(
-    day0Logs[0].amount === 450000000,
-    `Auto Term deposit locked full pool balance of 450M VND (locked: ${day0Logs[0].amount})`
+    day0Logs[0].amount === 420000000,
+    `Auto Term deposit locked 420M VND leaving 30M buffer in pool (locked: ${day0Logs[0].amount})`
   );
   assert(
     autoTermSimRes.totals.created6MCount >= 2,
     `Auto Term rolled over upon maturity over 1-year timeline (total: ${autoTermSimRes.totals.created6MCount})`
   );
 
-  // First day snapshot pool balance should be 450M - 450M = 0
+  // First day snapshot pool balance should be retained emergencyBuffer = 30M
   const firstDaySnap = autoTermSimRes.dailySnapshots[0];
   assert(
-    Math.round(firstDaySnap.poolBalance) === 0,
-    `Pool balance reduced to 0 after locking full 450M balance (got: ${firstDaySnap.poolBalance})`
+    Math.round(firstDaySnap.poolBalance) === 30000000,
+    `Pool balance retains 30M emergency buffer after sweep (got: ${firstDaySnap.poolBalance})`
   );
   assert(
-    Math.round(firstDaySnap.fixedSavingsBalance) === 450000000,
-    `Active fixed savings holds 450M in the single Auto Term account (got: ${firstDaySnap.fixedSavingsBalance})`
+    Math.round(firstDaySnap.fixedSavingsBalance) === 420000000,
+    `Active fixed savings holds 420M in the single Auto Term account (got: ${firstDaySnap.fixedSavingsBalance})`
   );
   assert(
     Math.round(firstDaySnap.totalWealth) === 450000000,
     `Total wealth is preserved across accounts (450M)`
   );
 
-  // Subtest 6b: Disabling Auto Term when threshold = 0
+  // Subtest 6b: Zero Emergency Buffer (legacy ADR-0005 full sweep behavior)
+  const zeroBufferSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      autoTermAnnualRate: 0.058,
+      autoTermThreshold: 200000000,
+      emergencyBuffer: 0,
+      autoTermMonths: 6,
+      savingsGoal: 0,
+    },
+    bigPoolPortfolio
+  );
+  const zeroBufferLogs = zeroBufferSim.simulationLogs.filter(
+    (l) =>
+      (l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM") &&
+      l.date === formatDate(today)
+  );
+  assert(
+    zeroBufferLogs.length === 1 && zeroBufferLogs[0].amount === 450000000,
+    `emergencyBuffer: 0 restores full 450M pool sweep`
+  );
+  assert(
+    Math.round(zeroBufferSim.dailySnapshots[0].poolBalance) === 0,
+    `Pool balance is 0 when emergencyBuffer is 0`
+  );
+
+  // Subtest 6c: Pool balance below sweep threshold (e.g. 210M pool < 200M threshold + 30M buffer = 230M)
+  const subThresholdPortfolio = [
+    {
+      "Account Name": "Sub-threshold Pool",
+      Principal: "210000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(oneYearLater),
+      Interest: "0",
+      Type: "Non-Term Pool",
+      Bank: "Cash",
+    },
+  ];
+  const subThresholdSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      autoTermAnnualRate: 0.058,
+      autoTermThreshold: 200000000,
+      emergencyBuffer: 30000000,
+      autoTermMonths: 6,
+      savingsGoal: 0,
+    },
+    subThresholdPortfolio
+  );
+  const subThresholdLogs = subThresholdSim.simulationLogs.filter(
+    (l) => l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM"
+  );
+  assert(
+    subThresholdLogs.length === 0,
+    `Pool balance of 210M does not trigger sweep when threshold is 200M and buffer is 30M (needs >= 230M)`
+  );
+
+  // Subtest 6d: Disabling Auto Term when threshold = 0
   const disabledAutoTermSim = simulate(
     {
       targetDateStr: formatDate(oneYearLater),
@@ -508,6 +574,38 @@ async function runSimulationTests() {
   assert(
     leapYearSim !== null && leapYearSim.dailySnapshots.length > 0,
     "Leap year simulation completes seamlessly"
+  );
+
+  // Test 12: Annual Bonus (13th Month Salary) Inflow (R22)
+  const bonusSim = simulate(
+    {
+      targetDateStr: "2027-12-31",
+      monthlySalary: 20000000, // 20M VND
+      salaryGrowthRate: 0.1, // 10% annual escalation
+      annualBonusMultiplier: 1.5, // 1.5x monthly salary
+      annualBonusMonth: 1, // January
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      term6MAnnualRate: 0,
+      savingsGoal: 0,
+    },
+    []
+  );
+  const bonusLogs = bonusSim.simulationLogs.filter(
+    (l) => l.type === "ANNUAL_BONUS"
+  );
+  assert(
+    bonusLogs.length >= 1,
+    `Annual bonus recorded ${bonusLogs.length} bonus deposit events`
+  );
+  const jan2027Bonus = bonusLogs.find((l) => l.date === "2027-01-01");
+  assert(
+    jan2027Bonus !== undefined && jan2027Bonus.amount >= 30000000,
+    `January bonus deposit is calculated with 1.5x multiplier (${jan2027Bonus ? jan2027Bonus.amount.toLocaleString() : 0} VND)`
+  );
+  assert(
+    bonusSim.totals.totalBonus > 0,
+    `Total bonus tracked in simulation totals: ${bonusSim.totals.totalBonus.toLocaleString()} VND`
   );
 
   console.log(

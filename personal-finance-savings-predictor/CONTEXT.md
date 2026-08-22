@@ -15,14 +15,22 @@ A time-locked savings account with a fixed start date, maturity date, principal 
 _Avoid_: Certificate of deposit, CD, locked account, time deposit
 
 **Auto Term Deposit**:
-A fixed-term savings deposit automatically instantiated whenever the Flexible Pool balance meets or exceeds the configurable Auto Term Threshold (default 200,000,000 VND). The entire available liquid pool balance is locked into a single term deposit of configurable duration (default 6 months) and annual rate, reducing the liquid Flexible Pool balance to 0. Upon maturity, principal and interest return to the Flexible Pool for immediate re-evaluation.
+A fixed-term savings deposit automatically instantiated whenever the Flexible Pool balance meets or exceeds the sum of the Auto Term Threshold (default 200,000,000 VND) and the Emergency Buffer Reserve. The available liquid pool balance exceeding the Emergency Buffer Reserve is swept into a single term deposit of configurable duration (default 6 months) and annual rate, retaining the Emergency Buffer Reserve in the liquid Flexible Pool. Upon maturity, principal and interest return to the Flexible Pool for immediate re-evaluation.
 _Avoid_: Auto 6M chunking, rollover deposit, auto-renew account, recurring term
+
+**Emergency Buffer Reserve**:
+The designated minimum liquid cash balance retained in the Flexible Pool during an Auto Term Deposit sweep to preserve liquidity for living expenses and upcoming scheduled withdrawals.
+_Avoid_: Cash cushion, minimum balance, safety net, checking reserve
 
 ### Cash Flows & Adjustments
 
 **Withdrawal**:
 A scheduled one-time cash outflow deducted directly from the Flexible Pool on a designated date.
 _Avoid_: Expense, payout, debit, transfer-out
+
+**Annual Bonus**:
+An annual supplemental cash inflow calculated as a multiplier of the current monthly salary (default 1.0x) and credited directly to the Flexible Pool on the 1st of a designated calendar month (e.g. January or February).
+_Avoid_: 13th month bonus, Tet gift, performance incentive, end-of-year payout
 
 **Purchasing Power (Real Value)**:
 The inflation-adjusted equivalent value of nominal balances, discounted continuously from the simulation start date.

@@ -18,10 +18,16 @@ function createDOMEnvironment() {
   const domStore = new Map();
 
   function createMockElement(id, tagName = "div") {
+    let _val = "";
     const el = {
       id,
       tagName: tagName.toUpperCase(),
-      value: "",
+      get value() {
+        return _val;
+      },
+      set value(v) {
+        _val = v == null ? "" : String(v);
+      },
       _innerText: "",
       _innerHTML: "",
       title: "",
@@ -303,6 +309,7 @@ function createDOMEnvironment() {
     },
   };
 
+  sandbox.htmlContent = htmlContent;
   sandbox.Chart.getChart = () => null;
   sandbox.Chart.register = () => {};
   sandbox.window = sandbox;
@@ -572,25 +579,52 @@ async function runUIUXTests() {
     "R13: filterChartDateRange successfully updated growthChart view"
   );
 
-  // Test R14: Heatmap Calendar
-  app.toggleHeatmap();
-  const heatmapSection = app.document.getElementById("heatmapSection");
+  // Test R14: Tabbed Analytics Hub - Heatmap Calendar
+  app.switchAnalyticsTab("heatmap");
+  const tabPanelHeatmap = app.document.getElementById("tabPanel_heatmap");
   assert(
-    !heatmapSection.classList.contains("hidden"),
-    "R14: toggleHeatmap revealed monthly heatmap section"
+    !tabPanelHeatmap.classList.contains("hidden"),
+    "R14: switchAnalyticsTab('heatmap') revealed monthly heatmap panel"
+  );
+  assert(
+    app.document
+      .getElementById("tabBtn_heatmap")
+      .getAttribute("aria-selected") === "true",
+    "R14: Heatmap tab button has aria-selected=true"
   );
 
-  // Test R15: Year-over-Year (YoY) Table
-  app.toggleYoYTable();
-  const yoySection = app.document.getElementById("yoySection");
+  // Test R15: Tabbed Analytics Hub - Year-over-Year (YoY) Table
+  app.switchAnalyticsTab("yoy");
+  const tabPanelYoY = app.document.getElementById("tabPanel_yoy");
   assert(
-    !yoySection.classList.contains("hidden"),
-    "R15: toggleYoYTable revealed YoY comparison table"
+    !tabPanelYoY.classList.contains("hidden"),
+    "R15: switchAnalyticsTab('yoy') revealed YoY comparison panel"
+  );
+  assert(
+    app.document.getElementById("tabBtn_yoy").getAttribute("aria-selected") ===
+      "true",
+    "R15: YoY tab button has aria-selected=true"
   );
   const yoyTbody = app.document.getElementById("yoyTableBody");
   assert(
     yoyTbody.children.length >= 1,
     `R15: YoY table populated with ${yoyTbody.children.length} annual rows`
+  );
+
+  // Tabbed Analytics Hub - Wealth Timeline & Canvas Cleanup
+  app.switchAnalyticsTab("timeline");
+  const tabPanelTimeline = app.document.getElementById("tabPanel_timeline");
+  assert(
+    !tabPanelTimeline.classList.contains("hidden"),
+    "R15: switchAnalyticsTab('timeline') restored Wealth Timeline view"
+  );
+  assert(
+    !app.htmlContent.includes('id="chartGoalRing2"'),
+    "R15: Redundant #chartGoalRing2 canvas removed from DOM"
+  );
+  assert(
+    app.htmlContent.includes('id="chartGoalRing"'),
+    "R15: Single #chartGoalRing canvas maintained in goal progress tracker"
   );
 
   // Test R16: CSV Editor Modal Operations
@@ -611,19 +645,61 @@ async function runUIUXTests() {
     "R16: saveCSVEditorData saved changes, ran simulation, and closed modal"
   );
 
-  // Test R17: Scenario Comparison Mode
+  // Test R17: Scenario Comparison Workbench (ADR-0007)
   app.toggleCompareMode();
   const compareSec = app.document.getElementById("compareSection");
   assert(
     !compareSec.classList.contains("hidden"),
     "R17: toggleCompareMode revealed Scenario Comparison section"
   );
+  assert(
+    app.comparisonActive === true,
+    "R17: window.comparisonActive flagged as true"
+  );
+
+  // Test cloneScenarioAtoB
+  app.document.getElementById("inputSalary").value = "40000000";
+  app.cloneScenarioAtoB();
+  assert(
+    app.document.getElementById("inputCompSalary").value === "40000000",
+    "R17: cloneScenarioAtoB copied Scenario A salary to Scenario B input"
+  );
+
+  // Set Scenario B custom salary to test delta calculations
+  app.document.getElementById("inputCompSalary").value = "50000000";
+  app.runComparison();
 
   const compASalary = app.document.getElementById("compASalary").innerText;
   const compBSalary = app.document.getElementById("compBSalary").innerText;
+  const compDeltaWealth =
+    app.document.getElementById("compDeltaWealth").innerText;
+  const compDeltaInterest =
+    app.document.getElementById("compDeltaInterest").innerText;
+  const compDeltaMilestone =
+    app.document.getElementById("compDeltaMilestone").innerText;
+
   assert(
     compASalary.length > 0 && compBSalary.length > 0,
     `R17: Side-by-side comparison calculated (Scenario A: "${compASalary}", Scenario B: "${compBSalary}")`
+  );
+  assert(
+    compDeltaWealth.includes("+") || compDeltaWealth.includes("-"),
+    `R17: Delta total wealth badge calculated: "${compDeltaWealth}"`
+  );
+  assert(
+    compDeltaInterest.length > 0,
+    `R17: Delta interest badge calculated: "${compDeltaInterest}"`
+  );
+  assert(
+    compDeltaMilestone.length > 0,
+    `R17: Delta milestone diff calculated: "${compDeltaMilestone}"`
+  );
+
+  // Test toggling off compare mode
+  app.toggleCompareMode();
+  assert(
+    compareSec.classList.contains("hidden") && app.comparisonActive === false,
+    "R17: Toggling compare mode off hidden section and reset comparisonActive"
   );
 
   // Test R18: Export Chart Image
@@ -648,8 +724,10 @@ async function runUIUXTests() {
   app.printSummary();
   assert(printTriggered, "R19: printSummary invoked window.print()");
 
-  // Test R20: Auto Term Allocation Rule
+  // Test R20: Auto Term Allocation Rule with Emergency Buffer Reserve (ADR-0006)
   app.document.getElementById("inputSalary").value = "0";
+  app.document.getElementById("inputAutoTermThreshold").value = "200000000";
+  app.document.getElementById("inputEmergencyBuffer").value = "30000000";
   app.syncCSVData([
     {
       "Account Name": "High Liquidity Pool",
@@ -663,12 +741,34 @@ async function runUIUXTests() {
   ]);
   app.runSimulation();
 
-  const autoTermLog = app.simulationLogs.find(
+  const autoTermLogWithBuffer = app.simulationLogs.find(
     (l) => l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM"
   );
   assert(
-    autoTermLog !== undefined && Math.round(autoTermLog.amount / 1e6) === 250,
-    "R20: Auto Term rule triggered single consolidated term creation for full ~250M pool balance when pool >= 200M VND"
+    autoTermLogWithBuffer !== undefined &&
+      Math.round(autoTermLogWithBuffer.amount / 1e6) === 220,
+    "R20: Auto Term sweep locked 220M VND retaining 30M emergency buffer in pool when pool >= 230M"
+  );
+
+  // Quick chip helper test: setting emergency buffer to 0
+  app.setEmergencyBufferValue(0);
+  assert(
+    app.document.getElementById("inputEmergencyBuffer").value === "0" ||
+      app.document.getElementById("inputEmergencyBuffer").value === 0,
+    "R20: setEmergencyBufferValue(0) updated inputEmergencyBuffer"
+  );
+  app.runSimulation();
+  const autoTermLogZeroBuffer = app.simulationLogs.find(
+    (l) => l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM"
+  );
+  assert(
+    autoTermLogZeroBuffer !== undefined &&
+      Math.round(autoTermLogZeroBuffer.amount / 1e6) === 250,
+    "R20: Zero emergency buffer restores full 250M pool sweep"
+  );
+  assert(
+    typeof app.triggerReactiveSimulation === "function",
+    "R20: triggerReactiveSimulation debounced function is registered"
   );
 
   // Test R21: Vietnamese Language Support & i18n Parity
@@ -687,6 +787,128 @@ async function runUIUXTests() {
   assert(
     app.formatCurrency(100000000) === "100,000,000 VND",
     "R21: Formatted English currency in 'en' mode"
+  );
+
+  // Test R22: Annual Bonus (13th Month Salary) & Recurring Cashflow Generator (Issue #4)
+  // 1. Annual Bonus Quick Chips & Input
+  app.setAnnualBonusMultiplier(1.5);
+  assert(
+    app.document.getElementById("inputAnnualBonusMultiplier").value === "1.5" ||
+      app.document.getElementById("inputAnnualBonusMultiplier").value === 1.5,
+    "R22: setAnnualBonusMultiplier(1.5) updated input value"
+  );
+  app.document.getElementById("inputSalary").value = "30000000";
+  app.document.getElementById("selectAnnualBonusMonth").value = "1";
+  app.runSimulation();
+
+  const bonusLogUI = app.simulationLogs.find((l) => l.type === "ANNUAL_BONUS");
+  assert(
+    bonusLogUI !== undefined && bonusLogUI.amount === 45000000,
+    "R22: Annual bonus correctly computed as 1.5x of 30M monthly salary (45M VND)"
+  );
+
+  // 2. Add Withdrawal Row button
+  const prevRowsCount = app.workingCSVData.length;
+  app.addWithdrawalRow();
+  const lastCSVRow = app.workingCSVData[app.workingCSVData.length - 1];
+  assert(
+    app.workingCSVData.length === prevRowsCount + 1 &&
+      lastCSVRow.Type === "Withdrawal",
+    "R22: addWithdrawalRow() appended scheduled withdrawal entry"
+  );
+
+  // 3. Recurring Generator Panel & Row Generation
+  app.toggleRecurringGenerator(true);
+  assert(
+    !app.document
+      .getElementById("recurringGenPanel")
+      .classList.contains("hidden"),
+    "R22: toggleRecurringGenerator(true) showed recurring generator panel"
+  );
+  app.document.getElementById("recurType").value = "Withdrawal";
+  app.document.getElementById("recurName").value = "Quarterly School Fee";
+  app.document.getElementById("recurAmount").value = "15000000";
+  app.document.getElementById("recurFreq").value = "3";
+  app.document.getElementById("recurStartDate").value = "2026-03-01";
+  app.document.getElementById("recurEndDate").value = "2026-09-01"; // Mar, Jun, Sep = 3 rows
+  const beforeGenCount = app.workingCSVData.length;
+  app.generateRecurringRows();
+  assert(
+    app.workingCSVData.length === beforeGenCount + 3,
+    "R22: generateRecurringRows() inserted 3 recurring withdrawal rows"
+  );
+
+  // 4. Strict CSV Date Validation (EndDate >= StartDate)
+  let csvErrorToastFired = false;
+  app.showToast = (msg, type) => {
+    if (type === "error") csvErrorToastFired = true;
+  };
+  app.workingCSVData.push({
+    "Account Name": "Invalid Date Row",
+    Principal: "10000000",
+    "Start Date": "2026-12-01",
+    "End Date": "2026-01-01", // End Date before Start Date
+    Interest: "5.0",
+    Type: "Term Saving",
+    Bank: "ACB",
+  });
+  app.saveCSVEditorData();
+  assert(
+    csvErrorToastFired === true,
+    "R22: saveCSVEditorData() strictly blocked save and fired error toast on EndDate < StartDate"
+  );
+
+  // Test R23: Strategy Persona Presets & Undo Safeguard (Issue #6)
+  // 1. Open Presets modal
+  app.togglePresetsModal(true);
+  const presetsModal = app.document.getElementById("presetsModal");
+  assert(
+    !presetsModal.classList.contains("hidden"),
+    "R23: togglePresetsModal(true) revealed strategy presets modal"
+  );
+  const presetsCardsContainer = app.document.getElementById(
+    "presetsCardsContainer"
+  );
+  assert(
+    presetsCardsContainer.children.length === 4,
+    `R23: renderPresetCards() generated ${presetsCardsContainer.children.length} interactive persona cards`
+  );
+
+  // 2. Apply FIRE preset & verify parameters + portfolio
+  const salaryBeforePreset = app.document.getElementById("inputSalary").value;
+  app.applyPreset("fire_aspirant");
+  assert(
+    presetsModal.classList.contains("hidden"),
+    "R23: applyPreset closed presets modal automatically"
+  );
+  assert(
+    app.document.getElementById("inputSalary").value === "60000000" &&
+      app.document.getElementById("inputSavingsGoal").value === "5000000000",
+    "R23: applyPreset('fire_aspirant') loaded FIRE parameters (Salary: 60M, Goal: 5B)"
+  );
+  assert(
+    app.workingCSVData.length === 3 &&
+      app.workingCSVData[0]["Account Name"].includes("FIRE Emergency Reserve"),
+    "R23: applyPreset('fire_aspirant') loaded 3-account diversified FIRE portfolio"
+  );
+
+  // 3. 5-Second Undo rollback
+  app.undoPresetApply();
+  assert(
+    app.document.getElementById("inputSalary").value === salaryBeforePreset,
+    `R23: undoPresetApply() restored previous salary ("${salaryBeforePreset}")`
+  );
+
+  // 4. Dismiss Presets Modal with Escape
+  app.togglePresetsModal(true);
+  assert(
+    !presetsModal.classList.contains("hidden"),
+    "R23: Re-opened presets modal"
+  );
+  app.triggerKeyboardEvent({ key: "Escape" });
+  assert(
+    presetsModal.classList.contains("hidden"),
+    "R23: Pressing Escape dismissed open presets modal"
   );
 
   console.log(
