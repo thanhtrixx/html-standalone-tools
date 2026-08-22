@@ -5,6 +5,8 @@ yarn.lock
 dist
 **/dist
 release-assets
+test-reports
+coverage
 
 ### IntelliJ IDEA ###
 .idea

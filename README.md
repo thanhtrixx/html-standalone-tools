@@ -20,7 +20,8 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 ├── package.json                                # Build, lint, and test scripts
 ├── scripts/
 │   ├── build.js                                # HTML/CSS/JS compaction engine
-│   └── pack-release.js                         # Production release asset packager
+│   ├── pack-release.js                         # Production release asset packager
+│   └── run-tests.js                            # Unified test runner & reporting engine
 ├── tests/
 │   └── build.test.js                           # Automated build pipeline tests
 ├── docs/
@@ -28,7 +29,8 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   │   ├── 0001-multi-tool-repository-structure.md
 │   │   ├── 0002-zero-build-standalone-single-file-html-constraint.md (superseded)
 │   │   ├── 0003-compacted-standalone-html-build-pipeline.md
-│   │   └── 0004-ci-pr-verification-and-automated-release-pipeline.md
+│   │   ├── 0004-ci-pr-verification-and-automated-release-pipeline.md
+│   │   └── 0005-unified-test-runner-and-multi-format-reporting.md
 │   └── agents/                                 # Issue tracker & skill specifications
 └── personal-finance-savings-predictor/         # Standalone Tool Directory
     ├── index.html                              # Source application (HTML/CSS/JS)
@@ -67,8 +69,16 @@ npm run build
 npm run build:predictor
 # or: node scripts/build.js --tool <tool-name>
 
-# Run automated tests verifying build pipeline and script integrity
+# Run automated tests and generate interactive reports (HTML, JSON, JUnit)
 npm test
+# or: npm run test:report
+
+# Run specific isolated test suite
+npm run test:build
+npm run test:i18n
+npm run test:sim
+npm run test:helpers
+npm run test:ui
 
 # Verify code formatting with Prettier (CI Gate)
 npm run lint:check

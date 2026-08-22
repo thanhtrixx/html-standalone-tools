@@ -9,7 +9,9 @@
   "scripts": {
     "build": "node scripts/build.js",
     "build:predictor": "node scripts/build.js --tool personal-finance-savings-predictor",
-    "test": "node tests/build.test.js && node tests/i18n.test.js && node tests/simulation.test.js && node tests/helpers.test.js && node tests/ui-ux.test.js",
+    "test": "node scripts/run-tests.js",
+    "test:all": "node scripts/run-tests.js",
+    "test:report": "node scripts/run-tests.js",
     "test:build": "node tests/build.test.js",
     "test:i18n": "node tests/i18n.test.js",
     "test:sim": "node tests/simulation.test.js",

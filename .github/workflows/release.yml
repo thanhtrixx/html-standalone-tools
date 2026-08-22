@@ -37,6 +37,14 @@ jobs:
           npm run build
           npm test
 
+      - name: Upload Test Report Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-release
+          path: test-reports/
+          retention-days: 30
+
       - name: Determine Semantic Version & Generate Changelog
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.2
