@@ -5257,7 +5257,7 @@
         switchAnalyticsTab("yoy");
       }
 
-      // --- UTF-8 SAFE BASE64 SERIALIZATION (R8, Global ADR-0002) ---
+      // --- UTF-8 BASE64 SERIALIZATION HELPERS (Legacy Deserialization Fallback) ---
       function utf8ToBase64(str) {
         const b = new TextEncoder().encode(str);
         let s = "";
@@ -5699,7 +5699,7 @@
       })();
       window.LZString = LZString;
 
-      // --- SHAREABLE LINKS (Task 2.2, R8, Global ADR-0002, Issue #6 LZ-String) ---
+      // --- SHAREABLE LINKS (Task 2.2, R8, ADR-0010 LZ-String Compression) ---
       function shareSimulation() {
         try {
           const params = {

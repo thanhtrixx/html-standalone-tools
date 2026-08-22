@@ -54,8 +54,8 @@ _Focus: Fix state persistence timing, versioned storage migration, URL hash seri
   - [x] Call `saveToStorage()` synchronously in `runSimulation()`.
   - [x] Support schema versioning (`SCHEMA_VERSION = 1`) with graceful migration for legacy data.
 
-- [x] **Task 2.2 — URL Hash Serialization for Link Sharing (R8, Global ADR-0002)**
-  - [x] Update `shareSimulation()` to encode JSON payload as URL-safe Base64 into `window.location.hash`.
+- [x] **Task 2.2 — URL Hash Serialization for Link Sharing (R8, ADR-0010)**
+  - [x] Update `shareSimulation()` to encode JSON payload via LZ-String compression into `window.location.hash` with legacy Base64 fallback.
   - [x] Auto-load simulation parameters and CSV from URL hash on page visit.
 
 - [x] **Task 2.3 — Goal Progress & Milestone Date Display (R7)**

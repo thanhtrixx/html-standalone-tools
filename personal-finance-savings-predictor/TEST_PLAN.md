@@ -5,42 +5,44 @@
 > **Method:** Automated Node test suites (`npm test`) + Browser console / UI tests
 
 ```bash
-# Automated Test Suites (137 tests passing)
-npm test              # Run all 5 suites
-npm run test:sim      # Simulation engine unit tests
-npm run test:helpers  # Formatters & CSV editor tests
-npm run test:ui       # UI/UX integration tests (R1-R21)
-npm run test:i18n     # Bilingual translation parity tests
-npm run test:build    # Compacted build pipeline tests
+# Automated Test Suites (196 tests passing across 5 suites)
+npm test              # Run all 5 suites (196 tests)
+npm run test:sim      # Simulation engine unit tests (38 tests)
+npm run test:helpers  # Formatters, LZString & CSV editor tests (46 tests)
+npm run test:ui       # UI/UX integration tests R1-R23 (73 tests)
+npm run test:i18n     # Bilingual translation parity tests (26 tests)
+npm run test:build    # Compacted build pipeline tests (13 tests)
 ```
 
 ---
 
 ## 📋 Feature Requirements Matrix
 
-| ID      | Feature                     | Requirement                                                      | Priority |
-| ------- | --------------------------- | ---------------------------------------------------------------- | -------- |
-| **R1**  | CSV Persistence             | Auto-save CSV data to localStorage; auto-load on reload          | P0       |
-| **R2**  | Parameter Persistence       | Save/load salary, growth, inflation, goal, rates to localStorage | P0       |
-| **R3**  | Reset All                   | Clear localStorage + restore default values                      | P1       |
-| **R4**  | Salary Growth               | Apply annual compound growth to monthly salary                   | P0       |
-| **R5**  | Inflation Adjustment        | Calculate real value (inflation-adjusted); toggle on/off         | P0       |
-| **R6**  | Withdrawals                 | Track manual withdrawals in simulation logs and charts           | P1       |
-| **R7**  | Goal Tracking               | Show progress bar + ring chart when savings goal set             | P1       |
-| **R8**  | Shareable Link              | Serialize params + CSV to URL hash; auto-load on visit           | P1       |
-| **R9**  | Theme Toggle                | Light/dark toggle; persist preference; CSS transitions           | P2       |
-| **R10** | Onboarding Tour             | 5-step guided tour on first visit; skip/show again               | P2       |
-| **R11** | Keyboard Shortcuts          | Enter=run, Ctrl+S=save, Esc=close modals                         | P2       |
-| **R12** | Toast Notifications         | Slide-in toasts auto-dismiss after 3s                            | P2       |
-| **R13** | Growth Chart                | Date range filter (All/3M/6M/1Y); Real vs Nominal toggle         | P2       |
-| **R14** | Heatmap Calendar            | 12-month color intensity grid                                    | P2       |
-| **R15** | YoY Table                   | Year-by-year breakdown with growth %                             | P2       |
-| **R16** | CSV Editor                  | Add/Edit/Delete rows; import/export Bank field                   | P1       |
-| **R17** | Scenario Comparison         | Compare current vs projected 2-year scenario                     | P3       |
-| **R18** | Export Chart Image          | Download growth chart as PNG                                     | P3       |
-| **R19** | Print Summary               | Print-friendly layout via `window.print()`                       | P2       |
-| **R20** | Auto Term Allocation Rule   | Sweep full pool into single term deposit when pool ≥ threshold   | P0       |
-| **R21** | Vietnamese Language Support | Language selector + full i18n translations for Vietnamese        | P1       |
+| ID      | Feature                     | Requirement                                                                                                                        | Priority |
+| ------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| **R1**  | CSV Persistence             | Auto-save CSV data to localStorage; auto-load on reload                                                                            | P0       |
+| **R2**  | Parameter Persistence       | Save/load salary, growth, inflation, goal, rates to localStorage with versioned schema migration                                   | P0       |
+| **R3**  | Reset All                   | Clear localStorage + restore default values                                                                                        | P1       |
+| **R4**  | Salary Growth               | Apply annual compound growth to monthly salary on 12-month anniversaries                                                           | P0       |
+| **R5**  | Inflation Adjustment        | Calculate real value (inflation-adjusted); toggle on/off                                                                           | P0       |
+| **R6**  | Withdrawals                 | Track manual withdrawals in simulation logs and charts with deficit handling                                                       | P1       |
+| **R7**  | Goal Tracking               | Show progress bar + ring chart when savings goal set                                                                               | P1       |
+| **R8**  | Shareable Link              | Serialize params + CSV via LZ-String compression (ADR-0010) with legacy Base64 fallback; auto-load on visit                        | P1       |
+| **R9**  | Theme Toggle                | Light/dark toggle; persist preference; CSS transitions                                                                             | P2       |
+| **R10** | Onboarding Tour             | 5-step guided tour on first visit; skip/show again                                                                                 | P2       |
+| **R11** | Keyboard Shortcuts          | Enter=run, Ctrl+S=save, Esc=close modals                                                                                           | P2       |
+| **R12** | Toast Notifications         | Slide-in toasts auto-dismiss after 3s                                                                                              | P2       |
+| **R13** | Growth Chart                | Date range filter (All/3M/6M/1Y); Real vs Nominal toggle                                                                           | P2       |
+| **R14** | Heatmap Calendar            | 12-month color intensity grid                                                                                                      | P2       |
+| **R15** | YoY Table                   | Year-by-year breakdown with growth %                                                                                               | P2       |
+| **R16** | CSV Editor                  | Add/Edit/Delete rows; import/export Bank field                                                                                     | P1       |
+| **R17** | Scenario Comparison         | Compare current vs projected 2-year scenario via dual-pass simulation                                                              | P3       |
+| **R18** | Export Chart Image          | Download growth chart as PNG                                                                                                       | P3       |
+| **R19** | Print Summary               | Print-friendly layout via `window.print()`                                                                                         | P2       |
+| **R20** | Auto Term Allocation Rule   | Sweep pool balance above buffer into single term deposit of $N$ calendar months via `addMonths` when pool ≥ threshold (ADR-0005/6) | P0       |
+| **R21** | Vietnamese Language Support | Language selector + full i18n translations for Vietnamese (ADR-0003)                                                               | P1       |
+| **R22** | Annual Bonus & Cashflows    | Annual bonus multiplier (13th month salary) and recurring withdrawal schedule generator (ADR-0008)                                 | P1       |
+| **R23** | Strategy Persona Presets    | Strategy persona preset templates with 5-second undo safeguard (ADR-0010)                                                          | P1       |
 
 ---
 

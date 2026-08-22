@@ -37,7 +37,7 @@ The inflation-adjusted equivalent value of nominal balances, discounted continuo
 _Avoid_: Constant dollars, deflated wealth, net-of-inflation balance
 
 **Demand Interest**:
-Interest accrued daily on the end-of-day balance of the Flexible Pool and credited at the end of each calendar month.
+Interest accrued and compounded daily on the end-of-day balance of the Flexible Pool.
 _Avoid_: Pool yield, non-term dividend, daily cash interest
 
 **Maturity Payout**:
