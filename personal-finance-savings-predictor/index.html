@@ -1596,7 +1596,7 @@
           </div>
         </div>
 
-        <!-- Tab 3: Heatmap Calendar Panel -->
+        <!-- Tab 3: Heatmap Calendar Panel (Issue #9) -->
         <div
           id="tabPanel_heatmap"
           role="tabpanel"
@@ -1606,40 +1606,71 @@
           <div
             class="glass-card rounded-2xl p-5 border border-slate-800"
             id="heatmapSection"
-            aria-label="Monthly heatmap calendar"
+            aria-label="Multi-Year Calendar Heatmap"
           >
-            <div class="flex items-center justify-between mb-4">
+            <div
+              class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4"
+            >
               <div>
                 <h3 class="font-bold text-slate-200 text-base">
                   <i class="fa-solid fa-calendar-days text-amber-400 mr-2"></i
                   ><span data-i18n="hdr_heatmap">Monthly Heatmap</span>
                 </h3>
                 <p class="text-xs text-slate-400" data-i18n="lbl_heatmap_sub">
-                  Color intensity = total monthly balance
+                  Continuous multi-year matrix & monthly breakdown
                 </p>
               </div>
-              <div class="flex items-center space-x-2">
-                <select
-                  id="heatmapYearSelect"
-                  onchange="renderHeatmap()"
-                  class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-slate-300"
+              <div
+                class="flex items-center space-x-1 bg-slate-950 p-1 rounded-xl border border-slate-800"
+              >
+                <button
+                  type="button"
+                  id="btnHeatmapModeWealth"
+                  onclick="setHeatmapMetricMode('wealth')"
+                  class="px-3 py-1 text-xs font-semibold rounded-lg transition bg-indigo-600 text-white shadow-sm"
+                  data-i18n="heatmap_mode_wealth"
                 >
-                  <option>2026</option>
-                </select>
+                  Total Wealth
+                </button>
+                <button
+                  type="button"
+                  id="btnHeatmapModeInflow"
+                  onclick="setHeatmapMetricMode('inflow')"
+                  class="px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white"
+                  data-i18n="heatmap_mode_inflow"
+                >
+                  Net Inflow
+                </button>
               </div>
             </div>
-            <div class="flex flex-col gap-1" id="heatmapGrid"></div>
             <div
-              class="flex items-center justify-between mt-2 text-xs text-slate-500"
+              class="overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-950/40 p-3"
+            >
+              <div id="heatmapGrid" class="min-w-[780px] space-y-2"></div>
+            </div>
+            <div
+              class="flex items-center justify-between mt-3 text-xs text-slate-500"
             >
               <span data-i18n="lbl_low">Low</span>
-              <div class="flex gap-0.5">
-                <div class="w-4 h-3 rounded bg-emerald-950"></div>
-                <div class="w-4 h-3 rounded bg-emerald-900"></div>
-                <div class="w-4 h-3 rounded bg-emerald-800"></div>
-                <div class="w-4 h-3 rounded bg-emerald-600"></div>
-                <div class="w-4 h-3 rounded bg-emerald-400"></div>
-                <div class="w-4 h-3 rounded bg-emerald-300"></div>
+              <div class="flex items-center gap-1">
+                <div
+                  class="w-5 h-3.5 rounded bg-emerald-950/70 border border-emerald-900/50"
+                ></div>
+                <div
+                  class="w-5 h-3.5 rounded bg-emerald-900/80 border border-emerald-800/50"
+                ></div>
+                <div
+                  class="w-5 h-3.5 rounded bg-emerald-800 border border-emerald-700/50"
+                ></div>
+                <div
+                  class="w-5 h-3.5 rounded bg-emerald-600 border border-emerald-500/50"
+                ></div>
+                <div
+                  class="w-5 h-3.5 rounded bg-emerald-500 border border-emerald-400/50"
+                ></div>
+                <div
+                  class="w-5 h-3.5 rounded bg-emerald-400 border border-emerald-300/50"
+                ></div>
               </div>
               <span data-i18n="lbl_high">High</span>
             </div>
@@ -2474,6 +2505,11 @@
           </div>
         </div>
       </div>
+      <!-- Interactive Heatmap Popover Tooltip (Issue #9) -->
+      <div
+        id="heatmapTooltip"
+        class="hidden fixed z-50 p-3.5 bg-slate-900/95 border border-slate-700/90 rounded-xl shadow-2xl backdrop-blur-md text-xs text-slate-200 pointer-events-none transition-opacity duration-150 max-w-xs space-y-1.5"
+      ></div>
     </main>
     <script>
       // Canvas fallback for headless/test environments
@@ -2610,7 +2646,16 @@
 
           // Heatmap & YoY
           hdr_heatmap: "Monthly Heatmap",
-          lbl_heatmap_sub: "Color intensity = total monthly balance",
+          lbl_heatmap_sub: "Continuous multi-year matrix & monthly breakdown",
+          heatmap_mode_wealth: "Total Wealth",
+          heatmap_mode_inflow: "Net Inflow",
+          col_year: "Year",
+          col_annual_delta: "Annual Delta",
+          lbl_flexible_pool: "Flexible Pool",
+          lbl_fixed_deposits: "Fixed Term Deposits",
+          lbl_demand_interest: "Demand Interest",
+          lbl_term_interest: "Term Interest",
+          lbl_net_inflow: "Net Inflow",
           btn_toggle: "Toggle",
           lbl_low: "Low",
           lbl_high: "High",
@@ -2910,7 +2955,16 @@
 
           // Heatmap & YoY
           hdr_heatmap: "Bản Đồ Nhiệt Hàng Tháng",
-          lbl_heatmap_sub: "Độ đậm màu = tổng số dư hàng tháng",
+          lbl_heatmap_sub: "Ma trận đa năm liên tục & phân tích hàng tháng",
+          heatmap_mode_wealth: "Tổng Tài Sản",
+          heatmap_mode_inflow: "Dòng Tiền Ròng",
+          col_year: "Năm",
+          col_annual_delta: "Biến Động Năm",
+          lbl_flexible_pool: "Quỹ Linh Hoạt",
+          lbl_fixed_deposits: "Tiết Kiệm Có Kỳ Hạn",
+          lbl_demand_interest: "Lãi Không Kỳ Hạn",
+          lbl_term_interest: "Lãi Có Kỳ Hạn",
+          lbl_net_inflow: "Dòng Tiền Vào Ròng",
           btn_toggle: "Ẩn/Hiện",
           lbl_low: "Thấp",
           lbl_high: "Cao",
@@ -4608,7 +4662,13 @@
             currentDate.getDate() === 1 && currentDate >= todayDateOnly;
 
           if (!monthlyCashflows[monthKey]) {
-            monthlyCashflows[monthKey] = { salary: 0, interestPaid: 0 };
+            monthlyCashflows[monthKey] = {
+              salary: 0,
+              interestPaid: 0,
+              demandInterest: 0,
+              termInterest: 0,
+              withdrawals: 0,
+            };
             monthlyWithdrawals[monthKey] = { total: 0 };
           }
           if (!yearlyCashflows[yearKey]) {
@@ -4667,6 +4727,7 @@
                 const wAmount = Math.abs(acc.principal);
                 totalWithdrawals += wAmount;
                 monthlyWithdrawals[monthKey].total += wAmount;
+                monthlyCashflows[monthKey].withdrawals += wAmount;
                 currentPoolBalance -= wAmount;
                 acc.status = "COMPLETED";
 
@@ -4694,6 +4755,7 @@
                 else if (acc.type === "AUTO_6M")
                   totalInterest6M += acc.earnedInterest;
                 monthlyCashflows[monthKey].interestPaid += acc.earnedInterest;
+                monthlyCashflows[monthKey].termInterest += acc.earnedInterest;
                 yearlyCashflows[yearKey].interest += acc.earnedInterest;
                 simulationLogs.push({
                   date: dateStr,
@@ -4713,6 +4775,8 @@
               currentPoolBalance * (poolAnnualRate / 365);
             currentPoolBalance += dailyPoolInterest;
             totalInterestPool += dailyPoolInterest;
+            monthlyCashflows[monthKey].demandInterest += dailyPoolInterest;
+            monthlyCashflows[monthKey].interestPaid += dailyPoolInterest;
             yearlyCashflows[yearKey].interest += dailyPoolInterest;
           }
 
@@ -5635,63 +5699,311 @@
         });
       }
 
-      // --- HEATMAP CALENDAR (Task 3.2, R14) ---
+      // --- CONTINUOUS MULTI-YEAR CALENDAR HEATMAP (ADR-0012, Issue #9) ---
+      window.heatmapMetricMode = "wealth";
+
+      function setHeatmapMetricMode(mode) {
+        window.heatmapMetricMode = mode;
+        const btnWealth = document.getElementById("btnHeatmapModeWealth");
+        const btnInflow = document.getElementById("btnHeatmapModeInflow");
+        if (btnWealth && btnInflow) {
+          if (mode === "wealth") {
+            btnWealth.className =
+              "px-3 py-1 text-xs font-semibold rounded-lg transition bg-indigo-600 text-white shadow-sm";
+            btnInflow.className =
+              "px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white";
+          } else {
+            btnWealth.className =
+              "px-3 py-1 text-xs font-semibold rounded-lg transition text-slate-400 hover:text-white";
+            btnInflow.className =
+              "px-3 py-1 text-xs font-semibold rounded-lg transition bg-indigo-600 text-white shadow-sm";
+          }
+        }
+        renderHeatmap();
+      }
+      window.setHeatmapMetricMode = setHeatmapMetricMode;
+
       function renderHeatmap() {
         renderHeatmapChart(window.dailySnapshots || []);
       }
+      window.renderHeatmap = renderHeatmap;
+
+      function showHeatmapTooltip(e, dataStr) {
+        const tooltip = document.getElementById("heatmapTooltip");
+        if (!tooltip) return;
+        try {
+          const data =
+            typeof dataStr === "string"
+              ? JSON.parse(decodeURIComponent(dataStr))
+              : dataStr;
+          tooltip.innerHTML = `
+            <div class="font-bold text-white border-b border-slate-700/80 pb-1.5 flex items-center justify-between">
+              <span>📅 ${data.monthLabel}</span>
+              <span class="text-[10px] text-emerald-400 font-mono">${data.badge}</span>
+            </div>
+            <div class="space-y-1 pt-1 text-[11px]">
+              <div class="flex justify-between"><span class="text-slate-400">${t("hdr_total_balance")}:</span> <span class="font-bold text-white font-mono">${formatCurrency(data.totalWealth)}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">${t("lbl_flexible_pool")}:</span> <span class="font-mono text-slate-300">${formatCurrency(data.poolBalance)}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">${t("lbl_fixed_deposits")}:</span> <span class="font-mono text-slate-300">${formatCurrency(data.termBalances)}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">${t("lbl_demand_interest")}:</span> <span class="font-mono text-emerald-400">+${formatCurrency(data.demandInterest)}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">${t("lbl_term_interest")}:</span> <span class="font-mono text-emerald-400">+${formatCurrency(data.termInterest)}</span></div>
+              <div class="flex justify-between border-t border-slate-800 pt-1 font-semibold"><span class="text-slate-300">${t("lbl_net_inflow")}:</span> <span class="font-bold font-mono text-indigo-400">${formatCurrency(data.netInflow)}</span></div>
+            </div>
+          `;
+          tooltip.classList.remove("hidden");
+          positionHeatmapTooltip(e);
+        } catch (err) {
+          console.error("Heatmap tooltip error:", err);
+        }
+      }
+      window.showHeatmapTooltip = showHeatmapTooltip;
+
+      function positionHeatmapTooltip(e) {
+        const tooltip = document.getElementById("heatmapTooltip");
+        if (!tooltip || tooltip.classList.contains("hidden")) return;
+        const x =
+          e.clientX ||
+          (e.touches && e.touches[0] ? e.touches[0].clientX : 0) ||
+          0;
+        const y =
+          e.clientY ||
+          (e.touches && e.touches[0] ? e.touches[0].clientY : 0) ||
+          0;
+        const tooltipWidth = 240;
+        const tooltipHeight = 170;
+        let posX = x + 12;
+        let posY = y + 12;
+        if (typeof window !== "undefined") {
+          if (posX + tooltipWidth > window.innerWidth)
+            posX = x - tooltipWidth - 12;
+          if (posY + tooltipHeight > window.innerHeight)
+            posY = y - tooltipHeight - 12;
+        }
+        tooltip.style.left = Math.max(10, posX) + "px";
+        tooltip.style.top = Math.max(10, posY) + "px";
+      }
+      window.positionHeatmapTooltip = positionHeatmapTooltip;
+
+      function hideHeatmapTooltip() {
+        const tooltip = document.getElementById("heatmapTooltip");
+        if (tooltip) tooltip.classList.add("hidden");
+      }
+      window.hideHeatmapTooltip = hideHeatmapTooltip;
 
       function renderHeatmapChart(snapshots) {
         const grid = document.getElementById("heatmapGrid");
         if (!grid) return;
         grid.innerHTML = "";
         if (!snapshots || snapshots.length === 0) return;
-        const yearSelect = document.getElementById("heatmapYearSelect");
-        const availableYears = [
+
+        const mode = window.heatmapMetricMode || "wealth";
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+
+        // 1. Group snapshots by month (YYYY-MM)
+        const monthMap = new Map();
+        snapshots.forEach((s) => {
+          const ym = s.date.substring(0, 7);
+          if (!monthMap.has(ym)) {
+            monthMap.set(ym, { first: s, last: s, count: 1 });
+          } else {
+            const entry = monthMap.get(ym);
+            entry.last = s;
+            entry.count++;
+          }
+        });
+
+        // 2. Extract unique years
+        const years = [
           ...new Set(snapshots.map((s) => s.date.substring(0, 4))),
         ].sort();
-        if (availableYears.length > 0 && yearSelect) {
-          const curVal = yearSelect.value;
-          yearSelect.innerHTML = availableYears
-            .map(
-              (y) =>
-                `<option value="${y}" ${y === curVal ? "selected" : ""}>${y}</option>`
-            )
-            .join("");
-        }
-        const selectedYear =
-          yearSelect && yearSelect.value
-            ? yearSelect.value
-            : availableYears[0] || "2026";
-        const filteredSnapshots = snapshots.filter((s) =>
-          s.date.startsWith(selectedYear)
-        );
-        const monthlyTotals = {};
-        filteredSnapshots.forEach((s) => {
-          const m = s.date.substring(0, 7);
-          monthlyTotals[m] = Math.max(monthlyTotals[m] || 0, s.totalWealth);
+        if (years.length === 0) return;
+
+        // 3. Compute values per month & global peak normalization value
+        const monthlyData = {};
+        const cashflows =
+          (window.simResult && window.simResult.monthlyCashflows) || {};
+        let peakVal = 1;
+        let prevMonthWealth = (snapshots[0] && snapshots[0].totalWealth) || 0;
+
+        years.forEach((y) => {
+          monthlyData[y] = {};
+          for (let m = 1; m <= 12; m++) {
+            const mStr = String(m).padStart(2, "0");
+            const ym = `${y}-${mStr}`;
+            if (monthMap.has(ym)) {
+              const entry = monthMap.get(ym);
+              const cf = cashflows[ym] || {};
+              const monthWealth = entry.last.totalWealth;
+              const poolBal = entry.last.poolBalance;
+              const termBal = entry.last.fixedSavingsBalance;
+              const netInflow =
+                cf.salary !== undefined
+                  ? (cf.salary || 0) +
+                    (cf.interestPaid || 0) -
+                    (cf.withdrawals || 0)
+                  : monthWealth - prevMonthWealth;
+              prevMonthWealth = monthWealth;
+
+              const val =
+                mode === "wealth" ? monthWealth : Math.max(0, netInflow);
+              if (val > peakVal) peakVal = val;
+
+              monthlyData[y][m] = {
+                active: true,
+                totalWealth: monthWealth,
+                poolBalance: poolBal,
+                termBalances: termBal,
+                demandInterest: cf.demandInterest || 0,
+                termInterest: cf.termInterest || 0,
+                netInflow: netInflow,
+                val: val,
+                monthLabel: `${monthNames[m - 1]} ${y}`,
+              };
+            } else {
+              monthlyData[y][m] = { active: false };
+            }
+          }
         });
-        const vals = Object.values(monthlyTotals);
-        const maxVal = Math.max(...vals, 1);
-        const months = Object.keys(monthlyTotals).sort();
-        months.forEach((m) => {
-          const val = monthlyTotals[m];
-          const intensity = Math.min(100, (val / maxVal) * 100);
-          const colors = [
-            "bg-emerald-950",
-            "bg-emerald-900",
-            "bg-emerald-800",
-            "bg-emerald-600",
-            "bg-emerald-400",
-            "bg-emerald-300",
-          ];
-          const ci = Math.min(colors.length - 1, Math.floor(intensity / 20));
-          const div = document.createElement("div");
-          div.className = `heatmap-cell ${colors[ci]} text-white`;
-          div.title = `${m}: ${formatCurrency(val)}`;
-          div.textContent = (val / 1e6).toFixed(1) + "M";
-          grid.appendChild(div);
+
+        // 4. Render Table Header Row
+        const headerRow = document.createElement("div");
+        headerRow.className =
+          "grid grid-cols-[60px_repeat(12,1fr)_120px] gap-1.5 text-[11px] font-bold text-slate-400 border-b border-slate-800 pb-2 px-1 text-center items-center";
+        let headerColsHtml = `<div class="text-left">${t("col_year") || "Year"}</div>`;
+        monthNames.forEach((name) => {
+          headerColsHtml += `<div>${name}</div>`;
+        });
+        headerColsHtml += `<div class="text-right">${t("col_annual_delta") || "Annual Delta"}</div>`;
+        headerRow.innerHTML = headerColsHtml;
+        grid.appendChild(headerRow);
+
+        // 5. Render Year Rows
+        years.forEach((y) => {
+          const row = document.createElement("div");
+          row.className =
+            "grid grid-cols-[60px_repeat(12,1fr)_120px] gap-1.5 items-center px-1 py-1 rounded-xl hover:bg-slate-900/40 transition";
+
+          let rowHtml = `<div class="font-bold text-xs text-white font-mono">${y}</div>`;
+
+          let yearStartWealth = null;
+          let yearEndWealth = null;
+
+          for (let m = 1; m <= 12; m++) {
+            const d = monthlyData[y][m];
+            if (d && d.active) {
+              if (yearStartWealth === null) yearStartWealth = d.totalWealth;
+              yearEndWealth = d.totalWealth;
+
+              const intensity = Math.min(
+                100,
+                Math.max(5, Math.round((d.val / peakVal) * 100))
+              );
+              const colorClasses =
+                intensity < 15
+                  ? "bg-emerald-950/70 text-emerald-300 border-emerald-900/40"
+                  : intensity < 35
+                    ? "bg-emerald-900/80 text-emerald-200 border-emerald-800/40"
+                    : intensity < 55
+                      ? "bg-emerald-800 text-white border-emerald-700/40"
+                      : intensity < 75
+                        ? "bg-emerald-600 text-white border-emerald-500/40"
+                        : intensity < 90
+                          ? "bg-emerald-500 text-white font-medium border-emerald-400/40"
+                          : "bg-emerald-400 text-slate-950 font-bold border-emerald-300/40";
+
+              const displayLabel =
+                d.val >= 1e9
+                  ? (d.val / 1e9).toFixed(2) + "B"
+                  : (d.val / 1e6).toFixed(1) + "M";
+
+              const payload = encodeURIComponent(
+                JSON.stringify({
+                  monthLabel: d.monthLabel,
+                  badge: displayLabel,
+                  totalWealth: d.totalWealth,
+                  poolBalance: d.poolBalance,
+                  termBalances: d.termBalances,
+                  demandInterest: d.demandInterest,
+                  termInterest: d.termInterest,
+                  netInflow: d.netInflow,
+                })
+              );
+
+              rowHtml += `
+                <div
+                  class="heatmap-cell h-9 rounded-lg flex items-center justify-center text-[10.5px] font-mono cursor-pointer transition transform hover:scale-105 hover:z-10 shadow-sm border ${colorClasses}"
+                  onmouseenter="showHeatmapTooltip(event, '${payload}')"
+                  onmousemove="positionHeatmapTooltip(event)"
+                  onmouseleave="hideHeatmapTooltip()"
+                  onclick="showHeatmapTooltip(event, '${payload}')"
+                >
+                  ${displayLabel}
+                </div>`;
+            } else {
+              rowHtml += `
+                <div class="h-9 rounded-lg flex items-center justify-center text-[11px] text-slate-700 bg-slate-950/40 border border-slate-900/80">
+                  -
+                </div>`;
+            }
+          }
+
+          // Annual Delta calculation
+          let deltaHtml = `<div class="text-right text-[11px] text-slate-500 font-mono">-</div>`;
+          if (yearStartWealth !== null && yearEndWealth !== null) {
+            const annualDelta = yearEndWealth - yearStartWealth;
+            const prevYear = String(Number(y) - 1);
+            let prevEnd = null;
+            if (monthlyData[prevYear]) {
+              for (let pm = 12; pm >= 1; pm--) {
+                if (
+                  monthlyData[prevYear][pm] &&
+                  monthlyData[prevYear][pm].active
+                ) {
+                  prevEnd = monthlyData[prevYear][pm].totalWealth;
+                  break;
+                }
+              }
+            }
+            const yoyPercent =
+              prevEnd && prevEnd > 0
+                ? ((yearEndWealth - prevEnd) / prevEnd) * 100
+                : null;
+            const deltaLabel =
+              (annualDelta >= 0 ? "+" : "") +
+              (Math.abs(annualDelta) >= 1e9
+                ? (annualDelta / 1e9).toFixed(2) + "B"
+                : (annualDelta / 1e6).toFixed(1) + "M");
+            const yoyLabel =
+              yoyPercent !== null
+                ? `(${yoyPercent >= 0 ? "+" : ""}${yoyPercent.toFixed(1)}%)`
+                : "";
+
+            deltaHtml = `
+              <div class="text-right flex flex-col items-end leading-tight">
+                <span class="text-[11px] font-bold font-mono ${annualDelta >= 0 ? "text-emerald-400" : "text-rose-400"}">${deltaLabel}</span>
+                <span class="text-[10px] text-slate-400 font-mono">${yoyLabel}</span>
+              </div>`;
+          }
+
+          rowHtml += deltaHtml;
+          row.innerHTML = rowHtml;
+          grid.appendChild(row);
         });
       }
+      window.renderHeatmapChart = renderHeatmapChart;
 
       function toggleHeatmap() {
         switchAnalyticsTab("heatmap");
