@@ -627,14 +627,213 @@ async function runSimulationTests() {
     "Leap year simulation completes seamlessly"
   );
 
-  // Test 12: Annual Bonus (13th Month Salary) Inflow (R22)
-  const bonusSim = simulate(
+  // Test 13: Zero, Empty, and Edge Input Parameters
+  const zeroSim = simulate(
     {
-      targetDateStr: "2027-12-31",
+      targetDateStr: formatDate(addMonths(today, 3)),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      savingsGoal: 0,
+    },
+    []
+  );
+  assert(
+    zeroSim !== null && zeroSim.totals.totalWealth === 0,
+    "Zero parameter simulation produces zero total wealth"
+  );
+  assert(
+    zeroSim.totals.totalInterest === 0 && zeroSim.totals.salaryCount === 0,
+    "Zero parameter simulation produces 0 interest and 0 salary count"
+  );
+  assert(
+    zeroSim.goalReached === false && zeroSim.goalReachedDate === null,
+    "Goal is not flagged as reached when savingsGoal is 0"
+  );
+
+  // Test 14: Multiple Concurrent Term Deposit Maturities on Same Date
+  const matureSameDay = addMonths(today, 2);
+  const multiTermPortfolio = [
+    {
+      "Account Name": "VCB 2M",
+      Principal: "50000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(matureSameDay),
+      Interest: "6.0",
+      Type: "Term Saving",
+      Bank: "VCB",
+    },
+    {
+      "Account Name": "TCB 2M",
+      Principal: "70000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(matureSameDay),
+      Interest: "6.5",
+      Type: "Term Saving",
+      Bank: "TCB",
+    },
+    {
+      "Account Name": "MBB 2M",
+      Principal: "80000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(matureSameDay),
+      Interest: "7.0",
+      Type: "Term Saving",
+      Bank: "MBB",
+    },
+  ];
+
+  const multiTermSim = simulate(
+    {
+      targetDateStr: formatDate(addMonths(today, 3)),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      autoTermThreshold: 0, // Disabled
+      savingsGoal: 0,
+    },
+    multiTermPortfolio
+  );
+
+  const sameDayMaturities = multiTermSim.simulationLogs.filter(
+    (l) => l.type === "MATURITY" && l.date === formatDate(matureSameDay)
+  );
+  assert(
+    sameDayMaturities.length === 3,
+    `Recorded 3 concurrent term deposit maturities on ${formatDate(matureSameDay)}`
+  );
+  const totalMaturityPayout = sameDayMaturities.reduce(
+    (sum, l) => sum + l.amount,
+    0
+  );
+  assert(
+    Math.round(multiTermSim.totals.poolBalance) ===
+      Math.round(totalMaturityPayout),
+    `Flexible pool received full payouts from all 3 maturing deposits (${Math.round(totalMaturityPayout).toLocaleString()} VND)`
+  );
+
+  // Test 15: Exact Auto Term Sweep Boundary & Multi-Cycle Rollover
+  // Boundary 1: Pool exactly equals sweepThreshold (200M threshold + 30M buffer = 230M)
+  const exactThresholdPortfolio = [
+    {
+      "Account Name": "Exact 230M Pool",
+      Principal: "230000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(oneYearLater),
+      Interest: "0",
+      Type: "Non-Term Pool",
+      Bank: "Cash",
+    },
+  ];
+  const exactSweepSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      autoTermAnnualRate: 0.06,
+      autoTermThreshold: 200000000,
+      emergencyBuffer: 30000000,
+      autoTermMonths: 6,
+      savingsGoal: 0,
+    },
+    exactThresholdPortfolio
+  );
+  const exactSweepLogs = exactSweepSim.simulationLogs.filter(
+    (l) => l.type === "NEW_6M" && l.date === formatDate(today)
+  );
+  assert(
+    exactSweepLogs.length === 1 && exactSweepLogs[0].amount === 200000000,
+    "Pool exactly equal to threshold + buffer (230M) sweeps exactly 200M into Auto Term"
+  );
+  assert(
+    Math.round(exactSweepSim.dailySnapshots[0].poolBalance) === 30000000,
+    "Emergency buffer of 30M is retained in pool on exact threshold sweep"
+  );
+
+  // Boundary 2: Pool is 1 VND below sweep threshold (229,999,999 VND)
+  const subOnePortfolio = [
+    {
+      "Account Name": "Sub 1 VND Pool",
+      Principal: "229999999",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(oneYearLater),
+      Interest: "0",
+      Type: "Non-Term Pool",
+      Bank: "Cash",
+    },
+  ];
+  const subOneSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      autoTermAnnualRate: 0.06,
+      autoTermThreshold: 200000000,
+      emergencyBuffer: 30000000,
+      autoTermMonths: 6,
+      savingsGoal: 0,
+    },
+    subOnePortfolio
+  );
+  const subOneLogs = subOneSim.simulationLogs.filter(
+    (l) => l.type === "NEW_6M" && l.date === formatDate(today)
+  );
+  assert(
+    subOneLogs.length === 0,
+    "Pool of 229,999,999 VND (1 VND below 230M requirement) strictly does not trigger sweep"
+  );
+
+  // Boundary 3: Custom 3-month and 12-month auto term durations
+  const custom3MSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      autoTermAnnualRate: 0.06,
+      autoTermThreshold: 100000000,
+      emergencyBuffer: 20000000,
+      autoTermMonths: 3,
+      savingsGoal: 0,
+    },
+    [
+      {
+        "Account Name": "Cash",
+        Principal: "150000000",
+        "Start Date": formatDate(today),
+        "End Date": formatDate(oneYearLater),
+        Type: "Non-Term Pool",
+      },
+    ]
+  );
+  const auto3MLogs = custom3MSim.simulationLogs.filter(
+    (l) => l.type === "NEW_6M"
+  );
+  assert(
+    auto3MLogs.length >= 3,
+    `Custom 3-month duration executes quarterly rollovers (${auto3MLogs.length} sweeps)`
+  );
+  assert(
+    auto3MLogs[0].months === 3,
+    "Auto Term log records correct 3-month duration"
+  );
+
+  // Test 16: Compound Salary Escalation Precision & Fractional Rates (ADR-0002)
+  const fiveYearsLater = new Date(today.getTime());
+  fiveYearsLater.setFullYear(fiveYearsLater.getFullYear() + 5);
+
+  const fractionalEscSim = simulate(
+    {
+      targetDateStr: formatDate(fiveYearsLater),
       monthlySalary: 20000000, // 20M VND
-      salaryGrowthRate: 0.1, // 10% annual escalation
-      annualBonusMultiplier: 1.5, // 1.5x monthly salary
-      annualBonusMonth: 1, // January
+      salaryGrowthRate: 0.075, // 7.5% annual compound growth
       inflationRate: 0,
       poolAnnualRate: 0,
       term6MAnnualRate: 0,
@@ -642,21 +841,294 @@ async function runSimulationTests() {
     },
     []
   );
-  const bonusLogs = bonusSim.simulationLogs.filter(
+
+  const fracLogs = fractionalEscSim.simulationLogs.filter(
+    (l) => l.type === "SALARY"
+  );
+  const yr1Logs = fracLogs.slice(0, 12);
+  const yr2Logs = fracLogs.slice(12, 24);
+  const yr3Logs = fracLogs.slice(24, 36);
+  const yr4Logs = fracLogs.slice(36, 48);
+  const yr5Logs = fracLogs.slice(48, 60);
+
+  assert(
+    yr1Logs.every((l) => l.amount === 20000000),
+    "Year 1 salary is strictly 20,000,000 across all 12 months"
+  );
+  const expYr2Salary = 20000000 * 1.075; // 21,500,000
+  assert(
+    yr2Logs.every((l) => Math.abs(l.amount - expYr2Salary) < 1),
+    `Year 2 salary compounded by 7.5% to ${expYr2Salary.toLocaleString()} across all 12 months`
+  );
+  const expYr3Salary = 20000000 * Math.pow(1.075, 2); // 23,112,500
+  assert(
+    yr3Logs.every((l) => Math.abs(l.amount - expYr3Salary) < 1),
+    `Year 3 salary compounded to ${expYr3Salary.toLocaleString()} across all 12 months`
+  );
+  const expYr5Salary = 20000000 * Math.pow(1.075, 4); // ~26,709,382.8
+  assert(
+    yr5Logs.every((l) => Math.abs(l.amount - expYr5Salary) < 1),
+    `Year 5 salary compounded to ${Math.round(expYr5Salary).toLocaleString()} across all 12 months`
+  );
+
+  // Test 17: Multiple Scheduled Withdrawals, Deep Deficit & Salary Replenishment (ADR-0001)
+  const deepDeficitPortfolio = [
+    {
+      "Account Name": "Small Pool",
+      Principal: "10000000", // 10M starting pool
+      "Start Date": formatDate(today),
+      "End Date": formatDate(oneYearLater),
+      Type: "Non-Term Pool",
+    },
+    {
+      "Account Name": "Outflow 1 (Car Deposit)",
+      Principal: "30000000", // 30M outflow in Month 1 -> pool = -20M
+      "Start Date": formatDate(today),
+      "End Date": formatDate(addMonths(today, 1)),
+      Type: "Withdrawal",
+    },
+    {
+      "Account Name": "Outflow 2 (Insurance)",
+      Principal: "20000000", // 20M outflow in Month 2 -> pool = -40M (before salary)
+      "Start Date": formatDate(today),
+      "End Date": formatDate(addMonths(today, 2)),
+      Type: "Withdrawal",
+    },
+  ];
+
+  const deepDeficitSim = simulate(
+    {
+      targetDateStr: formatDate(addMonths(today, 6)),
+      monthlySalary: 15000000, // 15M/mo salary gradually repays deficit
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0.05,
+      autoTermThreshold: 0,
+      savingsGoal: 0,
+    },
+    deepDeficitPortfolio
+  );
+
+  const deficitLogs = deepDeficitSim.simulationLogs.filter(
+    (l) => l.type === "DEFICIT_WARNING"
+  );
+  assert(
+    deficitLogs.length >= 2,
+    `Recorded ${deficitLogs.length} deficit warnings during successive large withdrawals`
+  );
+  assert(
+    deepDeficitSim.totals.totalWithdrawals === 50000000,
+    "Sum of all withdrawals tracked accurately (50M VND)"
+  );
+  // Deficit should eventually be repaid by month 5 (10M start + 6*15M salary - 50M withdrawals = 50M net)
+  const finalPool = deepDeficitSim.finalSnapshot.poolBalance;
+  assert(
+    finalPool > 45000000,
+    `Flexible pool recovered from negative deficit to positive balance (${Math.round(finalPool).toLocaleString()} VND)`
+  );
+
+  // Test 18: Goal Milestone Edge Scenarios (Day 0 achievement, last day, re-crossing)
+  // Subtest 18a: Initial pool already exceeds goal on Day 0
+  const instantGoalSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      savingsGoal: 100000000, // 100M goal
+    },
+    [
+      {
+        "Account Name": "Large Starting Cash",
+        Principal: "150000000", // 150M > 100M
+        "Start Date": formatDate(today),
+        "End Date": formatDate(oneYearLater),
+        Type: "Non-Term Pool",
+      },
+    ]
+  );
+  assert(
+    instantGoalSim.goalReached === true,
+    "Goal is immediately reached when initial wealth >= savingsGoal"
+  );
+  assert(
+    instantGoalSim.goalReachedDate === formatDate(today),
+    `Goal milestone date is Day 0 start date (${instantGoalSim.goalReachedDate})`
+  );
+
+  // Subtest 18b: Goal reached on exact last day of simulation
+  const target3M = addMonths(today, 3);
+  const lastDaySim = simulate(
+    {
+      targetDateStr: formatDate(target3M),
+      monthlySalary: 10000000, // 10M/mo
+      salaryGrowthRate: 0,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      autoTermThreshold: 0,
+      savingsGoal: 30000000, // Reached on month 3
+    },
+    []
+  );
+  assert(
+    lastDaySim.goalReached === true && lastDaySim.goalReachedDate !== null,
+    `Goal achievement detected when target crossed on boundary date (${lastDaySim.goalReachedDate})`
+  );
+
+  // Test 19: Multi-Year Inflation Purchasing Power Compound Discounting
+  const multiYearInflSim = simulate(
+    {
+      targetDateStr: formatDate(threeYearsLater),
+      monthlySalary: 0,
+      salaryGrowthRate: 0,
+      inflationRate: 0.05, // 5% annual inflation
+      poolAnnualRate: 0,
+      autoTermThreshold: 0, // Disabled so principal remains static
+      savingsGoal: 0,
+    },
+    [
+      {
+        "Account Name": "Fixed Wealth",
+        Principal: "1000000000", // 1 Billion VND
+        "Start Date": formatDate(today),
+        "End Date": formatDate(threeYearsLater),
+        Type: "Non-Term Pool",
+      },
+    ]
+  );
+  // Real value after 3 years at 5% = 1,000,000,000 / (1.05)^(days/365)
+  const inflDays = getDaysDiff(today, threeYearsLater);
+  const expectedRealVal = 1000000000 / Math.pow(1.05, inflDays / 365);
+  const actualRealVal = multiYearInflSim.totals.inflationAdjusted;
+  assert(
+    Math.abs(actualRealVal - expectedRealVal) < 1,
+    `Multi-year compound inflation discounted with exact day-precision: ${Math.round(actualRealVal).toLocaleString()} VND vs nominal 1B VND`
+  );
+
+  // Test 20: Annual Bonus Month Configuration & Multiplier Variations (R22)
+  // Subtest 20a: December Bonus (Month 12)
+  const decBonusSim = simulate(
+    {
+      targetDateStr: "2027-12-31",
+      monthlySalary: 30000000,
+      salaryGrowthRate: 0,
+      annualBonusMultiplier: 2.0, // 2.0x
+      annualBonusMonth: 12, // December
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      savingsGoal: 0,
+    },
+    []
+  );
+  const decBonusLogs = decBonusSim.simulationLogs.filter(
     (l) => l.type === "ANNUAL_BONUS"
   );
   assert(
-    bonusLogs.length >= 1,
-    `Annual bonus recorded ${bonusLogs.length} bonus deposit events`
-  );
-  const jan2027Bonus = bonusLogs.find((l) => l.date === "2027-01-01");
-  assert(
-    jan2027Bonus !== undefined && jan2027Bonus.amount >= 30000000,
-    `January bonus deposit is calculated with 1.5x multiplier (${jan2027Bonus ? jan2027Bonus.amount.toLocaleString() : 0} VND)`
+    decBonusLogs.length >= 1,
+    "December annual bonus deposited correctly on month 12"
   );
   assert(
-    bonusSim.totals.totalBonus > 0,
-    `Total bonus tracked in simulation totals: ${bonusSim.totals.totalBonus.toLocaleString()} VND`
+    decBonusLogs[0].amount === 60000000,
+    "2.0x bonus on 30M salary equals 60,000,000 VND"
+  );
+
+  // Subtest 20b: Zero Bonus Multiplier
+  const zeroBonusSim = simulate(
+    {
+      targetDateStr: "2027-12-31",
+      monthlySalary: 30000000,
+      salaryGrowthRate: 0,
+      annualBonusMultiplier: 0,
+      annualBonusMonth: 1,
+      inflationRate: 0,
+      poolAnnualRate: 0,
+      savingsGoal: 0,
+    },
+    []
+  );
+  const zeroBonusLogs = zeroBonusSim.simulationLogs.filter(
+    (l) => l.type === "ANNUAL_BONUS"
+  );
+  assert(
+    zeroBonusLogs.length === 0 && zeroBonusSim.totals.totalBonus === 0,
+    "0x bonus multiplier creates 0 bonus logs and 0 total bonus"
+  );
+
+  // Test 21: Highly Diversified Portfolio with All Account Types Active Simultaneously
+  const complexPortfolio = [
+    {
+      "Account Name": "Emergency Liquid Cash",
+      Principal: "50000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(oneYearLater),
+      Type: "Non-Term Pool",
+      Bank: "VCB",
+    },
+    {
+      "Account Name": "Techcombank 6M Term",
+      Principal: "150000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(addMonths(today, 6)),
+      Interest: "6.2",
+      Type: "Term Saving",
+      Bank: "TCB",
+    },
+    {
+      "Account Name": "ACB 9M Term",
+      Principal: "100000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(addMonths(today, 9)),
+      Interest: "6.8",
+      Type: "Term Saving",
+      Bank: "ACB",
+    },
+    {
+      "Account Name": "Tuition Fee Outflow",
+      Principal: "40000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(addMonths(today, 4)),
+      Type: "Withdrawal",
+      Bank: "Outflow",
+    },
+  ];
+
+  const complexSim = simulate(
+    {
+      targetDateStr: formatDate(oneYearLater),
+      monthlySalary: 25000000,
+      salaryGrowthRate: 0.08,
+      annualBonusMultiplier: 1.0,
+      annualBonusMonth: 1,
+      inflationRate: 0.04,
+      poolAnnualRate: 0.005,
+      autoTermThreshold: 150000000,
+      emergencyBuffer: 30000000,
+      autoTermMonths: 6,
+      autoTermAnnualRate: 0.06,
+      savingsGoal: 500000000,
+    },
+    complexPortfolio
+  );
+
+  assert(
+    complexSim !== null && complexSim.dailySnapshots.length > 300,
+    "Complex simulation with 4 distinct asset classes runs completely over 1 year"
+  );
+  assert(
+    complexSim.totals.totalWealth > 0 && complexSim.totals.totalInterest > 0,
+    `Total wealth (${Math.round(complexSim.totals.totalWealth).toLocaleString()} VND) and interest (${Math.round(complexSim.totals.totalInterest).toLocaleString()} VND) calculated accurately`
+  );
+  assert(
+    complexSim.totals.totalWithdrawals === 40000000,
+    "Scheduled withdrawal processed accurately in complex portfolio"
+  );
+  assert(
+    complexSim.dailySnapshots.every(
+      (s) =>
+        Math.abs(s.totalWealth - (s.poolBalance + s.fixedSavingsBalance)) < 1
+    ),
+    "Invariant holds on every single day: totalWealth === poolBalance + fixedSavingsBalance"
   );
 
   console.log(
