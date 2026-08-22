@@ -239,6 +239,35 @@ function createDOMEnvironment() {
         if (sel === ".metric-card") {
           return [getEl("metricCard1"), getEl("metricCard2")];
         }
+        if (
+          sel === "[data-preset-field]" ||
+          sel.startsWith("[data-preset-field=")
+        ) {
+          if (!sandbox._presetChips) {
+            const matches = [
+              ...htmlContent.matchAll(
+                /data-preset-field=["']([^"']+)["']\s+data-preset-val=["']([^"']+)["']/g
+              ),
+            ];
+            sandbox._presetChips = matches.map((m, idx) => {
+              const el = createMockElement(
+                "preset_chip_" + m[1] + "_" + m[2] + "_" + idx,
+                "button"
+              );
+              el.setAttribute("data-preset-field", m[1]);
+              el.setAttribute("data-preset-val", m[2]);
+              return el;
+            });
+          }
+          if (sel === "[data-preset-field]") return sandbox._presetChips;
+          const matchField = sel.match(/data-preset-field=['"]([^'"]+)['"]/);
+          if (matchField) {
+            return sandbox._presetChips.filter(
+              (c) => c.getAttribute("data-preset-field") === matchField[1]
+            );
+          }
+          return sandbox._presetChips;
+        }
         return [];
       },
       createElement: (tag) =>
@@ -986,6 +1015,103 @@ async function runUIUXTests() {
       )
     ),
     "R24: Simulation runs successfully and displays valid numerical total wealth with masked inputs"
+  );
+
+  // --- Test R25: Quick Presets & Debounced Live Recalculation (Issue #11) ---
+  // 1. Salary preset chips
+  const salary20MChip = Array.from(
+    app.document.querySelectorAll("[data-preset-field='salary']")
+  ).find((c) => c.getAttribute("data-preset-val") === "20000000");
+  assert(
+    salary20MChip !== undefined,
+    "R25: 20M Salary quick preset chip exists in DOM"
+  );
+  app.setSalaryValue(20000000);
+  assert(
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSalary").value
+    ) === 20000000,
+    "R25: setSalaryValue(20000000) updated inputSalary to 20M"
+  );
+  assert(
+    salary20MChip.classList.contains("active"),
+    "R25: 20M Salary chip highlighted as active"
+  );
+
+  // 2. Additive modifier chip
+  app.addSalaryDelta(5000000);
+  assert(
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSalary").value
+    ) === 25000000,
+    "R25: addSalaryDelta(5000000) incremented salary to 25M"
+  );
+  const salary25MChip = Array.from(
+    app.document.querySelectorAll("[data-preset-field='salary']")
+  ).find((c) => c.getAttribute("data-preset-val") === "25000000");
+  assert(
+    salary25MChip && salary25MChip.classList.contains("active"),
+    "R25: 25M Salary chip highlighted as active after delta increment"
+  );
+
+  // 3. Goal preset chips
+  const goal1BChip = Array.from(
+    app.document.querySelectorAll("[data-preset-field='goal']")
+  ).find((c) => c.getAttribute("data-preset-val") === "1000000000");
+  assert(
+    goal1BChip !== undefined,
+    "R25: 1B Goal quick preset chip exists in DOM"
+  );
+  app.setSavingsGoalValue(1000000000);
+  assert(
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSavingsGoal").value
+    ) === 1000000000,
+    "R25: setSavingsGoalValue(1000000000) updated inputSavingsGoal to 1B"
+  );
+  assert(
+    goal1BChip.classList.contains("active"),
+    "R25: 1B Goal chip highlighted as active"
+  );
+
+  // 4. Auto Term Threshold preset chips
+  const thresh100MChip = Array.from(
+    app.document.querySelectorAll("[data-preset-field='autoTermThreshold']")
+  ).find((c) => c.getAttribute("data-preset-val") === "100000000");
+  assert(
+    thresh100MChip !== undefined,
+    "R25: 100M Auto Term Threshold quick preset chip exists in DOM"
+  );
+  app.setAutoTermThresholdValue(100000000);
+  assert(
+    app.parseFormattedNumber(
+      app.document.getElementById("inputAutoTermThreshold").value
+    ) === 100000000,
+    "R25: setAutoTermThresholdValue(100000000) updated Auto Term Threshold to 100M"
+  );
+  assert(
+    thresh100MChip.classList.contains("active"),
+    "R25: 100M Threshold chip highlighted as active"
+  );
+
+  // 5. Emergency Buffer Reserve preset chips
+  const buffer10MChip = Array.from(
+    app.document.querySelectorAll("[data-preset-field='emergencyBuffer']")
+  ).find((c) => c.getAttribute("data-preset-val") === "10000000");
+  assert(
+    buffer10MChip !== undefined,
+    "R25: 10M Emergency Buffer quick preset chip exists in DOM"
+  );
+  app.setEmergencyBufferValue(10000000);
+  assert(
+    app.parseFormattedNumber(
+      app.document.getElementById("inputEmergencyBuffer").value
+    ) === 10000000,
+    "R25: setEmergencyBufferValue(10000000) updated Emergency Buffer to 10M"
+  );
+  assert(
+    buffer10MChip.classList.contains("active"),
+    "R25: 10M Emergency Buffer chip highlighted as active"
   );
 
   console.log(
