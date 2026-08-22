@@ -40,7 +40,14 @@ function loadEnvironment() {
         set textContent(v) {
           this._innerText = String(v);
         },
-        innerHTML: "",
+        _innerHTML: "",
+        get innerHTML() {
+          return this._innerHTML;
+        },
+        set innerHTML(v) {
+          this._innerHTML = String(v);
+          if (v === "") this.children = [];
+        },
         children: [],
         parentElement: null,
         style: {},
@@ -901,6 +908,14 @@ async function runHelperTests() {
     },
     {
       id: "5",
+      name: "Auto Term #2 Matured",
+      principal: 60000000,
+      rate: 6.0,
+      status: "MATURED",
+      type: "AUTO_6M",
+    },
+    {
+      id: "6",
       name: "Withdrawal 1",
       principal: 30000000,
       rate: 0,
@@ -908,7 +923,7 @@ async function runHelperTests() {
       type: "Withdrawal",
     },
   ];
-  ctx.updateSavingsHubKPIs(mockPortfolio);
+  ctx.renderSavingsTable(mockPortfolio);
   // Total active locked principal = 100M + 200M + 150M = 450M
   // Active accounts = 3, Auto sweeps = 1
   // Weighted rate = (100*6 + 200*7.5 + 150*6.5) / 450 = (600 + 1500 + 975) / 450 = 3075 / 450 = 6.833%
@@ -923,6 +938,37 @@ async function runHelperTests() {
   assert(
     ctx.document.getElementById("kpiWeightedRate").innerText.startsWith("6.83"),
     `updateSavingsHubKPIs computed weighted average rate (6.83%/yr)`
+  );
+
+  const tbody = ctx.document.getElementById("savingsTableBody");
+  ctx.filterSavingsCategory("all");
+  assert(
+    tbody.children.length === 6,
+    `renderFilteredSavingsTable('all') shows all 6 accounts`
+  );
+
+  ctx.filterSavingsCategory("active_fixed");
+  assert(
+    tbody.children.length === 2,
+    `renderFilteredSavingsTable('active_fixed') shows 2 active fixed accounts`
+  );
+
+  ctx.filterSavingsCategory("auto_term");
+  assert(
+    tbody.children.length === 1,
+    `renderFilteredSavingsTable('auto_term') shows only 1 active auto-term account (excluding matured auto-terms)`
+  );
+
+  ctx.filterSavingsCategory("matured");
+  assert(
+    tbody.children.length === 2,
+    `renderFilteredSavingsTable('matured') shows 2 matured accounts (CSV + Auto Term)`
+  );
+
+  ctx.filterSavingsCategory("withdrawals");
+  assert(
+    tbody.children.length === 1,
+    `renderFilteredSavingsTable('withdrawals') shows 1 withdrawal`
   );
 
   // Test 19: Modal Lifecycle Controller & Dialog Safeguards (ADR-0014, Issue #12)

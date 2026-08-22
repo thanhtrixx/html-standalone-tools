@@ -25,7 +25,7 @@ Previously, the Savings Accounts table and the Simulation Milestones feed shared
    - Introduced instant client-side category filters without re-running the simulation engine:
      - `All`: All portfolio accounts and withdrawals.
      - `Active Fixed`: Active CSV and manual fixed-term accounts.
-     - `Auto Term`: Auto-term sweep deposits.
+     - `Auto Term`: Active auto-term sweep deposits.
      - `Matured`: Completed and matured accounts.
      - `Withdrawals`: Scheduled cash outflows.
 
