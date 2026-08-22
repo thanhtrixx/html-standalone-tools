@@ -57,3 +57,13 @@ _Avoid_: Target date, completion time, ETA
 **Scenario Comparison**:
 A side-by-side execution of two independent simulation parameter sets (Scenario A baseline and Scenario B custom/projected) to contrast wealth growth curves and milestone dates.
 _Avoid_: Sensitivity check, what-if multiplier, projection ratio
+
+### UI Input & Formatting
+
+**Currency Input Masking**:
+Live formatting of numerical monetary input fields with locale-aware thousand separators (dot `.` in `vi`, comma `,` in `en`) while preserving cursor positions during text insertion/deletion.
+_Avoid_: Number spinner, raw unformatted input, unmasked text
+
+**Dynamic Verbal Helper**:
+Real-time localized verbal representation of monetary quantities (e.g. `25 Triệu VND` / `25 Million VND`, `1.5 Tỷ VND` / `1.5 Billion VND`) displayed beneath currency inputs.
+_Avoid_: Tooltip translation, spelled-out popup, static text hint

@@ -43,6 +43,7 @@ npm run test:build    # Compacted build pipeline tests (13 tests)
 | **R21** | Vietnamese Language Support | Language selector + full i18n translations for Vietnamese (ADR-0003)                                                               | P1       |
 | **R22** | Annual Bonus & Cashflows    | Annual bonus multiplier (13th month salary) and recurring withdrawal schedule generator (ADR-0008)                                 | P1       |
 | **R23** | Strategy Persona Presets    | Strategy persona preset templates with 5-second undo safeguard (ADR-0010)                                                          | P1       |
+| **R24** | Currency Masking & Helpers  | Locale-aware thousand-separator masking (`.` for `vi`, `,` for `en`) with caret stability and dynamic verbal labels (ADR-0011)     | P1       |
 
 ---
 

@@ -372,7 +372,9 @@ async function runUIUXTests() {
   app.loadFromStorage();
 
   assert(
-    app.document.getElementById("inputSalary").value === "40000000",
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSalary").value
+    ) === 40000000,
     "R2: inputSalary restored accurately from localStorage"
   );
   assert(
@@ -383,7 +385,9 @@ async function runUIUXTests() {
   // Test R3: Reset All
   app.resetAll(true);
   assert(
-    app.document.getElementById("inputSalary").value === "25000000",
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSalary").value
+    ) === 25000000,
     "R3: Reset All restored default salary (25,000,000 VND)"
   );
   assert(
@@ -882,8 +886,12 @@ async function runUIUXTests() {
     "R23: applyPreset closed presets modal automatically"
   );
   assert(
-    app.document.getElementById("inputSalary").value === "60000000" &&
-      app.document.getElementById("inputSavingsGoal").value === "5000000000",
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSalary").value
+    ) === 60000000 &&
+      app.parseFormattedNumber(
+        app.document.getElementById("inputSavingsGoal").value
+      ) === 5000000000,
     "R23: applyPreset('fire_aspirant') loaded FIRE parameters (Salary: 60M, Goal: 5B)"
   );
   assert(
@@ -895,7 +903,9 @@ async function runUIUXTests() {
   // 3. 5-Second Undo rollback
   app.undoPresetApply();
   assert(
-    app.document.getElementById("inputSalary").value === salaryBeforePreset,
+    app.parseFormattedNumber(
+      app.document.getElementById("inputSalary").value
+    ) === app.parseFormattedNumber(salaryBeforePreset),
     `R23: undoPresetApply() restored previous salary ("${salaryBeforePreset}")`
   );
 
@@ -909,6 +919,73 @@ async function runUIUXTests() {
   assert(
     presetsModal.classList.contains("hidden"),
     "R23: Pressing Escape dismissed open presets modal"
+  );
+
+  // --- Test R24: Locale-Aware Currency Input Masking & Verbal Helpers (ADR-0011, Issue #8) ---
+  const salaryInput = app.document.getElementById("inputSalary");
+  const salaryHelper = app.document.getElementById("helperSalary");
+  assert(
+    salaryInput !== null && salaryHelper !== null,
+    "R24: inputSalary and helperSalary elements exist in DOM"
+  );
+  salaryInput.value = "35000000";
+  app.applyCurrencyMask(salaryInput, "en");
+  assert(
+    salaryInput.value === "35,000,000",
+    "R24: applyCurrencyMask formatted '35000000' to '35,000,000' with comma in English"
+  );
+  assert(
+    salaryHelper.textContent === "35 Million VND",
+    "R24: helperSalary displayed '35 Million VND' for 35,000,000 in English"
+  );
+
+  // Switch to Vietnamese
+  app.changeLanguage("vi");
+  assert(
+    salaryInput.value === "35.000.000",
+    "R24: changeLanguage('vi') updated thousand separator to dot '35.000.000'"
+  );
+  assert(
+    salaryHelper.textContent === "35 Triệu VND",
+    "R24: helperSalary updated to '35 Triệu VND' in Vietnamese"
+  );
+
+  // Goal helper (Billion / Tỷ)
+  const goalInput = app.document.getElementById("inputSavingsGoal");
+  const goalHelper = app.document.getElementById("helperSavingsGoal");
+  goalInput.value = "2500000000";
+  app.applyCurrencyMask(goalInput, "vi");
+  assert(
+    goalInput.value === "2.500.000.000",
+    "R24: inputSavingsGoal formatted to '2.500.000.000' in Vietnamese"
+  );
+  assert(
+    goalHelper.textContent === "2.5 Tỷ VND",
+    "R24: helperSavingsGoal displayed '2.5 Tỷ VND'"
+  );
+
+  // Switch back to English
+  app.changeLanguage("en");
+  assert(
+    goalInput.value === "2,500,000,000",
+    "R24: changeLanguage('en') updated goal to '2,500,000,000'"
+  );
+  assert(
+    goalHelper.textContent === "2.5 Billion VND",
+    "R24: helperSavingsGoal updated to '2.5 Billion VND' in English"
+  );
+
+  // Simulation runs cleanly with masked inputs without NaN
+  app.runSimulation();
+  assert(
+    !isNaN(
+      Number(
+        (
+          app.document.getElementById("txtTotalBalance").textContent || ""
+        ).replace(/[^0-9]/g, "")
+      )
+    ),
+    "R24: Simulation runs successfully and displays valid numerical total wealth with masked inputs"
   );
 
   console.log(
