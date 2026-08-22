@@ -1887,15 +1887,18 @@
         document.getElementById("inputTargetDate").value = formatDate(target);
         runSimulation();
       }
-      function resetAll() {
-        try {
-          if (
-            typeof window !== "undefined" &&
-            window.confirm &&
-            !confirm("Reset all parameters and CSV data to defaults?")
-          )
-            return;
-        } catch (e) {}
+      function resetAll(force = false) {
+        if (
+          !force &&
+          typeof window !== "undefined" &&
+          window.confirm &&
+          typeof confirm === "function"
+        ) {
+          try {
+            if (!confirm("Reset all parameters and CSV data to defaults?"))
+              return;
+          } catch (e) {}
+        }
         localStorage.clear();
         syncCSVData(JSON.parse(JSON.stringify(DEFAULT_CSV_DATA)));
         document.getElementById("inputTargetDate").value = formatDate(
@@ -2528,23 +2531,27 @@
           };
           window.simResult = simResult;
 
+          // Task 2.1 (R1, R2): Synchronous save
+          saveToStorage();
+
           // --- RENDER TABLES & CHARTS ---
           renderSavingsTable(res.allSavings, res.simTargetDate);
           renderSimulationLogs(res.simulationLogs);
-          renderGrowthChart(res.dailySnapshots, finalSnapshot, inflationRate);
-          renderAllocationChart(
-            finalSnapshot.poolBalance,
-            finalSnapshot.fixedSavingsBalance
-          );
-          renderMonthlyIncomeChart(
-            res.monthlyCashflows,
-            res.monthlyWithdrawals
-          );
-          renderYearlyTable(res.dailySnapshots, res.yearlyCashflows);
-          renderHeatmapChart(res.dailySnapshots);
-
-          // Task 2.1 (R1, R2): Synchronous save
-          saveToStorage();
+          try {
+            renderGrowthChart(res.dailySnapshots, finalSnapshot, inflationRate);
+            renderAllocationChart(
+              finalSnapshot.poolBalance,
+              finalSnapshot.fixedSavingsBalance
+            );
+            renderMonthlyIncomeChart(
+              res.monthlyCashflows,
+              res.monthlyWithdrawals
+            );
+            renderYearlyTable(res.dailySnapshots, res.yearlyCashflows);
+            renderHeatmapChart(res.dailySnapshots);
+          } catch (chartErr) {
+            console.warn("Chart rendering notice:", chartErr);
+          }
         } catch (e) {
           showToast("Simulation error: " + e.message, "error");
           console.error(e);
@@ -2615,7 +2622,18 @@
 
       // --- CHART.JS VISUALIZATIONS (Enhanced R13, R18) ---
       function renderGrowthChart(snapshots, finalSnapshot, inflationRate) {
-        const ctx = document.getElementById("chartGrowth").getContext("2d");
+        const canvas = document.getElementById("chartGrowth");
+        if (!canvas) return;
+        const existing = Chart.getChart(canvas);
+        if (existing) existing.destroy();
+        if (growthChart) {
+          try {
+            growthChart.destroy();
+          } catch (e) {}
+          growthChart = null;
+        }
+
+        const ctx = canvas.getContext("2d");
         const step = Math.max(1, Math.floor(snapshots.length / 60));
         const filtered = snapshots.filter(
           (_, idx) => idx % step === 0 || idx === snapshots.length - 1
@@ -2637,7 +2655,6 @@
           });
         }
 
-        if (growthChart) growthChart.destroy();
         const datasets = [
           {
             label: "Total",
@@ -2764,8 +2781,18 @@
       }
 
       function renderAllocationChart(poolBalance, fixedBalance) {
-        const ctx = document.getElementById("chartAllocation").getContext("2d");
-        if (allocationChart) allocationChart.destroy();
+        const canvas = document.getElementById("chartAllocation");
+        if (!canvas) return;
+        const existing = Chart.getChart(canvas);
+        if (existing) existing.destroy();
+        if (allocationChart) {
+          try {
+            allocationChart.destroy();
+          } catch (e) {}
+          allocationChart = null;
+        }
+
+        const ctx = canvas.getContext("2d");
         allocationChart = new Chart(ctx, {
           type: "doughnut",
           data: {
@@ -2800,9 +2827,18 @@
         });
       }
       function renderMonthlyIncomeChart(monthlyCashflows, monthlyWithdrawals) {
-        const ctx = document
-          .getElementById("chartMonthlyIncome")
-          .getContext("2d");
+        const canvas = document.getElementById("chartMonthlyIncome");
+        if (!canvas) return;
+        const existing = Chart.getChart(canvas);
+        if (existing) existing.destroy();
+        if (monthlyIncomeChart) {
+          try {
+            monthlyIncomeChart.destroy();
+          } catch (e) {}
+          monthlyIncomeChart = null;
+        }
+
+        const ctx = canvas.getContext("2d");
         const labels = Object.keys(monthlyCashflows).sort();
         const salaryData = labels.map((k) => monthlyCashflows[k].salary || 0);
         const interestData = labels.map(
@@ -2814,7 +2850,6 @@
             : 0
         );
         const hasWithdrawals = withdrawalData.some((v) => v > 0);
-        if (monthlyIncomeChart) monthlyIncomeChart.destroy();
         const datasets = [
           {
             label: "Salary Deposited",
@@ -2878,11 +2913,19 @@
         });
       }
       function renderGoalRing(currentTotal, goal) {
-        const ctx = document.getElementById("chartGoalRing2");
-        if (!ctx) return;
-        if (goalRingChart2) goalRingChart2.destroy();
+        const canvas = document.getElementById("chartGoalRing2");
+        if (!canvas) return;
+        const existing = Chart.getChart(canvas);
+        if (existing) existing.destroy();
+        if (goalRingChart2) {
+          try {
+            goalRingChart2.destroy();
+          } catch (e) {}
+          goalRingChart2 = null;
+        }
+
         const pct = Math.min(100, (currentTotal / goal) * 100);
-        goalRingChart2 = new Chart(ctx.getContext("2d"), {
+        goalRingChart2 = new Chart(canvas.getContext("2d"), {
           type: "doughnut",
           data: {
             labels: ["Achieved", "Remaining"],
