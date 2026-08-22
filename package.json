@@ -16,6 +16,8 @@
     "test:helpers": "node tests/helpers.test.js",
     "test:ui": "node tests/ui-ux.test.js",
     "format": "prettier --write .",
+    "lint:check": "prettier --check .",
+    "pack:release": "node scripts/pack-release.js",
     "prepare": "husky"
   },
   "repository": {

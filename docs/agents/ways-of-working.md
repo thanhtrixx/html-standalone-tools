@@ -16,18 +16,23 @@ flowchart TD
     subgraph P2["2. GitHub Flow &amp; TDD"]
         Branch["Branch per Issue<br/>(feat/issue-&lt;n&gt;-...)"] --> TDD["Write Tests (TDD)"]
         TDD --> Impl["Implementation"]
-        Impl --> Verify["npm run build &amp;&amp; npm test<br/>(100% Green)"]
+        Impl --> LocalVerify["Local Verify<br/>(npm run lint:check &amp;&amp; npm test)"]
     end
 
-    subgraph P3["3. PR, Review &amp; Merge"]
-        PR["Create PR<br/>(gh pr create --body &quot;Closes #&lt;n&gt;&quot;)"] --> Review["Code &amp; Spec Review"]
-        Review --> Merge["Merge PR"]
-        Merge --> VerifyAC["Verify ACs [x]"]
+    subgraph P3["3. PR, CI Gate &amp; Merge"]
+        PR["Create PR<br/>(gh pr create --body &quot;Closes #&lt;n&gt;&quot;)"] --> CIGate["Automated CI Quality Gate<br/>(pr-verify.yml: Lint, Build, Tests)"]
+        CIGate --> Review["Code &amp; Spec Review"]
+        Review --> Merge["Merge PR to main"]
+    end
+
+    subgraph P4["4. Automated Release &amp; Closure"]
+        Merge --> CDRelease["Automated CD Pipeline<br/>(release.yml: SemVer Tag &amp; GitHub Release)"]
+        CDRelease --> VerifyAC["Verify ACs [x]"]
         VerifyAC --> Close["Close Issue<br/>(gh issue close)"]
     end
 
     Issues --> Branch
-    Verify --> PR
+    LocalVerify --> PR
 ```
 
 <details>
@@ -43,13 +48,19 @@ flowchart TD
 [2. GitHub Flow & TDD]                 Branch per Issue (`feat/issue-<n>-...`)
        │                                      │
        ▼                                      ▼
-  Write Tests (TDD) ──► Implementation ──► npm run build && npm test (100% Green)
+  Write Tests (TDD) ──► Implementation ──► Local Verify (`npm run lint:check && npm test`)
                                               │
                                               ▼
-[3. PR, Review & Merge]                Create PR (`gh pr create --body "Closes #<n>"`)
+[3. PR, CI Gate & Merge]               Create PR (`gh pr create --body "Closes #<n>"`)
        │                                      │
        ▼                                      ▼
-  Code & Spec Review ──► Merge PR ──► Verify ACs `[x]` ──► Close Issue (`gh issue close`)
+  Automated CI Gate (pr-verify.yml) ──► Code & Spec Review ──► Merge PR to main
+                                                                  │
+                                                                  ▼
+[4. Release & Closure]                 Automated CD Release (`release.yml`)
+       │                                      │
+       ▼                                      ▼
+  GitHub Release & Assets Uploaded ──► Verify ACs `[x]` ──► Close Issue (`gh issue close`)
 ```
 
 </details>
@@ -93,16 +104,16 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
 3. **Test-First Implementation (TDD)**:
    - Add/update unit test cases in `tests/*.test.js` asserting observable behaviors and acceptance criteria.
    - Implement the feature/fix cleanly adhering to repository constraints (zero-runtime build dependencies, isolated tool directory).
-4. **100% Automated Verification**:
-   - Execute the entire verification suite:
+4. **100% Local Automated Verification**:
+   - Execute the local verification suite:
      ```bash
-     npm run build && npm test
+     npm run lint:check && npm run build && npm test
      ```
-   - Build checks, pure simulation unit tests, helper tests, UI/UX requirement tests, and i18n parity tests must pass with zero failures.
+   - Formatting checks, build checks, pure simulation unit tests, helper tests, UI/UX requirement tests, and i18n parity tests must pass with zero failures.
 
 ---
 
-## Phase 3: Pull Request, Review, Merge & Closure
+## Phase 3: Pull Request, CI Quality Gate & Review
 
 1. **Commit & Push**:
    - Commit with conventional commit messages (`feat(...)`, `fix(...)`, `test(...)`, `docs(...)`).
@@ -126,14 +137,32 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
    ## Test Verification
    - Verified with automated test suites (\`npm test\`)."
    ```
-3. **Review & Merge Gate**:
+3. **Automated CI Quality Gate (`pr-verify.yml`)**:
+   - The PR automatically triggers the GitHub Actions CI pipeline:
+     - Prettier code style validation (`npm run lint:check`).
+     - Standalone compaction build (`npm run build`).
+     - Complete automated test suite (`npm test`).
+   - PR runs feature auto-cancellation (`cancel-in-progress: true`) on subsequent pushes to conserve runner time.
+   - **All checks must be 100% green before approval.**
+4. **Review & Merge Gate**:
    - Conduct peer review or automated agent review (standards + spec conformance).
    - **MANDATORY**: Merge the PR into `main` before closing the issue:
    ```bash
    gh pr merge <pr-number> --merge --delete-branch
    # Or squash: gh pr merge <pr-number> --squash --delete-branch
    ```
-4. **Verify Acceptance Criteria & Close Issue**:
+
+---
+
+## Phase 4: Automated Build & Release, Verification & Closure
+
+1. **Automated CD Pipeline (`release.yml`)**:
+   - Merging to `main` automatically triggers the release workflow:
+     - Full build and test validation suite runs.
+     - Next Semantic Version tag (`v*.*.*`) is computed from Conventional Commits.
+     - Release assets are packaged (named standalone `.html` files + unified `.zip` bundle).
+     - Annotated GitHub Release is published with generated changelog notes.
+2. **Verify Acceptance Criteria & Close Issue**:
    - Switch back to `main` and pull latest changes (`git checkout main && git pull`).
    - Double-check all Acceptance Criteria against the merged code and test suite.
    - Update all issue checkboxes to completed (`[x]`).
@@ -147,6 +176,8 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
 ## 🛡️ Non-Negotiable Quality Guardrails
 
 - **No Issue Closed Without Merged PR**: Every issue must have a corresponding PR merged into `main` prior to issue closure.
+- **CI Gate Must Be 100% Green**: No PR may be merged if the `pr-verify.yml` status check is failing or pending.
+- **Automated Release on Merge**: Releases and standalone download assets are published automatically on `main` via `release.yml`.
 - **Observable Behavior Over Implementation Details**: Tests must assert observable outputs (simulation logs, calculations, DOM state, URL payloads), not private variables.
 - **Zero-Regression Standard**: All existing tests must pass on every commit and PR.
 - **Documentation Integrity**: ADRs, `CONTEXT.md`, and translation key parity (`TRANSLATIONS.en` vs `TRANSLATIONS.vi`) must be maintained in sync with code changes.

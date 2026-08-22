@@ -10,19 +10,25 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 
 ```
 /
+├── .github/
+│   └── workflows/
+│       ├── pr-verify.yml                       # CI quality gate on Pull Requests
+│       └── release.yml                         # Automated SemVer release on merge
 ├── AGENTS.md                                   # Agent skills configuration
 ├── CONTEXT-MAP.md                              # Multi-context registry of all tools
 ├── README.md                                   # Repository overview and guidelines
-├── package.json                                # Build and test scripts
+├── package.json                                # Build, lint, and test scripts
 ├── scripts/
-│   └── build.js                                # HTML/CSS/JS compaction engine
+│   ├── build.js                                # HTML/CSS/JS compaction engine
+│   └── pack-release.js                         # Production release asset packager
 ├── tests/
 │   └── build.test.js                           # Automated build pipeline tests
 ├── docs/
 │   ├── adr/                                    # System-wide Architecture Decision Records
 │   │   ├── 0001-multi-tool-repository-structure.md
 │   │   ├── 0002-zero-build-standalone-single-file-html-constraint.md (superseded)
-│   │   └── 0003-compacted-standalone-html-build-pipeline.md
+│   │   ├── 0003-compacted-standalone-html-build-pipeline.md
+│   │   └── 0004-ci-pr-verification-and-automated-release-pipeline.md
 │   └── agents/                                 # Issue tracker & skill specifications
 └── personal-finance-savings-predictor/         # Standalone Tool Directory
     ├── index.html                              # Source application (HTML/CSS/JS)
@@ -46,11 +52,12 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 1. **Compacted Standalone Single-File Applications**: Source files are authored with readability, maintainability, and comments. The build engine inlines local resources and minifies HTML, inline CSS, and JavaScript into a single, compact `dist/index.html` file per tool for optimal web delivery payloads.
 2. **Zero Backend & Instant Portability**: Every tool runs completely client-side without servers or databases. Both source and compacted HTML files can be opened directly via `file://` or hosted on any static web host.
 3. **Strict Directory Isolation**: Tools are completely decoupled. They never share runtime state, global dependencies, or storage keys across directories.
-4. **Dedicated Domain Modeling**: Each tool maintains its own `CONTEXT.md` glossary and `docs/adr/` decision records to keep requirements explicit and avoid semantic drift.
+4. **Automated CI/CD Quality Gates & Release Delivery**: All Pull Requests must pass automated Prettier formatting, compaction build, and 100% of test suites (`pr-verify.yml`). Merging to `main` automatically computes Semantic Version tags and publishes GitHub Releases with standalone `.html` and unified `.zip` downloads (`release.yml`).
+5. **Dedicated Domain Modeling**: Each tool maintains its own `CONTEXT.md` glossary and `docs/adr/` decision records to keep requirements explicit and avoid semantic drift.
 
 ---
 
-## 🚀 Build & Test Commands
+## 🚀 Build, Lint & Test Commands
 
 ```bash
 # Build all standalone tools to compacted dist/ outputs
@@ -63,8 +70,14 @@ npm run build:predictor
 # Run automated tests verifying build pipeline and script integrity
 npm test
 
+# Verify code formatting with Prettier (CI Gate)
+npm run lint:check
+
 # Format source files with Prettier
 npm run format
+
+# Package release assets (standalone HTMLs + unified zip)
+npm run pack:release
 ```
 
 ---
@@ -103,9 +116,11 @@ This repository follows a strict **GitHub Flow** and **Test-Driven Delivery** pr
 1. **Spec & Issue Decomposition**: Requirements are decomposed into small vertical slices with checkable Acceptance Criteria (`- [ ]`) and tracked via GitHub Issues.
 2. **Branch per Issue**: Every feature or fix is developed in an isolated branch branched from `main` (`feat/issue-<n>-<slug>` or `fix/issue-<n>-<slug>`).
 3. **Test-Driven Development (TDD)**: Automated test suites in `tests/` must be authored/updated and passing (`100%`) before PR creation.
-4. **Pull Request & Merge Required Before Closure**:
+4. **Automated CI Quality Gate**: Opening a PR triggers `.github/workflows/pr-verify.yml` running format checks, compaction build, and tests.
+5. **Pull Request & Merge Required Before Closure**:
    - Open a PR linking the issue (`gh pr create --body "Closes #<n>"`).
    - Review and merge the PR into `main` (`gh pr merge`).
+   - Merging to `main` triggers `.github/workflows/release.yml` for automated SemVer tagging and GitHub Release asset packaging.
    - Verify all Acceptance Criteria against the merged build.
    - Close the issue only after successful merge and verification.
 
