@@ -1,677 +1,258 @@
 # 🧪 Personal Finance Savings Predictor — Requirements & Test Plan
 
-> **Target:** `index.html`  
-> **Goal:** Validate all Phase 1–5 features work correctly  
-> **Method:** Automated Node test suites (`npm test`) + Browser console / UI tests
+> **Target:** `personal-finance-savings-predictor/index.html` & `dist/personal-finance-savings-predictor/index.html`  
+> **Goal:** Deterministically validate all 28 feature requirements (R1–R28) across financial simulation mathematics, utility helpers, UI/UX DOM components, bilingual i18n parity, and compacted build packaging.  
+> **Method:** Automated Node.js test runner (`npm test`) + Browser DevTools console verification + Comprehensive manual QA checklist.
 
 ```bash
 # Automated Test Suites (434 assertions passing across 5 suites)
-npm test              # Run all 5 suites (434 assertions)
-npm run test:sim      # Simulation engine unit tests (63 assertions)
-npm run test:helpers  # Formatters, LZString & CSV editor tests (135 assertions)
-npm run test:ui       # UI/UX integration tests R1-R28 (138 assertions)
-npm run test:i18n     # Bilingual translation parity tests (60 assertions)
-npm run test:build    # Compacted build pipeline tests (38 assertions)
+npm test              # Run all 5 suites with unified multi-format reporting (434 assertions)
+npm run test:sim      # Pure simulation engine unit tests & mathematical edge cases (63 assertions)
+npm run test:helpers  # Currency masking, formatters, LZ-String & CSV editor tests (135 assertions)
+npm run test:ui       # UI/UX component & DOM integration tests for R1-R28 (138 assertions)
+npm run test:i18n     # Bilingual translation dictionary parity & verbal localization (60 assertions)
+npm run test:build    # Compacted build pipeline & release packaging verification (38 assertions)
 ```
 
 ---
 
-## 📋 Feature Requirements Matrix
+## 📋 Feature Requirements Matrix (R1–R28)
 
-| ID      | Feature                     | Requirement                                                                                                                                                                                           | Priority |
-| ------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| **R1**  | CSV Persistence             | Auto-save CSV data to localStorage; auto-load on reload                                                                                                                                               | P0       |
-| **R2**  | Parameter Persistence       | Save/load salary, growth, inflation, goal, rates to localStorage with versioned schema migration                                                                                                      | P0       |
-| **R3**  | Reset All                   | Clear localStorage + restore default values                                                                                                                                                           | P1       |
-| **R4**  | Salary Growth               | Apply annual compound growth to monthly salary on 12-month anniversaries                                                                                                                              | P0       |
-| **R5**  | Inflation Adjustment        | Calculate real value (inflation-adjusted); toggle on/off                                                                                                                                              | P0       |
-| **R6**  | Withdrawals                 | Track manual withdrawals in simulation logs and charts with deficit handling                                                                                                                          | P1       |
-| **R7**  | Goal Tracking               | Show progress bar + ring chart when savings goal set                                                                                                                                                  | P1       |
-| **R8**  | Shareable Link              | Serialize params + CSV via LZ-String compression (ADR-0010) with legacy Base64 fallback; auto-load on visit                                                                                           | P1       |
-| **R9**  | Theme Toggle                | Light/dark toggle; persist preference; CSS transitions                                                                                                                                                | P2       |
-| **R10** | Onboarding Tour             | 5-step guided tour on first visit; skip/show again                                                                                                                                                    | P2       |
-| **R11** | Keyboard Shortcuts          | Enter=run, Ctrl+S=save, Esc=close modals                                                                                                                                                              | P2       |
-| **R12** | Toast Notifications         | Slide-in toasts auto-dismiss after 3s                                                                                                                                                                 | P2       |
-| **R13** | Growth Chart                | Date range filter (All/3M/6M/1Y); Real vs Nominal toggle                                                                                                                                              | P2       |
-| **R14** | Heatmap Calendar            | 12-month color intensity grid                                                                                                                                                                         | P2       |
-| **R15** | YoY Table                   | Year-by-year breakdown with growth %                                                                                                                                                                  | P2       |
-| **R16** | CSV Editor                  | Add/Edit/Delete rows; import/export Bank field                                                                                                                                                        | P1       |
-| **R17** | Scenario Comparison         | Compare current vs projected 2-year scenario via dual-pass simulation                                                                                                                                 | P3       |
-| **R18** | Export Chart Image          | Download growth chart as PNG                                                                                                                                                                          | P3       |
-| **R19** | Print Summary               | Print-friendly layout via `window.print()`                                                                                                                                                            | P2       |
-| **R20** | Auto Term Allocation Rule   | Sweep pool balance above buffer into single term deposit of $N$ calendar months via `addMonths` when pool ≥ threshold (ADR-0005/6)                                                                    | P0       |
-| **R21** | Vietnamese Language Support | Language selector + full i18n translations for Vietnamese (ADR-0003)                                                                                                                                  | P1       |
-| **R22** | Annual Bonus & Cashflows    | Annual bonus multiplier (13th month salary) and recurring withdrawal schedule generator (ADR-0008)                                                                                                    | P1       |
-| **R23** | Strategy Persona Presets    | Strategy persona preset templates with 5-second undo safeguard (ADR-0010)                                                                                                                             | P1       |
-| **R24** | Currency Masking & Helpers  | Locale-aware thousand-separator masking (`.` for `vi`, `,` for `en`) with caret stability and dynamic verbal labels (ADR-0011)                                                                        | P1       |
-| **R25** | Quick Presets & Live Recalc | Quick preset chips and additive modifier chips under inputs with active state highlighting and debounced live simulation updates                                                                      | P1       |
-| **R26** | Multi-Year Calendar Heatmap | Continuous multi-year matrix (no dropdown), Annual Delta & YoY % columns, Total Wealth vs Net Inflow mode toggle, and popover breakdown tooltips (ADR-0012)                                           | P1       |
-| **R27** | Full-Width Savings Hub      | Dedicated full-width layout, live KPI pills (Locked Principal, Active, Sweeps, Weighted Rate), and instant category filters (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`) (ADR-0013) | P1       |
-| **R28** | Modal Layering & Safeguards | Centralized modal lifecycle controller (`dismissAllModals()`), single-active-modal invariant, backdrop dismissals, and clean first-time onboarding walkthrough without popup clashing (ADR-0014)      | P1       |
+| ID      | Feature                          | Requirement                                                                                                                                 | ADR Reference                                                                                                                                                                     | Priority |
+| :------ | :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- |
+| **R1**  | CSV Persistence                  | Auto-save active portfolio CSV data to `localStorage`; auto-load on page reload                                                             | —                                                                                                                                                                                 | P0       |
+| **R2**  | Parameter Persistence            | Save/load monthly salary, growth, inflation, goal, and rate inputs to `localStorage` with versioned schema upgrades                         | —                                                                                                                                                                                 | P0       |
+| **R3**  | Reset All                        | Clear `localStorage` and restore default financial parameters and portfolio accounts                                                        | —                                                                                                                                                                                 | P1       |
+| **R4**  | Salary Growth                    | Apply annual compound escalation to monthly salary on exact 12-month simulation anniversaries                                               | [`ADR-0002`](./docs/adr/0002-anniversary-based-salary-escalation.md)                                                                                                              | P0       |
+| **R5**  | Inflation Adjustment             | Calculate real purchasing power discounted continuously from start date; toggle nominal vs real value display                               | —                                                                                                                                                                                 | P0       |
+| **R6**  | Withdrawals                      | Deduct scheduled one-time outflows from Flexible Pool with deficit logging and salary replenishment                                         | [`ADR-0001`](./docs/adr/0001-flexible-pool-deficit-handling.md)                                                                                                                   | P1       |
+| **R7**  | Goal Milestone Tracking          | Render goal progress bar, milestone achievement date badge, and animated ring chart                                                         | —                                                                                                                                                                                 | P1       |
+| **R8**  | Resilient Shareable Link         | Encode state into URL hash using LZ-String compression with automatic decompression fallback                                                | [`ADR-0010`](./docs/adr/0010-lz-string-url-compression-and-strategy-persona-presets.md), [`ADR-0015`](./docs/adr/0015-resilient-url-state-sharing-and-dual-mode-decompression.md) | P1       |
+| **R9**  | Theme Toggle                     | Seamless Light/Dark theme switching with class persistence on `<html>` and CSS color transitions                                            | —                                                                                                                                                                                 | P2       |
+| **R10** | Onboarding Walkthrough           | 5-step interactive onboarding tour for first-time visitors with skip and re-launch capabilities                                             | —                                                                                                                                                                                 | P2       |
+| **R11** | Keyboard Shortcuts               | Accessibility shortcuts (`Enter` to simulate, `Ctrl+S`/`Cmd+S` to save, `Escape` to close active modal)                                     | —                                                                                                                                                                                 | P2       |
+| **R12** | Toast Notification Queue         | Stacking slide-in toasts auto-dismissing after 3 seconds with colored success, warning, and error states                                    | —                                                                                                                                                                                 | P2       |
+| **R13** | Growth Timeline Chart            | Interactive Chart.js timeline with preset date filters (`All`, `3M`, `6M`, `1Y`) and Real vs Nominal curves                                 | —                                                                                                                                                                                 | P2       |
+| **R14** | Monthly Heatmap Grid             | 12-column color-intensity calendar grid mapping monthly liquidity density and net wealth shifts                                             | [`ADR-0012`](./docs/adr/0012-continuous-multi-year-calendar-heatmap-and-tooltips.md)                                                                                              | P2       |
+| **R15** | Tabbed Analytics Hub             | Consolidated tab switcher integrating Wealth Timeline, Heatmap Matrix, and Year-over-Year (YoY) breakdown                                   | [`ADR-0009`](./docs/adr/0009-consolidated-tabbed-analytics-hub.md)                                                                                                                | P2       |
+| **R16** | CSV Editor Modal                 | Full in-browser CRUD editor for portfolio accounts with date validation (`End Date >= Start Date`)                                          | —                                                                                                                                                                                 | P1       |
+| **R17** | Scenario Comparison              | Dual-pass comparison workbench evaluating Scenario A baseline vs Scenario B with dynamic delta badges                                       | [`ADR-0007`](./docs/adr/0007-interactive-dual-pass-scenario-comparison-workbench.md)                                                                                              | P2       |
+| **R18** | Export Chart Image               | Client-side PNG export of the Growth Timeline chart with solid dark background fill                                                         | —                                                                                                                                                                                 | P3       |
+| **R19** | Print Summary                    | Dedicated CSS `@media print` layout formatting key metrics and charts for PDF export or paper printing                                      | —                                                                                                                                                                                 | P3       |
+| **R20** | Auto Term Allocation Rule        | Sweep excess pool liquidity into a consolidated $N$-month term deposit above threshold and emergency buffer                                 | [`ADR-0005`](./docs/adr/0005-unified-threshold-auto-term-allocation.md), [`ADR-0006`](./docs/adr/0006-liquid-emergency-buffer-reserve-in-auto-term-allocation.md)                 | P0       |
+| **R21** | Bilingual Language Support       | Full Vietnamese & English localization (`TRANSLATIONS.en`/`vi`) with locale-standard numbers and dates                                      | [`ADR-0003`](./docs/adr/0003-locale-aware-number-and-date-formatting.md)                                                                                                          | P1       |
+| **R22** | Annual Bonus & Cashflows         | Configurable annual bonus multiplier (e.g. 13th month salary) and recurring withdrawal schedule generator                                   | [`ADR-0008`](./docs/adr/0008-annual-bonus-inflow-and-recurring-cashflow-generator.md)                                                                                             | P1       |
+| **R23** | Strategy Persona Presets         | One-click financial strategies (Fresh Grad, FIRE, Home Downpayment, Bank Ladder) with 5s undo safeguard                                     | [`ADR-0010`](./docs/adr/0010-lz-string-url-compression-and-strategy-persona-presets.md)                                                                                           | P1       |
+| **R24** | Currency Masking & Verbal Labels | Live thousand-separator input masking (`.` in `vi`, `,` in `en`) and dynamic verbal quantity helpers                                        | [`ADR-0011`](./docs/adr/0011-locale-aware-currency-input-masking-and-verbal-helpers.md)                                                                                           | P1       |
+| **R25** | Quick Presets & Live Recalc      | Target value chips and additive delta modifiers (`+5M`, `+10M`, `+500M`) with reactive debounced execution                                  | —                                                                                                                                                                                 | P1       |
+| **R26** | Continuous Multi-Year Heatmap    | Matrix rendering all simulation years with Net Inflow vs Total Wealth modes and popover breakdown tooltips                                  | [`ADR-0012`](./docs/adr/0012-continuous-multi-year-calendar-heatmap-and-tooltips.md)                                                                                              | P1       |
+| **R27** | Full-Width Savings Accounts Hub  | Dedicated portfolio table with aggregated KPI pills and category filter tabs (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`) | [`ADR-0013`](./docs/adr/0013-full-width-savings-hub-and-category-filtering.md)                                                                                                    | P1       |
+| **R28** | Modal Layering & Safeguards      | Centralized modal lifecycle controller (`dismissAllModals()`), single-active-dialog invariant, and backdrop dismissals                      | [`ADR-0014`](./docs/adr/0014-modal-lifecycle-and-dialog-layering-safeguards.md)                                                                                                   | P1       |
 
 ---
 
-## 🧪 Browser Console Unit Tests
+## 🏗️ Automated Test Suites
 
-Copy and paste each block into the browser DevTools console (`F12` → Console tab) to verify functionality.
+The repository features a high-performance, zero-dependency Node.js test framework with a unified test runner (`scripts/test-runner.js`) generating interactive HTML, structured JSON, and standard JUnit XML reports in `test-reports/`.
 
-### 🔹 R1/R2: Data Persistence
+```mermaid
+flowchart TD
+    Runner["Unified Test Runner (scripts/test-runner.js)"]
+
+    Runner --> S1["1. Simulation Engine (tests/simulation.test.js)<br/>63 assertions"]
+    Runner --> S2["2. Calculation Helpers (tests/helpers.test.js)<br/>135 assertions"]
+    Runner --> S3["3. UI/UX & DOM Component Interactions (tests/ui-ux.test.js)<br/>138 assertions"]
+    Runner --> S4["4. Bilingual i18n Parity (tests/i18n.test.js)<br/>60 assertions"]
+    Runner --> S5["5. Compacted Build Pipeline (tests/build.test.js)<br/>38 assertions"]
+
+    S1 & S2 & S3 & S4 & S5 --> Report["Multi-Format Reports<br/>• test-reports/index.html<br/>• test-reports/results.json<br/>• test-reports/junit.xml"]
+```
+
+### Suite 1: Pure Simulation Engine Math & Sweep Logic (`tests/simulation.test.js`)
+
+- **Scope**: Core mathematical invariants of `simulate()`, day-by-day cashflow evaluation, interest compounding, and milestone detection.
+- **Key Assertions (63 tests)**:
+  - Total wealth invariant on every simulation day: `totalWealth === poolBalance + fixedSavingsBalance`.
+  - Zero/empty parameter handling without division by zero or NaN.
+  - Concurrent same-day deposit maturities and lump-sum pool replenishment.
+  - Exact boundary evaluation for Auto Term sweeps (`pool == threshold + buffer` vs `pool == threshold + buffer - 1`).
+  - Multi-year compound salary escalation on exact 12-month anniversaries.
+  - Large withdrawal deficit handling with negative pool balance and monthly salary replenishment.
+  - Day-0 and final-day boundary goal milestone detection.
+  - Day-precise multi-year continuous inflation discounting.
+  - Annual bonus multiplier calculation and custom deposit month execution.
+  - Complex diversified multi-asset portfolios.
+
+### Suite 2: Calculation & Utility Helpers (`tests/helpers.test.js`)
+
+- **Scope**: Number parsing, formatting, verbal tier scaling, currency masking, LZ-String compression, and CSV table logic.
+- **Key Assertions (135 tests)**:
+  - Trillion and negative number formatting and parsing.
+  - Robust stripping of noisy prefix/suffix strings and currency tokens.
+  - Verbal tier scaling across Billions (`Tỷ`), Millions (`Triệu`), Thousands (`Nghìn`), and sub-thousands in EN and VI.
+  - Currency input masking typing simulations and caret position preservation.
+  - Resilient recovery from corrupted or malformed LZ-String URL hashes.
+  - Persona presets configuration validation across all 4 predefined profiles.
+  - Recurring cashflow generator for Monthly, Quarterly, and Annual schedules.
+  - Aggregated portfolio KPI calculations for empty, active, and matured-only portfolios.
+  - CSV Editor date range validation rejecting `End Date < Start Date`.
+  - Safe no-op executions for dialog controllers when 0 modals are open.
+
+### Suite 3: UI/UX & DOM Component Interactions (`tests/ui-ux.test.js`)
+
+- **Scope**: Complete DOM integration test suite across all user interface requirements (R1–R28).
+- **Key Assertions (138 tests)**:
+  - `localStorage` persistence and versioned schema migration.
+  - Goal progress bar, ring chart canvas, and milestone achievement status badge.
+  - URL hash generation and dynamic hash change hydration without page reload.
+  - Theme switching with dark/light class persistence.
+  - Onboarding tour walkthrough navigation and skip completion.
+  - Keyboard navigation (`Enter` to simulate, `Ctrl+S` to save, `Escape` to close active modal).
+  - Toast notification queue rendering and dismissals.
+  - Tabbed Analytics Hub switching (`timeline`, `heatmap`, `yoy`).
+  - Continuous multi-year heatmap matrix rendering and popover tooltip breakdown.
+  - Scenario B comparison workbench, side-by-side metrics, and negative delta badge styling.
+  - Full-width Savings Accounts Hub KPI pills and instant category filtering tabs.
+  - Centralized modal lifecycle controller (`dismissAllModals()`) enforcing single-active-dialog invariants.
+
+### Suite 4: Bilingual i18n Parity & Verbal Localization (`tests/i18n.test.js`)
+
+- **Scope**: 1-to-1 dictionary parity, verbal helpers, and template interpolation safety.
+- **Key Assertions (60 tests)**:
+  - 100% 1-to-1 key parity between `TRANSLATIONS.en` and `TRANSLATIONS.vi`.
+  - Zero Vietnamese diacritics in English dictionary.
+  - Locale-standard currency formatting (`250,000,000 VND` in EN vs `250.000.000 ₫` in VI).
+  - Locale-standard date formatting (`YYYY-MM-DD` in EN vs `DD/MM/YYYY` in VI).
+  - Dynamic log placeholder interpolation (zero unreplaced `{months}`, `{amount}`, `{count}`, `{rate}` tokens).
+  - 100% resolution coverage for all 169 `data-i18n` and 12 `data-i18n-title` HTML DOM attributes.
+
+### Suite 5: Compacted Build Pipeline & Packaging Verification (`tests/build.test.js`)
+
+- **Scope**: Automated tool discovery, HTML asset inlining, minification savings, and production deliverable execution.
+- **Key Assertions (38 tests)**:
+  - Automatic tool discovery across repository directories.
+  - Inlining of local CSS and JS files into self-contained HTML.
+  - Minification compaction achieving > 30% file size reduction.
+  - Deliverable verification ensuring standalone `dist/` files exist and start with valid `<!doctype html>`.
+  - Preservation of all 15 critical interactive DOM element IDs in compacted deliverables.
+  - Successful sandbox execution of `simulate()` from compacted production scripts.
+  - Release packager creating standalone deliverable HTML files and unified release ZIP bundles.
+
+---
+
+## 🧪 Interactive DevTools Console Verification
+
+Open the application in Google Chrome, Firefox, or Safari, open DevTools (`F12` or `Cmd+Option+I` → **Console** tab), and execute these test snippets for quick interactive validation.
+
+### 🔹 Quick Sanity & Invariant Check
 
 ```javascript
-// Test: Verify localStorage works and stores CSV data
-console.log("%c📦 R1: CSV Persistence", "color: #6366f1; font-weight: bold");
-localStorage.removeItem("workingCSVData");
-const csvKey = localStorage.getItem("workingCSVData");
-console.assert(csvKey === null, "Initial state: CSV data should be null");
-// Trigger save by running simulation
-runSimulation();
-const saved = localStorage.getItem("workingCSVData");
-console.assert(saved !== null, "After run: CSV data should be saved");
-console.log("✅ CSV persistence:", saved ? "PASS" : "FAIL");
-
-// Test: Parameter persistence
+// Verify core simulation invariants and state integrity
 console.log(
-  "%c📦 R2: Parameter Persistence",
+  "%c🧪 Running Console Sanity Verification...",
   "color: #6366f1; font-weight: bold"
 );
-document.getElementById("inputSalary").value = "30000000";
-document.getElementById("inputSalaryGrowth").value = "5";
-document.getElementById("inputInflation").value = "3.5";
-document.getElementById("inputSavingsGoal").value = "1000000000";
-document.getElementById("inputPoolRate").value = "0.8";
-document.getElementById("input6MRate").value = "6.0";
+
+// 1. Run simulation
 runSimulation();
-const params = JSON.parse(localStorage.getItem("params"));
+console.assert(simulationLogs.length > 0, "Simulation logs generated");
 console.assert(
-  params !== null && params.salary === "30000000",
-  "Parameters should be saved"
+  document.getElementById("metricTotalBalance").innerText.length > 0,
+  "Total balance metric rendered"
 );
-console.log(
-  "✅ Parameter persistence:",
-  params && params.salary === "30000000" ? "PASS" : "FAIL"
-);
-```
 
-### 🔹 R3: Reset All
-
-```javascript
-// Test: Reset All functionality
-console.log("%c🔄 R3: Reset All", "color: #6366f1; font-weight: bold");
-localStorage.clear();
-// Re-run to get fresh state
-resetAll();
-const salaryVal = document.getElementById("inputSalary").value;
-const goalVal = document.getElementById("inputSavingsGoal").value;
-console.assert(
-  salaryVal === "25000000",
-  `Reset salary should be 25M, got: ${salaryVal}`
-);
-console.log("✅ Reset All:", salaryVal === "25000000" ? "PASS" : "FAIL");
-```
-
-### 🔹 R4: Salary Growth
-
-```javascript
-// Test: Salary growth compound calculation
-console.log("%c📈 R4: Salary Growth", "color: #6366f1; font-weight: bold");
-document.getElementById("inputSalary").value = "10000000";
-document.getElementById("inputSalaryGrowth").value = "10";
-document.getElementById("inputInflation").value = "0";
-document.getElementById("inputTargetDate").value = "";
-const today = new Date();
-const target = new Date(
-  today.getFullYear() + 1,
-  today.getMonth(),
-  today.getDate()
-);
-document.getElementById("inputTargetDate").value = formatDate(target);
-runSimulation();
-// Check that salary increases in logs
-const salaryLogs = simulationLogs.filter((l) => l.type === "SALARY");
-console.assert(salaryLogs.length > 0, "Salary logs should exist");
-if (salaryLogs.length > 1) {
-  const firstSalary = salaryLogs[salaryLogs.length - 1].amount;
-  const lastSalary = salaryLogs[0].amount;
-  console.assert(lastSalary > firstSalary, "Salary should grow over time");
-  console.log(
-    `✅ Salary growth: PASS (first: ${firstSalary}, last: ${lastSalary})`
-  );
-} else {
-  console.log("⚠️ Salary growth: Single year, verify manually");
-}
-```
-
-### 🔹 R5: Inflation Adjustment
-
-```javascript
-// Test: Real vs Nominal toggle and inflation calculation
-console.log(
-  "%c🌡️ R5: Inflation Adjustment",
-  "color: #6366f1; font-weight: bold"
-);
-document.getElementById("inputInflation").value = "5";
-document.getElementById("inputSalaryGrowth").value = "0";
-document.getElementById("inputTargetDate").value = "";
-const t2 = new Date();
-const target2 = new Date(t2.getFullYear() + 2, t2.getMonth(), t2.getDate());
-document.getElementById("inputTargetDate").value = formatDate(target2);
-runSimulation();
-const realEl = document.getElementById("metricRealValue");
-console.assert(realEl.style.display !== "none", "Real value should be visible");
-console.log(
-  "✅ Real value visible:",
-  realEl.style.display !== "none" ? "PASS" : "FAIL"
-);
-console.log("✅ Real value text:", realEl.innerText || "Not set");
-// Test toggle
-document.getElementById("realToggleBtn").click();
-console.log("🔄 Toggle Real/Nominal clicked");
-```
-
-### 🔹 R6: Withdrawals
-
-```javascript
-// Test: Withdrawal tracking in simulation
-console.log("%c💸 R6: Withdrawals", "color: #6366f1; font-weight: bold");
-// Add a withdrawal row
-workingCSVData.push({
-  "Account Name": "Test Withdrawal",
-  Principal: "50000000",
-  "Start Date": formatDate(new Date()),
-  "End Date": formatDate(addMonths(new Date(), 6)),
-  Interest: "0",
-  Type: "Withdrawal",
-  Bank: "TestBank",
-});
-runSimulation();
-const withdrawalLogs = simulationLogs.filter((l) => l.type === "WITHDRAWAL");
-console.assert(withdrawalLogs.length > 0, "Withdrawal logs should exist");
-console.log(
-  "✅ Withdrawal logs:",
-  withdrawalLogs.length > 0 ? `PASS (${withdrawalLogs.length})` : "FAIL"
-);
-// Check earnings breakdown
-const withdrawEl = document.getElementById("txtWithdrawals");
-console.assert(
-  withdrawEl.parentElement.classList.contains("hidden") === false,
-  "Withdrawals should be visible"
-);
-console.log(
-  "✅ Withdrawals displayed:",
-  withdrawEl.parentElement.classList.contains("hidden") === false
-    ? "PASS"
-    : "FAIL"
-);
-// Clean up
-workingCSVData = workingCSVData.slice(0, -1);
-```
-
-### 🔹 R7: Goal Tracking
-
-```javascript
-// Test: Goal progress bar and ring chart
-console.log("%n🎯 R7: Goal Tracking", "color: #6366f1; font-weight: bold");
-document.getElementById("inputSavingsGoal").value = "500000000";
-runSimulation();
-const goalSection = document.getElementById("goalProgressSection");
-console.assert(
-  !goalSection.classList.contains("hidden"),
-  "Goal section should be visible"
-);
-const goalRingEl = document.getElementById("goalRingSection");
-console.assert(
-  !goalRingEl.classList.contains("hidden"),
-  "Goal ring section should be visible"
-);
-console.log(
-  "✅ Goal progress section:",
-  !goalSection.classList.contains("hidden") ? "PASS" : "FAIL"
-);
-console.log(
-  "✅ Goal ring chart:",
-  !goalRingEl.classList.contains("hidden") ? "PASS" : "FAIL"
-);
-```
-
-### 🔹 R8: Shareable Link
-
-```javascript
-// Test: URL serialization and deserialization
-console.log("%🔗 R8: Shareable Link", "color: #6366f1; font-weight: bold");
+// 2. Test Currency Masking & Verbal Helpers
 document.getElementById("inputSalary").value = "35000000";
-document.getElementById("inputSalaryGrowth").value = "3";
-document.getElementById("inputInflation").value = "4";
-document.getElementById("inputSavingsGoal").value = "750000000";
-runSimulation();
-try {
-  shareSimulation();
-  console.log("✅ Share simulation: function executed");
-  // Verify URL contains hash
-  const hashPresent = window.location.hash.length > 10;
-  console.assert(hashPresent, "URL hash should contain encoded data");
-  console.log("✅ URL hash present:", hashPresent ? "PASS" : "FAIL");
-} catch (e) {
-  console.assert(false, "shareSimulation should not throw: " + e.message);
-}
-```
-
-### 🔹 R9: Theme Toggle
-
-```javascript
-// Test: Light/Dark theme switching
-console.log("%🎨 R9: Theme Toggle", "color: #6366f1; font-weight: bold");
-localStorage.removeItem("theme");
-// Initially dark
+applyCurrencyMask(document.getElementById("inputSalary"));
 console.assert(
-  !document.documentElement.classList.contains("light"),
-  "Default should be dark"
-);
-document.getElementById("themeBtn").click();
-document.getElementById("themeBtn").click();
-const isLight = document.documentElement.classList.contains("light");
-console.log("✅ Theme toggled:", "PASS");
-document.getElementById("themeBtn").click();
-localStorage.removeItem("theme");
-```
-
-### 🔹 R10: Onboarding
-
-```javascript
-// Test: Onboarding tour navigation
-console.log("%🗺️ R10: Onboarding", "color: #6366f1; font-weight: bold");
-localStorage.removeItem("showedOnboarding");
-showOnboarding();
-const overlay = document.getElementById("onboardingOverlay");
-console.assert(
-  !overlay.classList.contains("hidden"),
-  "Onboarding overlay should be visible"
-);
-console.log(
-  "✅ Onboarding overlay shown:",
-  !overlay.classList.contains("hidden") ? "PASS" : "FAIL"
-);
-// Close and verify
-closeOnboarding();
-console.assert(
-  overlay.classList.contains("hidden"),
-  "Onboarding should be hidden"
-);
-console.log(
-  "✅ Onboarding closed:",
-  overlay.classList.contains("hidden") ? "PASS" : "FAIL"
-);
-```
-
-### 🔹 R11: Keyboard Shortcuts
-
-```javascript
-// Test: Keyboard shortcut handling
-console.log("%⌨️ R11: Keyboard Shortcuts", "color: #6366f1; font-weight: bold");
-// Simulate Enter key on input
-const salaryInput = document.getElementById("inputSalary");
-salaryInput.focus();
-const enterEvent = new KeyboardEvent("keydown", { key: "Enter" });
-salaryInput.dispatchEvent(enterEvent);
-console.log("✅ Enter key triggered simulation");
-// Simulate Escape key
-const modal = document.getElementById("csvModal");
-toggleCSVModal(true);
-const escEvent = new KeyboardEvent("keydown", { key: "Escape" });
-modal.dispatchEvent(escEvent);
-console.log("✅ Escape key handling verified");
-```
-
-### 🔹 R12: Toast Notifications
-
-```javascript
-// Test: Toast notification creation and auto-dismiss
-console.log(
-  "%🔔 R12: Toast Notifications",
-  "color: #6366f1; font-weight: bold"
-);
-showToast("Test notification", "info");
-showToast("Success test", "success");
-showToast("Error test", "error");
-showToast("Warning test", "warning");
-const toasts = document.querySelectorAll(".toast");
-console.assert(toasts.length >= 3, "At least 3 toasts should exist");
-console.log(
-  "✅ Toast notifications:",
-  toasts.length >= 3 ? `PASS (${toasts.length})` : "FAIL"
-);
-// Auto-dismiss after 3s
-setTimeout(() => {
-  const remaining = document.querySelectorAll(".toast");
-  console.log(
-    `ℹ️ After 3s: ${remaining.length} toasts remaining (expected: 0)`
-  );
-}, 3500);
-```
-
-### 🔹 R13: Growth Chart
-
-```javascript
-// Test: Growth chart rendering and date filtering
-console.log("%📊 R13: Growth Chart", "color: #6366f1; font-weight: bold");
-document.getElementById("inputSalary").value = "25000000";
-document.getElementById("inputTargetDate").value = "";
-const today = new Date();
-const target = new Date(
-  today.getFullYear() + 1,
-  today.getMonth(),
-  today.getDate()
-);
-document.getElementById("inputTargetDate").value = formatDate(target);
-runSimulation();
-const growthCanvas = document.getElementById("chartGrowth");
-console.assert(growthChart !== null, "Growth chart should be initialized");
-console.log(
-  "✅ Growth chart rendered:",
-  growthChart !== null ? "PASS" : "FAIL"
-);
-// Test date range filter
-document.getElementById("chartDateRange").value = "1y";
-document.getElementById("chartDateRange").dispatchEvent(new Event("change"));
-console.log("🔄 Date range filter: 1Y");
-document.getElementById("chartDateRange").value = "all";
-document.getElementById("chartDateRange").dispatchEvent(new Event("change"));
-console.log("✅ Date range filter: PASS");
-```
-
-### 🔹 R14: Heatmap Calendar
-
-```javascript
-// Test: Heatmap visibility and rendering
-console.log("%🗓️ R14: Heatmap Calendar", "color: #6366f1; font-weight: bold");
-runSimulation();
-document.getElementById("heatmapSection").classList.remove("hidden");
-const heatmapGrid = document.getElementById("heatmapGrid");
-console.assert(heatmapGrid.children.length > 0, "Heatmap should have cells");
-console.log(
-  "✅ Heatmap cells:",
-  heatmapGrid.children.length > 0
-    ? `PASS (${heatmapGrid.children.length})`
-    : "FAIL"
-);
-document.getElementById("heatmapSection").classList.add("hidden");
-```
-
-### 🔹 R15: YoY Table
-
-```javascript
-// Test: Year-over-Year table rendering
-console.log("%📅 R15: YoY Table", "color: #6366f1; font-weight: bold");
-document.getElementById("inputTargetDate").value = "";
-const today = new Date();
-const target = new Date(
-  today.getFullYear() + 3,
-  today.getMonth(),
-  today.getDate()
-);
-document.getElementById("inputTargetDate").value = formatDate(target);
-runSimulation();
-document.getElementById("yoySection").classList.remove("hidden");
-const yoyRows = document.getElementById("yoyTableBody").children;
-console.assert(yoyRows.length >= 2, "YoY table should have at least 2 rows");
-console.log(
-  "✅ YoY table rows:",
-  yoyRows.length >= 2 ? `PASS (${yoyRows.length})` : "FAIL"
-);
-document.getElementById("yoySection").classList.add("hidden");
-```
-
-### 🔹 R16: CSV Editor
-
-```javascript
-// Test: CSV editor add/edit/delete/import/export
-console.log("%📋 R16: CSV Editor", "color: #6366f1; font-weight: bold");
-const initialCount = workingCSVData.length;
-// Add row
-addEmptyCSVRow();
-console.assert(
-  workingCSVData.length === initialCount + 1,
-  "CSV data length should increase"
-);
-console.log(
-  "✅ Add row:",
-  workingCSVData.length === initialCount + 1 ? "PASS" : "FAIL"
-);
-// Edit row
-updateCSVRowField(0, "Account Name", "Test Account");
-console.assert(
-  workingCSVData[0]["Account Name"] === "Test Account",
-  "Row should be updated"
-);
-console.log(
-  "✅ Edit row:",
-  workingCSVData[0]["Account Name"] === "Test Account" ? "PASS" : "FAIL"
-);
-// Delete row
-deleteCSVRow(0);
-console.assert(
-  workingCSVData.length === initialCount,
-  "CSV data length should decrease"
-);
-console.log(
-  "✅ Delete row:",
-  workingCSVData.length === initialCount ? "PASS" : "FAIL"
-);
-// Export
-try {
-  exportCSV();
-  console.log("✅ Export CSV: function executed");
-} catch (e) {
-  console.assert(false, "exportCSV failed: " + e.message);
-}
-```
-
-### 🔹 R20: Auto Term Allocation Rule
-
-```javascript
-// Test: Auto Term creation when pool >= threshold (default 200M VND)
-console.log(
-  "%🏦 R20: Auto Term Allocation Rule",
-  "color: #6366f1; font-weight: bold"
-);
-// Set up high initial pool (450M)
-workingCSVData[3].Principal = "450000000"; // Set Non-Term Pool to 450M
-document.getElementById("inputPoolRate").value = "0.5";
-if (document.getElementById("inputAutoTermRate"))
-  document.getElementById("inputAutoTermRate").value = "5.8";
-if (document.getElementById("inputAutoTermThreshold"))
-  document.getElementById("inputAutoTermThreshold").value = "200000000";
-if (document.getElementById("inputAutoTermMonths"))
-  document.getElementById("inputAutoTermMonths").value = "6";
-document.getElementById("inputSalary").value = "0"; // No salary
-document.getElementById("inputTargetDate").value = "";
-const tToday = new Date();
-const tTarget = new Date(
-  tToday.getFullYear() + 1,
-  tToday.getMonth(),
-  tToday.getDate()
-);
-document.getElementById("inputTargetDate").value = formatDate(tTarget);
-runSimulation();
-const autoTermLogs = simulationLogs.filter(
-  (l) => l.type === "NEW_6M" || l.type === "NEW_AUTO_TERM"
-);
-console.assert(
-  autoTermLogs.length === 1,
-  "Exactly one consolidated Auto Term deposit created for 450M"
-);
-console.assert(
-  autoTermLogs[0].amount === 450000000,
-  "Auto Term deposit holds full 450M balance"
-);
-console.log(
-  "✅ Auto Term Allocation rule:",
-  autoTermLogs.length === 1 && autoTermLogs[0].amount === 450000000
-    ? "PASS"
-    : "FAIL"
-);
-// Restore
-workingCSVData[3].Principal = "15000000";
-```
-
----
-
-### 🔹 R21: Vietnamese Language Support
-
-```javascript
-// Test: Language selector exists and works
-console.log(
-  "%c🌐 R21: Vietnamese Language Support",
-  "color: #6366f1; font-weight: bold"
-);
-const langSelector = document.getElementById("langSelector");
-console.assert(langSelector !== null, "Language selector should exist");
-console.log(
-  "✅ Language selector exists:",
-  langSelector !== null ? "PASS" : "FAIL"
+  document.getElementById("helperSalary").innerText.includes("Million") ||
+    document.getElementById("helperSalary").innerText.includes("Triệu"),
+  "Verbal helper populated"
 );
 
-// Test: Switch to Vietnamese
-langSelector.value = "vi";
-langSelector.dispatchEvent(new Event("change"));
-const appTitle = document.querySelector('[data-i18n="app_title"]');
-console.assert(
-  appTitle.textContent.includes("Giả Lập"),
-  `Vietnamese title should contain 'Giả Lập', got: ${appTitle.textContent}`
-);
-console.log(
-  "✅ Vietnamese language switch:",
-  appTitle.textContent.includes("Giả Lập") ? "PASS" : "FAIL"
-);
-
-// Test: Switch back to English
-langSelector.value = "en";
-langSelector.dispatchEvent(new Event("change"));
-console.assert(
-  appTitle.textContent.includes("Savings"),
-  `English title should contain 'Savings', got: ${appTitle.textContent}`
-);
-console.log(
-  "✅ English language switch:",
-  appTitle.textContent.includes("Savings") ? "PASS" : "FAIL"
-);
-
-// Test: Onboarding texts in Vietnamese
-document.getElementById("onboardNext").click();
-const step2Title = document.querySelector('[data-i18n="onboard_title_2"]');
-console.assert(
-  step2Title.textContent.includes("Thông Số"),
-  `Step 2 title should contain 'Thông Số', got: ${step2Title.textContent}`
-);
-console.log(
-  "✅ Onboarding Vietnamese texts:",
-  step2Title.textContent.includes("Thông Số") ? "PASS" : "FAIL"
-);
-
-// Test: Strict Currency & Date Format Parity
-changeLanguage("en");
-console.assert(
-  formatCurrency(250000000) === "250,000,000 VND",
-  "EN currency format"
-);
-console.assert(
-  formatDateDisplay(new Date(2026, 7, 22)) === "2026-08-22",
-  "EN date format"
-);
-
+// 3. Test Bilingual Language Switching
 changeLanguage("vi");
 console.assert(
-  formatCurrency(250000000) === "250.000.000 ₫",
-  "VI currency format"
+  formatCurrency(100000000).includes("₫"),
+  "Vietnamese currency formatted with ₫"
 );
+changeLanguage("en");
 console.assert(
-  formatDateDisplay(new Date(2026, 7, 22)) === "22/08/2026",
-  "VI date format"
+  formatCurrency(100000000).includes("VND"),
+  "English currency formatted with VND"
 );
 
-console.log("✅ R21 Vietnamese Language Support: ALL TESTS PASSED");
+// 4. Test Modal Lifecycle Controller
+showOnboarding();
+console.assert(
+  !document.getElementById("onboardingOverlay").classList.contains("hidden"),
+  "Onboarding modal open"
+);
+toggleCSVModal(true);
+console.assert(
+  document.getElementById("onboardingOverlay").classList.contains("hidden"),
+  "Onboarding closed when CSV modal opened"
+);
+dismissAllModals();
+console.assert(
+  document.getElementById("csvModal").classList.contains("hidden"),
+  "All modals cleanly dismissed"
+);
+
+console.log(
+  "%c✨ All console sanity checks passed!",
+  "color: #10b981; font-weight: bold"
+);
 ```
 
-## 📝 Manual Testing Checklist
+---
 
-| #       | Test Case                 | Expected Result                   | ✅  |
-| ------- | ------------------------- | --------------------------------- | --- |
-| **M1**  | Open HTML file in browser | Page loads, dark theme, no errors |     |
-| **M2**  | Click "Run Simulation"    | Metrics update, charts render     |     |
-| **M3**  | Change target date        | Date range filters work           |     |
-| **M4**  | Set salary growth to 5%   | Salary increases each year        |     |
-| **M5**  | Set inflation to 4%       | Real value shown, toggle works    |     |
-| **M6**  | Set savings goal          | Progress bar + ring appear        |     |
-| **M7**  | Add withdrawal to CSV     | Withdrawals in logs + chart       |     |
-| **M8**  | Click "Import CSV"        | File picker opens, data loads     |     |
-| **M9**  | Add/edit/delete CSV rows  | Changes persist, table updates    |     |
-| **M10** | Click "Download CSV"      | CSV file downloads                |     |
-| **M11** | Click "Share" link        | URL copied to clipboard           |     |
-| **M12** | Click "Light" toggle      | Theme switches, persists          |     |
-| **M13** | Click "?" button          | Onboarding tour shows             |     |
-| **M14** | Press `Enter` in input    | Simulation runs                   |     |
-| **M15** | Press `Ctrl+S`            | Toast shows "saved"               |     |
-| **M16** | Press `Esc` in modal      | Modal closes                      |     |
-| **M17** | Click "1Y" preset         | Date set to 1 year from now       |     |
-| **M18** | Click "Reset All"         | All defaults restored             |     |
-| **M19** | Open Heatmap              | Grid renders with colors          |     |
-| **M20** | Open YoY Table            | Annual breakdown shows            |     |
-| **M21** | Compare scenarios         | Side-by-side comparison           |     |
-| **M22** | Export chart as image     | PNG downloads                     |     |
-| **M23** | Click "Print"             | Print dialog opens                |     |
-| **M24** | Resize window to mobile   | Layout adapts correctly           |     |
-| **M25** | Reload page               | All data persists                 |     |
+## 📝 Manual Testing Checklist (M1–M28)
+
+| #       | Test Scenario                    | Steps to Execute                                                         | Expected Result                                                                             | Verified |
+| :------ | :------------------------------- | :----------------------------------------------------------------------- | :------------------------------------------------------------------------------------------ | :------: |
+| **M1**  | Initial Page Load                | Open `personal-finance-savings-predictor/index.html` in browser          | Page renders in dark theme with default parameters and initial starting accounts            |   [ ]    |
+| **M2**  | Run Simulation                   | Click **"Run Simulation"** button                                        | Metrics update, Growth Timeline chart renders, and simulation logs populate                 |   [ ]    |
+| **M3**  | Timeline Date Range Filters      | Click `3M`, `6M`, `1Y`, `All` buttons above Growth Chart                 | Timeline x-axis zooms dynamically to selected time window                                   |   [ ]    |
+| **M4**  | Compound Salary Escalation       | Set monthly salary to 20M and growth to 10% over a 3-year projection     | Monthly deposit increases on each 12-month anniversary (20M → 22M → 24.2M)                  |   [ ]    |
+| **M5**  | Inflation Real vs Nominal        | Set inflation to 4.5% and click the **"Real Value"** toggle button       | Metric displays discounted purchasing power; chart plots real vs nominal curves             |   [ ]    |
+| **M6**  | Goal Milestone Tracking          | Set savings goal to 1 Billion VND                                        | Progress bar fills, percentage text updates, and milestone date badge appears               |   [ ]    |
+| **M7**  | Scheduled Outflows & Deficit     | Add a scheduled withdrawal larger than pool balance                      | Negative pool balance logs deficit warning and recovers as future salary deposits arrive    |   [ ]    |
+| **M8**  | CSV Modal File Import / Export   | Open CSV Editor, export CSV file, and re-import via file picker          | Accounts parse cleanly with Bank fields and update table state                              |   [ ]    |
+| **M9**  | CSV Editor Table CRUD            | Add new row, edit principal, set End Date < Start Date                   | System displays error toast and blocks saving until date range is corrected                 |   [ ]    |
+| **M10** | URL State Sharing                | Click **"Share"** button in header                                       | URL hash updates with LZ-String payload and link is copied to clipboard                     |   [ ]    |
+| **M11** | Theme Switching                  | Click theme toggle button                                                | Application transitions between Dark and Light themes; preference persists on reload        |   [ ]    |
+| **M12** | Onboarding Walkthrough           | Click **"?"** button to open tour; step through 5 screens                | Step highlights focus on target UI components; completing tour sets storage flag            |   [ ]    |
+| **M13** | Keyboard Shortcuts               | Press `Enter` in salary input; press `Ctrl+S` / `Cmd+S`; press `Escape`  | `Enter` triggers simulation; `Ctrl+S` saves data; `Escape` closes active modal              |   [ ]    |
+| **M14** | Toast Notification Alerts        | Trigger actions (save parameters, copy link, switch preset)              | Colored slide-in toasts appear in top-right corner and auto-dismiss after 3s                |   [ ]    |
+| **M15** | Tabbed Analytics Hub             | Click `Timeline`, `Heatmap`, and `YoY Comparison` tab headers            | Active panel switches with smooth transition and accessible `aria-selected` state           |   [ ]    |
+| **M16** | Continuous Multi-Year Heatmap    | Switch to Heatmap tab; toggle `Total Wealth` vs `Net Inflow`             | Multi-year matrix renders all years in rows; hovering over cells reveals breakdown popover  |   [ ]    |
+| **M17** | Year-over-Year Breakdown         | Switch to YoY tab                                                        | Annual financial table displays Starting Wealth, Annual Inflow, Interest, and Ending Wealth |   [ ]    |
+| **M18** | Scenario Comparison Workbench    | Click **"Compare Scenarios"** toggle button; clone A to B and edit B     | Side-by-side comparison table highlights delta total wealth and milestone difference        |   [ ]    |
+| **M19** | Export Chart Image               | Click **"Export PNG"** button on growth chart                            | Chart image downloads with clean solid dark background and crisp canvas curves              |   [ ]    |
+| **M20** | Print Summary Layout             | Press `Cmd+P` / `Ctrl+P` or click Print button                           | Page formats into a clean, printer-friendly summary omitting navigation controls            |   [ ]    |
+| **M21** | Auto Term Allocation Sweep       | Set pool balance ≥ 200M with 30M buffer                                  | Liquid pool balance sweeps into a 6-month term deposit, retaining 30M liquid buffer         |   [ ]    |
+| **M22** | Bilingual Language Switcher      | Select `Tiếng Việt` from language dropdown                               | All UI labels, verbal helpers, logs, dates (`DD/MM/YYYY`), and currencies (`₫`) localize    |   [ ]    |
+| **M23** | Annual Bonus & Cashflows         | Set Annual Bonus to 1.5x in Month 12; open recurring generator           | 1.5x salary bonus credits in December; recurring generator adds scheduled outflows          |   [ ]    |
+| **M24** | Strategy Persona Presets         | Open Presets modal; select **"FIRE Aspirant"** preset                    | Predefined salary, goal, and 3-account portfolio load; 5s undo toast restores prior inputs  |   [ ]    |
+| **M25** | Currency Masking & Verbal Labels | Type `50000000` into salary input                                        | Input automatically masks with thousand separators and verbal helper shows `50 Million VND` |   [ ]    |
+| **M26** | Quick Preset Chips               | Click `+5M` delta chip under salary input                                | Salary increments by 5M VND, active chip highlights, and simulation updates reactively      |   [ ]    |
+| **M27** | Full-Width Savings Accounts Hub  | Scroll to Savings Hub; click `Active Fixed`, `Auto Term`, `Matured` tabs | Table filters accounts instantaneously and KPI summary pills update aggregate metrics       |   [ ]    |
+| **M28** | Modal Lifecycle Controller       | Open Onboarding tour, then open CSV modal                                | Onboarding overlay closes automatically to enforce single-active-dialog invariant           |   [ ]    |
 
 ---
 
-## 🔧 Test Setup Instructions
+## 📊 Expected Quality Gates & Acceptance Criteria
 
-1. **Open the HTML file** in your browser
-2. **Open DevTools** (`Cmd+Option+I` on Mac, `F12` on Windows)
-3. **Go to Console tab**
-4. **Copy-paste test blocks** one by one
-5. **Review console assertions** — green `PASS` means test succeeded
-6. **For manual tests**, use the checklist table
-
-### Prerequisites
-
-| Requirement      | Details                                                                 |
-| ---------------- | ----------------------------------------------------------------------- |
-| **Browser**      | Chrome 90+ / Firefox 90+ / Safari 15+                                   |
-| **JavaScript**   | ES6+ supported (const, let, arrow functions)                            |
-| **localStorage** | Must be enabled                                                         |
-| **Internet**     | Required for CDN libraries (Tailwind, Chart.js, PapaParse, FontAwesome) |
+| Category                  | Requirement                                              | Quality Threshold                            |
+| :------------------------ | :------------------------------------------------------- | :------------------------------------------- |
+| **Automated Test Suites** | All 5 test suites pass cleanly (`npm test`)              | **434 / 434 (100% PASS)**                    |
+| **Lint & Formatting**     | Code formatting and syntax checks (`npm run lint:check`) | **0 errors / 0 warnings**                    |
+| **Build Compaction**      | Minification and asset inlining (`npm run build`)        | **> 30% reduction (< 220 KB deliverable)**   |
+| **Browser Performance**   | 5-year simulation run execution time                     | **< 100 milliseconds**                       |
+| **Console Cleanliness**   | Runtime error log scan                                   | **0 unhandled exceptions or error warnings** |
 
 ---
 
-## 📊 Expected Test Results
-
-All **automated tests** should show `PASS` in the console.  
-Any `FAIL` or `assertion failed` indicates a bug to fix.  
-**Manual tests** should be verified by visual inspection.
-
-### Success Criteria
-
-| Category         | Pass Threshold                      |
-| ---------------- | ----------------------------------- |
-| R1–R20 Automated | 15/20 PASS (core features)          |
-| M1–M25 Manual    | 20/25 PASS (all critical paths)     |
-| Console Errors   | 0 (no JavaScript errors)            |
-| Performance      | Simulation completes in < 2 seconds |
-
----
-
-## 🛠️ Troubleshooting
-
-| Issue                | Fix                                                  |
-| -------------------- | ---------------------------------------------------- |
-| Charts not rendering | Check console for Chart.js errors; verify CDN loaded |
-| localStorage blocked | Check browser settings; try incognito mode           |
-| Toasts not showing   | Check `toastContainer` exists in DOM                 |
-| Sim fails silently   | Check `runSimulation()` try/catch block              |
-| Theme not persisting | Clear localStorage; verify `toggleTheme()` works     |
-| CSV import fails     | Check PapaParse CDN; verify CSV format matches spec  |
-
----
-
-_Generated: 2026-08-09_  
-_File: `TEST_PLAN.md`_
+_Last Updated: August 2026_  
+_Maintained under [`docs/agents/ways-of-working.md`](../docs/agents/ways-of-working.md)_

@@ -58,6 +58,10 @@ _Avoid_: Target date, completion time, ETA
 A side-by-side execution of two independent simulation parameter sets (Scenario A baseline and Scenario B custom/projected) to contrast wealth growth curves and milestone dates.
 _Avoid_: Sensitivity check, what-if multiplier, projection ratio
 
+**Strategy Persona Preset**:
+A predefined financial strategy configuration (e.g. Fresh Graduate, FIRE Aspirant, Home Downpayment, Bank Rate Ladder) that instantly loads tailored monthly salaries, goals, and multi-account portfolios, protected by an interactive 5-second undo toast action.
+_Avoid_: User profile, default config, template scheme, portfolio starter
+
 ### UI Input & Formatting
 
 **Currency Input Masking**:
@@ -81,6 +85,10 @@ _Avoid_: Single-year calendar, dropdown heatmap, separate year tables
 **Savings Accounts Hub**:
 A dedicated full-width portfolio table view featuring aggregated KPI summary pills (Total Locked Principal, Active Accounts, Auto Sweeps, Weighted Average Rate) and instant category filtering tabs (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`).
 _Avoid_: Split-column table, cramped list, static accounts table
+
+**Tabbed Analytics Hub**:
+A unified interactive analytics switcher integrating the Wealth Timeline area chart, Continuous Multi-Year Heatmap Matrix, and Year-over-Year (YoY) comparison breakdown with accessible tab roles and keyboard navigation.
+_Avoid_: Chart view selector, analytics tabs, sub-panels
 
 ### Modal & Dialog Architecture
 
