@@ -1786,6 +1786,15 @@
       function formatCurrency(val) {
         if (isNaN(val) || val === null) return "0 ₫";
         const sign = val < 0 ? "-" : "";
+        const lang =
+          window.currentLang ||
+          (typeof getStorage === "function" ? getStorage("lang") : "vi") ||
+          "vi";
+        if (lang === "en") {
+          return (
+            sign + Math.round(Math.abs(val)).toLocaleString("en-US") + " VND"
+          );
+        }
         return sign + Math.round(Math.abs(val)).toLocaleString("vi-VN") + " ₫";
       }
       function parseDate(dateStr) {
@@ -1835,6 +1844,12 @@
 
         updateThemeBtn();
         updateOnboardUI();
+        if (
+          document.getElementById("inputTargetDate") &&
+          document.getElementById("inputTargetDate").value
+        ) {
+          runSimulation();
+        }
       }
 
       // --- TOAST NOTIFICATIONS ---
@@ -2052,7 +2067,313 @@
         showToast("CSV exported successfully", "success");
       }
 
-      // --- MAIN SIMULATION ENGINE (Enhanced & Fixed) ---
+      // --- PURE SIMULATION ENGINE (ADR-0004 & ADR-0005) ---
+      function simulate(params, portfolioData) {
+        const {
+          targetDateStr,
+          monthlySalary = 0,
+          salaryGrowthRate = 0,
+          inflationRate = 0,
+          poolAnnualRate = 0,
+          term6MAnnualRate = 0,
+          savingsGoal = 0,
+        } = params;
+
+        if (!targetDateStr) return null;
+
+        const simTargetDate = parseDate(targetDateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let simStartDate = new Date(today.getTime());
+
+        // Parse savings accounts from portfolio
+        const allSavings = [];
+        let initialPoolStartBalance = 0;
+        (portfolioData || []).forEach((row, idx) => {
+          const principal = parseFloat(row["Principal"]) || 0;
+          const interestRate = parseFloat(row["Interest"]) || 0;
+          const startDate = parseDate(row["Start Date"]);
+          const endDate = parseDate(row["End Date"]);
+          const type = row["Type"] || "Term Saving";
+
+          if (type === "Non-Term Pool") {
+            initialPoolStartBalance += principal;
+          } else if (type === "Withdrawal") {
+            allSavings.push({
+              id: "csv_" + idx,
+              name: row["Account Name"] || "Withdrawal",
+              principal: principal * -1,
+              rate: interestRate,
+              startDate: startDate,
+              endDate: endDate,
+              totalDays: getDaysDiff(startDate, endDate),
+              earnedInterest: 0,
+              status: "ACTIVE",
+              type: "Withdrawal",
+              bank: row["Bank"] || "",
+            });
+            if (startDate < simStartDate)
+              simStartDate = new Date(startDate.getTime());
+          } else {
+            const totalDays = Math.max(1, getDaysDiff(startDate, endDate));
+            const earnedInterest =
+              principal * (interestRate / 100) * (totalDays / 365);
+            allSavings.push({
+              id: "csv_" + idx,
+              name: row["Account Name"] || "Term Saving #" + (idx + 1),
+              principal: principal,
+              rate: interestRate,
+              startDate: startDate,
+              endDate: endDate,
+              totalDays: totalDays,
+              earnedInterest: earnedInterest,
+              status: "ACTIVE",
+              type: "CSV",
+              bank: row["Bank"] || "",
+            });
+            if (startDate < simStartDate)
+              simStartDate = new Date(startDate.getTime());
+          }
+        });
+
+        // State variables
+        let currentPoolBalance = initialPoolStartBalance;
+        let cumulativeSalary = 0;
+        let salaryCount = 0;
+        let totalInterestInitialCSV = 0;
+        let totalInterestPool = 0;
+        let totalInterest6M = 0;
+        let created6MCount = 0;
+        let totalWithdrawals = 0;
+        let currentSalary = monthlySalary;
+
+        const monthlyCashflows = {};
+        const monthlyWithdrawals = {};
+        const yearlyCashflows = {};
+        const simulationLogs = [];
+        const dailySnapshots = [];
+
+        const todayDateOnly = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1
+        );
+        let currentDate = new Date(simStartDate.getTime());
+        let goalReached = false;
+        let goalReachedDate = null;
+
+        while (currentDate <= simTargetDate) {
+          const dateStr = formatDate(currentDate);
+          const monthKey = dateStr.substring(0, 7); // YYYY-MM
+          const yearKey = dateStr.substring(0, 4); // YYYY
+          const isMonthStart =
+            currentDate.getDate() === 1 && currentDate >= todayDateOnly;
+
+          if (!monthlyCashflows[monthKey]) {
+            monthlyCashflows[monthKey] = { salary: 0, interestPaid: 0 };
+            monthlyWithdrawals[monthKey] = { total: 0 };
+          }
+          if (!yearlyCashflows[yearKey]) {
+            yearlyCashflows[yearKey] = { salary: 0, interest: 0 };
+          }
+
+          // 1. Monthly Salary Inflow (1st of month with anniversary escalation - ADR-0003)
+          if (isMonthStart) {
+            if (monthlySalary > 0) {
+              currentPoolBalance += currentSalary;
+              cumulativeSalary += currentSalary;
+              salaryCount++;
+              monthlyCashflows[monthKey].salary += currentSalary;
+              yearlyCashflows[yearKey].salary += currentSalary;
+              simulationLogs.push({
+                date: dateStr,
+                type: "SALARY",
+                title: "Monthly Salary Deposited",
+                amount: currentSalary,
+                details: `${formatCurrency(currentSalary)} to Pool (rate: ${(salaryGrowthRate * 100).toFixed(1)}%/yr)`,
+              });
+
+              // Anniversary-based escalation
+              const yearDiff = getMonthDiff(todayDateOnly, currentDate) / 12;
+              if (
+                yearDiff > 0 &&
+                Math.abs(yearDiff - Math.round(yearDiff)) < 0.01 &&
+                salaryGrowthRate > 0
+              ) {
+                currentSalary =
+                  monthlySalary * Math.pow(1 + salaryGrowthRate, yearDiff);
+              }
+            }
+          }
+
+          // 2. Check Maturing Fixed Term Deposits & Scheduled Withdrawals
+          allSavings.forEach((acc) => {
+            if (acc.status === "ACTIVE" && currentDate >= acc.endDate) {
+              if (acc.type === "Withdrawal") {
+                const wAmount = Math.abs(acc.principal);
+                totalWithdrawals += wAmount;
+                monthlyWithdrawals[monthKey].total += wAmount;
+                currentPoolBalance -= wAmount; // Cash deduction from pool
+                acc.status = "COMPLETED";
+
+                simulationLogs.push({
+                  date: dateStr,
+                  type: "WITHDRAWAL",
+                  title: `Withdrawal: ${acc.name}`,
+                  amount: wAmount,
+                  details: `${formatCurrency(wAmount)} deducted from Flexible Pool`,
+                });
+
+                // ADR-0002 Deficit Warning
+                if (currentPoolBalance < 0) {
+                  simulationLogs.push({
+                    date: dateStr,
+                    type: "DEFICIT_WARNING",
+                    title: `Flexible Pool Deficit`,
+                    amount: Math.abs(currentPoolBalance),
+                    details: `Flexible Pool entered deficit (${formatCurrency(currentPoolBalance)}) after withdrawal`,
+                  });
+                }
+              } else {
+                acc.status = "MATURED";
+                const payout = acc.principal + acc.earnedInterest;
+                currentPoolBalance += payout;
+                if (acc.type === "CSV")
+                  totalInterestInitialCSV += acc.earnedInterest;
+                else if (acc.type === "AUTO_6M")
+                  totalInterest6M += acc.earnedInterest;
+                monthlyCashflows[monthKey].interestPaid += acc.earnedInterest;
+                yearlyCashflows[yearKey].interest += acc.earnedInterest;
+                simulationLogs.push({
+                  date: dateStr,
+                  type: "MATURITY",
+                  title: `Matured: ${acc.name}`,
+                  amount: payout,
+                  details: `${formatCurrency(acc.principal)} + ${formatCurrency(acc.earnedInterest)} to Pool`,
+                });
+              }
+            }
+          });
+
+          // 3. Flexible Pool Demand Interest
+          if (currentPoolBalance > 0) {
+            const dailyPoolInterest =
+              currentPoolBalance * (poolAnnualRate / 365);
+            currentPoolBalance += dailyPoolInterest;
+            totalInterestPool += dailyPoolInterest;
+            yearlyCashflows[yearKey].interest += dailyPoolInterest;
+          }
+
+          // 4. Unified Auto 6M Allocation (ADR-0005)
+          while (currentPoolBalance >= 200000000) {
+            const lockedAmount = 200000000;
+            currentPoolBalance -= lockedAmount;
+            created6MCount++;
+            const autoStartDate = new Date(currentDate.getTime());
+            const autoEndDate = addMonths(autoStartDate, 6);
+            const totalDays = Math.max(
+              1,
+              getDaysDiff(autoStartDate, autoEndDate)
+            );
+            const estInterest =
+              lockedAmount * term6MAnnualRate * (totalDays / 365);
+            allSavings.push({
+              id: "auto_6m_" + created6MCount,
+              name: `Auto 6M Saving #${created6MCount}`,
+              principal: lockedAmount,
+              rate: term6MAnnualRate * 100,
+              startDate: autoStartDate,
+              endDate: autoEndDate,
+              totalDays: totalDays,
+              earnedInterest: estInterest,
+              status: "ACTIVE",
+              type: "AUTO_6M",
+              bank: "",
+            });
+            simulationLogs.push({
+              date: dateStr,
+              type: "NEW_6M",
+              title: `Created Auto 6M Saving #${created6MCount}`,
+              amount: lockedAmount,
+              details: `Pool hit >= 200M. Locked 200M VND into 6M term @ ${(term6MAnnualRate * 100).toFixed(1)}%/yr`,
+            });
+          }
+
+          // 5. Active Fixed Savings Total
+          let activeFixedSavingsBalance = 0;
+          allSavings.forEach((acc) => {
+            if (
+              currentDate >= acc.startDate &&
+              currentDate < acc.endDate &&
+              acc.status !== "COMPLETED"
+            ) {
+              activeFixedSavingsBalance += acc.principal;
+            }
+          });
+
+          // 6. Daily Snapshot
+          const totalWealth = currentPoolBalance + activeFixedSavingsBalance;
+          dailySnapshots.push({
+            date: dateStr,
+            timestamp: currentDate.getTime(),
+            poolBalance: currentPoolBalance,
+            fixedSavingsBalance: activeFixedSavingsBalance,
+            totalWealth: totalWealth,
+            cumulativeSalary: cumulativeSalary,
+          });
+
+          // 7. Check Milestone Date / Goal Achievement
+          if (savingsGoal > 0 && !goalReached && totalWealth >= savingsGoal) {
+            goalReached = true;
+            goalReachedDate = dateStr;
+          }
+
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        const finalSnapshot = dailySnapshots[dailySnapshots.length - 1] || {
+          totalWealth: 0,
+          poolBalance: 0,
+          fixedSavingsBalance: 0,
+        };
+        const totalEarnedInterest =
+          totalInterestInitialCSV + totalInterestPool + totalInterest6M;
+        const years = getDaysDiff(today, simTargetDate) / 365;
+        const inflationAdjusted =
+          inflationRate > 0
+            ? finalSnapshot.totalWealth / Math.pow(1 + inflationRate, years)
+            : finalSnapshot.totalWealth;
+
+        return {
+          allSavings,
+          dailySnapshots,
+          simulationLogs,
+          monthlyCashflows,
+          monthlyWithdrawals,
+          yearlyCashflows,
+          finalSnapshot,
+          totals: {
+            totalWealth: finalSnapshot.totalWealth,
+            poolBalance: finalSnapshot.poolBalance,
+            fixedSavingsBalance: finalSnapshot.fixedSavingsBalance,
+            totalInterest: totalEarnedInterest,
+            totalInterestInitialCSV,
+            totalInterestPool,
+            totalInterest6M,
+            cumulativeSalary,
+            salaryCount,
+            created6MCount,
+            totalWithdrawals,
+            inflationAdjusted,
+          },
+          goalReached,
+          goalReachedDate,
+          simStartDate,
+          simTargetDate,
+        };
+      }
+
+      // --- MAIN SIMULATION DISPATCHER ---
       function runSimulation() {
         try {
           const targetDateStr =
@@ -2079,318 +2400,56 @@
             return;
           }
 
-          const simTargetDate = parseDate(targetDateStr);
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          let simStartDate = new Date(today.getTime());
+          const params = {
+            targetDateStr,
+            monthlySalary,
+            salaryGrowthRate,
+            inflationRate,
+            poolAnnualRate,
+            term6MAnnualRate,
+            savingsGoal,
+          };
 
-          // Parse CSV savings accounts
           if (window.workingCSVData) workingCSVData = window.workingCSVData;
-          const allSavings = [];
-          let initialPoolStartBalance = 0;
-          workingCSVData.forEach((row, idx) => {
-            const principal = parseFloat(row["Principal"]) || 0;
-            const interestRate = parseFloat(row["Interest"]) || 0;
-            const startDate = parseDate(row["Start Date"]);
-            const endDate = parseDate(row["End Date"]);
-            const type = row["Type"] || "Term Saving";
+          const res = simulate(params, workingCSVData);
+          if (!res) return;
 
-            if (type === "Non-Term Pool") {
-              initialPoolStartBalance += principal;
-            } else if (type === "Withdrawal") {
-              // Fix Task 1.2 (R6): Set status to ACTIVE so withdrawal maturity processing is evaluated in timeline loop
-              allSavings.push({
-                id: "csv_" + idx,
-                name: row["Account Name"] || "Withdrawal",
-                principal: principal * -1,
-                rate: interestRate,
-                startDate: startDate,
-                endDate: endDate,
-                totalDays: getDaysDiff(startDate, endDate),
-                earnedInterest: 0,
-                status: "ACTIVE",
-                type: "Withdrawal",
-                bank: row["Bank"] || "",
-              });
-              if (startDate < simStartDate)
-                simStartDate = new Date(startDate.getTime());
-            } else {
-              const totalDays = Math.max(1, getDaysDiff(startDate, endDate));
-              const earnedInterest =
-                principal * (interestRate / 100) * (totalDays / 365);
-              allSavings.push({
-                id: "csv_" + idx,
-                name: row["Account Name"] || "Term Saving #" + (idx + 1),
-                principal: principal,
-                rate: interestRate,
-                startDate: startDate,
-                endDate: endDate,
-                totalDays: totalDays,
-                earnedInterest: earnedInterest,
-                status: "ACTIVE",
-                type: "CSV",
-                bank: row["Bank"] || "",
-              });
-              if (startDate < simStartDate)
-                simStartDate = new Date(startDate.getTime());
-            }
-          });
+          // Expose globals for tests (R4, R6, R20)
+          window.simulationLogs = res.simulationLogs;
+          window.dailySnapshots = res.dailySnapshots;
 
-          // Simulation state
-          let currentPoolBalance = initialPoolStartBalance;
-          let cumulativeSalary = 0,
-            salaryCount = 0,
-            totalInterestInitialCSV = 0,
-            totalInterestPool = 0,
-            totalInterest6M = 0;
-          let created6MCount = 0,
-            totalWithdrawals = 0,
-            currentSalary = monthlySalary;
-          const monthlyCashflows = {};
-          const monthlyWithdrawals = {};
-          const yearlyCashflows = {};
-          const todayDateOnly = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            1
-          );
-
-          // Fix Task 1.3 (R4, R6, R20): Expose logs globally to window.simulationLogs
-          const simulationLogs = [];
-          window.simulationLogs = simulationLogs;
-          const dailySnapshots = [];
-          window.dailySnapshots = dailySnapshots;
-
-          let currentDate = new Date(simStartDate.getTime());
-          let goalReached = false;
-          let goalReachedDate = null;
-
-          while (currentDate <= simTargetDate) {
-            const dateStr = formatDate(currentDate);
-            const monthKey = dateStr.substring(0, 7); // YYYY-MM
-            const yearKey = dateStr.substring(0, 4); // YYYY
-            const isMonthStart =
-              currentDate.getDate() === 1 && currentDate >= todayDateOnly;
-
-            if (!monthlyCashflows[monthKey]) {
-              monthlyCashflows[monthKey] = { salary: 0, interestPaid: 0 };
-              monthlyWithdrawals[monthKey] = { total: 0 };
-            }
-            if (!yearlyCashflows[yearKey]) {
-              yearlyCashflows[yearKey] = { salary: 0, interest: 0 };
-            }
-
-            // 1. Monthly Salary Deposit (1st day of month with salary growth)
-            if (isMonthStart) {
-              if (monthlySalary > 0) {
-                currentPoolBalance += currentSalary;
-                cumulativeSalary += currentSalary;
-                salaryCount++;
-                monthlyCashflows[monthKey].salary += currentSalary;
-                yearlyCashflows[yearKey].salary += currentSalary;
-                simulationLogs.push({
-                  date: dateStr,
-                  type: "SALARY",
-                  title: "Monthly Salary Deposited",
-                  amount: currentSalary,
-                  details: `${formatCurrency(currentSalary)} to Pool (rate: ${(salaryGrowthRate * 100).toFixed(1)}%/yr)`,
-                });
-
-                // Apply salary growth annually
-                const yearDiff = getMonthDiff(todayDateOnly, currentDate) / 12;
-                if (
-                  yearDiff > 0 &&
-                  Math.abs(yearDiff - Math.round(yearDiff)) < 0.01 &&
-                  salaryGrowthRate > 0
-                ) {
-                  currentSalary =
-                    monthlySalary * Math.pow(1 + salaryGrowthRate, yearDiff);
-                }
-              }
-            }
-
-            // 2. Check Maturing Fixed Term Savings & Withdrawals (R6, R20)
-            allSavings.forEach((acc) => {
-              if (acc.status === "ACTIVE" && currentDate >= acc.endDate) {
-                if (acc.type === "Withdrawal") {
-                  totalWithdrawals += Math.abs(acc.principal);
-                  monthlyWithdrawals[monthKey].total += Math.abs(acc.principal);
-                  simulationLogs.push({
-                    date: dateStr,
-                    type: "WITHDRAWAL",
-                    title: `Withdrawal: ${acc.name}`,
-                    amount: Math.abs(acc.principal),
-                    details: `${formatCurrency(Math.abs(acc.principal))} withdrawn`,
-                  });
-                  acc.status = "COMPLETED";
-                } else {
-                  acc.status = "MATURED";
-                  const payout = acc.principal + acc.earnedInterest;
-                  currentPoolBalance += payout;
-                  if (acc.type === "CSV")
-                    totalInterestInitialCSV += acc.earnedInterest;
-                  else if (acc.type === "AUTO_6M")
-                    totalInterest6M += acc.earnedInterest;
-                  monthlyCashflows[monthKey].interestPaid += acc.earnedInterest;
-                  yearlyCashflows[yearKey].interest += acc.earnedInterest;
-                  simulationLogs.push({
-                    date: dateStr,
-                    type: "MATURITY",
-                    title: `Matured: ${acc.name}`,
-                    amount: payout,
-                    details: `${formatCurrency(acc.principal)} + ${formatCurrency(acc.earnedInterest)} to Pool`,
-                  });
-
-                  // Task 1.1 (R20): Auto 6M reinvestment with payout deduction from pool
-                  if (acc.type === "CSV" && payout >= 200000000) {
-                    const locked = payout;
-                    currentPoolBalance -= locked; // DEDUCT LOCKED AMOUNT TO PREVENT DOUBLE COUNTING
-                    const as = new Date(currentDate.getTime()),
-                      ae = addMonths(as, 6);
-                    const td = Math.max(1, getDaysDiff(as, ae));
-                    const ei = locked * term6MAnnualRate * (td / 365);
-                    allSavings.push({
-                      id: "auto_6m_" + ++created6MCount,
-                      name: `Auto 6M Saving #${created6MCount}`,
-                      principal: locked,
-                      rate: term6MAnnualRate * 100,
-                      startDate: as,
-                      endDate: ae,
-                      totalDays: td,
-                      earnedInterest: ei,
-                      status: "ACTIVE",
-                      type: "AUTO_6M",
-                      bank: "",
-                    });
-                    simulationLogs.push({
-                      date: dateStr,
-                      type: "NEW_6M",
-                      title: `Created Auto 6M Saving #${created6MCount}`,
-                      amount: locked,
-                      details: `Pool hit ${formatCurrency(locked)} (>= 200M). Locked @ ${(term6MAnnualRate * 100).toFixed(1)}%/yr`,
-                    });
-                  }
-                }
-              }
-            });
-
-            // 3. Non-term Pool Daily Interest
-            if (currentPoolBalance > 0) {
-              const dailyPoolInterest =
-                currentPoolBalance * (poolAnnualRate / 365);
-              currentPoolBalance += dailyPoolInterest;
-              totalInterestPool += dailyPoolInterest;
-              yearlyCashflows[yearKey].interest += dailyPoolInterest;
-            }
-
-            // 4. Pool Threshold Rule (>= 200M -> create 6M term)
-            if (currentPoolBalance >= 200000000) {
-              const lockedAmount = currentPoolBalance;
-              currentPoolBalance = 0;
-              created6MCount++;
-              const autoStartDate = new Date(currentDate.getTime()),
-                autoEndDate = addMonths(autoStartDate, 6);
-              const totalDays = Math.max(
-                1,
-                getDaysDiff(autoStartDate, autoEndDate)
-              );
-              const estInterest =
-                lockedAmount * term6MAnnualRate * (totalDays / 365);
-              allSavings.push({
-                id: "auto_6m_" + created6MCount,
-                name: `Auto 6M Saving #${created6MCount}`,
-                principal: lockedAmount,
-                rate: term6MAnnualRate * 100,
-                startDate: autoStartDate,
-                endDate: autoEndDate,
-                totalDays: totalDays,
-                earnedInterest: estInterest,
-                status: "ACTIVE",
-                type: "AUTO_6M",
-                bank: "",
-              });
-              simulationLogs.push({
-                date: dateStr,
-                type: "NEW_6M",
-                title: `Created Auto 6M Saving #${created6MCount}`,
-                amount: lockedAmount,
-                details: `Pool hit ${formatCurrency(lockedAmount)} (>= 200M). Moved 100% into 6M term @ ${(term6MAnnualRate * 100).toFixed(1)}%/yr`,
-              });
-            }
-
-            // 5. Active Fixed Savings Total
-            let activeFixedSavingsBalance = 0;
-            allSavings.forEach((acc) => {
-              if (
-                currentDate >= acc.startDate &&
-                currentDate < acc.endDate &&
-                acc.status !== "COMPLETED"
-              )
-                activeFixedSavingsBalance += acc.principal;
-            });
-
-            // 6. Daily Snapshot
-            const totalWealth = currentPoolBalance + activeFixedSavingsBalance;
-            dailySnapshots.push({
-              date: dateStr,
-              timestamp: currentDate.getTime(),
-              poolBalance: currentPoolBalance,
-              fixedSavingsBalance: activeFixedSavingsBalance,
-              totalWealth: totalWealth,
-              cumulativeSalary: cumulativeSalary,
-            });
-
-            // 7. Check Goal Achievement
-            if (savingsGoal > 0 && !goalReached && totalWealth >= savingsGoal) {
-              goalReached = true;
-              goalReachedDate = dateStr;
-              showToast(
-                `🎉 Goal of ${formatCurrency(savingsGoal)} reached on ${dateStr}!`,
-                "success"
-              );
-            }
-
-            // Increment day
-            currentDate.setDate(currentDate.getDate() + 1);
-          }
+          const { totals, finalSnapshot, goalReached, goalReachedDate } = res;
 
           // --- UPDATE METRICS DISPLAY ---
-          const finalSnapshot = dailySnapshots[dailySnapshots.length - 1] || {
-            totalWealth: 0,
-            poolBalance: 0,
-          };
-          const totalEarnedInterest =
-            totalInterestInitialCSV + totalInterestPool + totalInterest6M;
-
           document.getElementById("metricTotalBalance").innerText =
-            formatCurrency(finalSnapshot.totalWealth);
+            formatCurrency(totals.totalWealth);
           document.getElementById("metricTargetDateText").innerText =
             targetDateStr;
           document.getElementById("metricTotalInterest").innerText =
-            formatCurrency(totalEarnedInterest);
+            formatCurrency(totals.totalInterest);
           const intRatio =
-            cumulativeSalary > 0
-              ? ((totalEarnedInterest / cumulativeSalary) * 100).toFixed(1)
+            totals.cumulativeSalary > 0
+              ? (
+                  (totals.totalInterest / totals.cumulativeSalary) *
+                  100
+                ).toFixed(1)
               : 0;
           document.getElementById("metricInterestPercentage").innerText =
             `+${intRatio}% yield`;
           document.getElementById("metricTotalSalary").innerText =
-            formatCurrency(cumulativeSalary);
+            formatCurrency(totals.cumulativeSalary);
           document.getElementById("metricSalaryCount").innerText =
-            `${salaryCount} monthly deposits`;
+            `${totals.salaryCount} monthly deposits`;
           document.getElementById("metricPoolBalance").innerText =
-            formatCurrency(finalSnapshot.poolBalance);
+            formatCurrency(totals.poolBalance);
           document.getElementById("metricCreated6MCount").innerText =
-            `${created6MCount} account(s)`;
+            `${totals.created6MCount} account(s)`;
 
           // Inflation-adjusted (real) value display (R5)
           if (inflationRate > 0) {
-            const years = getDaysDiff(today, simTargetDate) / 365;
-            const realValue =
-              finalSnapshot.totalWealth / Math.pow(1 + inflationRate, years);
             document.getElementById("metricRealValue").style.display = "";
             document.getElementById("metricRealValue").innerText =
-              `real: ${formatCurrency(realValue)}`;
+              `real: ${formatCurrency(totals.inflationAdjusted)}`;
             document
               .getElementById("realLineIndicator")
               .classList.remove("opacity-0");
@@ -2403,78 +2462,88 @@
 
           // Earnings Breakdown
           document.getElementById("txtInitialInterest").innerText =
-            formatCurrency(totalInterestInitialCSV);
-          document.getElementById("txtPoolInterest").innerText =
-            formatCurrency(totalInterestPool);
+            formatCurrency(totals.totalInterestInitialCSV);
+          document.getElementById("txtPoolInterest").innerText = formatCurrency(
+            totals.totalInterestPool
+          );
           document.getElementById("txtAuto6MInterest").innerText =
-            formatCurrency(totalInterest6M);
+            formatCurrency(totals.totalInterest6M);
           document.getElementById("txtSalaryDeposited").innerText =
-            formatCurrency(cumulativeSalary);
+            formatCurrency(totals.cumulativeSalary);
           document
             .getElementById("txtWithdrawals")
-            .parentElement.classList.toggle("hidden", totalWithdrawals === 0);
-          document.getElementById("txtWithdrawals").innerText =
-            formatCurrency(totalWithdrawals);
+            .parentElement.classList.toggle(
+              "hidden",
+              totals.totalWithdrawals === 0
+            );
+          document.getElementById("txtWithdrawals").innerText = formatCurrency(
+            totals.totalWithdrawals
+          );
           document.getElementById("txtTotalSavingsCount").innerText =
-            allSavings.length;
+            res.allSavings.length;
 
-          // Task 2.3 (R7): Goal Progress Section Visibility
+          // Goal Progress Section Visibility & Milestone Date
           const goalSection = document.getElementById("goalProgressSection");
           const goalRingSection = document.getElementById("goalRingSection");
           if (savingsGoal > 0) {
             goalSection.classList.remove("hidden");
             goalRingSection.classList.remove("hidden");
-            const pct = Math.min(
-              100,
-              (finalSnapshot.totalWealth / savingsGoal) * 100
-            );
+            const pct = Math.min(100, (totals.totalWealth / savingsGoal) * 100);
             document.getElementById("goalProgressBar").style.width = pct + "%";
             document.getElementById("goalCurrentText").innerText =
-              formatCurrency(finalSnapshot.totalWealth);
+              formatCurrency(totals.totalWealth);
             document.getElementById("goalTargetText").innerText =
               "Goal: " + formatCurrency(savingsGoal);
-            document.getElementById("goalMonthsToGo").innerText = goalReached
-              ? "✅ Goal Reached!"
-              : `Target: ${formatCurrency(savingsGoal)}`;
-            renderGoalRing(finalSnapshot.totalWealth, savingsGoal);
+            if (goalReached && goalReachedDate) {
+              document.getElementById("goalMonthsToGo").innerText =
+                `🎉 Milestone: ${goalReachedDate}`;
+              if (!window._lastToastGoalReached) {
+                showToast(
+                  `🎉 Goal of ${formatCurrency(savingsGoal)} reached on ${goalReachedDate}!`,
+                  "success"
+                );
+                window._lastToastGoalReached = true;
+              }
+            } else {
+              document.getElementById("goalMonthsToGo").innerText =
+                "📈 Goal not reached within target timeframe";
+              window._lastToastGoalReached = false;
+            }
+            renderGoalRing(totals.totalWealth, savingsGoal);
           } else {
             goalSection.classList.add("hidden");
             goalRingSection.classList.add("hidden");
           }
 
-          // Store sim result for sharing/export
+          // Store simResult
           simResult = {
-            totalWealth: finalSnapshot.totalWealth,
-            poolBalance: finalSnapshot.poolBalance,
-            totalInterest: totalEarnedInterest,
-            cumulativeSalary,
-            created6MCount,
+            totalWealth: totals.totalWealth,
+            poolBalance: totals.poolBalance,
+            totalInterest: totals.totalInterest,
+            cumulativeSalary: totals.cumulativeSalary,
+            created6MCount: totals.created6MCount,
             goalReached,
             goalReachedDate,
-            inflationAdjusted:
-              inflationRate > 0
-                ? finalSnapshot.totalWealth /
-                  Math.pow(
-                    1 + inflationRate,
-                    getDaysDiff(today, simTargetDate) / 365
-                  )
-                : finalSnapshot.totalWealth,
+            inflationAdjusted: totals.inflationAdjusted,
           };
           window.simResult = simResult;
 
           // --- RENDER TABLES & CHARTS ---
-          renderSavingsTable(allSavings, simTargetDate);
-          renderSimulationLogs(simulationLogs);
-          renderGrowthChart(dailySnapshots, finalSnapshot, inflationRate);
+          renderSavingsTable(res.allSavings, res.simTargetDate);
+          renderSimulationLogs(res.simulationLogs);
+          renderGrowthChart(res.dailySnapshots, finalSnapshot, inflationRate);
           renderAllocationChart(
             finalSnapshot.poolBalance,
             finalSnapshot.fixedSavingsBalance
           );
-          renderMonthlyIncomeChart(monthlyCashflows, monthlyWithdrawals);
-          renderYearlyTable(dailySnapshots, yearlyCashflows);
-          renderHeatmapChart(dailySnapshots);
+          renderMonthlyIncomeChart(
+            res.monthlyCashflows,
+            res.monthlyWithdrawals
+          );
+          renderYearlyTable(res.dailySnapshots, res.yearlyCashflows);
+          renderHeatmapChart(res.dailySnapshots);
 
-          // Task 2.1 (R1, R2): Save to storage synchronously during simulation run
+          // Task 2.1 (R1, R2): Synchronous save
           saveToStorage();
         } catch (e) {
           showToast("Simulation error: " + e.message, "error");
@@ -3165,42 +3234,77 @@
         }
       }
       function runComparison() {
+        const targetDateStr = document.getElementById("inputTargetDate").value;
         const salary =
           parseFloat(document.getElementById("inputSalary").value) || 0;
         const salaryGrowth =
           parseFloat(document.getElementById("inputSalaryGrowth").value) || 0;
+        const inflation =
+          parseFloat(document.getElementById("inputInflation").value) || 0;
+        const poolRate =
+          parseFloat(document.getElementById("inputPoolRate").value) || 0;
+        const rate6M =
+          parseFloat(document.getElementById("input6MRate").value) || 0;
+        const goal =
+          parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
+
+        if (!targetDateStr) {
+          showToast("Please run simulation first", "warning");
+          return;
+        }
+
+        const paramsA = {
+          targetDateStr,
+          monthlySalary: salary,
+          salaryGrowthRate: salaryGrowth / 100,
+          inflationRate: inflation / 100,
+          poolAnnualRate: poolRate / 100,
+          term6MAnnualRate: rate6M / 100,
+          savingsGoal: goal,
+        };
+
         const projectedSalary = salary * Math.pow(1 + salaryGrowth / 100, 2); // 2-year projection
+        const paramsB = {
+          targetDateStr,
+          monthlySalary: projectedSalary,
+          salaryGrowthRate: salaryGrowth / 100,
+          inflationRate: inflation / 100,
+          poolAnnualRate: poolRate / 100,
+          term6MAnnualRate: rate6M / 100,
+          savingsGoal: goal,
+        };
 
-        // Scenario A
-        document.getElementById("compASalary").innerText =
-          formatCurrency(salary);
-        document.getElementById("compATotal").innerText = simResult
-          ? formatCurrency(simResult.totalWealth)
-          : "-";
-        document.getElementById("compAInterest").innerText = simResult
-          ? formatCurrency(simResult.totalInterest)
-          : "-";
-        document.getElementById("compAGoal").innerText =
-          simResult && simResult.goalReached ? "✅ Yes" : "📈 Not yet";
+        const resA = simulate(paramsA, workingCSVData);
+        const resB = simulate(paramsB, workingCSVData);
 
-        // Real simulation pass for Scenario B (R17)
-        const origSalary = document.getElementById("inputSalary").value;
-        document.getElementById("inputSalary").value = projectedSalary;
-        runSimulation();
-        const resultB = simResult;
-        document.getElementById("inputSalary").value = origSalary;
-        runSimulation(); // Restore Scenario A
+        if (resA) {
+          document.getElementById("compASalary").innerText =
+            formatCurrency(salary);
+          document.getElementById("compATotal").innerText = formatCurrency(
+            resA.totals.totalWealth
+          );
+          document.getElementById("compAInterest").innerText = formatCurrency(
+            resA.totals.totalInterest
+          );
+          document.getElementById("compAGoal").innerText = resA.goalReached
+            ? "✅ " + resA.goalReachedDate
+            : "📈 Not yet";
+        }
 
-        document.getElementById("compBSalary").innerText =
-          formatCurrency(projectedSalary);
-        document.getElementById("compBTotal").innerText = resultB
-          ? formatCurrency(resultB.totalWealth)
-          : "-";
-        document.getElementById("compBInterest").innerText = resultB
-          ? formatCurrency(resultB.totalInterest)
-          : "-";
-        document.getElementById("compBGoal").innerText =
-          resultB && resultB.goalReached ? "✅ Yes" : "📈 Not yet";
+        if (resB) {
+          document.getElementById("compBSalary").innerText =
+            formatCurrency(projectedSalary);
+          document.getElementById("compBTotal").innerText = formatCurrency(
+            resB.totals.totalWealth
+          );
+          document.getElementById("compBInterest").innerText = formatCurrency(
+            resB.totals.totalInterest
+          );
+          document.getElementById("compBGoal").innerText = resB.goalReached
+            ? "✅ " + resB.goalReachedDate
+            : "📈 Not yet";
+        }
+
         showToast("Comparison updated", "success");
       }
 

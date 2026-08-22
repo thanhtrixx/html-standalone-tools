@@ -1,0 +1,3 @@
+# 4. Pure Simulation Engine Separation
+
+The daily timeline simulation logic is isolated into a pure, side-effect-free function `simulate(params, portfolioData)` that takes input parameters and portfolio positions and returns calculated snapshots, logs, totals, and milestone forecasts. UI rendering (Chart.js updates, DOM metric updates, toasts) and browser persistence (`localStorage`) are handled separately by caller functions (`runSimulation()`, `runComparison()`). This avoids DOM flicker, prevents accidental storage overwrites during multi-scenario comparisons, and facilitates deterministic automated testing.
