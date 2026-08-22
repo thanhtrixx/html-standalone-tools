@@ -571,13 +571,19 @@
               >Monthly Salary (VND)</label
             >
             <input
-              type="number"
+              type="text"
+              inputmode="numeric"
               id="inputSalary"
-              value="25000000"
-              min="0"
-              step="1000000"
+              value="25,000,000"
+              oninput="applyCurrencyMask(this)"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+            <div
+              id="helperSalary"
+              class="text-[11px] text-indigo-400 font-medium mt-1 min-h-[16px]"
+            >
+              25 Million VND
+            </div>
           </div>
           <div>
             <label
@@ -690,13 +696,17 @@
               >Savings Goal (VND)</label
             >
             <input
-              type="number"
+              type="text"
+              inputmode="numeric"
               id="inputSavingsGoal"
               value="0"
-              min="0"
-              step="10000000"
+              oninput="applyCurrencyMask(this)"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+            <div
+              id="helperSavingsGoal"
+              class="text-[11px] text-indigo-400 font-medium mt-1 min-h-[16px]"
+            ></div>
           </div>
           <div>
             <label
@@ -723,13 +733,19 @@
               >Auto Term Threshold (VND)</label
             >
             <input
-              type="number"
+              type="text"
+              inputmode="numeric"
               id="inputAutoTermThreshold"
-              value="200000000"
-              min="0"
-              step="10000000"
+              value="200,000,000"
+              oninput="applyCurrencyMask(this)"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+            <div
+              id="helperAutoTermThreshold"
+              class="text-[11px] text-amber-400 font-medium mt-1 min-h-[16px]"
+            >
+              200 Million VND
+            </div>
           </div>
           <div>
             <label
@@ -739,13 +755,19 @@
               >Emergency Buffer Reserve (VND)</label
             >
             <input
-              type="number"
+              type="text"
+              inputmode="numeric"
               id="inputEmergencyBuffer"
-              value="30000000"
-              min="0"
-              step="5000000"
+              value="30,000,000"
+              oninput="applyCurrencyMask(this)"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+            <div
+              id="helperEmergencyBuffer"
+              class="text-[11px] text-amber-400 font-medium mt-1 min-h-[16px]"
+            >
+              30 Million VND
+            </div>
             <div class="flex flex-wrap gap-1 mt-1.5">
               <button
                 type="button"
@@ -1517,14 +1539,22 @@
                 >Monthly Salary (VND)</label
               >
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
                 id="inputCompSalary"
-                value="30000000"
-                min="0"
-                step="1000000"
-                oninput="triggerReactiveComparison()"
+                value="30,000,000"
+                oninput="
+                  applyCurrencyMask(this);
+                  triggerReactiveComparison();
+                "
                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
               />
+              <div
+                id="helperCompSalary"
+                class="text-[10px] text-emerald-400 font-medium mt-1 min-h-[14px]"
+              >
+                30 Million VND
+              </div>
             </div>
             <div>
               <label
@@ -1570,14 +1600,20 @@
                 >Savings Goal (VND)</label
               >
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
                 id="inputCompSavingsGoal"
                 value="0"
-                min="0"
-                step="10000000"
-                oninput="triggerReactiveComparison()"
+                oninput="
+                  applyCurrencyMask(this);
+                  triggerReactiveComparison();
+                "
                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
               />
+              <div
+                id="helperCompSavingsGoal"
+                class="text-[10px] text-emerald-400 font-medium mt-1 min-h-[14px]"
+              ></div>
             </div>
             <div>
               <label
@@ -1605,14 +1641,22 @@
                 >Auto Term Threshold (VND)</label
               >
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
                 id="inputCompAutoTermThreshold"
-                value="200000000"
-                min="0"
-                step="10000000"
-                oninput="triggerReactiveComparison()"
+                value="200,000,000"
+                oninput="
+                  applyCurrencyMask(this);
+                  triggerReactiveComparison();
+                "
                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
               />
+              <div
+                id="helperCompAutoTermThreshold"
+                class="text-[10px] text-emerald-400 font-medium mt-1 min-h-[14px]"
+              >
+                200 Million VND
+              </div>
             </div>
             <div>
               <label
@@ -1622,14 +1666,22 @@
                 >Emergency Buffer Reserve (VND)</label
               >
               <input
-                type="number"
+                type="text"
+                inputmode="numeric"
                 id="inputCompEmergencyBuffer"
-                value="30000000"
-                min="0"
-                step="5000000"
-                oninput="triggerReactiveComparison()"
+                value="30,000,000"
+                oninput="
+                  applyCurrencyMask(this);
+                  triggerReactiveComparison();
+                "
                 class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 transition"
               />
+              <div
+                id="helperCompEmergencyBuffer"
+                class="text-[10px] text-emerald-400 font-medium mt-1 min-h-[14px]"
+              >
+                30 Million VND
+              </div>
             </div>
             <div>
               <label
@@ -3028,6 +3080,142 @@
         return sign + absVal.toLocaleString("en-US") + " VND";
       }
 
+      // --- CURRENCY INPUT MASKING & VERBAL HELPERS (ADR-0011) ---
+      function formatNumberWithSeparators(val, lang) {
+        if (val === null || val === undefined || val === "") return "";
+        const l = lang || window.currentLang || "en";
+        const num =
+          typeof val === "number"
+            ? Math.round(val)
+            : parseInt(String(val).replace(/[^0-9-]/g, ""), 10);
+        if (isNaN(num)) return "";
+        const sep = l === "vi" ? "." : ",";
+        const isNeg = num < 0;
+        const str = Math.abs(num).toString();
+        const formatted = str.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+        return isNeg ? "-" + formatted : formatted;
+      }
+      window.formatNumberWithSeparators = formatNumberWithSeparators;
+
+      function parseFormattedNumber(val) {
+        if (typeof val === "number") return isNaN(val) ? 0 : Math.round(val);
+        if (!val) return 0;
+        const cleaned = String(val).replace(/[^0-9-]/g, "");
+        const num = parseInt(cleaned, 10);
+        return isNaN(num) ? 0 : num;
+      }
+      window.parseFormattedNumber = parseFormattedNumber;
+
+      function getSpelledOutAmount(val, lang) {
+        const num = typeof val === "number" ? val : parseFormattedNumber(val);
+        if (!num || num <= 0) return "";
+        const l = lang || window.currentLang || "en";
+        const isVi = l === "vi";
+        if (num >= 1e9) {
+          const b = Math.round((num / 1e9) * 100) / 100;
+          return isVi ? `${b} Tỷ VND` : `${b} Billion VND`;
+        }
+        if (num >= 1e6) {
+          const m = Math.round((num / 1e6) * 100) / 100;
+          return isVi ? `${m} Triệu VND` : `${m} Million VND`;
+        }
+        if (num >= 1e3) {
+          const k = Math.round((num / 1e3) * 100) / 100;
+          return isVi ? `${k} Nghìn VND` : `${k} Thousand VND`;
+        }
+        return `${num} VND`;
+      }
+      window.getSpelledOutAmount = getSpelledOutAmount;
+
+      function updateVerbalHelperForInput(input, lang) {
+        if (!input) return;
+        const id = input.id;
+        const helperMap = {
+          inputSalary: "helperSalary",
+          inputSavingsGoal: "helperSavingsGoal",
+          inputAutoTermThreshold: "helperAutoTermThreshold",
+          inputEmergencyBuffer: "helperEmergencyBuffer",
+          inputCompSalary: "helperCompSalary",
+          inputCompSavingsGoal: "helperCompSavingsGoal",
+          inputCompAutoTermThreshold: "helperCompAutoTermThreshold",
+          inputCompEmergencyBuffer: "helperCompEmergencyBuffer",
+          inputRecurAmount: "helperRecurAmount",
+        };
+        const helperId = helperMap[id];
+        if (helperId) {
+          const helperEl = document.getElementById(helperId);
+          if (helperEl) {
+            const rawVal = parseFormattedNumber(input.value);
+            const verbal = getSpelledOutAmount(rawVal, lang);
+            helperEl.textContent = verbal;
+          }
+        }
+      }
+      window.updateVerbalHelperForInput = updateVerbalHelperForInput;
+
+      function applyCurrencyMask(input, lang) {
+        if (!input) return;
+        const l = lang || window.currentLang || "en";
+        const raw = input.value || "";
+        const selStart =
+          input.selectionStart != null ? input.selectionStart : raw.length;
+        const digitsBefore = (raw.slice(0, selStart).match(/\d/g) || []).length;
+        const num = parseFormattedNumber(raw);
+        const formatted =
+          raw.trim() === "" ? "" : formatNumberWithSeparators(num, l);
+        input.value = formatted;
+
+        let newPos = 0;
+        let digitsCounted = 0;
+        for (let i = 0; i < formatted.length; i++) {
+          if (/\d/.test(formatted[i])) {
+            digitsCounted++;
+          }
+          if (digitsCounted >= digitsBefore) {
+            newPos = i + 1;
+            break;
+          }
+        }
+        if (digitsBefore === 0) newPos = 0;
+        if (digitsCounted < digitsBefore) newPos = formatted.length;
+
+        if (input.setSelectionRange && document.activeElement === input) {
+          try {
+            input.setSelectionRange(newPos, newPos);
+          } catch (e) {}
+        }
+        updateVerbalHelperForInput(input, l);
+      }
+      window.applyCurrencyMask = applyCurrencyMask;
+
+      function updateAllVerbalHelpers(lang) {
+        const l = lang || window.currentLang || "en";
+        const ids = [
+          "inputSalary",
+          "inputSavingsGoal",
+          "inputAutoTermThreshold",
+          "inputEmergencyBuffer",
+          "inputCompSalary",
+          "inputCompSavingsGoal",
+          "inputCompAutoTermThreshold",
+          "inputCompEmergencyBuffer",
+          "inputRecurAmount",
+        ];
+        ids.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            if (el.value) {
+              el.value = formatNumberWithSeparators(
+                parseFormattedNumber(el.value),
+                l
+              );
+            }
+            updateVerbalHelperForInput(el, l);
+          }
+        });
+      }
+      window.updateAllVerbalHelpers = updateAllVerbalHelpers;
+
       function parseDate(dateStr) {
         if (!dateStr) return new Date();
         const p = typeof dateStr === "string" ? dateStr.trim().split("-") : [];
@@ -3105,6 +3293,7 @@
 
         updateThemeBtn();
         updateOnboardUI();
+        updateAllVerbalHelpers(lang);
 
         // Re-render open modal table if visible
         const csvModal = document.getElementById("csvModal");
@@ -3206,25 +3395,30 @@
         document.getElementById("inputTargetDate").value = formatDate(
           addMonths(new Date(), 24)
         );
-        document.getElementById("inputSalary").value = "25000000";
+        document.getElementById("inputSalary").value =
+          formatNumberWithSeparators(25000000);
         document.getElementById("inputSalaryGrowth").value = "0";
         if (document.getElementById("inputAnnualBonusMultiplier"))
           document.getElementById("inputAnnualBonusMultiplier").value = "1.0";
         if (document.getElementById("selectAnnualBonusMonth"))
           document.getElementById("selectAnnualBonusMonth").value = "1";
         document.getElementById("inputInflation").value = "0";
-        document.getElementById("inputSavingsGoal").value = "0";
+        document.getElementById("inputSavingsGoal").value =
+          formatNumberWithSeparators(0);
         document.getElementById("inputPoolRate").value = "0.5";
         if (document.getElementById("inputAutoTermThreshold"))
-          document.getElementById("inputAutoTermThreshold").value = "200000000";
+          document.getElementById("inputAutoTermThreshold").value =
+            formatNumberWithSeparators(200000000);
         if (document.getElementById("inputEmergencyBuffer"))
-          document.getElementById("inputEmergencyBuffer").value = "30000000";
+          document.getElementById("inputEmergencyBuffer").value =
+            formatNumberWithSeparators(30000000);
         if (document.getElementById("inputAutoTermMonths"))
           document.getElementById("inputAutoTermMonths").value = "6";
         if (document.getElementById("inputAutoTermRate"))
           document.getElementById("inputAutoTermRate").value = "5.8";
         if (document.getElementById("input6MRate"))
           document.getElementById("input6MRate").value = "5.8";
+        updateAllVerbalHelpers();
         setStorage("theme", "dark");
         document.documentElement.classList.remove("light");
         updateThemeBtn();
@@ -3518,9 +3712,8 @@
           addMonths(new Date(), (preset.params.targetYears || 2) * 12)
         );
         document.getElementById("inputTargetDate").value = targetDate;
-        document.getElementById("inputSalary").value = String(
-          preset.params.salary
-        );
+        document.getElementById("inputSalary").value =
+          formatNumberWithSeparators(preset.params.salary);
         document.getElementById("inputSalaryGrowth").value = String(
           preset.params.salaryGrowth
         );
@@ -3537,21 +3730,18 @@
         document.getElementById("inputInflation").value = String(
           preset.params.inflation
         );
-        document.getElementById("inputSavingsGoal").value = String(
-          preset.params.savingsGoal
-        );
+        document.getElementById("inputSavingsGoal").value =
+          formatNumberWithSeparators(preset.params.savingsGoal);
         document.getElementById("inputPoolRate").value = String(
           preset.params.poolRate
         );
         if (document.getElementById("inputAutoTermThreshold")) {
-          document.getElementById("inputAutoTermThreshold").value = String(
-            preset.params.autoTermThreshold
-          );
+          document.getElementById("inputAutoTermThreshold").value =
+            formatNumberWithSeparators(preset.params.autoTermThreshold);
         }
         if (document.getElementById("inputEmergencyBuffer")) {
-          document.getElementById("inputEmergencyBuffer").value = String(
-            preset.params.emergencyBuffer
-          );
+          document.getElementById("inputEmergencyBuffer").value =
+            formatNumberWithSeparators(preset.params.emergencyBuffer);
         }
         if (document.getElementById("inputAutoTermMonths")) {
           document.getElementById("inputAutoTermMonths").value = String(
@@ -3572,6 +3762,7 @@
         // Apply preset CSV
         syncCSVData(JSON.parse(JSON.stringify(preset.csv)));
         updateCSVCountBadge();
+        updateAllVerbalHelpers();
 
         togglePresetsModal(false);
         runSimulation();
@@ -3594,7 +3785,9 @@
         const u = window._undoState;
         if (u.targetDate)
           document.getElementById("inputTargetDate").value = u.targetDate;
-        if (u.salary) document.getElementById("inputSalary").value = u.salary;
+        if (u.salary)
+          document.getElementById("inputSalary").value =
+            formatNumberWithSeparators(parseFormattedNumber(u.salary));
         if (u.salaryGrowth !== undefined)
           document.getElementById("inputSalaryGrowth").value = u.salaryGrowth;
         if (
@@ -3614,7 +3807,8 @@
         if (u.inflation !== undefined)
           document.getElementById("inputInflation").value = u.inflation;
         if (u.goal !== undefined)
-          document.getElementById("inputSavingsGoal").value = u.goal;
+          document.getElementById("inputSavingsGoal").value =
+            formatNumberWithSeparators(parseFormattedNumber(u.goal));
         if (u.poolRate !== undefined)
           document.getElementById("inputPoolRate").value = u.poolRate;
         if (
@@ -3622,14 +3816,16 @@
           document.getElementById("inputAutoTermThreshold")
         ) {
           document.getElementById("inputAutoTermThreshold").value =
-            u.autoTermThreshold;
+            formatNumberWithSeparators(
+              parseFormattedNumber(u.autoTermThreshold)
+            );
         }
         if (
           u.emergencyBuffer !== undefined &&
           document.getElementById("inputEmergencyBuffer")
         ) {
           document.getElementById("inputEmergencyBuffer").value =
-            u.emergencyBuffer;
+            formatNumberWithSeparators(parseFormattedNumber(u.emergencyBuffer));
         }
         if (
           u.autoTermMonths !== undefined &&
@@ -3648,6 +3844,7 @@
           syncCSVData(JSON.parse(JSON.stringify(u.csv)));
           updateCSVCountBadge();
         }
+        updateAllVerbalHelpers();
         window._undoState = null;
         runSimulation();
         showToast(t("toast_preset_undone"), "success");
@@ -3758,7 +3955,7 @@
           const tr = document.createElement("tr");
           tr.className = `hover:bg-slate-800/40 transition ${isWithdrawal ? "bg-rose-950/20 border-l-2 border-rose-500" : ""}`;
           tr.innerHTML = `<td class="p-2.5"><input type="text" value="${row["Account Name"] || ""}" onchange="updateCSVRowField(${idx},'Account Name',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
-      <td class="p-2.5"><input type="number" value="${row["Principal"] || 0}" onchange="updateCSVRowField(${idx},'Principal',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5"><input type="text" inputmode="numeric" value="${formatNumberWithSeparators(row["Principal"] || 0, lang)}" oninput="applyCurrencyMask(this)" onchange="updateCSVRowField(${idx},'Principal',parseFormattedNumber(this.value))" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="date" value="${row["Start Date"] || ""}" onchange="updateCSVRowField(${idx},'Start Date',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="date" value="${row["End Date"] || ""}" onchange="updateCSVRowField(${idx},'End Date',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="number" value="${row["Interest"] || 0}" onchange="updateCSVRowField(${idx},'Interest',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
@@ -3773,7 +3970,10 @@
         });
       }
       function updateCSVRowField(idx, field, value) {
-        if (workingCSVData[idx]) workingCSVData[idx][field] = value;
+        if (workingCSVData[idx]) {
+          workingCSVData[idx][field] =
+            field === "Principal" ? parseFormattedNumber(value) : value;
+        }
       }
       function deleteCSVRow(idx) {
         workingCSVData.splice(idx, 1);
@@ -4344,8 +4544,9 @@
         try {
           const targetDateStr =
             document.getElementById("inputTargetDate").value;
-          const monthlySalary =
-            parseFloat(document.getElementById("inputSalary").value) || 0;
+          const monthlySalary = parseFormattedNumber(
+            document.getElementById("inputSalary").value
+          );
           const salaryGrowthRate =
             (parseFloat(document.getElementById("inputSalaryGrowth").value) ||
               0) / 100;
@@ -4385,10 +4586,7 @@
           const rawThreshold = document.getElementById("inputAutoTermThreshold")
             ? document.getElementById("inputAutoTermThreshold").value
             : "200000000";
-          const autoTermThreshold =
-            rawThreshold === "" || isNaN(Number(rawThreshold))
-              ? 200000000
-              : Number(rawThreshold);
+          const autoTermThreshold = parseFormattedNumber(rawThreshold);
 
           const rawMonths = document.getElementById("inputAutoTermMonths")
             ? document.getElementById("inputAutoTermMonths").value
@@ -4402,12 +4600,10 @@
           )
             ? document.getElementById("inputEmergencyBuffer").value
             : "30000000";
-          const emergencyBuffer =
-            rawEmergencyBuffer === "" || isNaN(Number(rawEmergencyBuffer))
-              ? 30000000
-              : Math.max(0, Number(rawEmergencyBuffer));
-          const savingsGoal =
-            parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
+          const emergencyBuffer = parseFormattedNumber(rawEmergencyBuffer);
+          const savingsGoal = parseFormattedNumber(
+            document.getElementById("inputSavingsGoal").value
+          );
 
           if (!targetDateStr) {
             showToast(t("toast_select_target"), "warning");
@@ -5792,7 +5988,8 @@
             if (p.targetDate)
               document.getElementById("inputTargetDate").value = p.targetDate;
             if (p.salary)
-              document.getElementById("inputSalary").value = p.salary;
+              document.getElementById("inputSalary").value =
+                formatNumberWithSeparators(p.salary);
             if (p.salaryGrowth !== undefined)
               document.getElementById("inputSalaryGrowth").value =
                 p.salaryGrowth;
@@ -5811,7 +6008,8 @@
             if (p.inflation !== undefined)
               document.getElementById("inputInflation").value = p.inflation;
             if (p.goal !== undefined)
-              document.getElementById("inputSavingsGoal").value = p.goal;
+              document.getElementById("inputSavingsGoal").value =
+                formatNumberWithSeparators(p.goal);
             if (p.poolRate)
               document.getElementById("inputPoolRate").value = p.poolRate;
             if (
@@ -5819,13 +6017,13 @@
               document.getElementById("inputAutoTermThreshold")
             )
               document.getElementById("inputAutoTermThreshold").value =
-                p.autoTermThreshold;
+                formatNumberWithSeparators(p.autoTermThreshold);
             if (
               p.emergencyBuffer !== undefined &&
               document.getElementById("inputEmergencyBuffer")
             )
               document.getElementById("inputEmergencyBuffer").value =
-                p.emergencyBuffer;
+                formatNumberWithSeparators(p.emergencyBuffer);
             if (
               p.autoTermMonths !== undefined &&
               document.getElementById("inputAutoTermMonths")
@@ -5847,6 +6045,7 @@
               )
                 document.getElementById("inputAutoTermRate").value = p.sixMRate;
             }
+            updateAllVerbalHelpers();
           }
           if (payload.csv && payload.csv.length > 0) {
             workingCSVData = payload.csv;
@@ -6039,8 +6238,9 @@
           return;
         }
 
-        const salaryA =
-          parseFloat(document.getElementById("inputSalary").value) || 0;
+        const salaryA = parseFormattedNumber(
+          document.getElementById("inputSalary").value
+        );
         const salaryGrowthA =
           (parseFloat(document.getElementById("inputSalaryGrowth").value) ||
             0) / 100;
@@ -6060,17 +6260,11 @@
         const rawThresholdA = document.getElementById("inputAutoTermThreshold")
           ? document.getElementById("inputAutoTermThreshold").value
           : "200000000";
-        const autoTermThresholdA =
-          rawThresholdA === "" || isNaN(Number(rawThresholdA))
-            ? 200000000
-            : Number(rawThresholdA);
+        const autoTermThresholdA = parseFormattedNumber(rawThresholdA);
         const rawBufferA = document.getElementById("inputEmergencyBuffer")
           ? document.getElementById("inputEmergencyBuffer").value
           : "30000000";
-        const emergencyBufferA =
-          rawBufferA === "" || isNaN(Number(rawBufferA))
-            ? 30000000
-            : Math.max(0, Number(rawBufferA));
+        const emergencyBufferA = parseFormattedNumber(rawBufferA);
         const rawMonthsA = document.getElementById("inputAutoTermMonths")
           ? document.getElementById("inputAutoTermMonths").value
           : "6";
@@ -6078,8 +6272,9 @@
           rawMonthsA === "" || isNaN(parseInt(rawMonthsA, 10))
             ? 6
             : parseInt(rawMonthsA, 10);
-        const goalA =
-          parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
+        const goalA = parseFormattedNumber(
+          document.getElementById("inputSavingsGoal").value
+        );
         const rawBonusMult = document.getElementById(
           "inputAnnualBonusMultiplier"
         )
@@ -6118,7 +6313,7 @@
 
         const elCompSalary = document.getElementById("inputCompSalary");
         const salaryB = elCompSalary
-          ? parseFloat(elCompSalary.value) || 0
+          ? parseFormattedNumber(elCompSalary.value)
           : salaryA * 1.2;
         const elCompSalaryGrowth = document.getElementById(
           "inputCompSalaryGrowth"
@@ -6147,24 +6342,19 @@
         const elCompThreshold = document.getElementById(
           "inputCompAutoTermThreshold"
         );
-        const autoTermThresholdB =
-          elCompThreshold &&
-          elCompThreshold.value !== "" &&
-          !isNaN(Number(elCompThreshold.value))
-            ? Number(elCompThreshold.value)
-            : autoTermThresholdA;
+        const autoTermThresholdB = elCompThreshold
+          ? parseFormattedNumber(elCompThreshold.value)
+          : autoTermThresholdA;
         const elCompBuffer = document.getElementById(
           "inputCompEmergencyBuffer"
         );
-        const emergencyBufferB =
-          elCompBuffer &&
-          elCompBuffer.value !== "" &&
-          !isNaN(Number(elCompBuffer.value))
-            ? Math.max(0, Number(elCompBuffer.value))
-            : emergencyBufferA;
+        const emergencyBufferB = elCompBuffer
+          ? parseFormattedNumber(elCompBuffer.value)
+          : emergencyBufferA;
         const goalB = document.getElementById("inputCompSavingsGoal")
-          ? parseFloat(document.getElementById("inputCompSavingsGoal").value) ||
-            0
+          ? parseFormattedNumber(
+              document.getElementById("inputCompSavingsGoal").value
+            )
           : goalA;
 
         const paramsB = {
@@ -6409,7 +6599,8 @@
               document.getElementById("inputTargetDate").value =
                 params.targetDate;
             if (params.salary)
-              document.getElementById("inputSalary").value = params.salary;
+              document.getElementById("inputSalary").value =
+                formatNumberWithSeparators(params.salary);
             if (params.salaryGrowth !== undefined)
               document.getElementById("inputSalaryGrowth").value =
                 params.salaryGrowth;
@@ -6429,7 +6620,8 @@
               document.getElementById("inputInflation").value =
                 params.inflation;
             if (params.goal !== undefined)
-              document.getElementById("inputSavingsGoal").value = params.goal;
+              document.getElementById("inputSavingsGoal").value =
+                formatNumberWithSeparators(params.goal);
             if (params.poolRate)
               document.getElementById("inputPoolRate").value = params.poolRate;
             if (
@@ -6437,13 +6629,13 @@
               document.getElementById("inputAutoTermThreshold")
             )
               document.getElementById("inputAutoTermThreshold").value =
-                params.autoTermThreshold;
+                formatNumberWithSeparators(params.autoTermThreshold);
             if (
               params.emergencyBuffer !== undefined &&
               document.getElementById("inputEmergencyBuffer")
             )
               document.getElementById("inputEmergencyBuffer").value =
-                params.emergencyBuffer;
+                formatNumberWithSeparators(params.emergencyBuffer);
             if (
               params.autoTermMonths !== undefined &&
               document.getElementById("inputAutoTermMonths")
@@ -6466,6 +6658,7 @@
                 document.getElementById("inputAutoTermRate").value =
                   params.sixMRate;
             }
+            updateAllVerbalHelpers();
           }
         } catch (e) {
           console.warn("Load from storage failed:", e);

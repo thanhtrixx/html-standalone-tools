@@ -268,7 +268,8 @@ async function runHelperTests() {
     `updateCSVRowField updated "Account Name"`
   );
   assert(
-    ctx.workingCSVData[targetIdx]["Principal"] === "95000000",
+    ctx.parseFormattedNumber(ctx.workingCSVData[targetIdx]["Principal"]) ===
+      95000000,
     `updateCSVRowField updated "Principal"`
   );
   assert(
@@ -347,7 +348,9 @@ async function runHelperTests() {
     `loadFromURL restored inputTargetDate: "2028-12-31"`
   );
   assert(
-    ctx.document.getElementById("inputSalary").value === "45000000",
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 45000000,
     `loadFromURL restored inputSalary: "45000000"`
   );
   assert(
@@ -520,7 +523,9 @@ async function runHelperTests() {
     `loadFromURL() seamlessly decompresses legacy Base64 URL hashes via automatic fallback`
   );
   assert(
-    ctx.document.getElementById("inputSalary").value === "80000000",
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 80000000,
     `loadFromURL restored legacy payload inputSalary: "80000000"`
   );
 
@@ -542,8 +547,12 @@ async function runHelperTests() {
   const salaryBeforePreset = ctx.document.getElementById("inputSalary").value;
   ctx.applyPreset("fresh_grad");
   assert(
-    ctx.document.getElementById("inputSalary").value === "15000000" &&
-      ctx.document.getElementById("inputSavingsGoal").value === "200000000",
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 15000000 &&
+      ctx.parseFormattedNumber(
+        ctx.document.getElementById("inputSavingsGoal").value
+      ) === 200000000,
     `applyPreset("fresh_grad") loaded Fresh Graduate parameters (Salary: 15M, Goal: 200M)`
   );
   assert(
@@ -560,6 +569,98 @@ async function runHelperTests() {
   assert(
     ctx._undoState === null,
     `undoPresetApply() cleared _undoState after successful rollback`
+  );
+
+  // Test 15: Currency Input Masking & Verbal Helpers (ADR-0011, Issue #8)
+  assert(
+    typeof ctx.formatNumberWithSeparators === "function",
+    `formatNumberWithSeparators helper is globally defined`
+  );
+  assert(
+    ctx.formatNumberWithSeparators(25000000, "en") === "25,000,000",
+    `formatNumberWithSeparators(25000000, 'en') formats with comma separators`
+  );
+  assert(
+    ctx.formatNumberWithSeparators(25000000, "vi") === "25.000.000",
+    `formatNumberWithSeparators(25000000, 'vi') formats with dot separators`
+  );
+  assert(
+    ctx.formatNumberWithSeparators("1500000000", "en") === "1,500,000,000",
+    `formatNumberWithSeparators("1500000000", 'en') formats string number with commas`
+  );
+  assert(
+    ctx.formatNumberWithSeparators(0, "en") === "0",
+    `formatNumberWithSeparators(0, 'en') formats zero`
+  );
+  assert(
+    ctx.formatNumberWithSeparators("", "en") === "",
+    `formatNumberWithSeparators("", 'en') formats empty string as ""`
+  );
+
+  assert(
+    typeof ctx.parseFormattedNumber === "function",
+    `parseFormattedNumber helper is globally defined`
+  );
+  assert(
+    ctx.parseFormattedNumber("25,000,000") === 25000000,
+    `parseFormattedNumber("25,000,000") parses comma-separated string to integer`
+  );
+  assert(
+    ctx.parseFormattedNumber("25.000.000") === 25000000,
+    `parseFormattedNumber("25.000.000") parses dot-separated string to integer`
+  );
+  assert(
+    ctx.parseFormattedNumber(" 1,500,000,000 VND ") === 1500000000,
+    `parseFormattedNumber(" 1,500,000,000 VND ") handles currency symbols and whitespace`
+  );
+  assert(
+    ctx.parseFormattedNumber(0) === 0 && ctx.parseFormattedNumber("") === 0,
+    `parseFormattedNumber handles zero and empty string safely`
+  );
+
+  assert(
+    typeof ctx.getSpelledOutAmount === "function",
+    `getSpelledOutAmount helper is globally defined`
+  );
+  assert(
+    ctx.getSpelledOutAmount(25000000, "vi") === "25 Triệu VND",
+    `getSpelledOutAmount(25000000, 'vi') returns '25 Triệu VND'`
+  );
+  assert(
+    ctx.getSpelledOutAmount(25000000, "en") === "25 Million VND",
+    `getSpelledOutAmount(25000000, 'en') returns '25 Million VND'`
+  );
+  assert(
+    ctx.getSpelledOutAmount(1500000000, "vi") === "1.5 Tỷ VND",
+    `getSpelledOutAmount(1500000000, 'vi') returns '1.5 Tỷ VND'`
+  );
+  assert(
+    ctx.getSpelledOutAmount(1500000000, "en") === "1.5 Billion VND",
+    `getSpelledOutAmount(1500000000, 'en') returns '1.5 Billion VND'`
+  );
+  assert(
+    ctx.getSpelledOutAmount(500000, "vi") === "500 Nghìn VND",
+    `getSpelledOutAmount(500000, 'vi') returns '500 Nghìn VND'`
+  );
+  assert(
+    ctx.getSpelledOutAmount(500000, "en") === "500 Thousand VND",
+    `getSpelledOutAmount(500000, 'en') returns '500 Thousand VND'`
+  );
+
+  // Test applyCurrencyMask with cursor preservation
+  const mockInput = {
+    id: "inputSalary",
+    value: "250000000",
+    selectionStart: 4,
+    setSelectionRange(s, e) {
+      this.selectionStart = s;
+      this.selectionEnd = e;
+    },
+  };
+  ctx.applyCurrencyMask(mockInput, "en");
+  assert(
+    mockInput.value === "250,000,000",
+    `applyCurrencyMask correctly formats mock input value to '250,000,000'`
   );
 
   console.log(
