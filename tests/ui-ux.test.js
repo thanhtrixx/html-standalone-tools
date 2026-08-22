@@ -517,11 +517,29 @@ async function runUIUXTests() {
   app.shareSimulation();
   assert(
     app.location.hash.length > 10,
-    "R8: Share simulation generated base64 encoded URL hash"
+    "R8: Share simulation generated compressed URL hash"
   );
   assert(
     app.navigator.clipboard.lastCopied.includes("#"),
     "R8: Share simulation copied full URL to clipboard"
+  );
+  assert(
+    !app.navigator.clipboard.lastCopied.startsWith("null/"),
+    "R8: Share simulation URL does not contain invalid null origin"
+  );
+
+  // Test R8b: Load URL with Percent-Encoded Hash
+  const rawHash = app.location.hash;
+  app.location.hash = encodeURIComponent(rawHash);
+  app.document.getElementById("inputSalary").value = "0";
+  const uiUxPercentSuccess = app.loadFromURL();
+  assert(
+    uiUxPercentSuccess === true,
+    "R8: loadFromURL() decoded percent-encoded hash successfully"
+  );
+  assert(
+    app.document.getElementById("inputSalary").value.length > 0,
+    "R8: inputSalary successfully restored from percent-encoded hash"
   );
 
   // Test R9: Theme Toggle (Dark / Light)
