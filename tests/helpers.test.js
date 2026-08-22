@@ -729,6 +729,28 @@ async function runHelperTests() {
     `updatePresetChipActiveStates helper is globally defined`
   );
 
+  // Test 17: Multi-Year Calendar Heatmap Matrix & Tooltips (ADR-0012, Issue #9)
+  assert(
+    typeof ctx.setHeatmapMetricMode === "function",
+    `setHeatmapMetricMode helper is globally defined`
+  );
+  ctx.setHeatmapMetricMode("inflow");
+  assert(
+    ctx.heatmapMetricMode === "inflow",
+    `setHeatmapMetricMode('inflow') toggled metric mode to 'inflow'`
+  );
+  ctx.setHeatmapMetricMode("wealth");
+  assert(
+    ctx.heatmapMetricMode === "wealth",
+    `setHeatmapMetricMode('wealth') toggled metric mode back to 'wealth'`
+  );
+
+  assert(
+    typeof ctx.showHeatmapTooltip === "function" &&
+      typeof ctx.hideHeatmapTooltip === "function",
+    `showHeatmapTooltip and hideHeatmapTooltip helpers are globally defined`
+  );
+
   console.log(
     `\n📊 Helper Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

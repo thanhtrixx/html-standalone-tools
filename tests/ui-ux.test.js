@@ -1114,6 +1114,77 @@ async function runUIUXTests() {
     "R25: 10M Emergency Buffer chip highlighted as active"
   );
 
+  // Test R26: Continuous Multi-Year Calendar Heatmap & Tooltips (ADR-0012, Issue #9)
+  app.switchAnalyticsTab("heatmap");
+  const heatmapGrid = app.document.getElementById("heatmapGrid");
+  assert(
+    heatmapGrid && heatmapGrid.children.length >= 2,
+    `R26: Heatmap grid rendered header and multi-year rows (Total rows: ${heatmapGrid.children.length})`
+  );
+
+  const btnHeatmapModeWealth = app.document.getElementById(
+    "btnHeatmapModeWealth"
+  );
+  const btnHeatmapModeInflow = app.document.getElementById(
+    "btnHeatmapModeInflow"
+  );
+  assert(
+    btnHeatmapModeWealth !== null && btnHeatmapModeInflow !== null,
+    "R26: Heatmap Total Wealth and Net Inflow metric toggle buttons exist"
+  );
+
+  app.setHeatmapMetricMode("inflow");
+  assert(
+    app.heatmapMetricMode === "inflow",
+    "R26: setHeatmapMetricMode('inflow') set active metric mode to 'inflow'"
+  );
+  assert(
+    btnHeatmapModeInflow.className.includes("bg-indigo-600"),
+    "R26: Net Inflow button has active styling in inflow mode"
+  );
+
+  app.setHeatmapMetricMode("wealth");
+  assert(
+    app.heatmapMetricMode === "wealth",
+    "R26: setHeatmapMetricMode('wealth') reverted metric mode to 'wealth'"
+  );
+  assert(
+    btnHeatmapModeWealth.className.includes("bg-indigo-600"),
+    "R26: Total Wealth button has active styling in wealth mode"
+  );
+
+  const heatmapTooltip = app.document.getElementById("heatmapTooltip");
+  assert(heatmapTooltip !== null, "R26: #heatmapTooltip element exists in DOM");
+
+  const mockTooltipPayload = encodeURIComponent(
+    JSON.stringify({
+      monthLabel: "Mar 2027",
+      badge: "150.0M",
+      totalWealth: 150000000,
+      poolBalance: 30000000,
+      termBalances: 120000000,
+      demandInterest: 125000,
+      termInterest: 2400000,
+      netInflow: 25000000,
+    })
+  );
+  app.showHeatmapTooltip({ clientX: 100, clientY: 200 }, mockTooltipPayload);
+  assert(
+    !heatmapTooltip.classList.contains("hidden"),
+    "R26: showHeatmapTooltip revealed #heatmapTooltip popover"
+  );
+  assert(
+    heatmapTooltip.innerHTML.includes("Mar 2027") &&
+      heatmapTooltip.innerHTML.includes("150,000,000"),
+    "R26: #heatmapTooltip rendered detailed breakdown (Month, Wealth, Pool, Interest)"
+  );
+
+  app.hideHeatmapTooltip();
+  assert(
+    heatmapTooltip.classList.contains("hidden"),
+    "R26: hideHeatmapTooltip hid popover"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

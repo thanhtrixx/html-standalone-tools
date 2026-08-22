@@ -71,3 +71,9 @@ _Avoid_: Tooltip translation, spelled-out popup, static text hint
 **Quick Preset Chips**:
 Interactive 1-click numerical target and additive delta modifier chips beneath simulation parameters allowing rapid value setting and increments with debounced live recalculation.
 _Avoid_: Stepper buttons, increment arrows, manual slider
+
+### Analytics & Visualization
+
+**Continuous Multi-Year Heatmap Matrix**:
+A comprehensive multi-year calendar grid rendering all simulation years simultaneously in rows (columns = Jan–Dec) with global normalized color shading, annual deltas, and dual-mode density/velocity metrics.
+_Avoid_: Single-year calendar, dropdown heatmap, separate year tables

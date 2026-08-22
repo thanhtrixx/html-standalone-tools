@@ -51,6 +51,7 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R23** | Strategy Persona Presets                | Strategy preset persona cards (`fresh_grad`, `fire_aspirant`, `home_downpayment`, `bank_ladder`) with 5-second undo safeguard toast.                                                           | P1       | ADR-0010           |
 | **R24** | Currency Input Masking & Verbal Helpers | Locale-aware thousand-separator masking (`.` for `vi`, `,` for `en`) on all currency inputs with cursor stability and real-time verbal helpers (`25 Triệu VND` / `25 Million VND`).            | P1       | ADR-0011           |
 | **R25** | Quick Presets & Debounced Live Recalc   | 1-click numerical preset chips and additive modifier chips under inputs (Salary, Goal, Threshold, Buffer) with active state highlighting and debounced live recalculation.                     | P1       | CONTEXT.md         |
+| **R26** | Multi-Year Calendar Heatmap & Tooltips  | Continuous multi-year matrix (no dropdown), Annual Delta & YoY % columns, Total Wealth vs Net Inflow mode toggle, and interactive popover breakdown tooltips.                                  | P1       | ADR-0012           |
 
 ---
 
