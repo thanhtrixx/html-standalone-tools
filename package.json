@@ -1,0 +1,29 @@
+{
+  "name": "html-standalone-tools",
+  "version": "1.0.0",
+  "description": "A set of html standalone tools",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thanhtrixx/html-standalone-tools.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/thanhtrixx/html-standalone-tools/issues"
+  },
+  "homepage": "https://github.com/thanhtrixx/html-standalone-tools#readme",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6"
+  }
+}

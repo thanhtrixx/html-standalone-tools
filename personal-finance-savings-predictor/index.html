@@ -1,0 +1,3341 @@
+<!doctype html>
+<html lang="en" class="h-full bg-slate-900 text-slate-100">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Savings & Wealth Simulator — Enhanced</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>"
+    />
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+              },
+              emerald: { 500: "#10b981", 600: "#059669" },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        --scrollbar-track: #1e293b;
+        --scrollbar-thumb: #475569;
+        --glass-bg: rgba(30, 41, 59, 0.7);
+      }
+
+      :root.light {
+        --scrollbar-track: #e2e8f0;
+        --scrollbar-thumb: #94a3b8;
+        --glass-bg: rgba(255, 255, 255, 0.88);
+      }
+
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: var(--scrollbar-track);
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 3px;
+      }
+
+      .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .light .glass-card {
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        background: var(--glass-bg);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateX(100%);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes scaleIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes pulse2 {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
+      @keyframes progressFill {
+        from {
+          width: 0;
+        }
+
+        to {
+          width: var(--fill);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .toast {
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .metric-card {
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .light .metric-card:hover {
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      }
+
+      .savings-goal-ring circle {
+        transition: stroke-dashoffset 0.5s ease;
+      }
+
+      .heatmap-cell {
+        width: calc(14.28% - 4px);
+        height: 60px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.1s,
+          opacity 0.2s;
+      }
+
+      .heatmap-cell:hover {
+        transform: scale(1.08);
+      }
+
+      .sensitivity-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--glass-bg);
+        outline: none;
+      }
+
+      .sensitivity-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #6366f1;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4);
+      }
+
+      .compare-card {
+        border-left: 3px solid;
+      }
+
+      .compare-a {
+        border-left-color: #6366f1;
+      }
+
+      .compare-b {
+        border-left-color: #10b981;
+      }
+
+      .onboarding-step {
+        display: none;
+      }
+
+      .onboarding-step.active {
+        display: block;
+      }
+
+      @media (max-width: 640px) {
+        .sm\:grid-cols-2 {
+          grid-template-columns: repeat(1, 1fr) !important;
+        }
+
+        .sm\:space-x-3 {
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+        }
+
+        .csv-modal-content {
+          max-height: 95vh;
+          border-radius: 16px 16px 0 0;
+        }
+
+        .csv-modal-overlay {
+          align-items: flex-end;
+        }
+      }
+
+      @media print {
+        body {
+          background: #fff !important;
+          color: #000 !important;
+        }
+
+        .glass-card {
+          background: #fff !important;
+          border: 1px solid #ccc !important;
+          backdrop-filter: none !important;
+        }
+
+        .no-print,
+        .csv-modal-overlay,
+        .onboarding-overlay,
+        .compare-modal-overlay {
+          display: none !important;
+        }
+
+        @page {
+          margin: 1cm;
+        }
+      }
+
+      .theme-transition * {
+        transition:
+          background-color 0.3s,
+          color 0.3s,
+          border-color 0.3s,
+          box-shadow 0.3s !important;
+      }
+    </style>
+  </head>
+
+  <body
+    class="h-full flex flex-col font-sans antialiased bg-slate-900 text-slate-100 theme-transition"
+  >
+    <div
+      id="toastContainer"
+      class="fixed top-4 right-4 z-[100] space-y-2 no-print"
+      aria-live="polite"
+      aria-label="Notifications"
+    ></div>
+    <!-- Onboarding Overlay -->
+    <div
+      id="onboardingOverlay"
+      class="fixed inset-0 bg-black/60 z-[90] hidden items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full shadow-2xl p-6 relative"
+      >
+        <button
+          onclick="closeOnboarding()"
+          class="absolute top-3 right-3 text-slate-500 hover:text-white"
+          aria-label="Close onboarding"
+        >
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+        <div id="onboardingContent">
+          <div class="onboarding-step active text-center py-8">
+            <div class="text-6xl mb-4">🚀</div>
+            <h2 class="text-xl font-bold mb-2" data-i18n="onboard_title_1">
+              Welcome to Savings & Wealth Simulator!
+            </h2>
+            <p class="text-slate-400 text-sm" data-i18n="onboard_desc_1">
+              Your personal finance planning companion with daily compounding,
+              salary growth tracking, and inflation-adjusted projections.
+            </p>
+          </div>
+          <div class="onboarding-step text-center py-4">
+            <div class="text-6xl mb-4">📊</div>
+            <h3 class="text-lg font-bold mb-2" data-i18n="onboard_title_2">
+              Parameters & CSV Data
+            </h3>
+            <p class="text-slate-400 text-sm" data-i18n="onboard_desc_2">
+              Set your target date, salary, and interest rates. Import or edit
+              your savings accounts from CSV. All data is saved automatically.
+            </p>
+          </div>
+          <div class="onboarding-step text-center py-4">
+            <div class="text-6xl mb-4">📈</div>
+            <h3 class="text-lg font-bold mb-2" data-i18n="onboard_title_3">
+              Charts & Analytics
+            </h3>
+            <p class="text-slate-400 text-sm" data-i18n="onboard_desc_3">
+              View wealth growth, asset allocation, monthly income flow, and
+              year-over-year breakdowns. Toggle inflation-adjusted (real)
+              values.
+            </p>
+          </div>
+          <div class="onboarding-step text-center py-4">
+            <div class="text-6xl mb-4">🎯</div>
+            <h3 class="text-lg font-bold mb-2" data-i18n="onboard_title_4">
+              Goals & Sharing
+            </h3>
+            <p class="text-slate-400 text-sm" data-i18n="onboard_desc_4">
+              Set a savings goal and track progress. Share your simulation via
+              URL link. Export charts and CSV reports.
+            </p>
+          </div>
+          <div class="onboarding-step text-center py-4">
+            <div class="text-6xl mb-4">⌨️</div>
+            <h3 class="text-lg font-bold mb-2" data-i18n="onboard_title_5">
+              Shortcuts
+            </h3>
+            <p class="text-slate-400 text-sm" data-i18n="onboard_desc_5">
+              <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Enter</kbd>
+              Run simulation ·
+              <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Ctrl+S</kbd>
+              Save CSV ·
+              <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Esc</kbd>
+              Close modals
+            </p>
+          </div>
+        </div>
+        <div class="flex justify-between mt-4">
+          <button
+            id="onboardPrev"
+            onclick="onboardNav(-1)"
+            class="px-4 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition"
+            data-i18n="btn_prev"
+          >
+            ← Prev
+          </button>
+          <div class="flex space-x-1" id="onboardDots"></div>
+          <button
+            id="onboardNext"
+            onclick="onboardNav(1)"
+            class="px-4 py-2 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition"
+            data-i18n="btn_next"
+          >
+            Next →
+          </button>
+        </div>
+        <div class="text-center mt-2">
+          <button
+            onclick="closeOnboarding()"
+            class="text-xs text-indigo-400 hover:text-indigo-300"
+            data-i18n="btn_skip"
+          >
+            Skip tour
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Theme: Dark (default) / Light via class toggle on :root -->
+    <div
+      id="themeOverlay"
+      class="fixed inset-0 bg-black/30 z-[85] hidden items-center justify-center"
+    >
+      <div class="glass-card rounded-2xl p-6 text-center">
+        <h2 class="text-2xl font-bold mb-2">🌙 Dark Mode</h2>
+        <p class="text-slate-400 text-sm">
+          Your default dark theme for reduced eye strain.
+        </p>
+        <button
+          onclick="toggleTheme()"
+          class="mt-4 px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+    <header
+      class="glass-card sticky top-0 z-30 px-4 lg:px-8 py-3 flex items-center justify-between border-b border-slate-800"
+      role="banner"
+    >
+      <div class="flex items-center space-x-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20"
+          role="img"
+          aria-label="Wallet"
+        >
+          <i class="fa-solid fa-wallet text-xl"></i>
+        </div>
+        <div>
+          <h1
+            class="text-lg font-bold leading-none tracking-tight"
+            data-i18n="app_title"
+          >
+            Savings & Wealth Simulator
+          </h1>
+          <p class="text-xs text-slate-400 mt-1" data-i18n="app_subtitle">
+            Daily compounding · Salary growth · Inflation-adjusted ·
+            Multi-scenario
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 sm:space-x-3 no-print">
+        <select
+          id="langSelector"
+          onchange="changeLanguage(this.value)"
+          class="bg-slate-800 border border-slate-700 text-xs sm:text-sm rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none transition cursor-pointer"
+          aria-label="Select Language"
+        >
+          <option value="en">🇬🇧 EN</option>
+          <option value="vi">🇻🇳 VI</option>
+        </select>
+        <button
+          onclick="triggerCSVUpload()"
+          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          title="Import CSV"
+        >
+          <i class="fa-solid fa-file-csv text-emerald-400 mr-2"></i
+          ><span data-i18n="btn_import">Import</span>
+        </button>
+        <button
+          onclick="shareSimulation()"
+          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          title="Share via URL"
+        >
+          <i class="fa-solid fa-share-nodes text-blue-400 mr-2"></i
+          ><span data-i18n="btn_share">Share</span>
+        </button>
+        <button
+          onclick="toggleCSVModal(true)"
+          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          title="Manage Data"
+        >
+          <i class="fa-solid fa-table text-indigo-400 mr-2"></i
+          ><span data-i18n="btn_manage">Manage</span> (<span id="csvCountBadge"
+            >0</span
+          >)
+        </button>
+        <button
+          onclick="toggleTheme()"
+          id="themeBtn"
+          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          title="Toggle Theme"
+        >
+          <i class="fa-solid fa-moon mr-2"></i
+          ><span data-i18n="btn_theme_light">Light</span>
+        </button>
+        <button
+          onclick="showOnboarding()"
+          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          title="Help"
+        >
+          <i class="fa-solid fa-circle-question mr-2"></i><span>?</span>
+        </button>
+      </div>
+    </header>
+    <input
+      type="file"
+      id="csvFileInput"
+      accept=".csv"
+      class="hidden"
+      onchange="handleCSVFileSelect(event)"
+    />
+    <main
+      class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6 max-w-[1600px] mx-auto w-full"
+      role="main"
+      aria-label="Main content"
+    >
+      <!-- Parameters Section -->
+      <section
+        class="glass-card rounded-2xl p-5 border border-slate-800 shadow-xl"
+        role="region"
+        aria-label="Simulation Parameters"
+      >
+        <div
+          class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800"
+        >
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-sliders text-indigo-400"></i>
+            <h2
+              class="font-semibold text-slate-200 text-sm tracking-wide uppercase"
+              data-i18n="hdr_sim_params"
+            >
+              Simulation Parameters
+            </h2>
+          </div>
+          <div class="text-xs text-slate-400">
+            <span
+              class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+            >
+              <i class="fa-solid fa-bolt mr-1"></i>
+              <span data-i18n="lbl_daily_resolution"
+                >Daily Resolution Simulation</span
+              >
+            </span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputTargetDate"
+              data-i18n="lbl_target_date"
+              >Target End Date</label
+            >
+            <input
+              type="date"
+              id="inputTargetDate"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputSalary"
+              data-i18n="lbl_salary"
+              >Monthly Salary (₫)</label
+            >
+            <input
+              type="number"
+              id="inputSalary"
+              value="25000000"
+              min="0"
+              step="1000000"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputSalaryGrowth"
+              data-i18n="lbl_salary_growth"
+              >Salary Growth (%/yr)</label
+            >
+            <input
+              type="number"
+              id="inputSalaryGrowth"
+              value="0"
+              min="0"
+              max="20"
+              step="0.5"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputInflation"
+              data-i18n="lbl_inflation"
+              >Inflation Rate (%/yr)</label
+            >
+            <input
+              type="number"
+              id="inputInflation"
+              value="0"
+              min="0"
+              max="20"
+              step="0.5"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputSavingsGoal"
+              data-i18n="lbl_savings_goal"
+              >Savings Goal (₫)</label
+            >
+            <input
+              type="number"
+              id="inputSavingsGoal"
+              value="0"
+              min="0"
+              step="10000000"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="inputPoolRate"
+              data-i18n="lbl_pool_rate"
+              >Pool Rate (%/yr)</label
+            >
+            <input
+              type="number"
+              id="inputPoolRate"
+              value="0.5"
+              min="0"
+              max="15"
+              step="0.1"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-medium text-slate-400 mb-1"
+              for="input6MRate"
+              data-i18n="lbl_6m_rate"
+              >6M Term Rate (%/yr)</label
+            >
+            <input
+              type="number"
+              id="input6MRate"
+              value="5.8"
+              min="0"
+              max="15"
+              step="0.1"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+            />
+          </div>
+        </div>
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            onclick="runSimulation()"
+            class="flex-1 min-w-[140px] bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-4 rounded-lg shadow-lg shadow-indigo-600/30 transition flex items-center justify-center space-x-2"
+          >
+            <i class="fa-solid fa-play text-xs"></i
+            ><span data-i18n="btn_run_sim">Run Simulation</span>
+          </button>
+          <div class="flex flex-wrap gap-2">
+            <button
+              onclick="setPresetYears(1)"
+              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              title="1 Year"
+            >
+              1Y
+            </button>
+            <button
+              onclick="setPresetYears(2)"
+              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              title="2 Years"
+            >
+              2Y
+            </button>
+            <button
+              onclick="setPresetYears(3)"
+              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              title="3 Years"
+            >
+              3Y
+            </button>
+            <button
+              onclick="setPresetYears(5)"
+              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              title="5 Years"
+            >
+              5Y
+            </button>
+            <button
+              onclick="setPresetYears(10)"
+              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              title="10 Years"
+            >
+              10Y
+            </button>
+          </div>
+          <button
+            onclick="resetAll()"
+            class="bg-rose-900/50 hover:bg-rose-800/50 text-xs px-3 py-2 rounded-lg border border-rose-700/50 transition"
+            title="Reset All"
+          >
+            <i class="fa-solid fa-rotate-left mr-1"></i
+            ><span data-i18n="btn_reset">Reset</span>
+          </button>
+        </div>
+      </section>
+      <!-- Goal Progress Tracker -->
+      <section
+        id="goalProgressSection"
+        class="glass-card rounded-2xl p-5 border border-slate-800 shadow-xl hidden"
+        aria-label="Savings Goal Progress"
+      >
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-slate-200 text-sm">
+            <i class="fa-solid fa-bullseye text-amber-400 mr-2"></i
+            ><span data-i18n="hdr_goal_progress">Savings Goal Progress</span>
+          </h3>
+          <span id="goalMonthsToGo" class="text-xs text-slate-400">--</span>
+        </div>
+        <div
+          class="w-full h-6 bg-slate-800/50 rounded-full overflow-hidden border border-slate-700"
+        >
+          <div
+            id="goalProgressBar"
+            class="h-full rounded-full transition-all duration-700 ease-out"
+            style="
+              width: 0%;
+              background: linear-gradient(90deg, #6366f1, #10b981);
+            "
+          ></div>
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-slate-400">
+          <span id="goalCurrentText">0 ₫</span>
+          <span id="goalTargetText">Goal: 0 ₫</span>
+        </div>
+        <div class="mt-3 h-32 relative flex items-center justify-center">
+          <canvas id="chartGoalRing"></canvas>
+        </div>
+      </section>
+      <!-- Metric Cards -->
+      <section
+        id="metricsSection"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        role="region"
+        aria-label="Dashboard metrics"
+      >
+        <div
+          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          role="region"
+          aria-label="Total balance"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition"
+          ></div>
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span
+              class="text-xs font-medium uppercase tracking-wider"
+              data-i18n="hdr_total_balance"
+              >Total Balance</span
+            ><i class="fa-solid fa-sack-dollar text-indigo-400 text-lg"></i>
+          </div>
+          <div
+            class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight"
+            id="metricTotalBalance"
+          >
+            0 ₫
+          </div>
+          <div class="text-xs text-indigo-300 mt-2">
+            <span data-i18n="lbl_at_target">At target:</span>
+            <span id="metricTargetDateText">-</span>
+          </div>
+        </div>
+        <div
+          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          role="region"
+          aria-label="Total interest earned"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"
+          ></div>
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span
+              class="text-xs font-medium uppercase tracking-wider"
+              data-i18n="hdr_total_interest"
+              >Total Interest</span
+            ><i class="fa-solid fa-arrow-trend-up text-emerald-400 text-lg"></i>
+          </div>
+          <div
+            class="text-2xl lg:text-3xl font-extrabold text-emerald-400 tracking-tight"
+            id="metricTotalInterest"
+          >
+            0 ₫
+          </div>
+          <div class="text-xs text-slate-400 mt-2 flex justify-between">
+            <span data-i18n="lbl_yield">Yield</span
+            ><span
+              class="text-emerald-400 font-semibold"
+              id="metricInterestPercentage"
+              >+0%</span
+            ><span
+              class="text-indigo-400 text-right"
+              id="metricRealValue"
+              style="display: none"
+              >real: --</span
+            >
+          </div>
+        </div>
+        <div
+          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          role="region"
+          aria-label="Total salary deposited"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition"
+          ></div>
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span
+              class="text-xs font-medium uppercase tracking-wider"
+              data-i18n="hdr_total_salary"
+              >Total Salary</span
+            ><i class="fa-solid fa-money-bill-wave text-blue-400 text-lg"></i>
+          </div>
+          <div
+            class="text-2xl lg:text-3xl font-extrabold text-blue-400 tracking-tight"
+            id="metricTotalSalary"
+          >
+            0 ₫
+          </div>
+          <div class="text-xs text-slate-400 mt-2">
+            <span id="metricSalaryCount">0 monthly deposits</span>
+          </div>
+        </div>
+        <div
+          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          role="region"
+          aria-label="Pool and auto 6m accounts"
+        >
+          <div
+            class="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition"
+          ></div>
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span
+              class="text-xs font-medium uppercase tracking-wider"
+              data-i18n="hdr_pool_auto6m"
+              >Pool & Auto 6M</span
+            ><i class="fa-solid fa-vault text-purple-400 text-lg"></i>
+          </div>
+          <div
+            class="text-xl font-bold text-slate-100 flex items-baseline justify-between"
+          >
+            <span class="text-sm text-slate-400" data-i18n="lbl_pool"
+              >Pool:</span
+            ><span id="metricPoolBalance" class="text-purple-300 font-extrabold"
+              >0 ₫</span
+            >
+          </div>
+          <div
+            class="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-800/80 flex justify-between items-center"
+          >
+            <span data-i18n="lbl_auto6m">Auto 6M:</span
+            ><span id="metricCreated6MCount" class="font-bold text-amber-400"
+              >0</span
+            >
+          </div>
+        </div>
+      </section>
+      <!-- Charts Grid Section -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Primary Balance Growth Chart -->
+        <div
+          class="lg:col-span-2 glass-card rounded-2xl p-5 border border-slate-800 flex flex-col"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3
+                class="font-bold text-slate-200 text-base"
+                data-i18n="hdr_wealth_growth"
+              >
+                Wealth Growth
+              </h3>
+              <p class="text-xs text-slate-400" data-i18n="lbl_daily_breakdown">
+                Daily balance breakdown
+              </p>
+            </div>
+            <div class="flex items-center space-x-2">
+              <select
+                id="chartDateRange"
+                onchange="filterChartDateRange()"
+                class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-slate-300"
+                aria-label="Chart date range"
+              >
+                <option value="all">All</option>
+                <option value="3m">3M</option>
+                <option value="6m">6M</option>
+                <option value="1y">1Y</option>
+              </select>
+              <button
+                onclick="toggleRealVsNominal()"
+                id="realToggleBtn"
+                class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+                title="Toggle inflation-adjusted view"
+              >
+                <i class="fa-solid fa-coins mr-1"></i
+                ><span data-i18n="btn_real">Real</span>
+              </button>
+              <button
+                onclick="exportChartAsImage()"
+                class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+                title="Download chart as image"
+              >
+                <i class="fa-solid fa-image mr-1"></i
+                ><span data-i18n="btn_image">Image</span>
+              </button>
+            </div>
+          </div>
+          <div class="relative flex-1 min-h-[320px]">
+            <canvas id="chartGrowth"></canvas>
+          </div>
+          <div
+            class="flex items-center space-x-4 text-xs text-slate-400 mt-2 border-t border-slate-800/50 pt-3"
+          >
+            <span class="flex items-center"
+              ><span
+                class="w-3 h-3 rounded-full bg-indigo-500 inline-block mr-1"
+              ></span
+              ><span data-i18n="lbl_legend_total">Total</span></span
+            >
+            <span class="flex items-center"
+              ><span
+                class="w-3 h-3 rounded-full bg-emerald-400 inline-block mr-1"
+              ></span
+              ><span data-i18n="lbl_legend_fixed">Fixed</span></span
+            >
+            <span class="flex items-center"
+              ><span
+                class="w-3 h-3 rounded-full bg-purple-400 inline-block mr-1"
+              ></span
+              ><span data-i18n="lbl_legend_pool">Pool</span></span
+            >
+            <span class="flex items-center"
+              ><span
+                class="w-3 h-3 rounded-full bg-amber-400 inline-block mr-1 opacity-0"
+                id="realLineIndicator"
+              ></span
+              ><span data-i18n="lbl_legend_real">Real</span></span
+            >
+          </div>
+        </div>
+        <!-- Right Column: Allocation + Earnings Breakdown -->
+        <div
+          class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col space-y-6"
+        >
+          <div>
+            <h3
+              class="font-bold text-slate-200 text-base mb-1"
+              data-i18n="hdr_asset_allocation"
+            >
+              Asset Allocation
+            </h3>
+            <p
+              class="text-xs text-slate-400 mb-4"
+              data-i18n="lbl_at_target_date"
+            >
+              At target date
+            </p>
+            <div class="relative h-[180px] flex items-center justify-center">
+              <canvas id="chartAllocation"></canvas>
+            </div>
+          </div>
+          <div class="border-t border-slate-800 pt-4">
+            <h4
+              class="text-xs font-semibold uppercase text-slate-400 mb-3"
+              data-i18n="hdr_earnings_breakdown"
+            >
+              Earnings Breakdown
+            </h4>
+            <div class="space-y-2 text-xs">
+              <div
+                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+              >
+                <span class="text-slate-300"
+                  ><i class="fa-solid fa-piggy-bank text-indigo-400 mr-2"></i
+                  ><span data-i18n="lbl_csv_interest">CSV Interest</span></span
+                ><span
+                  id="txtInitialInterest"
+                  class="font-mono font-bold text-slate-200"
+                  >0 ₫</span
+                >
+              </div>
+              <div
+                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+              >
+                <span class="text-slate-300"
+                  ><i class="fa-solid fa-water text-purple-400 mr-2"></i
+                  ><span data-i18n="lbl_pool_interest"
+                    >Pool Interest</span
+                  ></span
+                ><span
+                  id="txtPoolInterest"
+                  class="font-mono font-bold text-slate-200"
+                  >0 ₫</span
+                >
+              </div>
+              <div
+                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+              >
+                <span class="text-slate-300"
+                  ><i
+                    class="fa-solid fa-arrows-rotate text-emerald-400 mr-2"
+                  ></i
+                  ><span data-i18n="lbl_auto6m_interest">Auto 6M</span></span
+                ><span
+                  id="txtAuto6MInterest"
+                  class="font-mono font-bold text-slate-200"
+                  >0 ₫</span
+                >
+              </div>
+              <div
+                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg"
+              >
+                <span class="text-slate-300"
+                  ><i
+                    class="fa-solid fa-hand-holding-dollar text-blue-400 mr-2"
+                  ></i
+                  ><span data-i18n="lbl_salary_deposited">Salary</span></span
+                ><span
+                  id="txtSalaryDeposited"
+                  class="font-mono font-bold text-slate-200"
+                  >0 ₫</span
+                >
+              </div>
+              <div
+                class="flex justify-between items-center bg-slate-950/50 p-2 rounded-lg hidden"
+                id="withdrawalBreakdown"
+              >
+                <span class="text-slate-300"
+                  ><i class="fa-solid fa-arrow-down text-rose-400 mr-2"></i
+                  ><span data-i18n="lbl_withdrawals">Withdrawals</span></span
+                ><span
+                  id="txtWithdrawals"
+                  class="font-mono font-bold text-rose-400"
+                  >0 ₫</span
+                >
+              </div>
+            </div>
+          </div>
+          <!-- Savings Goal Ring Chart -->
+          <div
+            id="goalRingSection"
+            class="border-t border-slate-800 pt-4 hidden"
+          >
+            <h4
+              class="text-xs font-semibold uppercase text-slate-400 mb-3"
+              data-i18n="hdr_goal_progress_ring"
+            >
+              Goal Progress
+            </h4>
+            <div class="relative h-[140px] flex items-center justify-center">
+              <canvas id="chartGoalRing2"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Monthly Income Chart -->
+      <section class="glass-card rounded-2xl p-5 border border-slate-800">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3
+              class="font-bold text-slate-200 text-base"
+              data-i18n="hdr_monthly_income"
+            >
+              Monthly Income & Interest Flow
+            </h3>
+            <p
+              class="text-xs text-slate-400"
+              data-i18n="lbl_monthly_income_sub"
+            >
+              Salary deposits and realized compound interest by month
+            </p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button
+              onclick="printSummary()"
+              class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200 no-print"
+              title="Print summary"
+            >
+              <i class="fa-solid fa-print mr-1"></i
+              ><span data-i18n="btn_print">Print</span>
+            </button>
+          </div>
+        </div>
+        <div class="relative h-[260px]">
+          <canvas id="chartMonthlyIncome"></canvas>
+        </div>
+      </section>
+      <!-- Heatmap Calendar -->
+      <section
+        class="glass-card rounded-2xl p-5 border border-slate-800 hidden"
+        id="heatmapSection"
+        aria-label="Monthly heatmap calendar"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-slate-200 text-base">
+              <i class="fa-solid fa-calendar-days text-amber-400 mr-2"></i
+              ><span data-i18n="hdr_heatmap">Monthly Heatmap</span>
+            </h3>
+            <p class="text-xs text-slate-400" data-i18n="lbl_heatmap_sub">
+              Color intensity = total monthly balance
+            </p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <select
+              id="heatmapYearSelect"
+              onchange="renderHeatmap()"
+              class="bg-slate-950 border border-slate-700 text-xs rounded px-2 py-1 text-slate-300"
+            >
+              <option>2026</option>
+            </select>
+            <button
+              onclick="toggleHeatmap()"
+              class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+            >
+              <i class="fa-solid fa-eye mr-1"></i
+              ><span data-i18n="btn_toggle">Toggle</span>
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-1" id="heatmapGrid"></div>
+        <div
+          class="flex items-center justify-between mt-2 text-xs text-slate-500"
+        >
+          <span data-i18n="lbl_low">Low</span>
+          <div class="flex gap-0.5">
+            <div class="w-4 h-3 rounded bg-emerald-950"></div>
+            <div class="w-4 h-3 rounded bg-emerald-900"></div>
+            <div class="w-4 h-3 rounded bg-emerald-800"></div>
+            <div class="w-4 h-3 rounded bg-emerald-600"></div>
+            <div class="w-4 h-3 rounded bg-emerald-400"></div>
+            <div class="w-4 h-3 rounded bg-emerald-300"></div>
+          </div>
+          <span data-i18n="lbl_high">High</span>
+        </div>
+      </section>
+      <!-- YoY Comparison Table -->
+      <section
+        class="glass-card rounded-2xl p-5 border border-slate-800 hidden"
+        id="yoySection"
+        aria-label="Year over year comparison"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-slate-200 text-base">
+              <i class="fa-solid fa-table-columns text-indigo-400 mr-2"></i
+              ><span data-i18n="hdr_yoy">Year-over-Year Comparison</span>
+            </h3>
+            <p class="text-xs text-slate-400" data-i18n="lbl_yoy_sub">
+              Annual breakdown with growth rates
+            </p>
+          </div>
+          <div>
+            <button
+              onclick="toggleYoYTable()"
+              class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+            >
+              <i class="fa-solid fa-eye mr-1"></i
+              ><span data-i18n="btn_toggle">Toggle</span>
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="text-slate-400 border-b border-slate-800">
+              <tr>
+                <th class="py-2 px-3" data-i18n="th_year">Year</th>
+                <th class="py-2 px-3" data-i18n="th_salary_in">Salary In</th>
+                <th class="py-2 px-3" data-i18n="th_interest_in">
+                  Interest In
+                </th>
+                <th class="py-2 px-3" data-i18n="th_end_balance">
+                  End Balance
+                </th>
+                <th class="py-2 px-3" data-i18n="th_growth">Growth %</th>
+                <th class="py-2 px-3" data-i18n="th_avg_month">Avg/Month</th>
+              </tr>
+            </thead>
+            <tbody
+              id="yoyTableBody"
+              class="divide-y divide-slate-800/60"
+            ></tbody>
+          </table>
+        </div>
+      </section>
+      <!-- Comparison Section -->
+      <section
+        id="compareSection"
+        class="glass-card rounded-2xl p-5 border border-slate-800 hidden"
+        role="region"
+        aria-label="Scenario comparison"
+      >
+        <div
+          class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800"
+        >
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-code-compare text-amber-400"></i>
+            <h2
+              class="font-semibold text-slate-200 text-sm tracking-wide uppercase"
+              data-i18n="hdr_scenario_comp"
+            >
+              Scenario Comparison
+            </h2>
+          </div>
+          <button
+            onclick="toggleCompareMode()"
+            class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+          >
+            <i class="fa-solid fa-xmark mr-1"></i>Close
+          </button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div
+            class="glass-card rounded-xl p-4 border border-indigo-500/30 compare-card compare-a"
+          >
+            <h4 class="text-sm font-bold text-indigo-400 mb-3">
+              <i class="fa-solid fa-chart-line mr-1"></i
+              ><span data-i18n="hdr_scenario_a">Scenario A (Current)</span>
+            </h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_salary"
+                  >Salary:</span
+                ><span id="compASalary" class="text-white">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_total"
+                  >Total Balance:</span
+                ><span id="compATotal" class="text-emerald-400">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_interest"
+                  >Interest:</span
+                ><span id="compAInterest" class="text-emerald-400">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_goal"
+                  >Goal Reached:</span
+                ><span id="compAGoal" class="text-white">-</span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="glass-card rounded-xl p-4 border border-emerald-500/30 compare-card compare-b"
+          >
+            <h4 class="text-sm font-bold text-emerald-400 mb-3">
+              <i class="fa-solid fa-chart-line mr-1"></i
+              ><span data-i18n="hdr_scenario_b">Scenario B (Projected)</span>
+            </h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_salary"
+                  >Salary:</span
+                ><span id="compBSalary" class="text-white">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_total"
+                  >Total Balance:</span
+                ><span id="compBTotal" class="text-emerald-400">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_interest"
+                  >Interest:</span
+                ><span id="compBInterest" class="text-emerald-400">-</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400" data-i18n="lbl_comp_goal"
+                  >Goal Reached:</span
+                ><span id="compBGoal" class="text-white">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4">
+          <button
+            onclick="runComparison()"
+            class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-lg transition"
+          >
+            <i class="fa-solid fa-code-compare mr-2"></i
+            ><span data-i18n="btn_run_comp">Run Comparison</span>
+          </button>
+        </div>
+      </section>
+      <!-- Detailed Tables Section -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Savings Portfolio Table -->
+        <div
+          class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-slate-200 text-base flex items-center">
+              <i class="fa-solid fa-list-check text-indigo-400 mr-2"></i>
+              <span data-i18n="hdr_savings_accounts">Savings Accounts</span>
+              (<span id="txtTotalSavingsCount">0</span>)
+            </h3>
+            <span class="text-xs text-slate-400" data-i18n="lbl_savings_sub"
+              >CSV + Auto 6M + Withdrawals</span
+            >
+          </div>
+          <div class="overflow-x-auto flex-1 max-h-[350px]">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead
+                class="sticky top-0 bg-slate-900/90 text-slate-400 border-b border-slate-800"
+              >
+                <tr>
+                  <th class="py-2 px-3" data-i18n="th_account">Account</th>
+                  <th class="py-2 px-3" data-i18n="th_principal">Principal</th>
+                  <th class="py-2 px-3" data-i18n="th_rate">Rate</th>
+                  <th class="py-2 px-3" data-i18n="th_end_date">End Date</th>
+                  <th class="py-2 px-3 text-right" data-i18n="th_est_interest">
+                    Est. Interest
+                  </th>
+                  <th class="py-2 px-3 text-center" data-i18n="th_status">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="savingsTableBody"
+                class="divide-y divide-slate-800/60 text-slate-300"
+              ></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Simulation Logs -->
+        <div
+          class="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-slate-200 text-base flex items-center">
+              <i
+                class="fa-solid fa-clock-rotate-left text-emerald-400 mr-2"
+              ></i>
+              <span data-i18n="hdr_sim_logs">Simulation Milestones</span>
+            </h3>
+            <span class="text-xs text-slate-400" data-i18n="lbl_logs_sub"
+              >Salary, Maturities & 6M Re-investments</span
+            >
+          </div>
+          <div
+            class="overflow-y-auto flex-1 max-h-[350px] space-y-2 pr-1"
+            id="simulationLogContainer"
+            role="log"
+            aria-live="polite"
+          ></div>
+        </div>
+      </section>
+      <!-- CSV Data Management Modal -->
+      <div
+        id="csvModal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+        role="dialog"
+        aria-label="CSV Data Management"
+      >
+        <div
+          class="glass-card bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl"
+        >
+          <div
+            class="p-4 border-b border-slate-800 flex items-center justify-between"
+          >
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-file-csv text-emerald-400 text-xl"></i>
+              <div>
+                <h3
+                  class="font-bold text-slate-100 text-base"
+                  data-i18n="hdr_manage_csv"
+                >
+                  Manage Saving Accounts CSV Data
+                </h3>
+                <p
+                  class="text-xs text-slate-400"
+                  data-i18n="lbl_manage_csv_sub"
+                >
+                  Add, edit, or upload savings accounts
+                </p>
+              </div>
+            </div>
+            <button
+              onclick="toggleCSVModal(false)"
+              class="text-slate-400 hover:text-white p-1 rounded-lg"
+              aria-label="Close modal"
+            >
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+          <div class="p-4 overflow-y-auto flex-1 space-y-4">
+            <div
+              class="flex flex-wrap items-center justify-between gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800"
+            >
+              <div class="flex items-center space-x-2">
+                <button
+                  onclick="addEmptyCSVRow()"
+                  class="px-3 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition flex items-center"
+                >
+                  <i class="fa-solid fa-plus mr-1.5"></i
+                  ><span data-i18n="btn_add_row">Add Row</span>
+                </button>
+                <button
+                  onclick="loadDefaultSampleData()"
+                  class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
+                >
+                  <i class="fa-solid fa-rotate-left mr-1.5 text-amber-400"></i
+                  ><span data-i18n="btn_reset_sample">Reset Sample CSV</span>
+                </button>
+                <button
+                  onclick="clearAllData()"
+                  class="px-3 py-1.5 text-xs bg-rose-900/50 hover:bg-rose-800/50 text-rose-300 border border-rose-700/50 rounded-lg transition flex items-center"
+                >
+                  <i class="fa-solid fa-trash mr-1.5"></i
+                  ><span data-i18n="btn_clear_saved">Clear Saved Data</span>
+                </button>
+              </div>
+              <button
+                onclick="exportCSV()"
+                class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
+              >
+                <i class="fa-solid fa-download mr-1.5 text-indigo-400"></i
+                ><span data-i18n="btn_download_csv">Download CSV</span>
+              </button>
+            </div>
+            <div class="overflow-x-auto border border-slate-800 rounded-xl">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead
+                  class="bg-slate-950 text-slate-400 border-b border-slate-800"
+                >
+                  <tr>
+                    <th class="p-2.5" data-i18n="th_account">Account Name</th>
+                    <th class="p-2.5" data-i18n="th_principal">Principal</th>
+                    <th class="p-2.5" data-i18n="th_start_date">Start Date</th>
+                    <th class="p-2.5" data-i18n="th_end_date">End Date</th>
+                    <th class="p-2.5" data-i18n="th_rate">Interest</th>
+                    <th class="p-2.5" data-i18n="th_type">Type</th>
+                    <th class="p-2.5" data-i18n="th_bank">Bank</th>
+                    <th class="p-2.5 text-center" data-i18n="th_action">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="csvEditorTableBody"
+                  class="divide-y divide-slate-800 bg-slate-900/50"
+                ></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="p-4 border-t border-slate-800 flex justify-end space-x-3">
+            <button
+              onclick="toggleCSVModal(false)"
+              class="px-4 py-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition"
+              data-i18n="btn_cancel"
+            >
+              Cancel
+            </button>
+            <button
+              onclick="saveCSVEditorData()"
+              class="px-5 py-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg shadow-lg shadow-emerald-600/20 transition"
+              data-i18n="btn_save_run"
+            >
+              Save & Run Simulation
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script>
+      // --- TRANSLATIONS DICTIONARY (R21) ---
+      const TRANSLATIONS = {
+        en: {
+          app_title: "Savings & Wealth Simulator",
+          app_subtitle:
+            "Daily compounding · Salary growth · Inflation-adjusted · Multi-scenario",
+          btn_import: "Import",
+          btn_share: "Share",
+          btn_manage: "Manage",
+          btn_theme_light: "Light",
+          btn_theme_dark: "Dark",
+          btn_help: "?",
+          hdr_sim_params: "Simulation Parameters",
+          lbl_daily_resolution: "Daily Resolution Simulation",
+          lbl_target_date: "Target End Date",
+          lbl_salary: "Monthly Salary (₫)",
+          lbl_salary_growth: "Salary Growth (%/yr)",
+          lbl_inflation: "Inflation Rate (%/yr)",
+          lbl_savings_goal: "Savings Goal (₫)",
+          lbl_pool_rate: "Pool Rate (%/yr)",
+          lbl_6m_rate: "6M Term Rate (%/yr)",
+          btn_run_sim: "Run Simulation",
+          btn_reset: "Reset",
+          hdr_goal_progress: "Savings Goal Progress",
+          hdr_total_balance: "Total Balance",
+          lbl_at_target: "At target:",
+          hdr_total_interest: "Total Interest",
+          lbl_yield: "Yield",
+          hdr_total_salary: "Total Salary",
+          lbl_monthly_deposits: "monthly deposits",
+          hdr_pool_auto6m: "Pool & Auto 6M",
+          lbl_pool: "Pool:",
+          lbl_auto6m: "Auto 6M:",
+          hdr_wealth_growth: "Wealth Growth",
+          lbl_daily_breakdown: "Daily balance breakdown",
+          btn_real: "Real",
+          btn_nominal: "Nominal",
+          btn_image: "Image",
+          lbl_legend_total: "Total",
+          lbl_legend_fixed: "Fixed",
+          lbl_legend_pool: "Pool",
+          lbl_legend_real: "Real",
+          hdr_asset_allocation: "Asset Allocation",
+          lbl_at_target_date: "At target date",
+          hdr_earnings_breakdown: "Earnings Breakdown",
+          lbl_csv_interest: "CSV Interest",
+          lbl_pool_interest: "Pool Interest",
+          lbl_auto6m_interest: "Auto 6M",
+          lbl_salary_deposited: "Salary",
+          lbl_withdrawals: "Withdrawals",
+          hdr_goal_progress_ring: "Goal Progress",
+          hdr_monthly_income: "Monthly Income & Interest Flow",
+          lbl_monthly_income_sub:
+            "Salary deposits and realized compound interest by month",
+          btn_print: "Print",
+          hdr_heatmap: "Monthly Heatmap",
+          lbl_heatmap_sub: "Color intensity = total monthly balance",
+          btn_toggle: "Toggle",
+          lbl_low: "Low",
+          lbl_high: "High",
+          hdr_yoy: "Year-over-Year Comparison",
+          lbl_yoy_sub: "Annual breakdown with growth rates",
+          th_year: "Year",
+          th_salary_in: "Salary In",
+          th_interest_in: "Interest In",
+          th_end_balance: "End Balance",
+          th_growth: "Growth %",
+          th_avg_month: "Avg/Month",
+          hdr_scenario_comp: "Scenario Comparison",
+          hdr_scenario_a: "Scenario A (Current)",
+          hdr_scenario_b: "Scenario B (Projected)",
+          lbl_comp_salary: "Salary:",
+          lbl_comp_total: "Total Balance:",
+          lbl_comp_interest: "Interest:",
+          lbl_comp_goal: "Goal Reached:",
+          btn_run_comp: "Run Comparison",
+          hdr_savings_accounts: "Savings Accounts",
+          lbl_savings_sub: "CSV + Auto 6M + Withdrawals",
+          th_account: "Account",
+          th_principal: "Principal",
+          th_rate: "Rate",
+          th_end_date: "End Date",
+          th_est_interest: "Est. Interest",
+          th_status: "Status",
+          hdr_sim_logs: "Simulation Milestones",
+          lbl_logs_sub: "Salary, Maturities & 6M Re-investments",
+          hdr_manage_csv: "Manage Saving Accounts CSV Data",
+          lbl_manage_csv_sub: "Add, edit, or upload savings accounts",
+          btn_add_row: "Add Row",
+          btn_reset_sample: "Reset Sample CSV",
+          btn_clear_saved: "Clear Saved Data",
+          btn_download_csv: "Download CSV",
+          th_start_date: "Start Date",
+          th_type: "Type",
+          th_bank: "Bank",
+          th_action: "Action",
+          btn_cancel: "Cancel",
+          btn_save_run: "Save & Run Simulation",
+          onboard_title_1: "Welcome to Savings & Wealth Simulator!",
+          onboard_desc_1:
+            "Your personal finance planning companion with daily compounding, salary growth tracking, and inflation-adjusted projections.",
+          onboard_title_2: "Parameters & CSV Data",
+          onboard_desc_2:
+            "Set your target date, salary, and interest rates. Import or edit your savings accounts from CSV. All data is saved automatically.",
+          onboard_title_3: "Charts & Analytics",
+          onboard_desc_3:
+            "View wealth growth, asset allocation, monthly income flow, and year-over-year breakdowns. Toggle inflation-adjusted (real) values.",
+          onboard_title_4: "Goals & Sharing",
+          onboard_desc_4:
+            "Set a savings goal and track progress. Share your simulation via URL link. Export charts and CSV reports.",
+          onboard_title_5: "Shortcuts",
+          onboard_desc_5:
+            '<kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Enter</kbd> Run simulation · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Ctrl+S</kbd> Save CSV · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Esc</kbd> Close modals',
+          btn_prev: "← Prev",
+          btn_next: "Next →",
+          btn_done: "Done 🎉",
+          btn_skip: "Skip tour",
+        },
+        vi: {
+          app_title: "Giả Lập Tiết Kiệm & Tài Sản",
+          app_subtitle:
+            "Lãi kép hàng ngày · Tăng trưởng lương · Điều chỉnh lạm phát · Đa kịch bản",
+          btn_import: "Nhập CSV",
+          btn_share: "Chia sẻ",
+          btn_manage: "Quản lý",
+          btn_theme_light: "Sáng",
+          btn_theme_dark: "Tối",
+          btn_help: "?",
+          hdr_sim_params: "Thông Số Giả Lập",
+          lbl_daily_resolution: "Mô Phỏng Theo Ngày",
+          lbl_target_date: "Ngày Kết Thúc",
+          lbl_salary: "Lương Hàng Tháng (₫)",
+          lbl_salary_growth: "Tăng Lương (%/năm)",
+          lbl_inflation: "Tỷ Lệ Lạm Phát (%/năm)",
+          lbl_savings_goal: "Mục Tiêu Tiết Kiệm (₫)",
+          lbl_pool_rate: "Lãi Suất Linh Hoạt (%/năm)",
+          lbl_6m_rate: "Lãi Suất Kỳ Hạn 6M (%/năm)",
+          btn_run_sim: "Chạy Giả Lập",
+          btn_reset: "Đặt Lại",
+          hdr_goal_progress: "Tiến Độ Mục Tiêu Tiết Kiệm",
+          hdr_total_balance: "Tổng Số Dư",
+          lbl_at_target: "Tại ngày mục tiêu:",
+          hdr_total_interest: "Tổng Lãi Nhận Được",
+          lbl_yield: "Tỷ suất",
+          hdr_total_salary: "Tổng Lương Nạp",
+          lbl_monthly_deposits: "lần gửi hàng tháng",
+          hdr_pool_auto6m: "Tiền Linh Hoạt & Tự Động 6M",
+          lbl_pool: "Linh hoạt:",
+          lbl_auto6m: "Tự động 6M:",
+          hdr_wealth_growth: "Tăng Trưởng Tài Sản",
+          lbl_daily_breakdown: "Chi tiết số dư hàng ngày",
+          btn_real: "Thực tế",
+          btn_nominal: "Danh nghĩa",
+          btn_image: "Tải ảnh",
+          lbl_legend_total: "Tổng số dư",
+          lbl_legend_fixed: "Cố định",
+          lbl_legend_pool: "Linh hoạt",
+          lbl_legend_real: "Thực tế",
+          hdr_asset_allocation: "Phân Bổ Tài Sản",
+          lbl_at_target_date: "Tại ngày mục tiêu",
+          hdr_earnings_breakdown: "Phân Tích Thu Nhập",
+          lbl_csv_interest: "Lãi Sổ Ban Đầu",
+          lbl_pool_interest: "Lãi Tiền Linh Hoạt",
+          lbl_auto6m_interest: "Lãi Tự Động 6M",
+          lbl_salary_deposited: "Tổng Lương Nạp",
+          lbl_withdrawals: "Rút Tiền",
+          hdr_goal_progress_ring: "Tiến Độ Mục Tiêu",
+          hdr_monthly_income: "Dòng Tiền Lương & Lãi Hàng Tháng",
+          lbl_monthly_income_sub:
+            "Lương gửi và lãi cộng dồn thực nhận theo tháng",
+          btn_print: "In Báo Cáo",
+          hdr_heatmap: "Bản Đồ Nhiệt Hàng Tháng",
+          lbl_heatmap_sub: "Độ đậm màu = tổng số dư hàng tháng",
+          btn_toggle: "Ẩn/Hiện",
+          lbl_low: "Thấp",
+          lbl_high: "Cao",
+          hdr_yoy: "So Sánh Theo Năm (YoY)",
+          lbl_yoy_sub: "Chi tiết từng năm kèm tỷ lệ tăng trưởng",
+          th_year: "Năm",
+          th_salary_in: "Lương Nạp",
+          th_interest_in: "Lãi Nhận",
+          th_end_balance: "Số Dư Cuối",
+          th_growth: "Tăng Trưởng %",
+          th_avg_month: "TB/Tháng",
+          hdr_scenario_comp: "So Sánh Kịch Bản",
+          hdr_scenario_a: "Kịch Bản A (Hiện Tại)",
+          hdr_scenario_b: "Kịch Bản B (Dự Phóng)",
+          lbl_comp_salary: "Lương:",
+          lbl_comp_total: "Tổng Số Dư:",
+          lbl_comp_interest: "Tổng Lãi:",
+          lbl_comp_goal: "Đạt Mục Tiêu:",
+          btn_run_comp: "Chạy So Sánh",
+          hdr_savings_accounts: "Danh Sách Sổ Tiết Kiệm",
+          lbl_savings_sub: "Từ CSV + Tự Động 6M + Rút Tiền",
+          th_account: "Tên Tài Khoản",
+          th_principal: "Tiền Gốc",
+          th_rate: "Lãi Suất",
+          th_end_date: "Ngày Đáo Hạn",
+          th_est_interest: "Lãi Dự Kiến",
+          th_status: "Trạng Thái",
+          hdr_sim_logs: "Cột Mốc Giả Lập",
+          lbl_logs_sub: "Lương nạp, đáo hạn & tái đầu tư 6M",
+          hdr_manage_csv: "Quản Lý Dữ Liệu Sổ Tiết Kiệm (CSV)",
+          lbl_manage_csv_sub: "Thêm, sửa hoặc tải lên sổ tiết kiệm",
+          btn_add_row: "Thêm Dòng",
+          btn_reset_sample: "Mẫu Mặc Định",
+          btn_clear_saved: "Xóa Dữ Liệu",
+          btn_download_csv: "Tải CSV",
+          th_start_date: "Ngày Bắt Đầu",
+          th_type: "Loại",
+          th_bank: "Ngân Hàng",
+          th_action: "Thao Tác",
+          btn_cancel: "Hủy",
+          btn_save_run: "Lưu & Chạy Giả Lập",
+          onboard_title_1: "Chào mừng đến với Giả Lập Tiết Kiệm & Tài Sản!",
+          onboard_desc_1:
+            "Công cụ hỗ trợ lập kế hoạch tài chính cá nhân với tính lãi kép hàng ngày, theo dõi tăng trưởng lương và điều chỉnh lạm phát.",
+          onboard_title_2: "Thông Số & Dữ Liệu CSV",
+          onboard_desc_2:
+            "Thiết lập ngày mục tiêu, lương và lãi suất. Nhập hoặc chỉnh sửa sổ tiết kiệm từ CSV. Tự động lưu mọi dữ liệu.",
+          onboard_title_3: "Biểu Đồ & Phân Tích",
+          onboard_desc_3:
+            "Xem tăng trưởng tài sản, phân bổ danh mục, dòng tiền hàng tháng và so sánh từng năm. Bật/tắt giá trị thực tế sau lạm phát.",
+          onboard_title_4: "Mục Tiêu & Chia Sẻ",
+          onboard_desc_4:
+            "Đặt mục tiêu tiết kiệm và theo dõi tiến độ. Chia sẻ mô phỏng qua đường dẫn URL. Xuất biểu đồ và báo cáo CSV.",
+          onboard_title_5: "Phím Tắt",
+          onboard_desc_5:
+            '<kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Enter</kbd> Chạy giả lập · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Ctrl+S</kbd> Lưu CSV · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Esc</kbd> Đóng cửa sổ',
+          btn_prev: "← Trở lại",
+          btn_next: "Tiếp →",
+          btn_done: "Hoàn thành 🎉",
+          btn_skip: "Bỏ qua hướng dẫn",
+        },
+      };
+
+      // --- DEFAULT CSV DATA ---
+      const DEFAULT_CSV_DATA = [
+        {
+          "Account Name": "Vietcombank Term 12M",
+          Principal: "150000000",
+          "Start Date": "2025-06-01",
+          "End Date": "2026-06-01",
+          Interest: "5.5",
+          Type: "Term Saving",
+          Bank: "Vietcombank",
+        },
+        {
+          "Account Name": "BIDV Term 6M",
+          Principal: "80000000",
+          "Start Date": "2025-11-15",
+          "End Date": "2026-05-15",
+          Interest: "4.8",
+          Type: "Term Saving",
+          Bank: "BIDV",
+        },
+        {
+          "Account Name": "Techcombank Term 3M",
+          Principal: "50000000",
+          "Start Date": "2026-01-10",
+          "End Date": "2026-04-10",
+          Interest: "4.2",
+          Type: "Term Saving",
+          Bank: "Techcombank",
+        },
+        {
+          "Account Name": "MBBank Non-Term Pool",
+          Principal: "15000000",
+          "Start Date": "2026-01-01",
+          "End Date": "2026-12-31",
+          Interest: "0.5",
+          Type: "Non-Term Pool",
+          Bank: "MBBank",
+        },
+      ];
+
+      // Global state
+      let workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
+      window.workingCSVData = workingCSVData;
+      function syncCSVData(data) {
+        workingCSVData = data;
+        window.workingCSVData = data;
+      }
+      let growthChart = null,
+        allocationChart = null,
+        monthlyIncomeChart = null;
+      let goalChart = null,
+        goalRingChart2 = null;
+      let heatmapChart = null;
+      let showRealValues = false;
+      let heatmapVisible = false,
+        yoyVisible = false;
+      let simResult = null; // Store simulation result for export/sharing
+      window.simulationLogs = [];
+      window.dailySnapshots = [];
+      window.currentLang = "en";
+
+      // --- LOCALSTORAGE HELPERS ---
+      function getStorage(key, defaultVal) {
+        try {
+          const v = localStorage.getItem(key);
+          return v !== null ? JSON.parse(v) : defaultVal;
+        } catch (e) {
+          return defaultVal;
+        }
+      }
+      function setStorage(key, val) {
+        try {
+          localStorage.setItem(key, JSON.stringify(val));
+        } catch (e) {
+          showToast("Save failed: storage full", "error");
+        }
+      }
+
+      // --- HELPER FUNCTIONS ---
+      function formatCurrency(val) {
+        if (isNaN(val) || val === null) return "0 ₫";
+        const sign = val < 0 ? "-" : "";
+        return sign + Math.round(Math.abs(val)).toLocaleString("vi-VN") + " ₫";
+      }
+      function parseDate(dateStr) {
+        if (!dateStr) return new Date();
+        const p = dateStr.trim().split("-");
+        return p.length === 3
+          ? new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2]))
+          : new Date(dateStr);
+      }
+      function formatDate(d) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      }
+      function addMonths(date, months) {
+        const d = new Date(date.getTime());
+        d.setMonth(d.getMonth() + months);
+        return d;
+      }
+      function getDaysDiff(d1, d2) {
+        return Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24));
+      }
+      function getMonthDiff(d1, d2) {
+        return (
+          (d2.getFullYear() - d1.getFullYear()) * 12 +
+          (d2.getMonth() - d1.getMonth())
+        );
+      }
+
+      // --- i18n LANGUAGE SWITCHING (R21) ---
+      function changeLanguage(lang) {
+        if (!TRANSLATIONS[lang]) lang = "en";
+        window.currentLang = lang;
+        setStorage("lang", lang);
+        const langSel = document.getElementById("langSelector");
+        if (langSel && langSel.value !== lang) langSel.value = lang;
+
+        const t = TRANSLATIONS[lang];
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (t[key]) {
+            if (el.tagName === "INPUT" && el.type === "placeholder") {
+              el.placeholder = t[key];
+            } else {
+              el.innerHTML = t[key];
+            }
+          }
+        });
+
+        updateThemeBtn();
+        updateOnboardUI();
+      }
+
+      // --- TOAST NOTIFICATIONS ---
+      function showToast(msg, type = "info") {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+        const el = document.createElement("div");
+        const colors = {
+          info: "bg-indigo-600",
+          success: "bg-emerald-600",
+          error: "bg-red-600",
+          warning: "bg-amber-600",
+        };
+        el.className = `toast ${colors[type] || colors.info} text-white px-4 py-2.5 rounded-xl shadow-xl text-xs sm:text-sm flex items-center gap-2 max-w-xs`;
+        const icons = {
+          info: "fa-circle-info",
+          success: "fa-check-circle",
+          error: "fa-circle-exclamation",
+          warning: "fa-triangle-exclamation",
+        };
+        el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span class="flex-1">${msg}</span><button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100"><i class="fa-solid fa-xmark text-[10px]"></i></button>`;
+        container.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = "0";
+          el.style.transform = "translateX(100%)";
+          el.style.transition = "all .3s";
+          setTimeout(() => el.remove(), 300);
+        }, 3000);
+      }
+
+      // --- PARAMETER & PRESET HELPERS ---
+      function setPresetYears(years) {
+        const today = new Date();
+        const target = addMonths(today, years * 12);
+        document.getElementById("inputTargetDate").value = formatDate(target);
+        runSimulation();
+      }
+      function resetAll() {
+        try {
+          if (
+            typeof window !== "undefined" &&
+            window.confirm &&
+            !confirm("Reset all parameters and CSV data to defaults?")
+          )
+            return;
+        } catch (e) {}
+        localStorage.clear();
+        syncCSVData(JSON.parse(JSON.stringify(DEFAULT_CSV_DATA)));
+        document.getElementById("inputTargetDate").value = formatDate(
+          addMonths(new Date(), 24)
+        );
+        document.getElementById("inputSalary").value = "25000000";
+        document.getElementById("inputSalaryGrowth").value = "0";
+        document.getElementById("inputInflation").value = "0";
+        document.getElementById("inputSavingsGoal").value = "0";
+        document.getElementById("inputPoolRate").value = "0.5";
+        document.getElementById("input6MRate").value = "5.8";
+        setStorage("theme", "dark");
+        document.documentElement.classList.remove("light");
+        updateThemeBtn();
+        showToast("All data reset to defaults", "info");
+        runSimulation();
+      }
+
+      // --- CSV EDITOR FUNCTIONS ---
+      function updateCSVCountBadge() {
+        document.getElementById("csvCountBadge").innerText =
+          workingCSVData.length;
+      }
+      function triggerCSVUpload() {
+        document.getElementById("csvFileInput").click();
+      }
+      function handleCSVFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        Papa.parse(file, {
+          header: true,
+          skipEmptyLines: true,
+          complete: function (res) {
+            if (res.data && res.data.length > 0) {
+              workingCSVData = res.data.map((row) => {
+                const keys = Object.keys(row);
+                const gv = (pk) => {
+                  const k = keys.find((k) =>
+                    pk.some((p) => k.toLowerCase().includes(p))
+                  );
+                  return k ? row[k] : "";
+                };
+                return {
+                  "Account Name":
+                    gv(["name", "account", "bank"]) || "Savings Account",
+                  Principal: gv(["principal", "amount", "balance"]) || "0",
+                  "Start Date": gv(["start"]) || formatDate(new Date()),
+                  "End Date":
+                    gv(["end", "maturity"]) ||
+                    formatDate(addMonths(new Date(), 6)),
+                  Interest: gv(["interest", "rate"]) || "0",
+                  Type: gv(["type", "category"]) || "Term Saving",
+                  Bank: gv(["bank"]) || "",
+                };
+              });
+              showToast(
+                `Imported ${workingCSVData.length} accounts`,
+                "success"
+              );
+              updateCSVCountBadge();
+              saveToStorage();
+              runSimulation();
+            } else {
+              showToast("No valid rows found", "error");
+            }
+          },
+          error: function (err) {
+            showToast("CSV parse error: " + err.message, "error");
+          },
+        });
+        event.target.value = "";
+      }
+      function toggleCSVModal(show) {
+        const m = document.getElementById("csvModal");
+        if (show) {
+          renderCSVEditorTable();
+          m.classList.remove("hidden");
+          m.classList.add("flex");
+        } else {
+          m.classList.add("hidden");
+          m.classList.remove("flex");
+        }
+      }
+      function renderCSVEditorTable() {
+        const tbody = document.getElementById("csvEditorTableBody");
+        tbody.innerHTML = "";
+        workingCSVData.forEach((row, idx) => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-800/40 transition";
+          tr.innerHTML = `<td class="p-2.5"><input type="text" value="${row["Account Name"] || ""}" onchange="updateCSVRowField(${idx},'Account Name',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5"><input type="number" value="${row["Principal"] || 0}" onchange="updateCSVRowField(${idx},'Principal',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5"><input type="date" value="${row["Start Date"] || ""}" onchange="updateCSVRowField(${idx},'Start Date',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5"><input type="date" value="${row["End Date"] || ""}" onchange="updateCSVRowField(${idx},'End Date',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5"><input type="number" value="${row["Interest"] || 0}" onchange="updateCSVRowField(${idx},'Interest',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5"><select onchange="updateCSVRowField(${idx},'Type',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+        <option ${row["Type"] === "Term Saving" ? "selected" : ""}>Term Saving</option><option ${row["Type"] === "Non-Term Pool" ? "selected" : ""}>Non-Term Pool</option><option ${row["Type"] === "Withdrawal" ? "selected" : ""}>Withdrawal</option></select></td>
+      <td class="p-2.5"><input type="text" value="${row["Bank"] || ""}" onchange="updateCSVRowField(${idx},'Bank',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5 text-center"><button onclick="deleteCSVRow(${idx})" class="text-rose-400 hover:text-rose-300 text-xs"><i class="fa-solid fa-trash"></i></button></td>`;
+          tbody.appendChild(tr);
+        });
+      }
+      function updateCSVRowField(idx, field, value) {
+        if (workingCSVData[idx]) workingCSVData[idx][field] = value;
+      }
+      function deleteCSVRow(idx) {
+        workingCSVData.splice(idx, 1);
+        renderCSVEditorTable();
+        updateCSVCountBadge();
+      }
+      function addEmptyCSVRow() {
+        workingCSVData.push({
+          "Account Name": "New Account",
+          Principal: "0",
+          "Start Date": formatDate(new Date()),
+          "End Date": formatDate(addMonths(new Date(), 6)),
+          Interest: "0",
+          Type: "Term Saving",
+          Bank: "",
+        });
+        renderCSVEditorTable();
+        updateCSVCountBadge();
+      }
+      function loadDefaultSampleData() {
+        workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
+        renderCSVEditorTable();
+        updateCSVCountBadge();
+        saveToStorage();
+        showToast("Sample CSV loaded", "info");
+      }
+      function saveCSVEditorData() {
+        saveToStorage();
+        toggleCSVModal(false);
+        runSimulation();
+        showToast("CSV saved & simulation run", "success");
+      }
+      function clearAllData() {
+        if (
+          typeof window !== "undefined" &&
+          window.confirm &&
+          !confirm("Clear all saved CSV data and parameters?")
+        )
+          return;
+        localStorage.clear();
+        workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
+        document.getElementById("inputTargetDate").value = "";
+        document.getElementById("inputSalary").value = "25000000";
+        document.getElementById("inputSalaryGrowth").value = "0";
+        document.getElementById("inputInflation").value = "0";
+        document.getElementById("inputSavingsGoal").value = "0";
+        showToast("All saved data cleared", "warning");
+        toggleCSVModal(false);
+        runSimulation();
+      }
+      function exportCSV() {
+        if (typeof Papa === "undefined") {
+          showToast("PapaParse not loaded", "error");
+          return;
+        }
+        const csv = Papa.unparse(workingCSVData);
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Finance_Saving_Export_" + formatDate(new Date()) + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast("CSV exported successfully", "success");
+      }
+
+      // --- MAIN SIMULATION ENGINE (Enhanced & Fixed) ---
+      function runSimulation() {
+        try {
+          const targetDateStr =
+            document.getElementById("inputTargetDate").value;
+          const monthlySalary =
+            parseFloat(document.getElementById("inputSalary").value) || 0;
+          const salaryGrowthRate =
+            (parseFloat(document.getElementById("inputSalaryGrowth").value) ||
+              0) / 100;
+          const inflationRate =
+            (parseFloat(document.getElementById("inputInflation").value) || 0) /
+            100;
+          const poolAnnualRate =
+            (parseFloat(document.getElementById("inputPoolRate").value) || 0) /
+            100;
+          const term6MAnnualRate =
+            (parseFloat(document.getElementById("input6MRate").value) || 0) /
+            100;
+          const savingsGoal =
+            parseFloat(document.getElementById("inputSavingsGoal").value) || 0;
+
+          if (!targetDateStr) {
+            showToast("Please select a target end date", "warning");
+            return;
+          }
+
+          const simTargetDate = parseDate(targetDateStr);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          let simStartDate = new Date(today.getTime());
+
+          // Parse CSV savings accounts
+          if (window.workingCSVData) workingCSVData = window.workingCSVData;
+          const allSavings = [];
+          let initialPoolStartBalance = 0;
+          workingCSVData.forEach((row, idx) => {
+            const principal = parseFloat(row["Principal"]) || 0;
+            const interestRate = parseFloat(row["Interest"]) || 0;
+            const startDate = parseDate(row["Start Date"]);
+            const endDate = parseDate(row["End Date"]);
+            const type = row["Type"] || "Term Saving";
+
+            if (type === "Non-Term Pool") {
+              initialPoolStartBalance += principal;
+            } else if (type === "Withdrawal") {
+              // Fix Task 1.2 (R6): Set status to ACTIVE so withdrawal maturity processing is evaluated in timeline loop
+              allSavings.push({
+                id: "csv_" + idx,
+                name: row["Account Name"] || "Withdrawal",
+                principal: principal * -1,
+                rate: interestRate,
+                startDate: startDate,
+                endDate: endDate,
+                totalDays: getDaysDiff(startDate, endDate),
+                earnedInterest: 0,
+                status: "ACTIVE",
+                type: "Withdrawal",
+                bank: row["Bank"] || "",
+              });
+              if (startDate < simStartDate)
+                simStartDate = new Date(startDate.getTime());
+            } else {
+              const totalDays = Math.max(1, getDaysDiff(startDate, endDate));
+              const earnedInterest =
+                principal * (interestRate / 100) * (totalDays / 365);
+              allSavings.push({
+                id: "csv_" + idx,
+                name: row["Account Name"] || "Term Saving #" + (idx + 1),
+                principal: principal,
+                rate: interestRate,
+                startDate: startDate,
+                endDate: endDate,
+                totalDays: totalDays,
+                earnedInterest: earnedInterest,
+                status: "ACTIVE",
+                type: "CSV",
+                bank: row["Bank"] || "",
+              });
+              if (startDate < simStartDate)
+                simStartDate = new Date(startDate.getTime());
+            }
+          });
+
+          // Simulation state
+          let currentPoolBalance = initialPoolStartBalance;
+          let cumulativeSalary = 0,
+            salaryCount = 0,
+            totalInterestInitialCSV = 0,
+            totalInterestPool = 0,
+            totalInterest6M = 0;
+          let created6MCount = 0,
+            totalWithdrawals = 0,
+            currentSalary = monthlySalary;
+          const monthlyCashflows = {};
+          const monthlyWithdrawals = {};
+          const yearlyCashflows = {};
+          const todayDateOnly = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            1
+          );
+
+          // Fix Task 1.3 (R4, R6, R20): Expose logs globally to window.simulationLogs
+          const simulationLogs = [];
+          window.simulationLogs = simulationLogs;
+          const dailySnapshots = [];
+          window.dailySnapshots = dailySnapshots;
+
+          let currentDate = new Date(simStartDate.getTime());
+          let goalReached = false;
+          let goalReachedDate = null;
+
+          while (currentDate <= simTargetDate) {
+            const dateStr = formatDate(currentDate);
+            const monthKey = dateStr.substring(0, 7); // YYYY-MM
+            const yearKey = dateStr.substring(0, 4); // YYYY
+            const isMonthStart =
+              currentDate.getDate() === 1 && currentDate >= todayDateOnly;
+
+            if (!monthlyCashflows[monthKey]) {
+              monthlyCashflows[monthKey] = { salary: 0, interestPaid: 0 };
+              monthlyWithdrawals[monthKey] = { total: 0 };
+            }
+            if (!yearlyCashflows[yearKey]) {
+              yearlyCashflows[yearKey] = { salary: 0, interest: 0 };
+            }
+
+            // 1. Monthly Salary Deposit (1st day of month with salary growth)
+            if (isMonthStart) {
+              if (monthlySalary > 0) {
+                currentPoolBalance += currentSalary;
+                cumulativeSalary += currentSalary;
+                salaryCount++;
+                monthlyCashflows[monthKey].salary += currentSalary;
+                yearlyCashflows[yearKey].salary += currentSalary;
+                simulationLogs.push({
+                  date: dateStr,
+                  type: "SALARY",
+                  title: "Monthly Salary Deposited",
+                  amount: currentSalary,
+                  details: `${formatCurrency(currentSalary)} to Pool (rate: ${(salaryGrowthRate * 100).toFixed(1)}%/yr)`,
+                });
+
+                // Apply salary growth annually
+                const yearDiff = getMonthDiff(todayDateOnly, currentDate) / 12;
+                if (
+                  yearDiff > 0 &&
+                  Math.abs(yearDiff - Math.round(yearDiff)) < 0.01 &&
+                  salaryGrowthRate > 0
+                ) {
+                  currentSalary =
+                    monthlySalary * Math.pow(1 + salaryGrowthRate, yearDiff);
+                }
+              }
+            }
+
+            // 2. Check Maturing Fixed Term Savings & Withdrawals (R6, R20)
+            allSavings.forEach((acc) => {
+              if (acc.status === "ACTIVE" && currentDate >= acc.endDate) {
+                if (acc.type === "Withdrawal") {
+                  totalWithdrawals += Math.abs(acc.principal);
+                  monthlyWithdrawals[monthKey].total += Math.abs(acc.principal);
+                  simulationLogs.push({
+                    date: dateStr,
+                    type: "WITHDRAWAL",
+                    title: `Withdrawal: ${acc.name}`,
+                    amount: Math.abs(acc.principal),
+                    details: `${formatCurrency(Math.abs(acc.principal))} withdrawn`,
+                  });
+                  acc.status = "COMPLETED";
+                } else {
+                  acc.status = "MATURED";
+                  const payout = acc.principal + acc.earnedInterest;
+                  currentPoolBalance += payout;
+                  if (acc.type === "CSV")
+                    totalInterestInitialCSV += acc.earnedInterest;
+                  else if (acc.type === "AUTO_6M")
+                    totalInterest6M += acc.earnedInterest;
+                  monthlyCashflows[monthKey].interestPaid += acc.earnedInterest;
+                  yearlyCashflows[yearKey].interest += acc.earnedInterest;
+                  simulationLogs.push({
+                    date: dateStr,
+                    type: "MATURITY",
+                    title: `Matured: ${acc.name}`,
+                    amount: payout,
+                    details: `${formatCurrency(acc.principal)} + ${formatCurrency(acc.earnedInterest)} to Pool`,
+                  });
+
+                  // Task 1.1 (R20): Auto 6M reinvestment with payout deduction from pool
+                  if (acc.type === "CSV" && payout >= 200000000) {
+                    const locked = payout;
+                    currentPoolBalance -= locked; // DEDUCT LOCKED AMOUNT TO PREVENT DOUBLE COUNTING
+                    const as = new Date(currentDate.getTime()),
+                      ae = addMonths(as, 6);
+                    const td = Math.max(1, getDaysDiff(as, ae));
+                    const ei = locked * term6MAnnualRate * (td / 365);
+                    allSavings.push({
+                      id: "auto_6m_" + ++created6MCount,
+                      name: `Auto 6M Saving #${created6MCount}`,
+                      principal: locked,
+                      rate: term6MAnnualRate * 100,
+                      startDate: as,
+                      endDate: ae,
+                      totalDays: td,
+                      earnedInterest: ei,
+                      status: "ACTIVE",
+                      type: "AUTO_6M",
+                      bank: "",
+                    });
+                    simulationLogs.push({
+                      date: dateStr,
+                      type: "NEW_6M",
+                      title: `Created Auto 6M Saving #${created6MCount}`,
+                      amount: locked,
+                      details: `Pool hit ${formatCurrency(locked)} (>= 200M). Locked @ ${(term6MAnnualRate * 100).toFixed(1)}%/yr`,
+                    });
+                  }
+                }
+              }
+            });
+
+            // 3. Non-term Pool Daily Interest
+            if (currentPoolBalance > 0) {
+              const dailyPoolInterest =
+                currentPoolBalance * (poolAnnualRate / 365);
+              currentPoolBalance += dailyPoolInterest;
+              totalInterestPool += dailyPoolInterest;
+              yearlyCashflows[yearKey].interest += dailyPoolInterest;
+            }
+
+            // 4. Pool Threshold Rule (>= 200M -> create 6M term)
+            if (currentPoolBalance >= 200000000) {
+              const lockedAmount = currentPoolBalance;
+              currentPoolBalance = 0;
+              created6MCount++;
+              const autoStartDate = new Date(currentDate.getTime()),
+                autoEndDate = addMonths(autoStartDate, 6);
+              const totalDays = Math.max(
+                1,
+                getDaysDiff(autoStartDate, autoEndDate)
+              );
+              const estInterest =
+                lockedAmount * term6MAnnualRate * (totalDays / 365);
+              allSavings.push({
+                id: "auto_6m_" + created6MCount,
+                name: `Auto 6M Saving #${created6MCount}`,
+                principal: lockedAmount,
+                rate: term6MAnnualRate * 100,
+                startDate: autoStartDate,
+                endDate: autoEndDate,
+                totalDays: totalDays,
+                earnedInterest: estInterest,
+                status: "ACTIVE",
+                type: "AUTO_6M",
+                bank: "",
+              });
+              simulationLogs.push({
+                date: dateStr,
+                type: "NEW_6M",
+                title: `Created Auto 6M Saving #${created6MCount}`,
+                amount: lockedAmount,
+                details: `Pool hit ${formatCurrency(lockedAmount)} (>= 200M). Moved 100% into 6M term @ ${(term6MAnnualRate * 100).toFixed(1)}%/yr`,
+              });
+            }
+
+            // 5. Active Fixed Savings Total
+            let activeFixedSavingsBalance = 0;
+            allSavings.forEach((acc) => {
+              if (
+                currentDate >= acc.startDate &&
+                currentDate < acc.endDate &&
+                acc.status !== "COMPLETED"
+              )
+                activeFixedSavingsBalance += acc.principal;
+            });
+
+            // 6. Daily Snapshot
+            const totalWealth = currentPoolBalance + activeFixedSavingsBalance;
+            dailySnapshots.push({
+              date: dateStr,
+              timestamp: currentDate.getTime(),
+              poolBalance: currentPoolBalance,
+              fixedSavingsBalance: activeFixedSavingsBalance,
+              totalWealth: totalWealth,
+              cumulativeSalary: cumulativeSalary,
+            });
+
+            // 7. Check Goal Achievement
+            if (savingsGoal > 0 && !goalReached && totalWealth >= savingsGoal) {
+              goalReached = true;
+              goalReachedDate = dateStr;
+              showToast(
+                `🎉 Goal of ${formatCurrency(savingsGoal)} reached on ${dateStr}!`,
+                "success"
+              );
+            }
+
+            // Increment day
+            currentDate.setDate(currentDate.getDate() + 1);
+          }
+
+          // --- UPDATE METRICS DISPLAY ---
+          const finalSnapshot = dailySnapshots[dailySnapshots.length - 1] || {
+            totalWealth: 0,
+            poolBalance: 0,
+          };
+          const totalEarnedInterest =
+            totalInterestInitialCSV + totalInterestPool + totalInterest6M;
+
+          document.getElementById("metricTotalBalance").innerText =
+            formatCurrency(finalSnapshot.totalWealth);
+          document.getElementById("metricTargetDateText").innerText =
+            targetDateStr;
+          document.getElementById("metricTotalInterest").innerText =
+            formatCurrency(totalEarnedInterest);
+          const intRatio =
+            cumulativeSalary > 0
+              ? ((totalEarnedInterest / cumulativeSalary) * 100).toFixed(1)
+              : 0;
+          document.getElementById("metricInterestPercentage").innerText =
+            `+${intRatio}% yield`;
+          document.getElementById("metricTotalSalary").innerText =
+            formatCurrency(cumulativeSalary);
+          document.getElementById("metricSalaryCount").innerText =
+            `${salaryCount} monthly deposits`;
+          document.getElementById("metricPoolBalance").innerText =
+            formatCurrency(finalSnapshot.poolBalance);
+          document.getElementById("metricCreated6MCount").innerText =
+            `${created6MCount} account(s)`;
+
+          // Inflation-adjusted (real) value display (R5)
+          if (inflationRate > 0) {
+            const years = getDaysDiff(today, simTargetDate) / 365;
+            const realValue =
+              finalSnapshot.totalWealth / Math.pow(1 + inflationRate, years);
+            document.getElementById("metricRealValue").style.display = "";
+            document.getElementById("metricRealValue").innerText =
+              `real: ${formatCurrency(realValue)}`;
+            document
+              .getElementById("realLineIndicator")
+              .classList.remove("opacity-0");
+          } else {
+            document.getElementById("metricRealValue").style.display = "none";
+            document
+              .getElementById("realLineIndicator")
+              .classList.add("opacity-0");
+          }
+
+          // Earnings Breakdown
+          document.getElementById("txtInitialInterest").innerText =
+            formatCurrency(totalInterestInitialCSV);
+          document.getElementById("txtPoolInterest").innerText =
+            formatCurrency(totalInterestPool);
+          document.getElementById("txtAuto6MInterest").innerText =
+            formatCurrency(totalInterest6M);
+          document.getElementById("txtSalaryDeposited").innerText =
+            formatCurrency(cumulativeSalary);
+          document
+            .getElementById("txtWithdrawals")
+            .parentElement.classList.toggle("hidden", totalWithdrawals === 0);
+          document.getElementById("txtWithdrawals").innerText =
+            formatCurrency(totalWithdrawals);
+          document.getElementById("txtTotalSavingsCount").innerText =
+            allSavings.length;
+
+          // Task 2.3 (R7): Goal Progress Section Visibility
+          const goalSection = document.getElementById("goalProgressSection");
+          const goalRingSection = document.getElementById("goalRingSection");
+          if (savingsGoal > 0) {
+            goalSection.classList.remove("hidden");
+            goalRingSection.classList.remove("hidden");
+            const pct = Math.min(
+              100,
+              (finalSnapshot.totalWealth / savingsGoal) * 100
+            );
+            document.getElementById("goalProgressBar").style.width = pct + "%";
+            document.getElementById("goalCurrentText").innerText =
+              formatCurrency(finalSnapshot.totalWealth);
+            document.getElementById("goalTargetText").innerText =
+              "Goal: " + formatCurrency(savingsGoal);
+            document.getElementById("goalMonthsToGo").innerText = goalReached
+              ? "✅ Goal Reached!"
+              : `Target: ${formatCurrency(savingsGoal)}`;
+            renderGoalRing(finalSnapshot.totalWealth, savingsGoal);
+          } else {
+            goalSection.classList.add("hidden");
+            goalRingSection.classList.add("hidden");
+          }
+
+          // Store sim result for sharing/export
+          simResult = {
+            totalWealth: finalSnapshot.totalWealth,
+            poolBalance: finalSnapshot.poolBalance,
+            totalInterest: totalEarnedInterest,
+            cumulativeSalary,
+            created6MCount,
+            goalReached,
+            goalReachedDate,
+            inflationAdjusted:
+              inflationRate > 0
+                ? finalSnapshot.totalWealth /
+                  Math.pow(
+                    1 + inflationRate,
+                    getDaysDiff(today, simTargetDate) / 365
+                  )
+                : finalSnapshot.totalWealth,
+          };
+          window.simResult = simResult;
+
+          // --- RENDER TABLES & CHARTS ---
+          renderSavingsTable(allSavings, simTargetDate);
+          renderSimulationLogs(simulationLogs);
+          renderGrowthChart(dailySnapshots, finalSnapshot, inflationRate);
+          renderAllocationChart(
+            finalSnapshot.poolBalance,
+            finalSnapshot.fixedSavingsBalance
+          );
+          renderMonthlyIncomeChart(monthlyCashflows, monthlyWithdrawals);
+          renderYearlyTable(dailySnapshots, yearlyCashflows);
+          renderHeatmapChart(dailySnapshots);
+
+          // Task 2.1 (R1, R2): Save to storage synchronously during simulation run
+          saveToStorage();
+        } catch (e) {
+          showToast("Simulation error: " + e.message, "error");
+          console.error(e);
+        }
+      }
+
+      // --- TABLE & LOG RENDERING ---
+      function renderSavingsTable(allSavings, targetDate) {
+        const tbody = document.getElementById("savingsTableBody");
+        tbody.innerHTML = "";
+        allSavings.forEach((acc) => {
+          let statusBadge;
+          if (acc.type === "Withdrawal" || acc.status === "WITHDRAWAL")
+            statusBadge = `<span class="px-2 py-0.5 text-[10px] rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">Withdrawal</span>`;
+          else if (acc.status === "MATURED" || acc.status === "COMPLETED")
+            statusBadge = `<span class="px-2 py-0.5 text-[10px] rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Matured / Pool</span>`;
+          else
+            statusBadge = `<span class="px-2 py-0.5 text-[10px] rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Active</span>`;
+          const typeBadge =
+            acc.type === "AUTO_6M"
+              ? `<span class="text-[10px] text-amber-400 font-medium ml-1">(Auto 6M)</span>`
+              : "";
+          const bankBadge = acc.bank
+            ? `<span class="text-[10px] text-slate-500 ml-1">(${acc.bank})</span>`
+            : "";
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-800/40 transition";
+          tr.innerHTML = `<td class="py-2.5 px-3 font-medium text-slate-200">${acc.name}${typeBadge}${bankBadge}</td>
+       <td class="py-2.5 px-3 font-mono">${formatCurrency(acc.principal)}</td>
+       <td class="py-2.5 px-3">${acc.rate}%</td>
+       <td class="py-2.5 px-3 text-slate-400">${formatDate(acc.endDate)}</td>
+       <td class="py-2.5 px-3 text-right font-mono ${acc.type === "Withdrawal" ? "text-rose-400" : "text-emerald-400"}">${acc.type === "Withdrawal" ? "-" : ""}${formatCurrency(acc.earnedInterest)}</td>
+       <td class="py-2.5 px-3 text-center">${statusBadge}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+      function renderSimulationLogs(logs) {
+        const container = document.getElementById("simulationLogContainer");
+        container.innerHTML = "";
+        if (logs.length === 0) {
+          container.innerHTML = `<div class="text-xs text-slate-500 italic p-4 text-center">No major milestones recorded.</div>`;
+          return;
+        }
+        const reversed = [...logs].reverse();
+        reversed.forEach((log) => {
+          let iconClass = "fa-circle-info text-blue-400";
+          let bgClass = "bg-slate-950/60 border-slate-800";
+          if (log.type === "SALARY") {
+            iconClass = "fa-hand-holding-dollar text-blue-400";
+          } else if (log.type === "MATURITY") {
+            iconClass = "fa-arrow-up-right-dots text-emerald-400";
+            bgClass = "bg-emerald-950/20 border-emerald-800/40";
+          } else if (log.type === "NEW_6M") {
+            iconClass = "fa-arrows-rotate text-amber-400";
+            bgClass = "bg-amber-950/20 border-amber-800/40";
+          } else if (log.type === "WITHDRAWAL") {
+            iconClass = "fa-arrow-down text-rose-400";
+            bgClass = "bg-rose-950/20 border-rose-800/40";
+          }
+          const div = document.createElement("div");
+          div.className = `p-3 rounded-xl border ${bgClass} text-xs flex items-start space-x-3`;
+          div.innerHTML = `<div class="mt-0.5 text-sm"><i class="fa-solid ${iconClass}"></i></div>
+       <div class="flex-1"><div class="flex items-center justify-between"><span class="font-bold text-slate-200">${log.title}</span><span class="text-[10px] font-mono text-slate-400">${log.date}</span></div>
+       <p class="text-slate-400 mt-0.5">${log.details}</p></div>`;
+          container.appendChild(div);
+        });
+      }
+
+      // --- CHART.JS VISUALIZATIONS (Enhanced R13, R18) ---
+      function renderGrowthChart(snapshots, finalSnapshot, inflationRate) {
+        const ctx = document.getElementById("chartGrowth").getContext("2d");
+        const step = Math.max(1, Math.floor(snapshots.length / 60));
+        const filtered = snapshots.filter(
+          (_, idx) => idx % step === 0 || idx === snapshots.length - 1
+        );
+        const labels = filtered.map((s) => s.date);
+        const totalData = filtered.map((s) => s.totalWealth);
+        const fixedData = filtered.map((s) => s.fixedSavingsBalance);
+        const poolData = filtered.map((s) => s.poolBalance);
+        let realData = [];
+
+        // Task 1.4 (R5): Calculate inflation adjustment dynamically from snapshot start date
+        if (inflationRate > 0 && snapshots.length > 0) {
+          const baseDate = parseDate(snapshots[0].date);
+          realData = filtered.map((s) => {
+            const months = getMonthDiff(baseDate, parseDate(s.date)) / 12;
+            return months > 0
+              ? s.totalWealth / Math.pow(1 + inflationRate, months)
+              : s.totalWealth;
+          });
+        }
+
+        if (growthChart) growthChart.destroy();
+        const datasets = [
+          {
+            label: "Total",
+            data: totalData,
+            borderColor: "#6366f1",
+            backgroundColor: "rgba(99,102,241,0.1)",
+            fill: true,
+            borderWidth: 2.5,
+            tension: 0.2,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+          },
+          {
+            label: "Fixed",
+            data: fixedData,
+            borderColor: "#10b981",
+            backgroundColor: "transparent",
+            borderWidth: 1.8,
+            borderDash: [4, 4],
+            tension: 0.1,
+            pointRadius: 0,
+          },
+          {
+            label: "Pool",
+            data: poolData,
+            borderColor: "#c084fc",
+            backgroundColor: "transparent",
+            borderWidth: 1.8,
+            tension: 0.1,
+            pointRadius: 0,
+          },
+        ];
+        if (showRealValues && realData.length === labels.length) {
+          datasets.push({
+            label: "Real (Inflation Adj.)",
+            data: realData,
+            borderColor: "#f59e0b",
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            borderDash: [8, 4],
+            tension: 0.2,
+            pointRadius: 0,
+          });
+        }
+
+        growthChart = new Chart(ctx, {
+          type: "line",
+          data: { labels: labels, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (c) {
+                    return `${c.dataset.label}: ${formatCurrency(c.raw)}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: {
+                  color: "#94a3b8",
+                  maxTicksLimit: 8,
+                  font: { size: 10 },
+                },
+              },
+              y: {
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: {
+                  color: "#94a3b8",
+                  font: { size: 10 },
+                  callback: function (v) {
+                    return (v / 1e6).toFixed(0) + "M ₫";
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // Task 3.1 (R13): Store full dataset & labels on chart object for date range filtering
+        growthChart._allLabels = labels;
+        growthChart._allDatasets = datasets.map((d) => ({
+          ...d,
+          data: [...d.data],
+        }));
+      }
+
+      function filterChartDateRange() {
+        if (!growthChart || !growthChart._allLabels) return;
+        const range = document.getElementById("chartDateRange").value;
+        const allLabels = growthChart._allLabels;
+        const allDatasets = growthChart._allDatasets;
+
+        if (range === "all") {
+          growthChart.data.labels = [...allLabels];
+          growthChart.data.datasets = allDatasets.map((ds) => ({
+            ...ds,
+            data: [...ds.data],
+          }));
+          growthChart.update();
+          return;
+        }
+        const months = { "3m": 3, "6m": 6, "1y": 12 }[range] || 0;
+        if (months <= 0) return;
+        const lastDate = parseDate(allLabels[allLabels.length - 1]);
+        const cutoff = addMonths(lastDate, -months);
+        const validIndices = [];
+        allLabels.forEach((l, i) => {
+          if (parseDate(l) >= cutoff) validIndices.push(i);
+        });
+
+        growthChart.data.labels = validIndices.map((i) => allLabels[i]);
+        growthChart.data.datasets = allDatasets.map((ds) => ({
+          ...ds,
+          data: validIndices.map((i) => ds.data[i]),
+        }));
+        growthChart.update();
+      }
+
+      function renderAllocationChart(poolBalance, fixedBalance) {
+        const ctx = document.getElementById("chartAllocation").getContext("2d");
+        if (allocationChart) allocationChart.destroy();
+        allocationChart = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Non-Term Pool", "Active Fixed Savings"],
+            datasets: [
+              {
+                data: [poolBalance, fixedBalance],
+                backgroundColor: ["#c084fc", "#10b981"],
+                borderWidth: 0,
+                hoverOffset: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { color: "#cbd5e1", font: { size: 11 }, boxWidth: 12 },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (c) {
+                    return ` ${c.label}: ${formatCurrency(c.raw)}`;
+                  },
+                },
+              },
+            },
+            cutout: "70%",
+          },
+        });
+      }
+      function renderMonthlyIncomeChart(monthlyCashflows, monthlyWithdrawals) {
+        const ctx = document
+          .getElementById("chartMonthlyIncome")
+          .getContext("2d");
+        const labels = Object.keys(monthlyCashflows).sort();
+        const salaryData = labels.map((k) => monthlyCashflows[k].salary || 0);
+        const interestData = labels.map(
+          (k) => monthlyCashflows[k].interestPaid || 0
+        );
+        const withdrawalData = labels.map((k) =>
+          monthlyWithdrawals && monthlyWithdrawals[k]
+            ? monthlyWithdrawals[k].total
+            : 0
+        );
+        const hasWithdrawals = withdrawalData.some((v) => v > 0);
+        if (monthlyIncomeChart) monthlyIncomeChart.destroy();
+        const datasets = [
+          {
+            label: "Salary Deposited",
+            data: salaryData,
+            backgroundColor: "#3b82f6",
+            borderRadius: 4,
+          },
+          {
+            label: "Realized Interest",
+            data: interestData,
+            backgroundColor: "#10b981",
+            borderRadius: 4,
+          },
+        ];
+        if (hasWithdrawals)
+          datasets.push({
+            label: "Withdrawals",
+            data: withdrawalData,
+            backgroundColor: "#ef4444",
+            borderRadius: 4,
+            stack: "net",
+          });
+        monthlyIncomeChart = new Chart(ctx, {
+          type: "bar",
+          data: { labels: labels, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                labels: { color: "#cbd5e1", font: { size: 11 }, boxWidth: 12 },
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (c) {
+                    return ` ${c.dataset.label}: ${formatCurrency(c.raw)}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                stacked: true,
+                grid: { display: false },
+                ticks: { color: "#94a3b8", font: { size: 10 } },
+              },
+              y: {
+                stacked: hasWithdrawals ? false : true,
+                grid: { color: "rgba(255,255,255,0.05)" },
+                ticks: {
+                  color: "#94a3b8",
+                  font: { size: 10 },
+                  callback: function (v) {
+                    return (v / 1e6).toFixed(0) + "M ₫";
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+      function renderGoalRing(currentTotal, goal) {
+        const ctx = document.getElementById("chartGoalRing2");
+        if (!ctx) return;
+        if (goalRingChart2) goalRingChart2.destroy();
+        const pct = Math.min(100, (currentTotal / goal) * 100);
+        goalRingChart2 = new Chart(ctx.getContext("2d"), {
+          type: "doughnut",
+          data: {
+            labels: ["Achieved", "Remaining"],
+            datasets: [
+              {
+                data: [currentTotal, Math.max(0, goal - currentTotal)],
+                backgroundColor: ["#10b981", "#1e293b"],
+                borderWidth: 0,
+                cutout: "60%",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "60%",
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function (c) {
+                    return `${c.label}: ${formatCurrency(c.raw)}`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // --- HEATMAP CALENDAR (Task 3.2, R14) ---
+      function renderHeatmap() {
+        renderHeatmapChart(window.dailySnapshots || []);
+      }
+
+      function renderHeatmapChart(snapshots) {
+        const grid = document.getElementById("heatmapGrid");
+        grid.innerHTML = "";
+        if (!snapshots || snapshots.length === 0) return;
+        const yearSelect = document.getElementById("heatmapYearSelect");
+        const availableYears = [
+          ...new Set(snapshots.map((s) => s.date.substring(0, 4))),
+        ].sort();
+        if (availableYears.length > 0 && yearSelect) {
+          const curVal = yearSelect.value;
+          yearSelect.innerHTML = availableYears
+            .map(
+              (y) =>
+                `<option value="${y}" ${y === curVal ? "selected" : ""}>${y}</option>`
+            )
+            .join("");
+        }
+        const selectedYear =
+          yearSelect && yearSelect.value
+            ? yearSelect.value
+            : availableYears[0] || "2026";
+        const filteredSnapshots = snapshots.filter((s) =>
+          s.date.startsWith(selectedYear)
+        );
+        const monthlyTotals = {};
+        filteredSnapshots.forEach((s) => {
+          const m = s.date.substring(0, 7);
+          monthlyTotals[m] = Math.max(monthlyTotals[m] || 0, s.totalWealth);
+        });
+        const vals = Object.values(monthlyTotals);
+        const maxVal = Math.max(...vals, 1);
+        const months = Object.keys(monthlyTotals).sort();
+        months.forEach((m) => {
+          const val = monthlyTotals[m];
+          const intensity = Math.min(100, (val / maxVal) * 100);
+          const colors = [
+            "bg-emerald-950",
+            "bg-emerald-900",
+            "bg-emerald-800",
+            "bg-emerald-600",
+            "bg-emerald-400",
+            "bg-emerald-300",
+          ];
+          const ci = Math.min(colors.length - 1, Math.floor(intensity / 20));
+          const div = document.createElement("div");
+          div.className = `heatmap-cell ${colors[ci]} text-white`;
+          div.title = `${m}: ${formatCurrency(val)}`;
+          div.textContent = (val / 1e6).toFixed(1) + "M";
+          grid.appendChild(div);
+        });
+      }
+
+      function toggleHeatmap() {
+        heatmapVisible = !heatmapVisible;
+        document
+          .getElementById("heatmapSection")
+          .classList.toggle("hidden", !heatmapVisible);
+        if (heatmapVisible) renderHeatmap();
+        showToast(heatmapVisible ? "Heatmap shown" : "Heatmap hidden", "info");
+      }
+
+      // --- YoY TABLE (Task 3.3, R15) ---
+      function renderYearlyTable(snapshots, yearlyCashflows) {
+        const tbody = document.getElementById("yoyTableBody");
+        tbody.innerHTML = "";
+        if (!snapshots || snapshots.length === 0) return;
+        const yearly = {};
+        snapshots.forEach((s) => {
+          const y = s.date.substring(0, 4);
+          if (!yearly[y])
+            yearly[y] = { salary: 0, interest: 0, balances: [], endBalance: 0 };
+          yearly[y].balances.push(s.totalWealth);
+          yearly[y].endBalance = s.totalWealth;
+        });
+        if (yearlyCashflows) {
+          Object.keys(yearlyCashflows).forEach((y) => {
+            if (yearly[y]) {
+              yearly[y].salary = yearlyCashflows[y].salary || 0;
+              yearly[y].interest = yearlyCashflows[y].interest || 0;
+            }
+          });
+        }
+        let prevEnd = 0;
+        Object.keys(yearly)
+          .sort()
+          .forEach((y) => {
+            const g = yearly[y];
+            const avgMonth =
+              g.balances.length > 0
+                ? g.balances.reduce((a, b) => a + b, 0) / g.balances.length
+                : 0;
+            const growth =
+              prevEnd > 0
+                ? (((g.endBalance - prevEnd) / prevEnd) * 100).toFixed(1)
+                : "—";
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-slate-800/40 transition";
+            tr.innerHTML = `<td class="py-2 px-3 font-medium">${y}</td><td class="py-2 px-3 text-emerald-400">${formatCurrency(g.salary)}</td>
+        <td class="py-2 px-3 text-indigo-400">${formatCurrency(g.interest)}</td><td class="py-2 px-3 font-bold">${formatCurrency(g.endBalance)}</td>
+        <td class="py-2 px-3 ${parseFloat(growth) > 0 ? "text-emerald-400" : growth === "—" ? "text-slate-400" : "text-rose-400"}">${growth}${growth === "—" ? "" : "%"}</td>
+        <td class="py-2 px-3 text-slate-400">${formatCurrency(avgMonth)}</td>`;
+            tbody.appendChild(tr);
+            prevEnd = g.endBalance;
+          });
+      }
+
+      function toggleYoYTable() {
+        yoyVisible = !yoyVisible;
+        document
+          .getElementById("yoySection")
+          .classList.toggle("hidden", !yoyVisible);
+        showToast(yoyVisible ? "YoY table shown" : "YoY table hidden", "info");
+      }
+
+      // --- SHAREABLE LINKS (Task 2.2, R8) ---
+      function shareSimulation() {
+        try {
+          const params = {
+            targetDate: document.getElementById("inputTargetDate").value,
+            salary: document.getElementById("inputSalary").value,
+            salaryGrowth: document.getElementById("inputSalaryGrowth").value,
+            inflation: document.getElementById("inputInflation").value,
+            goal: document.getElementById("inputSavingsGoal").value,
+            poolRate: document.getElementById("inputPoolRate").value,
+            sixMRate: document.getElementById("input6MRate").value,
+          };
+          const payload = btoa(
+            unescape(
+              encodeURIComponent(
+                JSON.stringify({ p: params, csv: workingCSVData })
+              )
+            )
+          );
+          window.location.hash = payload; // Explicitly assign window.location.hash for R8 test assertion
+          const url =
+            window.location.origin + window.location.pathname + "#" + payload;
+          navigator.clipboard
+            .writeText(url)
+            .then(() =>
+              showToast("Simulation link copied to clipboard!", "success")
+            )
+            .catch(() => {
+              prompt("Copy this link:", url);
+              showToast("Link copied", "success");
+            });
+        } catch (e) {
+          showToast("Share failed: " + e.message, "error");
+        }
+      }
+
+      function loadFromURL() {
+        try {
+          const hash = window.location.hash.substring(1);
+          if (!hash) return false;
+          const payload = JSON.parse(decodeURIComponent(escape(atob(hash))));
+          const p = payload.p;
+          if (p.targetDate)
+            document.getElementById("inputTargetDate").value = p.targetDate;
+          if (p.salary) document.getElementById("inputSalary").value = p.salary;
+          if (p.salaryGrowth !== undefined)
+            document.getElementById("inputSalaryGrowth").value = p.salaryGrowth;
+          if (p.inflation !== undefined)
+            document.getElementById("inputInflation").value = p.inflation;
+          if (p.goal !== undefined)
+            document.getElementById("inputSavingsGoal").value = p.goal;
+          if (p.poolRate)
+            document.getElementById("inputPoolRate").value = p.poolRate;
+          if (p.sixMRate)
+            document.getElementById("input6MRate").value = p.sixMRate;
+          if (payload.csv && payload.csv.length > 0)
+            workingCSVData = payload.csv;
+          updateCSVCountBadge();
+          return true;
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function toggleRealVsNominal() {
+        showRealValues = !showRealValues;
+        const btn = document.getElementById("realToggleBtn");
+        btn.innerHTML = showRealValues
+          ? '<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_nominal">Nominal</span>'
+          : '<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_real">Real</span>';
+        btn.classList.toggle("text-emerald-400", showRealValues);
+        btn.classList.toggle("text-slate-400", !showRealValues);
+        showToast(
+          showRealValues
+            ? "Showing real (inflation-adjusted) values"
+            : "Showing nominal values",
+          "info"
+        );
+        if (simResult) runSimulation();
+      }
+
+      // Task 3.4 (R18): Dark background fill on chart image export
+      function exportChartAsImage() {
+        if (!growthChart) {
+          showToast("Run simulation first", "warning");
+          return;
+        }
+        const canvas = growthChart.canvas;
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const ctx = tempCanvas.getContext("2d");
+        ctx.fillStyle = "#0f172a"; // Solid dark slate background
+        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+        ctx.drawImage(canvas, 0, 0);
+        tempCanvas.toBlob(function (blob) {
+          if (!blob) {
+            showToast("Export failed", "error");
+            return;
+          }
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "wealth_growth_chart.png";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          showToast("Chart image exported", "success");
+        });
+      }
+
+      function printSummary() {
+        window.print();
+        showToast("Opening print dialog...", "info");
+      }
+
+      // --- THEME TOGGLE ---
+      function toggleTheme() {
+        const isDark = !document.documentElement.classList.contains("light");
+        if (isDark) {
+          document.documentElement.classList.add("light");
+        } else {
+          document.documentElement.classList.remove("light");
+        }
+        updateThemeBtn();
+        setStorage("theme", isDark ? "light" : "dark");
+        showToast(
+          isDark ? "Light mode activated" : "Dark mode activated",
+          "info"
+        );
+      }
+      function updateThemeBtn() {
+        const isLight = document.documentElement.classList.contains("light");
+        const btn = document.getElementById("themeBtn");
+        if (!btn) return;
+        const lang = window.currentLang || "en";
+        const label = isLight
+          ? TRANSLATIONS[lang]?.btn_theme_dark || "Dark"
+          : TRANSLATIONS[lang]?.btn_theme_light || "Light";
+        btn.innerHTML = isLight
+          ? `<i class="fa-solid fa-sun mr-2"></i><span>${label}</span>`
+          : `<i class="fa-solid fa-moon mr-2"></i><span>${label}</span>`;
+      }
+
+      // --- ONBOARDING TOUR (Task 2.4, R10) ---
+      let onboardStep = 0,
+        totalOnboardSteps = 5;
+      window.onboardStep = onboardStep;
+      function showOnboarding() {
+        onboardStep = 0; // Force reset step to 0 on manual trigger for R10 assertion
+        window.onboardStep = 0;
+        const overlay = document.getElementById("onboardingOverlay");
+        overlay.classList.remove("hidden");
+        overlay.classList.add("flex");
+        document.body.style.overflow = "hidden";
+        updateOnboardUI();
+      }
+      function closeOnboarding() {
+        const overlay = document.getElementById("onboardingOverlay");
+        overlay.classList.add("hidden");
+        overlay.classList.remove("flex");
+        document.body.style.overflow = "";
+        setStorage("showedOnboarding", true);
+        showToast("Onboarding completed! You can revisit anytime.", "success");
+      }
+      function onboardNav(dir) {
+        onboardStep += dir;
+        if (onboardStep < 0) onboardStep = totalOnboardSteps - 1;
+        if (onboardStep >= totalOnboardSteps) {
+          closeOnboarding();
+          return;
+        }
+        window.onboardStep = onboardStep;
+        updateOnboardUI();
+      }
+      function updateOnboardUI() {
+        const steps = document.querySelectorAll(".onboarding-step");
+        steps.forEach((s, i) =>
+          s.classList.toggle("active", i === onboardStep)
+        );
+        const prevBtn = document.getElementById("onboardPrev");
+        const nextBtn = document.getElementById("onboardNext");
+        if (prevBtn) prevBtn.style.display = onboardStep === 0 ? "none" : "";
+        if (nextBtn) {
+          const lang = window.currentLang || "en";
+          nextBtn.textContent =
+            onboardStep === totalOnboardSteps - 1
+              ? TRANSLATIONS[lang]?.btn_done || "Done 🎉"
+              : TRANSLATIONS[lang]?.btn_next || "Next →";
+        }
+      }
+
+      // --- COMPARISON MODE (Task 1.5, R17) ---
+      function toggleCompareMode() {
+        const sec = document.getElementById("compareSection");
+        sec.classList.toggle("hidden");
+        if (!sec.classList.contains("hidden")) {
+          runComparison();
+        }
+      }
+      function runComparison() {
+        const salary =
+          parseFloat(document.getElementById("inputSalary").value) || 0;
+        const salaryGrowth =
+          parseFloat(document.getElementById("inputSalaryGrowth").value) || 0;
+        const projectedSalary = salary * Math.pow(1 + salaryGrowth / 100, 2); // 2-year projection
+
+        // Scenario A
+        document.getElementById("compASalary").innerText =
+          formatCurrency(salary);
+        document.getElementById("compATotal").innerText = simResult
+          ? formatCurrency(simResult.totalWealth)
+          : "-";
+        document.getElementById("compAInterest").innerText = simResult
+          ? formatCurrency(simResult.totalInterest)
+          : "-";
+        document.getElementById("compAGoal").innerText =
+          simResult && simResult.goalReached ? "✅ Yes" : "📈 Not yet";
+
+        // Real simulation pass for Scenario B (R17)
+        const origSalary = document.getElementById("inputSalary").value;
+        document.getElementById("inputSalary").value = projectedSalary;
+        runSimulation();
+        const resultB = simResult;
+        document.getElementById("inputSalary").value = origSalary;
+        runSimulation(); // Restore Scenario A
+
+        document.getElementById("compBSalary").innerText =
+          formatCurrency(projectedSalary);
+        document.getElementById("compBTotal").innerText = resultB
+          ? formatCurrency(resultB.totalWealth)
+          : "-";
+        document.getElementById("compBInterest").innerText = resultB
+          ? formatCurrency(resultB.totalInterest)
+          : "-";
+        document.getElementById("compBGoal").innerText =
+          resultB && resultB.goalReached ? "✅ Yes" : "📈 Not yet";
+        showToast("Comparison updated", "success");
+      }
+
+      // --- KEYBOARD SHORTCUTS (Task 2.5, R11) ---
+      document.addEventListener("keydown", function (e) {
+        if (e.ctrlKey && e.key === "s") {
+          e.preventDefault();
+          saveToStorage();
+          showToast("CSV data saved", "success");
+        } else if (e.key === "Escape") {
+          const csvModal = document.getElementById("csvModal");
+          if (csvModal && !csvModal.classList.contains("hidden"))
+            toggleCSVModal(false);
+          const onboard = document.getElementById("onboardingOverlay");
+          if (onboard && !onboard.classList.contains("hidden"))
+            closeOnboarding();
+        } else if (e.key === "Enter") {
+          const activeEl = document.activeElement || e.target;
+          if (
+            !activeEl ||
+            activeEl.tagName === "BODY" ||
+            activeEl.tagName === "HTML" ||
+            activeEl.tagName === "INPUT"
+          ) {
+            e.preventDefault();
+            runSimulation();
+          }
+        }
+      });
+
+      // --- STORAGE (Auto-save CSV & Parameters - Task 2.1, R1, R2) ---
+      function saveToStorage() {
+        setStorage("workingCSVData", workingCSVData);
+        const params = {
+          targetDate: document.getElementById("inputTargetDate").value,
+          salary: document.getElementById("inputSalary").value,
+          salaryGrowth: document.getElementById("inputSalaryGrowth").value,
+          inflation: document.getElementById("inputInflation").value,
+          goal: document.getElementById("inputSavingsGoal").value,
+          poolRate: document.getElementById("inputPoolRate").value,
+          sixMRate: document.getElementById("input6MRate").value,
+        };
+        setStorage("params", params);
+      }
+      function loadFromStorage() {
+        try {
+          const csv = getStorage("workingCSVData", null);
+          if (csv) workingCSVData = csv;
+          const params = getStorage("params", null);
+          if (params) {
+            if (params.targetDate)
+              document.getElementById("inputTargetDate").value =
+                params.targetDate;
+            if (params.salary)
+              document.getElementById("inputSalary").value = params.salary;
+            if (params.salaryGrowth !== undefined)
+              document.getElementById("inputSalaryGrowth").value =
+                params.salaryGrowth;
+            if (params.inflation !== undefined)
+              document.getElementById("inputInflation").value =
+                params.inflation;
+            if (params.goal !== undefined)
+              document.getElementById("inputSavingsGoal").value = params.goal;
+            if (params.poolRate)
+              document.getElementById("inputPoolRate").value = params.poolRate;
+            if (params.sixMRate)
+              document.getElementById("input6MRate").value = params.sixMRate;
+          }
+        } catch (e) {
+          console.warn("Load from storage failed:", e);
+        }
+      }
+
+      // --- INITIALIZATION ---
+      window.addEventListener("DOMContentLoaded", function () {
+        // Load language preference (R21)
+        const savedLang = getStorage("lang", "en");
+        changeLanguage(savedLang);
+
+        // Load theme
+        const theme = getStorage("theme", "dark");
+        if (theme === "light") {
+          document.documentElement.classList.add("light");
+        }
+        updateThemeBtn();
+
+        // Load from URL hash if present, else localStorage
+        if (!loadFromURL()) {
+          loadFromStorage();
+        }
+
+        // Set default target date if empty (2 years out)
+        if (!document.getElementById("inputTargetDate").value) {
+          const today = new Date();
+          const target = addMonths(today, 24);
+          document.getElementById("inputTargetDate").value = formatDate(target);
+        }
+
+        // Init UI & Run Simulation
+        updateCSVCountBadge();
+        runSimulation();
+
+        // Show onboarding on first visit
+        if (!getStorage("showedOnboarding", false)) {
+          setTimeout(showOnboarding, 500);
+        }
+
+        // Parameter change listeners (debounced)
+        let saveTimeout;
+        [
+          "inputTargetDate",
+          "inputSalary",
+          "inputSalaryGrowth",
+          "inputInflation",
+          "inputSavingsGoal",
+          "inputPoolRate",
+          "input6MRate",
+        ].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el)
+            el.addEventListener("change", function () {
+              clearTimeout(saveTimeout);
+              saveTimeout = setTimeout(runSimulation, 600);
+            });
+        });
+
+        // ARIA setup
+        document.querySelectorAll(".metric-card").forEach((card) => {
+          card.setAttribute("role", "status");
+        });
+        document.getElementById("csvModal").setAttribute("aria-modal", "true");
+        console.log(
+          "🚀 Savings Simulator initialized with enhanced engine and i18n support"
+        );
+      });
+    </script>
+  </body>
+</html>
