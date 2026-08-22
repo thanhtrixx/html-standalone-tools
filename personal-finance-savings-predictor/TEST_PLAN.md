@@ -5,13 +5,13 @@
 > **Method:** Automated Node test suites (`npm test`) + Browser console / UI tests
 
 ```bash
-# Automated Test Suites (196 tests passing across 5 suites)
-npm test              # Run all 5 suites (196 tests)
-npm run test:sim      # Simulation engine unit tests (38 tests)
-npm run test:helpers  # Formatters, LZString & CSV editor tests (46 tests)
-npm run test:ui       # UI/UX integration tests R1-R23 (73 tests)
-npm run test:i18n     # Bilingual translation parity tests (26 tests)
-npm run test:build    # Compacted build pipeline tests (13 tests)
+# Automated Test Suites (434 assertions passing across 5 suites)
+npm test              # Run all 5 suites (434 assertions)
+npm run test:sim      # Simulation engine unit tests (63 assertions)
+npm run test:helpers  # Formatters, LZString & CSV editor tests (135 assertions)
+npm run test:ui       # UI/UX integration tests R1-R28 (138 assertions)
+npm run test:i18n     # Bilingual translation parity tests (60 assertions)
+npm run test:build    # Compacted build pipeline tests (38 assertions)
 ```
 
 ---
