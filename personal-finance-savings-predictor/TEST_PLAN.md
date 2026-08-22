@@ -524,7 +524,7 @@ console.log(
 
 // Test: Onboarding texts in Vietnamese
 document.getElementById("onboardNext").click();
-const step2Title = document.querySelector('[data-i18n="onboard_step2_title"]');
+const step2Title = document.querySelector('[data-i18n="onboard_title_2"]');
 console.assert(
   step2Title.textContent.includes("Thông Số"),
   `Step 2 title should contain 'Thông Số', got: ${step2Title.textContent}`
@@ -532,6 +532,27 @@ console.assert(
 console.log(
   "✅ Onboarding Vietnamese texts:",
   step2Title.textContent.includes("Thông Số") ? "PASS" : "FAIL"
+);
+
+// Test: Strict Currency & Date Format Parity
+changeLanguage("en");
+console.assert(
+  formatCurrency(250000000) === "250,000,000 VND",
+  "EN currency format"
+);
+console.assert(
+  formatDateDisplay(new Date(2026, 7, 22)) === "2026-08-22",
+  "EN date format"
+);
+
+changeLanguage("vi");
+console.assert(
+  formatCurrency(250000000) === "250.000.000 ₫",
+  "VI currency format"
+);
+console.assert(
+  formatDateDisplay(new Date(2026, 7, 22)) === "22/08/2026",
+  "VI date format"
 );
 
 console.log("✅ R21 Vietnamese Language Support: ALL TESTS PASSED");

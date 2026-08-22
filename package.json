@@ -7,6 +7,11 @@
     "doc": "docs"
   },
   "scripts": {
+    "build": "node scripts/build.js",
+    "build:predictor": "node scripts/build.js --tool personal-finance-savings-predictor",
+    "test": "node tests/build.test.js && node tests/i18n.test.js",
+    "test:i18n": "node tests/i18n.test.js",
+    "format": "prettier --write .",
     "prepare": "husky"
   },
   "repository": {
@@ -22,8 +27,10 @@
   },
   "homepage": "https://github.com/thanhtrixx/html-standalone-tools#readme",
   "devDependencies": {
+    "html-minifier-terser": "^7.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.3.0",
-    "prettier": "^3.9.6"
+    "prettier": "^3.9.6",
+    "terser": "^5.50.0"
   }
 }
