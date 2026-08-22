@@ -1273,6 +1273,30 @@ async function runUIUXTests() {
     `R27: Savings table filtered to withdrawals view (${withdrawalRowCount} rows)`
   );
 
+  app.filterSavingsCategory("auto_term");
+  assert(
+    app.activeSavingsCategory === "auto_term",
+    "R27: filterSavingsCategory('auto_term') set category to 'auto_term'"
+  );
+  const autoTermRowCount = savingsTableBody.children.length;
+  const countAutoTermEl = app.document.getElementById("count_filter_auto_term");
+  assert(
+    autoTermRowCount === parseInt(countAutoTermEl.innerText, 10),
+    `R27: Savings table filtered to auto_term view matches badge count (${autoTermRowCount} rows)`
+  );
+
+  app.filterSavingsCategory("matured");
+  assert(
+    app.activeSavingsCategory === "matured",
+    "R27: filterSavingsCategory('matured') set category to 'matured'"
+  );
+  const maturedRowCount = savingsTableBody.children.length;
+  const countMaturedEl = app.document.getElementById("count_filter_matured");
+  assert(
+    maturedRowCount === parseInt(countMaturedEl.innerText, 10),
+    `R27: Savings table filtered to matured view matches badge count (${maturedRowCount} rows)`
+  );
+
   app.filterSavingsCategory("all");
   assert(
     savingsTableBody.children.length === initialRowCount,

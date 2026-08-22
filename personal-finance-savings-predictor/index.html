@@ -5533,8 +5533,8 @@
 
           if (category === "all") return true;
           if (category === "active_fixed") return isActive && !isAutoTerm;
-          if (category === "auto_term") return isAutoTerm;
-          if (category === "matured") return isMatured;
+          if (category === "auto_term") return isActive && isAutoTerm;
+          if (category === "matured") return !isWithdrawal && isMatured;
           if (category === "withdrawals") return isWithdrawal;
           return true;
         });
