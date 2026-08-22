@@ -1000,6 +1000,266 @@ async function runHelperTests() {
     `dismissAllModals() cleanly closed all active modals`
   );
 
+  // Test 20: formatNumberWithSeparators & parseFormattedNumber Edge Cases & Extreme Values
+  assert(
+    ctx.formatNumberWithSeparators(1000000000000, "en") === "1,000,000,000,000",
+    "formatNumberWithSeparators formats Trillions with commas"
+  );
+  assert(
+    ctx.formatNumberWithSeparators(1000000000000, "vi") === "1.000.000.000.000",
+    "formatNumberWithSeparators formats Trillions with dots"
+  );
+  assert(
+    ctx.formatNumberWithSeparators(-50000000, "en") === "-50,000,000",
+    "formatNumberWithSeparators formats negative values"
+  );
+  assert(
+    ctx.parseFormattedNumber("  $ 150,000,000 VND  ") === 150000000,
+    "parseFormattedNumber strips currency prefixes, suffixes, and whitespace"
+  );
+  assert(
+    ctx.parseFormattedNumber("-25.000.000") === -25000000,
+    "parseFormattedNumber handles negative formatted strings"
+  );
+  assert(
+    ctx.parseFormattedNumber("invalid_text_without_digits") === 0,
+    "parseFormattedNumber returns 0 for non-numerical string"
+  );
+  assert(
+    ctx.parseFormattedNumber(null) === 0 &&
+      ctx.parseFormattedNumber(undefined) === 0,
+    "parseFormattedNumber safely returns 0 for null and undefined"
+  );
+
+  // Test 21: getSpelledOutAmount Full Tiers & Boundary Values
+  assert(
+    ctx.getSpelledOutAmount(10000000000, "vi") === "10 Tỷ VND",
+    "getSpelledOutAmount: 10B VND in VI returns '10 Tỷ VND'"
+  );
+  assert(
+    ctx.getSpelledOutAmount(10000000000, "en") === "10 Billion VND",
+    "getSpelledOutAmount: 10B VND in EN returns '10 Billion VND'"
+  );
+  assert(
+    ctx.getSpelledOutAmount(2500000000, "vi") === "2.5 Tỷ VND",
+    "getSpelledOutAmount: 2.5B VND in VI returns '2.5 Tỷ VND'"
+  );
+  assert(
+    ctx.getSpelledOutAmount(100000000, "vi") === "100 Triệu VND",
+    "getSpelledOutAmount: 100M VND in VI returns '100 Triệu VND'"
+  );
+  assert(
+    ctx.getSpelledOutAmount(1000000, "en") === "1 Million VND",
+    "getSpelledOutAmount: 1M VND in EN returns '1 Million VND'"
+  );
+  assert(
+    ctx.getSpelledOutAmount(750000, "vi") === "750 Nghìn VND",
+    "getSpelledOutAmount: 750k VND in VI returns '750 Nghìn VND'"
+  );
+  assert(
+    ctx.getSpelledOutAmount(500, "vi") === "500 VND",
+    "getSpelledOutAmount: sub-thousand returns raw '500 VND'"
+  );
+  assert(
+    ctx.getSpelledOutAmount(0, "vi") === "" &&
+      ctx.getSpelledOutAmount(-100000, "vi") === "",
+    "getSpelledOutAmount: zero or negative returns empty string"
+  );
+
+  // Test 22: applyCurrencyMask Typing Simulation & Caret Stability
+  const typingMock = {
+    id: "inputSalary",
+    value: "1000000",
+    selectionStart: 7,
+    setSelectionRange(s, e) {
+      this.selectionStart = s;
+    },
+  };
+  ctx.applyCurrencyMask(typingMock, "en");
+  assert(
+    typingMock.value === "1,000,000",
+    "applyCurrencyMask formats 1000000 to '1,000,000'"
+  );
+
+  // Deleting all input
+  const emptyMock = {
+    id: "inputSalary",
+    value: "",
+    selectionStart: 0,
+    setSelectionRange() {},
+  };
+  ctx.applyCurrencyMask(emptyMock, "en");
+  assert(
+    emptyMock.value === "",
+    "applyCurrencyMask preserves empty string when input is cleared"
+  );
+
+  // Test 23: LZ-String URL Compression & Malformed Hash Resilience
+  ctx.location.hash = "#invalid_corrupt_lz_payload_12345";
+  const malformedLoad = ctx.loadFromURL();
+  assert(
+    malformedLoad === false,
+    "loadFromURL() safely handles corrupted hash without throwing unhandled exceptions"
+  );
+
+  // Test 24: Persona Presets Configuration & All 4 Strategy Loads
+  const presets = ctx.PERSONA_PRESETS;
+  assert(
+    presets.length === 4,
+    "PERSONA_PRESETS defines all 4 required financial strategy presets"
+  );
+
+  ctx.applyPreset("fire_aspirant");
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 60000000,
+    "applyPreset('fire_aspirant') sets salary to 60M"
+  );
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSavingsGoal").value
+    ) === 5000000000,
+    "applyPreset('fire_aspirant') sets savings goal to 5B"
+  );
+
+  ctx.applyPreset("home_downpayment");
+  assert(
+    ctx.parseFormattedNumber(
+      ctx.document.getElementById("inputSalary").value
+    ) === 35000000,
+    "applyPreset('home_downpayment') sets salary to 35M"
+  );
+
+  ctx.applyPreset("bank_ladder");
+  assert(
+    ctx.workingCSVData.length >= 3,
+    "applyPreset('bank_ladder') loads multi-tier term deposit portfolio"
+  );
+
+  // Test 25: Recurring Cashflow Schedule Generator Frequencies
+  // Monthly (freq = 1) over 6 months -> 6 entries
+  ctx.document.getElementById("recurType").value = "Withdrawal";
+  ctx.document.getElementById("recurName").value = "Monthly Rent";
+  ctx.document.getElementById("recurAmount").value = "8000000";
+  ctx.document.getElementById("recurFreq").value = "1"; // Monthly
+  ctx.document.getElementById("recurStartDate").value = "2026-01-01";
+  ctx.document.getElementById("recurEndDate").value = "2026-06-01";
+  const preMonthlyCount = ctx.workingCSVData.length;
+  ctx.generateRecurringRows();
+  assert(
+    ctx.workingCSVData.length === preMonthlyCount + 6,
+    "generateRecurringRows() created 6 monthly withdrawal rows"
+  );
+
+  // Annual (freq = 12) over 2 years -> 2 entries
+  ctx.document.getElementById("recurType").value = "Non-Term Pool";
+  ctx.document.getElementById("recurName").value = "Annual Bonus";
+  ctx.document.getElementById("recurAmount").value = "50000000";
+  ctx.document.getElementById("recurFreq").value = "12"; // Annual
+  ctx.document.getElementById("recurStartDate").value = "2026-01-01";
+  ctx.document.getElementById("recurEndDate").value = "2027-01-01";
+  const preAnnualCount = ctx.workingCSVData.length;
+  ctx.generateRecurringRows();
+  assert(
+    ctx.workingCSVData.length === preAnnualCount + 2,
+    "generateRecurringRows() created 2 annual entries"
+  );
+
+  // Test 26: Savings Hub KPI Math with Boundary & Empty Portfolios
+  ctx.updateSavingsHubKPIs([]);
+  assert(
+    ctx.document.getElementById("kpiActiveAccounts").innerText === "0",
+    "Empty portfolio yields 0 active accounts"
+  );
+  assert(
+    ctx.document.getElementById("kpiAutoSweeps").innerText === "0",
+    "Empty portfolio yields 0 auto sweeps"
+  );
+  assert(
+    ctx.document.getElementById("kpiWeightedRate").innerText === "0.00%/yr",
+    "Empty portfolio yields 0.00%/yr weighted rate"
+  );
+
+  // Only Matured accounts portfolio
+  const maturedOnlyPortfolio = [
+    {
+      id: "m1",
+      name: "Old Term",
+      principal: 100000000,
+      rate: 7.0,
+      status: "MATURED",
+      type: "CSV",
+    },
+  ];
+  ctx.updateSavingsHubKPIs(maturedOnlyPortfolio);
+  assert(
+    ctx.document.getElementById("kpiActiveAccounts").innerText === "0",
+    "Matured-only portfolio yields 0 active accounts"
+  );
+  assert(
+    ctx.document.getElementById("kpiLockedPrincipal").innerText.startsWith("0"),
+    "Matured-only portfolio yields 0 locked principal"
+  );
+
+  // Test 27: CSV Editor Validation Safeguards (End Date < Start Date)
+  ctx.toggleCSVModal(true);
+  const csvModalElTest27 = ctx.document.getElementById("csvModal");
+  assert(
+    !csvModalElTest27.classList.contains("hidden"),
+    "CSV modal is open prior to invalid save attempt"
+  );
+
+  ctx.syncCSVData([
+    {
+      "Account Name": "Invalid Dates Account",
+      Principal: "50000000",
+      "Start Date": "2026-12-01",
+      "End Date": "2026-01-01", // End Date before Start Date
+      Interest: "5.0",
+      Type: "Term Saving",
+      Bank: "VCB",
+    },
+  ]);
+  // Attempt to save invalid data
+  ctx.saveCSVEditorData();
+  assert(
+    !csvModalElTest27.classList.contains("hidden"),
+    "saveCSVEditorData() rejects invalid date range (End < Start) and leaves CSV modal open"
+  );
+
+  // Now fix date range and save successfully
+  ctx.syncCSVData([
+    {
+      "Account Name": "Valid Dates Account",
+      Principal: "50000000",
+      "Start Date": "2026-01-01",
+      "End Date": "2027-12-01",
+      Interest: "5.0",
+      Type: "Term Saving",
+      Bank: "VCB",
+    },
+  ]);
+  ctx.saveCSVEditorData();
+  assert(
+    csvModalElTest27.classList.contains("hidden"),
+    "saveCSVEditorData() accepts valid date range, saves data, and closes CSV modal"
+  );
+
+  // Test 28: Keyboard & Dialog Manager Safeguards
+  ctx.dismissAllModals();
+  // Call dismissAllModals when no modal is open (should be a safe no-op)
+  let noopError = false;
+  try {
+    ctx.dismissAllModals();
+  } catch (e) {
+    noopError = true;
+  }
+  assert(
+    noopError === false,
+    "dismissAllModals() when 0 modals are open executes safely as a no-op"
+  );
+
   console.log(
     `\n📊 Helper Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
