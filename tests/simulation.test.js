@@ -1343,6 +1343,36 @@ async function runSimulationTests() {
     `Issue #72: Capital Yield with zero salary accurately reflects deposit yield (+${capitalYield.toFixed(1)}%)`
   );
 
+  // Issue #76: Secondary Bonus Schedule Simulation Logic
+  const dualBonusParams = {
+    targetDateStr: formatDate(addMonths(today, 12)),
+    monthlySalary: 20000000,
+    salaryGrowthRate: 0,
+    annualBonusMultiplier: 1.0,
+    annualBonusMonth: 1, // Jan
+    secondaryBonusMultiplier: 0.5,
+    secondaryBonusMonth: 7, // Jul
+    inflationRate: 0,
+    poolAnnualRate: 0,
+    term6MAnnualRate: 0,
+    autoTermRate: 0,
+    autoTermThreshold: 500000000,
+    emergencyBuffer: 100000000,
+    savingsGoal: 0,
+  };
+  const dualBonusSim = simulate(dualBonusParams, []);
+  const dualLogs = (dualBonusSim.simulationLogs || []).filter(
+    (l) => l.type === "ANNUAL_BONUS" || l.type === "SECONDARY_BONUS"
+  );
+  assert(
+    dualLogs.some((l) => l.type === "ANNUAL_BONUS" && l.multiplier === 1.0),
+    "Issue #76: Engine emits ANNUAL_BONUS log with multiplier 1.0"
+  );
+  assert(
+    dualLogs.some((l) => l.type === "SECONDARY_BONUS" && l.multiplier === 0.5),
+    "Issue #76: Engine emits SECONDARY_BONUS log with multiplier 0.5"
+  );
+
   console.log(
     `\n📊 Simulation Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

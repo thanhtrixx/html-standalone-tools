@@ -81,6 +81,9 @@ function createDOMEnvironment() {
       getAttribute(k) {
         return this.attributes[k] !== undefined ? this.attributes[k] : null;
       },
+      hasAttribute(k) {
+        return this.attributes[k] !== undefined;
+      },
       removeAttribute(k) {
         delete this.attributes[k];
       },
@@ -330,6 +333,34 @@ function createDOMEnvironment() {
             el.setAttribute("data-category", cat);
             return el;
           });
+        }
+        if (sel === ".heatmap-cell") {
+          const grid = getEl("heatmapGrid");
+          if (
+            !grid._heatmapCells ||
+            grid._heatmapCellsVersion !== grid.children.length
+          ) {
+            const cells = [];
+            (grid.children || []).forEach((row) => {
+              if (row && row._innerHTML) {
+                const matches = [
+                  ...row._innerHTML.matchAll(
+                    /<div[^>]*class=["'][^"']*heatmap-cell[^"']*["'][^>]*data-tier=["'](\d+)["'][^>]*>([\s\S]*?)<\/div>/g
+                  ),
+                ];
+                matches.forEach((m, idx) => {
+                  const cellEl = createMockElement("cell_" + idx);
+                  cellEl.classList.add("heatmap-cell");
+                  cellEl.setAttribute("data-tier", m[1]);
+                  cellEl.innerHTML = m[2].trim();
+                  cells.push(cellEl);
+                });
+              }
+            });
+            grid._heatmapCells = cells;
+            grid._heatmapCellsVersion = grid.children.length;
+          }
+          return grid._heatmapCells;
         }
         return [];
       },
@@ -2309,6 +2340,104 @@ async function runUIUXTests() {
   assert(
     salaryTrack && salaryTrack.innerHTML.includes("25M"),
     "R49: Salary preset chips restored to VND magnitude (10M, 20M, 25M)"
+  );
+
+  // Test R50: Issue #76 Interactive Heatmap Color Legend & Secondary Bonus Schedule Modeling
+  // 1. Heatmap Legend & Interactive Tier Highlighting
+  const heatmapLegend = app.document.getElementById("heatmapLegendSection");
+  const legendMin = app.document.getElementById("heatmapLegendMinText");
+  const legendMax = app.document.getElementById("heatmapLegendMaxText");
+  const legendBar = app.document.getElementById("heatmapLegendBar");
+  assert(
+    heatmapLegend !== null &&
+      legendMin !== null &&
+      legendMax !== null &&
+      legendBar !== null,
+    "R50: #heatmapLegendSection and min/max/tier controls exist in Heatmap DOM"
+  );
+
+  app.setSalaryValue(25000000);
+  app.setPresetYears(2);
+  app.runSimulation();
+  app.switchAnalyticsTab("heatmap");
+
+  assert(
+    legendMin.textContent.includes("Min:") ||
+      legendMin.textContent.includes("0"),
+    `R50: Heatmap legend displays dynamic Min marker: "${legendMin.textContent}"`
+  );
+  assert(
+    legendMax.textContent.includes("Peak:") ||
+      legendMax.textContent.includes("VND") ||
+      legendMax.textContent.includes("₫"),
+    `R50: Heatmap legend displays dynamic Peak marker: "${legendMax.textContent}"`
+  );
+
+  const heatmapCells = app.document.querySelectorAll(".heatmap-cell");
+  assert(
+    heatmapCells.length > 0,
+    `R50: Calendar Heatmap rendered ${heatmapCells.length} monthly intensity cells`
+  );
+  const firstCell = heatmapCells[0];
+  assert(
+    firstCell.hasAttribute("data-tier"),
+    "R50: Heatmap cell contains data-tier attribute for interactive filtering"
+  );
+
+  // Test Tier Highlight & Clear
+  const targetTier = parseInt(firstCell.getAttribute("data-tier"), 10) || 1;
+  app.highlightHeatmapTier(targetTier);
+  assert(
+    firstCell.classList.contains("ring-2"),
+    `R50: highlightHeatmapTier(${targetTier}) applied ring-2 highlight class to matching tier cells`
+  );
+  app.clearHeatmapHighlights();
+  assert(
+    !firstCell.classList.contains("ring-2") &&
+      !firstCell.classList.contains("opacity-30"),
+    "R50: clearHeatmapHighlights() restored default cell opacity and styling"
+  );
+
+  // 2. Secondary Bonus Schedule Modeling
+  const secBonusInput = app.document.getElementById(
+    "inputSecondaryBonusMultiplier"
+  );
+  const secBonusMonth = app.document.getElementById(
+    "selectSecondaryBonusMonth"
+  );
+  const secBonusHelper = app.document.getElementById(
+    "helperSecondaryBonusPreview"
+  );
+  assert(
+    secBonusInput !== null && secBonusMonth !== null && secBonusHelper !== null,
+    "R50: Secondary bonus multiplier, month selector, and preview helper exist in DOM"
+  );
+
+  app.setSecondaryBonusMultiplier(0.5);
+  secBonusMonth.value = "7"; // July
+  app.updateBonusPreview();
+
+  assert(
+    secBonusHelper.textContent.includes("12,500,000") &&
+      (secBonusHelper.textContent.includes("July") ||
+        secBonusHelper.textContent.includes("Tháng 7")),
+    `R50: Live Secondary Bonus preview dynamically computes 0.5x mid-year bonus: "${secBonusHelper.textContent}"`
+  );
+
+  // Run simulation and verify SECONDARY_BONUS log and compounding
+  app.runSimulation();
+  const simLogs =
+    app.simulationLogs || (app.simResult && app.simResult.simulationLogs) || [];
+  const secBonusLogs = simLogs.filter((l) => l.type === "SECONDARY_BONUS");
+  assert(
+    secBonusLogs.length > 0,
+    `R50: Simulation generated ${secBonusLogs.length} SECONDARY_BONUS events in simulation logs`
+  );
+  assert(
+    secBonusLogs[0] &&
+      secBonusLogs[0].multiplier === 0.5 &&
+      secBonusLogs[0].amount >= 12500000,
+    `R50: Secondary bonus event amount (${secBonusLogs[0] ? secBonusLogs[0].amount : 0}) matches 0.5x monthly salary`
   );
 
   app.dismissAllModals();
