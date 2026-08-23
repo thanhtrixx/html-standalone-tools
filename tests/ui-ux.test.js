@@ -1808,6 +1808,49 @@ async function runUIUXTests() {
     "R40: English language restores AI Dossier Markdown preview to English headers"
   );
 
+  // Test R41: Issue #71 Scenario Comparison Workbench Trigger Button & Navigation Entry
+  const btnCompareScenarios = app.document.getElementById(
+    "btnCompareScenarios"
+  );
+  assert(
+    btnCompareScenarios !== null,
+    "R41: #btnCompareScenarios trigger button exists in main action toolbar"
+  );
+
+  const btnMobileCompare = app.document.getElementById("btnMobileCompare");
+  assert(
+    btnMobileCompare !== null,
+    "R41: #btnMobileCompare button exists in mobile action sheet"
+  );
+
+  // Initial state: comparison section is hidden
+  const compareSectionEl = app.document.getElementById("compareSection");
+  assert(
+    compareSectionEl && compareSectionEl.classList.contains("hidden"),
+    "R41: #compareSection is hidden by default"
+  );
+
+  // Trigger compare mode via button
+  app.toggleCompareMode(true);
+  assert(
+    app.window.comparisonActive === true &&
+      !compareSectionEl.classList.contains("hidden"),
+    "R41: toggleCompareMode(true) opens #compareSection and sets comparisonActive"
+  );
+  assert(
+    btnCompareScenarios.classList.contains("text-emerald-300") ||
+      btnCompareScenarios.classList.contains("bg-emerald-950/70"),
+    "R41: #btnCompareScenarios has active styling when compare mode is open"
+  );
+
+  // Toggle off
+  app.toggleCompareMode(false);
+  assert(
+    app.window.comparisonActive === false &&
+      compareSectionEl.classList.contains("hidden"),
+    "R41: toggleCompareMode(false) hides #compareSection and resets comparisonActive"
+  );
+
   app.dismissAllModals();
 
   console.log(
