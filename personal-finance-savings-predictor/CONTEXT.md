@@ -119,4 +119,3 @@ _Avoid_: Multi-row chip wrap, tiny touch buttons, stepper clusters
 **Adaptive Mobile Card-View**:
 A responsive viewport-triggered rendering pattern that transforms wide desktop tabular data (`min-w-[650px]`) into touch-friendly account cards on screens `< 640px`.
 _Avoid_: Cramped table pinching, unbounded horizontal table scroll, truncated table cells
-

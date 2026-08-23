@@ -1459,6 +1459,57 @@ async function runUIUXTests() {
     "R32: loadFromURL() hydrides state correctly from active location.hash"
   );
 
+  // Test R33: Semantic CSS Design Tokens & Full Light Theme Contrast Styling (ADR-0016, Issue #44)
+  const indexHtmlRaw = fs.readFileSync(
+    path.join(
+      __dirname,
+      "..",
+      "personal-finance-savings-predictor",
+      "index.html"
+    ),
+    "utf8"
+  );
+  assert(
+    indexHtmlRaw.includes("--bg-page") &&
+      indexHtmlRaw.includes("--bg-card") &&
+      indexHtmlRaw.includes("--text-primary") &&
+      indexHtmlRaw.includes("--border-subtle") &&
+      indexHtmlRaw.includes(":root.light"),
+    "R33: Semantic CSS custom property tokens defined under :root and :root.light"
+  );
+
+  // Toggle to Light Theme
+  app.document.documentElement.classList.remove("light");
+  app.toggleTheme();
+  assert(
+    app.document.documentElement.classList.contains("light"),
+    "R33: Toggling theme adds 'light' class to document element"
+  );
+  assert(
+    app.getStorage("theme") === "light",
+    "R33: Light theme preference saved in local storage"
+  );
+  const themeBtnEl = app.document.getElementById("themeBtn");
+  assert(
+    themeBtnEl && themeBtnEl.innerHTML.includes("fa-sun"),
+    "R33: Theme button displays Sun icon when Light theme is active"
+  );
+
+  // Toggle back to Dark Theme
+  app.toggleTheme();
+  assert(
+    !app.document.documentElement.classList.contains("light"),
+    "R33: Toggling theme removes 'light' class for Dark theme"
+  );
+  assert(
+    app.getStorage("theme") === "dark",
+    "R33: Dark theme preference saved in local storage"
+  );
+  assert(
+    themeBtnEl && themeBtnEl.innerHTML.includes("fa-moon"),
+    "R33: Theme button displays Moon icon when Dark theme is active"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
