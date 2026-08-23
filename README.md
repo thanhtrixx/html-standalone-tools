@@ -42,9 +42,9 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
     │   └── index.html
     ├── CONTEXT.md                              # Tool-specific domain glossary
     ├── docs/
-    │   └── adr/                                # Tool-specific architecture decisions (0001–0015)
-    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R28)
-    └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
+    │   └── adr/                                # Tool-specific architecture decisions (0001–0017)
+    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R40)
+    └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist (502 tests)
 ```
 
 ### Core Architecture Principles

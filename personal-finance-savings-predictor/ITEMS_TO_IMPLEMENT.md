@@ -22,7 +22,7 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 
 ---
 
-## 📊 Core Requirements Matrix (R1 – R23)
+## 📊 Core Requirements Matrix (R1 – R40)
 
 | ID      | Feature                                  | Specification                                                                                                                                                                                                       | Priority | ADR Reference      |
 | ------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------ |
@@ -54,6 +54,18 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R26** | Multi-Year Calendar Heatmap & Tooltips   | Continuous multi-year matrix (no dropdown), Annual Delta & YoY % columns, Total Wealth vs Net Inflow mode toggle, and interactive popover breakdown tooltips.                                                       | P1       | ADR-0012           |
 | **R27** | Full-Width Savings Accounts Hub & Filter | Dedicated full-width card layout with 4 portfolio KPI pills (Locked Principal, Active, Auto Sweeps, Weighted Rate) and instant category filter tabs (`All`, `Active Fixed`, `Auto Term`, `Matured`, `Withdrawals`). | P1       | ADR-0013           |
 | **R28** | Modal Layering & Dialog Safeguards       | Centralized modal lifecycle controller (`dismissAllModals()`), single-active-modal invariant, backdrop dismissals, and clean first-time onboarding walkthrough without popup clashing.                              | P1       | ADR-0014           |
+| **R29** | Boundary & Extreme Number Handling       | Fallback safely when Target Date is empty/unconfigured; handle extreme financial sums (100B+ VND) without numerical overflow or NaN.                                                                                | P1       | —                  |
+| **R30** | Comparative Delta Badging & Mode Reset   | Highlight negative Scenario B delta badges with warning styling and clean toggle off without state leakage.                                                                                                         | P1       | ADR-0007           |
+| **R31** | Dynamic Verbal Helper Synchronization    | Ensure verbal quantity helper labels stay 100% reactive across dynamic inputs, currency masking, and language toggles.                                                                                              | P1       | ADR-0011           |
+| **R32** | Resilient URL State Sharing              | Sanitize percent-encoded hash fragments, dual-mode LZ-String/Base64 decompression, dynamic `hashchange` listener, and robust clipboard copy helper with fallbacks.                                                  | P1       | ADR-0015           |
+| **R33** | Semantic Design Tokens & Theme System    | Centralized CSS custom properties (`:root` / `:root.light`) for WCAG 2.1 AA/AAA contrast compliance across themes.                                                                                                  | P1       | ADR-0016           |
+| **R34** | Dynamic Chart.js Theme Sync Hook         | Recolor Chart.js gridlines, ticks, legends, and tooltip palettes synchronously upon toggling Dark/Light theme.                                                                                                      | P1       | ADR-0016           |
+| **R35** | Responsive Mobile Action Sheet           | Condense secondary utilities into an overflow action sheet on screens $< 768\text{px}$ to prevent multi-line header wrapping.                                                                                       | P1       | ADR-0016           |
+| **R36** | Mobile Metric Grid & Preset Carousels    | 2x2 compact metric layout on mobile with fluid typography and horizontal scrollable touch preset carousels ($\ge 36\text{px}$ touch targets).                                                                       | P1       | ADR-0016           |
+| **R37** | Adaptive Mobile Card-View for Hub        | Render Savings Accounts as structured touch cards on viewports $< 640\text{px}$ while preserving full desktop tabular view.                                                                                         | P1       | ADR-0016           |
+| **R38** | Light Theme High-Contrast Overrides      | Explicit style overrides for slate backgrounds, timeframe filters, bonus chips, and utility buttons in Light mode.                                                                                                  | P1       | ADR-0016           |
+| **R39** | AI Financial Health Dossier Modal        | Client-side Markdown dossier generator with live monospaced preview, 1-click clipboard copy, and `.md` file download export.                                                                                        | P1       | ADR-0017           |
+| **R40** | AI Blueprints & Privacy Anonymization    | 5 prompt blueprints (General, FIRE, Real Estate, Ladder, Compare), custom inquiries textarea, and zero-leak privacy mask converting sums to salary multiples and % shares.                                          | P1       | ADR-0017           |
 
 ---
 
@@ -90,4 +102,4 @@ For each calendar day $t$ from Start Date to Target Date:
 ---
 
 _File: `ITEMS_TO_IMPLEMENT.md`_  
-_Updated: 2026-08-22_
+_Updated: August 2026_

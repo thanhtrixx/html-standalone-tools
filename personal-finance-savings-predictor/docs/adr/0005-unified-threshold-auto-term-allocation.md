@@ -1,9 +1,21 @@
-# 5. Unified Threshold Auto Term Allocation & Consolidated Sweep
+# ADR-0005: Unified Threshold Auto Term Allocation & Consolidated Sweep
 
-All cash inflows (monthly salary deposits, matured CSV fixed term proceeds, and expired Auto Term payouts) sweep directly into the Flexible Pool. On each simulation day, after processing all daily inflows and scheduled withdrawals, a single unified threshold check is performed: if the configurable Auto Term Threshold is active ($> 0$) and the Flexible Pool balance is $\ge \text{Auto Term Threshold}$ (default $200,000,000\text{ VND}$), the entire available Flexible Pool balance is swept into **exactly one** new Fixed Term Deposit of configurable duration ($N$ months, default 6) and annual rate, setting the liquid Flexible Pool balance to 0.
+## Status
 
-We rejected the previous fixed 200M chunking loop (`while (pool >= 200M)`) because:
+Accepted (Extended by [ADR-0006](./0006-liquid-emergency-buffer-reserve-in-auto-term-allocation.md))
 
-1. It left residual unallocated cash (e.g. 50M out of a 450M balance) idling at low demand interest rates rather than compounding at term rates.
-2. Real-world savers consolidate large lump-sums and matured term returns into a single high-yield term deposit rather than managing multiple arbitrary 200M slices.
-3. Parameterizing the threshold, duration, and rate provides users complete flexibility to model various savings strategies (e.g., 3-month rolling ladders or 12-month compounding deposits) or disable auto-allocation completely by setting the threshold to 0.
+## Context
+
+Previously, the simulation engine executed an arbitrary fixed 200M chunking loop (`while (pool >= 200M)`), creating multiple duplicate 200M accounts whenever large lump-sums matured. This left residual unallocated cash (e.g. 50M out of 450M) idling at low demand interest rates and did not reflect real-world banking behavior where savers consolidate funds into a single term deposit.
+
+## Decision
+
+1. **Consolidated Sweep**: When the liquid Flexible Pool balance reaches or exceeds the configured Auto Term Threshold ($> 0$), the entire balance is swept into **exactly one** new Fixed Term Deposit.
+2. **Configurable Parameters**: Duration ($N$ months, default 6) and annual interest rate are user-customizable. Setting the threshold to 0 disables auto-allocation entirely.
+3. **Unified Inflow Routing**: All inflows (salary, CSV term maturities, expired auto-terms) route to the liquid Flexible Pool before evaluating the threshold sweep.
+
+## Consequences
+
+- Maximizes interest compounding by preventing idle unallocated cash.
+- Provides savers flexibility to model 3-month rolling ladders, 6-month deposits, or 12-month compounding strategies.
+- Eliminates account clutter from multiple fragmented 200M slices.
