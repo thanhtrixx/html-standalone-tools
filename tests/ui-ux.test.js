@@ -314,6 +314,13 @@ function createDOMEnvironment() {
       createObjectURL: () => "blob:http://localhost/mock-blob",
       revokeObjectURL: () => {},
     },
+    Blob:
+      typeof Blob !== "undefined"
+        ? Blob
+        : function Blob(content, opts) {
+            this.content = content;
+            this.opts = opts;
+          },
     btoa: (str) => Buffer.from(str, "binary").toString("base64"),
     atob: (b64) => Buffer.from(b64, "base64").toString("binary"),
     TextEncoder: global.TextEncoder,
@@ -1642,6 +1649,85 @@ async function runUIUXTests() {
     app.htmlContent.includes(".light .bg-indigo-950") &&
       app.htmlContent.includes(".light .bg-rose-950"),
     "R38: Light theme overrides dark colored utility button backgrounds with high-contrast tints"
+  );
+
+  // Test R39: AI Health Dossier Modal, Live Preview & Export Actions (ADR-0017, Issue #58)
+  assert(
+    app.htmlContent.includes('id="btnAIDossier"') ||
+      app.document.getElementById("btnAIDossier") !== null,
+    "R39: #btnAIDossier trigger button exists in DOM header"
+  );
+  assert(
+    app.document.getElementById("aiDossierModal") !== null,
+    "R39: #aiDossierModal element exists in DOM"
+  );
+  assert(
+    typeof app.openAIDossierModal === "function" &&
+      typeof app.toggleAIDossierModal === "function",
+    "R39: openAIDossierModal and toggleAIDossierModal functions are defined"
+  );
+
+  // Modal lifecycle & layering tests
+  const aiModal = app.document.getElementById("aiDossierModal");
+  assert(
+    aiModal.classList.contains("hidden"),
+    "R39: #aiDossierModal is hidden by default"
+  );
+
+  // Open CSV modal first, then open AI Dossier Modal -> should dismiss CSV modal
+  app.toggleCSVModal(true);
+  const csvModalEl = app.document.getElementById("csvModal");
+  assert(
+    !csvModalEl.classList.contains("hidden"),
+    "R39: CSV modal is open before AI Dossier modal trigger"
+  );
+  app.openAIDossierModal();
+  assert(
+    !aiModal.classList.contains("hidden") &&
+      csvModalEl.classList.contains("hidden"),
+    "R39: openAIDossierModal() enforces single-active-dialog invariant by dismissing CSV modal"
+  );
+
+  // Check preview content rendered
+  const previewEl = app.document.getElementById("dossierMarkdownPreview");
+  assert(
+    previewEl !== null &&
+      previewEl.textContent &&
+      previewEl.textContent.includes("Financial Health Dossier"),
+    "R39: #dossierMarkdownPreview displays rendered Markdown text"
+  );
+
+  // Check Copy to Clipboard action
+  let copiedText = "";
+  app.navigator.clipboard.writeText = async (text) => {
+    copiedText = text;
+  };
+  app.copyAIDossierToClipboard();
+  assert(
+    copiedText.length > 100 && copiedText.includes("Financial Health Dossier"),
+    "R39: copyAIDossierToClipboard() writes Markdown to system clipboard"
+  );
+
+  // Check Download Action
+  let downloadTriggered = false;
+  let downloadedFileName = "";
+  if (typeof global.URL === "undefined") {
+    global.URL = {};
+  }
+  global.URL.createObjectURL = () => "blob:http://localhost/dossier-mock";
+  global.URL.revokeObjectURL = () => {};
+
+  app.downloadAIDossierFile();
+  assert(
+    typeof app.downloadAIDossierFile === "function",
+    "R39: downloadAIDossierFile() is defined and callable"
+  );
+
+  // Dismiss via dismissAllModals
+  app.dismissAllModals();
+  assert(
+    aiModal.classList.contains("hidden"),
+    "R39: dismissAllModals() cleanly dismisses #aiDossierModal"
   );
 
   console.log(
