@@ -1890,6 +1890,48 @@ async function runUIUXTests() {
     `R42: Capital Yield with zero monthly salary produces valid formatted percentage: ${yieldDisplay ? yieldDisplay.innerText : "null"}`
   );
 
+  // Test R43: Issue #68 CSV Portfolio Editor Currency Masking & Reset Actions Scope Clarification
+  // 1. Elements existence
+  const btnLoadSample = app.document.getElementById("btnLoadSamplePortfolio");
+  const btnClearAccounts = app.document.getElementById("btnClearAllAccounts");
+  const btnResetAll = app.document.getElementById("btnResetAllSettings");
+  assert(
+    btnLoadSample !== null,
+    "R43: #btnLoadSamplePortfolio button exists in CSV management modal"
+  );
+  assert(
+    btnClearAccounts !== null,
+    "R43: #btnClearAllAccounts danger button exists in CSV management modal"
+  );
+  assert(
+    btnResetAll !== null,
+    "R43: #btnResetAllSettings button exists in parameters toolbar"
+  );
+
+  // 2. Clear All Accounts with Undo Toast Safeguard
+  app.loadDefaultSampleData();
+  const initialCsvCount = app.workingCSVData.length;
+  assert(
+    initialCsvCount > 0,
+    `R43: Sample portfolio loaded with ${initialCsvCount} accounts`
+  );
+
+  app.clearAllAccounts();
+  assert(
+    app.workingCSVData.length === 0,
+    "R43: clearAllAccounts() emptied workingCSVData"
+  );
+
+  // Trigger undo from latest toast
+  const lastToastUndoBtn = app.document.getElementById("toastActionBtn");
+  if (lastToastUndoBtn) {
+    lastToastUndoBtn.click();
+    assert(
+      app.workingCSVData.length === initialCsvCount,
+      `R43: Undo toast safeguard restored previous ${app.workingCSVData.length} accounts`
+    );
+  }
+
   app.dismissAllModals();
 
   console.log(
