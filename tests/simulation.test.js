@@ -1312,6 +1312,37 @@ async function runSimulationTests() {
     "Vietnamese locale generates localized Markdown headers and terms"
   );
 
+  // Test 29: Issue #72 Capital Yield Calculation for Initial Portfolio Deposits
+  const initialPortfolioOnly = [
+    {
+      "Account Name": "Term Deposit 100M",
+      Principal: "100000000",
+      Interest: "6.0",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(addMonths(today, 12)),
+      Type: "Term Saving",
+      Bank: "Vietcombank",
+    },
+  ];
+  const yieldSim = simulate(zeroSalaryParams, initialPortfolioOnly);
+  assert(
+    yieldSim.totals.initialStartingPrincipal === 100000000,
+    `Issue #72: Simulation tracks initialStartingPrincipal (${yieldSim.totals.initialStartingPrincipal})`
+  );
+  assert(
+    yieldSim.totals.totalInjectedCapital === 100000000,
+    `Issue #72: Simulation computes totalInjectedCapital (${yieldSim.totals.totalInjectedCapital})`
+  );
+  const capitalYield =
+    yieldSim.totals.totalInjectedCapital > 0
+      ? (yieldSim.totals.totalInterest / yieldSim.totals.totalInjectedCapital) *
+        100
+      : 0;
+  assert(
+    capitalYield >= 5.9 && capitalYield <= 6.1,
+    `Issue #72: Capital Yield with zero salary accurately reflects deposit yield (+${capitalYield.toFixed(1)}%)`
+  );
+
   console.log(
     `\n📊 Simulation Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
