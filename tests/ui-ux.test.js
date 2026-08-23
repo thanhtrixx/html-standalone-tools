@@ -1977,6 +1977,19 @@ async function runUIUXTests() {
     "R44: Savings Accounts table populated with portfolio rows"
   );
 
+  // Test R45: Issue #73 Downloadable CSV Sample Template & Date Parsing
+  const btnDownloadTemplate = app.document.getElementById(
+    "btnDownloadSampleTemplate"
+  );
+  assert(
+    btnDownloadTemplate !== null,
+    "R45: #btnDownloadSampleTemplate button exists in CSV modal"
+  );
+  assert(
+    typeof app.downloadSampleTemplate === "function",
+    "R45: downloadSampleTemplate function is exposed globally"
+  );
+
   app.dismissAllModals();
 
   console.log(
