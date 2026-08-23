@@ -1890,6 +1890,17 @@
               >0</span
             >
           </div>
+          <div
+            id="metricPoolDeficitAlert"
+            class="hidden mt-1.5 px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-semibold flex items-center gap-1"
+          >
+            <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+            <span
+              id="metricPoolDeficitText"
+              data-i18n="lbl_deficit_warning_badge"
+              >⚠️ Liquid Deficit (Replenished by salary)</span
+            >
+          </div>
         </div>
       </section>
       <!-- Consolidated Tabbed Analytics Hub (Issue #5) -->
@@ -3732,6 +3743,11 @@
           badge_auto6m: "(Auto Term)",
           badge_auto_term: "(Auto Term)",
           badge_fixed: "Fixed",
+          badge_origin_initial: "Initial Portfolio",
+          badge_origin_auto_sweep: "Auto Sweep",
+          badge_origin_withdrawal: "Scheduled Outflow",
+          lbl_deficit_warning_badge:
+            "⚠️ Liquid Deficit (Replenished by salary)",
           no_milestones: "No major milestones recorded.",
 
           // Simulation Milestones Logs
@@ -4092,6 +4108,10 @@
           badge_auto6m: "(Tự động)",
           badge_auto_term: "(Tự động)",
           badge_fixed: "Cố định",
+          badge_origin_initial: "Danh mục ban đầu",
+          badge_origin_auto_sweep: "Tự động gom sổ",
+          badge_origin_withdrawal: "Khoản rút tiền",
+          lbl_deficit_warning_badge: "⚠️ Tạm thời âm quỹ (Lương bù đắp)",
           no_milestones: "Chưa có cột mốc nào được ghi nhận.",
 
           // Simulation Milestones Logs
@@ -7140,6 +7160,27 @@ ${customInquiriesBlock}
           if (elPoolBal)
             elPoolBal.innerText = formatCurrency(totals.poolBalance);
 
+          // Liquid Pool Deficit Alert (Issue #69)
+          const hasDeficit =
+            res.dailySnapshots &&
+            res.dailySnapshots.some((s) => s.poolBalance < 0);
+          const elDeficitAlert = document.getElementById(
+            "metricPoolDeficitAlert"
+          );
+          const elDeficitText = document.getElementById(
+            "metricPoolDeficitText"
+          );
+          if (elDeficitAlert) {
+            if (hasDeficit) {
+              elDeficitAlert.classList.remove("hidden");
+              if (elDeficitText) {
+                elDeficitText.textContent = t("lbl_deficit_warning_badge");
+              }
+            } else {
+              elDeficitAlert.classList.add("hidden");
+            }
+          }
+
           const elCreated6M = document.getElementById("metricCreated6MCount");
           if (elCreated6M)
             elCreated6M.innerText = t("auto_account_count", {
@@ -7471,11 +7512,11 @@ ${customInquiriesBlock}
 
           let typeBadge;
           if (isWithdrawal) {
-            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/25 ml-1.5">${t("status_withdrawal")}</span>`;
+            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/25 ml-1.5">${t("badge_origin_withdrawal")}</span>`;
           } else if (isAutoTerm) {
-            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] font-medium rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/25 ml-1.5">${t("badge_auto_term")}</span>`;
+            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] font-medium rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/25 ml-1.5">${t("badge_origin_auto_sweep")}</span>`;
           } else {
-            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] font-medium rounded-md bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 ml-1.5">${t("badge_fixed")}</span>`;
+            typeBadge = `<span class="px-2 py-0.5 text-[9.5px] font-medium rounded-md bg-indigo-500/15 text-indigo-400 border border-indigo-500/25 ml-1.5">${t("badge_origin_initial")}</span>`;
           }
 
           const bankBadge = acc.bank
