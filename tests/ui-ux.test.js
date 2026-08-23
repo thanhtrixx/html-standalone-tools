@@ -1626,6 +1626,24 @@ async function runUIUXTests() {
     "R37: renderFilteredSavingsTable() populates #savingsCardList with adaptive card views"
   );
 
+  // Test R38: Light Theme Button Contrast & Modal Component Theming (Issue #55)
+  assert(
+    app.htmlContent.includes(".light .bg-slate-800") &&
+      app.htmlContent.includes(".light .annual-bonus-chip") &&
+      app.htmlContent.includes(".light .timeframe-preset-btn"),
+    "R38: Light theme styles define explicit contrast rules for .bg-slate-800, annual bonus chips, and timeframe buttons"
+  );
+  assert(
+    app.htmlContent.includes(".light #csvModal") &&
+      app.htmlContent.includes(".light .hover\\:bg-slate-700:hover"),
+    "R38: Light theme overrides hover states and CSV modal components"
+  );
+  assert(
+    app.htmlContent.includes(".light .bg-indigo-950") &&
+      app.htmlContent.includes(".light .bg-rose-950"),
+    "R38: Light theme overrides dark colored utility button backgrounds with high-contrast tints"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

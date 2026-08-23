@@ -199,18 +199,105 @@
         border-color: #4338ca !important;
       }
 
+      /* Annual Bonus & Timeframe Preset Buttons in Light Theme (Issue #55) */
+      .light .annual-bonus-chip,
+      .light .timeframe-preset-btn {
+        background-color: var(--bg-chip) !important;
+        color: var(--text-secondary) !important;
+        border: 1px solid var(--border-strong) !important;
+      }
+
+      .light .annual-bonus-chip:hover,
+      .light .timeframe-preset-btn:hover {
+        background-color: var(--bg-chip-hover) !important;
+        color: var(--text-primary) !important;
+        border-color: #6366f1 !important;
+      }
+
+      /* Slate Overrides in Light Theme */
       .light .bg-slate-950,
-      .light .bg-slate-950\/40,
-      .light .bg-slate-950\/50,
-      .light .bg-slate-950\/60,
-      .light .bg-slate-950\/70,
-      .light .bg-slate-950\/80,
       .light .bg-slate-950\/90,
+      .light .bg-slate-950\/80,
+      .light .bg-slate-950\/70,
+      .light .bg-slate-950\/60,
+      .light .bg-slate-950\/50,
+      .light .bg-slate-950\/40,
       .light .bg-slate-900,
+      .light .bg-slate-900\/90,
+      .light .bg-slate-900\/80,
       .light .bg-slate-900\/60,
-      .light .bg-slate-900\/90 {
+      .light .bg-slate-900\/50,
+      .light .bg-slate-800,
+      .light .bg-slate-800\/90,
+      .light .bg-slate-800\/80,
+      .light .bg-slate-800\/70,
+      .light .bg-slate-800\/60,
+      .light .bg-slate-800\/50,
+      .light .bg-slate-800\/40 {
         background-color: var(--bg-card-subtle) !important;
         border-color: var(--border-medium) !important;
+      }
+
+      .light .hover\:bg-slate-700:hover,
+      .light .hover\:bg-slate-800:hover,
+      .light .hover\:bg-slate-800\/40:hover {
+        background-color: var(--bg-chip-hover) !important;
+        color: var(--text-primary) !important;
+      }
+
+      .light .hover\:text-white:hover,
+      .light .hover\:text-slate-200:hover,
+      .light .hover\:text-slate-100:hover {
+        color: var(--text-primary) !important;
+      }
+
+      /* Colored Utility Buttons in Light Theme */
+      .light .bg-indigo-950,
+      .light .bg-indigo-950\/70,
+      .light .bg-indigo-950\/60,
+      .light .bg-indigo-950\/40,
+      .light .bg-indigo-950\/20 {
+        background-color: rgba(99, 102, 241, 0.12) !important;
+        border-color: rgba(99, 102, 241, 0.28) !important;
+        color: #4338ca !important;
+      }
+
+      .light .hover\:bg-indigo-900\/80:hover,
+      .light .hover\:bg-indigo-900\/60:hover {
+        background-color: rgba(99, 102, 241, 0.2) !important;
+        color: #3730a3 !important;
+      }
+
+      .light .bg-rose-950,
+      .light .bg-rose-950\/60,
+      .light .bg-rose-950\/40,
+      .light .bg-rose-950\/20,
+      .light .bg-rose-900\/50,
+      .light .bg-rose-600\/20 {
+        background-color: rgba(244, 63, 94, 0.12) !important;
+        border-color: rgba(244, 63, 94, 0.28) !important;
+        color: #be123c !important;
+      }
+
+      .light .hover\:bg-rose-800\/50:hover,
+      .light .hover\:bg-rose-600\/30:hover {
+        background-color: rgba(244, 63, 94, 0.2) !important;
+        color: #9f1239 !important;
+      }
+
+      .light .bg-emerald-600\/20,
+      .light .bg-emerald-950,
+      .light .bg-emerald-950\/60,
+      .light .bg-emerald-950\/40,
+      .light .bg-emerald-950\/20 {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        border-color: rgba(16, 185, 129, 0.28) !important;
+        color: #047857 !important;
+      }
+
+      .light .hover\:bg-emerald-600\/30:hover {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #065f46 !important;
       }
 
       .light .border-slate-800,
@@ -221,6 +308,7 @@
         border-color: var(--border-medium) !important;
       }
 
+      .light .divide-slate-800,
       .light .divide-slate-800\/60 > * + * {
         border-color: var(--border-medium) !important;
       }
@@ -243,6 +331,7 @@
         color: var(--text-primary) !important;
       }
 
+      /* Modals and Containers */
       .light #csvModal > div,
       .light #presetsModal > div,
       .light #onboardingOverlay > div,
@@ -251,6 +340,23 @@
         color: var(--text-primary) !important;
         border-color: var(--border-medium) !important;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      .light #csvModal input,
+      .light #csvModal select {
+        background-color: var(--bg-input) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-strong) !important;
+      }
+
+      .light #recurringGenPanel {
+        background-color: #f1f5f9 !important;
+        border-color: rgba(99, 102, 241, 0.3) !important;
+      }
+
+      .light .savings-account-card {
+        background-color: var(--bg-card) !important;
+        border-color: var(--border-medium) !important;
       }
 
       /* Hide scrollbar for Chrome, Safari, Opera, Edge, and Firefox */
@@ -998,28 +1104,28 @@
                 <button
                   type="button"
                   onclick="setAnnualBonusMultiplier(0)"
-                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                  class="annual-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                 >
                   0x
                 </button>
                 <button
                   type="button"
                   onclick="setAnnualBonusMultiplier(1.0)"
-                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                  class="annual-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                 >
                   1x
                 </button>
                 <button
                   type="button"
                   onclick="setAnnualBonusMultiplier(1.5)"
-                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                  class="annual-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                 >
                   1.5x
                 </button>
                 <button
                   type="button"
                   onclick="setAnnualBonusMultiplier(2.0)"
-                  class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                  class="annual-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
                 >
                   2x
                 </button>
@@ -1383,7 +1489,7 @@
           <div class="flex flex-wrap gap-2">
             <button
               onclick="setPresetYears(1)"
-              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
               data-i18n-title="preset_1y"
               title="1 Year"
             >
@@ -1391,7 +1497,7 @@
             </button>
             <button
               onclick="setPresetYears(2)"
-              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
               data-i18n-title="preset_2y"
               title="2 Years"
             >
@@ -1399,7 +1505,7 @@
             </button>
             <button
               onclick="setPresetYears(3)"
-              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
               data-i18n-title="preset_3y"
               title="3 Years"
             >
@@ -1407,7 +1513,7 @@
             </button>
             <button
               onclick="setPresetYears(5)"
-              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
               data-i18n-title="preset_5y"
               title="5 Years"
             >
@@ -1415,7 +1521,7 @@
             </button>
             <button
               onclick="setPresetYears(10)"
-              class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
+              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
               data-i18n-title="preset_10y"
               title="10 Years"
             >
