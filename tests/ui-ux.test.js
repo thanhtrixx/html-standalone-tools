@@ -1510,6 +1510,36 @@ async function runUIUXTests() {
     "R33: Theme button displays Moon icon when Dark theme is active"
   );
 
+  // Test R34: Dynamic Chart.js Theme Palette Synchronization (ADR-0016, Issue #45)
+  assert(
+    typeof app.getChartThemeConfig === "function",
+    "R34: getChartThemeConfig function is exposed"
+  );
+  const darkChartTheme = app.getChartThemeConfig();
+  assert(
+    darkChartTheme.isLight === false &&
+      darkChartTheme.canvasBg === "#0f172a" &&
+      darkChartTheme.tickColor === "#94a3b8",
+    "R34: getChartThemeConfig returns valid dark theme palette in dark mode"
+  );
+
+  app.toggleTheme(); // Switch to light
+  const lightChartTheme = app.getChartThemeConfig();
+  assert(
+    lightChartTheme.isLight === true &&
+      lightChartTheme.canvasBg === "#ffffff" &&
+      lightChartTheme.tickColor === "#64748b",
+    "R34: getChartThemeConfig returns valid light theme palette in light mode"
+  );
+
+  assert(
+    typeof app.applyThemeToAllCharts === "function",
+    "R34: applyThemeToAllCharts function is defined and available"
+  );
+
+  // Switch back to dark
+  app.toggleTheme();
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
