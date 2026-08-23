@@ -2543,7 +2543,13 @@
               aria-selected="true"
               aria-controls="tabPanel_timeline"
               onclick="switchAnalyticsTab('timeline')"
-              class="px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5"
+              class="tooltip-trigger px-4 py-2 text-xs font-semibold rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5"
+              data-tooltip-key="tooltip_tab_timeline"
+              aria-label="Wealth Timeline tab"
+              onmouseenter="showAppTooltip(event, this)"
+              onmouseleave="hideAppTooltip()"
+              onfocus="showAppTooltip(event, this)"
+              onblur="hideAppTooltip()"
             >
               <i class="fa-solid fa-chart-line text-indigo-200"></i>
               <span data-i18n="btn_tab_timeline">Wealth Timeline</span>
@@ -2555,7 +2561,13 @@
               aria-selected="false"
               aria-controls="tabPanel_flow"
               onclick="switchAnalyticsTab('flow')"
-              class="px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
+              class="tooltip-trigger px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
+              data-tooltip-key="tooltip_tab_flow"
+              aria-label="Monthly Flow tab"
+              onmouseenter="showAppTooltip(event, this)"
+              onmouseleave="hideAppTooltip()"
+              onfocus="showAppTooltip(event, this)"
+              onblur="hideAppTooltip()"
             >
               <i class="fa-solid fa-chart-simple text-emerald-400"></i>
               <span data-i18n="btn_tab_flow">Monthly Flow</span>
@@ -2567,7 +2579,13 @@
               aria-selected="false"
               aria-controls="tabPanel_heatmap"
               onclick="switchAnalyticsTab('heatmap')"
-              class="px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
+              class="tooltip-trigger px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
+              data-tooltip-key="tooltip_tab_heatmap"
+              aria-label="Calendar Heatmap tab"
+              onmouseenter="showAppTooltip(event, this)"
+              onmouseleave="hideAppTooltip()"
+              onfocus="showAppTooltip(event, this)"
+              onblur="hideAppTooltip()"
             >
               <i class="fa-solid fa-calendar-days text-amber-400"></i>
               <span data-i18n="btn_tab_heatmap">Calendar Heatmap</span>
@@ -2579,7 +2597,13 @@
               aria-selected="false"
               aria-controls="tabPanel_yoy"
               onclick="switchAnalyticsTab('yoy')"
-              class="px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
+              class="tooltip-trigger px-4 py-2 text-xs font-medium rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition flex items-center gap-1.5"
+              data-tooltip-key="tooltip_tab_yoy"
+              aria-label="Year-over-Year Summary tab"
+              onmouseenter="showAppTooltip(event, this)"
+              onmouseleave="hideAppTooltip()"
+              onfocus="showAppTooltip(event, this)"
+              onblur="hideAppTooltip()"
             >
               <i class="fa-solid fa-table-columns text-blue-400"></i>
               <span data-i18n="btn_tab_yoy">YoY Summary</span>
@@ -2630,8 +2654,13 @@
                     type="button"
                     onclick="toggleRealVsNominal()"
                     id="realToggleBtn"
-                    class="text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
-                    title="Toggle inflation-adjusted view"
+                    class="tooltip-trigger text-xs px-2 py-1 rounded border border-slate-700 text-slate-400 hover:text-slate-200"
+                    data-tooltip-key="tooltip_real_mode"
+                    aria-label="Toggle inflation-adjusted view"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
                   >
                     <i class="fa-solid fa-coins mr-1"></i
                     ><span data-i18n="btn_real">Real</span>
@@ -2985,10 +3014,28 @@
           >
             <div class="flex items-center justify-between mb-4">
               <div>
-                <h3 class="font-bold text-slate-200 text-base">
-                  <i class="fa-solid fa-table-columns text-indigo-400 mr-2"></i
-                  ><span data-i18n="hdr_yoy">Year-over-Year Comparison</span>
-                </h3>
+                <div class="flex items-center space-x-2">
+                  <h3 class="font-bold text-slate-200 text-base">
+                    <i
+                      class="fa-solid fa-table-columns text-indigo-400 mr-2"
+                    ></i
+                    ><span data-i18n="hdr_yoy">Year-over-Year Comparison</span>
+                  </h3>
+                  <button
+                    type="button"
+                    tabindex="0"
+                    class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_yoy_summary"
+                    aria-label="Year-over-Year Comparison information"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-xs"></i>
+                  </button>
+                </div>
                 <p class="text-xs text-slate-400" data-i18n="lbl_yoy_sub">
                   Annual breakdown with growth rates
                 </p>
@@ -3433,11 +3480,27 @@
               <div
                 class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
               >
-                <span
-                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
-                  data-i18n="kpi_locked_principal"
-                  >Locked Principal</span
-                >
+                <div class="flex items-center justify-between">
+                  <span
+                    class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                    data-i18n="kpi_locked_principal"
+                    >Locked Principal</span
+                  >
+                  <button
+                    type="button"
+                    tabindex="0"
+                    class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_kpi_locked_principal"
+                    aria-label="Locked Principal information"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[10px]"></i>
+                  </button>
+                </div>
                 <span
                   class="text-xs sm:text-sm font-bold font-mono text-emerald-400 truncate"
                   id="kpiLockedPrincipal"
@@ -3448,11 +3511,27 @@
               <div
                 class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
               >
-                <span
-                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
-                  data-i18n="kpi_active_accounts"
-                  >Active Accounts</span
-                >
+                <div class="flex items-center justify-between">
+                  <span
+                    class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                    data-i18n="kpi_active_accounts"
+                    >Active Accounts</span
+                  >
+                  <button
+                    type="button"
+                    tabindex="0"
+                    class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_kpi_active_accounts"
+                    aria-label="Active Accounts information"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[10px]"></i>
+                  </button>
+                </div>
                 <span
                   class="text-xs sm:text-sm font-bold font-mono text-indigo-400"
                   id="kpiActiveAccounts"
@@ -3463,11 +3542,27 @@
               <div
                 class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
               >
-                <span
-                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
-                  data-i18n="kpi_auto_sweeps"
-                  >Auto Sweeps</span
-                >
+                <div class="flex items-center justify-between">
+                  <span
+                    class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                    data-i18n="kpi_auto_sweeps"
+                    >Auto Sweeps</span
+                  >
+                  <button
+                    type="button"
+                    tabindex="0"
+                    class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_kpi_auto_sweeps"
+                    aria-label="Auto Sweeps information"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[10px]"></i>
+                  </button>
+                </div>
                 <span
                   class="text-xs sm:text-sm font-bold font-mono text-amber-400"
                   id="kpiAutoSweeps"
@@ -3478,11 +3573,27 @@
               <div
                 class="bg-slate-950/70 border border-slate-800 rounded-xl px-3 py-2 flex flex-col justify-center"
               >
-                <span
-                  class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
-                  data-i18n="kpi_weighted_rate"
-                  >Weighted Rate</span
-                >
+                <div class="flex items-center justify-between">
+                  <span
+                    class="text-[10px] uppercase font-semibold text-slate-400 tracking-wider"
+                    data-i18n="kpi_weighted_rate"
+                    >Weighted Rate</span
+                  >
+                  <button
+                    type="button"
+                    tabindex="0"
+                    class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_kpi_weighted_rate"
+                    aria-label="Weighted Average Rate information"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[10px]"></i>
+                  </button>
+                </div>
                 <span
                   class="text-xs sm:text-sm font-bold font-mono text-cyan-400"
                   id="kpiWeightedRate"
@@ -4133,22 +4244,40 @@
               </div>
 
               <!-- Privacy Mask Toggle Checkbox -->
-              <label
-                class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none px-2.5 py-1 rounded-lg border border-slate-700/80 hover:border-slate-600 transition"
+              <div
+                class="flex items-center gap-2 text-xs text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700/80 hover:border-slate-600 transition"
               >
-                <input
-                  type="checkbox"
-                  id="togglePrivacyMask"
-                  class="w-3.5 h-3.5 rounded text-emerald-500 bg-slate-800 border-slate-600 focus:ring-emerald-500 cursor-pointer"
-                  onchange="toggleDossierPrivacyMask()"
-                />
-                <span class="flex items-center gap-1.5 font-medium">
-                  <i class="fa-solid fa-user-shield text-emerald-400"></i>
-                  <span data-i18n="lbl_privacy_mask"
-                    >Privacy Mask (Salary Multiples & %)</span
-                  >
-                </span>
-              </label>
+                <label
+                  class="flex items-center gap-2 cursor-pointer select-none"
+                >
+                  <input
+                    type="checkbox"
+                    id="togglePrivacyMask"
+                    class="w-3.5 h-3.5 rounded text-emerald-500 bg-slate-800 border-slate-600 focus:ring-emerald-500 cursor-pointer"
+                    onchange="toggleDossierPrivacyMask()"
+                  />
+                  <span class="flex items-center gap-1.5 font-medium">
+                    <i class="fa-solid fa-user-shield text-emerald-400"></i>
+                    <span data-i18n="lbl_privacy_mask"
+                      >Privacy Mask (Salary Multiples & %)</span
+                    >
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  tabindex="0"
+                  class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                  data-tooltip-key="tooltip_privacy_mask"
+                  aria-label="Privacy Mask information"
+                  onclick="handleTooltipClick(event, this)"
+                  onmouseenter="showAppTooltip(event, this)"
+                  onmouseleave="hideAppTooltip()"
+                  onfocus="showAppTooltip(event, this)"
+                  onblur="hideAppTooltip()"
+                >
+                  <i class="fa-solid fa-circle-info text-xs"></i>
+                </button>
+              </div>
             </div>
 
             <!-- Optional Collapsible Custom Inquiries Area -->
@@ -4348,6 +4477,32 @@
             "Cumulative sum of initial capital, monthly salary contributions, and bonus cash flows.",
           tooltip_kpi_pool_term:
             "Liquid cash currently held in your flexible pool alongside active auto-created term deposits.",
+          tooltip_kpi_locked_principal:
+            "Sum of all active fixed-term deposits and automated term sweeps currently locked in banks earning fixed interest.",
+          tooltip_kpi_active_accounts:
+            "Number of active fixed-term savings accounts currently open and accumulating interest.",
+          tooltip_kpi_auto_sweeps:
+            "Count of fixed-term savings accounts automatically created by the system from excess flexible pool cash.",
+          tooltip_kpi_weighted_rate:
+            "Principal-weighted annualized interest rate averaged across all active fixed deposit accounts.",
+          tooltip_real_mode:
+            "Discounted real purchasing power adjusted continuously for inflation drag over time.",
+          tooltip_nominal_mode:
+            "Total nominal face value without inflation discounting.",
+          tooltip_privacy_mask:
+            "Converts exact monetary amounts into salary multiples and percentage shares to protect financial privacy before sharing with AI advisors.",
+          tooltip_deficit_alert:
+            "Scheduled withdrawals temporarily exceeded liquid flexible pool cash. Upcoming monthly salary deposits will automatically replenish the balance.",
+          tooltip_yoy_summary:
+            "Year-over-Year (YoY) annual comparative performance table tracking annual salary contributions, interest earned, and wealth growth rates.",
+          tooltip_tab_timeline:
+            "Interactive daily trajectory of total wealth, flexible pool, and locked term deposits.",
+          tooltip_tab_flow:
+            "Monthly breakdown of salary deposits, bonus inflows, withdrawals, and realized interest.",
+          tooltip_tab_heatmap:
+            "Multi-year calendar matrix visualizing monthly wealth density and net cashflow velocity.",
+          tooltip_tab_yoy:
+            "Year-over-Year (YoY) annual comparative performance table and annual wealth growth rates.",
           lbl_real_zero_inflation_note: "(0% inflation — matches nominal)",
           btn_run_sim: "Run Simulation",
           btn_reset: "Reset",
@@ -4784,6 +4939,32 @@
             "Tổng số tiền đã tích lũy vào hệ thống gồm vốn ban đầu, lương hàng tháng và các khoản tiền thưởng.",
           tooltip_kpi_pool_term:
             "Số dư tiền linh hoạt hiện có cùng tổng tiền gửi trong các sổ tiết kiệm tự động đang mở.",
+          tooltip_kpi_locked_principal:
+            "Tổng số tiền gốc đang được gửi trong các sổ tiết kiệm có kỳ hạn và sổ gửi tự động để sinh lãi cố định.",
+          tooltip_kpi_active_accounts:
+            "Số lượng sổ tiết kiệm có kỳ hạn đang mở và tích lũy tiền lãi tính đến thời điểm hiện tại.",
+          tooltip_kpi_auto_sweeps:
+            "Số lượng sổ tiết kiệm được hệ thống tự động mở từ phần tiền nhàn rỗi vượt mức trong quỹ linh hoạt.",
+          tooltip_kpi_weighted_rate:
+            "Lãi suất năm bình quân gia quyền theo số dư tiền gốc của tất cả các sổ tiết kiệm đang hoạt động.",
+          tooltip_real_mode:
+            "Giá trị thực tế của tài sản sau khi trừ mức độ hao hụt sức mua do lạm phát theo thời gian.",
+          tooltip_nominal_mode:
+            "Tổng giá trị tài sản danh nghĩa theo mệnh giá thực nhận (chưa trừ lạm phát).",
+          tooltip_privacy_mask:
+            "Chuyển đổi số tiền thành hệ số lương và tỷ lệ phần trăm tương đối để bảo mật thông tin tài chính cá nhân trước khi gửi cho AI.",
+          tooltip_deficit_alert:
+            "Các khoản rút tiền dự kiến tạm thời vượt quá số dư linh hoạt hiện có. Thu nhập lương hàng tháng tới sẽ tự động bù đắp phần âm này.",
+          tooltip_yoy_summary:
+            "Bảng tổng kết so sánh qua từng năm (Year-over-Year) theo dõi tổng lương tích lũy, tiền lãi nhận được và tỷ lệ tăng trưởng tài sản.",
+          tooltip_tab_timeline:
+            "Biểu đồ theo dõi tiến trình tăng trưởng tổng tài sản và dòng tiền theo từng ngày.",
+          tooltip_tab_flow:
+            "Biểu đồ chi tiết thu nhập lương, tiền thưởng, khoản rút và tiền lãi thực nhận theo từng tháng.",
+          tooltip_tab_heatmap:
+            "Ma trận nhiệt trực quan hóa mức độ tích lũy tài sản và tốc độ dòng tiền vào qua các năm.",
+          tooltip_tab_yoy:
+            "Bảng tổng kết so sánh qua từng năm (Year-over-Year) và tỷ lệ tăng trưởng tài sản hàng năm.",
           lbl_real_zero_inflation_note: "(Lạm phát 0% — bằng với danh nghĩa)",
           btn_run_sim: "Chạy Giả Lập",
           btn_reset: "Đặt Lại",

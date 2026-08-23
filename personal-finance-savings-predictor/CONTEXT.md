@@ -145,7 +145,7 @@ _Avoid_: Data hide, obfuscation
 ### Micro-Interactions & Contextual Help
 
 **Interactive Floating Tooltip Engine**:
-A zero-dependency floating popover engine providing instant (<100ms) hover explanations, mobile touch toggle with event isolation from parent form labels, smart viewport collision detection, and full WCAG 2.1 AA keyboard accessibility across all simulation parameters and summary KPI metric cards.
+A zero-dependency floating popover engine providing instant (<100ms) hover explanations, mobile touch toggle with event isolation from parent form labels, smart viewport collision detection, and full WCAG 2.1 AA keyboard accessibility across all simulation parameters, summary KPI metric cards, Savings Accounts Hub portfolio pills, analytics tabs, real/nominal toggles, and privacy masks.
 _Avoid_: Native browser title tooltip, delayed OS tooltips, un-isolated label clicks
 
 ---
