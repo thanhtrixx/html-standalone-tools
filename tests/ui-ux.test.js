@@ -2085,6 +2085,75 @@ async function runUIUXTests() {
     "R46: closeOnboarding() displays actionable Presets CTA toast"
   );
 
+  // Test R47: Issue #67 Parameter Explanations, Auto-Term Math Visualizer & Bonus Live Previews
+  // 1. Auto Term Formula Hint
+  const formulaHintEl = app.document.getElementById("autoTermFormulaHint");
+  const formulaTextEl = app.document.getElementById("autoTermFormulaText");
+  assert(
+    formulaHintEl !== null && formulaTextEl !== null,
+    "R47: #autoTermFormulaHint and #autoTermFormulaText elements exist in DOM"
+  );
+
+  app.setAutoTermThresholdValue(200000000);
+  app.setEmergencyBufferValue(30000000);
+  app.setAutoTermTenor(6, 5.8);
+  app.updateAutoTermFormulaHint("en");
+  assert(
+    formulaTextEl.textContent.includes("200") &&
+      formulaTextEl.textContent.includes("30") &&
+      formulaTextEl.textContent.includes("230"),
+    `R47: Auto Term Formula Hint dynamically displays computed trigger sum (200M + 30M = 230M): "${formulaTextEl.textContent}"`
+  );
+
+  // 2. Annual Bonus Live Preview
+  const bonusPreviewEl = app.document.getElementById(
+    "helperAnnualBonusPreview"
+  );
+  assert(
+    bonusPreviewEl !== null,
+    "R47: #helperAnnualBonusPreview element exists in DOM"
+  );
+
+  app.setSalaryValue(25000000);
+  app.setAnnualBonusMultiplier(1.5);
+  app.document.getElementById("selectAnnualBonusMonth").value = "1";
+  app.updateBonusPreview("en");
+  assert(
+    bonusPreviewEl.textContent.includes("37,500,000") &&
+      bonusPreviewEl.textContent.includes("January"),
+    `R47: Live Bonus preview computes 1.5x salary bonus in January: "${bonusPreviewEl.textContent}"`
+  );
+
+  app.setAnnualBonusMultiplier(0);
+  app.updateBonusPreview("en");
+  assert(
+    bonusPreviewEl.textContent.toLowerCase().includes("no") ||
+      bonusPreviewEl.textContent.toLowerCase().includes("none"),
+    `R47: Zero bonus multiplier shows no bonus scheduled: "${bonusPreviewEl.textContent}"`
+  );
+
+  // 3. Real zero-inflation indicator note
+  const realZeroNote = app.document.getElementById("realZeroInflationNote");
+  assert(
+    realZeroNote !== null,
+    "R47: #realZeroInflationNote element exists in DOM"
+  );
+
+  app.document.getElementById("inputInflation").value = "0";
+  if (!app.showRealValues) app.toggleRealVsNominal();
+  app.runSimulation();
+  assert(
+    !realZeroNote.classList.contains("hidden"),
+    "R47: #realZeroInflationNote is visibly displayed when Real mode is active and inflation is 0%"
+  );
+
+  app.document.getElementById("inputInflation").value = "3.5";
+  app.runSimulation();
+  assert(
+    realZeroNote.classList.contains("hidden"),
+    "R47: #realZeroInflationNote is hidden when inflation > 0%"
+  );
+
   app.dismissAllModals();
 
   console.log(
