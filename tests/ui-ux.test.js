@@ -2154,6 +2154,91 @@ async function runUIUXTests() {
     "R47: #realZeroInflationNote is hidden when inflation > 0%"
   );
 
+  // Test R48: Issue #74 Goal Shortfall Advisor & Actionable Contribution Gap Calculator
+  const shortfallCard = app.document.getElementById("goalShortfallAdvisorCard");
+  const celebrationCard = app.document.getElementById("goalCelebrationCard");
+  const deficitText = app.document.getElementById("goalShortfallDeficitText");
+  const monthlyGapText = app.document.getElementById(
+    "goalShortfallMonthlyText"
+  );
+  const timeframeGapText = app.document.getElementById(
+    "goalShortfallTimeframeText"
+  );
+  assert(
+    shortfallCard !== null &&
+      celebrationCard !== null &&
+      deficitText !== null &&
+      monthlyGapText !== null &&
+      timeframeGapText !== null,
+    "R48: #goalShortfallAdvisorCard, #goalCelebrationCard, and action elements exist in DOM"
+  );
+
+  // 1. When Projected Wealth < Goal: Shortfall card is rendered with deficit and bridging options
+  app.setSalaryValue(10000000);
+  app.setSavingsGoalValue(1000000000); // 1B VND goal
+  app.setPresetYears(1); // 1 Year timeframe (10M/mo * 12 = 120M, far below 1B)
+  app.runSimulation();
+
+  assert(
+    !shortfallCard.classList.contains("hidden"),
+    "R48: Goal Shortfall Advisor card is visible when Projected Wealth < Goal"
+  );
+  assert(
+    celebrationCard.classList.contains("hidden"),
+    "R48: Goal Celebration card is hidden when Projected Wealth < Goal"
+  );
+  assert(
+    deficitText.textContent.includes("-") &&
+      (deficitText.textContent.includes("8") ||
+        deficitText.textContent.includes("9") ||
+        deficitText.textContent.includes("000")),
+    `R48: Shortfall Advisor renders computed deficit amount: "${deficitText.textContent}"`
+  );
+  assert(
+    typeof app._shortfallMonthlyGap === "number" &&
+      app._shortfallMonthlyGap > 0,
+    `R48: Accurately computed required monthly savings gap: +${app._shortfallMonthlyGap} VND/mo`
+  );
+  assert(
+    app._shortfallNewTargetDate instanceof Date,
+    "R48: Accurately computed timeframe extension target date"
+  );
+
+  // 2. Quick Apply Action: Apply Monthly Savings Gap
+  const prevSalary = app.parseFormattedNumber(
+    app.document.getElementById("inputSalary").value
+  );
+  app.applyShortfallMonthlyGap();
+  const newSalary = app.parseFormattedNumber(
+    app.document.getElementById("inputSalary").value
+  );
+  assert(
+    newSalary > prevSalary,
+    `R48: applyShortfallMonthlyGap() applied monthly gap to Salary (from ${prevSalary} to ${newSalary})`
+  );
+
+  // 3. When Projected Wealth >= Goal: Celebration card is rendered with exact milestone date
+  app.setSalaryValue(100000000); // 100M/mo
+  app.setSavingsGoalValue(500000000); // 500M goal (reached in ~5 months)
+  app.setPresetYears(2);
+  app.runSimulation();
+
+  assert(
+    shortfallCard.classList.contains("hidden"),
+    "R48: Goal Shortfall Advisor card is hidden when Goal is achieved"
+  );
+  assert(
+    !celebrationCard.classList.contains("hidden"),
+    "R48: Goal Celebration card is visible when Goal is achieved"
+  );
+  const celebrationHeading = app.document.getElementById(
+    "goalCelebrationHeading"
+  );
+  assert(
+    celebrationHeading && celebrationHeading.textContent.includes("Goal"),
+    `R48: Celebration card displays milestone celebration heading: "${celebrationHeading.textContent}"`
+  );
+
   app.dismissAllModals();
 
   console.log(
