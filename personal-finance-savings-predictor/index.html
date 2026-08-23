@@ -3068,14 +3068,34 @@
                   >
                 </button>
               </div>
-              <button
-                type="button"
-                onclick="exportCSV()"
-                class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
-              >
-                <i class="fa-solid fa-download mr-1.5 text-indigo-400"></i
-                ><span data-i18n="btn_download_csv">Download CSV</span>
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="btnDownloadSampleTemplate"
+                  onclick="downloadSampleTemplate()"
+                  class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
+                  data-i18n-title="tooltip_download_template"
+                  title="Download CSV Sample Template"
+                >
+                  <i
+                    class="fa-solid fa-file-arrow-down mr-1.5 text-emerald-400"
+                  ></i
+                  ><span data-i18n="btn_download_template"
+                    >Download Template</span
+                  >
+                </button>
+                <button
+                  type="button"
+                  id="btnExportCSV"
+                  onclick="exportCSV()"
+                  class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
+                  data-i18n-title="tooltip_download_csv"
+                  title="Download CSV"
+                >
+                  <i class="fa-solid fa-download mr-1.5 text-indigo-400"></i
+                  ><span data-i18n="btn_download_csv">Download CSV</span>
+                </button>
+              </div>
             </div>
 
             <!-- Recurring Cashflow Generator Sub-Panel -->
@@ -3795,7 +3815,10 @@
             "Reset all parameters and portfolio data to defaults",
           btn_reset_sample: "Load Sample Portfolio",
           btn_clear_saved: "Clear Saved Data",
+          btn_download_template: "Download Template",
+          tooltip_download_template: "Download clean CSV portfolio template",
           btn_download_csv: "Download CSV",
+          tooltip_download_csv: "Export current portfolio to CSV",
           th_start_date: "Start Date",
           th_type: "Type",
           th_bank: "Bank",
@@ -3824,6 +3847,7 @@
           toast_data_cleared: "All saved data cleared",
           toast_accounts_cleared: "Cleared all savings accounts",
           toast_csv_exported: "CSV exported successfully",
+          toast_template_downloaded: "Downloaded CSV sample template",
           toast_link_copied: "Simulation link copied to clipboard!",
           toast_copy_prompt: "Copy this link:",
           toast_real_shown: "Showing real (inflation-adjusted) values",
@@ -4158,7 +4182,11 @@
             "Đặt lại toàn bộ thông số và dữ liệu danh mục về mặc định",
           btn_reset_sample: "Tải Danh Mục Mẫu",
           btn_clear_saved: "Xóa Dữ Liệu",
+          btn_download_template: "Tải Mẫu CSV",
+          tooltip_download_template:
+            "Tải file mẫu danh mục tiết kiệm chuẩn CSV",
           btn_download_csv: "Tải CSV",
+          tooltip_download_csv: "Xuất danh mục hiện tại ra file CSV",
           th_start_date: "Ngày Bắt Đầu",
           th_type: "Loại",
           th_bank: "Ngân Hàng",
@@ -4186,6 +4214,7 @@
           toast_data_cleared: "Đã xóa tất cả dữ liệu đã lưu",
           toast_accounts_cleared: "Đã xóa toàn bộ sổ tiết kiệm",
           toast_csv_exported: "Đã xuất CSV thành công",
+          toast_template_downloaded: "Đã tải file mẫu CSV",
           toast_link_copied: "Đã sao chép liên kết mô phỏng vào clipboard!",
           toast_copy_prompt: "Sao chép đường dẫn:",
           toast_real_shown: "Đang hiển thị giá trị thực tế (sau lạm phát)",
@@ -4699,16 +4728,43 @@
 
       function parseDate(dateStr) {
         if (!dateStr) return new Date();
-        const p = typeof dateStr === "string" ? dateStr.trim().split("-") : [];
-        if (p.length === 3) {
-          const y = parseInt(p[0]);
-          const m = parseInt(p[1]) - 1;
-          const d = parseInt(p[2]);
+        if (dateStr instanceof Date) return dateStr;
+        const str = String(dateStr).trim();
+        if (!str) return new Date();
+
+        // 1. ISO format: YYYY-MM-DD or YYYY/MM/DD or YYYY.MM.DD
+        const isoMatch = str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+        if (isoMatch) {
+          const y = parseInt(isoMatch[1], 10);
+          const m = parseInt(isoMatch[2], 10) - 1;
+          const d = parseInt(isoMatch[3], 10);
           if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
             return new Date(y, m, d);
           }
         }
-        const parsed = new Date(dateStr);
+
+        // 2. Multi-format: DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY, MM/DD/YYYY, MM-DD-YYYY
+        const otherMatch = str.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+        if (otherMatch) {
+          const p1 = parseInt(otherMatch[1], 10);
+          const p2 = parseInt(otherMatch[2], 10);
+          const y = parseInt(otherMatch[3], 10);
+          const lang = window.currentLang || "en";
+
+          // If p1 > 12 -> definitely DD/MM/YYYY
+          if (p1 > 12 && p2 <= 12) {
+            return new Date(y, p2 - 1, p1);
+          }
+          // If p2 > 12 -> definitely MM/DD/YYYY
+          if (p2 > 12 && p1 <= 12) {
+            return new Date(y, p1 - 1, p2);
+          }
+          // Ambiguous day/month (both <= 12): use locale decision (Q8 -> A)
+          // In Vietnamese (vi), DD/MM/YYYY is standard. In English (en), default DD/MM/YYYY
+          return new Date(y, p2 - 1, p1);
+        }
+
+        const parsed = new Date(str);
         return isNaN(parsed.getTime()) ? new Date() : parsed;
       }
 
@@ -5720,10 +5776,12 @@
                   "Account Name":
                     gv(["name", "account", "bank"]) || defaultName,
                   Principal: gv(["principal", "amount", "balance"]) || "0",
-                  "Start Date": gv(["start"]) || formatDate(new Date()),
-                  "End Date":
-                    gv(["end", "maturity"]) ||
-                    formatDate(addMonths(new Date(), 6)),
+                  "Start Date": gv(["start"])
+                    ? formatDate(parseDate(gv(["start"])))
+                    : formatDate(new Date()),
+                  "End Date": gv(["end", "maturity"])
+                    ? formatDate(parseDate(gv(["end", "maturity"])))
+                    : formatDate(addMonths(new Date(), 6)),
                   Interest: gv(["interest", "rate"]) || "0",
                   Type: gv(["type", "category"]) || "Term Saving",
                   Bank: gv(["bank"]) || "",
@@ -6038,6 +6096,59 @@
         URL.revokeObjectURL(url);
         showToast(t("toast_csv_exported"), "success");
       }
+      window.exportCSV = exportCSV;
+
+      function downloadSampleTemplate() {
+        const sampleRows = [
+          {
+            "Account Name": "VCB Term Deposit",
+            Principal: "100000000",
+            "Start Date": "2026-01-01",
+            "End Date": "2026-07-01",
+            Interest: "5.5",
+            Type: "Term Saving",
+            Bank: "Vietcombank",
+          },
+          {
+            "Account Name": "Techcombank Flexible",
+            Principal: "50000000",
+            "Start Date": "2026-01-01",
+            "End Date": "2026-01-01",
+            Interest: "0.5",
+            Type: "Non-Term Pool",
+            Bank: "Techcombank",
+          },
+          {
+            "Account Name": "Quarterly Tax Payment",
+            Principal: "15000000",
+            "Start Date": "2026-04-01",
+            "End Date": "2026-04-01",
+            Interest: "0",
+            Type: "Withdrawal",
+            Bank: "Cash",
+          },
+        ];
+        const csvContent =
+          typeof Papa !== "undefined"
+            ? Papa.unparse(sampleRows)
+            : "Account Name,Principal,Start Date,End Date,Interest,Type,Bank\nVCB Term Deposit,100000000,2026-01-01,2026-07-01,5.5,Term Saving,Vietcombank\nTechcombank Flexible,50000000,2026-01-01,2026-01-01,0.5,Non-Term Pool,Techcombank\nQuarterly Tax Payment,15000000,2026-04-01,2026-04-01,0,Withdrawal,Cash";
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const filename =
+          window.currentLang === "vi"
+            ? "mau_danh_muc_tiet_kiem.csv"
+            : "savings_portfolio_template.csv";
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast(t("toast_template_downloaded"), "success");
+      }
+      window.downloadSampleTemplate = downloadSampleTemplate;
 
       // --- PURE SIMULATION ENGINE (ADR-0004 & ADR-0005) ---
       function simulate(params, portfolioData) {

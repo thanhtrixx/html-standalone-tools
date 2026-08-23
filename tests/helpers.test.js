@@ -224,12 +224,55 @@ async function runHelperTests() {
 
   const ctx = loadEnvironment();
 
-  // Test 1: parseDate()
+  // Test 1: parseDate() Multi-Format Parsing (Issue #73)
   const d1 = ctx.parseDate("2026-08-22");
   assert(
     d1.getFullYear() === 2026 && d1.getMonth() === 7 && d1.getDate() === 22,
     `parseDate("2026-08-22") parsed exact year, month, date`
   );
+  const dIsoSlash = ctx.parseDate("2026/08/22");
+  assert(
+    dIsoSlash.getFullYear() === 2026 &&
+      dIsoSlash.getMonth() === 7 &&
+      dIsoSlash.getDate() === 22,
+    `parseDate("2026/08/22") parsed YYYY/MM/DD format`
+  );
+  const dVnSlash = ctx.parseDate("22/08/2026");
+  assert(
+    dVnSlash.getFullYear() === 2026 &&
+      dVnSlash.getMonth() === 7 &&
+      dVnSlash.getDate() === 22,
+    `parseDate("22/08/2026") parsed DD/MM/YYYY format`
+  );
+  const dVnDash = ctx.parseDate("22-08-2026");
+  assert(
+    dVnDash.getFullYear() === 2026 &&
+      dVnDash.getMonth() === 7 &&
+      dVnDash.getDate() === 22,
+    `parseDate("22-08-2026") parsed DD-MM-YYYY format`
+  );
+  const dVnDot = ctx.parseDate("22.08.2026");
+  assert(
+    dVnDot.getFullYear() === 2026 &&
+      dVnDot.getMonth() === 7 &&
+      dVnDot.getDate() === 22,
+    `parseDate("22.08.2026") parsed DD.MM.YYYY format`
+  );
+  const dUsSlash = ctx.parseDate("08/22/2026");
+  assert(
+    dUsSlash.getFullYear() === 2026 &&
+      dUsSlash.getMonth() === 7 &&
+      dUsSlash.getDate() === 22,
+    `parseDate("08/22/2026") parsed MM/DD/YYYY format`
+  );
+  ctx.changeLanguage("vi");
+  const dAmbiguousVi = ctx.parseDate("01/02/2026");
+  assert(
+    dAmbiguousVi.getDate() === 1 && dAmbiguousVi.getMonth() === 1,
+    `parseDate("01/02/2026") in VI resolves to 1st Feb (DD/MM/YYYY)`
+  );
+  ctx.changeLanguage("en");
+
   const dInvalid = ctx.parseDate("invalid-date");
   assert(
     dInvalid instanceof Date && !isNaN(dInvalid.getTime()),
