@@ -595,6 +595,102 @@
         </div>
       </div>
     </div>
+    <!-- Responsive Mobile Action Sheet (ADR-0016, Issue #46) -->
+    <div
+      id="mobileActionSheet"
+      class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="More Actions"
+      onclick="if (event.target === this) toggleMobileActionSheet(false);"
+    >
+      <div
+        class="glass-card bg-slate-900 border border-slate-700 rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 flex flex-col space-y-3 shadow-2xl"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-800 pb-3"
+        >
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-ellipsis text-indigo-400 text-lg"></i>
+            <h3
+              class="font-bold text-slate-100 text-sm"
+              data-i18n="hdr_more_actions"
+            >
+              More Actions
+            </h3>
+          </div>
+          <button
+            onclick="toggleMobileActionSheet(false)"
+            class="text-slate-400 hover:text-white p-1 rounded-lg"
+            aria-label="Close action sheet"
+          >
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </div>
+        <div class="space-y-2 text-xs">
+          <button
+            type="button"
+            onclick="
+              toggleMobileActionSheet(false);
+              triggerCSVUpload();
+            "
+            class="w-full px-3 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-between transition"
+          >
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-file-csv text-emerald-400 text-sm"></i>
+              <span data-i18n="btn_import">Import CSV</span>
+            </span>
+            <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          </button>
+          <button
+            type="button"
+            onclick="
+              toggleMobileActionSheet(false);
+              toggleCSVModal(true);
+            "
+            class="w-full px-3 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-between transition"
+          >
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-table text-indigo-400 text-sm"></i>
+              <span data-i18n="btn_manage">Manage CSV Data</span>
+            </span>
+            <span
+              class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+              id="mobileCsvCountBadge"
+              >0</span
+            >
+          </button>
+          <button
+            type="button"
+            onclick="
+              toggleMobileActionSheet(false);
+              shareSimulation();
+            "
+            class="w-full px-3 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-between transition"
+          >
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-share-nodes text-blue-400 text-sm"></i>
+              <span data-i18n="btn_share">Share Simulation via URL</span>
+            </span>
+            <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          </button>
+          <button
+            type="button"
+            onclick="
+              toggleMobileActionSheet(false);
+              showOnboarding();
+            "
+            class="w-full px-3 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-between transition"
+          >
+            <span class="flex items-center gap-2.5">
+              <i class="fa-solid fa-circle-question text-amber-400 text-sm"></i>
+              <span data-i18n="btn_help_tour">Help & Onboarding Tour</span>
+            </span>
+            <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+    </div>
     <header
       class="glass-card sticky top-0 z-30 px-4 lg:px-8 py-3 flex items-center justify-between border-b border-slate-800"
       role="banner"
@@ -614,7 +710,10 @@
           >
             Savings & Wealth Simulator
           </h1>
-          <p class="text-xs text-slate-400 mt-1" data-i18n="app_subtitle">
+          <p
+            class="text-xs text-slate-400 mt-1 hidden md:block"
+            data-i18n="app_subtitle"
+          >
             Daily compounding · Salary growth · Inflation-adjusted ·
             Multi-scenario
           </p>
@@ -632,7 +731,7 @@
         </select>
         <button
           onclick="triggerCSVUpload()"
-          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_import"
           title="Import CSV"
         >
@@ -641,7 +740,7 @@
         </button>
         <button
           onclick="shareSimulation()"
-          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_share"
           title="Share via URL"
         >
@@ -650,7 +749,7 @@
         </button>
         <button
           onclick="toggleCSVModal(true)"
-          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_manage"
           title="Manage Data"
         >
@@ -681,11 +780,26 @@
         </button>
         <button
           onclick="showOnboarding()"
-          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_help"
           title="Help"
         >
           <i class="fa-solid fa-circle-question mr-2"></i><span>?</span>
+        </button>
+        <button
+          onclick="toggleMobileActionSheet(true)"
+          id="btnMobileActions"
+          class="md:hidden px-2.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center relative transition"
+          data-i18n-title="tooltip_more_actions"
+          aria-label="More actions"
+          title="More actions"
+        >
+          <i class="fa-solid fa-ellipsis-vertical text-indigo-400"></i>
+          <span
+            id="headerMobileCsvBadge"
+            class="hidden absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-indigo-600 text-white text-[9px] font-bold flex items-center justify-center"
+            >0</span
+          >
         </button>
       </div>
     </header>
@@ -2906,6 +3020,9 @@
           tooltip_manage: "Manage Data",
           tooltip_theme: "Toggle Theme",
           tooltip_help: "Help",
+          hdr_more_actions: "More Actions",
+          btn_help_tour: "Help & Onboarding Tour",
+          tooltip_more_actions: "More Actions",
 
           // Theme Overlay
           overlay_dark_title: "🌙 Dark Mode",
@@ -3228,6 +3345,9 @@
           tooltip_manage: "Quản lý dữ liệu",
           tooltip_theme: "Chuyển đổi giao diện",
           tooltip_help: "Hướng dẫn",
+          hdr_more_actions: "Tùy Chọn Khác",
+          btn_help_tour: "Hướng Dẫn & Trợ Giúp",
+          tooltip_more_actions: "Tùy chọn khác",
 
           // Theme Overlay
           overlay_dark_title: "🌙 Chế Độ Tối",
@@ -4613,8 +4733,20 @@
 
       // --- CSV EDITOR FUNCTIONS ---
       function updateCSVCountBadge() {
-        document.getElementById("csvCountBadge").innerText =
-          workingCSVData.length;
+        const badge = document.getElementById("csvCountBadge");
+        if (badge) badge.innerText = workingCSVData.length;
+        const mobileBadge = document.getElementById("mobileCsvCountBadge");
+        if (mobileBadge) mobileBadge.innerText = workingCSVData.length;
+        const headerMobileBadge = document.getElementById(
+          "headerMobileCsvBadge"
+        );
+        if (headerMobileBadge) {
+          headerMobileBadge.innerText = workingCSVData.length;
+          headerMobileBadge.classList.toggle(
+            "hidden",
+            workingCSVData.length === 0
+          );
+        }
       }
       function triggerCSVUpload() {
         document.getElementById("csvFileInput").click();
@@ -7856,7 +7988,27 @@
           : `<i class="fa-solid fa-moon mr-2"></i><span>${label}</span>`;
       }
 
-      // --- CENTRALIZED MODAL LIFECYCLE CONTROLLER (ADR-0014, Issue #12) ---
+      // --- CENTRALIZED MODAL LIFECYCLE CONTROLLER (ADR-0014, ADR-0016) ---
+      function toggleMobileActionSheet(show) {
+        const sheet = document.getElementById("mobileActionSheet");
+        if (!sheet) return;
+        if (show) {
+          dismissAllModals();
+          sheet.classList.remove("hidden");
+          sheet.classList.add("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "hidden";
+          }
+        } else {
+          sheet.classList.add("hidden");
+          sheet.classList.remove("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "";
+          }
+        }
+      }
+      window.toggleMobileActionSheet = toggleMobileActionSheet;
+
       function dismissAllModals() {
         const onboard = document.getElementById("onboardingOverlay");
         if (onboard && !onboard.classList.contains("hidden")) {
@@ -7872,6 +8024,11 @@
         if (presetsModal && !presetsModal.classList.contains("hidden")) {
           presetsModal.classList.add("hidden");
           presetsModal.classList.remove("flex");
+        }
+        const mobileSheet = document.getElementById("mobileActionSheet");
+        if (mobileSheet && !mobileSheet.classList.contains("hidden")) {
+          mobileSheet.classList.add("hidden");
+          mobileSheet.classList.remove("flex");
         }
         if (typeof document !== "undefined" && document.body) {
           document.body.style.overflow = "";

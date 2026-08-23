@@ -1540,6 +1540,47 @@ async function runUIUXTests() {
   // Switch back to dark
   app.toggleTheme();
 
+  // Test R35: Responsive Mobile/Tablet Header & Action Sheet Menu (ADR-0016, Issue #46)
+  assert(
+    typeof app.toggleMobileActionSheet === "function",
+    "R35: toggleMobileActionSheet function is defined"
+  );
+  const mobileSheet = app.document.getElementById("mobileActionSheet");
+  assert(
+    mobileSheet !== null,
+    "R35: #mobileActionSheet modal element exists in DOM"
+  );
+  assert(
+    mobileSheet.classList.contains("hidden"),
+    "R35: #mobileActionSheet is hidden by default"
+  );
+
+  app.toggleMobileActionSheet(true);
+  assert(
+    !mobileSheet.classList.contains("hidden") &&
+      mobileSheet.classList.contains("flex"),
+    "R35: toggleMobileActionSheet(true) displays mobile action sheet"
+  );
+
+  app.toggleMobileActionSheet(false);
+  assert(
+    mobileSheet.classList.contains("hidden"),
+    "R35: toggleMobileActionSheet(false) closes mobile action sheet"
+  );
+
+  app.toggleMobileActionSheet(true);
+  app.dismissAllModals();
+  assert(
+    mobileSheet.classList.contains("hidden"),
+    "R35: dismissAllModals() cleanly closes #mobileActionSheet"
+  );
+
+  const btnMobileActions = app.document.getElementById("btnMobileActions");
+  assert(
+    btnMobileActions !== null,
+    "R35: #btnMobileActions responsive toggle button exists in header"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
