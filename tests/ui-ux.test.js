@@ -123,6 +123,24 @@ function createDOMEnvironment() {
         if (this.onclick) this.onclick();
         this.dispatchEvent({ type: "click" });
       },
+      querySelector(sel) {
+        if (sel === ".toast-action-btn" || sel === "#toastActionBtn") {
+          if (this._innerHTML && this._innerHTML.includes("toast-action-btn")) {
+            if (this._toastBtn) return this._toastBtn;
+            const btnMatch = this._innerHTML.match(
+              /<button[^>]*class=["'][^"']*toast-action-btn[^"']*["'][^>]*>(.*?)<\/button>/
+            );
+            const btnEl = createMockElement("toastActionBtn", "button");
+            if (btnMatch) btnEl.innerText = btnMatch[1];
+            if (typeof this._toastAction === "function") {
+              btnEl.onclick = this._toastAction;
+            }
+            this._toastBtn = btnEl;
+            return btnEl;
+          }
+        }
+        return null;
+      },
     };
 
     Object.defineProperty(el, "innerText", {
@@ -215,9 +233,29 @@ function createDOMEnvironment() {
       },
       querySelector: (sel) => {
         if (sel === "#toastContainer") return getEl("toastContainer");
+        if (
+          sel === ".toast-action-btn" ||
+          sel === "#toastActionBtn" ||
+          sel === ".toast:last-child .toast-action-btn"
+        ) {
+          const tc = getEl("toastContainer");
+          if (tc && tc.children && tc.children.length > 0) {
+            const lastChild = tc.children[tc.children.length - 1];
+            return lastChild.querySelector(".toast-action-btn");
+          }
+        }
         return getEl(sel.replace(/^[#.]/, ""));
       },
       querySelectorAll: (sel) => {
+        if (sel === ".toast-action-btn") {
+          const tc = getEl("toastContainer");
+          const btns = [];
+          (tc.children || []).forEach((ch) => {
+            const b = ch.querySelector(".toast-action-btn");
+            if (b) btns.push(b);
+          });
+          return btns;
+        }
         if (sel === "[data-i18n]") {
           const matches = [
             ...htmlContent.matchAll(/data-i18n=["']([^"']+)["']/g),
@@ -923,6 +961,7 @@ async function runUIUXTests() {
 
   // 4. Strict CSV Date Validation (EndDate >= StartDate)
   let csvErrorToastFired = false;
+  const origShowToast2 = app.showToast;
   app.showToast = (msg, type) => {
     if (type === "error") csvErrorToastFired = true;
   };
@@ -936,6 +975,7 @@ async function runUIUXTests() {
     Bank: "ACB",
   });
   app.saveCSVEditorData();
+  app.showToast = origShowToast2;
   assert(
     csvErrorToastFired === true,
     "R22: saveCSVEditorData() strictly blocked save and fired error toast on EndDate < StartDate"
@@ -1923,7 +1963,9 @@ async function runUIUXTests() {
   );
 
   // Trigger undo from latest toast
-  const lastToastUndoBtn = app.document.getElementById("toastActionBtn");
+  const allToastBtns = app.document.querySelectorAll(".toast-action-btn");
+  const lastToastUndoBtn =
+    allToastBtns.length > 0 ? allToastBtns[allToastBtns.length - 1] : null;
   if (lastToastUndoBtn) {
     lastToastUndoBtn.click();
     assert(
@@ -1988,6 +2030,59 @@ async function runUIUXTests() {
   assert(
     typeof app.downloadSampleTemplate === "function",
     "R45: downloadSampleTemplate function is exposed globally"
+  );
+
+  // Test R46: Issue #66 Interactive Onboarding Tour, Goal CTA & Simulation Start Date Anchor
+  // 1. Simulation Start Date Anchor
+  const elStartDate = app.document.getElementById("lblSimStartDateText");
+  assert(
+    elStartDate !== null,
+    "R46: #lblSimStartDateText start date indicator exists in DOM"
+  );
+
+  // 2. Discoverable Goal Placeholder CTA
+  const goalPlaceholder = app.document.getElementById("goalPlaceholderSection");
+  const goalSection = app.document.getElementById("goalProgressSection");
+  assert(
+    goalPlaceholder !== null,
+    "R46: #goalPlaceholderSection element exists in DOM"
+  );
+
+  // When goal is 0: placeholder is visible, progress section is hidden
+  app.setSavingsGoalValue(0);
+  app.runSimulation();
+  assert(
+    !goalPlaceholder.classList.contains("hidden"),
+    "R46: Goal placeholder card is visible when Savings Goal is 0"
+  );
+  assert(
+    goalSection.classList.contains("hidden"),
+    "R46: Goal progress section is hidden when Savings Goal is 0"
+  );
+
+  // When goal > 0: progress section is visible, placeholder is hidden
+  app.setSavingsGoalValue(1000000000);
+  app.runSimulation();
+  assert(
+    goalPlaceholder.classList.contains("hidden"),
+    "R46: Goal placeholder card is hidden when Savings Goal is set (> 0)"
+  );
+  assert(
+    !goalSection.classList.contains("hidden"),
+    "R46: Goal progress section is visible when Savings Goal is set (> 0)"
+  );
+
+  // 3. Onboarding completion triggers Presets CTA
+  app.showOnboarding();
+  app.closeOnboarding();
+  const latestToastBtns = app.document.querySelectorAll(".toast-action-btn");
+  const toastAction =
+    latestToastBtns.length > 0
+      ? latestToastBtns[latestToastBtns.length - 1]
+      : null;
+  assert(
+    toastAction !== null && toastAction.innerText.length > 0,
+    "R46: closeOnboarding() displays actionable Presets CTA toast"
   );
 
   app.dismissAllModals();

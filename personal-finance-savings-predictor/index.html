@@ -1092,6 +1092,16 @@
                 10Y
               </button>
             </div>
+            <div
+              class="mt-1.5 flex items-center justify-between text-[11px] text-slate-400"
+            >
+              <span id="lblSimStartDateAnchor" class="flex items-center gap-1">
+                <i class="fa-regular fa-calendar-check text-indigo-400"></i>
+                <span id="lblSimStartDateText" data-i18n="lbl_sim_starts_today"
+                  >📅 Timeline Starts: Today</span
+                >
+              </span>
+            </div>
           </div>
           <div>
             <label
@@ -1706,7 +1716,57 @@
           </button>
         </div>
       </section>
-      <!-- Goal Progress Tracker -->
+      <!-- Goal Progress Tracker & Placeholder (Issue #66) -->
+      <section
+        id="goalPlaceholderSection"
+        class="glass-card rounded-2xl p-4 border border-dashed border-slate-700/80 bg-slate-900/40 hover:border-indigo-500/50 transition cursor-pointer group"
+        onclick="
+          const el = document.getElementById('inputSavingsGoal');
+          if (el) {
+            el.focus();
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        "
+        role="region"
+        aria-label="Savings Goal Setup CTA"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 transition flex-shrink-0"
+            >
+              <i class="fa-solid fa-bullseye text-lg"></i>
+            </div>
+            <div>
+              <h4
+                class="text-xs sm:text-sm font-bold text-slate-200 group-hover:text-indigo-300 transition"
+                data-i18n="hdr_goal_cta"
+              >
+                Set a Savings Goal & Track Milestone Projections
+              </h4>
+              <p
+                class="text-[11px] text-slate-400"
+                data-i18n="lbl_goal_cta_sub"
+              >
+                Enter your target amount to unlock completion countdown,
+                progress ring, and milestone dates.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="
+              event.stopPropagation();
+              setSavingsGoalValue(1000000000);
+              runSimulation();
+            "
+            class="px-3 py-1.5 text-xs font-semibold bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white rounded-lg border border-indigo-500/40 transition whitespace-nowrap hidden sm:inline-flex items-center gap-1"
+          >
+            <i class="fa-solid fa-plus text-[10px]"></i
+            ><span data-i18n="btn_quick_goal_1b">Try 1B Goal</span>
+          </button>
+        </div>
+      </section>
       <section
         id="goalProgressSection"
         class="glass-card rounded-2xl p-5 border border-slate-800 shadow-xl hidden"
@@ -3620,9 +3680,14 @@
           preset_3y: "3 Years",
           preset_5y: "5 Years",
           preset_10y: "10 Years",
+          lbl_sim_starts_today: "📅 Timeline Starts: Today ({date})",
 
           // Goal Progress
           hdr_goal_progress: "Savings Goal Progress",
+          hdr_goal_cta: "Set a Savings Goal & Track Milestone Projections",
+          lbl_goal_cta_sub:
+            "Enter your target amount to unlock completion countdown, progress ring, and milestone dates.",
+          btn_quick_goal_1b: "Try 1B Goal",
           goal_reached_milestone: "🎉 Milestone: {date}",
           goal_not_reached: "📈 Goal not reached within target timeframe",
           goal_label: "Goal: {amount}",
@@ -3989,9 +4054,14 @@
           preset_3y: "3 Năm",
           preset_5y: "5 Năm",
           preset_10y: "10 Năm",
+          lbl_sim_starts_today: "📅 Bắt đầu: Hôm nay ({date})",
 
           // Goal Progress
           hdr_goal_progress: "Tiến Độ Mục Tiêu Tiết Kiệm",
+          hdr_goal_cta: "Đặt Mục Tiêu Tiết Kiệm & Theo Dõi Cột Mốc",
+          lbl_goal_cta_sub:
+            "Nhập số tiền mục tiêu để mở khóa đếm ngược hoàn thành, biểu đồ vòng và ngày chạm mốc.",
+          btn_quick_goal_1b: "Thử Mục Tiêu 1 Tỷ",
           goal_reached_milestone: "🎉 Cột mốc: {date}",
           goal_not_reached: "📈 Chưa đạt mục tiêu trong khung thời gian",
           goal_label: "Mục tiêu: {amount}",
@@ -4723,6 +4793,12 @@
           }
         });
         updatePresetChipActiveStates();
+        const elSimStartText = document.getElementById("lblSimStartDateText");
+        if (elSimStartText) {
+          elSimStartText.textContent = t("lbl_sim_starts_today", {
+            date: formatDateDisplay(new Date()),
+          });
+        }
       }
       window.updateAllVerbalHelpers = updateAllVerbalHelpers;
 
@@ -4885,7 +4961,8 @@
           options.actionText &&
           typeof options.onAction === "function"
         ) {
-          actionBtnHtml = `<button type="button" class="px-2.5 py-1 text-xs font-bold bg-white text-slate-900 rounded-lg hover:bg-slate-200 transition shadow toast-action-btn">${options.actionText}</button>`;
+          el._toastAction = options.onAction;
+          actionBtnHtml = `<button type="button" id="toastActionBtn" class="px-2.5 py-1 text-xs font-bold bg-white text-slate-900 rounded-lg hover:bg-slate-200 transition shadow toast-action-btn">${options.actionText}</button>`;
         }
         el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span class="flex-1">${msg}</span>${actionBtnHtml}<button onclick="this.parentElement.remove()" class="opacity-70 hover:opacity-100 p-1"><i class="fa-solid fa-xmark text-[10px]"></i></button>`;
         if (
@@ -7356,54 +7433,51 @@ ${customInquiriesBlock}
 
           // Goal Progress Section Visibility & Milestone Date
           const goalSection = document.getElementById("goalProgressSection");
-          if (goalSection) {
-            if (savingsGoal > 0) {
-              goalSection.classList.remove("hidden");
-              const pct = Math.min(
-                100,
-                (totals.totalWealth / savingsGoal) * 100
-              );
-              const elGoalBar = document.getElementById("goalProgressBar");
-              if (elGoalBar) elGoalBar.style.width = pct + "%";
+          const goalPlaceholder = document.getElementById(
+            "goalPlaceholderSection"
+          );
+          if (savingsGoal > 0) {
+            if (goalSection) goalSection.classList.remove("hidden");
+            if (goalPlaceholder) goalPlaceholder.classList.add("hidden");
+            const pct = Math.min(100, (totals.totalWealth / savingsGoal) * 100);
+            const elGoalBar = document.getElementById("goalProgressBar");
+            if (elGoalBar) elGoalBar.style.width = pct + "%";
 
-              const elGoalCurrent = document.getElementById("goalCurrentText");
-              if (elGoalCurrent)
-                elGoalCurrent.innerText = formatCurrency(totals.totalWealth);
+            const elGoalCurrent = document.getElementById("goalCurrentText");
+            if (elGoalCurrent)
+              elGoalCurrent.innerText = formatCurrency(totals.totalWealth);
 
-              const elGoalTarget = document.getElementById("goalTargetText");
-              if (elGoalTarget)
-                elGoalTarget.innerText = t("goal_label", {
-                  amount: formatCurrency(savingsGoal),
+            const elGoalTarget = document.getElementById("goalTargetText");
+            if (elGoalTarget)
+              elGoalTarget.innerText = t("goal_label", {
+                amount: formatCurrency(savingsGoal),
+              });
+
+            const elGoalMonths = document.getElementById("goalMonthsToGo");
+            if (goalReached && goalReachedDate) {
+              const displayDate = formatDateDisplay(parseDate(goalReachedDate));
+              if (elGoalMonths)
+                elGoalMonths.innerText = t("goal_reached_milestone", {
+                  date: displayDate,
                 });
-
-              const elGoalMonths = document.getElementById("goalMonthsToGo");
-              if (goalReached && goalReachedDate) {
-                const displayDate = formatDateDisplay(
-                  parseDate(goalReachedDate)
-                );
-                if (elGoalMonths)
-                  elGoalMonths.innerText = t("goal_reached_milestone", {
+              if (!window._lastToastGoalReached) {
+                showToast(
+                  t("toast_goal_reached", {
+                    goal: formatCurrency(savingsGoal),
                     date: displayDate,
-                  });
-                if (!window._lastToastGoalReached) {
-                  showToast(
-                    t("toast_goal_reached", {
-                      goal: formatCurrency(savingsGoal),
-                      date: displayDate,
-                    }),
-                    "success"
-                  );
-                  window._lastToastGoalReached = true;
-                }
-              } else {
-                if (elGoalMonths)
-                  elGoalMonths.innerText = t("goal_not_reached");
-                window._lastToastGoalReached = false;
+                  }),
+                  "success"
+                );
+                window._lastToastGoalReached = true;
               }
-              renderGoalRing(totals.totalWealth, savingsGoal);
             } else {
-              goalSection.classList.add("hidden");
+              if (elGoalMonths) elGoalMonths.innerText = t("goal_not_reached");
+              window._lastToastGoalReached = false;
             }
+            renderGoalRing(totals.totalWealth, savingsGoal);
+          } else {
+            if (goalSection) goalSection.classList.add("hidden");
+            if (goalPlaceholder) goalPlaceholder.classList.remove("hidden");
           }
 
           // Expose cashflows for analytics tabs
@@ -9836,7 +9910,11 @@ ${customInquiriesBlock}
           document.body.style.overflow = "";
         }
         setStorage("showedOnboarding", true);
-        showToast(t("toast_onboard_complete"), "success");
+        showToast(t("toast_onboard_complete"), "success", {
+          actionText: t("btn_presets"),
+          onAction: () => togglePresetsModal(true),
+          duration: 6000,
+        });
       }
       window.closeOnboarding = closeOnboarding;
       function onboardNav(dir) {
