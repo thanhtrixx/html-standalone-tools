@@ -5880,7 +5880,165 @@
         });
       }
 
-      // --- CHART.JS VISUALIZATIONS (Enhanced R13, R18) ---
+      // --- CHART.JS VISUALIZATIONS & THEME SYNCHRONIZATION (ADR-0016, Issue #45) ---
+      function getChartThemeConfig() {
+        const isLight = document.documentElement.classList.contains("light");
+        return {
+          isLight,
+          gridColor: isLight
+            ? "rgba(0, 0, 0, 0.08)"
+            : "rgba(255, 255, 255, 0.05)",
+          tickColor: isLight ? "#64748b" : "#94a3b8",
+          legendColor: isLight ? "#334155" : "#cbd5e1",
+          tooltipBg: isLight
+            ? "rgba(255, 255, 255, 0.98)"
+            : "rgba(15, 23, 42, 0.95)",
+          tooltipTitle: isLight ? "#0f172a" : "#f8fafc",
+          tooltipBody: isLight ? "#334155" : "#f8fafc",
+          tooltipBorder: isLight ? "#cbd5e1" : "rgba(255, 255, 255, 0.1)",
+          canvasBg: isLight ? "#ffffff" : "#0f172a",
+          remainingBg: isLight ? "#e2e8f0" : "#1e293b",
+        };
+      }
+      window.getChartThemeConfig = getChartThemeConfig;
+
+      function applyThemeToAllCharts() {
+        const theme = getChartThemeConfig();
+
+        // 1. Growth Chart
+        if (growthChart && growthChart.options) {
+          if (growthChart.options.scales) {
+            if (growthChart.options.scales.x) {
+              if (growthChart.options.scales.x.grid)
+                growthChart.options.scales.x.grid.color = theme.gridColor;
+              if (growthChart.options.scales.x.ticks)
+                growthChart.options.scales.x.ticks.color = theme.tickColor;
+            }
+            if (growthChart.options.scales.y) {
+              if (growthChart.options.scales.y.grid)
+                growthChart.options.scales.y.grid.color = theme.gridColor;
+              if (growthChart.options.scales.y.ticks)
+                growthChart.options.scales.y.ticks.color = theme.tickColor;
+            }
+          }
+          if (
+            growthChart.options.plugins &&
+            growthChart.options.plugins.tooltip
+          ) {
+            growthChart.options.plugins.tooltip.backgroundColor =
+              theme.tooltipBg;
+            growthChart.options.plugins.tooltip.titleColor = theme.tooltipTitle;
+            growthChart.options.plugins.tooltip.bodyColor = theme.tooltipBody;
+            growthChart.options.plugins.tooltip.borderColor =
+              theme.tooltipBorder;
+            growthChart.options.plugins.tooltip.borderWidth = 1;
+          }
+          try {
+            growthChart.update();
+          } catch (e) {}
+        }
+
+        // 2. Allocation Chart
+        if (allocationChart && allocationChart.options) {
+          if (allocationChart.options.plugins) {
+            if (
+              allocationChart.options.plugins.legend &&
+              allocationChart.options.plugins.legend.labels
+            ) {
+              allocationChart.options.plugins.legend.labels.color =
+                theme.legendColor;
+            }
+            if (allocationChart.options.plugins.tooltip) {
+              allocationChart.options.plugins.tooltip.backgroundColor =
+                theme.tooltipBg;
+              allocationChart.options.plugins.tooltip.titleColor =
+                theme.tooltipTitle;
+              allocationChart.options.plugins.tooltip.bodyColor =
+                theme.tooltipBody;
+              allocationChart.options.plugins.tooltip.borderColor =
+                theme.tooltipBorder;
+              allocationChart.options.plugins.tooltip.borderWidth = 1;
+            }
+          }
+          try {
+            allocationChart.update();
+          } catch (e) {}
+        }
+
+        // 3. Monthly Income Chart
+        if (monthlyIncomeChart && monthlyIncomeChart.options) {
+          if (monthlyIncomeChart.options.scales) {
+            if (
+              monthlyIncomeChart.options.scales.x &&
+              monthlyIncomeChart.options.scales.x.ticks
+            ) {
+              monthlyIncomeChart.options.scales.x.ticks.color = theme.tickColor;
+            }
+            if (monthlyIncomeChart.options.scales.y) {
+              if (monthlyIncomeChart.options.scales.y.grid)
+                monthlyIncomeChart.options.scales.y.grid.color =
+                  theme.gridColor;
+              if (monthlyIncomeChart.options.scales.y.ticks)
+                monthlyIncomeChart.options.scales.y.ticks.color =
+                  theme.tickColor;
+            }
+          }
+          if (monthlyIncomeChart.options.plugins) {
+            if (
+              monthlyIncomeChart.options.plugins.legend &&
+              monthlyIncomeChart.options.plugins.legend.labels
+            ) {
+              monthlyIncomeChart.options.plugins.legend.labels.color =
+                theme.legendColor;
+            }
+            if (monthlyIncomeChart.options.plugins.tooltip) {
+              monthlyIncomeChart.options.plugins.tooltip.backgroundColor =
+                theme.tooltipBg;
+              monthlyIncomeChart.options.plugins.tooltip.titleColor =
+                theme.tooltipTitle;
+              monthlyIncomeChart.options.plugins.tooltip.bodyColor =
+                theme.tooltipBody;
+              monthlyIncomeChart.options.plugins.tooltip.borderColor =
+                theme.tooltipBorder;
+              monthlyIncomeChart.options.plugins.tooltip.borderWidth = 1;
+            }
+          }
+          try {
+            monthlyIncomeChart.update();
+          } catch (e) {}
+        }
+
+        // 4. Goal Ring Chart
+        if (
+          goalChart &&
+          goalChart.data &&
+          goalChart.data.datasets &&
+          goalChart.data.datasets[0]
+        ) {
+          if (
+            Array.isArray(goalChart.data.datasets[0].backgroundColor) &&
+            goalChart.data.datasets[0].backgroundColor.length > 1
+          ) {
+            goalChart.data.datasets[0].backgroundColor[1] = theme.remainingBg;
+          }
+          if (
+            goalChart.options &&
+            goalChart.options.plugins &&
+            goalChart.options.plugins.tooltip
+          ) {
+            goalChart.options.plugins.tooltip.backgroundColor = theme.tooltipBg;
+            goalChart.options.plugins.tooltip.titleColor = theme.tooltipTitle;
+            goalChart.options.plugins.tooltip.bodyColor = theme.tooltipBody;
+            goalChart.options.plugins.tooltip.borderColor = theme.tooltipBorder;
+            goalChart.options.plugins.tooltip.borderWidth = 1;
+          }
+          try {
+            goalChart.update();
+          } catch (e) {}
+        }
+      }
+      window.applyThemeToAllCharts = applyThemeToAllCharts;
+
       function renderGrowthChart(snapshots, finalSnapshot, inflationRate) {
         const canvas = document.getElementById("chartGrowth");
         if (!canvas) return;
@@ -5893,6 +6051,7 @@
           growthChart = null;
         }
 
+        const chartTheme = getChartThemeConfig();
         const ctx = canvas.getContext("2d");
         const step = Math.max(1, Math.floor(snapshots.length / 60));
         const filtered = snapshots.filter(
@@ -5995,6 +6154,11 @@
             plugins: {
               legend: { display: false },
               tooltip: {
+                backgroundColor: chartTheme.tooltipBg,
+                titleColor: chartTheme.tooltipTitle,
+                bodyColor: chartTheme.tooltipBody,
+                borderColor: chartTheme.tooltipBorder,
+                borderWidth: 1,
                 callbacks: {
                   label: function (c) {
                     return `${c.dataset.label}: ${formatCurrency(c.raw)}`;
@@ -6004,9 +6168,9 @@
             },
             scales: {
               x: {
-                grid: { color: "rgba(255,255,255,0.05)" },
+                grid: { color: chartTheme.gridColor },
                 ticks: {
-                  color: "#94a3b8",
+                  color: chartTheme.tickColor,
                   maxTicksLimit: 8,
                   font: { size: 10 },
                   callback: function (val, index) {
@@ -6017,9 +6181,9 @@
                 },
               },
               y: {
-                grid: { color: "rgba(255,255,255,0.05)" },
+                grid: { color: chartTheme.gridColor },
                 ticks: {
-                  color: "#94a3b8",
+                  color: chartTheme.tickColor,
                   font: { size: 10 },
                   callback: function (v) {
                     return (v / 1e6).toFixed(0) + " " + t("chart_y_unit");
@@ -6081,6 +6245,7 @@
           allocationChart = null;
         }
 
+        const chartTheme = getChartThemeConfig();
         const ctx = canvas.getContext("2d");
         allocationChart = new Chart(ctx, {
           type: "doughnut",
@@ -6101,9 +6266,18 @@
             plugins: {
               legend: {
                 position: "bottom",
-                labels: { color: "#cbd5e1", font: { size: 11 }, boxWidth: 12 },
+                labels: {
+                  color: chartTheme.legendColor,
+                  font: { size: 11 },
+                  boxWidth: 12,
+                },
               },
               tooltip: {
+                backgroundColor: chartTheme.tooltipBg,
+                titleColor: chartTheme.tooltipTitle,
+                bodyColor: chartTheme.tooltipBody,
+                borderColor: chartTheme.tooltipBorder,
+                borderWidth: 1,
                 callbacks: {
                   label: function (c) {
                     return ` ${c.label}: ${formatCurrency(c.raw)}`;
@@ -6128,6 +6302,7 @@
           monthlyIncomeChart = null;
         }
 
+        const chartTheme = getChartThemeConfig();
         const ctx = canvas.getContext("2d");
         const labels = Object.keys(monthlyCashflows).sort();
         const salaryData = labels.map((k) => monthlyCashflows[k].salary || 0);
@@ -6171,9 +6346,18 @@
             plugins: {
               legend: {
                 position: "top",
-                labels: { color: "#cbd5e1", font: { size: 11 }, boxWidth: 12 },
+                labels: {
+                  color: chartTheme.legendColor,
+                  font: { size: 11 },
+                  boxWidth: 12,
+                },
               },
               tooltip: {
+                backgroundColor: chartTheme.tooltipBg,
+                titleColor: chartTheme.tooltipTitle,
+                bodyColor: chartTheme.tooltipBody,
+                borderColor: chartTheme.tooltipBorder,
+                borderWidth: 1,
                 callbacks: {
                   label: function (c) {
                     return ` ${c.dataset.label}: ${formatCurrency(c.raw)}`;
@@ -6186,7 +6370,7 @@
                 stacked: true,
                 grid: { display: false },
                 ticks: {
-                  color: "#94a3b8",
+                  color: chartTheme.tickColor,
                   font: { size: 10 },
                   callback: function (val, index) {
                     const labelStr = labels[index] || "";
@@ -6203,9 +6387,9 @@
               },
               y: {
                 stacked: hasWithdrawals ? false : true,
-                grid: { color: "rgba(255,255,255,0.05)" },
+                grid: { color: chartTheme.gridColor },
                 ticks: {
-                  color: "#94a3b8",
+                  color: chartTheme.tickColor,
                   font: { size: 10 },
                   callback: function (v) {
                     return (v / 1e6).toFixed(0) + " " + t("chart_y_unit");
@@ -6284,6 +6468,7 @@
           goalChart = null;
         }
 
+        const chartTheme = getChartThemeConfig();
         const pct = Math.min(100, (currentTotal / goal) * 100);
         goalChart = new Chart(canvas.getContext("2d"), {
           type: "doughnut",
@@ -6292,7 +6477,7 @@
             datasets: [
               {
                 data: [currentTotal, Math.max(0, goal - currentTotal)],
-                backgroundColor: ["#10b981", "#1e293b"],
+                backgroundColor: ["#10b981", chartTheme.remainingBg],
                 borderWidth: 0,
                 cutout: "70%",
               },
@@ -6305,6 +6490,11 @@
             plugins: {
               legend: { display: false },
               tooltip: {
+                backgroundColor: chartTheme.tooltipBg,
+                titleColor: chartTheme.tooltipTitle,
+                bodyColor: chartTheme.tooltipBody,
+                borderColor: chartTheme.tooltipBorder,
+                borderWidth: 1,
                 callbacks: {
                   label: function (c) {
                     return `${c.label}: ${formatCurrency(c.raw)}`;
@@ -7599,7 +7789,7 @@
         if (simResult) runSimulation();
       }
 
-      // Task 3.4 (R18): Dark background fill on chart image export
+      // Task 3.4 (R18, R34): Background fill on chart image export respecting active theme
       function exportChartAsImage() {
         if (!growthChart) {
           showToast(t("toast_run_first"), "warning");
@@ -7610,7 +7800,8 @@
         tempCanvas.width = canvas.width;
         tempCanvas.height = canvas.height;
         const ctx = tempCanvas.getContext("2d");
-        ctx.fillStyle = "#0f172a";
+        const chartTheme = getChartThemeConfig();
+        ctx.fillStyle = chartTheme.canvasBg;
         ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
         ctx.drawImage(canvas, 0, 0);
         tempCanvas.toBlob(function (blob) {
@@ -7639,7 +7830,7 @@
         showToast(t("toast_print_dialog"), "info");
       }
 
-      // --- THEME TOGGLE ---
+      // --- THEME TOGGLE (ADR-0016, Issue #45) ---
       function toggleTheme() {
         const isDark = !document.documentElement.classList.contains("light");
         if (isDark) {
@@ -7648,6 +7839,7 @@
           document.documentElement.classList.remove("light");
         }
         updateThemeBtn();
+        applyThemeToAllCharts();
         setStorage("theme", isDark ? "light" : "dark");
         showToast(
           isDark ? t("toast_theme_light") : t("toast_theme_dark"),
