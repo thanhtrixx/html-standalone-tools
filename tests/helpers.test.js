@@ -507,8 +507,8 @@ async function runHelperTests() {
     `loadFromURL() restored empty CSV data array without default fallback`
   );
 
-  // Test 9: Schema versioning & parameter migration (R2, R22)
-  assert(ctx.SCHEMA_VERSION === 4, `SCHEMA_VERSION constant is defined as 4`);
+  // Test 9: Schema versioning & parameter migration (R2, R22, Issue #76)
+  assert(ctx.SCHEMA_VERSION === 5, `SCHEMA_VERSION constant is defined as 5`);
   const nullMigrated = ctx.migrateParams(null);
   assert(nullMigrated === null, `migrateParams(null) safely returns null`);
   const stringMigrated = ctx.migrateParams("invalid-param-payload");
@@ -517,31 +517,35 @@ async function runHelperTests() {
     `migrateParams("invalid") safely returns null`
   );
   const legacyV0Params = { salary: "25000000", goal: "500000000" };
-  const v4Migrated = ctx.migrateParams(legacyV0Params);
+  const v5Migrated = ctx.migrateParams(legacyV0Params);
   assert(
-    v4Migrated !== null &&
-      v4Migrated.schemaVersion === 4 &&
-      v4Migrated.salary === "25000000" &&
-      v4Migrated.autoTermThreshold === "200000000" &&
-      v4Migrated.autoTermMonths === "6" &&
-      v4Migrated.emergencyBuffer === "30000000" &&
-      v4Migrated.annualBonusMultiplier === "1.0" &&
-      v4Migrated.annualBonusMonth === "1",
-    `migrateParams stamps legacy v0 payload with schemaVersion: 4, emergency buffer, and annual bonus defaults`
+    v5Migrated !== null &&
+      v5Migrated.schemaVersion === 5 &&
+      v5Migrated.salary === "25000000" &&
+      v5Migrated.autoTermThreshold === "200000000" &&
+      v5Migrated.autoTermMonths === "6" &&
+      v5Migrated.emergencyBuffer === "30000000" &&
+      v5Migrated.annualBonusMultiplier === "1.0" &&
+      v5Migrated.annualBonusMonth === "1" &&
+      v5Migrated.secondaryBonusMultiplier === "0" &&
+      v5Migrated.secondaryBonusMonth === "7",
+    `migrateParams stamps legacy v0 payload with schemaVersion: 5, emergency buffer, annual & secondary bonus defaults`
   );
   const alreadyV1 = {
     schemaVersion: 1,
     salary: "35000000",
     sixMRate: "6.0",
   };
-  const v1ToV4 = ctx.migrateParams(alreadyV1);
+  const v1ToV5 = ctx.migrateParams(alreadyV1);
   assert(
-    v1ToV4.salary === "35000000" &&
-      v1ToV4.schemaVersion === 4 &&
-      v1ToV4.autoTermRate === "6.0" &&
-      v1ToV4.emergencyBuffer === "30000000" &&
-      v1ToV4.annualBonusMultiplier === "1.0",
-    `migrateParams upgrades v1 payload to v4 preserving rate settings and adding emergency buffer & annual bonus`
+    v1ToV5.salary === "35000000" &&
+      v1ToV5.schemaVersion === 5 &&
+      v1ToV5.autoTermRate === "6.0" &&
+      v1ToV5.emergencyBuffer === "30000000" &&
+      v1ToV5.annualBonusMultiplier === "1.0" &&
+      v1ToV5.secondaryBonusMultiplier === "0" &&
+      v1ToV5.secondaryBonusMonth === "7",
+    `migrateParams upgrades v1 payload to v5 preserving rate settings and adding emergency buffer, annual & secondary bonus`
   );
 
   // Test 10: Multibyte UTF-8 Base64 round-trip (R8)

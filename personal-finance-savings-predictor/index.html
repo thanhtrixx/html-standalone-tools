@@ -1323,6 +1323,89 @@
             </div>
           </div>
           <div>
+            <div class="flex items-center justify-between mb-1">
+              <label
+                class="block text-xs font-medium text-slate-400"
+                for="inputSecondaryBonusMultiplier"
+                data-i18n="lbl_secondary_bonus"
+                >Secondary Bonus (Mid-Year / Incentive)</label
+              >
+              <div class="flex items-center space-x-1">
+                <button
+                  type="button"
+                  onclick="setSecondaryBonusMultiplier(0)"
+                  class="secondary-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  0x
+                </button>
+                <button
+                  type="button"
+                  onclick="setSecondaryBonusMultiplier(0.5)"
+                  class="secondary-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  0.5x
+                </button>
+                <button
+                  type="button"
+                  onclick="setSecondaryBonusMultiplier(1.0)"
+                  class="secondary-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  1x
+                </button>
+                <button
+                  type="button"
+                  onclick="setSecondaryBonusMultiplier(1.5)"
+                  class="secondary-bonus-chip px-1.5 py-0.5 rounded text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                >
+                  1.5x
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input
+                type="number"
+                id="inputSecondaryBonusMultiplier"
+                value="0"
+                min="0"
+                max="10"
+                step="0.1"
+                placeholder="0.0x"
+                oninput="
+                  updateBonusPreview();
+                  triggerReactiveSimulation();
+                "
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+              />
+              <select
+                id="selectSecondaryBonusMonth"
+                onchange="
+                  updateBonusPreview();
+                  triggerReactiveSimulation();
+                "
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
+              >
+                <option value="1">Jan (Tháng 1)</option>
+                <option value="2">Feb (Tháng 2)</option>
+                <option value="3">Mar (Tháng 3)</option>
+                <option value="4">Apr (Tháng 4)</option>
+                <option value="5">May (Tháng 5)</option>
+                <option value="6">Jun (Tháng 6)</option>
+                <option value="7" selected>Jul (Tháng 7)</option>
+                <option value="8">Aug (Tháng 8)</option>
+                <option value="9">Sep (Tháng 9)</option>
+                <option value="10">Oct (Tháng 10)</option>
+                <option value="11">Nov (Tháng 11)</option>
+                <option value="12">Dec (Tháng 12)</option>
+              </select>
+            </div>
+            <div
+              id="helperSecondaryBonusPreview"
+              class="text-[11px] text-slate-500 font-medium mt-1 min-h-[16px]"
+            >
+              No secondary bonus scheduled
+            </div>
+          </div>
+          <div>
             <label
               class="block text-xs font-medium text-slate-400 mb-1"
               for="inputInflation"
@@ -2540,31 +2623,80 @@
             >
               <div id="heatmapGrid" class="min-w-[780px] space-y-2"></div>
             </div>
+            <!-- Interactive Heatmap Color Legend (Issue #76) -->
             <div
-              class="flex items-center justify-between mt-3 text-xs text-slate-500"
+              id="heatmapLegendSection"
+              class="flex flex-wrap items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-800/60 text-xs"
             >
-              <span data-i18n="lbl_low">Low</span>
-              <div class="flex items-center gap-1">
-                <div
-                  class="w-5 h-3.5 rounded bg-emerald-950/70 border border-emerald-900/50"
-                ></div>
-                <div
-                  class="w-5 h-3.5 rounded bg-emerald-900/80 border border-emerald-800/50"
-                ></div>
-                <div
-                  class="w-5 h-3.5 rounded bg-emerald-800 border border-emerald-700/50"
-                ></div>
-                <div
-                  class="w-5 h-3.5 rounded bg-emerald-600 border border-emerald-500/50"
-                ></div>
-                <div
-                  class="w-5 h-3.5 rounded bg-emerald-500 border border-emerald-400/50"
-                ></div>
-                <div
-                  class="w-5 h-3.5 rounded bg-emerald-400 border border-emerald-300/50"
-                ></div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="text-slate-400 font-medium"
+                  data-i18n="lbl_heatmap_legend"
+                  >Intensity Scale:</span
+                >
+                <span
+                  id="heatmapLegendMinText"
+                  class="font-mono text-emerald-300 font-semibold text-[11px]"
+                  >Min: 0 VND</span
+                >
               </div>
-              <span data-i18n="lbl_high">High</span>
+              <div class="flex items-center gap-1.5" id="heatmapLegendBar">
+                <button
+                  type="button"
+                  data-legend-tier="1"
+                  onmouseenter="highlightHeatmapTier(1)"
+                  onmouseleave="clearHeatmapHighlights()"
+                  class="w-7 h-4 rounded bg-emerald-950/70 border border-emerald-900/50 hover:ring-2 hover:ring-white transition cursor-pointer"
+                  title="Tier 1 (<15% peak)"
+                ></button>
+                <button
+                  type="button"
+                  data-legend-tier="2"
+                  onmouseenter="highlightHeatmapTier(2)"
+                  onmouseleave="clearHeatmapHighlights()"
+                  class="w-7 h-4 rounded bg-emerald-900/80 border border-emerald-800/50 hover:ring-2 hover:ring-white transition cursor-pointer"
+                  title="Tier 2 (15%-35% peak)"
+                ></button>
+                <button
+                  type="button"
+                  data-legend-tier="3"
+                  onmouseenter="highlightHeatmapTier(3)"
+                  onmouseleave="clearHeatmapHighlights()"
+                  class="w-7 h-4 rounded bg-emerald-800 border border-emerald-700/50 hover:ring-2 hover:ring-white transition cursor-pointer"
+                  title="Tier 3 (35%-55% peak)"
+                ></button>
+                <button
+                  type="button"
+                  data-legend-tier="4"
+                  onmouseenter="highlightHeatmapTier(4)"
+                  onmouseleave="clearHeatmapHighlights()"
+                  class="w-7 h-4 rounded bg-emerald-600 border border-emerald-500/50 hover:ring-2 hover:ring-white transition cursor-pointer"
+                  title="Tier 4 (55%-75% peak)"
+                ></button>
+                <button
+                  type="button"
+                  data-legend-tier="5"
+                  onmouseenter="highlightHeatmapTier(5)"
+                  onmouseleave="clearHeatmapHighlights()"
+                  class="w-7 h-4 rounded bg-emerald-500 border border-emerald-400/50 hover:ring-2 hover:ring-white transition cursor-pointer"
+                  title="Tier 5 (75%-90% peak)"
+                ></button>
+                <button
+                  type="button"
+                  data-legend-tier="6"
+                  onmouseenter="highlightHeatmapTier(6)"
+                  onmouseleave="clearHeatmapHighlights()"
+                  class="w-7 h-4 rounded bg-emerald-400 border border-emerald-300/50 hover:ring-2 hover:ring-white transition cursor-pointer"
+                  title="Tier 6 (90%+ peak)"
+                ></button>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  id="heatmapLegendMaxText"
+                  class="font-mono text-emerald-400 font-bold text-[11px]"
+                  >Peak: 0 VND</span
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -3883,6 +4015,11 @@
           lbl_annual_bonus: "Annual Bonus (13th Month Salary)",
           lbl_bonus_multiplier: "Bonus Multiplier (x Monthly Salary)",
           lbl_bonus_month: "Bonus Month",
+          lbl_secondary_bonus: "Secondary Bonus (Mid-Year / Incentive)",
+          lbl_secondary_bonus_multiplier:
+            "Secondary Multiplier (x Monthly Salary)",
+          lbl_secondary_bonus_month: "Secondary Bonus Month",
+          lbl_secondary_bonus_preview_none: "No secondary bonus scheduled",
           lbl_inflation: "Inflation Rate (%/yr)",
           lbl_savings_goal: "Savings Goal (VND)",
           lbl_pool_rate: "Pool Rate (%/yr)",
@@ -3970,8 +4107,11 @@
           chart_label_total: "Total",
           chart_label_fixed: "Fixed",
           chart_label_pool: "Pool",
-          chart_label_real: "Real (Inflation Adj.)",
+          chart_label_term: "Term",
+          chart_label_real: "Real",
           chart_y_unit: "M VND",
+          chart_ring_achieved: "Achieved",
+          chart_ring_remaining: "Remaining",
 
           // Asset Allocation
           hdr_asset_allocation: "Asset Allocation",
@@ -4013,6 +4153,7 @@
           btn_toggle: "Toggle",
           lbl_low: "Low",
           lbl_high: "High",
+          lbl_heatmap_legend: "Heatmap Legend",
           hdr_yoy: "Year-over-Year Comparison",
           lbl_yoy_sub: "Annual breakdown with growth rates",
           th_year: "Year",
@@ -4084,6 +4225,7 @@
           log_salary_title: "Monthly Salary Deposited",
           log_salary_details: "{amount} to Pool (rate: {rate}%/yr)",
           log_bonus_title: "13th-Month Annual Bonus",
+          log_secondary_bonus_title: "Secondary Bonus",
           log_bonus_details:
             "Bonus deposit of {amount} ({multiplier}x monthly salary)",
           log_maturity_title: "Matured: {name}",
@@ -4282,6 +4424,10 @@
           lbl_annual_bonus: "Thưởng Năm (Lương Tháng 13)",
           lbl_bonus_multiplier: "Hệ Số Thưởng (x Lương Tháng)",
           lbl_bonus_month: "Tháng Thưởng",
+          lbl_secondary_bonus: "Thưởng Phụ (Giữa Năm / Hiệu Suất)",
+          lbl_secondary_bonus_multiplier: "Hệ Số Thưởng Phụ (x Lương Tháng)",
+          lbl_secondary_bonus_month: "Tháng Thưởng Phụ",
+          lbl_secondary_bonus_preview_none: "Không có thưởng phụ",
           lbl_inflation: "Tỷ Lệ Lạm Phát (%/năm)",
           lbl_savings_goal: "Mục Tiêu Tiết Kiệm (₫)",
           lbl_pool_rate: "Lãi Suất Linh Hoạt (%/năm)",
@@ -4371,6 +4517,7 @@
           chart_label_total: "Tổng số dư",
           chart_label_fixed: "Cố định",
           chart_label_pool: "Linh hoạt",
+          chart_label_term: "Có Kỳ Hạn",
           chart_label_real: "Thực tế (sau lạm phát)",
           chart_y_unit: "M ₫",
 
@@ -4414,6 +4561,7 @@
           btn_toggle: "Ẩn/Hiện",
           lbl_low: "Thấp",
           lbl_high: "Cao",
+          lbl_heatmap_legend: "Thang mức độ:",
           hdr_yoy: "So Sánh Theo Năm (YoY)",
           lbl_yoy_sub: "Chi tiết từng năm kèm tỷ lệ tăng trưởng",
           th_year: "Năm",
@@ -4484,6 +4632,7 @@
           log_salary_title: "Nạp Lương Hàng Tháng",
           log_salary_details: "{amount} vào Tiền Linh Hoạt (tăng: {rate}%/năm)",
           log_bonus_title: "Thưởng Lương Tháng 13",
+          log_secondary_bonus_title: "Nạp Thưởng Phụ",
           log_bonus_details:
             "Nạp tiền thưởng {amount} (hệ số {multiplier}x lương tháng)",
           log_maturity_title: "Đáo Hạn: {name}",
@@ -4732,7 +4881,7 @@
       window.currentLang = "en";
 
       // --- SCHEMA VERSIONING & MIGRATION (R2) ---
-      const SCHEMA_VERSION = 4;
+      const SCHEMA_VERSION = 5;
       function migrateParams(raw) {
         if (!raw || typeof raw !== "object") return null;
         let p = { ...raw };
@@ -4783,6 +4932,20 @@
             annualBonusMultiplier: bonusMult,
             annualBonusMonth: bonusMonth,
             schemaVersion: 4,
+          };
+        }
+        if (from < 5) {
+          const secBonusMult =
+            p.secondaryBonusMultiplier !== undefined
+              ? p.secondaryBonusMultiplier
+              : "0";
+          const secBonusMonth =
+            p.secondaryBonusMonth !== undefined ? p.secondaryBonusMonth : "7";
+          p = {
+            ...p,
+            secondaryBonusMultiplier: secBonusMult,
+            secondaryBonusMonth: secBonusMonth,
+            schemaVersion: 5,
           };
         }
         return p;
@@ -4890,6 +5053,15 @@
 
       window.setAnnualBonusMultiplier = function (val) {
         const el = document.getElementById("inputAnnualBonusMultiplier");
+        if (el) {
+          el.value = val;
+          updateBonusPreview();
+          triggerReactiveSimulation();
+        }
+      };
+
+      window.setSecondaryBonusMultiplier = function (val) {
+        const el = document.getElementById("inputSecondaryBonusMultiplier");
         if (el) {
           el.value = val;
           updateBonusPreview();
@@ -5360,26 +5532,14 @@
       function updateBonusPreview(lang) {
         const l = lang || window.currentLang || "en";
         const previewEl = document.getElementById("helperAnnualBonusPreview");
-        if (!previewEl) return;
-        const salaryInput = document.getElementById("inputSalary");
-        const bonusInput = document.getElementById(
-          "inputAnnualBonusMultiplier"
+        const secPreviewEl = document.getElementById(
+          "helperSecondaryBonusPreview"
         );
-        const monthSelect = document.getElementById("selectAnnualBonusMonth");
+        const salaryInput = document.getElementById("inputSalary");
         const salary = salaryInput
           ? parseFormattedNumber(salaryInput.value)
           : 0;
-        const multiplier = bonusInput ? parseFloat(bonusInput.value) || 0 : 0;
-        const month = monthSelect ? parseInt(monthSelect.value, 10) || 1 : 1;
 
-        if (multiplier <= 0 || salary <= 0) {
-          previewEl.textContent = t("lbl_bonus_preview_none");
-          previewEl.classList.remove("text-amber-400");
-          previewEl.classList.add("text-slate-500");
-          return;
-        }
-
-        const bonusAmount = salary * multiplier;
         const monthNamesEn = [
           "January",
           "February",
@@ -5408,14 +5568,68 @@
           "Tháng 11",
           "Tháng 12",
         ];
-        const monthName =
-          l === "vi" ? monthNamesVi[month - 1] : monthNamesEn[month - 1];
-        previewEl.textContent = t("lbl_bonus_preview_active", {
-          amount: formatCurrency(bonusAmount),
-          month: monthName,
-        });
-        previewEl.classList.remove("text-slate-500");
-        previewEl.classList.add("text-amber-400");
+
+        // 1. Primary Annual Bonus Preview
+        if (previewEl) {
+          const bonusInput = document.getElementById(
+            "inputAnnualBonusMultiplier"
+          );
+          const monthSelect = document.getElementById("selectAnnualBonusMonth");
+          const multiplier = bonusInput ? parseFloat(bonusInput.value) || 0 : 0;
+          const month = monthSelect ? parseInt(monthSelect.value, 10) || 1 : 1;
+
+          if (multiplier <= 0 || salary <= 0) {
+            previewEl.textContent = t("lbl_bonus_preview_none");
+            previewEl.classList.remove("text-amber-400");
+            previewEl.classList.add("text-slate-500");
+          } else {
+            const bonusAmount = salary * multiplier;
+            const monthName =
+              l === "vi" ? monthNamesVi[month - 1] : monthNamesEn[month - 1];
+            previewEl.textContent = t("lbl_bonus_preview_active", {
+              amount: formatCurrency(bonusAmount),
+              month: monthName,
+            });
+            previewEl.classList.remove("text-slate-500");
+            previewEl.classList.add("text-amber-400");
+          }
+        }
+
+        // 2. Secondary Bonus Preview
+        if (secPreviewEl) {
+          const secBonusInput = document.getElementById(
+            "inputSecondaryBonusMultiplier"
+          );
+          const secMonthSelect = document.getElementById(
+            "selectSecondaryBonusMonth"
+          );
+          const secMultiplier = secBonusInput
+            ? parseFloat(secBonusInput.value) || 0
+            : 0;
+          const secMonth = secMonthSelect
+            ? parseInt(secMonthSelect.value, 10) || 7
+            : 7;
+
+          if (secMultiplier <= 0 || salary <= 0) {
+            secPreviewEl.textContent =
+              t("lbl_secondary_bonus_preview_none") ||
+              t("lbl_bonus_preview_none");
+            secPreviewEl.classList.remove("text-purple-400");
+            secPreviewEl.classList.add("text-slate-500");
+          } else {
+            const secBonusAmount = salary * secMultiplier;
+            const secMonthName =
+              l === "vi"
+                ? monthNamesVi[secMonth - 1]
+                : monthNamesEn[secMonth - 1];
+            secPreviewEl.textContent = t("lbl_bonus_preview_active", {
+              amount: formatCurrency(secBonusAmount),
+              month: secMonthName,
+            });
+            secPreviewEl.classList.remove("text-slate-500");
+            secPreviewEl.classList.add("text-purple-400");
+          }
+        }
       }
       window.updateBonusPreview = updateBonusPreview;
 
@@ -6976,6 +7190,21 @@
             ? 1
             : Math.min(12, Math.max(1, parseInt(rawBonusMonth, 10)));
 
+        const rawSecBonusMult = params.secondaryBonusMultiplier;
+        const secondaryBonusMultiplier =
+          rawSecBonusMult === undefined ||
+          rawSecBonusMult === "" ||
+          isNaN(Number(rawSecBonusMult))
+            ? 0
+            : Math.max(0, Number(rawSecBonusMult));
+        const rawSecBonusMonth = params.secondaryBonusMonth;
+        const secondaryBonusMonth =
+          rawSecBonusMonth === undefined ||
+          rawSecBonusMonth === "" ||
+          isNaN(parseInt(rawSecBonusMonth, 10))
+            ? 7
+            : Math.min(12, Math.max(1, parseInt(rawSecBonusMonth, 10)));
+
         if (!targetDateStr) return null;
 
         const simTargetDate = parseDate(targetDateStr);
@@ -7110,6 +7339,25 @@
                   type: "ANNUAL_BONUS",
                   amount: bonusAmount,
                   multiplier: annualBonusMultiplier,
+                });
+              }
+
+              // Secondary Bonus (Mid-Year / Semi-Annual Bonus)
+              if (
+                secondaryBonusMultiplier > 0 &&
+                calMonth === secondaryBonusMonth
+              ) {
+                const secBonusAmount = currentSalary * secondaryBonusMultiplier;
+                currentPoolBalance += secBonusAmount;
+                cumulativeSalary += secBonusAmount;
+                totalAnnualBonus += secBonusAmount;
+                monthlyCashflows[monthKey].salary += secBonusAmount;
+                yearlyCashflows[yearKey].salary += secBonusAmount;
+                simulationLogs.push({
+                  date: dateStr,
+                  type: "SECONDARY_BONUS",
+                  amount: secBonusAmount,
+                  multiplier: secondaryBonusMultiplier,
                 });
               }
 
@@ -7932,6 +8180,24 @@
             rawBonusMonth === "" || isNaN(parseInt(rawBonusMonth, 10))
               ? 1
               : parseInt(rawBonusMonth, 10);
+          const rawSecBonusMult = document.getElementById(
+            "inputSecondaryBonusMultiplier"
+          )
+            ? document.getElementById("inputSecondaryBonusMultiplier").value
+            : "0";
+          const secondaryBonusMultiplier =
+            rawSecBonusMult === "" || isNaN(Number(rawSecBonusMult))
+              ? 0
+              : Math.max(0, Number(rawSecBonusMult));
+          const rawSecBonusMonth = document.getElementById(
+            "selectSecondaryBonusMonth"
+          )
+            ? document.getElementById("selectSecondaryBonusMonth").value
+            : "7";
+          const secondaryBonusMonth =
+            rawSecBonusMonth === "" || isNaN(parseInt(rawSecBonusMonth, 10))
+              ? 7
+              : parseInt(rawSecBonusMonth, 10);
           const inflationRate =
             (parseFloat(document.getElementById("inputInflation").value) || 0) /
             100;
@@ -7980,6 +8246,8 @@
             salaryGrowthRate,
             annualBonusMultiplier,
             annualBonusMonth,
+            secondaryBonusMultiplier,
+            secondaryBonusMonth,
             inflationRate,
             poolAnnualRate,
             term6MAnnualRate: autoTermRate,
@@ -8221,6 +8489,8 @@
             goalReached,
             goalReachedDate,
             inflationAdjusted: totals.inflationAdjusted,
+            simulationLogs: res.simulationLogs,
+            dailySnapshots: res.dailySnapshots,
           };
           window.simResult = simResult;
 
@@ -8518,10 +8788,16 @@
               amount: formatCurrency(log.amount),
               rate: ((log.growthRate || 0) * 100).toFixed(1),
             });
-          } else if (log.type === "ANNUAL_BONUS") {
+          } else if (
+            log.type === "ANNUAL_BONUS" ||
+            log.type === "SECONDARY_BONUS"
+          ) {
             iconClass = "fa-gift text-purple-400";
             bgClass = "bg-purple-950/20 border-purple-800/40";
-            title = t("log_bonus_title");
+            title =
+              log.type === "SECONDARY_BONUS"
+                ? t("log_secondary_bonus_title") || t("log_bonus_title")
+                : t("log_bonus_title");
             details = t("log_bonus_details", {
               amount: formatCurrency(log.amount),
               multiplier: log.multiplier !== undefined ? log.multiplier : 1.0,
@@ -9502,11 +9778,12 @@
         ].sort();
         if (years.length === 0) return;
 
-        // 3. Compute values per month & global peak normalization value
+        // 3. Compute values per month & global min/peak normalization value
         const monthlyData = {};
         const cashflows =
           (window.simResult && window.simResult.monthlyCashflows) || {};
         let peakVal = 1;
+        let minVal = Infinity;
         let prevMonthWealth = (snapshots[0] && snapshots[0].totalWealth) || 0;
 
         years.forEach((y) => {
@@ -9531,6 +9808,7 @@
               const val =
                 mode === "wealth" ? monthWealth : Math.max(0, netInflow);
               if (val > peakVal) peakVal = val;
+              if (val < minVal) minVal = val;
 
               monthlyData[y][m] = {
                 active: true,
@@ -9548,6 +9826,17 @@
             }
           }
         });
+        if (minVal === Infinity) minVal = 0;
+
+        // Update Heatmap Legend Min / Max markers (Issue #76)
+        const minLegendEl = document.getElementById("heatmapLegendMinText");
+        const maxLegendEl = document.getElementById("heatmapLegendMaxText");
+        if (minLegendEl) {
+          minLegendEl.textContent = `${t("lbl_low") || "Min"}: ${formatCurrency(minVal)}`;
+        }
+        if (maxLegendEl) {
+          maxLegendEl.textContent = `${t("lbl_high") || "Peak"}: ${formatCurrency(peakVal)}`;
+        }
 
         // 4. Render Table Header Row
         const headerRow = document.createElement("div");
@@ -9582,16 +9871,29 @@
                 100,
                 Math.max(5, Math.round((d.val / peakVal) * 100))
               );
-              const colorClasses =
+              const tier =
                 intensity < 15
-                  ? "bg-emerald-950/70 text-emerald-300 border-emerald-900/40"
+                  ? 1
                   : intensity < 35
-                    ? "bg-emerald-900/80 text-emerald-200 border-emerald-800/40"
+                    ? 2
                     : intensity < 55
-                      ? "bg-emerald-800 text-white border-emerald-700/40"
+                      ? 3
                       : intensity < 75
-                        ? "bg-emerald-600 text-white border-emerald-500/40"
+                        ? 4
                         : intensity < 90
+                          ? 5
+                          : 6;
+
+              const colorClasses =
+                tier === 1
+                  ? "bg-emerald-950/70 text-emerald-300 border-emerald-900/40"
+                  : tier === 2
+                    ? "bg-emerald-900/80 text-emerald-200 border-emerald-800/40"
+                    : tier === 3
+                      ? "bg-emerald-800 text-white border-emerald-700/40"
+                      : tier === 4
+                        ? "bg-emerald-600 text-white border-emerald-500/40"
+                        : tier === 5
                           ? "bg-emerald-500 text-white font-medium border-emerald-400/40"
                           : "bg-emerald-400 text-slate-950 font-bold border-emerald-300/40";
 
@@ -9616,6 +9918,7 @@
               rowHtml += `
                       <div
                         class="heatmap-cell h-9 rounded-lg flex items-center justify-center text-[10.5px] font-mono cursor-pointer transition transform hover:scale-105 hover:z-10 shadow-sm border ${colorClasses}"
+                        data-tier="${tier}"
                         onmouseenter="showHeatmapTooltip(event, '${payload}')"
                         onmousemove="positionHeatmapTooltip(event)"
                         onmouseleave="hideHeatmapTooltip()"
@@ -9675,6 +9978,35 @@
         });
       }
       window.renderHeatmapChart = renderHeatmapChart;
+
+      function highlightHeatmapTier(tier) {
+        const cells = document.querySelectorAll(".heatmap-cell");
+        cells.forEach((cell) => {
+          const cellTier = parseInt(cell.getAttribute("data-tier"), 10);
+          if (cellTier === tier) {
+            cell.classList.add("ring-2", "ring-white", "scale-110", "z-20");
+            cell.classList.remove("opacity-30");
+          } else {
+            cell.classList.add("opacity-30");
+            cell.classList.remove("ring-2", "ring-white", "scale-110", "z-20");
+          }
+        });
+      }
+      window.highlightHeatmapTier = highlightHeatmapTier;
+
+      function clearHeatmapHighlights() {
+        const cells = document.querySelectorAll(".heatmap-cell");
+        cells.forEach((cell) => {
+          cell.classList.remove(
+            "ring-2",
+            "ring-white",
+            "scale-110",
+            "z-20",
+            "opacity-30"
+          );
+        });
+      }
+      window.clearHeatmapHighlights = clearHeatmapHighlights;
 
       function toggleHeatmap() {
         switchAnalyticsTab("heatmap");
@@ -10261,6 +10593,16 @@
             annualBonusMonth: document.getElementById("selectAnnualBonusMonth")
               ? document.getElementById("selectAnnualBonusMonth").value
               : "1",
+            secondaryBonusMultiplier: document.getElementById(
+              "inputSecondaryBonusMultiplier"
+            )
+              ? document.getElementById("inputSecondaryBonusMultiplier").value
+              : "0",
+            secondaryBonusMonth: document.getElementById(
+              "selectSecondaryBonusMonth"
+            )
+              ? document.getElementById("selectSecondaryBonusMonth").value
+              : "7",
             inflation: document.getElementById("inputInflation")
               ? document.getElementById("inputInflation").value
               : "0",
@@ -10456,6 +10798,18 @@
             )
               document.getElementById("selectAnnualBonusMonth").value =
                 p.annualBonusMonth;
+            if (
+              p.secondaryBonusMultiplier !== undefined &&
+              document.getElementById("inputSecondaryBonusMultiplier")
+            )
+              document.getElementById("inputSecondaryBonusMultiplier").value =
+                p.secondaryBonusMultiplier;
+            if (
+              p.secondaryBonusMonth !== undefined &&
+              document.getElementById("selectSecondaryBonusMonth")
+            )
+              document.getElementById("selectSecondaryBonusMonth").value =
+                p.secondaryBonusMonth;
             if (
               p.inflation !== undefined &&
               document.getElementById("inputInflation")
@@ -11259,6 +11613,16 @@
           annualBonusMonth: document.getElementById("selectAnnualBonusMonth")
             ? document.getElementById("selectAnnualBonusMonth").value
             : "1",
+          secondaryBonusMultiplier: document.getElementById(
+            "inputSecondaryBonusMultiplier"
+          )
+            ? document.getElementById("inputSecondaryBonusMultiplier").value
+            : "0",
+          secondaryBonusMonth: document.getElementById(
+            "selectSecondaryBonusMonth"
+          )
+            ? document.getElementById("selectSecondaryBonusMonth").value
+            : "7",
           inflation: document.getElementById("inputInflation").value,
           goal: parseFormattedNumber(
             document.getElementById("inputSavingsGoal").value
@@ -11321,6 +11685,18 @@
             )
               document.getElementById("selectAnnualBonusMonth").value =
                 params.annualBonusMonth;
+            if (
+              params.secondaryBonusMultiplier !== undefined &&
+              document.getElementById("inputSecondaryBonusMultiplier")
+            )
+              document.getElementById("inputSecondaryBonusMultiplier").value =
+                params.secondaryBonusMultiplier;
+            if (
+              params.secondaryBonusMonth !== undefined &&
+              document.getElementById("selectSecondaryBonusMonth")
+            )
+              document.getElementById("selectSecondaryBonusMonth").value =
+                params.secondaryBonusMonth;
             if (params.inflation !== undefined)
               document.getElementById("inputInflation").value =
                 params.inflation;
@@ -11449,6 +11825,8 @@
           "inputSalaryGrowth",
           "inputAnnualBonusMultiplier",
           "selectAnnualBonusMonth",
+          "inputSecondaryBonusMultiplier",
+          "selectSecondaryBonusMonth",
           "inputInflation",
           "inputSavingsGoal",
           "inputPoolRate",
