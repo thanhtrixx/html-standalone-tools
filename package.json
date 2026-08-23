@@ -19,8 +19,7 @@
     "test:ui": "node tests/ui-ux.test.js",
     "format": "prettier --write .",
     "lint:check": "prettier --check .",
-    "pack:release": "node scripts/pack-release.js",
-    "prepare": "husky"
+    "pack:release": "node scripts/pack-release.js"
   },
   "repository": {
     "type": "git",
@@ -36,8 +35,6 @@
   "homepage": "https://github.com/thanhtrixx/html-standalone-tools#readme",
   "devDependencies": {
     "html-minifier-terser": "^7.2.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^17.3.0",
     "prettier": "^3.9.6",
     "terser": "^5.50.0"
   }
