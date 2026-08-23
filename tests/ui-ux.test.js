@@ -22,6 +22,7 @@ function createDOMEnvironment() {
     const el = {
       id,
       tagName: tagName.toUpperCase(),
+      checked: false,
       get value() {
         return _val;
       },
@@ -1729,6 +1730,85 @@ async function runUIUXTests() {
     aiModal.classList.contains("hidden"),
     "R39: dismissAllModals() cleanly dismisses #aiDossierModal"
   );
+
+  // Test R40: Goal-Specific AI Prompt Blueprints, Privacy Masking & Bilingual Switching (Issue #59)
+  app.openAIDossierModal();
+
+  // 1. Test Blueprint switching (FIRE blueprint)
+  app.setDossierBlueprint("fire");
+  assert(
+    previewEl.textContent.includes(
+      "FIRE (Financial Independence, Retire Early)"
+    ),
+    "R40: setDossierBlueprint('fire') renders FIRE prompt blueprint instructions"
+  );
+
+  // 2. Test Downpayment blueprint
+  app.setDossierBlueprint("real_estate");
+  assert(
+    previewEl.textContent.includes(
+      "Real Estate Downpayment & Milestone Sizing"
+    ),
+    "R40: setDossierBlueprint('real_estate') renders Real Estate prompt blueprint instructions"
+  );
+
+  // 3. Test Ladder blueprint
+  app.setDossierBlueprint("ladder");
+  assert(
+    previewEl.textContent.includes(
+      "Deposit Ladder & Emergency Buffer Optimization"
+    ),
+    "R40: setDossierBlueprint('ladder') renders Deposit Ladder prompt blueprint instructions"
+  );
+
+  // 4. Test Privacy Anonymization Mask Toggle
+  const privacyToggle = app.document.getElementById("togglePrivacyMask");
+  assert(
+    privacyToggle !== null,
+    "R40: #togglePrivacyMask toggle exists in DOM"
+  );
+  privacyToggle.checked = true;
+  app.toggleDossierPrivacyMask();
+  assert(
+    previewEl.textContent.includes("Relative Multiples") &&
+      previewEl.textContent.includes("Salary"),
+    "R40: Enabling privacy mask generates zero-leak anonymized dossier with salary multiples"
+  );
+  privacyToggle.checked = false;
+  app.toggleDossierPrivacyMask();
+
+  // 5. Test Custom Inquiries Textarea
+  const customInquiriesEl = app.document.getElementById(
+    "dossierCustomInquiries"
+  );
+  assert(
+    customInquiriesEl !== null,
+    "R40: #dossierCustomInquiries textarea exists in DOM"
+  );
+  customInquiriesEl.value = "Plan to take sabbatical in year 2";
+  app.renderAIDossierModalContent();
+  assert(
+    previewEl.textContent.includes("Custom Inquiries from Client") &&
+      previewEl.textContent.includes("Plan to take sabbatical in year 2"),
+    "R40: Custom inquiries textarea appends client notes to rendered Markdown"
+  );
+
+  // 6. Test Bilingual Switching for AI Dossier Preview
+  app.changeLanguage("vi");
+  app.renderAIDossierModalContent();
+  assert(
+    previewEl.textContent.includes("Hồ Sơ Sức Khỏe Tài Chính") ||
+      previewEl.textContent.includes("Chẩn Đoán Sức Khỏe Tài Chính"),
+    "R40: Vietnamese language switches AI Dossier Markdown preview to Vietnamese headers"
+  );
+  app.changeLanguage("en");
+  app.renderAIDossierModalContent();
+  assert(
+    previewEl.textContent.includes("Financial Health Dossier"),
+    "R40: English language restores AI Dossier Markdown preview to English headers"
+  );
+
+  app.dismissAllModals();
 
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
