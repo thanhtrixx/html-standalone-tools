@@ -141,3 +141,9 @@ _Avoid_: Savings ratio, deposit percentage
 **Privacy Anonymization Mask**:
 A client-side sanitization transformation that converts absolute monetary values in the Financial Health Dossier into normalized salary multiples and portfolio percentage shares, transforms calendar dates into relative simulation month offsets, and anonymizes financial institution names before export or clipboard transfer.
 _Avoid_: Data hide, obfuscation
+
+### Micro-Interactions & Contextual Help
+
+**Interactive Floating Tooltip Engine**:
+A zero-dependency floating popover engine providing instant (<100ms) hover explanations, mobile touch toggle with event isolation from parent form labels, smart viewport collision detection, and full WCAG 2.1 AA keyboard accessibility across all simulation parameters and summary KPI metric cards.
+_Avoid_: Native browser title tooltip, delayed OS tooltips, un-isolated label clicks
