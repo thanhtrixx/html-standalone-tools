@@ -1851,6 +1851,45 @@ async function runUIUXTests() {
     "R41: toggleCompareMode(false) hides #compareSection and resets comparisonActive"
   );
 
+  // Test R42: Issue #72 Timeframe Preset Placement, Standard Bank Tenors & Capital Yield
+  // 1. Timeframe Presets inside Target Date Section
+  assert(
+    typeof app.setPresetYears === "function",
+    "R42: setPresetYears function is exposed globally"
+  );
+  app.setPresetYears(3);
+  const targetDateInput = app.document.getElementById("inputTargetDate");
+  assert(
+    targetDateInput && targetDateInput.value.length > 0,
+    `R42: setPresetYears(3) updated inputTargetDate to ${targetDateInput ? targetDateInput.value : "empty"}`
+  );
+
+  // 2. Standard Tenor Selector
+  assert(
+    typeof app.setAutoTermTenor === "function",
+    "R42: setAutoTermTenor function is exposed globally"
+  );
+  app.setAutoTermTenor(12, 6.0);
+  const monthsInput = app.document.getElementById("inputAutoTermMonths");
+  const rateInput = app.document.getElementById("inputAutoTermRate");
+  assert(
+    monthsInput && String(monthsInput.value) === "12",
+    `R42: setAutoTermTenor(12, 6.0) updated inputAutoTermMonths to 12 (${monthsInput ? monthsInput.value : "null"})`
+  );
+  assert(
+    rateInput && String(rateInput.value) === "6",
+    `R42: setAutoTermTenor(12, 6.0) updated inputAutoTermRate to 6.0 (${rateInput ? rateInput.value : "null"})`
+  );
+
+  // 3. Capital Yield Calculation with Initial Portfolio
+  app.document.getElementById("inputSalary").value = "0";
+  app.runSimulation();
+  const yieldDisplay = app.document.getElementById("metricInterestPercentage");
+  assert(
+    yieldDisplay !== null && !yieldDisplay.innerText.includes("NaN"),
+    `R42: Capital Yield with zero monthly salary produces valid formatted percentage: ${yieldDisplay ? yieldDisplay.innerText : "null"}`
+  );
+
   app.dismissAllModals();
 
   console.log(

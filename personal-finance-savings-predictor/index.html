@@ -1038,6 +1038,60 @@
               id="inputTargetDate"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+            <div
+              class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar py-1 touch-pan-x"
+            >
+              <button
+                type="button"
+                data-preset-years="1"
+                onclick="setPresetYears(1)"
+                class="timeframe-preset-btn min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                data-i18n-title="preset_1y"
+                title="1 Year"
+              >
+                1Y
+              </button>
+              <button
+                type="button"
+                data-preset-years="2"
+                onclick="setPresetYears(2)"
+                class="timeframe-preset-btn min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-indigo-600 text-white rounded-lg border border-indigo-500 transition flex items-center justify-center whitespace-nowrap"
+                data-i18n-title="preset_2y"
+                title="2 Years"
+              >
+                2Y
+              </button>
+              <button
+                type="button"
+                data-preset-years="3"
+                onclick="setPresetYears(3)"
+                class="timeframe-preset-btn min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                data-i18n-title="preset_3y"
+                title="3 Years"
+              >
+                3Y
+              </button>
+              <button
+                type="button"
+                data-preset-years="5"
+                onclick="setPresetYears(5)"
+                class="timeframe-preset-btn min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                data-i18n-title="preset_5y"
+                title="5 Years"
+              >
+                5Y
+              </button>
+              <button
+                type="button"
+                data-preset-years="10"
+                onclick="setPresetYears(10)"
+                class="timeframe-preset-btn min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                data-i18n-title="preset_10y"
+                title="10 Years"
+              >
+                10Y
+              </button>
+            </div>
           </div>
           <div>
             <label
@@ -1523,6 +1577,73 @@
               step="1"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
+            <div
+              class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar py-1 touch-pan-x"
+            >
+              <button
+                type="button"
+                data-tenor-months="1"
+                onclick="setAutoTermTenor(1, 3.2)"
+                class="tenor-chip min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                title="1 Month (3.2%)"
+              >
+                1M
+              </button>
+              <button
+                type="button"
+                data-tenor-months="3"
+                onclick="setAutoTermTenor(3, 3.8)"
+                class="tenor-chip min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                title="3 Months (3.8%)"
+              >
+                3M
+              </button>
+              <button
+                type="button"
+                data-tenor-months="6"
+                onclick="setAutoTermTenor(6, 5.5)"
+                class="tenor-chip min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs font-semibold bg-indigo-600 text-white rounded-lg border border-indigo-500 transition flex items-center justify-center whitespace-nowrap"
+                title="6 Months (5.5%)"
+              >
+                6M
+              </button>
+              <button
+                type="button"
+                data-tenor-months="12"
+                onclick="setAutoTermTenor(12, 6.0)"
+                class="tenor-chip min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                title="12 Months (6.0%)"
+              >
+                12M
+              </button>
+              <button
+                type="button"
+                data-tenor-months="18"
+                onclick="setAutoTermTenor(18, 6.2)"
+                class="tenor-chip min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                title="18 Months (6.2%)"
+              >
+                18M
+              </button>
+              <button
+                type="button"
+                data-tenor-months="24"
+                onclick="setAutoTermTenor(24, 6.5)"
+                class="tenor-chip min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                title="24 Months (6.5%)"
+              >
+                24M
+              </button>
+              <button
+                type="button"
+                data-tenor-months="36"
+                onclick="setAutoTermTenor(36, 6.8)"
+                class="tenor-chip min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
+                title="36 Months (6.8%)"
+              >
+                36M
+              </button>
+            </div>
           </div>
           <div>
             <label
@@ -1551,48 +1672,6 @@
             <i class="fa-solid fa-play text-xs"></i
             ><span data-i18n="btn_run_sim">Run Simulation</span>
           </button>
-          <div class="flex flex-wrap gap-2">
-            <button
-              onclick="setPresetYears(1)"
-              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
-              data-i18n-title="preset_1y"
-              title="1 Year"
-            >
-              1Y
-            </button>
-            <button
-              onclick="setPresetYears(2)"
-              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
-              data-i18n-title="preset_2y"
-              title="2 Years"
-            >
-              2Y
-            </button>
-            <button
-              onclick="setPresetYears(3)"
-              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
-              data-i18n-title="preset_3y"
-              title="3 Years"
-            >
-              3Y
-            </button>
-            <button
-              onclick="setPresetYears(5)"
-              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
-              data-i18n-title="preset_5y"
-              title="5 Years"
-            >
-              5Y
-            </button>
-            <button
-              onclick="setPresetYears(10)"
-              class="timeframe-preset-btn bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg border border-slate-700 transition"
-              data-i18n-title="preset_10y"
-              title="10 Years"
-            >
-              10Y
-            </button>
-          </div>
           <button
             type="button"
             onclick="togglePresetsModal(true)"
@@ -4743,9 +4822,78 @@
       function setPresetYears(years) {
         const today = new Date();
         const target = addMonths(today, years * 12);
-        document.getElementById("inputTargetDate").value = formatDate(target);
+        const targetInput = document.getElementById("inputTargetDate");
+        if (targetInput) targetInput.value = formatDate(target);
+
+        document.querySelectorAll("[data-preset-years]").forEach((btn) => {
+          if (
+            parseInt(btn.getAttribute("data-preset-years"), 10) ===
+            parseInt(years, 10)
+          ) {
+            btn.classList.add(
+              "bg-indigo-600",
+              "text-white",
+              "border-indigo-500"
+            );
+            btn.classList.remove(
+              "bg-slate-800",
+              "text-slate-300",
+              "border-slate-700"
+            );
+          } else {
+            btn.classList.remove(
+              "bg-indigo-600",
+              "text-white",
+              "border-indigo-500"
+            );
+            btn.classList.add(
+              "bg-slate-800",
+              "text-slate-300",
+              "border-slate-700"
+            );
+          }
+        });
         runSimulation();
       }
+      window.setPresetYears = setPresetYears;
+
+      function setAutoTermTenor(months, rate) {
+        const monthsEl = document.getElementById("inputAutoTermMonths");
+        if (monthsEl) monthsEl.value = months;
+        const rateEl = document.getElementById("inputAutoTermRate");
+        if (rateEl && rate !== undefined) rateEl.value = rate;
+
+        document.querySelectorAll("[data-tenor-months]").forEach((btn) => {
+          if (
+            parseInt(btn.getAttribute("data-tenor-months"), 10) ===
+            parseInt(months, 10)
+          ) {
+            btn.classList.add(
+              "bg-indigo-600",
+              "text-white",
+              "border-indigo-500"
+            );
+            btn.classList.remove(
+              "bg-slate-800",
+              "text-slate-300",
+              "border-slate-700"
+            );
+          } else {
+            btn.classList.remove(
+              "bg-indigo-600",
+              "text-white",
+              "border-indigo-500"
+            );
+            btn.classList.add(
+              "bg-slate-800",
+              "text-slate-300",
+              "border-slate-700"
+            );
+          }
+        });
+        triggerReactiveSimulation();
+      }
+      window.setAutoTermTenor = setAutoTermTenor;
       function resetAll(force = false) {
         if (
           !force &&
@@ -6157,6 +6305,16 @@
             ? finalSnapshot.totalWealth / Math.pow(1 + inflationRate, years)
             : finalSnapshot.totalWealth;
 
+        const initialStartingPrincipal =
+          initialPoolStartBalance +
+          allSavings
+            .filter((s) => s.type === "CSV")
+            .reduce((sum, s) => sum + s.principal, 0);
+        const totalInjectedCapital = Math.max(
+          0,
+          initialStartingPrincipal + cumulativeSalary + totalAnnualBonus
+        );
+
         return {
           allSavings,
           dailySnapshots,
@@ -6179,6 +6337,8 @@
             created6MCount,
             totalWithdrawals,
             inflationAdjusted,
+            initialStartingPrincipal,
+            totalInjectedCapital,
           },
           goalReached,
           goalReachedDate,
@@ -6884,13 +7044,14 @@ ${customInquiriesBlock}
           if (elTotalInt)
             elTotalInt.innerText = formatCurrency(totals.totalInterest);
 
+          const totalInjected =
+            totals.totalInjectedCapital !== undefined
+              ? totals.totalInjectedCapital
+              : totals.cumulativeSalary;
           const intRatio =
-            totals.cumulativeSalary > 0
-              ? (
-                  (totals.totalInterest / totals.cumulativeSalary) *
-                  100
-                ).toFixed(1)
-              : 0;
+            totalInjected > 0
+              ? ((totals.totalInterest / totalInjected) * 100).toFixed(1)
+              : "0.0";
           const elIntPct = document.getElementById("metricInterestPercentage");
           if (elIntPct)
             elIntPct.innerText = `+${intRatio}% ${t("yield_suffix")}`;
