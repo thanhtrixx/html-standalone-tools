@@ -1206,11 +1206,16 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputSalaryGrowth"
-              data-i18n="lbl_salary_growth"
-              >Salary Growth (%/yr)</label
             >
+              <span data-i18n="lbl_salary_growth">Salary Growth (%/yr)</span>
+              <i
+                class="fa-solid fa-circle-info text-slate-500 hover:text-slate-300 cursor-help"
+                data-i18n-title="tooltip_salary_growth"
+                title="Compound salary escalation applied annually on the 12-month anniversary of your start date."
+              ></i>
+            </label>
             <input
               type="number"
               id="inputSalaryGrowth"
@@ -1269,10 +1274,18 @@
                 max="10"
                 step="0.1"
                 placeholder="1.0x"
+                oninput="
+                  updateBonusPreview();
+                  triggerReactiveSimulation();
+                "
                 class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
               />
               <select
                 id="selectAnnualBonusMonth"
+                onchange="
+                  updateBonusPreview();
+                  triggerReactiveSimulation();
+                "
                 class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
               >
                 <option value="1" selected>Jan (Tháng 1)</option>
@@ -1288,6 +1301,12 @@
                 <option value="11">Nov (Tháng 11)</option>
                 <option value="12">Dec (Tháng 12)</option>
               </select>
+            </div>
+            <div
+              id="helperAnnualBonusPreview"
+              class="text-[11px] text-amber-400 font-medium mt-1 min-h-[16px]"
+            >
+              ≈ 25,000,000 VND every January
             </div>
           </div>
           <div>
@@ -1396,11 +1415,16 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputPoolRate"
-              data-i18n="lbl_pool_rate"
-              >Pool Rate (%/yr)</label
             >
+              <span data-i18n="lbl_pool_rate">Pool Rate (%/yr)</span>
+              <i
+                class="fa-solid fa-circle-info text-slate-500 hover:text-slate-300 cursor-help"
+                data-i18n-title="tooltip_pool_rate"
+                title="Annual interest earned daily on uncommitted cash in your flexible liquid pool."
+              ></i>
+            </label>
             <input
               type="number"
               id="inputPoolRate"
@@ -1672,6 +1696,18 @@
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 transition"
             />
             <input type="hidden" id="input6MRate" value="5.8" />
+          </div>
+          <div
+            id="autoTermFormulaHint"
+            class="sm:col-span-2 lg:col-span-3 px-3.5 py-2.5 rounded-xl bg-purple-950/30 border border-purple-800/40 text-purple-200 text-xs flex items-center gap-2.5 shadow-sm"
+          >
+            <i
+              class="fa-solid fa-calculator text-purple-400 flex-shrink-0 text-sm"
+            ></i>
+            <span id="autoTermFormulaText" class="leading-relaxed">
+              Trigger when Pool ≥ Threshold + Buffer (e.g. 200M + 30M = 230M) ·
+              Retains 30M in Pool, sweeps excess into 6M Term Deposit
+            </span>
           </div>
         </div>
         <div class="mt-4 flex flex-wrap items-center gap-3">
@@ -2106,12 +2142,18 @@
                   ></span
                   ><span data-i18n="lbl_legend_pool">Pool</span></span
                 >
-                <span class="flex items-center"
+                <span class="flex items-center gap-1.5"
                   ><span
                     class="w-3 h-3 rounded-full bg-amber-400 inline-block mr-1 opacity-0"
                     id="realLineIndicator"
                   ></span
-                  ><span data-i18n="lbl_legend_real">Real</span></span
+                  ><span data-i18n="lbl_legend_real">Real</span>
+                  <span
+                    id="realZeroInflationNote"
+                    class="text-[10px] text-amber-400/90 italic hidden"
+                    data-i18n="lbl_real_zero_inflation_note"
+                    >(0% inflation — matches nominal)</span
+                  ></span
                 >
               </div>
             </div>
@@ -3673,6 +3715,15 @@
           lbl_auto_term_months: "Auto Term Duration (Months)",
           lbl_auto_term_rate: "Auto Term Rate (%/yr)",
           lbl_6m_rate: "Auto Term Rate (%/yr)",
+          lbl_bonus_preview_active: "≈ {amount} every {month}",
+          lbl_bonus_preview_none: "No annual bonus scheduled",
+          lbl_auto_term_formula_hint:
+            "Trigger when Pool ≥ Threshold + Buffer (e.g. {threshold} + {buffer} = {total}) · Retains {buffer} in Pool, sweeps excess into {months}M Term Deposit",
+          tooltip_salary_growth:
+            "Compound salary escalation applied annually on the 12-month anniversary of your start date.",
+          tooltip_pool_rate:
+            "Annual interest earned daily on uncommitted cash in your flexible liquid pool.",
+          lbl_real_zero_inflation_note: "(0% inflation — matches nominal)",
           btn_run_sim: "Run Simulation",
           btn_reset: "Reset",
           preset_1y: "1 Year",
@@ -4047,6 +4098,15 @@
           lbl_auto_term_months: "Kỳ Hạn Gửi Tự Động (Tháng)",
           lbl_auto_term_rate: "Lãi Suất Kỳ Hạn Tự Động (%/năm)",
           lbl_6m_rate: "Lãi Suất Kỳ Hạn Tự Động (%/năm)",
+          lbl_bonus_preview_active: "≈ {amount} vào mỗi {month}",
+          lbl_bonus_preview_none: "Không có thưởng hàng năm",
+          lbl_auto_term_formula_hint:
+            "Kích hoạt khi Số dư linh hoạt ≥ Ngưỡng + Dự phòng (vd: {threshold} + {buffer} = {total}) · Giữ lại {buffer} trong Pool, chuyển phần vượt vào Tiết kiệm {months}T",
+          tooltip_salary_growth:
+            "Tăng lương định kỳ hàng năm vào đúng ngày tròn 12 tháng kể từ ngày bắt đầu mô phỏng.",
+          tooltip_pool_rate:
+            "Lãi suất không kỳ hạn sinh lời hàng ngày trên số dư tiền mặt linh hoạt chưa gửi tiết kiệm.",
+          lbl_real_zero_inflation_note: "(Lạm phát 0% — trùng với danh nghĩa)",
           btn_run_sim: "Chạy Giả Lập",
           btn_reset: "Đặt Lại",
           preset_1y: "1 Năm",
@@ -4537,6 +4597,7 @@
           el.value = formatNumberWithSeparators(val);
           updateVerbalHelperForInput(el);
           updatePresetChipActiveStates();
+          updateBonusPreview();
           triggerReactiveSimulation();
         }
       }
@@ -4550,6 +4611,7 @@
           el.value = formatNumberWithSeparators(next);
           updateVerbalHelperForInput(el);
           updatePresetChipActiveStates();
+          updateBonusPreview();
           triggerReactiveSimulation();
         }
       }
@@ -4572,6 +4634,7 @@
           el.value = formatNumberWithSeparators(val);
           updateVerbalHelperForInput(el);
           updatePresetChipActiveStates();
+          updateAutoTermFormulaHint();
           triggerReactiveSimulation();
         }
       }
@@ -4583,6 +4646,7 @@
           el.value = formatNumberWithSeparators(val);
           updateVerbalHelperForInput(el);
           updatePresetChipActiveStates();
+          updateAutoTermFormulaHint();
           triggerReactiveSimulation();
         }
       };
@@ -4618,6 +4682,7 @@
         const el = document.getElementById("inputAnnualBonusMultiplier");
         if (el) {
           el.value = val;
+          updateBonusPreview();
           triggerReactiveSimulation();
         }
       };
@@ -4764,8 +4829,102 @@
         }
         updateVerbalHelperForInput(input, l);
         updatePresetChipActiveStates();
+        updateBonusPreview(l);
+        updateAutoTermFormulaHint(l);
       }
       window.applyCurrencyMask = applyCurrencyMask;
+
+      function updateBonusPreview(lang) {
+        const l = lang || window.currentLang || "en";
+        const previewEl = document.getElementById("helperAnnualBonusPreview");
+        if (!previewEl) return;
+        const salaryInput = document.getElementById("inputSalary");
+        const bonusInput = document.getElementById(
+          "inputAnnualBonusMultiplier"
+        );
+        const monthSelect = document.getElementById("selectAnnualBonusMonth");
+        const salary = salaryInput
+          ? parseFormattedNumber(salaryInput.value)
+          : 0;
+        const multiplier = bonusInput ? parseFloat(bonusInput.value) || 0 : 0;
+        const month = monthSelect ? parseInt(monthSelect.value, 10) || 1 : 1;
+
+        if (multiplier <= 0 || salary <= 0) {
+          previewEl.textContent = t("lbl_bonus_preview_none");
+          previewEl.classList.remove("text-amber-400");
+          previewEl.classList.add("text-slate-500");
+          return;
+        }
+
+        const bonusAmount = salary * multiplier;
+        const monthNamesEn = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        const monthNamesVi = [
+          "Tháng 1",
+          "Tháng 2",
+          "Tháng 3",
+          "Tháng 4",
+          "Tháng 5",
+          "Tháng 6",
+          "Tháng 7",
+          "Tháng 8",
+          "Tháng 9",
+          "Tháng 10",
+          "Tháng 11",
+          "Tháng 12",
+        ];
+        const monthName =
+          l === "vi" ? monthNamesVi[month - 1] : monthNamesEn[month - 1];
+        previewEl.textContent = t("lbl_bonus_preview_active", {
+          amount: formatCurrency(bonusAmount),
+          month: monthName,
+        });
+        previewEl.classList.remove("text-slate-500");
+        previewEl.classList.add("text-amber-400");
+      }
+      window.updateBonusPreview = updateBonusPreview;
+
+      function updateAutoTermFormulaHint(lang) {
+        const l = lang || window.currentLang || "en";
+        const formulaTextEl = document.getElementById("autoTermFormulaText");
+        if (!formulaTextEl) return;
+
+        const threshEl = document.getElementById("inputAutoTermThreshold");
+        const bufferEl = document.getElementById("inputEmergencyBuffer");
+        const monthsEl = document.getElementById("inputAutoTermMonths");
+
+        const thresh = threshEl ? parseFormattedNumber(threshEl.value) : 0;
+        const buffer = bufferEl ? parseFormattedNumber(bufferEl.value) : 0;
+        const months = monthsEl ? parseInt(monthsEl.value, 10) || 6 : 6;
+        const triggerTotal = thresh + buffer;
+
+        const threshSpelled =
+          getSpelledOutAmount(thresh, l) || formatCurrency(thresh);
+        const bufferSpelled =
+          getSpelledOutAmount(buffer, l) || formatCurrency(buffer);
+        const totalSpelled =
+          getSpelledOutAmount(triggerTotal, l) || formatCurrency(triggerTotal);
+
+        formulaTextEl.textContent = t("lbl_auto_term_formula_hint", {
+          threshold: threshSpelled,
+          buffer: bufferSpelled,
+          total: totalSpelled,
+          months: months,
+        });
+      }
+      window.updateAutoTermFormulaHint = updateAutoTermFormulaHint;
 
       function updateAllVerbalHelpers(lang) {
         const l = lang || window.currentLang || "en";
@@ -4793,6 +4952,8 @@
           }
         });
         updatePresetChipActiveStates();
+        updateBonusPreview(l);
+        updateAutoTermFormulaHint(l);
         const elSimStartText = document.getElementById("lblSimStartDateText");
         if (elSimStartText) {
           elSimStartText.textContent = t("lbl_sim_starts_today", {
@@ -5074,6 +5235,7 @@
             );
           }
         });
+        updateAutoTermFormulaHint();
         triggerReactiveSimulation();
       }
       window.setAutoTermTenor = setAutoTermTenor;
@@ -7378,15 +7540,35 @@ ${customInquiriesBlock}
           // Inflation-adjusted (real) value display (R5)
           const elRealVal = document.getElementById("metricRealValue");
           const elRealLine = document.getElementById("realLineIndicator");
+          const elRealZeroNote = document.getElementById(
+            "realZeroInflationNote"
+          );
+          if (showRealValues) {
+            if (elRealLine) elRealLine.classList.remove("opacity-0");
+            if (inflationRate === 0) {
+              if (elRealZeroNote) {
+                elRealZeroNote.classList.remove("hidden");
+                elRealZeroNote.textContent = t("lbl_real_zero_inflation_note");
+              }
+            } else {
+              if (elRealZeroNote) elRealZeroNote.classList.add("hidden");
+            }
+          } else {
+            if (inflationRate > 0) {
+              if (elRealLine) elRealLine.classList.remove("opacity-0");
+            } else {
+              if (elRealLine) elRealLine.classList.add("opacity-0");
+            }
+            if (elRealZeroNote) elRealZeroNote.classList.add("hidden");
+          }
+
           if (inflationRate > 0) {
             if (elRealVal) {
               elRealVal.style.display = "";
               elRealVal.innerText = `${t("lbl_real_prefix")}${formatCurrency(totals.inflationAdjusted)}`;
             }
-            if (elRealLine) elRealLine.classList.remove("opacity-0");
           } else {
             if (elRealVal) elRealVal.style.display = "none";
-            if (elRealLine) elRealLine.classList.add("opacity-0");
           }
 
           // Earnings Breakdown
@@ -9749,11 +9931,25 @@ ${customInquiriesBlock}
         showRealValues = !showRealValues;
         window.showRealValues = showRealValues;
         const btn = document.getElementById("realToggleBtn");
-        btn.innerHTML = showRealValues
-          ? `<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_nominal">${t("btn_nominal")}</span>`
-          : `<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_real">${t("btn_real")}</span>`;
-        btn.classList.toggle("text-emerald-400", showRealValues);
-        btn.classList.toggle("text-slate-400", !showRealValues);
+        if (btn) {
+          btn.innerHTML = showRealValues
+            ? `<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_nominal">${t("btn_nominal")}</span>`
+            : `<i class="fa-solid fa-coins mr-1"></i><span data-i18n="btn_real">${t("btn_real")}</span>`;
+          btn.classList.toggle("text-emerald-400", showRealValues);
+          btn.classList.toggle("text-slate-400", !showRealValues);
+        }
+        const elRealZeroNote = document.getElementById("realZeroInflationNote");
+        if (elRealZeroNote) {
+          const inflationRate =
+            (parseFloat(document.getElementById("inputInflation")?.value) ||
+              0) / 100;
+          if (showRealValues && inflationRate === 0) {
+            elRealZeroNote.classList.remove("hidden");
+            elRealZeroNote.textContent = t("lbl_real_zero_inflation_note");
+          } else {
+            elRealZeroNote.classList.add("hidden");
+          }
+        }
         showToast(
           showRealValues ? t("toast_real_shown") : t("toast_nominal_shown"),
           "info"
