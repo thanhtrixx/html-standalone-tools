@@ -1602,6 +1602,30 @@ async function runUIUXTests() {
     "R36: .no-scrollbar utility class defined in CSS styles"
   );
 
+  // Test R37: Adaptive Mobile Card-View for Savings Accounts Hub (ADR-0016, Issue #48)
+  assert(
+    app.htmlContent.includes('id="savingsAccountsTableContainer"') &&
+      app.htmlContent.includes("hidden sm:block"),
+    "R37: #savingsAccountsTableContainer has responsive desktop display class (hidden sm:block)"
+  );
+  assert(
+    app.htmlContent.includes('id="savingsAccountsCardContainer"') &&
+      app.htmlContent.includes("sm:hidden"),
+    "R37: #savingsAccountsCardContainer has responsive mobile card display class (sm:hidden)"
+  );
+  assert(
+    app.document.getElementById("savingsCardList") !== null,
+    "R37: #savingsCardList mobile card list container element exists"
+  );
+
+  // Test that rendering savings hub populates both table and mobile card list
+  app.renderFilteredSavingsTable();
+  const cardListEl = app.document.getElementById("savingsCardList");
+  assert(
+    cardListEl !== null && cardListEl.children.length > 0,
+    "R37: renderFilteredSavingsTable() populates #savingsCardList with adaptive card views"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

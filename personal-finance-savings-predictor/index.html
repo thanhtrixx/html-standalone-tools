@@ -2615,11 +2615,13 @@
             </button>
           </div>
 
-          <!-- Full-Width Accounts Table -->
+          <!-- Full-Width Accounts Table (Desktop sm:block) -->
           <div
-            class="overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-950/40"
+            id="savingsAccountsTableContainer"
+            class="hidden sm:block overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-950/40"
           >
             <table
+              id="savingsAccountsTable"
               class="w-full text-left text-xs border-collapse min-w-[650px]"
             >
               <thead
@@ -2652,6 +2654,14 @@
                 class="divide-y divide-slate-800/60 text-slate-300"
               ></tbody>
             </table>
+          </div>
+
+          <!-- Adaptive Mobile Card-View for Savings Accounts Hub (ADR-0016, Issue #48) -->
+          <div
+            id="savingsAccountsCardContainer"
+            class="sm:hidden flex flex-col space-y-2.5"
+          >
+            <div id="savingsCardList" class="flex flex-col space-y-2.5"></div>
           </div>
         </div>
 
@@ -5913,6 +5923,9 @@
           return true;
         });
 
+        const cardContainer = document.getElementById("savingsCardList");
+        if (cardContainer) cardContainer.innerHTML = "";
+
         if (filtered.length === 0) {
           const emptyTr = document.createElement("tr");
           emptyTr.innerHTML = `
@@ -5921,6 +5934,14 @@
               ${t("empty_savings_filter")}
             </td>`;
           tbody.appendChild(emptyTr);
+
+          if (cardContainer) {
+            cardContainer.innerHTML = `
+              <div class="py-6 text-center text-slate-500 text-xs bg-slate-950/40 rounded-xl border border-slate-800">
+                <i class="fa-solid fa-inbox text-lg mb-2 block text-slate-600"></i>
+                ${t("empty_savings_filter")}
+              </div>`;
+          }
           return;
         }
 
@@ -5970,6 +5991,47 @@
             <td class="py-2.5 px-3.5 text-center">${statusBadge}</td>
           `;
           tbody.appendChild(tr);
+
+          // Render adaptive mobile card item
+          if (cardContainer) {
+            const cardDiv = document.createElement("div");
+            cardDiv.className =
+              "savings-account-card p-3 rounded-xl border border-slate-800/80 bg-slate-950/60 flex flex-col space-y-2 text-xs shadow-sm";
+            const mobileBankStr = acc.bank
+              ? `<span class="text-[10px] text-slate-400 font-normal">· ${acc.bank}</span>`
+              : "";
+            cardDiv.innerHTML = `
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex flex-col">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-bold text-slate-100 text-xs">${acc.name}</span>
+                    ${typeBadge}
+                    ${mobileBankStr}
+                  </div>
+                </div>
+                <div>${statusBadge}</div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-800/60 text-[11px]">
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wider block">${t("th_principal")}</span>
+                  <span class="font-mono font-bold text-slate-200">${formatCurrency(acc.principal)}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wider block">${t("th_est_interest")}</span>
+                  <span class="font-mono font-bold ${isWithdrawal ? "text-rose-400" : "text-emerald-400"}">${isWithdrawal ? "-" : ""}${formatCurrency(acc.earnedInterest)}</span>
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wider block">${t("th_rate")}</span>
+                  <span class="font-mono ${isWithdrawal ? "text-slate-500" : "text-indigo-300"}">${isWithdrawal ? "-" : acc.rate + "%"}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-slate-400 uppercase tracking-wider block">${t("th_end_date")}</span>
+                  <span class="font-mono text-slate-300">${formatDateDisplay(acc.endDate)}</span>
+                </div>
+              </div>
+            `;
+            cardContainer.appendChild(cardDiv);
+          }
         });
       }
       window.renderFilteredSavingsTable = renderFilteredSavingsTable;
