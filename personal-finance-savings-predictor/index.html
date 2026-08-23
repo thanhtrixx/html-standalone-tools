@@ -1834,6 +1834,161 @@
         <div class="mt-3 h-32 relative flex items-center justify-center">
           <canvas id="chartGoalRing"></canvas>
         </div>
+
+        <!-- Shortfall Advisor Card (Issue #74) -->
+        <div
+          id="goalShortfallAdvisorCard"
+          class="mt-4 p-4 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs space-y-3 hidden"
+        >
+          <div
+            class="flex flex-wrap items-center justify-between gap-2 border-b border-amber-500/20 pb-2.5"
+          >
+            <div class="flex items-center gap-2">
+              <div
+                class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold flex-shrink-0"
+              >
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div>
+                <h4
+                  class="font-bold text-amber-200"
+                  data-i18n="hdr_shortfall_advisor"
+                >
+                  Goal Shortfall Advisor
+                </h4>
+                <p
+                  class="text-[11px] text-slate-400"
+                  data-i18n="lbl_shortfall_sub"
+                >
+                  Actionable steps to bridge your contribution gap
+                </p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span
+                class="text-[10px] uppercase tracking-wider text-rose-400 font-semibold"
+                data-i18n="lbl_projected_deficit"
+                >Projected Deficit</span
+              >
+              <div
+                id="goalShortfallDeficitText"
+                class="text-sm font-extrabold text-rose-400"
+              >
+                -0 VND
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+            <!-- Option 1: Monthly Adjustment -->
+            <div
+              class="p-3 rounded-lg bg-slate-900/60 border border-slate-800 flex flex-col justify-between space-y-2"
+            >
+              <div>
+                <div
+                  class="text-indigo-300 font-semibold flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-arrow-trend-up text-xs"></i>
+                  <span data-i18n="lbl_opt_increase_monthly"
+                    >Monthly Contribution Gap</span
+                  >
+                </div>
+                <p
+                  id="goalShortfallMonthlyText"
+                  class="text-slate-300 text-[11px] mt-1"
+                >
+                  Save an additional +0 VND / month to reach your goal by target
+                  date.
+                </p>
+              </div>
+              <button
+                type="button"
+                id="btnApplyMonthlyGap"
+                onclick="applyShortfallMonthlyGap()"
+                class="w-full mt-2 py-1.5 px-3 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/40 text-xs font-semibold transition flex items-center justify-center gap-1.5"
+              >
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span
+                  id="btnApplyMonthlyGapText"
+                  data-i18n="btn_apply_monthly_gap"
+                  >Apply +0 VND / mo</span
+                >
+              </button>
+            </div>
+
+            <!-- Option 2: Timeframe Extension -->
+            <div
+              class="p-3 rounded-lg bg-slate-900/60 border border-slate-800 flex flex-col justify-between space-y-2"
+            >
+              <div>
+                <div
+                  class="text-amber-300 font-semibold flex items-center gap-1.5"
+                >
+                  <i class="fa-solid fa-calendar-plus text-xs"></i>
+                  <span data-i18n="lbl_opt_extend_timeframe"
+                    >Timeframe Extension</span
+                  >
+                </div>
+                <p
+                  id="goalShortfallTimeframeText"
+                  class="text-slate-300 text-[11px] mt-1"
+                >
+                  Or extend your timeline by +0 months (Target: --).
+                </p>
+              </div>
+              <button
+                type="button"
+                id="btnApplyTimeframeExtension"
+                onclick="applyShortfallTimeframeExtension()"
+                class="w-full mt-2 py-1.5 px-3 rounded-lg bg-amber-600/30 hover:bg-amber-600 text-amber-200 hover:text-white border border-amber-500/40 text-xs font-semibold transition flex items-center justify-center gap-1.5"
+              >
+                <i class="fa-solid fa-calendar-check text-[10px]"></i>
+                <span
+                  id="btnApplyTimeframeText"
+                  data-i18n="btn_apply_timeframe_gap"
+                  >Extend to --</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Goal Celebration Card (Issue #74) -->
+        <div
+          id="goalCelebrationCard"
+          class="mt-4 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/30 text-xs hidden"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div
+                class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm flex-shrink-0"
+              >
+                <i class="fa-solid fa-trophy"></i>
+              </div>
+              <div>
+                <h4
+                  class="font-bold text-emerald-200"
+                  id="goalCelebrationHeading"
+                  data-i18n="hdr_goal_achieved"
+                >
+                  🎉 Goal Achieved!
+                </h4>
+                <p
+                  class="text-[11px] text-emerald-300/80"
+                  id="goalCelebrationSubText"
+                >
+                  Milestone projected with surplus.
+                </p>
+              </div>
+            </div>
+            <span
+              id="goalCelebrationBadge"
+              class="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold text-[11px] whitespace-nowrap"
+            >
+              100% Target
+            </span>
+          </div>
+        </div>
       </section>
       <!-- Metric Cards (ADR-0016, Issue #47) -->
       <section
@@ -3742,6 +3897,22 @@
           goal_reached_milestone: "🎉 Milestone: {date}",
           goal_not_reached: "📈 Goal not reached within target timeframe",
           goal_label: "Goal: {amount}",
+          hdr_shortfall_advisor: "Goal Shortfall Advisor",
+          lbl_shortfall_sub: "Actionable steps to bridge your contribution gap",
+          lbl_projected_deficit: "Projected Deficit",
+          lbl_opt_increase_monthly: "Monthly Contribution Gap",
+          lbl_shortfall_monthly_desc:
+            "Save an additional +{amount} / month to reach your goal by {date}.",
+          btn_apply_monthly_gap: "Apply +{amount} / mo",
+          lbl_opt_extend_timeframe: "Timeframe Extension",
+          lbl_shortfall_timeframe_desc:
+            "Or extend your timeline by +{months} month(s) (Target: {date}).",
+          btn_apply_timeframe_gap: "Extend to {date}",
+          hdr_goal_achieved: "🎉 Goal Achieved ({date})!",
+          lbl_goal_achieved_surplus:
+            "Milestone projected on {date} with surplus of +{surplus}.",
+          toast_applied_monthly_gap: "Added +{amount}/month to salary.",
+          toast_applied_timeframe_extension: "Target date extended to {date}.",
 
           // Metrics Cards
           hdr_total_balance: "Total Balance",
@@ -4125,6 +4296,24 @@
           goal_reached_milestone: "🎉 Cột mốc: {date}",
           goal_not_reached: "📈 Chưa đạt mục tiêu trong khung thời gian",
           goal_label: "Mục tiêu: {amount}",
+          hdr_shortfall_advisor: "Cố Vấn Bù Đắp Mục Tiêu",
+          lbl_shortfall_sub:
+            "Giải pháp thiết thực để hoàn thành mục tiêu tiết kiệm",
+          lbl_projected_deficit: "Thâm hụt dự kiến",
+          lbl_opt_increase_monthly: "Khoảng cách tiết kiệm hàng tháng",
+          lbl_shortfall_monthly_desc:
+            "Tiết kiệm thêm +{amount} / tháng để đạt mục tiêu vào ngày {date}.",
+          btn_apply_monthly_gap: "Áp dụng +{amount} / tháng",
+          lbl_opt_extend_timeframe: "Gia hạn thời gian",
+          lbl_shortfall_timeframe_desc:
+            "Hoặc kéo dài thêm +{months} tháng (Đến ngày: {date}).",
+          btn_apply_timeframe_gap: "Gia hạn đến {date}",
+          hdr_goal_achieved: "🎉 Đã Đạt Mục Tiêu ({date})!",
+          lbl_goal_achieved_surplus:
+            "Cột mốc dự kiến chạm vào {date} với thặng dư +{surplus}.",
+          toast_applied_monthly_gap: "Đã tăng thêm +{amount}/tháng vào lương.",
+          toast_applied_timeframe_extension:
+            "Đã gia hạn ngày mục tiêu sang {date}.",
 
           // Metrics Cards
           hdr_total_balance: "Tổng Số Dư",
@@ -7657,9 +7846,22 @@ ${customInquiriesBlock}
               window._lastToastGoalReached = false;
             }
             renderGoalRing(totals.totalWealth, savingsGoal);
+            renderGoalShortfallAdvisor(
+              totals,
+              savingsGoal,
+              parseDate(res.startDate || new Date()),
+              parseDate(targetDateStr),
+              goalReachedDate
+            );
           } else {
             if (goalSection) goalSection.classList.add("hidden");
             if (goalPlaceholder) goalPlaceholder.classList.remove("hidden");
+            const advisorCard = document.getElementById(
+              "goalShortfallAdvisorCard"
+            );
+            const celebCard = document.getElementById("goalCelebrationCard");
+            if (advisorCard) advisorCard.classList.add("hidden");
+            if (celebCard) celebCard.classList.add("hidden");
           }
 
           // Expose cashflows for analytics tabs
@@ -8659,6 +8861,171 @@ ${customInquiriesBlock}
           },
         });
       }
+
+      // --- GOAL SHORTFALL ADVISOR (Issue #74) ---
+      function renderGoalShortfallAdvisor(
+        totals,
+        savingsGoal,
+        startDate,
+        endDate,
+        goalReachedDate
+      ) {
+        const advisorCard = document.getElementById("goalShortfallAdvisorCard");
+        const celebCard = document.getElementById("goalCelebrationCard");
+        if (!advisorCard || !celebCard) return;
+
+        if (!savingsGoal || savingsGoal <= 0) {
+          advisorCard.classList.add("hidden");
+          celebCard.classList.add("hidden");
+          return;
+        }
+
+        const deficit = savingsGoal - totals.totalWealth;
+        if (deficit <= 0) {
+          // Goal Reached / Exceeded
+          advisorCard.classList.add("hidden");
+          celebCard.classList.remove("hidden");
+
+          const surplus = Math.max(0, totals.totalWealth - savingsGoal);
+          const reachedDateStr = goalReachedDate
+            ? formatDateDisplay(parseDate(goalReachedDate))
+            : formatDateDisplay(endDate);
+          const celebHeading = document.getElementById(
+            "goalCelebrationHeading"
+          );
+          const celebSub = document.getElementById("goalCelebrationSubText");
+          const celebBadge = document.getElementById("goalCelebrationBadge");
+
+          if (celebHeading) {
+            celebHeading.textContent = t("hdr_goal_achieved", {
+              date: reachedDateStr,
+            });
+          }
+          if (celebSub) {
+            celebSub.textContent = t("lbl_goal_achieved_surplus", {
+              date: reachedDateStr,
+              surplus: formatCurrency(surplus),
+            });
+          }
+          if (celebBadge) {
+            const pct = Math.round((totals.totalWealth / savingsGoal) * 100);
+            celebBadge.textContent = `${pct}% Target`;
+          }
+          return;
+        }
+
+        // Goal Shortfall (Wealth < Goal)
+        celebCard.classList.add("hidden");
+        advisorCard.classList.remove("hidden");
+
+        const deficitTextEl = document.getElementById(
+          "goalShortfallDeficitText"
+        );
+        if (deficitTextEl) {
+          deficitTextEl.textContent = `-${formatCurrency(deficit)}`;
+        }
+
+        const sDate = startDate instanceof Date ? startDate : new Date();
+        const eDate = endDate instanceof Date ? endDate : parseDate(endDate);
+        const totalMonths = Math.max(
+          1,
+          Math.round(
+            (eDate.getTime() - sDate.getTime()) / (30.4375 * 24 * 3600 * 1000)
+          )
+        );
+
+        // 1. Monthly contribution gap
+        const monthlyGap = Math.ceil(deficit / totalMonths);
+        window._shortfallMonthlyGap = monthlyGap;
+        const monthlyTextEl = document.getElementById(
+          "goalShortfallMonthlyText"
+        );
+        const btnMonthlyText = document.getElementById(
+          "btnApplyMonthlyGapText"
+        );
+        if (monthlyTextEl) {
+          monthlyTextEl.textContent = t("lbl_shortfall_monthly_desc", {
+            amount: formatCurrency(monthlyGap),
+            date: formatDateDisplay(eDate),
+          });
+        }
+        if (btnMonthlyText) {
+          btnMonthlyText.textContent = t("btn_apply_monthly_gap", {
+            amount: formatCurrency(monthlyGap),
+          });
+        }
+
+        // 2. Timeframe extension
+        const salaryEl = document.getElementById("inputSalary");
+        const currentSalary = salaryEl
+          ? parseFormattedNumber(salaryEl.value)
+          : 0;
+        const avgMonthlyInflow =
+          totals.totalWealth > 0
+            ? totals.totalWealth / totalMonths
+            : currentSalary;
+        const monthlyBasis = Math.max(
+          currentSalary,
+          avgMonthlyInflow > 0 ? avgMonthlyInflow : 1000000
+        );
+        const extraMonths = Math.max(1, Math.ceil(deficit / monthlyBasis));
+        const newTargetDate = addMonths(eDate, extraMonths);
+        window._shortfallNewTargetDate = newTargetDate;
+
+        const timeframeTextEl = document.getElementById(
+          "goalShortfallTimeframeText"
+        );
+        const btnTimeframeText = document.getElementById(
+          "btnApplyTimeframeText"
+        );
+        if (timeframeTextEl) {
+          timeframeTextEl.textContent = t("lbl_shortfall_timeframe_desc", {
+            months: extraMonths,
+            date: formatDateDisplay(newTargetDate),
+          });
+        }
+        if (btnTimeframeText) {
+          btnTimeframeText.textContent = t("btn_apply_timeframe_gap", {
+            months: extraMonths,
+            date: formatDateDisplay(newTargetDate),
+          });
+        }
+      }
+      window.renderGoalShortfallAdvisor = renderGoalShortfallAdvisor;
+
+      function applyShortfallMonthlyGap() {
+        if (!window._shortfallMonthlyGap) return;
+        const salaryEl = document.getElementById("inputSalary");
+        if (salaryEl) {
+          const current = parseFormattedNumber(salaryEl.value);
+          const next = current + window._shortfallMonthlyGap;
+          setSalaryValue(next);
+          showToast(
+            t("toast_applied_monthly_gap", {
+              amount: formatCurrency(window._shortfallMonthlyGap),
+            }),
+            "success"
+          );
+        }
+      }
+      window.applyShortfallMonthlyGap = applyShortfallMonthlyGap;
+
+      function applyShortfallTimeframeExtension() {
+        if (!window._shortfallNewTargetDate) return;
+        const dateEl = document.getElementById("inputTargetDate");
+        if (dateEl) {
+          dateEl.value = formatDate(window._shortfallNewTargetDate);
+          runSimulation();
+          showToast(
+            t("toast_applied_timeframe_extension", {
+              date: formatDateDisplay(window._shortfallNewTargetDate),
+            }),
+            "success"
+          );
+        }
+      }
+      window.applyShortfallTimeframeExtension =
+        applyShortfallTimeframeExtension;
 
       // --- CONTINUOUS MULTI-YEAR CALENDAR HEATMAP (ADR-0012, Issue #9) ---
       window.heatmapMetricMode = "wealth";
