@@ -102,6 +102,7 @@ function loadSimulateEngine() {
 
   return {
     simulate: sandbox.simulate,
+    generateFinancialHealthMarkdown: sandbox.generateFinancialHealthMarkdown,
     formatDate: sandbox.formatDate,
     parseDate: sandbox.parseDate,
     addMonths: sandbox.addMonths,
@@ -125,8 +126,14 @@ async function runSimulationTests() {
     }
   }
 
-  const { simulate, formatDate, parseDate, addMonths, getDaysDiff } =
-    loadSimulateEngine();
+  const {
+    simulate,
+    generateFinancialHealthMarkdown,
+    formatDate,
+    parseDate,
+    addMonths,
+    getDaysDiff,
+  } = loadSimulateEngine();
 
   // Test 1: Null target date handling
   const nullRes = simulate({ targetDateStr: "" }, []);
@@ -1129,6 +1136,180 @@ async function runSimulationTests() {
         Math.abs(s.totalWealth - (s.poolBalance + s.fixedSavingsBalance)) < 1
     ),
     "Invariant holds on every single day: totalWealth === poolBalance + fixedSavingsBalance"
+  );
+
+  // Test 22: Pure generation of Financial Health Markdown with standard parameters
+  const standardParams = {
+    targetDateStr: formatDate(oneYearLater),
+    monthlySalary: 30000000,
+    salaryGrowthRate: 0.05,
+    annualBonusMultiplier: 1.0,
+    annualBonusMonth: 1,
+    inflationRate: 0.04,
+    poolAnnualRate: 0.005,
+    autoTermThreshold: 200000000,
+    emergencyBuffer: 30000000,
+    autoTermMonths: 6,
+    autoTermAnnualRate: 0.058,
+    savingsGoal: 600000000,
+  };
+  const standardSim = simulate(standardParams, complexPortfolio);
+  const mdReport = generateFinancialHealthMarkdown(
+    standardParams,
+    standardSim,
+    {
+      blueprint: "general",
+      anonymized: false,
+      locale: "en",
+    }
+  );
+
+  assert(
+    typeof mdReport === "string" && mdReport.length > 500,
+    "generateFinancialHealthMarkdown returns a rich Markdown string"
+  );
+  assert(
+    mdReport.includes("# 🏦 Financial Health Dossier") ||
+      mdReport.includes("# Financial Health Dossier"),
+    "Markdown includes primary H1 Dossier Title"
+  );
+  assert(
+    mdReport.includes("Executive Summary") &&
+      mdReport.includes("Financial Health Diagnostics") &&
+      mdReport.includes("Income & Cashflow Architecture") &&
+      mdReport.includes("Term Deposit Portfolio Breakdown") &&
+      mdReport.includes("Liquidity & Risk Stress Assessment") &&
+      mdReport.includes("AI Advisory Blueprint"),
+    "Markdown contains all 6 standardized diagnostic sections"
+  );
+
+  // Test 23: Liquidity Runway Ratio computation
+  assert(
+    mdReport.includes("Liquidity Runway Ratio:"),
+    "Markdown includes Liquidity Runway Ratio metric"
+  );
+  const zeroWithdrawalParams = { ...standardParams };
+  const zeroWithdrawalSim = simulate(zeroWithdrawalParams, [
+    {
+      "Account Name": "Starting Cash",
+      Principal: "100000000",
+      "Start Date": formatDate(today),
+      "End Date": formatDate(oneYearLater),
+      Type: "Non-Term Pool",
+      Bank: "Cash",
+    },
+  ]);
+  const zeroWithdrawalMd = generateFinancialHealthMarkdown(
+    zeroWithdrawalParams,
+    zeroWithdrawalSim,
+    { blueprint: "general", anonymized: false, locale: "en" }
+  );
+  assert(
+    zeroWithdrawalMd.includes("Liquidity Runway Ratio:"),
+    "Runway ratio calculated when scheduled withdrawals are zero without throwing division errors"
+  );
+
+  // Test 24: Savings Retention Rate & Capital Efficiency Multiple
+  assert(
+    mdReport.includes("Savings Retention Rate:") && mdReport.includes("%"),
+    "Markdown includes Savings Retention Rate percentage"
+  );
+  assert(
+    mdReport.includes("Capital Efficiency Multiple:") ||
+      mdReport.includes("Yield Multiple:"),
+    "Markdown includes Capital Efficiency / Yield Multiple"
+  );
+
+  // Test 25: Real Wealth Preservation, Inflation Drag & Goal Feasibility
+  assert(
+    mdReport.includes("Real Wealth Preservation:") ||
+      mdReport.includes("Inflation Drag"),
+    "Markdown reports Real Wealth Preservation and Inflation Drag"
+  );
+  assert(
+    mdReport.includes("Goal Feasibility"),
+    "Markdown reports Goal Feasibility & Milestone Status"
+  );
+
+  // Test 26: Deficit Risk Score & Deficit Event Tracking
+  const deficitPortfolio = [
+    {
+      "Account Name": "Massive Outflow",
+      Principal: "500000000", // 500M withdrawal against 0 starting pool
+      "Start Date": formatDate(today),
+      "End Date": formatDate(addMonths(today, 2)),
+      Type: "Withdrawal",
+      Bank: "Outflow",
+    },
+  ];
+  const deficitSim = simulate(standardParams, deficitPortfolio);
+  const deficitMd = generateFinancialHealthMarkdown(
+    standardParams,
+    deficitSim,
+    {
+      blueprint: "general",
+      anonymized: false,
+      locale: "en",
+    }
+  );
+  assert(
+    deficitMd.includes("WARNING") ||
+      deficitMd.includes("DEFICIT") ||
+      deficitMd.includes("CRITICAL"),
+    "Deficit scenario triggers WARNING/CRITICAL liquidity risk status in markdown"
+  );
+
+  // Test 27: Privacy Anonymization Masking
+  const anonymizedMd = generateFinancialHealthMarkdown(
+    standardParams,
+    standardSim,
+    { blueprint: "general", anonymized: true, locale: "en" }
+  );
+  assert(
+    !anonymizedMd.includes("30,000,000 VND") &&
+      !anonymizedMd.includes("600,000,000 VND"),
+    "Anonymized markdown masks raw monetary figures with normalized multiples/percentages"
+  );
+  assert(
+    anonymizedMd.includes("Salary") || anonymizedMd.includes("%"),
+    "Anonymized markdown preserves normalized financial ratios and relative proportions"
+  );
+
+  // Test 28: Edge Cases & Bilingual Parity
+  const zeroSalaryParams = {
+    targetDateStr: formatDate(oneYearLater),
+    monthlySalary: 0,
+    salaryGrowthRate: 0,
+    annualBonusMultiplier: 0,
+    annualBonusMonth: 1,
+    inflationRate: 0,
+    poolAnnualRate: 0.01,
+    autoTermThreshold: 0,
+    emergencyBuffer: 0,
+    autoTermMonths: 6,
+    autoTermAnnualRate: 0.05,
+    savingsGoal: 0,
+  };
+  const zeroSalarySim = simulate(zeroSalaryParams, []);
+  const zeroSalaryMd = generateFinancialHealthMarkdown(
+    zeroSalaryParams,
+    zeroSalarySim,
+    { blueprint: "general", anonymized: false, locale: "en" }
+  );
+  assert(
+    !zeroSalaryMd.includes("NaN") && !zeroSalaryMd.includes("Infinity"),
+    "Zero salary, zero goal, zero inflation edge cases generate clean report without NaN/Infinity"
+  );
+
+  const viMdReport = generateFinancialHealthMarkdown(
+    standardParams,
+    standardSim,
+    { blueprint: "general", anonymized: false, locale: "vi" }
+  );
+  assert(
+    viMdReport.includes("Hồ Sơ Sức Khỏe Tài Chính") ||
+      viMdReport.includes("Tóm Tắt"),
+    "Vietnamese locale generates localized Markdown headers and terms"
   );
 
   console.log(
