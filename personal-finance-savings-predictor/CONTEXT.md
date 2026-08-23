@@ -95,3 +95,28 @@ _Avoid_: Chart view selector, analytics tabs, sub-panels
 **Modal Lifecycle Controller**:
 Centralized dialog manager preventing modal stacking and ensuring strict single-active-dialog invariants, background scroll locking, standardized backdrop dismissals, and unified Escape key interception.
 _Avoid_: Layered dialogs, stacked popups, independent modal listeners
+
+### Theme & Visual System
+
+**Semantic Design Tokens**:
+CSS custom properties (`--bg-page`, `--bg-card`, `--text-primary`, `--text-secondary`, `--border-color`, `--input-bg`) defining centralized visual styling for both Dark and Light themes with WCAG 2.1 AA/AAA contrast compliance.
+_Avoid_: Ad-hoc inline colors, hardcoded dark classes, un-themed overrides
+
+**Dynamic Chart Re-Theming**:
+The real-time recoloring and re-rendering of all active Chart.js canvas instances (gridlines, axis ticks, legends, tooltips) upon switching between Dark and Light themes.
+_Avoid_: Static chart colors, hardcoded canvas themes, un-synced charts
+
+### Mobile & Tablet Ergonomics
+
+**Responsive Mobile Action Sheet**:
+A sleek overflow action menu grouping secondary utilities (`Import CSV`, `Manage Data`, `Share via URL`, `Help`) on screens `< 768px` while presenting primary actions (`Theme`, `Presets`, `Language`) as dedicated icon-buttons to prevent multi-line header wrapping.
+_Avoid_: Cluttered multi-row nav, hidden header items, squished top-bar
+
+**Touch Preset Carousel**:
+A single-row, horizontally scrollable chip track featuring accessible touch targets (min 36px height) and edge scroll gradient hints for rapid parameter selection without vertical layout sprawl.
+_Avoid_: Multi-row chip wrap, tiny touch buttons, stepper clusters
+
+**Adaptive Mobile Card-View**:
+A responsive viewport-triggered rendering pattern that transforms wide desktop tabular data (`min-w-[650px]`) into touch-friendly account cards on screens `< 640px`.
+_Avoid_: Cramped table pinching, unbounded horizontal table scroll, truncated table cells
+
