@@ -122,6 +122,14 @@ function createDOMEnvironment() {
         }),
       }),
       focus() {},
+      getBoundingClientRect: () => ({
+        top: 100,
+        left: 100,
+        width: 20,
+        height: 20,
+        right: 120,
+        bottom: 120,
+      }),
       click() {
         if (this.onclick) this.onclick();
         this.dispatchEvent({ type: "click" });
@@ -170,6 +178,7 @@ function createDOMEnvironment() {
       },
       set(val) {
         this._innerHTML = String(val);
+        this._innerText = String(val).replace(/<[^>]*>/g, "");
         if (val === "") this.children = [];
       },
     });
@@ -247,6 +256,24 @@ function createDOMEnvironment() {
             return lastChild.querySelector(".toast-action-btn");
           }
         }
+        if (
+          sel.startsWith("[data-tooltip-key=") ||
+          sel === "[data-tooltip-key]"
+        ) {
+          const matchKey = sel.match(/data-tooltip-key=['"]([^'"]+)['"]/);
+          if (matchKey) {
+            const k = matchKey[1];
+            if (
+              htmlContent.includes(`data-tooltip-key="${k}"`) ||
+              htmlContent.includes(`data-tooltip-key='${k}'`)
+            ) {
+              const el = getEl("tooltip_trigger_" + k);
+              el.setAttribute("data-tooltip-key", k);
+              return el;
+            }
+            return null;
+          }
+        }
         return getEl(sel.replace(/^[#.]/, ""));
       },
       querySelectorAll: (sel) => {
@@ -258,6 +285,16 @@ function createDOMEnvironment() {
             if (b) btns.push(b);
           });
           return btns;
+        }
+        if (sel === "[data-tooltip-key]") {
+          const matches = [
+            ...htmlContent.matchAll(/data-tooltip-key=["']([^"']+)["']/g),
+          ];
+          return matches.map((m) => {
+            const el = getEl("tooltip_trigger_" + m[1]);
+            el.setAttribute("data-tooltip-key", m[1]);
+            return el;
+          });
         }
         if (sel === "[data-i18n]") {
           const matches = [
@@ -450,6 +487,7 @@ function createDOMEnvironment() {
   getEl("heatmapSection").classList.add("hidden");
   getEl("csvModal").classList.add("hidden");
   getEl("goalProgressSection").classList.add("hidden");
+  getEl("appTooltip").classList.add("hidden");
 
   vm.createContext(sandbox);
   vm.runInContext(combinedScripts, sandbox);
@@ -2439,6 +2477,138 @@ async function runUIUXTests() {
       secBonusLogs[0].amount >= 12500000,
     `R50: Secondary bonus event amount (${secBonusLogs[0] ? secBonusLogs[0].amount : 0}) matches 0.5x monthly salary`
   );
+
+  // Test R51: Issue #87 Global Interactive Floating Tooltip Engine & Comprehensive Explanations
+  // 1. Tooltip DOM container & functions existence
+  const appTooltip = app.document.getElementById("appTooltip");
+  const appTooltipContent = app.document.getElementById("appTooltipContent");
+  const appTooltipArrow = app.document.getElementById("appTooltipArrow");
+  assert(
+    appTooltip !== null &&
+      appTooltipContent !== null &&
+      appTooltipArrow !== null,
+    "R51: #appTooltip, #appTooltipContent, and #appTooltipArrow elements exist in DOM"
+  );
+  assert(
+    typeof app.showAppTooltip === "function" &&
+      typeof app.hideAppTooltip === "function" &&
+      typeof app.handleTooltipClick === "function" &&
+      typeof app.getTooltipText === "function",
+    "R51: showAppTooltip, hideAppTooltip, handleTooltipClick, and getTooltipText functions are exposed globally"
+  );
+
+  // 2. Complete Coverage: All 12 simulation parameters have .tooltip-trigger buttons
+  const paramKeys = [
+    "tooltip_target_date",
+    "tooltip_salary",
+    "tooltip_salary_growth",
+    "tooltip_annual_bonus",
+    "tooltip_secondary_bonus",
+    "tooltip_inflation",
+    "tooltip_savings_goal",
+    "tooltip_pool_rate",
+    "tooltip_auto_term_threshold",
+    "tooltip_emergency_buffer",
+    "tooltip_auto_term_months",
+    "tooltip_auto_term_rate",
+  ];
+  paramKeys.forEach((k) => {
+    const btn = app.document.querySelector(`[data-tooltip-key="${k}"]`);
+    assert(
+      btn !== null,
+      `R51: Parameter tooltip trigger for '${k}' exists in DOM`
+    );
+  });
+
+  // 3. KPI Metrics Coverage: Top KPI cards have .tooltip-trigger buttons
+  const kpiKeys = [
+    "tooltip_kpi_nominal",
+    "tooltip_kpi_interest",
+    "tooltip_kpi_contributed",
+    "tooltip_kpi_pool_term",
+  ];
+  kpiKeys.forEach((k) => {
+    const btn = app.document.querySelector(`[data-tooltip-key="${k}"]`);
+    assert(
+      btn !== null,
+      `R51: KPI metric card tooltip trigger for '${k}' exists in DOM`
+    );
+  });
+
+  // 4. Interactive Hover & Focus Triggering
+  const salaryGrowthTrigger = app.document.querySelector(
+    '[data-tooltip-key="tooltip_salary_growth"]'
+  );
+  assert(
+    salaryGrowthTrigger !== null,
+    "R51: Salary growth tooltip trigger button exists"
+  );
+
+  app.changeLanguage("en");
+  app.showAppTooltip({ clientX: 150, clientY: 250 }, salaryGrowthTrigger);
+  assert(
+    !appTooltip.classList.contains("hidden"),
+    "R51: showAppTooltip() reveals #appTooltip element"
+  );
+  assert(
+    appTooltipContent.textContent.includes("Compound salary escalation") &&
+      appTooltipContent.textContent.includes("12-month anniversary"),
+    `R51: Tooltip renders correct English explanation: "${appTooltipContent.textContent}"`
+  );
+  assert(
+    salaryGrowthTrigger.getAttribute("aria-expanded") === "true",
+    "R51: Trigger button aria-expanded attribute is set to 'true' when tooltip is open"
+  );
+
+  // 5. Hide Tooltip
+  app.hideAppTooltip();
+  assert(
+    appTooltip.classList.contains("hidden"),
+    "R51: hideAppTooltip() hides #appTooltip element"
+  );
+  assert(
+    salaryGrowthTrigger.getAttribute("aria-expanded") === "false",
+    "R51: Trigger button aria-expanded attribute is reset to 'false'"
+  );
+
+  // 6. Mobile Click / Tap Toggle (e.preventDefault & e.stopPropagation safeguard)
+  let stoppedProp = false;
+  let preventedDef = false;
+  const mockClickEvent = {
+    stopPropagation: () => {
+      stoppedProp = true;
+    },
+    preventDefault: () => {
+      preventedDef = true;
+    },
+  };
+  app.handleTooltipClick(mockClickEvent, salaryGrowthTrigger);
+  assert(
+    stoppedProp && preventedDef,
+    "R51: handleTooltipClick() invokes stopPropagation() and preventDefault() to isolate label focus"
+  );
+  assert(
+    !appTooltip.classList.contains("hidden"),
+    "R51: handleTooltipClick() opened tooltip on first tap"
+  );
+
+  // Tap again to close (toggle behavior)
+  app.handleTooltipClick(mockClickEvent, salaryGrowthTrigger);
+  assert(
+    appTooltip.classList.contains("hidden"),
+    "R51: handleTooltipClick() toggled tooltip closed on second tap"
+  );
+
+  // 7. Bilingual Dynamic Translation
+  app.changeLanguage("vi");
+  app.showAppTooltip({ clientX: 150, clientY: 250 }, salaryGrowthTrigger);
+  assert(
+    appTooltipContent.textContent.includes("Tăng lương định kỳ") &&
+      appTooltipContent.textContent.includes("12 tháng"),
+    `R51: Vietnamese language dynamically updates tooltip text: "${appTooltipContent.textContent}"`
+  );
+  app.hideAppTooltip();
+  app.changeLanguage("en");
 
   app.dismissAllModals();
 

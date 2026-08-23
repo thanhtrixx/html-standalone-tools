@@ -498,12 +498,15 @@ async function runI18nTests() {
     );
   });
 
-  // Test 13: 100% DOM data-i18n and data-i18n-title Keys Resolution
+  // Test 13: 100% DOM data-i18n, data-i18n-title and data-tooltip-key Keys Resolution
   const allDataI18nMatches = [
     ...htmlContent.matchAll(/data-i18n=["']([^"']+)["']/g),
   ].map((m) => m[1]);
   const allDataI18nTitleMatches = [
     ...htmlContent.matchAll(/data-i18n-title=["']([^"']+)["']/g),
+  ].map((m) => m[1]);
+  const allDataTooltipKeyMatches = [
+    ...htmlContent.matchAll(/data-tooltip-key=["']([^"']+)["']/g),
   ].map((m) => m[1]);
 
   const missingDataI18nEn = allDataI18nMatches.filter(
@@ -518,6 +521,12 @@ async function runI18nTests() {
   const missingTitleVi = allDataI18nTitleMatches.filter(
     (k) => !(k in TRANSLATIONS.vi)
   );
+  const missingTooltipKeyEn = allDataTooltipKeyMatches.filter(
+    (k) => !(k in TRANSLATIONS.en)
+  );
+  const missingTooltipKeyVi = allDataTooltipKeyMatches.filter(
+    (k) => !(k in TRANSLATIONS.vi)
+  );
 
   assert(
     missingDataI18nEn.length === 0 && missingDataI18nVi.length === 0,
@@ -526,6 +535,10 @@ async function runI18nTests() {
   assert(
     missingTitleEn.length === 0 && missingTitleVi.length === 0,
     `All ${allDataI18nTitleMatches.length} HTML data-i18n-title elements map to valid EN and VI translations (missing EN: ${missingTitleEn.join(", ") || "none"}, missing VI: ${missingTitleVi.join(", ") || "none"})`
+  );
+  assert(
+    missingTooltipKeyEn.length === 0 && missingTooltipKeyVi.length === 0,
+    `All ${allDataTooltipKeyMatches.length} HTML data-tooltip-key elements map to valid EN and VI translations (missing EN: ${missingTooltipKeyEn.join(", ") || "none"}, missing VI: ${missingTooltipKeyVi.join(", ") || "none"})`
   );
 
   // Test 14: Leap Year & Boundary Date Display Formatting

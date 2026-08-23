@@ -411,6 +411,42 @@
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
       }
 
+      /* Global Interactive Floating Tooltip Engine */
+      #appTooltip {
+        background-color: var(
+          --chart-tooltip-bg,
+          rgba(15, 23, 42, 0.96)
+        ) !important;
+        color: var(--chart-tooltip-text, #f8fafc) !important;
+        border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.15)) !important;
+        box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45) !important;
+      }
+
+      .light #appTooltip {
+        background-color: var(
+          --chart-tooltip-bg,
+          rgba(255, 255, 255, 0.98)
+        ) !important;
+        color: var(--chart-tooltip-text, #0f172a) !important;
+        border: 1px solid var(--border-strong, rgba(0, 0, 0, 0.18)) !important;
+        box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.12) !important;
+      }
+
+      #appTooltipArrow {
+        background-color: inherit;
+        border-color: inherit;
+      }
+
+      .tooltip-trigger {
+        touch-action: manipulation;
+        user-select: none;
+      }
+
+      .tooltip-trigger:focus-visible {
+        outline: 2px solid #6366f1;
+        outline-offset: 1px;
+      }
+
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -1039,11 +1075,25 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputTargetDate"
-              data-i18n="lbl_target_date"
-              >Target End Date</label
             >
+              <span data-i18n="lbl_target_date">Target End Date</span>
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_target_date"
+                aria-label="Target End Date information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="date"
               id="inputTargetDate"
@@ -1116,12 +1166,27 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputSalary"
-              ><span id="labelSalary" data-i18n="lbl_salary"
-                >Monthly Salary (VND)</span
-              ></label
             >
+              <span id="labelSalary" data-i18n="lbl_salary"
+                >Monthly Salary (VND)</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_salary"
+                aria-label="Monthly Salary information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="text"
               inputmode="numeric"
@@ -1223,11 +1288,20 @@
               for="inputSalaryGrowth"
             >
               <span data-i18n="lbl_salary_growth">Salary Growth (%/yr)</span>
-              <i
-                class="fa-solid fa-circle-info text-slate-500 hover:text-slate-300 cursor-help"
-                data-i18n-title="tooltip_salary_growth"
-                title="Compound salary escalation applied annually on the 12-month anniversary of your start date."
-              ></i>
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_salary_growth"
+                aria-label="Salary Growth information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
             </label>
             <input
               type="number"
@@ -1241,12 +1315,28 @@
           </div>
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label
-                class="block text-xs font-medium text-slate-400"
-                for="inputAnnualBonusMultiplier"
-                data-i18n="lbl_annual_bonus"
-                >Annual Bonus (13th Month Salary)</label
-              >
+              <div class="flex items-center space-x-1">
+                <label
+                  class="block text-xs font-medium text-slate-400"
+                  for="inputAnnualBonusMultiplier"
+                  data-i18n="lbl_annual_bonus"
+                  >Annual Bonus (13th Month Salary)</label
+                >
+                <button
+                  type="button"
+                  tabindex="0"
+                  class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                  data-tooltip-key="tooltip_annual_bonus"
+                  aria-label="Annual Bonus information"
+                  onclick="handleTooltipClick(event, this)"
+                  onmouseenter="showAppTooltip(event, this)"
+                  onmouseleave="hideAppTooltip()"
+                  onfocus="showAppTooltip(event, this)"
+                  onblur="hideAppTooltip()"
+                >
+                  <i class="fa-solid fa-circle-info text-xs"></i>
+                </button>
+              </div>
               <div class="flex items-center space-x-1">
                 <button
                   type="button"
@@ -1324,12 +1414,28 @@
           </div>
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label
-                class="block text-xs font-medium text-slate-400"
-                for="inputSecondaryBonusMultiplier"
-                data-i18n="lbl_secondary_bonus"
-                >Secondary Bonus (Mid-Year / Incentive)</label
-              >
+              <div class="flex items-center space-x-1">
+                <label
+                  class="block text-xs font-medium text-slate-400"
+                  for="inputSecondaryBonusMultiplier"
+                  data-i18n="lbl_secondary_bonus"
+                  >Secondary Bonus (Mid-Year / Incentive)</label
+                >
+                <button
+                  type="button"
+                  tabindex="0"
+                  class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                  data-tooltip-key="tooltip_secondary_bonus"
+                  aria-label="Secondary Bonus information"
+                  onclick="handleTooltipClick(event, this)"
+                  onmouseenter="showAppTooltip(event, this)"
+                  onmouseleave="hideAppTooltip()"
+                  onfocus="showAppTooltip(event, this)"
+                  onblur="hideAppTooltip()"
+                >
+                  <i class="fa-solid fa-circle-info text-xs"></i>
+                </button>
+              </div>
               <div class="flex items-center space-x-1">
                 <button
                   type="button"
@@ -1407,11 +1513,25 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputInflation"
-              data-i18n="lbl_inflation"
-              >Inflation Rate (%/yr)</label
             >
+              <span data-i18n="lbl_inflation">Inflation Rate (%/yr)</span>
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_inflation"
+                aria-label="Inflation Rate information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="number"
               id="inputInflation"
@@ -1424,12 +1544,27 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputSavingsGoal"
-              ><span id="labelSavingsGoal" data-i18n="lbl_savings_goal"
-                >Savings Goal (VND)</span
-              ></label
             >
+              <span id="labelSavingsGoal" data-i18n="lbl_savings_goal"
+                >Savings Goal (VND)</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_savings_goal"
+                aria-label="Savings Goal information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="text"
               inputmode="numeric"
@@ -1517,11 +1652,20 @@
               for="inputPoolRate"
             >
               <span data-i18n="lbl_pool_rate">Pool Rate (%/yr)</span>
-              <i
-                class="fa-solid fa-circle-info text-slate-500 hover:text-slate-300 cursor-help"
-                data-i18n-title="tooltip_pool_rate"
-                title="Annual interest earned daily on uncommitted cash in your flexible liquid pool."
-              ></i>
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_pool_rate"
+                aria-label="Pool Rate information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
             </label>
             <input
               type="number"
@@ -1535,14 +1679,29 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputAutoTermThreshold"
-              ><span
+            >
+              <span
                 id="labelAutoTermThreshold"
                 data-i18n="lbl_auto_term_threshold"
                 >Auto Term Threshold (VND)</span
-              ></label
-            >
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_auto_term_threshold"
+                aria-label="Auto Term Threshold information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="text"
               inputmode="numeric"
@@ -1619,12 +1778,27 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputEmergencyBuffer"
-              ><span id="labelEmergencyBuffer" data-i18n="lbl_emergency_buffer"
-                >Emergency Buffer Reserve (VND)</span
-              ></label
             >
+              <span id="labelEmergencyBuffer" data-i18n="lbl_emergency_buffer"
+                >Emergency Buffer Reserve (VND)</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_emergency_buffer"
+                aria-label="Emergency Buffer Reserve information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="text"
               inputmode="numeric"
@@ -1701,11 +1875,27 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputAutoTermMonths"
-              data-i18n="lbl_auto_term_months"
-              >Auto Term Duration (Months)</label
             >
+              <span data-i18n="lbl_auto_term_months"
+                >Auto Term Duration (Months)</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_auto_term_months"
+                aria-label="Auto Term Duration information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="number"
               id="inputAutoTermMonths"
@@ -1785,11 +1975,25 @@
           </div>
           <div>
             <label
-              class="block text-xs font-medium text-slate-400 mb-1"
+              class="block text-xs font-medium text-slate-400 mb-1 flex items-center justify-between"
               for="inputAutoTermRate"
-              data-i18n="lbl_auto_term_rate"
-              >Auto Term Rate (%/yr)</label
             >
+              <span data-i18n="lbl_auto_term_rate">Auto Term Rate (%/yr)</span>
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-400 dark:hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_auto_term_rate"
+                aria-label="Auto Term Rate information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-xs"></i>
+              </button>
+            </label>
             <input
               type="number"
               id="inputAutoTermRate"
@@ -2112,11 +2316,28 @@
           <div
             class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
           >
-            <span
-              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
-              data-i18n="hdr_total_balance"
-              >Total Balance</span
-            ><i
+            <div class="flex items-center gap-1.5 truncate">
+              <span
+                class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
+                data-i18n="hdr_total_balance"
+                >Total Balance</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-indigo-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_nominal"
+                aria-label="Total Balance information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[10px]"></i>
+              </button>
+            </div>
+            <i
               class="fa-solid fa-sack-dollar text-indigo-400 text-sm sm:text-lg"
             ></i>
           </div>
@@ -2144,11 +2365,28 @@
           <div
             class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
           >
-            <span
-              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
-              data-i18n="hdr_total_interest"
-              >Total Interest</span
-            ><i
+            <div class="flex items-center gap-1.5 truncate">
+              <span
+                class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
+                data-i18n="hdr_total_interest"
+                >Total Interest</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-emerald-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_interest"
+                aria-label="Total Interest information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[10px]"></i>
+              </button>
+            </div>
+            <i
               class="fa-solid fa-arrow-trend-up text-emerald-400 text-sm sm:text-lg"
             ></i>
           </div>
@@ -2185,11 +2423,28 @@
           <div
             class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
           >
-            <span
-              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
-              data-i18n="hdr_total_salary"
-              >Total Salary</span
-            ><i
+            <div class="flex items-center gap-1.5 truncate">
+              <span
+                class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
+                data-i18n="hdr_total_salary"
+                >Total Salary</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-blue-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_contributed"
+                aria-label="Total Salary information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[10px]"></i>
+              </button>
+            </div>
+            <i
               class="fa-solid fa-money-bill-wave text-blue-400 text-sm sm:text-lg"
             ></i>
           </div>
@@ -2216,13 +2471,28 @@
           <div
             class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
           >
-            <span
-              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
-              data-i18n="hdr_pool_auto_term"
-              >Pool & Auto Term</span
-            ><i
-              class="fa-solid fa-vault text-purple-400 text-sm sm:text-lg"
-            ></i>
+            <div class="flex items-center gap-1.5 truncate">
+              <span
+                class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
+                data-i18n="hdr_pool_auto_term"
+                >Pool & Auto Term</span
+              >
+              <button
+                type="button"
+                tabindex="0"
+                class="tooltip-trigger inline-flex items-center justify-center text-slate-500 hover:text-purple-300 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_pool_term"
+                aria-label="Pool and Auto Term information"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[10px]"></i>
+              </button>
+            </div>
+            <i class="fa-solid fa-vault text-purple-400 text-sm sm:text-lg"></i>
           </div>
           <div
             class="text-sm sm:text-base lg:text-xl font-bold text-slate-100 flex items-baseline justify-between truncate"
@@ -3963,6 +4233,20 @@
         id="heatmapTooltip"
         class="hidden fixed z-50 p-3.5 bg-slate-900/95 border border-slate-700/90 rounded-xl shadow-2xl backdrop-blur-md text-xs text-slate-200 pointer-events-none transition-opacity duration-150 max-w-xs space-y-1.5"
       ></div>
+      <!-- Global Interactive Floating Tooltip Engine (Issue #87) -->
+      <div
+        id="appTooltip"
+        role="tooltip"
+        aria-hidden="true"
+        class="hidden fixed z-50 max-w-xs sm:max-w-sm px-3.5 py-2.5 text-xs rounded-xl shadow-2xl pointer-events-none transition-all duration-150 border backdrop-blur-md opacity-0 transform scale-95"
+        style="top: 0; left: 0"
+      >
+        <div id="appTooltipContent" class="leading-relaxed font-normal"></div>
+        <div
+          id="appTooltipArrow"
+          class="absolute w-2.5 h-2.5 rotate-45 border pointer-events-none"
+        ></div>
+      </div>
     </main>
     <script>
       // Canvas fallback for headless/test environments
@@ -4032,10 +4316,38 @@
           lbl_bonus_preview_none: "No annual bonus scheduled",
           lbl_auto_term_formula_hint:
             "Trigger when Pool ≥ Threshold + Buffer (e.g. {threshold} + {buffer} = {total}) · Retains {buffer} in Pool, sweeps excess into {months}M Term Deposit",
+          tooltip_target_date:
+            "Simulation end date. Timeframe presets calculate the exact calendar maturity with daily precision.",
+          tooltip_salary:
+            "Monthly take-home income automatically deposited into your flexible pool on the 1st of each month.",
           tooltip_salary_growth:
             "Compound salary escalation applied annually on the 12-month anniversary of your start date.",
+          tooltip_annual_bonus:
+            "Year-end 13th month bonus deposited into the liquid pool in your chosen month.",
+          tooltip_secondary_bonus:
+            "Mid-year or performance incentive bonus deposited in your specified target month.",
+          tooltip_inflation:
+            "Annual price inflation rate used to calculate Real Purchasing Power (present value) by discounting future nominal wealth.",
+          tooltip_savings_goal:
+            "Target wealth threshold to track milestone progress, time to completion, and shortfall gaps.",
           tooltip_pool_rate:
             "Annual interest earned daily on uncommitted cash in your flexible liquid pool.",
+          tooltip_auto_term_threshold:
+            "Minimum liquid pool balance required before excess funds are automatically swept into term deposits.",
+          tooltip_emergency_buffer:
+            "Untouchable liquid cash floor reserved in your pool for safety, protected from auto sweeps.",
+          tooltip_auto_term_months:
+            "Lock-in duration for auto-created fixed deposits. Principal and interest roll back to pool on maturity.",
+          tooltip_auto_term_rate:
+            "Annualized fixed interest rate locked in for auto-generated term deposits.",
+          tooltip_kpi_nominal:
+            "Total nominal wealth including flexible liquid pool balance, active fixed deposits, and all accumulated interest.",
+          tooltip_kpi_interest:
+            "Total accumulated profit earned from flexible daily pool interest and matured fixed term deposits.",
+          tooltip_kpi_contributed:
+            "Cumulative sum of initial capital, monthly salary contributions, and bonus cash flows.",
+          tooltip_kpi_pool_term:
+            "Liquid cash currently held in your flexible pool alongside active auto-created term deposits.",
           lbl_real_zero_inflation_note: "(0% inflation — matches nominal)",
           btn_run_sim: "Run Simulation",
           btn_reset: "Reset",
@@ -4440,10 +4752,38 @@
           lbl_bonus_preview_none: "Không có thưởng hàng năm",
           lbl_auto_term_formula_hint:
             "Kích hoạt khi Số dư linh hoạt ≥ Ngưỡng + Dự phòng (vd: {threshold} + {buffer} = {total}) · Giữ lại {buffer} trong Pool, chuyển phần vượt vào Tiết kiệm {months}T",
+          tooltip_target_date:
+            "Ngày kết thúc mô phỏng. Các mốc thời gian tính toán ngày chính xác theo độ phân giải từng ngày.",
+          tooltip_salary:
+            "Thu nhập hàng tháng được tự động nạp vào quỹ linh hoạt vào ngày mùng 1 hàng tháng.",
           tooltip_salary_growth:
             "Tăng lương định kỳ hàng năm vào đúng ngày tròn 12 tháng kể từ ngày bắt đầu mô phỏng.",
+          tooltip_annual_bonus:
+            "Thưởng lương tháng 13 được cộng vào quỹ linh hoạt vào tháng đã chọn.",
+          tooltip_secondary_bonus:
+            "Thưởng giữa năm hoặc hiệu suất được cộng vào quỹ linh hoạt vào tháng đã chọn.",
+          tooltip_inflation:
+            "Tỷ lệ lạm phát hàng năm dùng để tính Giá trị thực tế (sức mua hiện tại) bằng cách chiết khấu tài sản danh nghĩa tương lai.",
+          tooltip_savings_goal:
+            "Mục tiêu tài sản kỳ vọng để theo dõi tiến độ, thời gian đạt mốc và khoảng cách thiếu hụt.",
           tooltip_pool_rate:
             "Lãi suất không kỳ hạn sinh lời hàng ngày trên số dư tiền mặt linh hoạt chưa gửi tiết kiệm.",
+          tooltip_auto_term_threshold:
+            "Ngưỡng tiền mặt tối thiểu trong quỹ linh hoạt trước khi phần vượt mức được tự động gửi tiết kiệm có kỳ hạn.",
+          tooltip_emergency_buffer:
+            "Khoản đệm tiền mặt an toàn được giữ lại trong quỹ linh hoạt cho các chi tiêu khẩn cấp, không bị quét tự động.",
+          tooltip_auto_term_months:
+            "Kỳ hạn gửi tiết kiệm tự động. Khi đáo hạn, cả gốc và lãi sẽ tự động hoàn về quỹ linh hoạt.",
+          tooltip_auto_term_rate:
+            "Lãi suất cố định năm được áp dụng cho các khoản tiền gửi tiết kiệm tự động.",
+          tooltip_kpi_nominal:
+            "Tổng tài sản danh nghĩa gồm số dư quỹ linh hoạt, các sổ tiết kiệm đang gửi và toàn bộ tiền lãi cộng dồn.",
+          tooltip_kpi_interest:
+            "Tổng lợi nhuận tiền lãi thu được từ lãi không kỳ hạn hàng ngày và các sổ tiết kiệm có kỳ hạn.",
+          tooltip_kpi_contributed:
+            "Tổng vốn tự có đã đóng góp gồm vốn ban đầu, tích lũy từ lương hàng tháng và các khoản tiền thưởng.",
+          tooltip_kpi_pool_term:
+            "Số dư tiền mặt linh hoạt hiện có trong quỹ cùng với các sổ tiết kiệm kỳ hạn tự động đang hoạt động.",
           lbl_real_zero_inflation_note: "(Lạm phát 0% — trùng với danh nghĩa)",
           btn_run_sim: "Chạy Giả Lập",
           btn_reset: "Đặt Lại",
@@ -5808,6 +6148,14 @@
           const key = el.getAttribute("data-i18n-placeholder");
           if (dict[key]) {
             el.placeholder = dict[key];
+          }
+        });
+
+        document.querySelectorAll("[data-tooltip-key]").forEach((el) => {
+          const key = el.getAttribute("data-tooltip-key");
+          if (dict[key]) {
+            el.setAttribute("aria-label", dict[key]);
+            el.title = dict[key];
           }
         });
 
@@ -9736,6 +10084,162 @@
         if (tooltip) tooltip.classList.add("hidden");
       }
       window.hideHeatmapTooltip = hideHeatmapTooltip;
+
+      // --- GLOBAL INTERACTIVE FLOATING TOOLTIP ENGINE (Issue #87) ---
+      let activeTooltipTrigger = null;
+
+      function getTooltipText(triggerEl) {
+        if (!triggerEl) return "";
+        const lang = window.currentLang || "en";
+        const dict =
+          (typeof TRANSLATIONS !== "undefined" && TRANSLATIONS[lang]) || {};
+        const key =
+          triggerEl.getAttribute("data-tooltip-key") ||
+          triggerEl.getAttribute("data-i18n-title") ||
+          triggerEl.getAttribute("data-i18n-tooltip");
+        if (key && dict[key]) {
+          return dict[key];
+        }
+        return (
+          triggerEl.getAttribute("data-tooltip") ||
+          triggerEl.getAttribute("title") ||
+          ""
+        );
+      }
+      window.getTooltipText = getTooltipText;
+
+      function showAppTooltip(e, triggerEl) {
+        const tooltip = document.getElementById("appTooltip");
+        const content = document.getElementById("appTooltipContent");
+        const arrow = document.getElementById("appTooltipArrow");
+        if (!tooltip || !content || !triggerEl) return;
+
+        const text = getTooltipText(triggerEl);
+        if (!text) return;
+
+        content.innerHTML = text;
+        activeTooltipTrigger = triggerEl;
+        triggerEl.setAttribute("aria-expanded", "true");
+
+        tooltip.classList.remove("hidden");
+        tooltip.setAttribute("aria-hidden", "false");
+
+        // Compute position
+        const rect =
+          typeof triggerEl.getBoundingClientRect === "function"
+            ? triggerEl.getBoundingClientRect()
+            : { top: 100, left: 100, width: 20, height: 20, bottom: 120 };
+
+        const winWidth =
+          typeof window !== "undefined" && window.innerWidth
+            ? window.innerWidth
+            : 1024;
+        const winHeight =
+          typeof window !== "undefined" && window.innerHeight
+            ? window.innerHeight
+            : 768;
+
+        const tooltipWidth = Math.min(320, winWidth - 24);
+        tooltip.style.maxWidth = tooltipWidth + "px";
+
+        const tipWidth = tooltip.offsetWidth || tooltipWidth;
+        const tipHeight = tooltip.offsetHeight || 60;
+
+        let left = rect.left + rect.width / 2 - tipWidth / 2;
+        let top = rect.top - tipHeight - 10;
+        let placeBelow = false;
+
+        // Boundary clamping
+        if (left < 12) left = 12;
+        if (left + tipWidth > winWidth - 12) {
+          left = winWidth - tipWidth - 12;
+        }
+
+        if (top < 12) {
+          top = rect.bottom + 10;
+          placeBelow = true;
+        }
+
+        tooltip.style.left = Math.round(left) + "px";
+        tooltip.style.top = Math.round(top) + "px";
+
+        if (arrow) {
+          const arrowLeft = Math.max(
+            8,
+            Math.min(tipWidth - 16, rect.left + rect.width / 2 - left - 5)
+          );
+          arrow.style.left = Math.round(arrowLeft) + "px";
+          if (placeBelow) {
+            arrow.style.top = "-5px";
+            arrow.style.bottom = "auto";
+            arrow.style.borderBottom = "none";
+            arrow.style.borderRight = "none";
+            arrow.style.borderTop = "1px solid inherit";
+            arrow.style.borderLeft = "1px solid inherit";
+          } else {
+            arrow.style.bottom = "-5px";
+            arrow.style.top = "auto";
+            arrow.style.borderTop = "none";
+            arrow.style.borderLeft = "none";
+            arrow.style.borderBottom = "1px solid inherit";
+            arrow.style.borderRight = "1px solid inherit";
+          }
+        }
+
+        tooltip.classList.remove("opacity-0", "scale-95");
+        tooltip.classList.add("opacity-100", "scale-100");
+      }
+      window.showAppTooltip = showAppTooltip;
+
+      function hideAppTooltip() {
+        const tooltip = document.getElementById("appTooltip");
+        if (!tooltip || tooltip.classList.contains("hidden")) return;
+        tooltip.classList.remove("opacity-100", "scale-100");
+        tooltip.classList.add("opacity-0", "scale-95");
+        tooltip.setAttribute("aria-hidden", "true");
+        if (activeTooltipTrigger) {
+          activeTooltipTrigger.setAttribute("aria-expanded", "false");
+          activeTooltipTrigger = null;
+        }
+        tooltip.classList.add("hidden");
+      }
+      window.hideAppTooltip = hideAppTooltip;
+
+      function handleTooltipClick(e, triggerEl) {
+        if (e) {
+          if (typeof e.preventDefault === "function") e.preventDefault();
+          if (typeof e.stopPropagation === "function") e.stopPropagation();
+        }
+        if (activeTooltipTrigger === triggerEl) {
+          hideAppTooltip();
+        } else {
+          showAppTooltip(e, triggerEl);
+        }
+      }
+      window.handleTooltipClick = handleTooltipClick;
+
+      if (typeof window !== "undefined" && window.addEventListener) {
+        window.addEventListener("click", (e) => {
+          if (
+            !e.target ||
+            !e.target.closest ||
+            (!e.target.closest(".tooltip-trigger") &&
+              !e.target.closest("#appTooltip"))
+          ) {
+            hideAppTooltip();
+          }
+        });
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") hideAppTooltip();
+        });
+        window.addEventListener(
+          "scroll",
+          () => {
+            if (activeTooltipTrigger) hideAppTooltip();
+          },
+          { passive: true }
+        );
+      }
 
       function renderHeatmapChart(snapshots) {
         const grid = document.getElementById("heatmapGrid");
