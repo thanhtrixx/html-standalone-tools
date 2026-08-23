@@ -1,9 +1,21 @@
-# 6. Liquid Emergency Buffer Reserve in Auto Term Allocation
+# ADR-0006: Liquid Emergency Buffer Reserve in Auto Term Allocation
 
-When evaluating the daily Auto Term Deposit sweep, the simulation engine requires that the liquid Flexible Pool balance meet or exceed the sum of the Auto Term Threshold and the configurable Emergency Buffer Reserve ($\text{Flexible Pool} \ge \text{Auto Term Threshold} + \text{Emergency Buffer Reserve}$). Upon trigger, exactly $\text{Flexible Pool} - \text{Emergency Buffer Reserve}$ is swept into a single Fixed Term Deposit, guaranteeing that the Emergency Buffer Reserve remains liquid in the Flexible Pool.
+## Status
 
-We rejected sweeping the entire pool to 0 VND (previous ADR-0005 behavior) because:
+Accepted (Builds upon [ADR-0005](./0005-unified-threshold-auto-term-allocation.md))
 
-1. Real-world individuals do not lock 100% of liquid assets without preserving cash for routine living expenses and unforeseen liquidity demands.
-2. Immediate scheduled withdrawals following a sweep previously triggered artificial deficit warnings.
-3. Requiring the pool to exceed $\text{Threshold} + \text{Buffer}$ ensures the locked principal is always at least equal to the user's intended minimum deposit threshold while keeping liquid reserves intact.
+## Context
+
+Sweeping 100% of available Flexible Pool cash to 0 VND upon triggering an Auto Term allocation (as originally implemented in ADR-0005) caused severe liquidity deficiencies. Savers do not lock all available liquidity without reserving cash for living expenses, and subsequent scheduled withdrawals immediately triggered artificial deficit warnings.
+
+## Decision
+
+1. **Threshold + Buffer Condition**: The Auto Term sweep triggers only when:
+   $$\text{Flexible Pool} \ge \text{Auto Term Threshold} + \text{Emergency Buffer Reserve}$$
+2. **Buffer Preservation**: Exactly $\text{Flexible Pool} - \text{Emergency Buffer Reserve}$ is locked into the new term deposit, leaving the Emergency Buffer Reserve liquid in the Flexible Pool.
+3. **Minimum Deposit Integrity**: Guarantees that the locked principal is always at least equal to the user's configured Auto Term Threshold.
+
+## Consequences
+
+- Prevents artificial cash deficit warnings following automated sweeps.
+- Accurately models real-world emergency cash cushions alongside automated wealth compounding.
