@@ -2239,6 +2239,78 @@ async function runUIUXTests() {
     `R48: Celebration card displays milestone celebration heading: "${celebrationHeading.textContent}"`
   );
 
+  // Test R49: Issue #75 Multi-Currency Formatting & Scale Support (VND, USD, EUR, SGD)
+  const currencySelector = app.document.getElementById("currencySelector");
+  assert(
+    currencySelector !== null,
+    "R49: #currencySelector dropdown exists in DOM header"
+  );
+
+  // 1. Switch to USD currency
+  app.setCurrency("USD");
+  assert(
+    app.currentCurrency === "USD",
+    "R49: setCurrency('USD') set active currency to USD"
+  );
+  const formattedUsd = app.formatCurrency(12500, "USD");
+  assert(
+    formattedUsd.startsWith("$") && formattedUsd.includes("12,500"),
+    `R49: formatCurrency in USD produces '$' prefix: "${formattedUsd}"`
+  );
+
+  const verbalUsd = app.getSpelledOutAmount(50000, "en", "USD");
+  assert(
+    verbalUsd.includes("50 Thousand USD"),
+    `R49: getSpelledOutAmount in USD produces '50 Thousand USD': "${verbalUsd}"`
+  );
+
+  const salaryTrack = app.document.getElementById("salaryPresetTrack");
+  assert(
+    salaryTrack &&
+      (salaryTrack.innerHTML.includes("$2k") ||
+        salaryTrack.innerHTML.includes("$5k")),
+    "R49: Salary preset chips adaptively rendered in USD denominations ($2k, $5k, etc.)"
+  );
+
+  // 2. Switch to EUR & SGD currencies
+  app.setCurrency("EUR");
+  assert(
+    app.currentCurrency === "EUR",
+    "R49: setCurrency('EUR') set active currency to EUR"
+  );
+  const formattedEur = app.formatCurrency(8400, "EUR");
+  assert(
+    formattedEur.startsWith("€") && formattedEur.includes("8,400"),
+    `R49: formatCurrency in EUR produces '€' prefix: "${formattedEur}"`
+  );
+
+  app.setCurrency("SGD");
+  assert(
+    app.currentCurrency === "SGD",
+    "R49: setCurrency('SGD') set active currency to SGD"
+  );
+  const formattedSgd = app.formatCurrency(15000, "SGD");
+  assert(
+    formattedSgd.startsWith("S$") && formattedSgd.includes("15,000"),
+    `R49: formatCurrency in SGD produces 'S$' prefix: "${formattedSgd}"`
+  );
+
+  // 3. Switch back to VND
+  app.setCurrency("VND");
+  assert(
+    app.currentCurrency === "VND",
+    "R49: setCurrency('VND') restored VND currency"
+  );
+  const formattedVnd = app.formatCurrency(25000000, "VND");
+  assert(
+    formattedVnd.includes("VND") || formattedVnd.includes("₫"),
+    `R49: formatCurrency restored VND formatting: "${formattedVnd}"`
+  );
+  assert(
+    salaryTrack && salaryTrack.innerHTML.includes("25M"),
+    "R49: Salary preset chips restored to VND magnitude (10M, 20M, 25M)"
+  );
+
   app.dismissAllModals();
 
   console.log(
