@@ -298,7 +298,7 @@ async function runI18nTests() {
 
   const viDepositText = getOrCreateEl("metricSalaryCount").innerText;
   assert(
-    viDepositText.includes("lần gửi hàng tháng") &&
+    viDepositText.includes("tháng tích lũy") &&
       !viDepositText.includes("monthly deposits"),
     `VI deposit text pure: "${viDepositText}"`
   );
@@ -330,7 +330,7 @@ async function runI18nTests() {
     .map((c) => c.innerHTML || "")
     .join(" ");
   assert(
-    viLogText.includes("Nạp Lương Hàng Tháng") ||
+    viLogText.includes("Nhận Lương Hàng Tháng") ||
       viLogText.includes("Đáo Hạn") ||
       viLogText.includes("Tạo Sổ Tiết Kiệm"),
     "VI simulation logs contain Vietnamese milestone titles"
