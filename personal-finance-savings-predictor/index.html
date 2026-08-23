@@ -245,11 +245,21 @@
 
       .light #csvModal > div,
       .light #presetsModal > div,
-      .light #onboardingOverlay > div {
+      .light #onboardingOverlay > div,
+      .light #mobileActionSheet > div {
         background-color: var(--bg-modal) !important;
         color: var(--text-primary) !important;
         border-color: var(--border-medium) !important;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+      }
+
+      /* Hide scrollbar for Chrome, Safari, Opera, Edge, and Firefox */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
 
       .light kbd {
@@ -879,13 +889,15 @@
             >
               25 Million VND
             </div>
-            <div class="flex flex-wrap gap-1 mt-1.5">
+            <div
+              class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar py-1 touch-pan-x"
+            >
               <button
                 type="button"
                 data-preset-field="salary"
                 data-preset-val="10000000"
                 onclick="setSalaryValue(10000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 10M
               </button>
@@ -894,7 +906,7 @@
                 data-preset-field="salary"
                 data-preset-val="20000000"
                 onclick="setSalaryValue(20000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 20M
               </button>
@@ -903,7 +915,7 @@
                 data-preset-field="salary"
                 data-preset-val="25000000"
                 onclick="setSalaryValue(25000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 25M
               </button>
@@ -912,7 +924,7 @@
                 data-preset-field="salary"
                 data-preset-val="35000000"
                 onclick="setSalaryValue(35000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 35M
               </button>
@@ -921,7 +933,7 @@
                 data-preset-field="salary"
                 data-preset-val="50000000"
                 onclick="setSalaryValue(50000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 50M
               </button>
@@ -930,28 +942,28 @@
                 data-preset-field="salary"
                 data-preset-val="100000000"
                 onclick="setSalaryValue(100000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 100M
               </button>
               <button
                 type="button"
                 onclick="addSalaryDelta(1000000)"
-                class="px-1.5 py-0.5 text-[10px] bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded border border-indigo-700/50 transition font-medium"
+                class="min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded-lg border border-indigo-700/50 transition font-bold flex items-center justify-center whitespace-nowrap"
               >
                 +1M
               </button>
               <button
                 type="button"
                 onclick="addSalaryDelta(5000000)"
-                class="px-1.5 py-0.5 text-[10px] bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded border border-indigo-700/50 transition font-medium"
+                class="min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded-lg border border-indigo-700/50 transition font-bold flex items-center justify-center whitespace-nowrap"
               >
                 +5M
               </button>
               <button
                 type="button"
                 onclick="addSalaryDelta(10000000)"
-                class="px-1.5 py-0.5 text-[10px] bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded border border-indigo-700/50 transition font-medium"
+                class="min-h-[32px] sm:min-h-[28px] px-2 py-1 text-xs bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 rounded-lg border border-indigo-700/50 transition font-bold flex items-center justify-center whitespace-nowrap"
               >
                 +10M
               </button>
@@ -1079,13 +1091,15 @@
               id="helperSavingsGoal"
               class="text-[11px] text-indigo-400 font-medium mt-1 min-h-[16px]"
             ></div>
-            <div class="flex flex-wrap gap-1 mt-1.5">
+            <div
+              class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar py-1 touch-pan-x"
+            >
               <button
                 type="button"
                 data-preset-field="goal"
                 data-preset-val="0"
                 onclick="setSavingsGoalValue(0)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 0
               </button>
@@ -1094,7 +1108,7 @@
                 data-preset-field="goal"
                 data-preset-val="300000000"
                 onclick="setSavingsGoalValue(300000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 300M
               </button>
@@ -1103,7 +1117,7 @@
                 data-preset-field="goal"
                 data-preset-val="500000000"
                 onclick="setSavingsGoalValue(500000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 500M
               </button>
@@ -1112,7 +1126,7 @@
                 data-preset-field="goal"
                 data-preset-val="1000000000"
                 onclick="setSavingsGoalValue(1000000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 1B
               </button>
@@ -1121,7 +1135,7 @@
                 data-preset-field="goal"
                 data-preset-val="2000000000"
                 onclick="setSavingsGoalValue(2000000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 2B
               </button>
@@ -1130,7 +1144,7 @@
                 data-preset-field="goal"
                 data-preset-val="5000000000"
                 onclick="setSavingsGoalValue(5000000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 5B
               </button>
@@ -1139,7 +1153,7 @@
                 data-preset-field="goal"
                 data-preset-val="10000000000"
                 onclick="setSavingsGoalValue(10000000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 10B
               </button>
@@ -1183,13 +1197,15 @@
             >
               200 Million VND
             </div>
-            <div class="flex flex-wrap gap-1 mt-1.5">
+            <div
+              class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar py-1 touch-pan-x"
+            >
               <button
                 type="button"
                 data-preset-field="autoTermThreshold"
                 data-preset-val="50000000"
                 onclick="setAutoTermThresholdValue(50000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 50M
               </button>
@@ -1198,7 +1214,7 @@
                 data-preset-field="autoTermThreshold"
                 data-preset-val="100000000"
                 onclick="setAutoTermThresholdValue(100000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 100M
               </button>
@@ -1207,7 +1223,7 @@
                 data-preset-field="autoTermThreshold"
                 data-preset-val="150000000"
                 onclick="setAutoTermThresholdValue(150000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 150M
               </button>
@@ -1216,7 +1232,7 @@
                 data-preset-field="autoTermThreshold"
                 data-preset-val="200000000"
                 onclick="setAutoTermThresholdValue(200000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 200M
               </button>
@@ -1225,7 +1241,7 @@
                 data-preset-field="autoTermThreshold"
                 data-preset-val="300000000"
                 onclick="setAutoTermThresholdValue(300000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 300M
               </button>
@@ -1234,7 +1250,7 @@
                 data-preset-field="autoTermThreshold"
                 data-preset-val="500000000"
                 onclick="setAutoTermThresholdValue(500000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 500M
               </button>
@@ -1261,13 +1277,15 @@
             >
               30 Million VND
             </div>
-            <div class="flex flex-wrap gap-1 mt-1.5">
+            <div
+              class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar py-1 touch-pan-x"
+            >
               <button
                 type="button"
                 data-preset-field="emergencyBuffer"
                 data-preset-val="0"
                 onclick="setEmergencyBufferValue(0)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 0
               </button>
@@ -1276,7 +1294,7 @@
                 data-preset-field="emergencyBuffer"
                 data-preset-val="10000000"
                 onclick="setEmergencyBufferValue(10000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 10M
               </button>
@@ -1285,7 +1303,7 @@
                 data-preset-field="emergencyBuffer"
                 data-preset-val="20000000"
                 onclick="setEmergencyBufferValue(20000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 20M
               </button>
@@ -1294,7 +1312,7 @@
                 data-preset-field="emergencyBuffer"
                 data-preset-val="30000000"
                 onclick="setEmergencyBufferValue(30000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 30M
               </button>
@@ -1303,7 +1321,7 @@
                 data-preset-field="emergencyBuffer"
                 data-preset-val="50000000"
                 onclick="setEmergencyBufferValue(50000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 50M
               </button>
@@ -1312,7 +1330,7 @@
                 data-preset-field="emergencyBuffer"
                 data-preset-val="100000000"
                 onclick="setEmergencyBufferValue(100000000)"
-                class="preset-chip px-2 py-0.5 text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 transition"
+                class="preset-chip min-h-[32px] sm:min-h-[28px] px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition flex items-center justify-center whitespace-nowrap"
               >
                 100M
               </button>
@@ -1457,61 +1475,73 @@
           <canvas id="chartGoalRing"></canvas>
         </div>
       </section>
-      <!-- Metric Cards -->
+      <!-- Metric Cards (ADR-0016, Issue #47) -->
       <section
         id="metricsSection"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
         role="region"
         aria-label="Dashboard metrics"
       >
         <div
-          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          class="glass-card rounded-2xl p-3.5 sm:p-5 border border-slate-800 relative overflow-hidden group metric-card"
           role="region"
           aria-label="Total balance"
         >
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl group-hover:bg-indigo-500/20 transition"
           ></div>
-          <div class="flex items-center justify-between text-slate-400 mb-2">
+          <div
+            class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
+          >
             <span
-              class="text-xs font-medium uppercase tracking-wider"
+              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
               data-i18n="hdr_total_balance"
               >Total Balance</span
-            ><i class="fa-solid fa-sack-dollar text-indigo-400 text-lg"></i>
+            ><i
+              class="fa-solid fa-sack-dollar text-indigo-400 text-sm sm:text-lg"
+            ></i>
           </div>
           <div
-            class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight"
+            class="text-base sm:text-xl lg:text-3xl font-extrabold text-white tracking-tight truncate"
             id="metricTotalBalance"
           >
             0 VND
           </div>
-          <div class="text-xs text-indigo-300 mt-2">
+          <div
+            class="text-[10px] sm:text-xs text-indigo-300 mt-1.5 sm:mt-2 truncate"
+          >
             <span data-i18n="lbl_at_target">At target:</span>
             <span id="metricTargetDateText">-</span>
           </div>
         </div>
         <div
-          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          class="glass-card rounded-2xl p-3.5 sm:p-5 border border-slate-800 relative overflow-hidden group metric-card"
           role="region"
           aria-label="Total interest earned"
         >
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl group-hover:bg-emerald-500/20 transition"
           ></div>
-          <div class="flex items-center justify-between text-slate-400 mb-2">
+          <div
+            class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
+          >
             <span
-              class="text-xs font-medium uppercase tracking-wider"
+              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
               data-i18n="hdr_total_interest"
               >Total Interest</span
-            ><i class="fa-solid fa-arrow-trend-up text-emerald-400 text-lg"></i>
+            ><i
+              class="fa-solid fa-arrow-trend-up text-emerald-400 text-sm sm:text-lg"
+            ></i>
           </div>
           <div
-            class="text-2xl lg:text-3xl font-extrabold text-emerald-400 tracking-tight"
+            class="text-base sm:text-xl lg:text-3xl font-extrabold text-emerald-400 tracking-tight truncate"
             id="metricTotalInterest"
           >
             0 VND
           </div>
-          <div class="text-xs text-slate-400 mt-2 flex justify-between">
+          <div
+            class="text-[10px] sm:text-xs text-slate-400 mt-1.5 sm:mt-2 flex justify-between items-center"
+          >
             <span data-i18n="lbl_yield">Yield</span
             ><span
               class="text-emerald-400 font-semibold"
@@ -1526,56 +1556,70 @@
           </div>
         </div>
         <div
-          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          class="glass-card rounded-2xl p-3.5 sm:p-5 border border-slate-800 relative overflow-hidden group metric-card"
           role="region"
           aria-label="Total salary deposited"
         >
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-xl group-hover:bg-blue-500/20 transition"
           ></div>
-          <div class="flex items-center justify-between text-slate-400 mb-2">
+          <div
+            class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
+          >
             <span
-              class="text-xs font-medium uppercase tracking-wider"
+              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
               data-i18n="hdr_total_salary"
               >Total Salary</span
-            ><i class="fa-solid fa-money-bill-wave text-blue-400 text-lg"></i>
+            ><i
+              class="fa-solid fa-money-bill-wave text-blue-400 text-sm sm:text-lg"
+            ></i>
           </div>
           <div
-            class="text-2xl lg:text-3xl font-extrabold text-blue-400 tracking-tight"
+            class="text-base sm:text-xl lg:text-3xl font-extrabold text-blue-400 tracking-tight truncate"
             id="metricTotalSalary"
           >
             0 VND
           </div>
-          <div class="text-xs text-slate-400 mt-2">
+          <div
+            class="text-[10px] sm:text-xs text-slate-400 mt-1.5 sm:mt-2 truncate"
+          >
             <span id="metricSalaryCount">0 monthly deposits</span>
           </div>
         </div>
         <div
-          class="glass-card rounded-2xl p-5 border border-slate-800 relative overflow-hidden group metric-card"
+          class="glass-card rounded-2xl p-3.5 sm:p-5 border border-slate-800 relative overflow-hidden group metric-card"
           role="region"
           aria-label="Pool and auto term accounts"
         >
           <div
             class="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition"
           ></div>
-          <div class="flex items-center justify-between text-slate-400 mb-2">
+          <div
+            class="flex items-center justify-between text-slate-400 mb-1.5 sm:mb-2"
+          >
             <span
-              class="text-xs font-medium uppercase tracking-wider"
+              class="text-[10px] sm:text-xs font-medium uppercase tracking-wider truncate"
               data-i18n="hdr_pool_auto_term"
               >Pool & Auto Term</span
-            ><i class="fa-solid fa-vault text-purple-400 text-lg"></i>
+            ><i
+              class="fa-solid fa-vault text-purple-400 text-sm sm:text-lg"
+            ></i>
           </div>
           <div
-            class="text-xl font-bold text-slate-100 flex items-baseline justify-between"
+            class="text-sm sm:text-base lg:text-xl font-bold text-slate-100 flex items-baseline justify-between truncate"
           >
-            <span class="text-sm text-slate-400" data-i18n="lbl_pool"
+            <span
+              class="text-[10px] sm:text-xs text-slate-400"
+              data-i18n="lbl_pool"
               >Pool:</span
-            ><span id="metricPoolBalance" class="text-purple-300 font-extrabold"
+            ><span
+              id="metricPoolBalance"
+              class="text-purple-300 font-extrabold truncate"
               >0 VND</span
             >
           </div>
           <div
-            class="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-800/80 flex justify-between items-center"
+            class="text-[10px] sm:text-xs text-slate-400 mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-slate-800/80 flex justify-between items-center"
           >
             <span data-i18n="lbl_auto_term">Auto Term:</span
             ><span id="metricCreated6MCount" class="font-bold text-amber-400"

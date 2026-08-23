@@ -1581,6 +1581,27 @@ async function runUIUXTests() {
     "R35: #btnMobileActions responsive toggle button exists in header"
   );
 
+  // Test R36: Touch Preset Chip Carousels & Mobile KPI Grid (ADR-0016, Issue #47)
+  assert(
+    app.document.getElementById("metricsSection") !== null,
+    "R36: #metricsSection dashboard metrics container exists"
+  );
+  assert(
+    app.htmlContent.includes('id="metricsSection"') &&
+      app.htmlContent.includes("grid-cols-2 lg:grid-cols-4"),
+    "R36: #metricsSection utilizes 2-column grid layout on mobile (grid-cols-2 lg:grid-cols-4)"
+  );
+  assert(
+    app.htmlContent.includes(
+      'class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar py-1 touch-pan-x"'
+    ),
+    "R36: Preset tracks configured as horizontal scrollable carousels (overflow-x-auto no-scrollbar touch-pan-x)"
+  );
+  assert(
+    app.htmlContent.includes(".no-scrollbar"),
+    "R36: .no-scrollbar utility class defined in CSS styles"
+  );
+
   console.log(
     `\n📊 UI/UX Requirements Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );
