@@ -2526,12 +2526,34 @@ async function runUIUXTests() {
     "tooltip_kpi_interest",
     "tooltip_kpi_contributed",
     "tooltip_kpi_pool_term",
+    "tooltip_kpi_locked_principal",
+    "tooltip_kpi_active_accounts",
+    "tooltip_kpi_auto_sweeps",
+    "tooltip_kpi_weighted_rate",
   ];
   kpiKeys.forEach((k) => {
     const btn = app.document.querySelector(`[data-tooltip-key="${k}"]`);
     assert(
       btn !== null,
       `R51: KPI metric card tooltip trigger for '${k}' exists in DOM`
+    );
+  });
+
+  // 3b. Additional Contextual Clarity Tooltips: Tabs, YoY, Real mode, and Privacy mask
+  const contextualKeys = [
+    "tooltip_tab_timeline",
+    "tooltip_tab_flow",
+    "tooltip_tab_heatmap",
+    "tooltip_tab_yoy",
+    "tooltip_yoy_summary",
+    "tooltip_real_mode",
+    "tooltip_privacy_mask",
+  ];
+  contextualKeys.forEach((k) => {
+    const btn = app.document.querySelector(`[data-tooltip-key="${k}"]`);
+    assert(
+      btn !== null,
+      `R51: Contextual clarity tooltip trigger for '${k}' exists in DOM`
     );
   });
 
