@@ -1260,6 +1260,133 @@ async function runHelperTests() {
     "dismissAllModals() when 0 modals are open executes safely as a no-op"
   );
 
+  // Test 29: AI Advisory Blueprints & Custom Inquiries in Dossier Engine
+  const testParams = {
+    targetDateStr: "2028-01-01",
+    monthlySalary: 40000000,
+    salaryGrowthRate: 0.06,
+    annualBonusMultiplier: 1.5,
+    annualBonusMonth: 1,
+    inflationRate: 0.04,
+    poolAnnualRate: 0.005,
+    autoTermThreshold: 200000000,
+    emergencyBuffer: 50000000,
+    autoTermMonths: 6,
+    autoTermAnnualRate: 0.06,
+    savingsGoal: 1000000000,
+  };
+  const simResultA = ctx.simulate(testParams, [
+    {
+      "Account Name": "VCB Savings",
+      Principal: "200000000",
+      "Start Date": "2026-01-01",
+      "End Date": "2026-07-01",
+      Interest: "6.0",
+      Type: "Term Saving",
+      Bank: "VCB",
+    },
+  ]);
+
+  const fireMd = ctx.generateFinancialHealthMarkdown(testParams, simResultA, {
+    blueprint: "fire",
+    locale: "en",
+  });
+  assert(
+    fireMd.includes(
+      "FIRE (Financial Independence, Retire Early) Acceleration"
+    ) && fireMd.includes("Safe Withdrawal Rate (SWR 3.5% - 4.0%)"),
+    "generateFinancialHealthMarkdown accurately renders FIRE blueprint persona"
+  );
+
+  const realEstateMd = ctx.generateFinancialHealthMarkdown(
+    testParams,
+    simResultA,
+    {
+      blueprint: "real_estate",
+      locale: "en",
+    }
+  );
+  assert(
+    realEstateMd.includes("Real Estate Downpayment & Milestone Sizing") &&
+      realEstateMd.includes("Downpayment Target Feasibility"),
+    "generateFinancialHealthMarkdown accurately renders Real Estate blueprint persona"
+  );
+
+  const ladderMd = ctx.generateFinancialHealthMarkdown(testParams, simResultA, {
+    blueprint: "ladder",
+    locale: "en",
+  });
+  assert(
+    ladderMd.includes("Deposit Ladder & Emergency Buffer Optimization") &&
+      ladderMd.includes("Multi-Tenor Ladder Diversification"),
+    "generateFinancialHealthMarkdown accurately renders Deposit Ladder blueprint persona"
+  );
+
+  const customNotes =
+    "Client is planning a sabbatical in Year 2; analyze cashflow vulnerability.";
+  const customNotesMd = ctx.generateFinancialHealthMarkdown(
+    testParams,
+    simResultA,
+    {
+      blueprint: "general",
+      customInquiries: customNotes,
+      locale: "en",
+    }
+  );
+  assert(
+    customNotesMd.includes("### 📝 Custom Inquiries from Client:") &&
+      customNotesMd.includes(customNotes),
+    "generateFinancialHealthMarkdown appends custom inquiries block when provided"
+  );
+
+  // Test 30: Dual-Pass Scenario Comparison Audit & 3-Tier Deficit Scoring
+  const testParamsB = {
+    ...testParams,
+    monthlySalary: 55000000,
+    savingsGoal: 1200000000,
+  };
+  const simResultB = ctx.simulate(testParamsB, [
+    {
+      "Account Name": "VCB Savings",
+      Principal: "200000000",
+      "Start Date": "2026-01-01",
+      "End Date": "2026-07-01",
+      Interest: "6.0",
+      Type: "Term Saving",
+      Bank: "VCB",
+    },
+  ]);
+
+  const compareMd = ctx.generateFinancialHealthMarkdown(
+    testParams,
+    simResultA,
+    {
+      blueprint: "compare",
+      scenarioBResult: simResultB,
+      scenarioBParams: testParamsB,
+      locale: "en",
+    }
+  );
+  assert(
+    compareMd.includes(
+      "Strategic Comparative Audit Matrix (Scenario A vs B)"
+    ) &&
+      compareMd.includes("Ending Total Wealth") &&
+      compareMd.includes("Scenario A (Baseline)") &&
+      compareMd.includes("Scenario B (Projected)"),
+    "generateFinancialHealthMarkdown renders side-by-side Scenario A vs B audit matrix table"
+  );
+
+  // Moderate Deficit vs Safe vs Critical Deficit scoring verification
+  const safeMd = ctx.generateFinancialHealthMarkdown(testParams, simResultA, {
+    locale: "en",
+  });
+  assert(
+    safeMd.includes("🟢 SAFE") &&
+      safeMd.includes("0 liquid pool deficit events"),
+    "Deficit scoring classifies healthy simulation as 🟢 SAFE"
+  );
+
   console.log(
     `\n📊 Helper Test Summary: ${passCount} Passed, ${failCount} Failed\n`
   );

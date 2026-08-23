@@ -119,3 +119,25 @@ _Avoid_: Multi-row chip wrap, tiny touch buttons, stepper clusters
 **Adaptive Mobile Card-View**:
 A responsive viewport-triggered rendering pattern that transforms wide desktop tabular data (`min-w-[650px]`) into touch-friendly account cards on screens `< 640px`.
 _Avoid_: Cramped table pinching, unbounded horizontal table scroll, truncated table cells
+
+### AI Consultation & Financial Diagnostics
+
+**Financial Health Dossier**:
+A structured, portable analytical Markdown summary generated from simulation parameters and month-by-month results, synthesizing liquidity ratios, savings retention rates, capital efficiency, inflation drag, and tailored AI advisory blueprints for external LLM consultation.
+_Avoid_: AI dump, summary text, raw data output
+
+**AI Advisory Blueprint**:
+A specialized prompt framing strategy (e.g. General Financial Health, FIRE Acceleration, Real Estate Downpayment, Deposit Ladder, Dual-Pass Comparative Audit) appended to the Financial Health Dossier instructing external AI advisors on specific analytical objectives and constraint optimization.
+_Avoid_: LLM prompt, system prompt, AI text
+
+**Liquidity Runway Ratio**:
+The number of months of baseline living costs and scheduled outflows secured by the unencumbered liquid Flexible Pool and Emergency Buffer Reserve.
+_Avoid_: Cash cushion time, survival months
+
+**Savings Retention Rate**:
+The proportion of all gross capital injected (initial starting portfolio plus cumulative salary deposits and annual bonuses) successfully retained and compounded into ending net wealth.
+_Avoid_: Savings ratio, deposit percentage
+
+**Privacy Anonymization Mask**:
+A client-side sanitization transformation that converts absolute monetary values in the Financial Health Dossier into normalized salary multiples and portfolio percentage shares, transforms calendar dates into relative simulation month offsets, and anonymizes financial institution names before export or clipboard transfer.
+_Avoid_: Data hide, obfuscation

@@ -5600,6 +5600,588 @@
         };
       }
 
+      // --- FINANCIAL HEALTH DOSSIER & MARKDOWN SUMMARY ENGINE (ADR-0017) ---
+      function generateFinancialHealthMarkdown(
+        params,
+        simResult,
+        options = {}
+      ) {
+        const locale = options && options.locale === "vi" ? "vi" : "en";
+        const isVi = locale === "vi";
+
+        if (!params || !simResult || !simResult.totals) {
+          return isVi
+            ? "# 🏦 Hồ Sơ Sức Khỏe Tài Chính & Tóm Tắt Tư Vấn AI\n\n> ⚠️ Không có dữ liệu mô phỏng khả dụng."
+            : "# 🏦 Financial Health Dossier & AI Advisory Summary\n\n> ⚠️ No simulation data available.";
+        }
+
+        const anonymized = !!(options && options.anonymized);
+        const blueprint = (options && options.blueprint) || "general";
+        const customInquiries = (
+          options && options.customInquiries
+            ? String(options.customInquiries)
+            : ""
+        ).trim();
+        const scenarioBResult =
+          options && options.scenarioBResult ? options.scenarioBResult : null;
+        const scenarioBParams =
+          options && options.scenarioBParams ? options.scenarioBParams : null;
+
+        const totals = simResult.totals || {};
+        const monthlySalary = Number(params.monthlySalary) || 0;
+        const savingsGoal = Number(params.savingsGoal) || 0;
+        const emergencyBuffer = Number(params.emergencyBuffer) || 0;
+        const autoTermThreshold = Number(params.autoTermThreshold) || 0;
+        const autoTermMonths = parseInt(params.autoTermMonths, 10) || 6;
+        const autoTermRate =
+          params.autoTermRate !== undefined
+            ? params.autoTermRate
+            : params.autoTermAnnualRate !== undefined
+              ? params.autoTermAnnualRate
+              : params.term6MAnnualRate !== undefined
+                ? params.term6MAnnualRate
+                : 0.058;
+        const autoTermRatePct =
+          Number(autoTermRate) > 1
+            ? Number(autoTermRate)
+            : Number(autoTermRate) * 100;
+        const salaryGrowthPct = (Number(params.salaryGrowthRate) || 0) * 100;
+        const inflationPct = (Number(params.inflationRate) || 0) * 100;
+        const poolRatePct = (Number(params.poolAnnualRate) || 0) * 100;
+        const bonusMultiplier =
+          params.annualBonusMultiplier !== undefined
+            ? Number(params.annualBonusMultiplier)
+            : 1.0;
+        const bonusMonth = parseInt(params.annualBonusMonth, 10) || 1;
+
+        const endingWealth = totals.totalWealth || 0;
+        const poolBalance = totals.poolBalance || 0;
+        const fixedSavingsBalance = totals.fixedSavingsBalance || 0;
+        const totalInterest = totals.totalInterest || 0;
+        const cumulativeSalary = totals.cumulativeSalary || 0;
+        const totalBonus = totals.totalBonus || 0;
+        const totalWithdrawals = totals.totalWithdrawals || 0;
+        const realWealth =
+          totals.inflationAdjusted !== undefined
+            ? totals.inflationAdjusted
+            : endingWealth;
+        const inflationDrag = endingWealth - realWealth;
+        const created6MCount = totals.created6MCount || 0;
+        const salaryCount =
+          totals.salaryCount ||
+          (simResult.dailySnapshots
+            ? Math.max(1, Math.round(simResult.dailySnapshots.length / 30.4375))
+            : 1);
+        const totalDays = simResult.dailySnapshots
+          ? simResult.dailySnapshots.length
+          : 365;
+        const durationYears = (totalDays / 365).toFixed(1);
+
+        // Compute Initial Starting Principal from Portfolio
+        let initialStartingPrincipal = 0;
+        if (simResult.allSavings && Array.isArray(simResult.allSavings)) {
+          simResult.allSavings.forEach((acc) => {
+            if (acc.type === "Non-Term Pool" || acc.type === "CSV") {
+              initialStartingPrincipal += Math.max(0, acc.principal || 0);
+            }
+          });
+        }
+        if (
+          initialStartingPrincipal === 0 &&
+          simResult.dailySnapshots &&
+          simResult.dailySnapshots.length > 0
+        ) {
+          const firstSnap = simResult.dailySnapshots[0];
+          initialStartingPrincipal = Math.max(
+            0,
+            (firstSnap.poolBalance || 0) +
+              (firstSnap.fixedSavingsBalance || 0) -
+              (monthlySalary > 0 ? monthlySalary : 0)
+          );
+        }
+
+        // Formatting Helpers
+        function fmtMoney(amount, isDelta = false) {
+          const num = Number(amount) || 0;
+          if (anonymized) {
+            if (monthlySalary > 0) {
+              const mult = num / monthlySalary;
+              const sign = isDelta && mult > 0 ? "+" : "";
+              return `${sign}${mult.toFixed(1)}x ${isVi ? "Lương" : "Salary"}`;
+            } else if (endingWealth > 0) {
+              const pct = (num / endingWealth) * 100;
+              const sign = isDelta && pct > 0 ? "+" : "";
+              return `${sign}${pct.toFixed(1)}% ${isVi ? "Tổng Tài Sản" : "Total Wealth"}`;
+            } else {
+              const sign = isDelta && num > 0 ? "+" : "";
+              return `${sign}${Math.round(num).toLocaleString("en-US")} ${isVi ? "đơn vị" : "units"}`;
+            }
+          }
+          const sign = isDelta && num > 0 ? "+" : "";
+          return `${sign}${Math.round(num).toLocaleString("en-US")} VND`;
+        }
+
+        function fmtPct(val) {
+          const num = Number(val);
+          if (isNaN(num) || !isFinite(num)) return "0.0%";
+          return num.toFixed(1) + "%";
+        }
+
+        function fmtMult(val) {
+          const num = Number(val);
+          if (isNaN(num) || !isFinite(num)) return "0.00x";
+          return num.toFixed(2) + "x";
+        }
+
+        function fmtDateOffset(dateStrOrObj, monthIdx = null) {
+          if (!anonymized) {
+            if (typeof dateStrOrObj === "string") return dateStrOrObj;
+            if (dateStrOrObj instanceof Date) {
+              const y = dateStrOrObj.getFullYear();
+              const m = String(dateStrOrObj.getMonth() + 1).padStart(2, "0");
+              const d = String(dateStrOrObj.getDate()).padStart(2, "0");
+              return `${y}-${m}-${d}`;
+            }
+            return String(dateStrOrObj || "");
+          }
+          if (monthIdx !== null) {
+            return monthIdx === 0
+              ? isVi
+                ? "Tháng 0 (Bắt đầu)"
+                : "Start (Month 0)"
+              : isVi
+                ? `Tháng +${monthIdx}`
+                : `Month +${monthIdx}`;
+          }
+          return isVi ? "Giai đoạn tương đối" : "Relative Timeline";
+        }
+
+        function fmtBankName(bankName, index = 1) {
+          if (!anonymized) {
+            return bankName || (isVi ? "Ngân hàng mặc định" : "Default Bank");
+          }
+          return isVi ? `Ngân Hàng Nhóm-${index}` : `Bank Tier-${index}`;
+        }
+
+        // 1. Liquidity Runway Ratio (Hybrid Approach - ADR-0017)
+        const availableLiquid = poolBalance + emergencyBuffer;
+        let runwayText = "";
+        let runwayMonths = 0;
+        if (totalWithdrawals > 0) {
+          const monthlyOutflow = totalWithdrawals / Math.max(1, salaryCount);
+          runwayMonths =
+            monthlyOutflow > 0 ? availableLiquid / monthlyOutflow : 0;
+          if (runwayMonths >= 12) {
+            runwayText = `${runwayMonths.toFixed(1)} ${isVi ? "tháng (Đệm thanh khoản dồi dào, bao phủ an toàn các dòng tiền rút)" : "months (Robust liquidity cushion covering scheduled outflows)"}`;
+          } else if (runwayMonths >= 6) {
+            runwayText = `${runwayMonths.toFixed(1)} ${isVi ? "tháng (Thanh khoản ổn định cho các khoản chi trung hạn)" : "months (Adequate liquidity for mid-term outflows)"}`;
+          } else if (runwayMonths > 0) {
+            runwayText = `${runwayMonths.toFixed(1)} ${isVi ? "tháng (Thanh khoản eo hẹp; cần theo dõi sát các khoản rút lớn)" : "months (Tight liquidity runway; closely monitor upcoming outflows)"}`;
+          } else {
+            runwayText = `0.0 ${isVi ? "tháng (Phát hiện thâm hụt số dư linh hoạt)" : "months (Liquid pool deficit detected)"}`;
+          }
+        } else if (monthlySalary > 0) {
+          runwayMonths = availableLiquid / monthlySalary;
+          runwayText = `${runwayMonths.toFixed(1)} ${isVi ? "tháng lương chi tiêu cơ bản được bảo toàn trong quỹ đệm linh hoạt (Không có lịch rút tiền)" : "months of base living salary preserved in liquid buffer (Zero scheduled withdrawals)"}`;
+        } else {
+          runwayText =
+            availableLiquid > 0
+              ? isVi
+                ? "Vô hạn (Không có lịch chi tiêu và số dư linh hoạt dương)"
+                : "Infinite (Zero scheduled outflows and positive liquid balance)"
+              : `0.0 ${isVi ? "tháng (Số dư bằng 0)" : "months (Zero liquid balance)"}`;
+        }
+
+        // 2. Savings Retention Rate (Total Injected Capital Baseline - ADR-0017)
+        const totalInjectedCapital =
+          initialStartingPrincipal + cumulativeSalary + totalBonus;
+        const retentionRate =
+          totalInjectedCapital > 0
+            ? (endingWealth / totalInjectedCapital) * 100
+            : endingWealth > 0
+              ? 100
+              : 0;
+
+        // 3. Capital Efficiency / Yield Multiple (ADR-0017)
+        const yieldMultiple =
+          cumulativeSalary > 0
+            ? totalInterest / cumulativeSalary
+            : totalInjectedCapital > 0
+              ? totalInterest / totalInjectedCapital
+              : 0;
+
+        // 4. Real Wealth Preservation & Inflation Drag
+        const purchasingPowerRetentionPct =
+          endingWealth > 0 ? (realWealth / endingWealth) * 100 : 100;
+        const inflationDragPct = 100 - purchasingPowerRetentionPct;
+
+        // 5. Goal Feasibility & Velocity
+        let goalStatusText = "";
+        if (savingsGoal > 0) {
+          if (simResult.goalReached) {
+            goalStatusText = isVi
+              ? `🎉 **ĐÃ ĐẠT MỤC TIÊU**: Cột mốc hoàn thành vào ngày \`${fmtDateOffset(simResult.goalReachedDate)}\` (sớm hơn kế hoạch).`
+              : `🎉 **ACHIEVED**: Goal milestone reached on \`${fmtDateOffset(simResult.goalReachedDate)}\` (ahead of target horizon).`;
+          } else {
+            const shortfall = Math.max(0, savingsGoal - endingWealth);
+            const monthlyAdjustment = shortfall / Math.max(1, salaryCount);
+            goalStatusText = isVi
+              ? `📈 **CHƯA ĐẠT MỤC TIÊU**: Còn thiếu \`${fmtMoney(shortfall)}\`. Cần gia tăng thặng dư tích lũy thêm \`+${fmtMoney(monthlyAdjustment)}/tháng\` để bắt kịp tiến độ.`
+              : `📈 **OFF TRACK / DEFICIT**: Shortfall gap of \`${fmtMoney(shortfall)}\`. Requires \`+${fmtMoney(monthlyAdjustment)}/month\` additional surplus to reach goal on time.`;
+          }
+        } else {
+          goalStatusText = isVi
+            ? "_Không thiết lập mục tiêu tích lũy cụ thể._"
+            : "_No target savings goal configured._";
+        }
+
+        // 6. 3-Tier Deficit Risk Scoring (ADR-0017)
+        let minPoolBalance = poolBalance;
+        let deficitDays = 0;
+        if (simResult.dailySnapshots && simResult.dailySnapshots.length > 0) {
+          simResult.dailySnapshots.forEach((snap) => {
+            if (snap.poolBalance < minPoolBalance)
+              minPoolBalance = snap.poolBalance;
+            if (snap.poolBalance < 0) deficitDays++;
+          });
+        }
+
+        let deficitRiskTier = "";
+        let deficitRiskDetails = "";
+        if (deficitDays === 0 && minPoolBalance >= 0) {
+          deficitRiskTier = isVi ? "🟢 AN TOÀN (SAFE)" : "🟢 SAFE";
+          deficitRiskDetails = isVi
+            ? "0 sự kiện thâm hụt số dư linh hoạt trong toàn bộ khoảng thời gian mô phỏng."
+            : "0 liquid pool deficit events observed throughout the entire projection horizon.";
+        } else if (poolBalance >= 0) {
+          deficitRiskTier = isVi
+            ? "🟡 CĂNG THẲNG THANH KHOẢN TẠM THỜI (MODERATE STRESS / WARNING)"
+            : "🟡 MODERATE STRESS / WARNING";
+          deficitRiskDetails = isVi
+            ? `Phát hiện thâm hụt tạm thời trong ${deficitDays} ngày (Mức số dư thấp nhất: \`${fmtMoney(minPoolBalance)}\`), đã phục hồi về dương trước khi kết thúc kỳ mô phỏng.`
+            : `Temporary liquid deficit occurred for ${deficitDays} days (Lowest pool balance: \`${fmtMoney(minPoolBalance)}\`), but successfully recovered to positive balance before horizon.`;
+        } else {
+          deficitRiskTier = isVi
+            ? "🔴 MẤT KHẢ NĂNG THANH KHOẢN NGHIÊM TRỌNG (CRITICAL INSOLVENCY / DEFICIT)"
+            : "🔴 CRITICAL INSOLVENCY / DEFICIT";
+          deficitRiskDetails = isVi
+            ? `Mô phỏng kết thúc trong trạng thái âm quỹ linh hoạt (\`${fmtMoney(poolBalance)}\`). Cần bổ sung ngay nguồn vốn thanh khoản để cân bằng tài chính.`
+            : `Simulation concludes with negative liquid pool balance (\`${fmtMoney(poolBalance)}\`). Immediate liquidity injection required to restore solvency.`;
+        }
+
+        // Prompt Blueprints Definitions
+        const blueprintTitles = {
+          general: isVi
+            ? "Đánh Giá Sức Khỏe Tài Chính Tổng Thể & Chiến Lược Tài Sản"
+            : "General Financial Health & Wealth Strategy Review",
+          fire: isVi
+            ? "Tăng Tốc Độc Lập Tài Chính & Nghỉ Hưu Sớm (FIRE)"
+            : "FIRE (Financial Independence, Retire Early) Acceleration",
+          real_estate: isVi
+            ? "Kế Hoạch Tích Lũy Trả Trước Mua Nhà & Quy Mô Cột Mốc"
+            : "Real Estate Downpayment & Milestone Sizing",
+          ladder: isVi
+            ? "Tối Ưu Hóa Bậc Thang Tiền Gửi & Quỹ Dự Phòng Khẩn Cấp"
+            : "Deposit Ladder & Emergency Buffer Optimization",
+          compare: isVi
+            ? "Kiểm Toán Chiến Lược So Sánh Kịch Bản A và B"
+            : "Dual-Pass Scenario A vs B Comparative Strategic Audit",
+        };
+
+        const blueprintPrompts = {
+          general: isVi
+            ? `Bạn là một Chuyên gia Hoạch định Tài chính Cá nhân (CFP) và Cố vấn Chiến lược Quản lý Gia sản. Hãy phân tích toàn diện hồ sơ tài chính trên của khách hàng theo các trọng tâm sau:
+1. **Đánh giá Quỹ Thanh khoản & Dự phòng**: Nhận xét về Tỷ lệ Runway Thanh khoản và quy mô Quỹ Dự phòng Khẩn cấp hiện tại so với các rủi ro dòng tiền chi tiêu.
+2. **Hiệu suất Bậc thang Tiền gửi & Lãi suất**: Đánh giá cơ chế tự động gửi tiết kiệm kỳ hạn, mức lãi suất thu được và tỷ lệ sinh lời trên vốn đóng góp.
+3. **Bào mòn Lạm phát & Bảo toàn Giá trị Thực**: Phân tích mức độ hao hụt sức mua do lạm phát và đề xuất các điều chỉnh danh mục tài sản phù hợp.
+4. **Kế hoạch Hành động Top 3**: Đề xuất 3 bước tối ưu hóa cụ thể, khả thi nhất để gia tăng tốc độ tích lũy tài sản ròng.`
+            : `You are an expert Certified Financial Planner (CFP) and Wealth Strategy Advisor. Conduct a comprehensive strategic assessment of this client's financial health dossier based on the following key areas:
+1. **Liquidity & Emergency Buffer Assessment**: Evaluate the Liquidity Runway Ratio and Emergency Buffer Reserve sizing against potential cashflow stress and scheduled outflows.
+2. **Deposit Ladder Yield & Capital Efficiency**: Analyze the auto-term sweep mechanics, interest yield captured, and the capital efficiency multiple on deposited salary.
+3. **Inflation Erosion & Real Wealth Preservation**: Assess the drag on purchasing power and recommend structural asset allocation enhancements.
+4. **Top 3 Actionable Recommendations**: Provide 3 high-impact, actionable steps to optimize net wealth accumulation and accelerate financial goals.`,
+
+          fire: isVi
+            ? `Bạn là Cố vấn Chuyên sâu về Độc lập Tài chính & Nghỉ Hưu Sớm (FIRE). Hãy phân tích hồ sơ trên để tối ưu hóa lộ trình FIRE:
+1. **Tỷ lệ Rút An toàn (SWR 3.5% - 4.0%)**: Ước tính mức chi tiêu năm khả dụng từ tổng tài sản kết thúc và kiểm tra độ bền vững dài hạn.
+2. **Tăng tốc Cột mốc (Milestone Acceleration)**: Phân tích các đòn bẩy gia tăng tỷ lệ tiết kiệm để kéo gần ngày đạt cột mốc tự do tài chính.
+3. **Đệm Thanh khoản Tránh Rủi ro Thứ tự Lợi nhuận (SRR)**: Đánh giá cơ cấu tiền gửi thanh khoản để bảo vệ danh mục trong những năm đầu nghỉ hưu.`
+            : `You are a specialized Financial Independence, Retire Early (FIRE) Strategist. Analyze this client's dossier to optimize their FIRE roadmap:
+1. **Safe Withdrawal Rate (SWR 3.5% - 4.0%)**: Calculate sustainable annual post-retirement living expenditure supported by the projected ending wealth.
+2. **Milestone Date Acceleration**: Identify high-leverage savings rate and yield optimization levers to pull forward the financial independence milestone date.
+3. **Sequence of Returns Risk (SRR) Mitigation**: Evaluate the liquidity buffer architecture required to withstand early retirement market drawdowns.`,
+
+          real_estate: isVi
+            ? `Bạn là Chuyên gia Tư vấn Tài chính Bất động sản và Đòn bẩy Tín dụng. Hãy phân tích hồ sơ trên phục vụ mục tiêu tích lũy trả trước mua nhà:
+1. **Tiến độ Tích lũy Khoản Trả trước**: Đánh giá tính khả thi của mục tiêu tài chính so với quy mô vốn trả trước bất động sản dự kiến.
+2. **Bảo toàn Thanh khoản Sau Mua Nhà**: Phân tích tỷ lệ thanh khoản còn lại sau khi giải ngân mua nhà để đảm bảo an toàn sinh hoạt.
+3. **Đồng bộ Đáo hạn Tiền gửi với Tiến độ Thanh toán**: Đề xuất kỳ hạn gửi tiết kiệm khớp với các đợt giải ngân hợp đồng mua bán.`
+            : `You are a Real Estate Financing and Mortgage Acquisition Advisor. Analyze this client's dossier for property purchase and downpayment readiness:
+1. **Downpayment Target Feasibility**: Assess the accumulation velocity and milestone date feasibility relative to expected property downpayment requirements.
+2. **Post-Purchase Liquidity Runway**: Ensure that adequate liquid flexible pool balances and emergency reserves are maintained after downpayment disbursement.
+3. **Deposit Maturity Scheduling**: Recommend term deposit duration alignment to synchronize cash payouts with contractual property installment milestones.`,
+
+          ladder: isVi
+            ? `Bạn là Chuyên gia Quản lý Danh mục Thu nhập Cố định và Thị trường Tiền tệ. Hãy kiểm toán cơ cấu bậc thang tiền gửi tiết kiệm:
+1. **Tối ưu hóa Kỳ hạn & Ngưỡng Tự động Quét**: Đánh giá xem kỳ hạn ${autoTermMonths} tháng và ngưỡng quét có tối đa hóa được lãi suất và tính thanh khoản không.
+2. **Đa dạng hóa Bậc thang Kỳ hạn**: Đề xuất phân bổ đa kỳ hạn (3M / 6M / 12M) để đón đầu chu kỳ biến động lãi suất ngân hàng.
+3. **Định cỡ Quỹ Dự phòng Khẩn cấp**: Kiểm toán quy mô quỹ dự phòng nhằm triệt tiêu hoàn toàn rủi ro tất toán sớm trước hạn.`
+            : `You are a Fixed Income and Treasury Portfolio Specialist. Audit the client's term deposit structure and auto-sweep mechanics:
+1. **Tenor & Sweep Threshold Optimization**: Evaluate whether the ${autoTermMonths}-month auto-term duration and sweep threshold maximize interest rate capture while maintaining essential liquidity.
+2. **Multi-Tenor Ladder Diversification**: Propose a structured laddering strategy (3M / 6M / 12M) to exploit yield curve dynamics and minimize reinvestment risk.
+3. **Emergency Buffer Calibration**: Audit the liquid emergency buffer reserve sizing to eliminate early withdrawal penalties under unexpected liquidity demands.`,
+
+          compare: isVi
+            ? `Bạn là Chuyên gia Phân tích So sánh Chiến lược Quản lý Gia sản. Hãy kiểm toán và đối chiếu giữa Kịch bản A (Cơ sở) và Kịch bản B (Dự phóng):
+1. **Chênh lệch Tài sản & Giá trị Thực**: Định lượng mức chênh lệch tài sản danh nghĩa và giá trị sức mua thực tế sau lạm phát.
+2. **So sánh Tiến độ Cột mốc**: Phân tích sự rút ngắn hoặc kéo dài thời gian hoàn thành mục tiêu tài chính giữa hai kịch bản.
+3. **Đánh giá Cân đối Lợi nhuận / Rủi ro**: Tổng hợp các đánh đổi chiến lược và đưa ra kết luận phương án tối ưu nhất.`
+            : `You are a Strategic Wealth Comparison and Scenario Audit Specialist. Conduct a comparative assessment contrasting Scenario A (Baseline) and Scenario B (Projected):
+1. **Net Wealth & Real Value Variance**: Quantify the ending wealth and inflation-adjusted purchasing power delta between the two strategic configurations.
+2. **Milestone Timeline Contrast**: Compare the goal milestone acceleration or delay between the two paths.
+3. **Risk-Return Trade-Off Synthesis**: Evaluate the trade-offs in liquidity runway, interest yield, and savings rate to recommend the optimal strategic path.`,
+        };
+
+        // Table of Portfolio Breakdown
+        let portfolioTable = "";
+        if (
+          simResult.allSavings &&
+          Array.isArray(simResult.allSavings) &&
+          simResult.allSavings.length > 0
+        ) {
+          const rows = simResult.allSavings
+            .filter((acc) => acc.type !== "Withdrawal")
+            .slice(0, 10);
+          if (rows.length > 0) {
+            portfolioTable = isVi
+              ? "| Tài Khoản / Kỳ Hạn | Loại Hình | Số Tiền Gốc | Lãi Suất (%/năm) | Ngày Mở | Ngày Đáo Hạn | Tiền Lãi Dự Kiến |\n| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n"
+              : "| Account / Tenor | Type | Principal | Rate (%/yr) | Start Date | Maturity Date | Est. Interest |\n| :--- | :--- | :--- | :--- | :--- | :--- | :--- |\n";
+            rows.forEach((acc, idx) => {
+              const accName = anonymized
+                ? isVi
+                  ? `Khoản Tiết Kiệm #${idx + 1}`
+                  : `Term Saving #${idx + 1}`
+                : acc.name || `Saving #${idx + 1}`;
+              const accType =
+                acc.type === "AUTO_6M"
+                  ? isVi
+                    ? "Tự Động Quét"
+                    : "Auto Sweep"
+                  : isVi
+                    ? "Kỳ Hạn Cố Định"
+                    : "Fixed Term";
+              const principalFmt = fmtMoney(acc.principal);
+              const rateFmt = fmtPct(acc.rate);
+              const startFmt = fmtDateOffset(acc.startDate, idx);
+              const endFmt = fmtDateOffset(
+                acc.endDate,
+                idx + (autoTermMonths || 6)
+              );
+              const interestFmt = fmtMoney(acc.earnedInterest);
+              portfolioTable += `| **${accName}** | ${accType} | \`${principalFmt}\` | \`${rateFmt}\` | \`${startFmt}\` | \`${endFmt}\` | \`${interestFmt}\` |\n`;
+            });
+            if (simResult.allSavings.length > 10) {
+              portfolioTable += isVi
+                ? `| _...và ${simResult.allSavings.length - 10} khoản tiết kiệm khác..._ | | | | | | |\n`
+                : `| _...and ${simResult.allSavings.length - 10} additional savings accounts..._ | | | | | | |\n`;
+            }
+          }
+        }
+        if (!portfolioTable) {
+          portfolioTable = isVi
+            ? "_Chưa có danh mục tiền gửi kỳ hạn; toàn bộ số dư lưu giữ trong Quỹ Linh Hoạt._\n"
+            : "_No fixed term savings active; entire balance maintained in liquid Flexible Pool._\n";
+        }
+
+        // Scenario B Comparison Table (if applicable)
+        let compareSection = "";
+        if (
+          blueprint === "compare" &&
+          scenarioBResult &&
+          scenarioBResult.totals
+        ) {
+          const bTotals = scenarioBResult.totals;
+          const deltaWealth = (bTotals.totalWealth || 0) - endingWealth;
+          const deltaInterest = (bTotals.totalInterest || 0) - totalInterest;
+          const deltaReal =
+            (bTotals.inflationAdjusted || 0) -
+            (totals.inflationAdjusted || endingWealth);
+
+          compareSection = isVi
+            ? `### 🔄 Bảng So Sánh Chiến Lược Đối Chiếu (Kịch Bản A vs B)
+| Tiêu Chí Đánh Giá | Kịch Bản A (Cơ Sở) | Kịch Bản B (Dự Phóng) | Chênh Lệch (Delta) |
+| :--- | :--- | :--- | :--- |
+| **Tổng Tài Sản Kết Thúc** | \`${fmtMoney(endingWealth)}\` | \`${fmtMoney(bTotals.totalWealth || 0)}\` | **\`${fmtMoney(deltaWealth, true)}\`** |
+| **Giá Trị Thực (Sức Mua)** | \`${fmtMoney(realWealth)}\` | \`${fmtMoney(bTotals.inflationAdjusted || 0)}\` | **\`${fmtMoney(deltaReal, true)}\`** |
+| **Tổng Lãi Tích Lũy** | \`${fmtMoney(totalInterest)}\` | \`${fmtMoney(bTotals.totalInterest || 0)}\` | **\`${fmtMoney(deltaInterest, true)}\`** |
+| **Trạng Thái Cột Mốc** | ${simResult.goalReached ? `Đạt ngày \`${fmtDateOffset(simResult.goalReachedDate)}\`` : "Chưa đạt"} | ${scenarioBResult.goalReached ? `Đạt ngày \`${fmtDateOffset(scenarioBResult.goalReachedDate)}\`` : "Chưa đạt"} | ${scenarioBResult.goalReached && !simResult.goalReached ? "🟢 Rút ngắn thời gian đạt mục tiêu" : "Tương đương"} |
+
+`
+            : `### 🔄 Strategic Comparative Audit Matrix (Scenario A vs B)
+| Evaluation Metric | Scenario A (Baseline) | Scenario B (Projected) | Variance (Delta) |
+| :--- | :--- | :--- | :--- |
+| **Ending Total Wealth** | \`${fmtMoney(endingWealth)}\` | \`${fmtMoney(bTotals.totalWealth || 0)}\` | **\`${fmtMoney(deltaWealth, true)}\`** |
+| **Real Value (Purchasing Power)** | \`${fmtMoney(realWealth)}\` | \`${fmtMoney(bTotals.inflationAdjusted || 0)}\` | **\`${fmtMoney(deltaReal, true)}\`** |
+| **Total Cumulative Interest** | \`${fmtMoney(totalInterest)}\` | \`${fmtMoney(bTotals.totalInterest || 0)}\` | **\`${fmtMoney(deltaInterest, true)}\`** |
+| **Milestone Status** | ${simResult.goalReached ? `Achieved on \`${fmtDateOffset(simResult.goalReachedDate)}\`` : "Not reached"} | ${scenarioBResult.goalReached ? `Achieved on \`${fmtDateOffset(scenarioBResult.goalReachedDate)}\`` : "Not reached"} | ${scenarioBResult.goalReached && !simResult.goalReached ? "🟢 Accelerates goal achievement" : "Comparable"} |
+
+`;
+        }
+
+        // Custom Inquiries Block
+        let customInquiriesBlock = "";
+        if (customInquiries) {
+          customInquiriesBlock = isVi
+            ? `\n### 📝 Yêu Cầu & Ghi Chú Riêng Từ Khách Hàng:
+> ${customInquiries.replace(/\n/g, "\n> ")}\n`
+            : `\n### 📝 Custom Inquiries from Client:
+> ${customInquiries.replace(/\n/g, "\n> ")}\n`;
+        }
+
+        const selectedBlueprintTitle =
+          blueprintTitles[blueprint] || blueprintTitles.general;
+        const selectedBlueprintPrompt =
+          blueprintPrompts[blueprint] || blueprintPrompts.general;
+
+        // Construct Full Markdown
+        const md = isVi
+          ? `# 🏦 Hồ Sơ Sức Khỏe Tài Chính & Tóm Tắt Tư Vấn AI
+
+> **Khung Thời Gian**: \`${fmtDateOffset(simResult.simStartDate, 0)}\` → \`${fmtDateOffset(simResult.simTargetDate, Math.round(durationYears * 12))}\` (\`${durationYears}\` năm) | **Chế Độ Ẩn Danh**: \`${anonymized ? "Bật (Tỷ lệ tương đối)" : "Tắt (Số liệu gốc)"}\` | **Ngôn Ngữ**: \`Tiếng Việt (vi)\`
+
+---
+
+## 📊 1. Tóm Tắt Tổng Quan & Chỉ Số Chính (Executive Summary)
+
+| Chỉ Số Tài Sản | Giá Trị Danh Nghĩa | Giá Trị Thực (Sau Lạm Phát) | Tỷ Lệ / Hệ Số |
+| :--- | :--- | :--- | :--- |
+| **Tổng Tài Sản Kết Thúc** | \`${fmtMoney(endingWealth)}\` | \`${fmtMoney(realWealth)}\` | \`100.0%\` |
+| **Quỹ Linh Hoạt Khả Dụng** | \`${fmtMoney(poolBalance)}\` | - | \`${fmtPct(endingWealth > 0 ? (poolBalance / endingWealth) * 100 : 0)}\` |
+| **Tiền Gửi Tiết Kiệm Kỳ Hạn** | \`${fmtMoney(fixedSavingsBalance)}\` | - | \`${fmtPct(endingWealth > 0 ? (fixedSavingsBalance / endingWealth) * 100 : 0)}\` |
+| **Tổng Tiền Lãi Tích Lũy** | \`${fmtMoney(totalInterest)}\` | - | **\`${fmtMult(yieldMultiple)}\`** (trên lương nạp) |
+| **Tổng Vốn Đóng Góp Vào Hệ Thống** | \`${fmtMoney(totalInjectedCapital)}\` | - | (Gốc ban đầu + Lương + Thưởng) |
+
+---
+
+## 🩺 2. Chẩn Đoán Sức Khỏe Tài Chính (Financial Health Diagnostics)
+
+- **Tỷ Lệ Runway Thanh Khoản (Liquidity Runway Ratio):** \`${runwayText}\`
+- **Tỷ Lệ Giữ Lại Tiết Kiệm (Savings Retention Rate):** \`${fmtPct(retentionRate)}\` (Tổng tài sản bảo toàn và tăng trưởng trên toàn bộ vốn nạp).
+- **Hệ Số Sinh Lời Vốn (Capital Efficiency Multiple):** \`${fmtMult(yieldMultiple)}\` (\`${fmtMoney(totalInterest)}\` tiền lãi thụ động tạo ra trên tổng lương).
+- **Bảo Toàn Giá Trị Thực & Hao Hụt Lạm Phát (Real Wealth Preservation):** Giữ lại \`${fmtPct(purchasingPowerRetentionPct)}\` sức mua (Hao hụt lạm phát: \`-${fmtMoney(inflationDrag)}\` hay \`-${fmtPct(inflationDragPct)}\`).
+- **Khả Thi Cột Mốc & Tiến Độ Mục Tiêu (Goal Feasibility & Gap Velocity):** ${goalStatusText}
+- **Đánh Giá Rủi Ro Thâm Hụt (Deficit Risk Score):** **${deficitRiskTier}** — ${deficitRiskDetails}
+
+---
+
+## 💼 3. Cấu Trúc Thu Nhập & Dòng Tiền (Income & Cashflow Architecture)
+
+- **Lương Hàng Tháng Khởi Điểm:** \`${fmtMoney(monthlySalary)}\` (Tăng trưởng định kỳ: \`${fmtPct(salaryGrowthPct)}/năm\`)
+- **Thưởng Hàng Năm (Lương Tháng 13):** \`${fmtMult(bonusMultiplier)}\` tháng lương (chi trả vào Tháng \`${bonusMonth}\`)
+- **Tổng Thu Nhập Tích Lũy:** \`${fmtMoney(cumulativeSalary + totalBonus)}\` (Lương: \`${fmtMoney(cumulativeSalary)}\`, Thưởng: \`${fmtMoney(totalBonus)}\`)
+- **Tổng Dòng Tiền Rút Dự Kiến:** \`${fmtMoney(totalWithdrawals)}\`
+- **Quỹ Dự Phòng Khẩn Cấp Thiết Lập:** \`${fmtMoney(emergencyBuffer)}\` (Bảo lưu thanh khoản khi quét tự động)
+
+---
+
+## 📦 4. Chi Tiết Danh Mục Tiền Gửi (Term Deposit Portfolio Breakdown)
+
+- **Số Lượng Tài Khoản Tự Động Quét Tạo Mới:** \`${created6MCount}\` đợt (Kỳ hạn \`${autoTermMonths}\` tháng @ \`${fmtPct(autoTermRatePct)}/năm\`)
+- **Ngưỡng Quét Tự Động Vào Tiền Gửi:** \`${fmtMoney(autoTermThreshold)}\` (Cần tối thiểu \`${fmtMoney(autoTermThreshold + emergencyBuffer)}\` để kích hoạt quét)
+
+${portfolioTable}
+---
+
+## ⚠️ 5. Đánh Giá Căng Thẳng Thanh Khoản & Rủi Ro (Liquidity & Risk Stress Assessment)
+
+- **Mức Số Dư Quỹ Linh Hoạt Thấp Nhất:** \`${fmtMoney(minPoolBalance)}\`
+- **Số Ngày Thâm Hụt Số Dư Linh Hoạt:** \`${deficitDays}\` ngày
+- **Mức Độ An Toàn Danh Mục:** ${deficitRiskTier}
+- **Khuyến Nghị Thanh Khoản:** ${
+              deficitDays > 0
+                ? "Cần xem xét hạ ngưỡng quét tự động hoặc tăng quỹ dự phòng khẩn cấp để đảm bảo không bị thâm hụt số dư khi có dòng tiền rút."
+                : "Cấu trúc thanh khoản được duy trì vững chắc, không phát hiện rủi ro căng thẳng dòng tiền."
+            }
+
+---
+
+${compareSection}## 🤖 6. Chỉ Dẫn Tư Vấn AI (AI Advisory Blueprint): [${selectedBlueprintTitle}]
+
+### 🎯 Bối Cảnh & Nhiệm Vụ Cho Cố Vấn AI:
+${selectedBlueprintPrompt}
+${customInquiriesBlock}
+`
+          : `# 🏦 Financial Health Dossier & AI Advisory Summary
+
+> **Projection Horizon**: \`${fmtDateOffset(simResult.simStartDate, 0)}\` → \`${fmtDateOffset(simResult.simTargetDate, Math.round(durationYears * 12))}\` (\`${durationYears}\` Years) | **Privacy Mask**: \`${anonymized ? "Enabled (Relative Multiples)" : "Disabled (Exact Figures)"}\` | **Locale**: \`English (en)\`
+
+---
+
+## 📊 1. Executive Summary & KPIs
+
+| Portfolio Metric | Nominal Value | Real Value (Inflation-Adjusted) | Allocation / Multiple |
+| :--- | :--- | :--- | :--- |
+| **Ending Total Wealth** | \`${fmtMoney(endingWealth)}\` | \`${fmtMoney(realWealth)}\` | \`100.0%\` |
+| **Liquid Flexible Pool** | \`${fmtMoney(poolBalance)}\` | - | \`${fmtPct(endingWealth > 0 ? (poolBalance / endingWealth) * 100 : 0)}\` |
+| **Active Term Deposits** | \`${fmtMoney(fixedSavingsBalance)}\` | - | \`${fmtPct(endingWealth > 0 ? (fixedSavingsBalance / endingWealth) * 100 : 0)}\` |
+| **Total Cumulative Interest Earned** | \`${fmtMoney(totalInterest)}\` | - | **\`${fmtMult(yieldMultiple)}\`** (on salary deposited) |
+| **Total Injected Capital Baseline** | \`${fmtMoney(totalInjectedCapital)}\` | - | (Starting Assets + Cumulative Salary + Bonuses) |
+
+---
+
+## 🩺 2. Financial Health Diagnostics
+
+- **Liquidity Runway Ratio:** \`${runwayText}\`
+- **Savings Retention Rate:** \`${fmtPct(retentionRate)}\` (Proportion of total gross capital injected preserved into net ending wealth).
+- **Capital Efficiency Multiple:** \`${fmtMult(yieldMultiple)}\` (\`${fmtMoney(totalInterest)}\` passive interest generated per deposited salary).
+- **Real Wealth Preservation & Inflation Drag:** Preserved \`${fmtPct(purchasingPowerRetentionPct)}\` purchasing power (Inflation Drag: \`-${fmtMoney(inflationDrag)}\` or \`-${fmtPct(inflationDragPct)}\`).
+- **Goal Feasibility & Gap Velocity:** ${goalStatusText}
+- **Deficit Risk Score:** **${deficitRiskTier}** — ${deficitRiskDetails}
+
+---
+
+## 💼 3. Income & Cashflow Architecture
+
+- **Starting Monthly Salary**: \`${fmtMoney(monthlySalary)}\` (Annual Compound Escalation: \`${fmtPct(salaryGrowthPct)}/yr\`)
+- **Annual Bonus (13th Month Salary)**: \`${fmtMult(bonusMultiplier)}\` monthly salary (credited in Month \`${bonusMonth}\`)
+- **Total Cumulative Career Inflows**: \`${fmtMoney(cumulativeSalary + totalBonus)}\` (Salary: \`${fmtMoney(cumulativeSalary)}\`, Bonus: \`${fmtMoney(totalBonus)}\`)
+- **Total Scheduled Outflows (Withdrawals)**: \`${fmtMoney(totalWithdrawals)}\`
+- **Emergency Buffer Reserve Target**: \`${fmtMoney(emergencyBuffer)}\` (Retained in liquid pool during auto-sweeps)
+
+---
+
+## 📦 4. Term Deposit Portfolio Breakdown
+
+- **Auto-Swept Term Accounts Created**: \`${created6MCount}\` sweeps (\`${autoTermMonths}\`M duration @ \`${fmtPct(autoTermRatePct)}/yr\`)
+- **Auto-Term Sweep Threshold**: \`${fmtMoney(autoTermThreshold)}\` (Requires pool $\ge$ \`${fmtMoney(autoTermThreshold + emergencyBuffer)}\` to trigger sweep)
+
+${portfolioTable}
+---
+
+## ⚠️ 5. Liquidity & Risk Stress Assessment
+
+- **Lowest Observed Flexible Pool Balance**: \`${fmtMoney(minPoolBalance)}\`
+- **Liquid Pool Deficit Duration**: \`${deficitDays}\` days
+- **Portfolio Safety Classification**: ${deficitRiskTier}
+- **Liquidity Guidance**: ${
+              deficitDays > 0
+                ? "Consider increasing Emergency Buffer Reserve or reducing auto-sweep threshold to prevent negative balances during scheduled withdrawals."
+                : "Liquidity buffer remains resilient with zero negative deficit occurrences across the projection timeline."
+            }
+
+---
+
+${compareSection}## 🤖 6. AI Advisory Blueprint: [${selectedBlueprintTitle}]
+
+### 🎯 System Prompt & Strategic Objective for AI Advisor:
+${selectedBlueprintPrompt}
+${customInquiriesBlock}
+`;
+
+        return md;
+      }
+      window.generateFinancialHealthMarkdown = generateFinancialHealthMarkdown;
+
       // --- MAIN SIMULATION DISPATCHER ---
       function runSimulation() {
         try {
