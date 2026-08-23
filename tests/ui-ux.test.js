@@ -1932,6 +1932,51 @@ async function runUIUXTests() {
     );
   }
 
+  // Test R44: Issue #69 Liquid Pool Deficit Prominence & Portfolio Source Badges in Savings Hub
+  // 1. Deficit alert badge in Pool Balance KPI card
+  const elDeficitBadge = app.document.getElementById("metricPoolDeficitAlert");
+  assert(
+    elDeficitBadge !== null,
+    "R44: #metricPoolDeficitAlert badge element exists in Pool Balance KPI card"
+  );
+
+  // Normal healthy run: deficit badge is hidden
+  app.loadDefaultSampleData();
+  app.document.getElementById("inputSalary").value = "25,000,000";
+  app.runSimulation();
+  assert(
+    elDeficitBadge.classList.contains("hidden"),
+    "R44: Deficit alert badge is hidden during healthy simulation without pool deficits"
+  );
+
+  // Trigger deficit via oversized withdrawal
+  app.workingCSVData = [
+    {
+      "Account Name": "Massive Outflow",
+      Principal: "500000000",
+      Interest: "0",
+      "Start Date": app.formatDate(new Date()),
+      "End Date": app.formatDate(app.addMonths(new Date(), 2)),
+      Type: "Withdrawal",
+      Bank: "Cash",
+    },
+  ];
+  app.runSimulation();
+  assert(
+    !elDeficitBadge.classList.contains("hidden"),
+    "R44: Deficit alert badge is visibly displayed when liquid pool enters deficit"
+  );
+
+  // 2. Savings Hub origin badges
+  app.loadDefaultSampleData();
+  app.runSimulation();
+  app.renderFilteredSavingsTable();
+  const tableBody = app.document.getElementById("savingsTableBody");
+  assert(
+    tableBody && tableBody.children.length > 0,
+    "R44: Savings Accounts table populated with portfolio rows"
+  );
+
   app.dismissAllModals();
 
   console.log(
