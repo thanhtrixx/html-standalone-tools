@@ -334,6 +334,7 @@
       /* Modals and Containers */
       .light #csvModal > div,
       .light #presetsModal > div,
+      .light #aiDossierModal > div,
       .light #onboardingOverlay > div,
       .light #mobileActionSheet > div {
         background-color: var(--bg-modal) !important;
@@ -343,10 +344,31 @@
       }
 
       .light #csvModal input,
-      .light #csvModal select {
+      .light #csvModal select,
+      .light #aiDossierModal textarea {
         background-color: var(--bg-input) !important;
         color: var(--text-primary) !important;
         border-color: var(--border-strong) !important;
+      }
+
+      .light #aiDossierModal #dossierMarkdownPreview {
+        background-color: var(--bg-input) !important;
+        color: var(--text-primary) !important;
+        border-color: var(--border-medium) !important;
+      }
+
+      .light #aiDossierModal .bg-slate-950,
+      .light #aiDossierModal .bg-slate-950\/40,
+      .light #aiDossierModal .bg-slate-950\/60,
+      .light #aiDossierModal .bg-slate-950\/80 {
+        background-color: var(--bg-card-subtle) !important;
+        border-color: var(--border-subtle) !important;
+      }
+
+      .light #aiDossierModal .dossier-bp-chip.bg-slate-800 {
+        background-color: var(--bg-chip) !important;
+        color: var(--text-secondary) !important;
+        border-color: var(--border-medium) !important;
       }
 
       .light #recurringGenPanel {
@@ -780,6 +802,24 @@
             type="button"
             onclick="
               toggleMobileActionSheet(false);
+              openAIDossierModal();
+            "
+            class="w-full px-3 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-between transition"
+          >
+            <span class="flex items-center gap-2.5">
+              <i
+                class="fa-solid fa-wand-magic-sparkles text-emerald-400 text-sm"
+              ></i>
+              <span data-i18n="btn_ai_dossier"
+                >AI Financial Health Dossier</span
+              >
+            </span>
+            <i class="fa-solid fa-chevron-right text-slate-500 text-[10px]"></i>
+          </button>
+          <button
+            type="button"
+            onclick="
+              toggleMobileActionSheet(false);
               shareSimulation();
             "
             class="w-full px-3 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-xl border border-slate-700 flex items-center justify-between transition"
@@ -883,6 +923,16 @@
         >
           <i class="fa-solid fa-bolt text-amber-300 mr-2"></i
           ><span data-i18n="btn_presets">Presets</span>
+        </button>
+        <button
+          onclick="openAIDossierModal()"
+          id="btnAIDossier"
+          class="px-3 py-1.5 text-xs sm:text-sm bg-gradient-to-r from-emerald-600/80 to-teal-600/80 hover:from-emerald-500 hover:to-teal-500 text-white font-medium border border-emerald-500/30 rounded-lg flex items-center shadow-md shadow-emerald-500/20 transition"
+          data-i18n-title="tooltip_ai_dossier"
+          title="AI Health Dossier"
+        >
+          <i class="fa-solid fa-wand-magic-sparkles text-emerald-300 mr-2"></i
+          ><span data-i18n="btn_ai_dossier">AI Dossier</span>
         </button>
         <button
           onclick="toggleTheme()"
@@ -3141,6 +3191,214 @@
           </div>
         </div>
       </div>
+      <!-- AI-Ready Financial Health Dossier Modal (ADR-0014, ADR-0017, Issue #58) -->
+      <div
+        id="aiDossierModal"
+        class="fixed inset-0 z-[90] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="aiDossierModalTitle"
+        onclick="if (event.target === this) toggleAIDossierModal(false);"
+      >
+        <div
+          class="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        >
+          <!-- Modal Header -->
+          <div
+            class="flex items-center justify-between p-4 sm:p-5 border-b border-slate-800 bg-slate-950/40"
+          >
+            <div class="flex items-center space-x-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg shadow-sm"
+              >
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </div>
+              <div>
+                <h2
+                  id="aiDossierModalTitle"
+                  class="text-base font-bold text-white tracking-wide flex items-center gap-2"
+                >
+                  <span data-i18n="hdr_ai_dossier_modal"
+                    >AI Financial Health Dossier</span
+                  >
+                  <span
+                    class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    >AI-Ready GFM</span
+                  >
+                </h2>
+                <p
+                  class="text-xs text-slate-400"
+                  data-i18n="lbl_ai_dossier_sub"
+                >
+                  Exportable diagnostic analysis & prompt blueprint for ChatGPT,
+                  Claude & Gemini
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="btnCloseAIDossierHeader"
+              onclick="toggleAIDossierModal(false)"
+              class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition"
+              aria-label="Close dialog"
+            >
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+
+          <!-- Controls Toolbar inside Modal (Blueprint chips, Privacy toggle, Custom inquiries) -->
+          <div
+            class="p-3.5 sm:p-4 bg-slate-950/60 border-b border-slate-800 space-y-3"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+              <!-- Blueprint Selector Chips -->
+              <div
+                class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5"
+                id="dossierBlueprintChips"
+              >
+                <button
+                  type="button"
+                  onclick="setDossierBlueprint('general')"
+                  data-blueprint="general"
+                  class="dossier-bp-chip px-3 py-1 text-xs font-semibold rounded-lg border transition flex items-center gap-1.5 bg-indigo-600 text-white border-indigo-500 shadow-sm"
+                >
+                  <i class="fa-solid fa-stethoscope"></i>
+                  <span data-i18n="chip_bp_general">General</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="setDossierBlueprint('fire')"
+                  data-blueprint="fire"
+                  class="dossier-bp-chip px-3 py-1 text-xs font-medium rounded-lg border transition flex items-center gap-1.5 bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600"
+                >
+                  <i class="fa-solid fa-fire text-amber-400"></i>
+                  <span data-i18n="chip_bp_fire">FIRE</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="setDossierBlueprint('real_estate')"
+                  data-blueprint="real_estate"
+                  class="dossier-bp-chip px-3 py-1 text-xs font-medium rounded-lg border transition flex items-center gap-1.5 bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600"
+                >
+                  <i class="fa-solid fa-house-chimney text-emerald-400"></i>
+                  <span data-i18n="chip_bp_real_estate">Downpayment</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="setDossierBlueprint('ladder')"
+                  data-blueprint="ladder"
+                  class="dossier-bp-chip px-3 py-1 text-xs font-medium rounded-lg border transition flex items-center gap-1.5 bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600"
+                >
+                  <i class="fa-solid fa-layer-group text-purple-400"></i>
+                  <span data-i18n="chip_bp_ladder">Ladder</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="setDossierBlueprint('compare')"
+                  data-blueprint="compare"
+                  class="dossier-bp-chip px-3 py-1 text-xs font-medium rounded-lg border transition flex items-center gap-1.5 bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-600"
+                >
+                  <i class="fa-solid fa-code-compare text-blue-400"></i>
+                  <span data-i18n="chip_bp_compare">Compare</span>
+                </button>
+              </div>
+
+              <!-- Privacy Mask Toggle Checkbox -->
+              <label
+                class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 select-none px-2.5 py-1 rounded-lg border border-slate-700/80 hover:border-slate-600 transition"
+              >
+                <input
+                  type="checkbox"
+                  id="togglePrivacyMask"
+                  class="w-3.5 h-3.5 rounded text-emerald-500 bg-slate-800 border-slate-600 focus:ring-emerald-500 cursor-pointer"
+                  onchange="toggleDossierPrivacyMask()"
+                />
+                <span class="flex items-center gap-1.5 font-medium">
+                  <i class="fa-solid fa-user-shield text-emerald-400"></i>
+                  <span data-i18n="lbl_privacy_mask"
+                    >Privacy Mask (Salary Multiples & %)</span
+                  >
+                </span>
+              </label>
+            </div>
+
+            <!-- Optional Collapsible Custom Inquiries Area -->
+            <div class="space-y-1">
+              <label
+                for="dossierCustomInquiries"
+                class="text-[11px] text-slate-400 flex items-center gap-1"
+              >
+                <i class="fa-solid fa-pen-to-square text-indigo-400"></i>
+                <span data-i18n="lbl_custom_inquiries"
+                  >Custom Notes / Questions for AI:</span
+                >
+              </label>
+              <textarea
+                id="dossierCustomInquiries"
+                rows="1"
+                placeholder="E.g. I plan to take a sabbatical in 2 years, evaluate cashflow risks..."
+                data-i18n-placeholder="ph_custom_inquiries"
+                oninput="debouncedRenderAIDossierContent()"
+                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 resize-none transition"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Live Markdown Preview Body -->
+          <div class="p-3.5 sm:p-5 overflow-y-auto flex-1 bg-slate-950/80">
+            <pre
+              id="dossierMarkdownPreview"
+              class="w-full text-xs font-mono text-slate-200 bg-slate-900/90 border border-slate-800 rounded-xl p-4 overflow-x-auto whitespace-pre-wrap select-all leading-relaxed shadow-inner"
+            ></pre>
+          </div>
+
+          <!-- Modal Footer Actions -->
+          <div
+            class="p-3.5 sm:p-4 bg-slate-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2.5"
+          >
+            <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-400"></i>
+              <span data-i18n="lbl_dossier_footer_hint"
+                >Paste directly into ChatGPT, Claude or Gemini for personalized
+                CFP financial consultation.</span
+              >
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="btnCloseAIDossier"
+                onclick="toggleAIDossierModal(false)"
+                class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition"
+                data-i18n="btn_close"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                id="btnDownloadDossier"
+                onclick="downloadAIDossierFile()"
+                class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium border border-slate-700 flex items-center gap-1.5 transition shadow-sm"
+                data-i18n-title="tooltip_download_dossier"
+                title="Download Markdown File"
+              >
+                <i class="fa-solid fa-download text-indigo-400"></i>
+                <span data-i18n="btn_download_dossier">Download .md</span>
+              </button>
+              <button
+                type="button"
+                id="btnCopyDossier"
+                onclick="copyAIDossierToClipboard()"
+                class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition"
+                data-i18n-title="tooltip_copy_dossier"
+                title="Copy Raw Markdown to Clipboard"
+              >
+                <i class="fa-solid fa-copy"></i>
+                <span data-i18n="btn_copy_dossier">Copy Markdown</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- Interactive Heatmap Popover Tooltip (Issue #9) -->
       <div
         id="heatmapTooltip"
@@ -3484,6 +3742,30 @@
           onboard_title_5: "Shortcuts",
           onboard_desc_5:
             '<kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Enter</kbd> Run simulation · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Ctrl+S</kbd> Save CSV · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Esc</kbd> Close modals',
+          // AI Health Dossier Modal (ADR-0017, Issue #58, #59)
+          btn_ai_dossier: "AI Dossier",
+          tooltip_ai_dossier: "AI Financial Health Dossier",
+          hdr_ai_dossier_modal: "AI Financial Health Dossier",
+          lbl_ai_dossier_sub:
+            "AI-ready diagnostic summary & advisory blueprint for ChatGPT, Claude & Gemini",
+          btn_copy_dossier: "Copy Markdown",
+          btn_download_dossier: "Download .md",
+          tooltip_copy_dossier: "Copy Raw Markdown to Clipboard",
+          tooltip_download_dossier: "Download Markdown File",
+          toast_dossier_copied: "Dossier copied to clipboard!",
+          toast_dossier_downloaded: "Dossier downloaded successfully!",
+          lbl_privacy_mask: "Privacy Mask (Salary Multiples & %)",
+          lbl_custom_inquiries: "Custom Notes / Questions for AI:",
+          ph_custom_inquiries:
+            "E.g. I plan to take a sabbatical in 2 years, evaluate cashflow risks...",
+          lbl_dossier_footer_hint:
+            "Paste directly into ChatGPT, Claude or Gemini for personalized CFP financial consultation.",
+          chip_bp_general: "General",
+          chip_bp_fire: "FIRE",
+          chip_bp_real_estate: "Downpayment",
+          chip_bp_ladder: "Ladder",
+          chip_bp_compare: "Compare",
+
           btn_prev: "← Prev",
           btn_next: "Next →",
           btn_done: "Done 🎉",
@@ -3809,6 +4091,30 @@
           onboard_title_5: "Phím Tắt",
           onboard_desc_5:
             '<kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Enter</kbd> Chạy giả lập · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Ctrl+S</kbd> Lưu CSV · <kbd class="px-2 py-0.5 bg-slate-800 rounded text-xs">Esc</kbd> Đóng cửa sổ',
+          // AI Health Dossier Modal (ADR-0017, Issue #58, #59)
+          btn_ai_dossier: "Hồ Sơ AI",
+          tooltip_ai_dossier: "Hồ Sơ Sức Khỏe Tài Chính AI",
+          hdr_ai_dossier_modal: "Hồ Sơ Sức Khỏe Tài Chính AI",
+          lbl_ai_dossier_sub:
+            "Tóm tắt chẩn đoán & chỉ dẫn tư vấn sẵn sàng cho ChatGPT, Claude & Gemini",
+          btn_copy_dossier: "Sao Chép Markdown",
+          btn_download_dossier: "Tải File .md",
+          tooltip_copy_dossier: "Sao chép mã Markdown vào Clipboard",
+          tooltip_download_dossier: "Tải xuống file Markdown (.md)",
+          toast_dossier_copied: "Đã sao chép hồ sơ Markdown vào clipboard!",
+          toast_dossier_downloaded: "Đã tải xuống file hồ sơ Markdown!",
+          lbl_privacy_mask: "Ẩn Danh (Tỷ Lệ & Hệ Số Lương)",
+          lbl_custom_inquiries: "Ghi chú & Câu hỏi riêng cho AI:",
+          ph_custom_inquiries:
+            "VD: Tôi dự định nghỉ phép dài hạn sau 2 năm, hãy đánh giá rủi ro dòng tiền...",
+          lbl_dossier_footer_hint:
+            "Dán trực tiếp vào ChatGPT, Claude hoặc Gemini để nhận tư vấn tài chính cá nhân chuyên sâu.",
+          chip_bp_general: "Tổng Quan",
+          chip_bp_fire: "FIRE",
+          chip_bp_real_estate: "Trả Trước Mua Nhà",
+          chip_bp_ladder: "Bậc Thang Tiền Gửi",
+          chip_bp_compare: "So Sánh",
+
           btn_prev: "← Trở lại",
           btn_next: "Tiếp →",
           btn_done: "Hoàn thành 🎉",
@@ -4890,6 +5196,242 @@
         }
       }
       window.togglePresetsModal = togglePresetsModal;
+
+      // --- AI HEALTH DOSSIER MODAL CONTROLLER (ADR-0014, ADR-0017, Issue #58) ---
+      let currentDossierBlueprint = "general";
+      let dossierDebounceTimer = null;
+
+      function openAIDossierModal() {
+        toggleAIDossierModal(true);
+      }
+      window.openAIDossierModal = openAIDossierModal;
+
+      function toggleAIDossierModal(show) {
+        const modal = document.getElementById("aiDossierModal");
+        if (!modal) return;
+        const isHidden = modal.classList.contains("hidden");
+        const nextShow = show !== undefined ? show : isHidden;
+        if (nextShow) {
+          if (typeof dismissAllModals === "function") dismissAllModals();
+          if (
+            window.comparisonActive &&
+            currentDossierBlueprint === "general"
+          ) {
+            currentDossierBlueprint = "compare";
+          }
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "hidden";
+          }
+          updateDossierBlueprintChipsUI();
+          renderAIDossierModalContent();
+        } else {
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          if (typeof document !== "undefined" && document.body) {
+            document.body.style.overflow = "";
+          }
+        }
+      }
+      window.toggleAIDossierModal = toggleAIDossierModal;
+
+      function setDossierBlueprint(bp) {
+        currentDossierBlueprint = bp;
+        updateDossierBlueprintChipsUI();
+        renderAIDossierModalContent();
+      }
+      window.setDossierBlueprint = setDossierBlueprint;
+
+      function updateDossierBlueprintChipsUI() {
+        const chips = document.querySelectorAll(".dossier-bp-chip");
+        chips.forEach((chip) => {
+          const bp = chip.getAttribute("data-blueprint");
+          const isActive = bp === currentDossierBlueprint;
+          chip.classList.toggle("bg-indigo-600", isActive);
+          chip.classList.toggle("text-white", isActive);
+          chip.classList.toggle("border-indigo-500", isActive);
+          chip.classList.toggle("shadow-sm", isActive);
+          chip.classList.toggle("font-semibold", isActive);
+
+          chip.classList.toggle("bg-slate-800", !isActive);
+          chip.classList.toggle("text-slate-300", !isActive);
+          chip.classList.toggle("border-slate-700", !isActive);
+          chip.classList.toggle("font-medium", !isActive);
+        });
+      }
+      window.updateDossierBlueprintChipsUI = updateDossierBlueprintChipsUI;
+
+      function toggleDossierPrivacyMask() {
+        renderAIDossierModalContent();
+      }
+      window.toggleDossierPrivacyMask = toggleDossierPrivacyMask;
+
+      function debouncedRenderAIDossierContent() {
+        if (dossierDebounceTimer) clearTimeout(dossierDebounceTimer);
+        dossierDebounceTimer = setTimeout(() => {
+          renderAIDossierModalContent();
+        }, 150);
+      }
+      window.debouncedRenderAIDossierContent = debouncedRenderAIDossierContent;
+
+      function renderAIDossierModalContent() {
+        const previewEl = document.getElementById("dossierMarkdownPreview");
+        if (!previewEl) return;
+
+        const targetDateInput = document.getElementById("inputTargetDate");
+        const salaryInput = document.getElementById("inputSalary");
+        const salaryGrowthInput = document.getElementById("inputSalaryGrowth");
+        const bonusMultInput = document.getElementById(
+          "inputAnnualBonusMultiplier"
+        );
+        const bonusMonthInput = document.getElementById(
+          "selectAnnualBonusMonth"
+        );
+        const inflationInput = document.getElementById("inputInflation");
+        const goalInput = document.getElementById("inputSavingsGoal");
+        const poolRateInput = document.getElementById("inputPoolRate");
+        const thresholdInput = document.getElementById(
+          "inputAutoTermThreshold"
+        );
+        const bufferInput = document.getElementById("inputEmergencyBuffer");
+        const monthsInput = document.getElementById("selectAutoTermMonths");
+        const rateInput = document.getElementById("inputAutoTermRate");
+
+        const params = {
+          targetDateStr: targetDateInput ? targetDateInput.value : "",
+          monthlySalary: salaryInput
+            ? parseFormattedNumber(salaryInput.value)
+            : 0,
+          salaryGrowthRate: salaryGrowthInput
+            ? (parseFloat(salaryGrowthInput.value) || 0) / 100
+            : 0,
+          annualBonusMultiplier: bonusMultInput
+            ? parseFloat(bonusMultInput.value) || 0
+            : 1.0,
+          annualBonusMonth: bonusMonthInput
+            ? parseInt(bonusMonthInput.value, 10) || 1
+            : 1,
+          inflationRate: inflationInput
+            ? (parseFloat(inflationInput.value) || 0) / 100
+            : 0,
+          savingsGoal: goalInput ? parseFormattedNumber(goalInput.value) : 0,
+          poolAnnualRate: poolRateInput
+            ? (parseFloat(poolRateInput.value) || 0) / 100
+            : 0.005,
+          autoTermThreshold: thresholdInput
+            ? parseFormattedNumber(thresholdInput.value)
+            : 200000000,
+          emergencyBuffer: bufferInput
+            ? parseFormattedNumber(bufferInput.value)
+            : 30000000,
+          autoTermMonths: monthsInput
+            ? parseInt(monthsInput.value, 10) || 6
+            : 6,
+          autoTermAnnualRate: rateInput
+            ? (parseFloat(rateInput.value) || 0) / 100
+            : 0.058,
+        };
+
+        const simResultA = simulate(
+          params,
+          typeof workingCSVData !== "undefined" ? workingCSVData : []
+        );
+
+        let simResultB = null;
+        let paramsB = null;
+        if (
+          window.comparisonActive &&
+          typeof getScenarioBParams === "function"
+        ) {
+          paramsB = getScenarioBParams();
+          if (paramsB) {
+            simResultB = simulate(
+              paramsB,
+              typeof workingCSVData !== "undefined" ? workingCSVData : []
+            );
+          }
+        }
+
+        const privacyCheckbox = document.getElementById("togglePrivacyMask");
+        const anonymized = privacyCheckbox ? privacyCheckbox.checked : false;
+
+        const customInquiriesTextarea = document.getElementById(
+          "dossierCustomInquiries"
+        );
+        const customInquiries = customInquiriesTextarea
+          ? customInquiriesTextarea.value
+          : "";
+
+        const md = generateFinancialHealthMarkdown(params, simResultA, {
+          blueprint: currentDossierBlueprint,
+          anonymized: anonymized,
+          locale: window.currentLang || "en",
+          customInquiries: customInquiries,
+          scenarioBResult: simResultB,
+          scenarioBParams: paramsB,
+        });
+
+        previewEl.textContent = md;
+      }
+      window.renderAIDossierModalContent = renderAIDossierModalContent;
+
+      async function copyAIDossierToClipboard() {
+        const previewEl = document.getElementById("dossierMarkdownPreview");
+        if (!previewEl) return;
+        const text = previewEl.textContent || "";
+        try {
+          if (
+            navigator &&
+            navigator.clipboard &&
+            navigator.clipboard.writeText
+          ) {
+            await navigator.clipboard.writeText(text);
+          }
+          showToast(t("toast_dossier_copied"), "success");
+        } catch (err) {
+          console.error("Failed to copy dossier to clipboard:", err);
+          showToast("Failed to copy to clipboard", "error");
+        }
+      }
+      window.copyAIDossierToClipboard = copyAIDossierToClipboard;
+
+      function downloadAIDossierFile() {
+        const previewEl = document.getElementById("dossierMarkdownPreview");
+        if (!previewEl) return;
+        const text = previewEl.textContent || "";
+        const today = new Date();
+        const dateStr = formatDate(today);
+        const filename = `Financial_Health_Dossier_${dateStr}.md`;
+
+        try {
+          if (
+            typeof Blob !== "undefined" &&
+            typeof URL !== "undefined" &&
+            typeof URL.createObjectURL === "function" &&
+            document &&
+            document.body
+          ) {
+            const blob = new Blob([text], {
+              type: "text/markdown;charset=utf-8",
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            if (typeof URL.revokeObjectURL === "function") {
+              URL.revokeObjectURL(url);
+            }
+          }
+        } catch (e) {
+          console.warn("Download blob generation skipped:", e);
+        }
+        showToast(t("toast_dossier_downloaded"), "success");
+      }
+      window.downloadAIDossierFile = downloadAIDossierFile;
 
       // --- CSV EDITOR FUNCTIONS ---
       function updateCSVCountBadge() {
@@ -8818,6 +9360,11 @@ ${customInquiriesBlock}
         if (presetsModal && !presetsModal.classList.contains("hidden")) {
           presetsModal.classList.add("hidden");
           presetsModal.classList.remove("flex");
+        }
+        const aiModal = document.getElementById("aiDossierModal");
+        if (aiModal && !aiModal.classList.contains("hidden")) {
+          aiModal.classList.add("hidden");
+          aiModal.classList.remove("flex");
         }
         const mobileSheet = document.getElementById("mobileActionSheet");
         if (mobileSheet && !mobileSheet.classList.contains("hidden")) {
