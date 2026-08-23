@@ -2,7 +2,7 @@
 
 > **Target:** `personal-finance-savings-predictor/index.html` & `dist/personal-finance-savings-predictor/index.html`  
 > **Goal:** Deterministically validate all 28 feature requirements (R1–R28) across financial simulation mathematics, utility helpers, UI/UX DOM components, bilingual i18n parity, and compacted build packaging.  
-> **Method:** Automated Node.js test runner (`npm test`) + Browser DevTools console verification + Comprehensive manual QA checklist.
+> **Method:** Automated Node.js test runner (`npm test`) + Comprehensive manual QA checklist.
 
 ```bash
 # Automated Test Suites (434 assertions passing across 5 suites)
@@ -137,73 +137,6 @@ flowchart TD
   - Preservation of all 15 critical interactive DOM element IDs in compacted deliverables.
   - Successful sandbox execution of `simulate()` from compacted production scripts.
   - Release packager creating standalone deliverable HTML files and unified release ZIP bundles.
-
----
-
-## 🧪 Interactive DevTools Console Verification
-
-Open the application in Google Chrome, Firefox, or Safari, open DevTools (`F12` or `Cmd+Option+I` → **Console** tab), and execute these test snippets for quick interactive validation.
-
-### 🔹 Quick Sanity & Invariant Check
-
-```javascript
-// Verify core simulation invariants and state integrity
-console.log(
-  "%c🧪 Running Console Sanity Verification...",
-  "color: #6366f1; font-weight: bold"
-);
-
-// 1. Run simulation
-runSimulation();
-console.assert(simulationLogs.length > 0, "Simulation logs generated");
-console.assert(
-  document.getElementById("metricTotalBalance").innerText.length > 0,
-  "Total balance metric rendered"
-);
-
-// 2. Test Currency Masking & Verbal Helpers
-document.getElementById("inputSalary").value = "35000000";
-applyCurrencyMask(document.getElementById("inputSalary"));
-console.assert(
-  document.getElementById("helperSalary").innerText.includes("Million") ||
-    document.getElementById("helperSalary").innerText.includes("Triệu"),
-  "Verbal helper populated"
-);
-
-// 3. Test Bilingual Language Switching
-changeLanguage("vi");
-console.assert(
-  formatCurrency(100000000).includes("₫"),
-  "Vietnamese currency formatted with ₫"
-);
-changeLanguage("en");
-console.assert(
-  formatCurrency(100000000).includes("VND"),
-  "English currency formatted with VND"
-);
-
-// 4. Test Modal Lifecycle Controller
-showOnboarding();
-console.assert(
-  !document.getElementById("onboardingOverlay").classList.contains("hidden"),
-  "Onboarding modal open"
-);
-toggleCSVModal(true);
-console.assert(
-  document.getElementById("onboardingOverlay").classList.contains("hidden"),
-  "Onboarding closed when CSV modal opened"
-);
-dismissAllModals();
-console.assert(
-  document.getElementById("csvModal").classList.contains("hidden"),
-  "All modals cleanly dismissed"
-);
-
-console.log(
-  "%c✨ All console sanity checks passed!",
-  "color: #10b981; font-weight: bold"
-);
-```
 
 ---
 

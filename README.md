@@ -23,7 +23,11 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── pack-release.js                         # Production release asset packager
 │   └── run-tests.js                            # Unified test runner & reporting engine
 ├── tests/
-│   └── build.test.js                           # Automated build pipeline tests
+│   ├── build.test.js                           # Compacted build pipeline tests
+│   ├── helpers.test.js                         # Utilities, maskers & recurring cashflow tests
+│   ├── i18n.test.js                            # Bilingual translation dictionary parity tests
+│   ├── simulation.test.js                      # Pure simulation engine mathematical tests
+│   └── ui-ux.test.js                           # UI/UX DOM component interaction tests
 ├── docs/
 │   ├── adr/                                    # System-wide Architecture Decision Records
 │   │   ├── 0001-multi-tool-repository-structure.md
@@ -38,15 +42,9 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
     │   └── index.html
     ├── CONTEXT.md                              # Tool-specific domain glossary
     ├── docs/
-    │   └── adr/                                # Tool-specific architecture decisions
-    │       ├── 0001-flexible-pool-deficit-handling.md
-    │       ├── 0002-anniversary-based-salary-escalation.md
-    │       ├── 0003-locale-aware-number-and-date-formatting.md
-    │       ├── 0004-pure-simulation-engine-separation.md
-    │       └── 0005-unified-threshold-auto-term-allocation.md
-    ├── ACTION_PLAN.md                          # Implementation roadmap & checklist
-    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs
-    └── TEST_PLAN.md                            # Automated console & manual test suite
+    │   └── adr/                                # Tool-specific architecture decisions (0001–0015)
+    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R28)
+    └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
 ```
 
 ### Core Architecture Principles
@@ -138,11 +136,14 @@ For full architectural lifecycle and guidelines, see [`docs/agents/ways-of-worki
 
 ---
 
-## 🔒 Code Quality & Pre-Commit
+## 🧼 Code Style & Formatting
 
-Pre-commit hooks are configured with **Husky** and **lint-staged** running **Prettier** across all staged source files on commit:
+Code formatting is maintained with **Prettier** across all source files, configurations, and documentation. Formatting is strictly validated in CI on every Pull Request.
 
 ```bash
-# Verify formatting across staged files
-npx lint-staged
+# Verify code formatting across repository (CI Gate)
+npm run lint:check
+
+# Automatically format all source and markdown files
+npm run format
 ```
