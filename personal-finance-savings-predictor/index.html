@@ -1694,12 +1694,15 @@
             ><span data-i18n="btn_compare_scenarios">Compare Scenarios</span>
           </button>
           <button
+            type="button"
+            id="btnResetAllSettings"
             onclick="resetAll()"
             class="bg-rose-900/50 hover:bg-rose-800/50 text-xs px-3 py-2 rounded-lg border border-rose-700/50 transition"
-            title="Reset All"
+            data-i18n-title="tooltip_reset_all"
+            title="Reset All Settings & Data"
           >
             <i class="fa-solid fa-rotate-left mr-1"></i
-            ><span data-i18n="btn_reset">Reset</span>
+            ><span data-i18n="btn_reset_all_settings">Reset All</span>
           </button>
         </div>
       </section>
@@ -3029,19 +3032,29 @@
                 </button>
                 <button
                   type="button"
+                  id="btnLoadSamplePortfolio"
                   onclick="loadDefaultSampleData()"
                   class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition flex items-center"
+                  data-i18n-title="tooltip_load_sample"
+                  title="Load Sample Portfolio"
                 >
-                  <i class="fa-solid fa-rotate-left mr-1.5 text-amber-400"></i
-                  ><span data-i18n="btn_reset_sample">Reset Sample CSV</span>
+                  <i class="fa-solid fa-folder-open mr-1.5 text-indigo-400"></i
+                  ><span data-i18n="btn_load_sample"
+                    >Load Sample Portfolio</span
+                  >
                 </button>
                 <button
                   type="button"
-                  onclick="clearAllData()"
-                  class="px-3 py-1.5 text-xs bg-rose-900/50 hover:bg-rose-800/50 text-rose-300 border border-rose-700/50 rounded-lg transition flex items-center"
+                  id="btnClearAllAccounts"
+                  onclick="clearAllAccounts()"
+                  class="px-3 py-1.5 text-xs bg-rose-950/70 hover:bg-rose-900/80 text-rose-300 border border-rose-700/60 rounded-lg transition flex items-center"
+                  data-i18n-title="tooltip_clear_accounts"
+                  title="Clear All Accounts"
                 >
-                  <i class="fa-solid fa-trash mr-1.5"></i
-                  ><span data-i18n="btn_clear_saved">Clear Saved Data</span>
+                  <i class="fa-solid fa-trash-can mr-1.5 text-rose-400"></i
+                  ><span data-i18n="btn_clear_accounts"
+                    >Clear All Accounts</span
+                  >
                 </button>
               </div>
               <button
@@ -3756,7 +3769,15 @@
           freq_semiannual: "Semi-Annually (6 mo)",
           freq_annual: "Annually (12 mo)",
           btn_insert_recurring: "Generate & Insert Rows",
-          btn_reset_sample: "Reset Sample CSV",
+          btn_load_sample: "Load Sample Portfolio",
+          tooltip_load_sample:
+            "Load sample portfolio with 4 standard savings accounts",
+          btn_clear_accounts: "Clear All Accounts",
+          tooltip_clear_accounts: "Remove all accounts from CSV portfolio",
+          btn_reset_all_settings: "Reset All",
+          tooltip_reset_all:
+            "Reset all parameters and portfolio data to defaults",
+          btn_reset_sample: "Load Sample Portfolio",
           btn_clear_saved: "Clear Saved Data",
           btn_download_csv: "Download CSV",
           th_start_date: "Start Date",
@@ -3785,6 +3806,7 @@
           toast_recurring_generated:
             "Generated {count} recurring cashflow entries",
           toast_data_cleared: "All saved data cleared",
+          toast_accounts_cleared: "Cleared all savings accounts",
           toast_csv_exported: "CSV exported successfully",
           toast_link_copied: "Simulation link copied to clipboard!",
           toast_copy_prompt: "Copy this link:",
@@ -4107,7 +4129,14 @@
           freq_semiannual: "Nửa Năm (6 th)",
           freq_annual: "Hàng Năm (12 th)",
           btn_insert_recurring: "Tạo & Thêm Dòng Vào Bảng",
-          btn_reset_sample: "Mẫu Mặc Định",
+          btn_load_sample: "Tải Danh Mục Mẫu",
+          tooltip_load_sample: "Tải danh mục mẫu gồm 4 sổ tiết kiệm tiêu chuẩn",
+          btn_clear_accounts: "Xóa Hết Sổ",
+          tooltip_clear_accounts: "Xóa toàn bộ các sổ khỏi danh mục CSV",
+          btn_reset_all_settings: "Đặt Lại Toàn Bộ",
+          tooltip_reset_all:
+            "Đặt lại toàn bộ thông số và dữ liệu danh mục về mặc định",
+          btn_reset_sample: "Tải Danh Mục Mẫu",
           btn_clear_saved: "Xóa Dữ Liệu",
           btn_download_csv: "Tải CSV",
           th_start_date: "Ngày Bắt Đầu",
@@ -4135,6 +4164,7 @@
           toast_csv_saved: "Đã lưu CSV và chạy giả lập",
           toast_recurring_generated: "Đã tạo {count} dòng tiền định kỳ",
           toast_data_cleared: "Đã xóa tất cả dữ liệu đã lưu",
+          toast_accounts_cleared: "Đã xóa toàn bộ sổ tiết kiệm",
           toast_csv_exported: "Đã xuất CSV thành công",
           toast_link_copied: "Đã sao chép liên kết mô phỏng vào clipboard!",
           toast_copy_prompt: "Sao chép đường dẫn:",
@@ -5740,8 +5770,12 @@
           const isWithdrawal = row["Type"] === "Withdrawal";
           const tr = document.createElement("tr");
           tr.className = `hover:bg-slate-800/40 transition ${isWithdrawal ? "bg-rose-950/20 border-l-2 border-rose-500" : ""}`;
+          const spelledOut = getSpelledOutAmount(
+            parseFormattedNumber(row["Principal"] || 0),
+            lang
+          );
           tr.innerHTML = `<td class="p-2.5"><input type="text" value="${row["Account Name"] || ""}" onchange="updateCSVRowField(${idx},'Account Name',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
-      <td class="p-2.5"><input type="text" inputmode="numeric" value="${formatNumberWithSeparators(row["Principal"] || 0, lang)}" oninput="applyCurrencyMask(this)" onchange="updateCSVRowField(${idx},'Principal',parseFormattedNumber(this.value))" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
+      <td class="p-2.5"><input type="text" inputmode="numeric" value="${formatNumberWithSeparators(row["Principal"] || 0, lang)}" title="${spelledOut}" oninput="applyCurrencyMask(this); this.title = getSpelledOutAmount(parseFormattedNumber(this.value), window.currentLang || 'en');" onchange="updateCSVRowField(${idx},'Principal',parseFormattedNumber(this.value))" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="date" value="${row["Start Date"] || ""}" onchange="updateCSVRowField(${idx},'Start Date',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="date" value="${row["End Date"] || ""}" onchange="updateCSVRowField(${idx},'End Date',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
       <td class="p-2.5"><input type="number" value="${row["Interest"] || 0}" onchange="updateCSVRowField(${idx},'Interest',this.value)" class="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200" /></td>
@@ -5876,13 +5910,50 @@
       window.generateRecurringRows = generateRecurringRows;
 
       function loadDefaultSampleData() {
+        const previousData = JSON.parse(JSON.stringify(workingCSVData));
         workingCSVData = JSON.parse(JSON.stringify(DEFAULT_CSV_DATA));
         window.workingCSVData = workingCSVData;
         renderCSVEditorTable();
         updateCSVCountBadge();
         saveToStorage();
-        showToast(t("toast_sample_loaded"), "info");
+        showToast(t("toast_sample_loaded"), "info", {
+          actionText: t("btn_undo"),
+          onAction: () => {
+            workingCSVData = previousData;
+            window.workingCSVData = workingCSVData;
+            renderCSVEditorTable();
+            updateCSVCountBadge();
+            saveToStorage();
+            showToast(t("toast_preset_undone"), "info");
+          },
+          duration: 5000,
+        });
       }
+      window.loadDefaultSampleData = loadDefaultSampleData;
+
+      function clearAllAccounts() {
+        if (workingCSVData.length === 0) return;
+        const previousData = JSON.parse(JSON.stringify(workingCSVData));
+        workingCSVData = [];
+        window.workingCSVData = workingCSVData;
+        renderCSVEditorTable();
+        updateCSVCountBadge();
+        saveToStorage();
+        showToast(t("toast_accounts_cleared"), "warning", {
+          actionText: t("btn_undo"),
+          onAction: () => {
+            workingCSVData = previousData;
+            window.workingCSVData = workingCSVData;
+            renderCSVEditorTable();
+            updateCSVCountBadge();
+            saveToStorage();
+            showToast(t("toast_preset_undone"), "info");
+          },
+          duration: 5000,
+        });
+      }
+      window.clearAllAccounts = clearAllAccounts;
+
       function saveCSVEditorData() {
         for (let i = 0; i < workingCSVData.length; i++) {
           const row = workingCSVData[i];
@@ -5922,6 +5993,7 @@
         toggleCSVModal(false);
         runSimulation();
       }
+      window.clearAllData = clearAllData;
       function exportCSV() {
         if (typeof Papa === "undefined") {
           showToast(
