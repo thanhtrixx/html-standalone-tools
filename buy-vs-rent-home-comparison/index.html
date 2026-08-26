@@ -3605,6 +3605,7 @@
 
         updateMethodologyLiveTraces();
         renderKaTeXInModal();
+        updateDossierMarkdownPreview();
         renderApp();
         renderActiveTabChart();
       }
@@ -3999,25 +4000,28 @@
         function fmtVal(amt) {
           if (!isAnonymized) return formatCurrency(amt, p.currency);
           const multiple = (amt / p.homePrice).toFixed(2);
-          return `${(multiple * 100).toFixed(1)}% of Home Price (${multiple}x Home Price)`;
+          const percent = (multiple * 100).toFixed(1);
+          return isVi
+            ? `${percent}% Giá nhà (${multiple}x Giá nhà)`
+            : `${percent}% of Home Price (${multiple}x Home Price)`;
         }
 
         let md = `# 📊 ${isVi ? "Hồ Sơ Tư Vấn Quyết Định: Mua Nhà vs Thuê Nhà" : "Real Estate Decision Dossier: Buy vs. Rent Comparison"}\n\n`;
-        md += `> **${isVi ? "Chế độ bảo mật" : "Privacy Mode"}:** ${isAnonymized ? "🔒 ANONYMIZED (Home Multiples & Shares)" : "🔓 STANDARD (Absolute Currency)"}\n`;
+        md += `> **${isVi ? "Chế độ bảo mật" : "Privacy Mode"}:** ${isAnonymized ? (isVi ? "🔒 ẨN DANH (Bội số giá nhà & Tỷ lệ %)" : "🔒 ANONYMIZED (Home Multiples & Shares)") : isVi ? "🔓 TIÊU CHUẨN (Số tiền tuyệt đối)" : "🔓 STANDARD (Absolute Currency)"}\n`;
         md += `> **${isVi ? "Khung thời gian" : "Time Horizon"}:** ${p.horizonYears} ${isVi ? "Năm" : "Years"} (${p.horizonYears * 12} ${isVi ? "tháng" : "months"})\n`;
-        md += `> **${isVi ? "Loại hình BĐS" : "Property Type"}:** ${p.propertyType === "apartment" ? "Apartment / Condo" : "Landed House / Townhouse"}\n\n`;
+        md += `> **${isVi ? "Loại hình BĐS" : "Property Type"}:** ${p.propertyType === "apartment" ? (isVi ? "Căn hộ chung cư" : "Apartment / Condo") : isVi ? "Nhà phố / Đất nền" : "Landed House / Townhouse"}\n\n`;
 
         md += `## 1. ${isVi ? "Tổng Quan Thông Số Đầu Vào" : "Simulation Input Parameters"}\n\n`;
         md += `| ${isVi ? "Thông số" : "Parameter"} | ${isVi ? "Giá trị" : "Value"} |\n`;
         md += `| :--- | :--- |\n`;
-        md += `| ${isVi ? "Giá mua nhà" : "Home Purchase Price"} | ${isAnonymized ? "1.0x (Baseline Home Price)" : formatCurrency(p.homePrice, p.currency)} |\n`;
+        md += `| ${isVi ? "Giá mua nhà" : "Home Purchase Price"} | ${isAnonymized ? (isVi ? "1.0x (Giá nhà cơ sở)" : "1.0x (Baseline Home Price)") : formatCurrency(p.homePrice, p.currency)} |\n`;
         md += `| ${isVi ? "Tỷ lệ trả trước" : "Downpayment Ratio"} | ${p.downpaymentPercent}% (${fmtVal(s.downpayment)}) |\n`;
-        md += `| ${isVi ? "Khoản vay thế chấp" : "Mortgage Principal"} | ${fmtVal(s.loanPrincipal)} (${p.loanTenureYears}y, ${p.amortizationScheme === "linear_principal" ? "Linear Principal" : "Fixed EMI"}) |\n`;
-        md += `| ${isVi ? "Lãi suất vay" : "Mortgage Interest"} | ${p.teaserAnnualRate}% (${p.teaserRateMonths}M Promo) → ${p.floatingAnnualRate}% (Floating) |\n`;
+        md += `| ${isVi ? "Khoản vay thế chấp" : "Mortgage Principal"} | ${fmtVal(s.loanPrincipal)} (${p.loanTenureYears}${isVi ? " năm" : "y"}, ${p.amortizationScheme === "linear_principal" ? (isVi ? "Dư nợ giảm dần" : "Linear Principal") : isVi ? "Niên kim cố định" : "Fixed EMI"}) |\n`;
+        md += `| ${isVi ? "Lãi suất vay" : "Mortgage Interest"} | ${p.teaserAnnualRate}% (${p.teaserRateMonths}${isVi ? " tháng ưu đãi" : "M Promo"}) → ${p.floatingAnnualRate}% (${isVi ? "Thả nổi" : "Floating"}) |\n`;
         md += `| ${isVi ? "Chi phí mua ban đầu" : "Total Upfront Buy Outflow"} | ${fmtVal(s.initialBuyOutflow)} |\n`;
-        md += `| ${isVi ? "Tiền thuê ban đầu" : "Initial Monthly Rent"} | ${fmtVal(p.monthlyRent)}/mo (Deposit: ${p.securityDepositMonths}M) |\n`;
-        md += `| ${isVi ? "Tăng giá thuê / Lãi đầu tư" : "Rent Inflation / Inv Yield"} | Rent +${p.rentInflationRate}%/yr · Investment Yield +${p.rentInvestmentYield}%/yr |\n`;
-        md += `| ${isVi ? "Tăng giá BĐS / Lạm phát CPI" : "Property Growth / CPI"} | Property +${p.propertyAppreciationRate}%/yr · CPI +${p.cpiInflationRate}%/yr |\n\n`;
+        md += `| ${isVi ? "Tiền thuê ban đầu" : "Initial Monthly Rent"} | ${fmtVal(p.monthlyRent)}/${isVi ? "tháng" : "mo"} (${isVi ? "Cọc" : "Deposit"}: ${p.securityDepositMonths}${isVi ? " tháng" : "M"}) |\n`;
+        md += `| ${isVi ? "Tăng giá thuê / Lãi đầu tư" : "Rent Inflation / Inv Yield"} | ${isVi ? "Tăng giá thuê" : "Rent"} +${p.rentInflationRate}%/${isVi ? "năm" : "yr"} · ${isVi ? "Lợi suất đầu tư" : "Investment Yield"} +${p.rentInvestmentYield}%/${isVi ? "năm" : "yr"} |\n`;
+        md += `| ${isVi ? "Tăng giá BĐS / Lạm phát CPI" : "Property Growth / CPI"} | ${isVi ? "Tăng giá BĐS" : "Property"} +${p.propertyAppreciationRate}%/${isVi ? "năm" : "yr"} · CPI +${p.cpiInflationRate}%/${isVi ? "năm" : "yr"} |\n\n`;
 
         md += `## 2. ${isVi ? "Kết Quả & Chỉ Số Tài Chính Chính" : "Key Financial Outcomes & Decision Metrics"}\n\n`;
         md += `- **${isVi ? "Kịch bản tối ưu tài chính" : "Winning Financial Path"}:** ${s.winnerScenario === "buy" ? (isVi ? "Kịch Bản Mua Nhà" : "Buy Path") : isVi ? "Kịch Bản Thuê Nhà & Đầu Tư" : "Rent Path"} (+${fmtVal(Math.abs(s.netWealthDeltaAtHorizon))})\n`;
@@ -4026,24 +4030,48 @@
         md += `- **${isVi ? "Tài sản ròng kết thúc (Kịch Bản Thuê & Đầu Tư)" : "Ending Portfolio (Rent Path)"}:** ${fmtVal(s.netWorthRentEnding)}\n`;
         md += `- **${isVi ? "Tổng chi phí mất đi (Kịch Bản Mua Nhà)" : "Total Cumulative Sunk Costs (Buy Path)"}:** ${fmtVal(s.totalSunkCostBuy)}\n`;
         md += `- **${isVi ? "Tổng chi phí mất đi (Kịch Bản Thuê)" : "Total Cumulative Sunk Costs (Rent Path)"}:** ${fmtVal(s.totalSunkCostRent)}\n`;
-        md += `- **Price-to-Rent Ratio (PRR):** ${s.priceToRentRatio.toFixed(1)}x (Gross Yield: ${s.grossRentalYield.toFixed(1)}%/yr)\n\n`;
+        md += `- **Price-to-Rent Ratio (PRR):** ${s.priceToRentRatio.toFixed(1)}x (${isVi ? "Tỷ suất cho thuê gộp" : "Gross Yield"}: ${s.grossRentalYield.toFixed(1)}%/${isVi ? "năm" : "yr"})\n\n`;
 
         md += `## 3. ${isVi ? "Hướng Dẫn & Yêu Cầu Chuyên Gia AI (Prompt Blueprint)" : "AI Advisor Consultation Blueprint"}\n\n`;
 
         if (blueprintKey === "verdict") {
-          md += `> **Mục tiêu tư vấn / Advisory Objective:** Phân tích toàn diện quyết định mua vs thuê nhà dựa trên điểm hòa vốn, chi phí cơ hội của tiền đặt cọc và mức độ an toàn tài chính.\n\n`;
-          md += `Vui lòng phân tích:\n1. Điểm hòa vốn ${s.crossoverYear !== null ? s.crossoverYear + " năm" : "không đạt được"} có thực tế với chu kỳ di chuyển việc làm / gia đình không?\n2. Chi phí mất đi (Sunk Costs) giữa trả lãi vay + phí bảo trì so với tiền thuê nhà?\n3. Khuyến nghị chiến lược hành động cụ thể cho người mua/người thuê trong 3–5 năm tới.`;
+          if (isVi) {
+            md += `> **Mục tiêu tư vấn:** Phân tích toàn diện quyết định mua vs thuê nhà dựa trên điểm hòa vốn, chi phí cơ hội của tiền đặt cọc và mức độ an toàn tài chính.\n\n`;
+            md += `Vui lòng phân tích:\n1. Điểm hòa vốn ${s.crossoverYear !== null ? s.crossoverYear + " năm (" + s.crossoverMonth + " tháng)" : "không đạt được"} có thực tế với chu kỳ di chuyển việc làm / gia đình không?\n2. Chi phí mất đi (Sunk Costs) giữa trả lãi vay + phí bảo trì + phí quản lý so với tiền thuê nhà?\n3. Khuyến nghị chiến lược hành động cụ thể cho người mua/người thuê trong 3–5 năm tới.`;
+          } else {
+            md += `> **Advisory Objective:** Comprehensively analyze the buy vs. rent decision based on net worth crossover horizon, downpayment opportunity cost, and financial safety.\n\n`;
+            md += `Please analyze:\n1. Is the net worth crossover horizon of ${s.crossoverYear !== null ? s.crossoverYear + " years (" + s.crossoverMonth + " months)" : "no crossover (Rent Path leads throughout horizon)"} realistic given employment mobility and family life cycles?\n2. Cumulative sunk costs comparison (mortgage interest + maintenance + HOA dues vs. rent paid)?\n3. Strategic recommendations and concrete action plan for the buyer/renter over the next 3–5 years.`;
+          }
         } else if (blueprintKey === "stress_test") {
-          md += `> **Mục tiêu tư vấn / Advisory Objective:** Kiểm tra độ căng thẳng tài chính (Stress-Test) trước rủi ro lãi suất thả nổi tăng vọt, mất việc làm hoặc thị trường BĐS đi ngang.\n\n`;
-          md += `Vui lòng đánh giá:\n1. Rủi ro khi lãi suất thả nổi vượt 12%–14% sau khi hết kỳ ưu đãi ${p.teaserRateMonths} tháng?\n2. Áp lực dòng tiền hàng tháng so với thu nhập và quỹ dự phòng thanh khoản?\n3. Kịch bản thoát hiểm nếu giá nhà không tăng trưởng như kỳ vọng (${p.propertyAppreciationRate}%).`;
+          if (isVi) {
+            md += `> **Mục tiêu tư vấn:** Kiểm tra độ căng thẳng tài chính (Stress-Test) trước rủi ro lãi suất thả nổi tăng vọt, mất việc làm hoặc thị trường BĐS đi ngang.\n\n`;
+            md += `Vui lòng đánh giá:\n1. Rủi ro khi lãi suất thả nổi vượt 12%–14% sau khi hết kỳ ưu đãi ${p.teaserRateMonths} tháng?\n2. Áp lực dòng tiền hàng tháng so với thu nhập và quỹ dự phòng thanh khoản?\n3. Kịch bản thoát hiểm nếu giá nhà không tăng trưởng như kỳ vọng (${p.propertyAppreciationRate}%/năm).`;
+          } else {
+            md += `> **Advisory Objective:** Stress-test financial resilience against floating interest rate spikes, income disruptions, or stagnant property markets.\n\n`;
+            md += `Please evaluate:\n1. Risk exposure if floating mortgage rates rise to 12%–14% after the ${p.teaserRateMonths}-month promotional teaser period?\n2. Monthly debt service cash flow pressure relative to income and emergency liquidity buffers?\n3. Exit strategy if property appreciation falls short of the expected baseline (${p.propertyAppreciationRate}%/yr).`;
+          }
         } else if (blueprintKey === "fire") {
-          md += `> **Mục tiêu tư vấn / Advisory Objective:** Tối ưu hóa lộ trình Tự do Tài chính & Nghỉ hưu sớm (FIRE).\n\n`;
-          md += `Vui lòng phân tích:\n1. Tác động của việc khóa vốn lớn vào tài sản cố định (nhà ở) đối với tỷ lệ tự do tài chính và dòng tiền thụ động?\n2. So sánh hiệu quả sinh lời giữa BĐS vs Danh mục cổ phiếu/ETF (${p.rentInvestmentYield}% p.a.)?\n3. Chiến lược nào giúp rút ngắn thời gian đạt mục tiêu FIRE nhanh hơn?`;
+          if (isVi) {
+            md += `> **Mục tiêu tư vấn:** Tối ưu hóa lộ trình Tự do Tài chính & Nghỉ hưu sớm (FIRE).\n\n`;
+            md += `Vui lòng phân tích:\n1. Tác động của việc khóa vốn lớn vào tài sản cố định (nhà ở) đối với tỷ lệ tự do tài chính và dòng tiền thụ động?\n2. So sánh hiệu quả sinh lời giữa BĐS vs Danh mục cổ phiếu/ETF (${p.rentInvestmentYield}%/năm)?\n3. Chiến lược nào giúp rút ngắn thời gian đạt mục tiêu FIRE nhanh hơn?`;
+          } else {
+            md += `> **Advisory Objective:** Optimize the financial trajectory for Financial Independence, Retire Early (FIRE).\n\n`;
+            md += `Please analyze:\n1. Impact of tying up capital into illiquid primary residential equity on FIRE savings rate and passive cash flow?\n2. Long-term return trade-offs between property equity appreciation vs. diversified stock/ETF portfolio (${p.rentInvestmentYield}% p.a.)?\n3. Which strategic path accelerates reaching the target FIRE number sooner?`;
+          }
         } else if (blueprintKey === "asset_allocation") {
-          md += `> **Mục tiêu tư vấn / Advisory Objective:** Đánh giá phân bổ danh mục tài sản và tỷ trọng đòn bẩy tài chính.\n\n`;
-          md += `Vui lòng tư vấn:\n1. Tỷ lệ đòn bẩy vay (${100 - p.downpaymentPercent}%) có tối ưu trên tổng tài sản không?\n2. Đa dạng hóa danh mục đầu tư giữa đất đai / căn hộ và tài sản thanh khoản cao?\n3. Thời điểm thích hợp để tái cấu trúc nợ hoặc chốt lời BĐS.`;
+          if (isVi) {
+            md += `> **Mục tiêu tư vấn:** Đánh giá phân bổ danh mục tài sản và tỷ trọng đòn bẩy tài chính.\n\n`;
+            md += `Vui lòng tư vấn:\n1. Tỷ lệ đòn bẩy vay (${100 - p.downpaymentPercent}%) có tối ưu trên tổng tài sản không?\n2. Đa dạng hóa danh mục đầu tư giữa đất đai / căn hộ và tài sản thanh khoản cao?\n3. Thời điểm thích hợp để tái cấu trúc nợ hoặc chốt lời BĐS.`;
+          } else {
+            md += `> **Advisory Objective:** Assess portfolio asset allocation and debt leverage weighting.\n\n`;
+            md += `Please advise:\n1. Is the debt leverage ratio (${100 - p.downpaymentPercent}%) optimal relative to total net worth?\n2. Portfolio diversification across real estate equity versus liquid investment assets?\n3. Optimal timing and triggers for debt restructuring, loan refinancing, or property equity harvesting.`;
+          }
         } else {
-          md += `> **Yêu cầu tùy chỉnh:** ${customQuery || "Đánh giá tổng thể phương án tối ưu tài chính."}\n`;
+          if (isVi) {
+            md += `> **Yêu cầu tùy chỉnh:** ${customQuery || "Đánh giá tổng thể phương án tối ưu tài chính."}\n`;
+          } else {
+            md += `> **Custom Request:** ${customQuery || "Evaluate the overall financial decision and optimization strategy."}\n`;
+          }
         }
 
         return md;

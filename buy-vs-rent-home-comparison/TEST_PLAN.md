@@ -83,6 +83,6 @@ Before opening a PR or merging to `main`, verify the following interactive behav
 - [ ] **Teaser Rate Reset**: Configure a 24-month promo teaser rate; inspect the monthly cashflow chart to verify the payment step-up at month 25.
 - [ ] **Sensitivity Heatmap**: Hover over 2D sensitivity matrix cells; verify that break-even years match simulation expectations and cells are color-coded smoothly.
 - [ ] **Dynamic Verbal Helpers**: Type `4500000000` into Home Price; verify that `4.5 Tỷ VND` (or `4.5 Billion VND` in English) updates instantaneously without cursor jumping.
-- [ ] **AI Decision Dossier Export**: Generate an AI Dossier, activate Privacy Anonymization Mask, and verify all absolute numbers convert to multiples and percentages.
+- [ ] **AI Decision Dossier Bilingual Export**: Generate an AI Dossier in English and Vietnamese; switch between all 4 prompt blueprints (Verdict, Stress-Test, FIRE, Asset Allocation) and verify 100% bilingual parity across parameters, outcomes, and advisory consultation blueprints. Activate Privacy Anonymization Mask and verify all absolute numbers convert to localized home price multiples and percentages.
 - [ ] **Methodology Hub & KaTeX Proofs**: Open the Methodology Hub; check that dynamic formula traces substitute active input values into mathematical equations in real time.
 - [ ] **Single-File Compaction**: Run `npm run build:buy-rent` and open `buy-vs-rent-home-comparison/dist/index.html` via `file://` to ensure 100% offline standalone execution.

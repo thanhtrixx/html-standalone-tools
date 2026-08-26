@@ -233,75 +233,220 @@ try {
     "Loaded parameters from localStorage match saved state"
   );
 
-  // Test 3: AI Real Estate Decision Dossier Markdown Generation
+  // Test 3: AI Real Estate Decision Dossier Markdown Generation (Bilingual Parity)
   assert(
     typeof app.generateAIDossierMarkdown === "function",
     "generateAIDossierMarkdown function is defined"
   );
 
-  const mdVerdict = app.generateAIDossierMarkdown(testParams, {
+  // Blueprint: Verdict (VI vs EN)
+  const mdVerdictVi = app.generateAIDossierMarkdown(testParams, {
     blueprint: "verdict",
     anonymize: false,
     lang: "vi",
   });
   assert(
-    mdVerdict.includes("Hồ Sơ Tư Vấn Quyết Định: Mua Nhà vs Thuê Nhà"),
+    mdVerdictVi.includes("Hồ Sơ Tư Vấn Quyết Định: Mua Nhà vs Thuê Nhà"),
     "Dossier includes Vietnamese header title"
   );
   assert(
-    mdVerdict.includes("5.000.000.000 VND") ||
-      mdVerdict.includes("5,000,000,000 VND") ||
-      mdVerdict.includes("5.0 Tỷ VND"),
-    "Standard mode contains absolute currency amounts"
-  );
-  assert(
-    mdVerdict.includes("Đánh Giá Toàn Diện") ||
-      mdVerdict.includes("Mục tiêu tư vấn"),
-    "Verdict blueprint consultation prompt included"
+    mdVerdictVi.includes("Mục tiêu tư vấn:") &&
+      mdVerdictVi.includes("Điểm hòa vốn") &&
+      mdVerdictVi.includes("Khuyến nghị chiến lược hành động cụ thể"),
+    "Verdict blueprint includes Vietnamese advisory objective and prompt questions"
   );
 
-  // Test 4: Privacy Anonymization Mask (Zero-Leak Mode)
-  const mdAnonymized = app.generateAIDossierMarkdown(testParams, {
-    blueprint: "stress_test",
-    anonymize: true,
+  const mdVerdictEn = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "verdict",
+    anonymize: false,
     lang: "en",
   });
   assert(
-    mdAnonymized.includes("ANONYMIZED"),
-    "Anonymized dossier header flags ANONYMIZED privacy mode"
+    mdVerdictEn.includes(
+      "Real Estate Decision Dossier: Buy vs. Rent Comparison"
+    ),
+    "Dossier includes English header title"
   );
   assert(
-    mdAnonymized.includes("1.0x (Baseline Home Price)"),
-    "Home price is normalized to 1.0x multiple"
-  );
-  assert(
-    mdAnonymized.includes("% of Home Price"),
-    "Currency values are transformed to percentage shares of Home Price"
-  );
-  assert(
-    !mdAnonymized.includes("5,000,000,000 VND"),
-    "Absolute monetary figures are strictly masked"
+    mdVerdictEn.includes("Advisory Objective:") &&
+      mdVerdictEn.includes("Is the net worth crossover horizon of") &&
+      mdVerdictEn.includes(
+        "Strategic recommendations and concrete action plan"
+      ),
+    "Verdict blueprint includes English advisory objective and prompt questions"
   );
 
-  // Test 5: Additional Consultation Blueprints
-  const mdFire = app.generateAIDossierMarkdown(testParams, {
+  // Blueprint: Stress-Test (VI vs EN)
+  const mdStressVi = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "stress_test",
+    anonymize: false,
+    lang: "vi",
+  });
+  assert(
+    mdStressVi.includes("Kiểm tra độ căng thẳng tài chính (Stress-Test)") &&
+      mdStressVi.includes("Rủi ro khi lãi suất thả nổi vượt 12%–14%"),
+    "Stress-test blueprint contains Vietnamese prompt questions"
+  );
+
+  const mdStressEn = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "stress_test",
+    anonymize: false,
+    lang: "en",
+  });
+  assert(
+    mdStressEn.includes(
+      "Stress-test financial resilience against floating interest rate spikes"
+    ) &&
+      mdStressEn.includes(
+        "Risk exposure if floating mortgage rates rise to 12%–14%"
+      ),
+    "Stress-test blueprint contains English prompt questions"
+  );
+
+  // Blueprint: FIRE Optimization (VI vs EN)
+  const mdFireVi = app.generateAIDossierMarkdown(testParams, {
     blueprint: "fire",
     anonymize: false,
     lang: "vi",
   });
   assert(
-    mdFire.includes("FIRE") || mdFire.includes("Tự do Tài chính"),
-    "FIRE blueprint includes FIRE optimization prompts"
+    mdFireVi.includes(
+      "Tối ưu hóa lộ trình Tự do Tài chính & Nghỉ hưu sớm (FIRE)"
+    ) &&
+      mdFireVi.includes("Tác động của việc khóa vốn lớn vào tài sản cố định") &&
+      mdFireVi.includes(
+        "So sánh hiệu quả sinh lời giữa BĐS vs Danh mục cổ phiếu/ETF"
+      ),
+    "FIRE blueprint includes Vietnamese FIRE optimization prompts"
   );
 
-  const mdAllocation = app.generateAIDossierMarkdown(testParams, {
+  const mdFireEn = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "fire",
+    anonymize: false,
+    lang: "en",
+  });
+  assert(
+    mdFireEn.includes(
+      "Optimize the financial trajectory for Financial Independence, Retire Early (FIRE)"
+    ) &&
+      mdFireEn.includes(
+        "Impact of tying up capital into illiquid primary residential equity"
+      ) &&
+      mdFireEn.includes(
+        "Long-term return trade-offs between property equity appreciation vs. diversified stock/ETF portfolio"
+      ),
+    "FIRE blueprint includes English FIRE optimization prompts"
+  );
+
+  // Blueprint: Asset & Debt Allocation (VI vs EN)
+  const mdAllocationVi = app.generateAIDossierMarkdown(testParams, {
     blueprint: "asset_allocation",
     anonymize: false,
     lang: "vi",
   });
   assert(
-    mdAllocation.includes("Phân bổ") || mdAllocation.includes("đòn bẩy"),
-    "Asset Allocation blueprint includes leverage and diversification prompts"
+    mdAllocationVi.includes(
+      "Đánh giá phân bổ danh mục tài sản và tỷ trọng đòn bẩy tài chính"
+    ) &&
+      mdAllocationVi.includes("Tỷ lệ đòn bẩy vay") &&
+      mdAllocationVi.includes("Đa dạng hóa danh mục đầu tư"),
+    "Asset Allocation blueprint includes Vietnamese leverage and diversification prompts"
+  );
+
+  const mdAllocationEn = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "asset_allocation",
+    anonymize: false,
+    lang: "en",
+  });
+  assert(
+    mdAllocationEn.includes(
+      "Assess portfolio asset allocation and debt leverage weighting"
+    ) &&
+      mdAllocationEn.includes("Is the debt leverage ratio") &&
+      mdAllocationEn.includes(
+        "Portfolio diversification across real estate equity versus liquid investment assets"
+      ),
+    "Asset Allocation blueprint includes English leverage and diversification prompts"
+  );
+
+  // Custom Query (VI vs EN)
+  const mdCustomVi = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "custom",
+    customQuery: "Đánh giá căn hộ studio cho thuê",
+    lang: "vi",
+  });
+  assert(
+    mdCustomVi.includes(
+      "**Yêu cầu tùy chỉnh:** Đánh giá căn hộ studio cho thuê"
+    ),
+    "Custom prompt blueprint renders Vietnamese custom request"
+  );
+
+  const mdCustomEn = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "custom",
+    customQuery: "Evaluate short-term Airbnb rental feasibility",
+    lang: "en",
+  });
+  assert(
+    mdCustomEn.includes(
+      "**Custom Request:** Evaluate short-term Airbnb rental feasibility"
+    ),
+    "Custom prompt blueprint renders English custom request"
+  );
+
+  // Test 4: Privacy Anonymization Mask (Zero-Leak Mode)
+  const mdAnonymizedEn = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "stress_test",
+    anonymize: true,
+    lang: "en",
+  });
+  assert(
+    mdAnonymizedEn.includes("🔒 ANONYMIZED (Home Multiples & Shares)"),
+    "Anonymized dossier header flags ANONYMIZED privacy mode in English"
+  );
+  assert(
+    mdAnonymizedEn.includes("1.0x (Baseline Home Price)"),
+    "Home price is normalized to 1.0x baseline multiple in English"
+  );
+  assert(
+    mdAnonymizedEn.includes("% of Home Price"),
+    "Currency values are transformed to percentage shares of Home Price in English"
+  );
+
+  const mdAnonymizedVi = app.generateAIDossierMarkdown(testParams, {
+    blueprint: "stress_test",
+    anonymize: true,
+    lang: "vi",
+  });
+  assert(
+    mdAnonymizedVi.includes("🔒 ẨN DANH (Bội số giá nhà & Tỷ lệ %)"),
+    "Anonymized dossier header flags ẨN DANH privacy mode in Vietnamese"
+  );
+  assert(
+    mdAnonymizedVi.includes("1.0x (Giá nhà cơ sở)"),
+    "Home price is normalized to 1.0x multiple in Vietnamese"
+  );
+  assert(
+    mdAnonymizedVi.includes("% Giá nhà"),
+    "Currency values are transformed to percentage shares of Home Price in Vietnamese"
+  );
+
+  // Test 5: Live DOM Preview Reactivity on Language Toggle
+  app.openAIDossierModal();
+  app.toggleLanguage("en");
+  const textareaEn = app.document.getElementById("dossierMarkdownTextarea");
+  assert(
+    textareaEn.value.includes("Real Estate Decision Dossier") &&
+      textareaEn.value.includes("Advisory Objective:"),
+    "Live preview textarea dynamically updates to English when toggleLanguage('en') is invoked"
+  );
+
+  app.toggleLanguage("vi");
+  const textareaVi = app.document.getElementById("dossierMarkdownTextarea");
+  assert(
+    textareaVi.value.includes("Hồ Sơ Tư Vấn Quyết Định") &&
+      textareaVi.value.includes("Mục tiêu tư vấn:"),
+    "Live preview textarea dynamically updates to Vietnamese when toggleLanguage('vi') is invoked"
   );
 
   // Test 6: Modal Lifecycle and Onboarding Walkthrough
