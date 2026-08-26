@@ -1991,6 +1991,7 @@
         });
 
         renderApp();
+        renderActiveTabChart();
       }
 
       function toggleTheme() {
@@ -2007,16 +2008,21 @@
           html.classList.add("dark");
           if (icon) icon.className = "fa-solid fa-sun text-amber-400";
         }
+
+        renderActiveTabChart();
       }
 
       function toggleRealPurchasingPower(checked) {
         currentParams.useRealPurchasingPower = checked;
         renderApp();
+        renderActiveTabChart();
       }
 
       function resetToDefaults() {
         currentParams = { ...DEFAULT_BUY_VS_RENT_PARAMS };
+        if (typeof window !== "undefined") window.currentParams = currentParams;
         renderApp();
+        renderActiveTabChart();
         showToast(TRANSLATIONS[currentLang].toast_reset);
       }
 
@@ -2037,6 +2043,280 @@
         showToast(TRANSLATIONS[currentLang].toast_copied);
       }
 
+      function getChartThemeColors() {
+        const isDark = currentTheme === "dark";
+        return {
+          gridColor: isDark
+            ? "rgba(51, 65, 85, 0.4)"
+            : "rgba(226, 232, 240, 0.8)",
+          tickColor: isDark ? "#94a3b8" : "#64748b",
+          tooltipBg: isDark
+            ? "rgba(15, 23, 42, 0.95)"
+            : "rgba(255, 255, 255, 0.95)",
+          tooltipText: isDark ? "#f8fafc" : "#0f172a",
+          tooltipBorder: isDark ? "#334155" : "#cbd5e1",
+        };
+      }
+
+      function renderActiveTabChart() {
+        const canvas = document.getElementById("mainChartCanvas");
+        const sensitivityBox = document.getElementById("sensitivityContainer");
+        const footerExplainer = document.getElementById("chartFooterExplainer");
+
+        if (currentTab === "sensitivity") {
+          if (canvas) canvas.classList.add("hidden");
+          if (sensitivityBox) {
+            sensitivityBox.classList.remove("hidden");
+            renderSensitivityMatrixHtml(sensitivityBox);
+          }
+          if (footerExplainer) footerExplainer.classList.add("hidden");
+          return;
+        }
+
+        if (canvas) canvas.classList.remove("hidden");
+        if (sensitivityBox) sensitivityBox.classList.add("hidden");
+        if (footerExplainer) footerExplainer.classList.remove("hidden");
+
+        if (!canvas || typeof Chart === "undefined") return;
+
+        const sim = simulateBuyVsRent(currentParams);
+        const timeline = sim.timeline;
+        const colors = getChartThemeColors();
+        const t = TRANSLATIONS[currentLang];
+
+        // Sample labels: show at intervals to keep axes clean
+        const step =
+          timeline.length > 240 ? 24 : timeline.length > 120 ? 12 : 6;
+        const labels = timeline.map((entry, idx) => {
+          if (
+            idx === 0 ||
+            (idx + 1) % step === 0 ||
+            idx === timeline.length - 1
+          ) {
+            return `${currentLang === "vi" ? "Năm" : "Yr"} ${entry.year}`;
+          }
+          return "";
+        });
+
+        let datasets = [];
+
+        if (currentTab === "timeline") {
+          const buyData = timeline.map((e) =>
+            currentParams.useRealPurchasingPower
+              ? e.netWorthBuyReal
+              : e.netWorthBuyNominal
+          );
+          const rentData = timeline.map((e) =>
+            currentParams.useRealPurchasingPower
+              ? e.netWorthRentReal
+              : e.netWorthRentNominal
+          );
+
+          datasets = [
+            {
+              label:
+                currentLang === "vi"
+                  ? "Mua Nhà (Tài Sản Ròng)"
+                  : "Buy (Net Realizable Equity)",
+              data: buyData,
+              borderColor: "#10b981",
+              backgroundColor: "rgba(16, 185, 129, 0.15)",
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+            },
+            {
+              label:
+                currentLang === "vi"
+                  ? "Thuê & Đầu Tư (Danh Mục)"
+                  : "Rent & Invest (Portfolio)",
+              data: rentData,
+              borderColor: "#38bdf8",
+              backgroundColor: "rgba(56, 189, 248, 0.15)",
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+            },
+          ];
+        } else if (currentTab === "sunk") {
+          const sunkBuyData = timeline.map((e) => e.cumulativeSunkCostBuy);
+          const sunkRentData = timeline.map((e) => e.cumulativeSunkCostRent);
+
+          datasets = [
+            {
+              label:
+                currentLang === "vi"
+                  ? "Chi Phí Mất Đi Khi Mua (Lãi, Phí, Thuế)"
+                  : "Buy Sunk Costs (Interest, HOA, Tax)",
+              data: sunkBuyData,
+              borderColor: "#f59e0b",
+              backgroundColor: "rgba(245, 158, 11, 0.15)",
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+            },
+            {
+              label:
+                currentLang === "vi"
+                  ? "Chi Phí Mất Đi Khi Thuê (Tiền Thuê Nhà)"
+                  : "Rent Sunk Costs (Rent Paid)",
+              data: sunkRentData,
+              borderColor: "#f43f5e",
+              backgroundColor: "rgba(244, 63, 94, 0.15)",
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+            },
+          ];
+        } else if (currentTab === "cashflow") {
+          const buyOutflow = timeline.map((e) => e.monthlyBuyOutflow);
+          const rentOutflow = timeline.map((e) => e.monthlyRentOutflow);
+
+          datasets = [
+            {
+              label:
+                currentLang === "vi"
+                  ? "Dòng Tiền Ra Hàng Tháng (Mua)"
+                  : "Monthly Outflow (Buy)",
+              data: buyOutflow,
+              borderColor: "#10b981",
+              borderWidth: 2,
+              pointRadius: 0,
+              pointHoverRadius: 4,
+            },
+            {
+              label:
+                currentLang === "vi"
+                  ? "Dòng Tiền Ra Hàng Tháng (Thuê)"
+                  : "Monthly Outflow (Rent)",
+              data: rentOutflow,
+              borderColor: "#38bdf8",
+              borderWidth: 2,
+              pointRadius: 0,
+              pointHoverRadius: 4,
+            },
+          ];
+        }
+
+        if (activeChartInstance) {
+          activeChartInstance.destroy();
+          activeChartInstance = null;
+        }
+
+        const ctx = canvas.getContext("2d");
+        activeChartInstance = new Chart(ctx, {
+          type: "line",
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                backgroundColor: colors.tooltipBg,
+                titleColor: colors.tooltipText,
+                bodyColor: colors.tooltipText,
+                borderColor: colors.tooltipBorder,
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                  label: function (context) {
+                    return ` ${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                grid: { color: colors.gridColor },
+                ticks: { color: colors.tickColor, font: { size: 11 } },
+              },
+              y: {
+                grid: { color: colors.gridColor },
+                ticks: {
+                  color: colors.tickColor,
+                  font: { size: 11 },
+                  callback: function (val) {
+                    return getSpelledOutAmount(val);
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      function renderSensitivityMatrixHtml(container) {
+        const matrix = generateSensitivityMatrix(currentParams);
+        const isVi = currentLang === "vi";
+
+        let html = `
+          <div class="p-2 space-y-3">
+            <div class="text-xs text-slate-400">
+              <span class="font-bold text-white">${isVi ? "Ma Trận Hòa Vốn & Người Thắng Cuộc:" : "Break-Even Crossover Matrix:"}</span>
+              ${isVi ? "So sánh các cặp tỷ lệ Tăng giá nhà vs Lãi sinh lời đầu tư thay thế." : "Evaluating crossover horizons across Property Appreciation vs. Alternative Investment Yield."}
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+              <table class="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-900/80 border-b border-slate-700 text-slate-400">
+                    <th class="p-2.5 font-semibold">${isVi ? "Tăng BĐS / Lãi ĐT" : "Prop Growth / Inv Yield"}</th>
+                    <th class="p-2.5 text-center font-mono">5.0%</th>
+                    <th class="p-2.5 text-center font-mono">6.5%</th>
+                    <th class="p-2.5 text-center font-mono">8.0%</th>
+                    <th class="p-2.5 text-center font-mono">9.5%</th>
+                    <th class="p-2.5 text-center font-mono">11.0%</th>
+                    <th class="p-2.5 text-center font-mono">12.5%</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800 font-mono">
+        `;
+
+        matrix.forEach((row) => {
+          html += `<tr><td class="p-2.5 font-bold text-slate-300 bg-slate-900/40">${row.propertyAppreciationRate.toFixed(1)}%/yr</td>`;
+          row.cells.forEach((cell) => {
+            if (cell.winnerScenario === "buy") {
+              const yrs =
+                cell.crossoverYear !== null ? cell.crossoverYear + "y" : "< 1y";
+              html += `<td class="p-2.5 text-center bg-emerald-950/40 text-emerald-300 font-semibold border border-emerald-900/30" title="${isVi ? "Mua thắng sau " + yrs : "Buy wins after " + yrs}">
+                <div>🟢 ${isVi ? "Mua" : "Buy"}</div>
+                <div class="text-[10px] text-emerald-400">${yrs}</div>
+              </td>`;
+            } else {
+              html += `<td class="p-2.5 text-center bg-sky-950/40 text-sky-300 font-semibold border border-sky-900/30" title="${isVi ? "Thuê có lợi hơn" : "Rent wins"}">
+                <div>🔵 ${isVi ? "Thuê" : "Rent"}</div>
+                <div class="text-[10px] text-sky-400">${isVi ? "Toàn kỳ" : "Always"}</div>
+              </td>`;
+            }
+          });
+          html += `</tr>`;
+        });
+
+        html += `
+                </tbody>
+              </table>
+            </div>
+            <div class="flex items-center gap-4 text-[11px] text-slate-400 pt-1">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> ${isVi ? "Mua Nhà Thắng (Có điểm hòa vốn)" : "Buy Wins (Crossover reached)"}</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-sky-500"></span> ${isVi ? "Thuê Nhà Thắng (Tài sản đầu tư vượt trội)" : "Rent Wins (Investment portfolio leads)"}</span>
+            </div>
+          </div>
+        `;
+
+        container.innerHTML = html;
+      }
+
       function switchAnalyticsTab(tabKey) {
         currentTab = tabKey;
         const tabs = ["timeline", "sunk", "cashflow", "sensitivity"];
@@ -2052,15 +2332,38 @@
             }
           }
         });
+        renderActiveTabChart();
       }
 
-      function exportChartPNG() {}
+      function exportChartPNG() {
+        const canvas = document.getElementById("mainChartCanvas");
+        if (!canvas) return;
+
+        const offscreen = document.createElement("canvas");
+        offscreen.width = canvas.width;
+        offscreen.height = canvas.height;
+        const offCtx = offscreen.getContext("2d");
+
+        // Solid background fill
+        offCtx.fillStyle = currentTheme === "dark" ? "#0f172a" : "#ffffff";
+        offCtx.fillRect(0, 0, offscreen.width, offscreen.height);
+        offCtx.drawImage(canvas, 0, 0);
+
+        const a = document.createElement("a");
+        a.download = `buy-vs-rent-chart-${currentTab}.png`;
+        a.href = offscreen.toDataURL("image/png");
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast(TRANSLATIONS[currentLang].toast_copied);
+      }
 
       // Initialize application on window load
       if (typeof window !== "undefined") {
         if (typeof window.addEventListener === "function") {
           window.addEventListener("DOMContentLoaded", () => {
             renderApp();
+            renderActiveTabChart();
           });
         }
 
@@ -2080,6 +2383,10 @@
         window.loadPersona = loadPersona;
         window.toggleLanguage = toggleLanguage;
         window.toggleTheme = toggleTheme;
+        window.switchAnalyticsTab = switchAnalyticsTab;
+        window.renderActiveTabChart = renderActiveTabChart;
+        window.renderSensitivityMatrixHtml = renderSensitivityMatrixHtml;
+        window.exportChartPNG = exportChartPNG;
         window.currentParams = currentParams;
       }
     </script>
