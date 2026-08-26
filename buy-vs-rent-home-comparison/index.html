@@ -2343,7 +2343,7 @@
 
           // KPIs
           kpi_crossover_title: "Điểm Hòa Vốn (Crossover)",
-          kpi_net_worth_title: "Tài Sản Ròng Sau Horizon",
+          kpi_net_worth_title: "Tổng Tài Sản Ròng Cuối Kỳ",
           kpi_sunk_costs_title: "Tổng Chi Phí Mất Đi (Sunk Costs)",
           kpi_prr_title: "Tỷ Lệ Giá / Tiền Thuê (PRR)",
           verdict_strong_buy: "Vùng Mua Tốt (Yield Cao)",
@@ -2368,8 +2368,8 @@
           label_loan_amount: "Khoản Vay",
           label_loan_tenure: "Thời Gian Vay",
           label_amortization_scheme: "Cách Trả Nợ",
-          opt_linear_principal: "Dư Nợ Giảm Dần",
-          opt_fixed_emi: "Niên Kim Cố Định (EMI)",
+          opt_linear_principal: "Dư Nợ Giảm Dần (Gốc Đều)",
+          opt_fixed_emi: "Niên Kim Cố Định (Fixed EMI)",
           label_teaser_rate: "Lãi Ưu Đãi (%)",
           label_floating_rate: "Lãi Thả Nổi (%)",
           sec_acquisition_breakdown: "Chi Phí Hoàn Thiện & Thuế Ban Đầu",
@@ -2419,10 +2419,10 @@
           btn_copy_md: "Sao Chép Markdown",
 
           // Toasts
-          toast_preset_loaded: "Đã tải chiến lược mẫu",
+          toast_preset_loaded: "Đã nạp chiến lược mẫu",
           toast_undo: "Hoàn tác",
-          toast_copied: "Đã sao chép liên kết vào bộ nhớ tạm!",
-          toast_reset: "Đã khôi phục cài đặt mặc định.",
+          toast_copied: "Đã sao chép liên kết chia sẻ vào bộ nhớ tạm!",
+          toast_reset: "Đã khôi phục tất cả thông số về mặc định.",
 
           // Methodology Modal & Mathematical Formulations
           btn_methodology: "Công thức & Phương pháp",
@@ -3587,6 +3587,7 @@
         } else {
           currentLang = currentLang === "vi" ? "en" : "vi";
         }
+        window.currentLang = currentLang;
         if (document.documentElement) {
           document.documentElement.lang = currentLang;
         }
@@ -4628,6 +4629,8 @@
         window.updateMethodologyLiveTraces = updateMethodologyLiveTraces;
         window.dismissAllModals = dismissAllModals;
         window.currentParams = currentParams;
+        window.currentLang = currentLang;
+        window.currentTheme = currentTheme;
       }
     </script>
   </body>
