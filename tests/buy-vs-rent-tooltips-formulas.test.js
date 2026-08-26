@@ -353,6 +353,47 @@ assert(
   "dismissAllModals cleanly closes methodology modal, tour modal, and AI dossier modal"
 );
 
+// 11. KaTeX & LaTeX Formulations Verification
+assert(
+  htmlContent.includes("katex.min.css") && htmlContent.includes("katex.min.js"),
+  "KaTeX CDN stylesheet and script tags are included in <head>"
+);
+
+assert(
+  htmlContent.includes(
+    "\\text{EMI} = P \\times \\frac{r(1+r)^n}{(1+r)^n - 1}"
+  ) &&
+    htmlContent.includes("\\text{Equity}(t) =") &&
+    htmlContent.includes("\\text{Portfolio}(t) =") &&
+    htmlContent.includes("\\text{PRR} ="),
+  "Mathematical formulas are properly formatted in LaTeX notation"
+);
+
+// 12. Accurate automated test assertion count
+assert(
+  sandbox.window.TRANSLATIONS.vi.meth_footer_badge.includes("134 assertions") &&
+    sandbox.window.TRANSLATIONS.en.meth_footer_badge.includes(
+      "134 automated assertions"
+    ),
+  "Methodology footer badge accurately displays 134 automated assertions for Buy vs Rent"
+);
+
+// 13. Mathematical Variable Notations Definitions
+assert(
+  htmlContent.includes("notion_mortgage_P") &&
+    htmlContent.includes("notion_equity_P0") &&
+    htmlContent.includes("notion_rent_port") &&
+    htmlContent.includes("notion_prr_P0"),
+  "Mathematical variable notation blocks are embedded under all formula cards"
+);
+assert(
+  sandbox.window.TRANSLATIONS.vi.notion_mortgage_P &&
+    sandbox.window.TRANSLATIONS.en.notion_mortgage_P &&
+    sandbox.window.TRANSLATIONS.vi.notion_equity_g &&
+    sandbox.window.TRANSLATIONS.en.notion_equity_g,
+  "Variable notations have full bilingual translation definitions in vi and en"
+);
+
 console.log(`\n==================================================`);
 console.log(`Summary: ${passed} Passed, ${failed} Failed`);
 console.log(`==================================================\n`);

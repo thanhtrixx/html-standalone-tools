@@ -16,6 +16,19 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
+    <!-- KaTeX Mathematical Typesetting CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+    ></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -24,6 +37,27 @@
     />
 
     <script>
+      // Canvas 2D safety polyfill for headless browsers (Lightpanda/Node canvas stubs)
+      if (
+        typeof HTMLCanvasElement !== "undefined" &&
+        HTMLCanvasElement.prototype &&
+        HTMLCanvasElement.prototype.getContext
+      ) {
+        const origGetCtx = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+          const ctx = origGetCtx.call(this, type, ...args);
+          if (ctx && typeof ctx.measureText !== "function") {
+            ctx.measureText = function (text) {
+              return {
+                width: String(text || "").length * 8,
+                actualBoundingBoxAscent: 10,
+                actualBoundingBoxDescent: 2,
+              };
+            };
+          }
+          return ctx;
+        };
+      }
       if (typeof tailwind !== "undefined") {
         tailwind.config = {
           darkMode: "class",
@@ -726,11 +760,21 @@
                   onchange="handleParamChange('loanTenureYears', this.value)"
                   class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition"
                 >
-                  <option value="10">10 Năm (120 Th)</option>
-                  <option value="15">15 Năm (180 Th)</option>
-                  <option value="20" selected>20 Năm (240 Th)</option>
-                  <option value="25">25 Năm (300 Th)</option>
-                  <option value="30">30 Năm (360 Th)</option>
+                  <option value="10" data-i18n="opt_tenure_10">
+                    10 Năm (120 Th)
+                  </option>
+                  <option value="15" data-i18n="opt_tenure_15">
+                    15 Năm (180 Th)
+                  </option>
+                  <option value="20" selected data-i18n="opt_tenure_20">
+                    20 Năm (240 Th)
+                  </option>
+                  <option value="25" data-i18n="opt_tenure_25">
+                    25 Năm (300 Th)
+                  </option>
+                  <option value="30" data-i18n="opt_tenure_30">
+                    30 Năm (360 Th)
+                  </option>
                 </select>
               </div>
               <div>
@@ -1095,18 +1139,21 @@
               <button
                 onclick="handleParamChange('rentInvestmentYield', 5.5)"
                 class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                data-i18n="chip_yield_savings"
               >
                 Gửi Tiết Kiệm (5.5%)
               </button>
               <button
                 onclick="handleParamChange('rentInvestmentYield', 8.0)"
                 class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                data-i18n="chip_yield_balanced"
               >
                 Cân Bằng (8.0%)
               </button>
               <button
                 onclick="handleParamChange('rentInvestmentYield', 10.5)"
                 class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                data-i18n="chip_yield_stocks"
               >
                 Cổ Phiếu/ETF (10.5%)
               </button>
@@ -1140,7 +1187,10 @@
                   >1,173,000,000 VND</span
                 >
               </div>
-              <div class="text-[11px] text-slate-500">
+              <div
+                class="text-[11px] text-slate-500"
+                data-i18n="desc_initial_portfolio_calc"
+              >
                 (= Vốn mua nhà trừ tiền cọc thuê 2 tháng & chi phí chuyển nhà)
               </div>
             </div>
@@ -1262,12 +1312,14 @@
                   onchange="handleParamChange('horizonYears', this.value)"
                   class="w-full px-2 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition"
                 >
-                  <option value="5">5 Năm</option>
-                  <option value="10">10 Năm</option>
-                  <option value="15">15 Năm</option>
-                  <option value="20" selected>20 Năm</option>
-                  <option value="25">25 Năm</option>
-                  <option value="30">30 Năm</option>
+                  <option value="5" data-i18n="opt_horizon_5">5 Năm</option>
+                  <option value="10" data-i18n="opt_horizon_10">10 Năm</option>
+                  <option value="15" data-i18n="opt_horizon_15">15 Năm</option>
+                  <option value="20" selected data-i18n="opt_horizon_20">
+                    20 Năm
+                  </option>
+                  <option value="25" data-i18n="opt_horizon_25">25 Năm</option>
+                  <option value="30" data-i18n="opt_horizon_30">30 Năm</option>
                 </select>
               </div>
             </div>
@@ -1361,13 +1413,17 @@
               <div class="flex items-center gap-4">
                 <span class="flex items-center gap-1.5">
                   <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
-                  <span class="font-medium text-slate-300"
+                  <span
+                    class="font-medium text-slate-300"
+                    data-i18n="legend_buy_equity"
                     >Mua Nhà (Buy Equity)</span
                   >
                 </span>
                 <span class="flex items-center gap-1.5">
                   <span class="w-3 h-3 rounded-full bg-sky-500"></span>
-                  <span class="font-medium text-slate-300"
+                  <span
+                    class="font-medium text-slate-300"
+                    data-i18n="legend_rent_portfolio"
                     >Thuê & Đầu Tư (Rent Portfolio)</span
                   >
                 </span>
@@ -1490,21 +1546,81 @@
               </p>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div
-                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 space-y-1.5"
                 >
-                  <div class="text-indigo-400 font-bold mb-1">
+                  <div
+                    class="text-indigo-400 font-bold"
+                    data-i18n="formula_emi_header"
+                  >
                     Niên Kim Cố Định (Fixed EMI):
                   </div>
-                  <div>EMI = P × [ r(1+r)^n ] / [ (1+r)^n - 1 ]</div>
+                  <div
+                    class="latex-math text-slate-200 overflow-x-auto py-1 font-mono text-center text-xs sm:text-sm"
+                    data-tex="\text{EMI} = P \times \frac{r(1+r)^n}{(1+r)^n - 1}"
+                  >
+                    $$\text{EMI} = P \times \frac{r(1+r)^n}{(1+r)^n - 1}$$
+                  </div>
                 </div>
                 <div
-                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 space-y-1.5"
                 >
-                  <div class="text-indigo-400 font-bold mb-1">
+                  <div
+                    class="text-indigo-400 font-bold"
+                    data-i18n="formula_linear_header"
+                  >
                     Dư Nợ Giảm Dần (Linear):
                   </div>
-                  <div>Gốc hàng tháng = P / n</div>
-                  <div>Lãi tháng t = Dư nợ t × r</div>
+                  <div
+                    class="latex-math text-slate-200 overflow-x-auto py-1 font-mono text-center text-xs sm:text-sm"
+                    data-tex="\text{Principal}_t = \frac{P}{n}, \quad \text{Interest}_t = \text{Balance}_t \times r"
+                  >
+                    $$\text{Principal}_t = \frac{P}{n}, \quad \text{Interest}_t
+                    = \text{Balance}_t \times r$$
+                  </div>
+                </div>
+                <div
+                  class="col-span-1 sm:col-span-2 p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 space-y-1"
+                >
+                  <div
+                    class="font-bold text-slate-300 flex items-center gap-1.5"
+                  >
+                    <i
+                      class="fa-solid fa-list-check text-[10px] text-indigo-400"
+                    ></i>
+                    <span data-i18n="formula_notations_title"
+                      >Ký hiệu biến số (Variable Notations):</span
+                    >
+                  </div>
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 font-mono text-[10.5px]"
+                  >
+                    <div>
+                      <span class="text-indigo-300 font-bold">P</span>:
+                      <span data-i18n="notion_mortgage_P"
+                        >Giá trị khoản vay gốc (Loan principal)</span
+                      >
+                    </div>
+                    <div>
+                      <span class="text-indigo-300 font-bold">r</span>:
+                      <span data-i18n="notion_mortgage_r"
+                        >Lãi suất tháng = Lãi năm / 12 (Monthly rate)</span
+                      >
+                    </div>
+                    <div>
+                      <span class="text-indigo-300 font-bold">n</span>:
+                      <span data-i18n="notion_mortgage_n"
+                        >Kỳ hạn vay tính theo tháng (Loan tenure in
+                        months)</span
+                      >
+                    </div>
+                    <div>
+                      <span class="text-indigo-300 font-bold">Balance_t</span>:
+                      <span data-i18n="notion_mortgage_bal"
+                        >Dư nợ gốc còn lại tại tháng t (Remaining debt at month
+                        t)</span
+                      >
+                    </div>
+                  </div>
                 </div>
               </div>
               <!-- Live Trace Box -->
@@ -1547,10 +1663,56 @@
                 nhà (môi giới, thuế TNCN 2% + phí công chứng).
               </p>
               <div
-                class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300"
               >
-                Equity(t) = [ Giá Nhà Ban Đầu × (1 + g_bds)^(t/12) ] × (1 - Phí
-                Bán 3%) - Dư Nợ Còn Lại(t)
+                <div
+                  class="latex-math text-slate-200 overflow-x-auto py-1 font-mono text-center text-xs sm:text-sm"
+                  data-tex="\text{Equity}(t) = \left[ P_0 \times (1 + g_{\text{property}})^{t/12} \right] \times (1 - f_{\text{selling}}) - \text{Debt}(t)"
+                >
+                  $$\text{Equity}(t) = \left[ P_0 \times (1 +
+                  g_{\text{property}})^{t/12} \right] \times (1 -
+                  f_{\text{selling}}) - \text{Debt}(t)$$
+                </div>
+              </div>
+              <div
+                class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 space-y-1"
+              >
+                <div class="font-bold text-slate-300 flex items-center gap-1.5">
+                  <i
+                    class="fa-solid fa-list-check text-[10px] text-emerald-400"
+                  ></i>
+                  <span data-i18n="formula_notations_title"
+                    >Ký hiệu biến số (Variable Notations):</span
+                  >
+                </div>
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 font-mono text-[10.5px]"
+                >
+                  <div>
+                    <span class="text-emerald-300 font-bold">P_0</span>:
+                    <span data-i18n="notion_equity_P0"
+                      >Giá mua nhà ban đầu (Initial home price)</span
+                    >
+                  </div>
+                  <div>
+                    <span class="text-emerald-300 font-bold">g_prop</span>:
+                    <span data-i18n="notion_equity_g"
+                      >Tỷ lệ tăng giá BĐS hàng năm (Property growth rate)</span
+                    >
+                  </div>
+                  <div>
+                    <span class="text-emerald-300 font-bold">f_sell</span>:
+                    <span data-i18n="notion_equity_f"
+                      >Tỷ lệ chi phí bán nhà 2.5%–3.0% (Selling friction)</span
+                    >
+                  </div>
+                  <div>
+                    <span class="text-emerald-300 font-bold">Debt(t)</span>:
+                    <span data-i18n="notion_equity_debt"
+                      >Dư nợ vay còn lại tại tháng t (Remaining mortgage)</span
+                    >
+                  </div>
+                </div>
               </div>
               <div
                 id="trace_equity"
@@ -1592,10 +1754,60 @@
                 tài sản sinh lời (Cổ phiếu/ETF).
               </p>
               <div
-                class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300"
               >
-                Portfolio(t) = Portfolio(t-1) × (1 + Lãi ĐT/12) + [ Chi Phí
-                Mua(t) - Chi Phí Thuê(t) ]
+                <div
+                  class="latex-math text-slate-200 overflow-x-auto py-1 font-mono text-center text-xs sm:text-sm"
+                  data-tex="\text{Portfolio}(t) = \text{Portfolio}(t-1) \times \left(1 + \frac{r_{\text{invest}}}{12}\right) + \left[ \text{Outflow}_{\text{Buy}}(t) - \text{Outflow}_{\text{Rent}}(t) \right]"
+                >
+                  $$\text{Portfolio}(t) = \text{Portfolio}(t-1) \times \left(1 +
+                  \frac{r_{\text{invest}}}{12}\right) + \left[
+                  \text{Outflow}_{\text{Buy}}(t) -
+                  \text{Outflow}_{\text{Rent}}(t) \right]$$
+                </div>
+              </div>
+              <div
+                class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 space-y-1"
+              >
+                <div class="font-bold text-slate-300 flex items-center gap-1.5">
+                  <i
+                    class="fa-solid fa-list-check text-[10px] text-sky-400"
+                  ></i>
+                  <span data-i18n="formula_notations_title"
+                    >Ký hiệu biến số (Variable Notations):</span
+                  >
+                </div>
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 font-mono text-[10.5px]"
+                >
+                  <div>
+                    <span class="text-sky-300 font-bold">Portfolio(t)</span>:
+                    <span data-i18n="notion_rent_port"
+                      >Giá trị danh mục tích lũy tháng t (Portfolio value at
+                      t)</span
+                    >
+                  </div>
+                  <div>
+                    <span class="text-sky-300 font-bold">r_invest</span>:
+                    <span data-i18n="notion_rent_r"
+                      >Lợi suất đầu tư hàng năm (Annual investment yield)</span
+                    >
+                  </div>
+                  <div>
+                    <span class="text-sky-300 font-bold">Outflow_Buy</span>:
+                    <span data-i18n="notion_rent_buy_out"
+                      >Tổng chi phí mua nhà tháng t (Total buy cash
+                      outflow)</span
+                    >
+                  </div>
+                  <div>
+                    <span class="text-sky-300 font-bold">Outflow_Rent</span>:
+                    <span data-i18n="notion_rent_rent_out"
+                      >Tổng tiền thuê & phụ phí tháng t (Total rent
+                      outflow)</span
+                    >
+                  </div>
+                </div>
               </div>
               <div
                 id="trace_rent"
@@ -1629,20 +1841,83 @@
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div
-                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 space-y-1.5"
                 >
-                  <div class="text-amber-400 font-bold mb-1">
+                  <div
+                    class="text-amber-400 font-bold"
+                    data-i18n="formula_prr_header"
+                  >
                     Price-to-Rent Ratio:
                   </div>
-                  <div>PRR = Giá Mua Nhà / (Tiền Thuê Tháng × 12)</div>
+                  <div
+                    class="latex-math text-slate-200 overflow-x-auto py-1 font-mono text-center text-xs sm:text-sm"
+                    data-tex="\text{PRR} = \frac{\text{Home Price}}{\text{Monthly Rent} \times 12} = \frac{P_0}{\text{Annual Rent}}"
+                  >
+                    $$\text{PRR} = \frac{\text{Home Price}}{\text{Monthly Rent}
+                    \times 12} = \frac{P_0}{\text{Annual Rent}}$$
+                  </div>
                 </div>
                 <div
-                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-[11px] text-slate-300 space-y-1.5"
                 >
-                  <div class="text-amber-400 font-bold mb-1">
+                  <div
+                    class="text-amber-400 font-bold"
+                    data-i18n="formula_yield_header"
+                  >
                     Gross Rental Yield:
                   </div>
-                  <div>Yield = (Tiền Thuê Năm / Giá Nhà) × 100%</div>
+                  <div
+                    class="latex-math text-slate-200 overflow-x-auto py-1 font-mono text-center text-xs sm:text-sm"
+                    data-tex="\text{Gross Rental Yield} = \frac{\text{Annual Rent}}{P_0} \times 100\%"
+                  >
+                    $$\text{Gross Rental Yield} = \frac{\text{Annual Rent}}{P_0}
+                    \times 100\%$$
+                  </div>
+                </div>
+                <div
+                  class="col-span-1 sm:col-span-2 p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 space-y-1"
+                >
+                  <div
+                    class="font-bold text-slate-300 flex items-center gap-1.5"
+                  >
+                    <i
+                      class="fa-solid fa-list-check text-[10px] text-amber-400"
+                    ></i>
+                    <span data-i18n="formula_notations_title"
+                      >Ký hiệu biến số (Variable Notations):</span
+                    >
+                  </div>
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 font-mono text-[10.5px]"
+                  >
+                    <div>
+                      <span class="text-amber-300 font-bold">P_0</span>:
+                      <span data-i18n="notion_prr_P0"
+                        >Giá mua nhà hợp đồng (Home purchase price)</span
+                      >
+                    </div>
+                    <div>
+                      <span class="text-amber-300 font-bold">Annual Rent</span>:
+                      <span data-i18n="notion_prr_ann_rent"
+                        >Tổng tiền thuê nhà 12 tháng (12-month lease
+                        total)</span
+                      >
+                    </div>
+                    <div>
+                      <span class="text-amber-300 font-bold">PRR</span>:
+                      <span data-i18n="notion_prr_bench"
+                        >Tỷ lệ định giá: &lt;16x Mua, &gt;22x Thuê (Valuation
+                        ratio)</span
+                      >
+                    </div>
+                    <div>
+                      <span class="text-amber-300 font-bold">Yield</span>:
+                      <span data-i18n="notion_prr_yield"
+                        >Tỷ suất cho thuê gộp hàng năm (Gross rental
+                        yield)</span
+                      >
+                    </div>
+                  </div>
                 </div>
               </div>
               <div
@@ -1804,7 +2079,7 @@
           <div class="text-[11px] text-slate-400">
             <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>
             <span data-i18n="meth_footer_badge"
-              >Được kiểm định toán học với 740+ assertions tự động</span
+              >Được kiểm định toán học với 134 assertions tự động</span
             >
           </div>
           <button
@@ -2158,11 +2433,13 @@
           meth_tab_glossary: "Từ Điển Thuật Ngữ",
           meth_tab_invariants: "Giả Định & Quy Chuẩn",
           meth_footer_badge:
-            "Được kiểm định toán học với 740+ assertions tự động",
+            "Được kiểm định toán học với 134 assertions tự động",
           formula_mortgage_title:
             "1. Cơ Chế Trả Nợ Vay Mua Nhà (Mortgage Amortization)",
           formula_mortgage_desc:
             "Công cụ hỗ trợ 2 cơ chế trả nợ phổ biến: Dư nợ giảm dần (Gốc chia đều + Lãi tính trên dư nợ thực tế) và Niên kim cố định Fixed EMI (Tổng tiền trả hàng tháng cố định).",
+          formula_emi_header: "Niên Kim Cố Định (Fixed EMI):",
+          formula_linear_header: "Dư Nợ Giảm Dần (Linear):",
           formula_equity_title:
             "2. Tài Sản Ròng Thực Nhận Khi Bán Nhà (Realizable Equity)",
           formula_equity_desc:
@@ -2173,7 +2450,57 @@
             "Người thuê giữ lại tiền trả trước + hoàn thiện để làm vốn đầu tư ban đầu, đồng thời mỗi tháng tái đầu tư số tiền chênh lệch dòng tiền (Chi phí Mua - Chi phí Thuê) vào tài sản sinh lời.",
           formula_prr_title:
             "4. Định Giá Tỷ Lệ Giá / Tiền Thuê (Price-to-Rent Ratio & Yield)",
+          formula_prr_header: "Price-to-Rent Ratio:",
+          formula_yield_header: "Gross Rental Yield:",
+          formula_notations_title: "Ký hiệu biến số (Variable Notations):",
+          notion_mortgage_P: "Giá trị khoản vay gốc (Loan principal)",
+          notion_mortgage_r:
+            "Lãi suất tháng = Lãi năm / 12 (Monthly interest rate)",
+          notion_mortgage_n:
+            "Kỳ hạn vay tính theo tháng (Loan tenure in months)",
+          notion_mortgage_bal:
+            "Dư nợ gốc còn lại tại tháng t (Remaining principal at month t)",
+          notion_equity_P0: "Giá mua nhà ban đầu (Initial home purchase price)",
+          notion_equity_g:
+            "Tỷ lệ tăng giá BĐS hàng năm (Annual property appreciation rate)",
+          notion_equity_f:
+            "Tỷ lệ chi phí bán nhà 2.5%–3.0% (Selling friction cost)",
+          notion_equity_debt:
+            "Dư nợ vay ngân hàng còn lại tại tháng t (Remaining mortgage debt)",
+          notion_rent_port:
+            "Giá trị danh mục tích lũy tháng t (Accumulated portfolio value)",
+          notion_rent_r:
+            "Lợi suất đầu tư hàng năm (Annualized investment yield)",
+          notion_rent_buy_out:
+            "Tổng chi phí mua nhà tháng t (Total buy cash outflow at month t)",
+          notion_rent_rent_out:
+            "Tổng tiền thuê & phụ phí tháng t (Total rent outflow at month t)",
+          notion_prr_P0: "Giá mua nhà hợp đồng (Home purchase price)",
+          notion_prr_ann_rent:
+            "Tổng tiền thuê nhà 12 tháng (12-month lease total)",
+          notion_prr_bench:
+            "Tỷ lệ định giá: <16x Mua, >22x Thuê (Valuation ratio)",
+          notion_prr_yield:
+            "Tỷ suất cho thuê gộp hàng năm (Gross rental yield)",
           trace_live_header: "Thay số thực tế với đầu vào của bạn:",
+          desc_initial_portfolio_calc:
+            "(= Vốn mua nhà trừ tiền cọc thuê 2 tháng & chi phí chuyển nhà)",
+          legend_buy_equity: "Mua Nhà (Buy Equity)",
+          legend_rent_portfolio: "Thuê & Đầu Tư (Rent Portfolio)",
+          chip_yield_savings: "Gửi Tiết Kiệm (5.5%)",
+          chip_yield_balanced: "Cân Bằng (8.0%)",
+          chip_yield_stocks: "Cổ Phiếu/ETF (10.5%)",
+          opt_tenure_10: "10 Năm (120 Th)",
+          opt_tenure_15: "15 Năm (180 Th)",
+          opt_tenure_20: "20 Năm (240 Th)",
+          opt_tenure_25: "25 Năm (300 Th)",
+          opt_tenure_30: "30 Năm (360 Th)",
+          opt_horizon_5: "5 Năm",
+          opt_horizon_10: "10 Năm",
+          opt_horizon_15: "15 Năm",
+          opt_horizon_20: "20 Năm",
+          opt_horizon_25: "25 Năm",
+          opt_horizon_30: "30 Năm",
           gloss_sunk_title: "Chi Phí Mất Đi (Sunk Costs)",
           gloss_sunk_desc:
             "Những khoản chi phí phát sinh trong quá trình ở mà bạn vĩnh viễn không thu hồi lại được (Người Mua: Lãi vay, bảo trì, HOA, thuế & phí bán; Người Thuê: Toàn bộ tiền thuê).",
@@ -2350,10 +2677,12 @@
           meth_tab_glossary: "Terminology Glossary",
           meth_tab_invariants: "Assumptions & Invariants",
           meth_footer_badge:
-            "Mathematically verified with 740+ automated assertions",
+            "Mathematically verified with 134 automated assertions",
           formula_mortgage_title: "1. Mortgage Amortization Mechanics",
           formula_mortgage_desc:
             "Supports 2 standard bank repayment schemes: Linear Principal (Equal principal + reducing interest) and Fixed EMI Annuity (Constant monthly out-of-pocket).",
+          formula_emi_header: "Fixed EMI Annuity:",
+          formula_linear_header: "Linear Principal Reduction:",
           formula_equity_title: "2. Realizable Home Equity",
           formula_equity_desc:
             "Net liquid equity of the home buyer at month t after deducting remaining mortgage debt and selling friction costs (3.0% brokerage + transfer taxes).",
@@ -2363,7 +2692,48 @@
             "The renter invests initial downpayment + fit-out capital, compounding monthly cashflow savings (Buy Outflow - Rent Outflow) into an alternative asset portfolio.",
           formula_prr_title:
             "4. Valuation Benchmarks (Price-to-Rent Ratio & Yield)",
+          formula_prr_header: "Price-to-Rent Ratio:",
+          formula_yield_header: "Gross Rental Yield:",
+          formula_notations_title: "Variable Notations:",
+          notion_mortgage_P: "Mortgage loan principal",
+          notion_mortgage_r: "Monthly interest rate = Annual rate / 12",
+          notion_mortgage_n: "Loan tenure in total months",
+          notion_mortgage_bal: "Remaining unpaid principal balance at month t",
+          notion_equity_P0: "Initial home purchase price",
+          notion_equity_g: "Annual property appreciation compound rate",
+          notion_equity_f:
+            "Selling friction transaction cost (default 2.5%–3.0%)",
+          notion_equity_debt: "Remaining bank debt principal at month t",
+          notion_rent_port: "Liquid investment portfolio balance at month t",
+          notion_rent_r: "Annualized alternative compound investment return",
+          notion_rent_buy_out:
+            "Total periodic housing out-of-pocket for buyer at month t",
+          notion_rent_rent_out:
+            "Total monthly rent and living expenses for renter at month t",
+          notion_prr_P0: "Home purchase contract price",
+          notion_prr_ann_rent: "12-month baseline annual lease cost",
+          notion_prr_bench:
+            "Valuation multiple: <16x favors Buy, >22x favors Rent",
+          notion_prr_yield: "Gross annual rental return percentage",
           trace_live_header: "Live dynamic arithmetic with your active inputs:",
+          desc_initial_portfolio_calc:
+            "(= Upfront buy capital minus 2 months lease deposit & move-in setup)",
+          legend_buy_equity: "Buy (Realizable Equity)",
+          legend_rent_portfolio: "Rent & Invest (Portfolio)",
+          chip_yield_savings: "Bank Savings (5.5%)",
+          chip_yield_balanced: "Balanced (8.0%)",
+          chip_yield_stocks: "Stocks/ETF (10.5%)",
+          opt_tenure_10: "10 Years (120 Mos)",
+          opt_tenure_15: "15 Years (180 Mos)",
+          opt_tenure_20: "20 Years (240 Mos)",
+          opt_tenure_25: "25 Years (300 Mos)",
+          opt_tenure_30: "30 Years (360 Mos)",
+          opt_horizon_5: "5 Years",
+          opt_horizon_10: "10 Years",
+          opt_horizon_15: "15 Years",
+          opt_horizon_20: "20 Years",
+          opt_horizon_25: "25 Years",
+          opt_horizon_30: "30 Years",
           gloss_sunk_title: "Cumulative Sunk Costs",
           gloss_sunk_desc:
             "Unrecoverable capital lost forever to housing (Buyer: Mortgage interest, maintenance, HOA, taxes & selling friction; Renter: 100% of rent paid).",
@@ -2490,7 +2860,9 @@
         if (currency === "USD") {
           return "$" + rounded.toLocaleString("en-US");
         }
-        return rounded.toLocaleString("vi-VN") + " VND";
+        return currentLang === "en"
+          ? rounded.toLocaleString("en-US") + " VND"
+          : rounded.toLocaleString("vi-VN") + " VND";
       }
 
       function formatNumberMask(val) {
@@ -3209,8 +3581,15 @@
         }
       }
 
-      function toggleLanguage() {
-        currentLang = currentLang === "vi" ? "en" : "vi";
+      function toggleLanguage(forcedLang) {
+        if (forcedLang) {
+          currentLang = forcedLang;
+        } else {
+          currentLang = currentLang === "vi" ? "en" : "vi";
+        }
+        if (document.documentElement) {
+          document.documentElement.lang = currentLang;
+        }
         const label = document.getElementById("langLabel");
         if (label) label.innerText = currentLang === "vi" ? "EN" : "VI";
 
@@ -3223,6 +3602,8 @@
           }
         });
 
+        updateMethodologyLiveTraces();
+        renderKaTeXInModal();
         renderApp();
         renderActiveTabChart();
       }
@@ -3439,6 +3820,10 @@
           ];
         }
 
+        if (typeof Chart !== "undefined" && Chart.getChart) {
+          const existing = Chart.getChart(canvas);
+          if (existing) existing.destroy();
+        }
         if (activeChartInstance) {
           activeChartInstance.destroy();
           activeChartInstance = null;
@@ -4005,11 +4390,44 @@
        */
       let activeMethodologySection = "formulas";
 
+      function renderKaTeXInModal() {
+        const modal = document.getElementById("methodologyModal");
+        if (!modal) return;
+        if (typeof renderMathInElement === "function") {
+          try {
+            renderMathInElement(modal, {
+              delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+              ],
+              throwOnError: false,
+            });
+          } catch (e) {}
+        } else if (
+          typeof katex !== "undefined" &&
+          typeof katex.render === "function"
+        ) {
+          const mathElements = modal.querySelectorAll(".latex-math");
+          mathElements.forEach((el) => {
+            const tex = el.getAttribute("data-tex");
+            if (tex) {
+              try {
+                katex.render(tex, el, {
+                  displayMode: true,
+                  throwOnError: false,
+                });
+              } catch (e) {}
+            }
+          });
+        }
+      }
+
       function openMethodologyModal() {
         const modal = document.getElementById("methodologyModal");
         if (modal) {
           modal.classList.remove("hidden");
           updateMethodologyLiveTraces();
+          renderKaTeXInModal();
         }
       }
 
