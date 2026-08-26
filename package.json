@@ -17,6 +17,7 @@
     "test:i18n": "node tests/i18n.test.js",
     "test:sim": "node tests/simulation.test.js",
     "test:buy-rent": "node tests/buy-vs-rent-simulation.test.js",
+    "test:buy-rent:ui": "node tests/buy-vs-rent-ui-i18n.test.js",
     "test:helpers": "node tests/helpers.test.js",
     "test:ui": "node tests/ui-ux.test.js",
     "format": "prettier --write .",

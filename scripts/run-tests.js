@@ -40,6 +40,11 @@ const TEST_SUITES = [
     category: "Core Math",
   },
   {
+    name: "Buy vs Rent UI Shell & i18n Parity",
+    file: "tests/buy-vs-rent-ui-i18n.test.js",
+    category: "UI/UX",
+  },
+  {
     name: "Calculation & Utility Helpers",
     file: "tests/helpers.test.js",
     category: "Helpers",
