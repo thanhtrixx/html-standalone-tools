@@ -1416,7 +1416,7 @@
                   <span
                     class="font-medium text-slate-300"
                     data-i18n="legend_buy_equity"
-                    >Mua Nhà (Buy Equity)</span
+                    >Kịch Bản Mua Nhà (Tài Sản Ròng)</span
                   >
                 </span>
                 <span class="flex items-center gap-1.5">
@@ -1424,7 +1424,7 @@
                   <span
                     class="font-medium text-slate-300"
                     data-i18n="legend_rent_portfolio"
-                    >Thuê & Đầu Tư (Rent Portfolio)</span
+                    >Kịch Bản Thuê Nhà & Đầu Tư (Danh Mục)</span
                   >
                 </span>
               </div>
@@ -2485,8 +2485,8 @@
           trace_live_header: "Thay số thực tế với đầu vào của bạn:",
           desc_initial_portfolio_calc:
             "(= Vốn mua nhà trừ tiền cọc thuê 2 tháng & chi phí chuyển nhà)",
-          legend_buy_equity: "Mua Nhà (Buy Equity)",
-          legend_rent_portfolio: "Thuê & Đầu Tư (Rent Portfolio)",
+          legend_buy_equity: "Kịch Bản Mua Nhà (Tài Sản Ròng)",
+          legend_rent_portfolio: "Kịch Bản Thuê Nhà & Đầu Tư (Danh Mục)",
           chip_yield_savings: "Gửi Tiết Kiệm (5.5%)",
           chip_yield_balanced: "Cân Bằng (8.0%)",
           chip_yield_stocks: "Cổ Phiếu/ETF (10.5%)",
@@ -2503,10 +2503,10 @@
           opt_horizon_30: "30 Năm",
           gloss_sunk_title: "Chi Phí Mất Đi (Sunk Costs)",
           gloss_sunk_desc:
-            "Những khoản chi phí phát sinh trong quá trình ở mà bạn vĩnh viễn không thu hồi lại được (Người Mua: Lãi vay, bảo trì, HOA, thuế & phí bán; Người Thuê: Toàn bộ tiền thuê).",
+            "Những khoản chi phí phát sinh trong quá trình ở mà bạn vĩnh viễn không thu hồi lại được (Kịch Bản Mua Nhà: Lãi vay, bảo trì, HOA, thuế & phí bán; Kịch Bản Thuê Nhà & Đầu Tư: Toàn bộ tiền thuê).",
           gloss_crossover_title: "Điểm Hòa Vốn (Crossover Horizon)",
           gloss_crossover_desc:
-            "Thời điểm mà đường tài sản ròng thực tế của người Mua bắt đầu vượt qua tổng tài sản danh mục đầu tư của người Thuê.",
+            "Thời điểm mà đường tài sản ròng thực tế của Kịch Bản Mua Nhà bắt đầu vượt qua tổng tài sản danh mục đầu tư của Kịch Bản Thuê Nhà & Đầu Tư.",
           gloss_rates_title: "Lãi Suất Ưu Đãi vs Thả Nổi (Teaser vs Floating)",
           gloss_rates_desc:
             "Gói vay cố định lãi suất thấp trong 12–36 tháng đầu, sau đó thả nổi theo lãi suất cơ sở + biên độ rủi ro.",
@@ -2530,7 +2530,7 @@
 
           // Tooltips
           tooltip_kpi_crossover:
-            "Thời điểm tài sản ròng mua nhà vượt danh mục đầu tư thuê nhà. Nếu chuyển nhà trước mốc này, thuê nhà sẽ có lợi tài chính hơn.",
+            "Thời điểm tài sản ròng của Kịch Bản Mua Nhà vượt danh mục đầu tư của Kịch Bản Thuê Nhà & Đầu Tư. Nếu chuyển nhà trước mốc này, thuê nhà sẽ có lợi tài chính hơn.",
           tooltip_kpi_net_worth:
             "Giá trị tài sản ròng cuối kỳ đã trừ hết nợ vay, chi phí bán nhà và hoàn trả tiền cọc thuê.",
           tooltip_kpi_sunk_costs:
@@ -2718,8 +2718,8 @@
           trace_live_header: "Live dynamic arithmetic with your active inputs:",
           desc_initial_portfolio_calc:
             "(= Upfront buy capital minus 2 months lease deposit & move-in setup)",
-          legend_buy_equity: "Buy (Realizable Equity)",
-          legend_rent_portfolio: "Rent & Invest (Portfolio)",
+          legend_buy_equity: "Buy Path (Realizable Equity)",
+          legend_rent_portfolio: "Rent Path (Investment Portfolio)",
           chip_yield_savings: "Bank Savings (5.5%)",
           chip_yield_balanced: "Balanced (8.0%)",
           chip_yield_stocks: "Stocks/ETF (10.5%)",
@@ -2736,10 +2736,10 @@
           opt_horizon_30: "30 Years",
           gloss_sunk_title: "Cumulative Sunk Costs",
           gloss_sunk_desc:
-            "Unrecoverable capital lost forever to housing (Buyer: Mortgage interest, maintenance, HOA, taxes & selling friction; Renter: 100% of rent paid).",
+            "Unrecoverable capital lost forever to housing (Buy Path: Mortgage interest, maintenance, HOA, taxes & selling friction; Rent Path: 100% of rent paid).",
           gloss_crossover_title: "Break-Even Crossover Horizon",
           gloss_crossover_desc:
-            "The milestone month when realizable homebuyer equity overtakes the renter's compounded investment portfolio.",
+            "The milestone month when realizable homebuyer equity in Buy Path overtakes the compounded investment portfolio in Rent Path.",
           gloss_rates_title: "Teaser vs. Floating Benchmark Rates",
           gloss_rates_desc:
             "Promotional fixed mortgage rate for the initial 12–36 months, transitioning to floating cost-of-funds benchmark plus risk margin.",
@@ -2763,7 +2763,7 @@
 
           // Tooltips
           tooltip_kpi_crossover:
-            "The break-even year when buying wealth surpasses renting. Moving before this horizon makes renting economically superior.",
+            "The milestone when Buy Path net wealth overtakes Rent Path investment portfolio. If moving before this year, renting is financially superior.",
           tooltip_kpi_net_worth:
             "Final liquidated wealth net of remaining loan debt, selling transaction friction, and security deposit refunds.",
           tooltip_kpi_sunk_costs:
@@ -3731,8 +3731,8 @@
             {
               label:
                 currentLang === "vi"
-                  ? "Mua Nhà (Tài Sản Ròng)"
-                  : "Buy (Net Realizable Equity)",
+                  ? "Kịch Bản Mua Nhà (Tài Sản Ròng)"
+                  : "Buy Path (Realizable Equity)",
               data: buyData,
               borderColor: "#10b981",
               backgroundColor: "rgba(16, 185, 129, 0.15)",
@@ -3745,8 +3745,8 @@
             {
               label:
                 currentLang === "vi"
-                  ? "Thuê & Đầu Tư (Danh Mục)"
-                  : "Rent & Invest (Portfolio)",
+                  ? "Kịch Bản Thuê Nhà & Đầu Tư (Danh Mục)"
+                  : "Rent Path (Investment Portfolio)",
               data: rentData,
               borderColor: "#38bdf8",
               backgroundColor: "rgba(56, 189, 248, 0.15)",
@@ -3765,8 +3765,8 @@
             {
               label:
                 currentLang === "vi"
-                  ? "Chi Phí Mất Đi Khi Mua (Lãi, Phí, Thuế)"
-                  : "Buy Sunk Costs (Interest, HOA, Tax)",
+                  ? "Kịch Bản Mua Nhà: Chi Phí Mất Đi (Lãi, Phí, Thuế)"
+                  : "Buy Path Sunk Costs (Interest, HOA, Tax)",
               data: sunkBuyData,
               borderColor: "#f59e0b",
               backgroundColor: "rgba(245, 158, 11, 0.15)",
@@ -3779,8 +3779,8 @@
             {
               label:
                 currentLang === "vi"
-                  ? "Chi Phí Mất Đi Khi Thuê (Tiền Thuê Nhà)"
-                  : "Rent Sunk Costs (Rent Paid)",
+                  ? "Kịch Bản Thuê Nhà: Chi Phí Mất Đi (Tiền Thuê Nhà)"
+                  : "Rent Path Sunk Costs (Rent Paid)",
               data: sunkRentData,
               borderColor: "#f43f5e",
               backgroundColor: "rgba(244, 63, 94, 0.15)",
@@ -3799,8 +3799,8 @@
             {
               label:
                 currentLang === "vi"
-                  ? "Dòng Tiền Ra Hàng Tháng (Mua)"
-                  : "Monthly Outflow (Buy)",
+                  ? "Kịch Bản Mua Nhà: Dòng Tiền Ra Hàng Tháng"
+                  : "Buy Path Monthly Outflow",
               data: buyOutflow,
               borderColor: "#10b981",
               borderWidth: 2,
@@ -3810,8 +3810,8 @@
             {
               label:
                 currentLang === "vi"
-                  ? "Dòng Tiền Ra Hàng Tháng (Thuê)"
-                  : "Monthly Outflow (Rent)",
+                  ? "Kịch Bản Thuê Nhà: Dòng Tiền Ra Hàng Tháng"
+                  : "Rent Path Monthly Outflow",
               data: rentOutflow,
               borderColor: "#38bdf8",
               borderWidth: 2,
@@ -3927,8 +3927,8 @@
               </table>
             </div>
             <div class="flex items-center gap-4 text-[11px] text-slate-400 pt-1">
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> ${isVi ? "Mua Nhà Thắng (Có điểm hòa vốn)" : "Buy Wins (Crossover reached)"}</span>
-              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-sky-500"></span> ${isVi ? "Thuê Nhà Thắng (Tài sản đầu tư vượt trội)" : "Rent Wins (Investment portfolio leads)"}</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> ${isVi ? "Kịch Bản Mua Nhà Thắng (Có điểm hòa vốn)" : "Buy Path Wins (Crossover reached)"}</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-sky-500"></span> ${isVi ? "Kịch Bản Thuê Nhà & Đầu Tư Thắng (Tài sản vượt trội)" : "Rent Path Wins (Investment portfolio leads)"}</span>
             </div>
           </div>
         `;
@@ -4020,12 +4020,12 @@
         md += `| ${isVi ? "Tăng giá BĐS / Lạm phát CPI" : "Property Growth / CPI"} | Property +${p.propertyAppreciationRate}%/yr · CPI +${p.cpiInflationRate}%/yr |\n\n`;
 
         md += `## 2. ${isVi ? "Kết Quả & Chỉ Số Tài Chính Chính" : "Key Financial Outcomes & Decision Metrics"}\n\n`;
-        md += `- **${isVi ? "Người chiến thắng tài chính" : "Winning Financial Path"}:** ${s.winnerScenario.toUpperCase()} (+${fmtVal(Math.abs(s.netWealthDeltaAtHorizon))})\n`;
-        md += `- **${isVi ? "Điểm hòa vốn (Crossover)" : "Net Worth Crossover Horizon"}:** ${s.crossoverYear !== null ? (isVi ? "Sau " + s.crossoverYear + " năm (" + s.crossoverMonth + " tháng)" : "After " + s.crossoverYear + " years (" + s.crossoverMonth + " months)") : isVi ? "Không hòa vốn (Thuê thắng toàn bộ horizon)" : "No Crossover (Rent leads throughout horizon)"}\n`;
-        md += `- **${isVi ? "Tài sản ròng kết thúc (Mua)" : "Ending Realizable Equity (Buy)"}:** ${fmtVal(s.netWorthBuyEnding)}\n`;
-        md += `- **${isVi ? "Tài sản ròng kết thúc (Thuê)" : "Ending Portfolio (Rent)"}:** ${fmtVal(s.netWorthRentEnding)}\n`;
-        md += `- **${isVi ? "Tổng chi phí mất đi (Mua)" : "Total Cumulative Sunk Costs (Buy)"}:** ${fmtVal(s.totalSunkCostBuy)}\n`;
-        md += `- **${isVi ? "Tổng chi phí mất đi (Thuê)" : "Total Cumulative Sunk Costs (Rent)"}:** ${fmtVal(s.totalSunkCostRent)}\n`;
+        md += `- **${isVi ? "Kịch bản tối ưu tài chính" : "Winning Financial Path"}:** ${s.winnerScenario === "buy" ? (isVi ? "Kịch Bản Mua Nhà" : "Buy Path") : isVi ? "Kịch Bản Thuê Nhà & Đầu Tư" : "Rent Path"} (+${fmtVal(Math.abs(s.netWealthDeltaAtHorizon))})\n`;
+        md += `- **${isVi ? "Điểm hòa vốn (Crossover)" : "Net Worth Crossover Horizon"}:** ${s.crossoverYear !== null ? (isVi ? "Sau " + s.crossoverYear + " năm (" + s.crossoverMonth + " tháng)" : "After " + s.crossoverYear + " years (" + s.crossoverMonth + " months)") : isVi ? "Không hòa vốn (Kịch Bản Thuê thắng toàn bộ horizon)" : "No Crossover (Rent Path leads throughout horizon)"}\n`;
+        md += `- **${isVi ? "Tài sản ròng kết thúc (Kịch Bản Mua Nhà)" : "Ending Realizable Equity (Buy Path)"}:** ${fmtVal(s.netWorthBuyEnding)}\n`;
+        md += `- **${isVi ? "Tài sản ròng kết thúc (Kịch Bản Thuê & Đầu Tư)" : "Ending Portfolio (Rent Path)"}:** ${fmtVal(s.netWorthRentEnding)}\n`;
+        md += `- **${isVi ? "Tổng chi phí mất đi (Kịch Bản Mua Nhà)" : "Total Cumulative Sunk Costs (Buy Path)"}:** ${fmtVal(s.totalSunkCostBuy)}\n`;
+        md += `- **${isVi ? "Tổng chi phí mất đi (Kịch Bản Thuê)" : "Total Cumulative Sunk Costs (Rent Path)"}:** ${fmtVal(s.totalSunkCostRent)}\n`;
         md += `- **Price-to-Rent Ratio (PRR):** ${s.priceToRentRatio.toFixed(1)}x (Gross Yield: ${s.grossRentalYield.toFixed(1)}%/yr)\n\n`;
 
         md += `## 3. ${isVi ? "Hướng Dẫn & Yêu Cầu Chuyên Gia AI (Prompt Blueprint)" : "AI Advisor Consultation Blueprint"}\n\n`;
@@ -4129,19 +4129,19 @@
       const TOUR_STEPS = [
         {
           icon: "fa-house-chimney",
-          titleVi: "1. Chọn Loại Hình & Thông Số Mua",
+          titleVi: "1. Thiết Lập Kịch Bản Mua Nhà",
           descVi:
             "Nhập giá mua nhà, tỷ lệ trả trước và cơ chế vay (Dư nợ giảm dần hoặc Niên kim cố định).",
-          titleEn: "1. Select Property Type & Purchase Terms",
+          titleEn: "1. Configure Buy Path & Mortgage",
           descEn:
             "Enter home purchase price, downpayment percentage, and mortgage repayment structure.",
         },
         {
           icon: "fa-key",
-          titleVi: "2. Thiết Lập Phương Án Thuê",
+          titleVi: "2. Thiết Lập Kịch Bản Thuê Nhà & Đầu Tư",
           descVi:
             "Nhập tiền thuê hàng tháng, số tháng đặt cọc và tỷ suất sinh lời kỳ vọng khi đầu tư vốn chênh lệch.",
-          titleEn: "2. Configure Renting Scenario",
+          titleEn: "2. Configure Rent Path & Investment",
           descEn:
             "Set monthly rent, security deposit months, and expected annual return on invested capital.",
         },
