@@ -35,6 +35,11 @@ const TEST_SUITES = [
     category: "Core Math",
   },
   {
+    name: "Buy vs Rent Simulation Engine Math",
+    file: "tests/buy-vs-rent-simulation.test.js",
+    category: "Core Math",
+  },
+  {
     name: "Calculation & Utility Helpers",
     file: "tests/helpers.test.js",
     category: "Helpers",
