@@ -2,6 +2,8 @@
 
 A standalone, client-side financial simulation and wealth projection tool designed for multi-tier savings, compound salary growth, and inflation modeling.
 
+For Vietnamese domain vocabulary, copywriting standards, and the bilingual terminology guide, refer to [I18N.md](./I18N.md).
+
 ## Language
 
 ### Core Accounts & Balances
@@ -147,27 +149,3 @@ _Avoid_: Data hide, obfuscation
 **Interactive Floating Tooltip Engine**:
 A zero-dependency floating popover engine providing instant (<100ms) hover explanations, mobile touch toggle with event isolation from parent form labels, smart viewport collision detection, and full WCAG 2.1 AA keyboard accessibility across all simulation parameters, summary KPI metric cards, Savings Accounts Hub portfolio pills, analytics tabs, real/nominal toggles, and privacy masks.
 _Avoid_: Native browser title tooltip, delayed OS tooltips, un-isolated label clicks
-
----
-
-## Vietnamese Domain Vocabulary & Copywriting Standards (Chuẩn Hóa Thuật Ngữ Tiếng Việt)
-
-To maintain clarity, natural financial phrasing, and customer empathy in Vietnamese localization, the following ubiquitous terms MUST be used:
-
-### Core Terms Mapping
-
-| English Domain Term                    | Vietnamese Standard Term                                           | Explicitly Avoided Synonyms             |
-| :------------------------------------- | :----------------------------------------------------------------- | :-------------------------------------- |
-| **Flexible Pool**                      | `Quỹ Linh Hoạt` / `Tiền Linh Hoạt`                                 | `Pool`, `Ví tiền`, `Tài khoản vãng lai` |
-| **Fixed Term Deposit**                 | `Sổ Tiết Kiệm Có Kỳ Hạn` / `Tiết Kiệm Có Kỳ Hạn`                   | `Chứng chỉ tiền gửi`, `Sổ khóa`         |
-| **Auto Term Deposit**                  | `Tiết Kiệm Gửi Tự Động` / `Gửi Tự Động`                            | `Tự động quét`, `Gom sổ`                |
-| **Emergency Buffer Reserve**           | `Quỹ Dự Phòng Khẩn Cấp` / `Khoản Dự Phòng An Toàn`                 | `Tiền đệm`, `Khoản giữ lại`             |
-| **Salary Contribution / Total Salary** | `Thu Nhập Lương` / `Tổng Lương Tích Lũy` / `Nhận Lương Hàng Tháng` | `Lương nạp`, `Nạp lương`, `Bơm lương`   |
-| **Scenario Projection (Scenario B)**   | `Kịch Bản Dự Kiến` / `Kịch Bản Giả Định`                           | `Kịch bản dự phóng`, `Dự phóng`         |
-| **Milestone Date**                     | `Ngày Đạt Cột Mốc` / `Ngày Đạt Mục Tiêu`                           | `Ngày ETA`, `Mốc thời gian`             |
-| **Goal Shortfall Advisor**             | `Kế Hoạch Bù Đắp Mục Tiêu` / `Cố Vấn Bù Đắp Mục Tiêu`              | `Thâm hụt dự kiến`, `Lỗ mục tiêu`       |
-| **Projected Deficit / Gap**            | `Số Tiền Còn Thiếu Dự Kiến`                                        | `Thâm hụt dự kiến`                      |
-| **Annual Bonus**                       | `Thưởng Năm (Lương Tháng 13)`                                      | `Quà Tết`, `Thưởng nạp`                 |
-| **Demand Interest**                    | `Lãi Không Kỳ Hạn`                                                 | `Lãi linh hoạt`, `Lãi hàng ngày`        |
-| **Term Interest**                      | `Lãi Có Kỳ Hạn`                                                    | `Lãi sổ khóa`, `Lãi cố định`            |
-| **Purchasing Power (Real Value)**      | `Giá Trị Thực Tế (Sau Lạm Phát)`                                   | `Tiền thật`, `Giá trị chiết khấu`       |
