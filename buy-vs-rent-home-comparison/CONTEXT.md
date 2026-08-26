@@ -145,3 +145,15 @@ _Avoid_: Number spinner, raw unformatted input, unmasked text
 **Dynamic Verbal Helper**:
 Real-time localized verbal representation of monetary quantities (e.g. `2.5 Tỷ VND` / `2.5 Billion VND`, `35 Triệu VND` / `35 Million VND`) displayed beneath currency inputs.
 _Avoid_: Tooltip translation, spelled-out popup, static text hint
+
+**Contextual Tooltip Popover**:
+A responsive floating micro-dialog triggered via hover or tap on information `(i)` icons across input fields and KPI cards, explaining domain definitions and behavioral nuances with zero layout shifts.
+_Avoid_: Static title attribute, inline helper text, popup drawer
+
+**Methodology & Formula Hub**:
+A dedicated in-app modal repository delivering complete mathematical proofs, variable definitions, live variable substitution traces, and bilingual glossary references for the underlying simulation engine.
+_Avoid_: Math docs, formula sheet, help guide
+
+**Dynamic Formula Trace**:
+An interactive mathematical display that dynamically substitutes the user's active input numbers into general formulas (e.g. EMI, Equity, PRR) to demonstrate step-by-step arithmetic without black-box opacity.
+_Avoid_: Static equation, example calculation, dummy trace
