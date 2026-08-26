@@ -45,6 +45,11 @@ const TEST_SUITES = [
     category: "UI/UX",
   },
   {
+    name: "Buy vs Rent Analytics Hub & Visualizations",
+    file: "tests/buy-vs-rent-charts.test.js",
+    category: "UI/UX",
+  },
+  {
     name: "Calculation & Utility Helpers",
     file: "tests/helpers.test.js",
     category: "Helpers",
