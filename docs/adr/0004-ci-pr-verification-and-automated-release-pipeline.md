@@ -1,4 +1,4 @@
-# 4. CI PR Verification & Automated Release Pipeline
+# ADR-0004: CI PR Verification & Automated Release Pipeline
 
 > **Status:** Accepted
 

@@ -1,4 +1,4 @@
-# 5. Unified Test Runner & Multi-Format Reporting
+# ADR-0005: Unified Test Runner & Multi-Format Reporting
 
 > **Status:** Accepted
 

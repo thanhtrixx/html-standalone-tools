@@ -1,4 +1,4 @@
-# 2. Zero-Build Standalone Single-File HTML Constraint
+# ADR-0002: Zero-Build Standalone Single-File HTML Constraint
 
 > **Status:** Superseded by [ADR-0003](./0003-compacted-standalone-html-build-pipeline.md)
 

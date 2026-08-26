@@ -66,7 +66,7 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R38** | Light Theme High-Contrast Overrides      | Explicit style overrides for slate backgrounds, timeframe filters, bonus chips, and utility buttons in Light mode.                                                                                                  | P1       | ADR-0016           |
 | **R39** | AI Financial Health Dossier Modal        | Client-side Markdown dossier generator with live monospaced preview, 1-click clipboard copy, and `.md` file download export.                                                                                        | P1       | ADR-0017           |
 | **R40** | AI Blueprints & Privacy Anonymization    | 5 prompt blueprints (General, FIRE, Real Estate, Ladder, Compare), custom inquiries textarea, and zero-leak privacy mask converting sums to salary multiples and % shares.                                          | P1       | ADR-0017           |
-| **R51** | Interactive Floating Tooltip Engine      | Lightweight floating tooltip engine with instant (<100ms) hover, mobile tap toggle, event isolation from parent labels, keyboard accessibility, and coverage for all 12 parameters and KPI metric cards.            | P1       | ADR-0018           |
+| **R41** | Interactive Floating Tooltip Engine      | Lightweight floating tooltip engine with instant (<100ms) hover, mobile tap toggle, event isolation from parent labels, keyboard accessibility, and coverage for all 12 parameters and KPI metric cards.            | P1       | ADR-0018           |
 
 ---
 
