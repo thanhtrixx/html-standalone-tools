@@ -63,6 +63,7 @@
         --border-color: #334155;
         --text-primary: #f8fafc;
         --text-secondary: #94a3b8;
+        --input-bg: #0f172a;
       }
       :root.light {
         --bg-page: #f8fafc;
@@ -70,6 +71,7 @@
         --border-color: #e2e8f0;
         --text-primary: #0f172a;
         --text-secondary: #64748b;
+        --input-bg: #f1f5f9;
       }
       body {
         background-color: var(--bg-page);
@@ -92,7 +94,7 @@
   <body
     class="min-h-screen transition-colors duration-200 antialiased flex flex-col justify-between"
   >
-    <!-- Main Container -->
+    <!-- Main Application Wrapper -->
     <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1">
       <!-- Top Header Bar -->
       <header
@@ -108,20 +110,122 @@
             <h1
               class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2"
             >
-              <span>Mua Nhà vs Thuê Nhà</span>
+              <span data-i18n="app_title">Mua Nhà vs Thuê Nhà</span>
               <span
                 class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium border border-indigo-500/30"
                 >v1.0</span
               >
             </h1>
-            <p class="text-xs sm:text-sm text-slate-400">
-              Mô phỏng quyết định tài chính, dòng tiền & điểm hòa vốn dài hạn
+            <p
+              class="text-xs sm:text-sm text-slate-400"
+              data-i18n="app_subtitle"
+            >
+              Mô phỏng so sánh tài chính, dòng tiền & điểm hòa vốn dài hạn
             </p>
           </div>
         </div>
 
         <!-- Header Controls -->
-        <div class="flex items-center gap-2 self-end md:self-center">
+        <div class="flex items-center gap-2 flex-wrap self-end md:self-center">
+          <!-- Persona Preset Dropdown / Modal Trigger -->
+          <div class="relative inline-block text-left">
+            <button
+              id="personaDropdownBtn"
+              onclick="togglePersonaMenu()"
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+              <span data-i18n="btn_personas">Chiến lược mẫu</span>
+              <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+            </button>
+
+            <div
+              id="personaMenu"
+              class="hidden absolute right-0 mt-2 w-72 origin-top-right rounded-xl bg-slate-900 border border-slate-700 shadow-2xl z-50 p-2 space-y-1"
+            >
+              <button
+                onclick="loadPersona('condo')"
+                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-800 text-slate-200 transition flex items-start gap-2.5"
+              >
+                <i class="fa-solid fa-building text-emerald-400 mt-0.5"></i>
+                <div>
+                  <div
+                    class="font-bold text-white"
+                    data-i18n="persona_condo_title"
+                  >
+                    Chung Cư Đô Thị (HN / TP.HCM)
+                  </div>
+                  <div
+                    class="text-[11px] text-slate-400"
+                    data-i18n="persona_condo_desc"
+                  >
+                    3.5 Tỷ · Vay 70% · Thuê 14Tr · Lãi suất 8%
+                  </div>
+                </div>
+              </button>
+              <button
+                onclick="loadPersona('landed')"
+                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-800 text-slate-200 transition flex items-start gap-2.5"
+              >
+                <i class="fa-solid fa-house text-indigo-400 mt-0.5"></i>
+                <div>
+                  <div
+                    class="font-bold text-white"
+                    data-i18n="persona_landed_title"
+                  >
+                    Nhà Phố Ngoại Thành
+                  </div>
+                  <div
+                    class="text-[11px] text-slate-400"
+                    data-i18n="persona_landed_desc"
+                  >
+                    6.0 Tỷ · Vay 60% · Tăng giá đất 9% · Phí QL 0đ
+                  </div>
+                </div>
+              </button>
+              <button
+                onclick="loadPersona('fire')"
+                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-800 text-slate-200 transition flex items-start gap-2.5"
+              >
+                <i class="fa-solid fa-fire text-amber-400 mt-0.5"></i>
+                <div>
+                  <div
+                    class="font-bold text-white"
+                    data-i18n="persona_fire_title"
+                  >
+                    Thuê Nhà & Tối Ưu FIRE
+                  </div>
+                  <div
+                    class="text-[11px] text-slate-400"
+                    data-i18n="persona_fire_desc"
+                  >
+                    Thuê căn hộ vừa phải · Đầu tư ETF/Cổ phiếu 10.5%
+                  </div>
+                </div>
+              </button>
+              <button
+                onclick="loadPersona('expat')"
+                class="w-full text-left px-3 py-2 text-xs rounded-lg hover:bg-slate-800 text-slate-200 transition flex items-start gap-2.5"
+              >
+                <i class="fa-solid fa-plane-departure text-sky-400 mt-0.5"></i>
+                <div>
+                  <div
+                    class="font-bold text-white"
+                    data-i18n="persona_expat_title"
+                  >
+                    Ngắn Hạn & Linh Hoạt (5 Năm)
+                  </div>
+                  <div
+                    class="text-[11px] text-slate-400"
+                    data-i18n="persona_expat_desc"
+                  >
+                    Horizon 5 năm · Tránh chi phí giao dịch bán nhà
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <!-- Language Switcher -->
           <button
             id="langToggleBtn"
@@ -158,24 +262,783 @@
             onclick="shareSimulationUrl()"
             class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow transition flex items-center gap-1.5"
           >
-            <i class="fa-solid fa-share-nodes"></i> <span>Chia sẻ</span>
+            <i class="fa-solid fa-share-nodes"></i>
+            <span data-i18n="btn_share">Chia sẻ</span>
           </button>
         </div>
       </header>
 
-      <main class="mt-6">
+      <!-- Top KPI Summary Cards -->
+      <section
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6"
+      >
+        <!-- KPI 1: Crossover Horizon / Winner -->
         <div
-          class="p-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-slate-300 text-sm"
+          class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm relative overflow-hidden"
         >
-          <p class="font-medium text-white mb-2">
-            🚀 Pure Simulation Engine & Decision Framework Active
-          </p>
-          <p class="text-slate-400">
-            Hệ thống tính toán mô phỏng dòng tiền, khấu hao lãi suất và cơ hội
-            đầu tư đang hoạt động.
-          </p>
+          <div
+            class="flex items-center justify-between text-xs text-slate-400 mb-2"
+          >
+            <span class="font-medium" data-i18n="kpi_crossover_title"
+              >Điểm Hòa Vốn (Crossover)</span
+            >
+            <i class="fa-solid fa-scale-balanced text-indigo-400"></i>
+          </div>
+          <div
+            id="kpi_crossover_value"
+            class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+          >
+            --
+          </div>
+          <div
+            id="kpi_crossover_sub"
+            class="text-xs text-emerald-400 mt-1.5 flex items-center gap-1"
+          >
+            --
+          </div>
         </div>
-      </main>
+
+        <!-- KPI 2: Ending Net Wealth Comparison -->
+        <div
+          class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm relative overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between text-xs text-slate-400 mb-2"
+          >
+            <span class="font-medium" data-i18n="kpi_net_worth_title"
+              >Tài Sản Ròng Sau Horizon</span
+            >
+            <i class="fa-solid fa-chart-line text-emerald-400"></i>
+          </div>
+          <div
+            id="kpi_net_worth_value"
+            class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+          >
+            --
+          </div>
+          <div id="kpi_net_worth_sub" class="text-xs text-slate-400 mt-1.5">
+            --
+          </div>
+        </div>
+
+        <!-- KPI 3: Total Sunk Costs Comparison -->
+        <div
+          class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm relative overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between text-xs text-slate-400 mb-2"
+          >
+            <span class="font-medium" data-i18n="kpi_sunk_costs_title"
+              >Tổng Chi Phí Mất Đi (Sunk Costs)</span
+            >
+            <i class="fa-solid fa-money-bill-transfer text-amber-400"></i>
+          </div>
+          <div
+            id="kpi_sunk_costs_value"
+            class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+          >
+            --
+          </div>
+          <div id="kpi_sunk_costs_sub" class="text-xs text-slate-400 mt-1.5">
+            --
+          </div>
+        </div>
+
+        <!-- KPI 4: Price-to-Rent Ratio & Yield Indicator -->
+        <div
+          class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm relative overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between text-xs text-slate-400 mb-2"
+          >
+            <span class="font-medium" data-i18n="kpi_prr_title"
+              >Tỷ Lệ Giá / Tiền Thuê (PRR)</span
+            >
+            <i class="fa-solid fa-building-circle-check text-sky-400"></i>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <div
+              id="kpi_prr_value"
+              class="text-xl sm:text-2xl font-bold text-white tracking-tight"
+            >
+              --
+            </div>
+            <span id="kpi_yield_value" class="text-xs text-indigo-300 font-mono"
+              >--</span
+            >
+          </div>
+          <div
+            id="kpi_prr_badge"
+            class="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+          >
+            --
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Workspace (Grid: Inputs on Left, Analytics on Right) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+        <!-- LEFT COLUMN: Parameter Configuration (5 Cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          <!-- 1. Property Type Selector Card -->
+          <div
+            class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm"
+          >
+            <div class="flex items-center justify-between mb-3">
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-city text-indigo-400"></i>
+                <span data-i18n="sec_property_type"
+                  >Loại Hình Bất Động Sản</span
+                >
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="propTypeApartmentBtn"
+                onclick="setPropertyType('apartment')"
+                class="px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition bg-indigo-600/20 border-indigo-500 text-indigo-300"
+              >
+                <i class="fa-solid fa-building"></i>
+                <span data-i18n="type_apartment">Chung Cư / Căn Hộ</span>
+              </button>
+              <button
+                id="propTypeLandedBtn"
+                onclick="setPropertyType('landed')"
+                class="px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200"
+              >
+                <i class="fa-solid fa-house"></i>
+                <span data-i18n="type_landed">Nhà Phố / Đất Nền</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Home Purchase & Financing Card -->
+          <div
+            class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm space-y-4"
+          >
+            <div
+              class="flex items-center justify-between border-b border-slate-700/60 pb-3"
+            >
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-key"></i>
+                <span data-i18n="sec_buy_profile">Mua Nhà & Vay Ngân Hàng</span>
+              </span>
+            </div>
+
+            <!-- Home Price Input -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label
+                  for="input_homePrice"
+                  class="text-xs font-medium text-slate-300"
+                  data-i18n="label_home_price"
+                  >Giá Mua Nhà</label
+                >
+                <span
+                  id="spelled_homePrice"
+                  class="text-xs font-semibold text-emerald-400 font-mono"
+                  >3.5 Tỷ VND</span
+                >
+              </div>
+              <input
+                type="text"
+                id="input_homePrice"
+                oninput="handleCurrencyInput(this, 'homePrice')"
+                class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition"
+              />
+
+              <!-- Quick Chips for Home Price -->
+              <div
+                class="flex items-center gap-1.5 mt-2 overflow-x-auto pb-1 custom-scrollbar"
+              >
+                <button
+                  onclick="setNumericValue('homePrice', 2500000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  2.5 Tỷ
+                </button>
+                <button
+                  onclick="setNumericValue('homePrice', 3500000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  3.5 Tỷ
+                </button>
+                <button
+                  onclick="setNumericValue('homePrice', 5000000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  5.0 Tỷ
+                </button>
+                <button
+                  onclick="setNumericValue('homePrice', 8000000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  8.0 Tỷ
+                </button>
+              </div>
+            </div>
+
+            <!-- Downpayment % & Amount -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  for="input_downpaymentPercent"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_downpayment"
+                  >Trả Trước (%)</label
+                >
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="input_downpaymentPercent"
+                    oninput="
+                      handleParamChange('downpaymentPercent', this.value)
+                    "
+                    min="0"
+                    max="100"
+                    step="5"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition pr-8"
+                  />
+                  <span
+                    class="absolute right-3 top-2.5 text-xs text-slate-500 font-mono"
+                    >%</span
+                  >
+                </div>
+              </div>
+              <div>
+                <label
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_loan_amount"
+                  >Khoản Vay</label
+                >
+                <div
+                  id="display_loanPrincipal"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900/60 border border-slate-800 text-sm font-semibold text-slate-400 font-mono truncate"
+                >
+                  2.45 Tỷ VND
+                </div>
+              </div>
+            </div>
+
+            <!-- Loan Tenure & Amortization Scheme -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  for="input_loanTenureYears"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_loan_tenure"
+                  >Thời Gian Vay</label
+                >
+                <select
+                  id="input_loanTenureYears"
+                  onchange="handleParamChange('loanTenureYears', this.value)"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition"
+                >
+                  <option value="10">10 Năm (120 Th)</option>
+                  <option value="15">15 Năm (180 Th)</option>
+                  <option value="20" selected>20 Năm (240 Th)</option>
+                  <option value="25">25 Năm (300 Th)</option>
+                  <option value="30">30 Năm (360 Th)</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  for="input_amortizationScheme"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_amortization_scheme"
+                  >Cách Trả Nợ</label
+                >
+                <select
+                  id="input_amortizationScheme"
+                  onchange="handleParamChange('amortizationScheme', this.value)"
+                  class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition"
+                >
+                  <option
+                    value="linear_principal"
+                    selected
+                    data-i18n="opt_linear_principal"
+                  >
+                    Dư Nợ Giảm Dần
+                  </option>
+                  <option value="fixed_emi" data-i18n="opt_fixed_emi">
+                    Niên Kim Cố Định (EMI)
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Teaser Rate & Floating Rate -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label
+                    for="input_teaserAnnualRate"
+                    class="text-xs font-medium text-slate-300"
+                    data-i18n="label_teaser_rate"
+                    >Lãi Ưu Đãi (%)</label
+                  >
+                  <span class="text-[10px] text-indigo-400 font-mono"
+                    >24 Th</span
+                  >
+                </div>
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="input_teaserAnnualRate"
+                    oninput="handleParamChange('teaserAnnualRate', this.value)"
+                    step="0.1"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition pr-8"
+                  />
+                  <span
+                    class="absolute right-3 top-2 text-xs text-slate-500 font-mono"
+                    >%</span
+                  >
+                </div>
+              </div>
+              <div>
+                <label
+                  for="input_floatingAnnualRate"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_floating_rate"
+                  >Lãi Thả Nổi (%)</label
+                >
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="input_floatingAnnualRate"
+                    oninput="
+                      handleParamChange('floatingAnnualRate', this.value)
+                    "
+                    step="0.1"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition pr-8"
+                  />
+                  <span
+                    class="absolute right-3 top-2 text-xs text-slate-500 font-mono"
+                    >%</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Expandable Upfront Breakdown Accordion -->
+            <details
+              class="group rounded-xl bg-slate-900/60 border border-slate-700/60 p-3"
+            >
+              <summary
+                class="text-xs font-semibold text-slate-300 cursor-pointer flex items-center justify-between list-none"
+              >
+                <span class="flex items-center gap-1.5">
+                  <i class="fa-solid fa-receipt text-indigo-400"></i>
+                  <span data-i18n="sec_acquisition_breakdown"
+                    >Chi Phí Hoàn Thiện & Thuế Ban Đầu</span
+                  >
+                </span>
+                <i
+                  class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform group-open:rotate-180"
+                ></i>
+              </summary>
+              <div
+                class="mt-3 pt-3 border-t border-slate-800 space-y-2.5 text-xs"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400" data-i18n="label_reg_tax"
+                    >Thuế trước bạ & Sang tên (0.6%):</span
+                  >
+                  <span
+                    id="display_regTax"
+                    class="font-mono font-semibold text-slate-200"
+                    >21,000,000 VND</span
+                  >
+                </div>
+                <div class="flex items-center justify-between">
+                  <label
+                    for="input_initialFurnishingAmount"
+                    class="text-slate-400"
+                    data-i18n="label_initial_furnishing"
+                    >Nội thất & Sửa chữa ban đầu:</label
+                  >
+                  <input
+                    type="text"
+                    id="input_initialFurnishingAmount"
+                    oninput="
+                      handleCurrencyInput(this, 'initialFurnishingAmount')
+                    "
+                    class="w-28 px-2 py-1 rounded bg-slate-950 border border-slate-700 text-right font-mono text-xs text-white"
+                  />
+                </div>
+                <div
+                  class="flex items-center justify-between pt-2 border-t border-slate-800 font-bold"
+                >
+                  <span class="text-white" data-i18n="label_total_upfront_buy"
+                    >Tổng Tiền Mặt Cần Có Để Mua:</span
+                  >
+                  <span
+                    id="display_totalUpfrontBuy"
+                    class="font-mono text-emerald-400"
+                    >1,221,000,000 VND</span
+                  >
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- 3. Renting & Investment Opportunity Card -->
+          <div
+            class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm space-y-4"
+          >
+            <div
+              class="flex items-center justify-between border-b border-slate-700/60 pb-3"
+            >
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-building-user"></i>
+                <span data-i18n="sec_rent_profile"
+                  >Thuê Nhà & Đầu Tư Tiền Chênh Lệch</span
+                >
+              </span>
+            </div>
+
+            <!-- Monthly Rent Input -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label
+                  for="input_monthlyRent"
+                  class="text-xs font-medium text-slate-300"
+                  data-i18n="label_monthly_rent"
+                  >Tiền Thuê Nhà Hàng Tháng</label
+                >
+                <span
+                  id="spelled_monthlyRent"
+                  class="text-xs font-semibold text-sky-400 font-mono"
+                  >14 Triệu VND</span
+                >
+              </div>
+              <input
+                type="text"
+                id="input_monthlyRent"
+                oninput="handleCurrencyInput(this, 'monthlyRent')"
+                class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-sm font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition"
+              />
+
+              <!-- Quick Chips for Rent -->
+              <div
+                class="flex items-center gap-1.5 mt-2 overflow-x-auto pb-1 custom-scrollbar"
+              >
+                <button
+                  onclick="setNumericValue('monthlyRent', 8000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  8 Triệu
+                </button>
+                <button
+                  onclick="setNumericValue('monthlyRent', 14000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  14 Triệu
+                </button>
+                <button
+                  onclick="setNumericValue('monthlyRent', 20000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  20 Triệu
+                </button>
+                <button
+                  onclick="setNumericValue('monthlyRent', 30000000)"
+                  class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+                >
+                  30 Triệu
+                </button>
+              </div>
+            </div>
+
+            <!-- Rent Inflation & Expected Investment Yield -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  for="input_rentInflationRate"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_rent_inflation"
+                  >Tăng Giá Thuê / Năm</label
+                >
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="input_rentInflationRate"
+                    oninput="handleParamChange('rentInflationRate', this.value)"
+                    step="0.5"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition pr-8"
+                  />
+                  <span
+                    class="absolute right-3 top-2 text-xs text-slate-500 font-mono"
+                    >%</span
+                  >
+                </div>
+              </div>
+              <div>
+                <label
+                  for="input_rentInvestmentYield"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_investment_yield"
+                  >Lãi Đầu Tư Sinh Lời</label
+                >
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="input_rentInvestmentYield"
+                    oninput="
+                      handleParamChange('rentInvestmentYield', this.value)
+                    "
+                    step="0.5"
+                    class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition pr-8"
+                  />
+                  <span
+                    class="absolute right-3 top-2 text-xs text-slate-500 font-mono"
+                    >%</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Yield Chips -->
+            <div
+              class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar"
+            >
+              <button
+                onclick="handleParamChange('rentInvestmentYield', 5.5)"
+                class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+              >
+                Gửi Tiết Kiệm (5.5%)
+              </button>
+              <button
+                onclick="handleParamChange('rentInvestmentYield', 8.0)"
+                class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+              >
+                Cân Bằng (8.0%)
+              </button>
+              <button
+                onclick="handleParamChange('rentInvestmentYield', 10.5)"
+                class="px-2 py-1 text-[11px] rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 whitespace-nowrap"
+              >
+                Cổ Phiếu/ETF (10.5%)
+              </button>
+            </div>
+
+            <!-- Initial Rent Portfolio Summary -->
+            <div
+              class="p-3 rounded-xl bg-slate-900/60 border border-slate-700/60 text-xs space-y-1.5"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-slate-400" data-i18n="label_initial_portfolio"
+                  >Vốn Ban Đầu Đem Đi Đầu Tư:</span
+                >
+                <span
+                  id="display_initialRentPortfolio"
+                  class="font-mono font-bold text-sky-400"
+                  >1,173,000,000 VND</span
+                >
+              </div>
+              <div class="text-[11px] text-slate-500">
+                (= Vốn mua nhà trừ tiền cọc thuê 2 tháng & chi phí chuyển nhà)
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Macroeconomics & Horizon Card -->
+          <div
+            class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm space-y-4"
+          >
+            <div
+              class="flex items-center justify-between border-b border-slate-700/60 pb-3"
+            >
+              <span
+                class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-earth-americas text-indigo-400"></i>
+                <span data-i18n="sec_macroeconomics"
+                  >Kinh Tế Vĩ Mô & Khung Thời Gian</span
+                >
+              </span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5">
+              <div>
+                <label
+                  for="input_propertyAppreciationRate"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_prop_appreciation"
+                  >Tăng Giá BĐS</label
+                >
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="input_propertyAppreciationRate"
+                    oninput="
+                      handleParamChange('propertyAppreciationRate', this.value)
+                    "
+                    step="0.5"
+                    class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition pr-6"
+                  />
+                  <span
+                    class="absolute right-2 top-2 text-xs text-slate-500 font-mono"
+                    >%</span
+                  >
+                </div>
+              </div>
+              <div>
+                <label
+                  for="input_cpiInflationRate"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_cpi_inflation"
+                  >Lạm Phát CPI</label
+                >
+                <div class="relative">
+                  <input
+                    type="number"
+                    id="input_cpiInflationRate"
+                    oninput="handleParamChange('cpiInflationRate', this.value)"
+                    step="0.5"
+                    class="w-full px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 font-mono transition pr-6"
+                  />
+                  <span
+                    class="absolute right-2 top-2 text-xs text-slate-500 font-mono"
+                    >%</span
+                  >
+                </div>
+              </div>
+              <div>
+                <label
+                  for="input_horizonYears"
+                  class="text-xs font-medium text-slate-300 block mb-1"
+                  data-i18n="label_horizon_years"
+                  >Thời Gian (Năm)</label
+                >
+                <select
+                  id="input_horizonYears"
+                  onchange="handleParamChange('horizonYears', this.value)"
+                  class="w-full px-2 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-white focus:outline-none focus:border-indigo-500 transition"
+                >
+                  <option value="5">5 Năm</option>
+                  <option value="10">10 Năm</option>
+                  <option value="15">15 Năm</option>
+                  <option value="20" selected>20 Năm</option>
+                  <option value="25">25 Năm</option>
+                  <option value="30">30 Năm</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Analytics Hub & Charts (7 Cols) -->
+        <div class="lg:col-span-7 space-y-5">
+          <!-- Analytics Hub Card -->
+          <div
+            class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm flex flex-col min-h-[560px]"
+          >
+            <!-- Tab Navigation Bar -->
+            <div
+              class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4 flex-wrap gap-2"
+            >
+              <div
+                class="flex items-center gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800"
+              >
+                <button
+                  id="tabBtn_timeline"
+                  onclick="switchAnalyticsTab('timeline')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow"
+                >
+                  <i class="fa-solid fa-chart-area mr-1"></i>
+                  <span data-i18n="tab_timeline">Tài Sản Ròng</span>
+                </button>
+                <button
+                  id="tabBtn_sunk"
+                  onclick="switchAnalyticsTab('sunk')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
+                >
+                  <i class="fa-solid fa-fire mr-1"></i>
+                  <span data-i18n="tab_sunk">Chi Phí Mất Đi</span>
+                </button>
+                <button
+                  id="tabBtn_cashflow"
+                  onclick="switchAnalyticsTab('cashflow')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
+                >
+                  <i class="fa-solid fa-money-bill-wave mr-1"></i>
+                  <span data-i18n="tab_cashflow">Dòng Tiền Ra</span>
+                </button>
+                <button
+                  id="tabBtn_sensitivity"
+                  onclick="switchAnalyticsTab('sensitivity')"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
+                >
+                  <i class="fa-solid fa-table-cells mr-1"></i>
+                  <span data-i18n="tab_sensitivity">Ma Trận Độ Nhạy</span>
+                </button>
+              </div>
+
+              <!-- Real Purchasing Power Toggle -->
+              <label
+                class="flex items-center gap-2 cursor-pointer text-xs text-slate-400 hover:text-slate-200 transition"
+              >
+                <input
+                  type="checkbox"
+                  id="toggle_realPurchasingPower"
+                  onchange="toggleRealPurchasingPower(this.checked)"
+                  class="sr-only peer"
+                />
+                <div
+                  class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600 relative"
+                ></div>
+                <span data-i18n="real_mode_label">Trừ lạm phát (Real)</span>
+              </label>
+            </div>
+
+            <!-- Canvas Container -->
+            <div
+              class="relative flex-1 w-full min-h-[380px] flex items-center justify-center"
+            >
+              <canvas id="mainChartCanvas" class="w-full h-full"></canvas>
+              <div
+                id="sensitivityContainer"
+                class="hidden w-full h-full overflow-x-auto custom-scrollbar"
+              ></div>
+            </div>
+
+            <!-- Chart Footer Legend / Explainer -->
+            <div
+              id="chartFooterExplainer"
+              class="mt-4 pt-3 border-t border-slate-700/60 text-xs text-slate-400 flex items-center justify-between flex-wrap gap-2"
+            >
+              <div class="flex items-center gap-4">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                  <span class="font-medium text-slate-300"
+                    >Mua Nhà (Buy Equity)</span
+                  >
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-3 h-3 rounded-full bg-sky-500"></span>
+                  <span class="font-medium text-slate-300"
+                    >Thuê & Đầu Tư (Rent Portfolio)</span
+                  >
+                </span>
+              </div>
+              <button
+                onclick="exportChartPNG()"
+                class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
+              >
+                <i class="fa-solid fa-download"></i>
+                <span data-i18n="btn_export_png">Tải ảnh đồ thị</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Toast Notification Container -->
@@ -187,53 +1050,255 @@
     <!-- Pure Simulation Engine & Application Scripts -->
     <script>
       /**
+       * Bilingual Translation Dictionaries (EN & VI)
+       */
+      const TRANSLATIONS = {
+        vi: {
+          app_title: "Mua Nhà vs Thuê Nhà",
+          app_subtitle:
+            "Mô phỏng so sánh tài chính, dòng tiền & điểm hòa vốn dài hạn",
+          badge_version: "v1.0",
+          btn_personas: "Chiến lược mẫu",
+          btn_share: "Chia sẻ",
+          btn_export_png: "Tải ảnh đồ thị",
+          real_mode_label: "Trừ lạm phát (Real)",
+
+          // KPIs
+          kpi_crossover_title: "Điểm Hòa Vốn (Crossover)",
+          kpi_net_worth_title: "Tài Sản Ròng Sau Horizon",
+          kpi_sunk_costs_title: "Tổng Chi Phí Mất Đi (Sunk Costs)",
+          kpi_prr_title: "Tỷ Lệ Giá / Tiền Thuê (PRR)",
+          verdict_strong_buy: "Vùng Mua Tốt (Yield Cao)",
+          verdict_fair_valuation: "Định Giá Cân Bằng",
+          verdict_strong_rent: "Vùng Nên Thuê (Yield Thấp)",
+
+          // Tabs
+          tab_timeline: "Tài Sản Ròng",
+          tab_sunk: "Chi Phí Mất Đi",
+          tab_cashflow: "Dòng Tiền Ra",
+          tab_sensitivity: "Ma Trận Độ Nhạy",
+
+          // Property Types
+          sec_property_type: "Loại Hình Bất Động Sản",
+          type_apartment: "Chung Cư / Căn Hộ",
+          type_landed: "Nhà Phố / Đất Nền",
+
+          // Buy Inputs
+          sec_buy_profile: "Mua Nhà & Vay Ngân Hàng",
+          label_home_price: "Giá Mua Nhà",
+          label_downpayment: "Trả Trước (%)",
+          label_loan_amount: "Khoản Vay",
+          label_loan_tenure: "Thời Gian Vay",
+          label_amortization_scheme: "Cách Trả Nợ",
+          opt_linear_principal: "Dư Nợ Giảm Dần",
+          opt_fixed_emi: "Niên Kim Cố Định (EMI)",
+          label_teaser_rate: "Lãi Ưu Đãi (%)",
+          label_floating_rate: "Lãi Thả Nổi (%)",
+          sec_acquisition_breakdown: "Chi Phí Hoàn Thiện & Thuế Ban Đầu",
+          label_reg_tax: "Thuế trước bạ & Sang tên (0.6%):",
+          label_initial_furnishing: "Nội thất & Sửa chữa ban đầu:",
+          label_total_upfront_buy: "Tổng Tiền Mặt Cần Có Để Mua:",
+
+          // Rent Inputs
+          sec_rent_profile: "Thuê Nhà & Đầu Tư Tiền Chênh Lệch",
+          label_monthly_rent: "Tiền Thuê Nhà Hàng Tháng",
+          label_rent_inflation: "Tăng Giá Thuê / Năm",
+          label_investment_yield: "Lãi Đầu Tư Sinh Lời",
+          label_initial_portfolio: "Vốn Ban Đầu Đem Đi Đầu Tư:",
+
+          // Macro
+          sec_macroeconomics: "Kinh Tế Vĩ Mô & Khung Thời Gian",
+          label_prop_appreciation: "Tăng Giá BĐS",
+          label_cpi_inflation: "Lạm Phát CPI",
+          label_horizon_years: "Thời Gian (Năm)",
+
+          // Personas
+          persona_condo_title: "Chung Cư Đô Thị (HN / TP.HCM)",
+          persona_condo_desc: "3.5 Tỷ · Vay 70% · Thuê 14Tr · Lãi suất 8%",
+          persona_landed_title: "Nhà Phố Ngoại Thành",
+          persona_landed_desc: "6.0 Tỷ · Vay 60% · Tăng giá đất 9% · Phí QL 0đ",
+          persona_fire_title: "Thuê Nhà & Tối Ưu FIRE",
+          persona_fire_desc: "Thuê căn hộ vừa phải · Đầu tư ETF/Cổ phiếu 10.5%",
+          persona_expat_title: "Ngắn Hạn & Linh Hoạt (5 Năm)",
+          persona_expat_desc: "Horizon 5 năm · Tránh chi phí giao dịch bán nhà",
+
+          // Toasts
+          toast_preset_loaded: "Đã tải chiến lược mẫu",
+          toast_undo: "Hoàn tác",
+          toast_copied: "Đã sao chép liên kết vào bộ nhớ tạm!",
+          toast_reset: "Đã khôi phục cài đặt mặc định.",
+        },
+        en: {
+          app_title: "Buy vs. Rent Home",
+          app_subtitle:
+            "Financial decision engine, cashflow projection & break-even crossover",
+          badge_version: "v1.0",
+          btn_personas: "Strategy Presets",
+          btn_share: "Share",
+          btn_export_png: "Export Chart",
+          real_mode_label: "Inflation-adjusted (Real)",
+
+          // KPIs
+          kpi_crossover_title: "Break-Even Horizon (Crossover)",
+          kpi_net_worth_title: "Ending Net Wealth",
+          kpi_sunk_costs_title: "Total Cumulative Sunk Costs",
+          kpi_prr_title: "Price-to-Rent Ratio (PRR)",
+          verdict_strong_buy: "Strong Buy Territory (High Yield)",
+          verdict_fair_valuation: "Fair Valuation",
+          verdict_strong_rent: "Strong Rent Territory (Low Yield)",
+
+          // Tabs
+          tab_timeline: "Net Wealth",
+          tab_sunk: "Sunk Costs",
+          tab_cashflow: "Cashflow Delta",
+          tab_sensitivity: "Sensitivity Matrix",
+
+          // Property Types
+          sec_property_type: "Property Type Profile",
+          type_apartment: "Apartment / Condo",
+          type_landed: "Landed House / Villa",
+
+          // Buy Inputs
+          sec_buy_profile: "Home Purchase & Mortgage",
+          label_home_price: "Home Purchase Price",
+          label_downpayment: "Downpayment (%)",
+          label_loan_amount: "Mortgage Loan",
+          label_loan_tenure: "Loan Tenure",
+          label_amortization_scheme: "Repayment Scheme",
+          opt_linear_principal: "Linear Principal (Reducing Interest)",
+          opt_fixed_emi: "Fixed EMI (Annuity)",
+          label_teaser_rate: "Promo Rate (%)",
+          label_floating_rate: "Floating Rate (%)",
+          sec_acquisition_breakdown: "Acquisition Taxes & Initial Fit-out",
+          label_reg_tax: "Transfer tax & Registration (0.6%):",
+          label_initial_furnishing: "Initial Interior Fit-out / Renovation:",
+          label_total_upfront_buy: "Total Cash Required to Purchase:",
+
+          // Rent Inputs
+          sec_rent_profile: "Rent & Invest the Difference",
+          label_monthly_rent: "Monthly Rent",
+          label_rent_inflation: "Rent Inflation / Year",
+          label_investment_yield: "Alternative Investment Yield",
+          label_initial_portfolio: "Initial Investment Portfolio:",
+
+          // Macro
+          sec_macroeconomics: "Macroeconomics & Horizon",
+          label_prop_appreciation: "Property Appreciation",
+          label_cpi_inflation: "CPI Inflation",
+          label_horizon_years: "Horizon (Years)",
+
+          // Personas
+          persona_condo_title: "Urban Apartment Condo",
+          persona_condo_desc: "3.5B VND · 70% Loan · 14M Rent · 8% Yield",
+          persona_landed_title: "Suburban Landed House",
+          persona_landed_desc: "6.0B VND · 60% Loan · 9% Land Growth · 0 HOA",
+          persona_fire_title: "FIRE Renter & Investor",
+          persona_fire_desc:
+            "Modest rent · Invest delta in 10.5% ETF/Stock Index",
+          persona_expat_title: "Short-Term Mobility (5 Years)",
+          persona_expat_desc:
+            "5-year horizon · Avoid high real estate friction",
+
+          // Toasts
+          toast_preset_loaded: "Strategy preset loaded",
+          toast_undo: "Undo",
+          toast_copied: "Shareable simulation link copied to clipboard!",
+          toast_reset: "Reset to default parameters.",
+        },
+      };
+
+      /**
        * Default Parameters Schema
        */
       const DEFAULT_BUY_VS_RENT_PARAMS = {
-        // Horizon & Macro
         horizonYears: 20,
         currency: "VND",
-        propertyAppreciationRate: 6.0, // % per year
-        rentInflationRate: 4.0, // % per year
-        cpiInflationRate: 3.5, // % per year
-
-        // Property & Buy Profile
-        propertyType: "apartment", // 'apartment' | 'landed'
-        homePrice: 3500000000, // 3.5 Billion VND
-        downpaymentPercent: 30.0, // 30%
-
-        // Upfront Acquisition Breakdown
-        registrationTaxRate: 0.5, // % (Lệ phí trước bạ)
-        notaryAndLegalRate: 0.1, // %
-        initialFurnishingAmount: 150000000, // 150M VND
+        propertyAppreciationRate: 6.0,
+        rentInflationRate: 4.0,
+        cpiInflationRate: 3.5,
+        propertyType: "apartment",
+        homePrice: 3500000000,
+        downpaymentPercent: 30.0,
+        registrationTaxRate: 0.5,
+        notaryAndLegalRate: 0.1,
+        initialFurnishingAmount: 150000000,
         loanOriginationAndInsurance: 0,
-
-        // Mortgage Financing
         loanTenureYears: 20,
-        amortizationScheme: "linear_principal", // 'linear_principal' | 'fixed_emi'
+        amortizationScheme: "linear_principal",
         teaserRateMonths: 24,
         teaserAnnualRate: 6.5,
         floatingAnnualRate: 10.5,
         extraMonthlyPrincipal: 0,
-
-        // Ongoing Ownership Expenses
         monthlyBuildingManagementHOA: 1500000,
         annualMaintenanceRate: 0.5,
         annualPropertyTaxInsurance: 5000000,
         sellingFrictionRate: 2.5,
-
-        // Rent Profile
-        monthlyRent: 14000000, // 14M VND
+        monthlyRent: 14000000,
         securityDepositMonths: 2,
         initialRenterMoveInCost: 20000000,
         monthlyTenantInsurance: 0,
-
-        // Opportunity Investment
-        rentInvestmentYield: 8.0, // % p.a.
-
-        // View Modes
+        rentInvestmentYield: 8.0,
         useRealPurchasingPower: false,
       };
+
+      // State Variables
+      let currentParams = { ...DEFAULT_BUY_VS_RENT_PARAMS };
+      let currentLang = "vi";
+      let currentTheme = "dark";
+      let currentTab = "timeline";
+      let previousParamsForUndo = null;
+      let undoToastTimeout = null;
+      let activeChartInstance = null;
+
+      /**
+       * Number & Currency Formatting Helpers
+       */
+      function formatCurrency(amount, currency = "VND") {
+        if (isNaN(amount) || amount === null || amount === undefined)
+          return "0 " + currency;
+        const rounded = Math.round(amount);
+        if (currency === "USD") {
+          return "$" + rounded.toLocaleString("en-US");
+        }
+        return rounded.toLocaleString("vi-VN") + " VND";
+      }
+
+      function formatNumberMask(val) {
+        if (val === undefined || val === null || isNaN(val)) return "";
+        return Math.round(val).toLocaleString("vi-VN");
+      }
+
+      function parseMaskedNumber(str) {
+        if (!str) return 0;
+        const clean = String(str)
+          .replace(/\./g, "")
+          .replace(/,/g, "")
+          .replace(/[^\d.-]/g, "");
+        const num = parseFloat(clean);
+        return isNaN(num) ? 0 : num;
+      }
+
+      function getSpelledOutAmount(amount, lang = currentLang) {
+        if (isNaN(amount) || amount <= 0) return "0 VND";
+        const isVi = lang === "vi";
+
+        if (amount >= 1000000000) {
+          const ty = amount / 1000000000;
+          const formatted = parseFloat(ty.toFixed(2)).toString();
+          return `${formatted} ${isVi ? "Tỷ VND" : "Billion VND"}`;
+        }
+        if (amount >= 1000000) {
+          const trieu = amount / 1000000;
+          const formatted = parseFloat(trieu.toFixed(2)).toString();
+          return `${formatted} ${isVi ? "Triệu VND" : "Million VND"}`;
+        }
+        if (amount >= 1000) {
+          const nghin = amount / 1000;
+          const formatted = parseFloat(nghin.toFixed(2)).toString();
+          return `${formatted} ${isVi ? "Nghìn VND" : "Thousand VND"}`;
+        }
+        return `${Math.round(amount)} VND`;
+      }
 
       /**
        * Rule-of-thumb: Price-to-Rent Ratio
@@ -252,7 +1317,7 @@
       }
 
       /**
-       * Mortgage Monthly Payment Calculator
+       * Mortgage Payment Calculation Helper
        */
       function calculateMortgagePayment({
         principal,
@@ -280,14 +1345,13 @@
           return principalMonthly + interestMonthly;
         }
 
-        // Fixed EMI (Annuity)
+        // Fixed EMI
         const factor = Math.pow(1 + monthlyRate, tenureMonths);
         return (remPrincipal * (monthlyRate * factor)) / (factor - 1);
       }
 
       /**
        * Pure Dual-Path Simulation Engine
-       * Evaluates Buy Path vs Rent & Invest Path month-by-month
        */
       function simulateBuyVsRent(rawParams = {}) {
         const p = { ...DEFAULT_BUY_VS_RENT_PARAMS, ...rawParams };
@@ -322,13 +1386,13 @@
         const initialMoveIn = p.initialRenterMoveInCost || 0;
         const initialRentOutflow = initialSecurityDeposit + initialMoveIn;
 
-        // Starting Rent Portfolio Balance
+        // Starting Rent Portfolio
         const initialRentPortfolio = Math.max(
           0,
           initialBuyOutflow - initialRentOutflow
         );
 
-        // Simulation State
+        // Timeline State
         let remainingLoan = loanPrincipal;
         let currentHomeValue = p.homePrice;
         let currentDeposit = initialSecurityDeposit;
@@ -355,17 +1419,14 @@
           Math.pow(1 + (p.rentInvestmentYield || 0) / 100, 1 / 12) - 1;
 
         for (let m = 1; m <= totalMonths; m++) {
-          // 1. Property Appreciation
           currentHomeValue = currentHomeValue * (1 + propMonthlyRate);
 
-          // 2. Active Mortgage Rate
           const currentMortgageRate =
             m <= (p.teaserRateMonths || 0)
               ? p.teaserAnnualRate || 0
               : p.floatingAnnualRate || 0;
           const monthlyMortgageRate = currentMortgageRate / 100 / 12;
 
-          // 3. Mortgage Payment & Amortization
           let mortgagePayment = 0;
           let interestPayment = 0;
           let principalPayment = 0;
@@ -381,7 +1442,6 @@
                 basePrincipal + (p.extraMonthlyPrincipal || 0)
               );
             } else {
-              // Fixed EMI
               if (monthlyMortgageRate > 0) {
                 const factor = Math.pow(1 + monthlyMortgageRate, remMonths);
                 const emi =
@@ -402,7 +1462,6 @@
             remainingLoan = Math.max(0, remainingLoan - principalPayment);
           }
 
-          // 4. Ownership Expenses
           const cpiFactor = Math.pow(
             1 + (p.cpiInflationRate || 0) / 100,
             (m - 1) / 12
@@ -421,7 +1480,6 @@
             interestPayment + monthlyMaintenance + monthlyHOA + monthlyTaxIns;
           cumulativeSunkCostBuy += currentMonthlySunkBuy;
 
-          // 5. Rent Outflow & Deposit Escalation
           const rentYearOffset = Math.floor((m - 1) / 12);
           const currentMonthlyRent =
             (p.monthlyRent || 0) *
@@ -438,10 +1496,8 @@
           cumulativeRentOutflow += monthlyRentOutflow;
           cumulativeSunkCostRent += currentMonthlyRent + monthlyTenantIns;
 
-          // 6. Opportunity Delta Sweep
           const cashflowDelta = monthlyBuyOutflow - monthlyRentOutflow;
 
-          // Portfolio Yield Compounding + Delta
           if (rentPortfolio > 0) {
             rentPortfolio =
               rentPortfolio * (1 + invMonthlyRate) + cashflowDelta;
@@ -457,7 +1513,6 @@
             }
           }
 
-          // 7. Equity & Realizable Net Worth
           const sellingFriction =
             currentHomeValue * ((p.sellingFrictionRate || 0) / 100);
           const netWorthBuyNominal =
@@ -465,7 +1520,6 @@
           const netWorthRentNominal =
             rentPortfolio - accumulatedDeficit + currentDeposit;
 
-          // 8. Continuous Purchasing Power Discount (Real Value)
           const realDiscountFactor = Math.pow(
             1 + (p.cpiInflationRate || 0) / 100,
             m / 12
@@ -473,7 +1527,6 @@
           const netWorthBuyReal = netWorthBuyNominal / realDiscountFactor;
           const netWorthRentReal = netWorthRentNominal / realDiscountFactor;
 
-          // 9. Crossover Check
           if (
             crossoverMonth === null &&
             netWorthBuyNominal >= netWorthRentNominal
@@ -525,7 +1578,6 @@
 
         winnerScenario = netWealthDeltaAtHorizon >= 0 ? "buy" : "rent";
 
-        // Sunk costs at exit
         const totalSunkCostBuy =
           lastMonth.cumulativeSunkCostBuy + lastMonth.sellingFriction;
         const totalSunkCostRent = lastMonth.cumulativeSunkCostRent;
@@ -565,8 +1617,7 @@
       }
 
       /**
-       * 2D Sensitivity Matrix Generator
-       * Evaluates Crossover Year across Property Appreciation Rates vs Rent Investment Yields
+       * Sensitivity Matrix Generator
        */
       function generateSensitivityMatrix(baseParams, options = {}) {
         const propRates = options.propertyAppreciationRates || [
@@ -606,14 +1657,430 @@
         return matrix;
       }
 
-      // Expose functions globally for UI & Node test sandbox
+      /**
+       * UI & State Synchronization Functions
+       */
+      function renderApp() {
+        const result = simulateBuyVsRent(currentParams);
+        const s = result.summary;
+        const t = TRANSLATIONS[currentLang];
+
+        // Update KPIs
+        const elCrossover = document.getElementById("kpi_crossover_value");
+        const elCrossoverSub = document.getElementById("kpi_crossover_sub");
+        if (elCrossover && elCrossoverSub) {
+          if (s.crossoverYear !== null) {
+            elCrossover.innerText = `${s.crossoverYear} ${currentLang === "vi" ? "Năm" : "Years"}`;
+            elCrossoverSub.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ${currentLang === "vi" ? "Mua thắng sau năm " + s.crossoverYear : "Buy wins after year " + s.crossoverYear}`;
+          } else {
+            elCrossover.innerText =
+              currentLang === "vi" ? "Không Hòa Vốn" : "No Crossover";
+            elCrossoverSub.innerHTML = `<i class="fa-solid fa-circle-info text-sky-400"></i> ${currentLang === "vi" ? "Thuê có lợi hơn trong horizon" : "Rent wins throughout horizon"}`;
+          }
+        }
+
+        const elNetWorth = document.getElementById("kpi_net_worth_value");
+        const elNetWorthSub = document.getElementById("kpi_net_worth_sub");
+        if (elNetWorth && elNetWorthSub) {
+          elNetWorth.innerText = getSpelledOutAmount(
+            Math.abs(s.netWealthDeltaAtHorizon)
+          );
+          const winnerText =
+            s.winnerScenario === "buy"
+              ? currentLang === "vi"
+                ? "Mua lời hơn +"
+                : "Buy is ahead by +"
+              : currentLang === "vi"
+                ? "Thuê lời hơn +"
+                : "Rent is ahead by +";
+          elNetWorthSub.innerText = `${winnerText} ${getSpelledOutAmount(Math.abs(s.netWealthDeltaAtHorizon))}`;
+        }
+
+        const elSunk = document.getElementById("kpi_sunk_costs_value");
+        const elSunkSub = document.getElementById("kpi_sunk_costs_sub");
+        if (elSunk && elSunkSub) {
+          elSunk.innerText = getSpelledOutAmount(s.totalSunkCostBuy);
+          elSunkSub.innerText = `${currentLang === "vi" ? "Thuê mất:" : "Rent lost:"} ${getSpelledOutAmount(s.totalSunkCostRent)}`;
+        }
+
+        const elPRR = document.getElementById("kpi_prr_value");
+        const elYield = document.getElementById("kpi_yield_value");
+        const elBadge = document.getElementById("kpi_prr_badge");
+        if (elPRR && elYield && elBadge) {
+          elPRR.innerText = s.priceToRentRatio.toFixed(1) + "x";
+          elYield.innerText = `(${s.grossRentalYield.toFixed(1)}%/yr)`;
+
+          if (s.priceToRentRatio < 15) {
+            elBadge.className =
+              "mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+            elBadge.innerText = t.verdict_strong_buy;
+          } else if (s.priceToRentRatio <= 20) {
+            elBadge.className =
+              "mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30";
+            elBadge.innerText = t.verdict_fair_valuation;
+          } else {
+            elBadge.className =
+              "mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30";
+            elBadge.innerText = t.verdict_strong_rent;
+          }
+        }
+
+        // Update Input Displays & Verbal Helpers
+        updateFormInputsFromState();
+      }
+
+      function updateFormInputsFromState() {
+        const p = currentParams;
+
+        const elHome = document.getElementById("input_homePrice");
+        if (elHome && document.activeElement !== elHome)
+          elHome.value = formatNumberMask(p.homePrice);
+        const spelledHome = document.getElementById("spelled_homePrice");
+        if (spelledHome)
+          spelledHome.innerText = getSpelledOutAmount(p.homePrice);
+
+        const elRent = document.getElementById("input_monthlyRent");
+        if (elRent && document.activeElement !== elRent)
+          elRent.value = formatNumberMask(p.monthlyRent);
+        const spelledRent = document.getElementById("spelled_monthlyRent");
+        if (spelledRent)
+          spelledRent.innerText = getSpelledOutAmount(p.monthlyRent);
+
+        const elDP = document.getElementById("input_downpaymentPercent");
+        if (elDP) elDP.value = p.downpaymentPercent;
+
+        const elLoanPrincipal = document.getElementById(
+          "display_loanPrincipal"
+        );
+        if (elLoanPrincipal) {
+          const loan = p.homePrice * (1 - p.downpaymentPercent / 100);
+          elLoanPrincipal.innerText = getSpelledOutAmount(loan);
+        }
+
+        const elTenure = document.getElementById("input_loanTenureYears");
+        if (elTenure) elTenure.value = p.loanTenureYears;
+
+        const elScheme = document.getElementById("input_amortizationScheme");
+        if (elScheme) elScheme.value = p.amortizationScheme;
+
+        const elTeaserRate = document.getElementById("input_teaserAnnualRate");
+        if (elTeaserRate) elTeaserRate.value = p.teaserAnnualRate;
+
+        const elFloatingRate = document.getElementById(
+          "input_floatingAnnualRate"
+        );
+        if (elFloatingRate) elFloatingRate.value = p.floatingAnnualRate;
+
+        const elFurnishing = document.getElementById(
+          "input_initialFurnishingAmount"
+        );
+        if (elFurnishing && document.activeElement !== elFurnishing)
+          elFurnishing.value = formatNumberMask(p.initialFurnishingAmount);
+
+        const elRentInf = document.getElementById("input_rentInflationRate");
+        if (elRentInf) elRentInf.value = p.rentInflationRate;
+
+        const elInvYield = document.getElementById("input_rentInvestmentYield");
+        if (elInvYield) elInvYield.value = p.rentInvestmentYield;
+
+        const elPropApp = document.getElementById(
+          "input_propertyAppreciationRate"
+        );
+        if (elPropApp) elPropApp.value = p.propertyAppreciationRate;
+
+        const elCpi = document.getElementById("input_cpiInflationRate");
+        if (elCpi) elCpi.value = p.cpiInflationRate;
+
+        const elHorizon = document.getElementById("input_horizonYears");
+        if (elHorizon) elHorizon.value = p.horizonYears;
+
+        // Breakdown summaries
+        const regTax = p.homePrice * 0.006;
+        const elRegTax = document.getElementById("display_regTax");
+        if (elRegTax) elRegTax.innerText = formatCurrency(regTax);
+
+        const totalBuyUpfront =
+          p.homePrice * (p.downpaymentPercent / 100) +
+          regTax +
+          (p.initialFurnishingAmount || 0);
+        const elTotalBuy = document.getElementById("display_totalUpfrontBuy");
+        if (elTotalBuy) elTotalBuy.innerText = formatCurrency(totalBuyUpfront);
+
+        const initialRentOutflow =
+          p.monthlyRent * p.securityDepositMonths + p.initialRenterMoveInCost;
+        const initialRentPort = Math.max(
+          0,
+          totalBuyUpfront - initialRentOutflow
+        );
+        const elPort = document.getElementById("display_initialRentPortfolio");
+        if (elPort) elPort.innerText = formatCurrency(initialRentPort);
+
+        // Property type active styling
+        const btnApt = document.getElementById("propTypeApartmentBtn");
+        const btnLanded = document.getElementById("propTypeLandedBtn");
+        if (btnApt && btnLanded) {
+          if (p.propertyType === "apartment") {
+            btnApt.className =
+              "px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition bg-indigo-600/20 border-indigo-500 text-indigo-300";
+            btnLanded.className =
+              "px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200";
+          } else {
+            btnLanded.className =
+              "px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition bg-indigo-600/20 border-indigo-500 text-indigo-300";
+            btnApt.className =
+              "px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200";
+          }
+        }
+      }
+
+      function handleCurrencyInput(inputEl, paramKey) {
+        const rawVal = parseMaskedNumber(inputEl.value);
+        currentParams[paramKey] = rawVal;
+
+        const spelledEl = document.getElementById(`spelled_${paramKey}`);
+        if (spelledEl) spelledEl.innerText = getSpelledOutAmount(rawVal);
+
+        renderApp();
+      }
+
+      function setNumericValue(paramKey, value) {
+        currentParams[paramKey] = value;
+        renderApp();
+      }
+
+      function handleParamChange(paramKey, value) {
+        currentParams[paramKey] =
+          typeof value === "string" && !isNaN(Number(value))
+            ? Number(value)
+            : value;
+        renderApp();
+      }
+
+      function setPropertyType(type) {
+        currentParams.propertyType = type;
+        if (type === "apartment") {
+          currentParams.monthlyBuildingManagementHOA = 1500000;
+          currentParams.annualMaintenanceRate = 0.5;
+          currentParams.propertyAppreciationRate = 6.0;
+          currentParams.homePrice = 3500000000;
+          currentParams.monthlyRent = 14000000;
+        } else {
+          currentParams.monthlyBuildingManagementHOA = 0;
+          currentParams.annualMaintenanceRate = 0.3;
+          currentParams.propertyAppreciationRate = 9.0;
+          currentParams.homePrice = 6000000000;
+          currentParams.monthlyRent = 18000000;
+        }
+        renderApp();
+      }
+
+      function loadPersona(key) {
+        previousParamsForUndo = { ...currentParams };
+
+        if (key === "condo") {
+          currentParams = {
+            ...DEFAULT_BUY_VS_RENT_PARAMS,
+            propertyType: "apartment",
+            homePrice: 3500000000,
+            downpaymentPercent: 30,
+            monthlyRent: 14000000,
+            propertyAppreciationRate: 6.0,
+            rentInvestmentYield: 8.0,
+            monthlyBuildingManagementHOA: 1500000,
+          };
+        } else if (key === "landed") {
+          currentParams = {
+            ...DEFAULT_BUY_VS_RENT_PARAMS,
+            propertyType: "landed",
+            homePrice: 6000000000,
+            downpaymentPercent: 40,
+            monthlyRent: 18000000,
+            propertyAppreciationRate: 9.0,
+            rentInvestmentYield: 8.0,
+            monthlyBuildingManagementHOA: 0,
+            annualMaintenanceRate: 0.3,
+          };
+        } else if (key === "fire") {
+          currentParams = {
+            ...DEFAULT_BUY_VS_RENT_PARAMS,
+            propertyType: "apartment",
+            homePrice: 3500000000,
+            downpaymentPercent: 30,
+            monthlyRent: 12000000,
+            propertyAppreciationRate: 5.0,
+            rentInvestmentYield: 10.5,
+            rentInflationRate: 3.5,
+          };
+        } else if (key === "expat") {
+          currentParams = {
+            ...DEFAULT_BUY_VS_RENT_PARAMS,
+            horizonYears: 5,
+            homePrice: 4000000000,
+            monthlyRent: 18000000,
+            sellingFrictionRate: 3.0,
+          };
+        }
+
+        if (typeof window !== "undefined") window.currentParams = currentParams;
+        togglePersonaMenu(false);
+        renderApp();
+        showUndoToast(TRANSLATIONS[currentLang].toast_preset_loaded);
+      }
+
+      function undoLastPreset() {
+        if (previousParamsForUndo) {
+          currentParams = { ...previousParamsForUndo };
+          if (typeof window !== "undefined")
+            window.currentParams = currentParams;
+          previousParamsForUndo = null;
+          renderApp();
+          dismissUndoToast();
+        }
+      }
+
+      function showUndoToast(msg) {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+
+        dismissUndoToast();
+
+        const toast = document.createElement("div");
+        toast.id = "activeUndoToast";
+        toast.className =
+          "pointer-events-auto flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl text-xs text-white animate-bounce-in";
+        toast.innerHTML = `
+        <span>${msg}</span>
+        <button onclick="undoLastPreset()" class="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 font-bold text-white transition">${TRANSLATIONS[currentLang].toast_undo}</button>
+      `;
+        container.appendChild(toast);
+
+        undoToastTimeout = setTimeout(() => {
+          dismissUndoToast();
+        }, 5000);
+      }
+
+      function dismissUndoToast() {
+        if (undoToastTimeout) clearTimeout(undoToastTimeout);
+        const toast = document.getElementById("activeUndoToast");
+        if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
+      }
+
+      function togglePersonaMenu(forceState) {
+        const menu = document.getElementById("personaMenu");
+        if (!menu) return;
+        if (forceState !== undefined) {
+          if (forceState) menu.classList.remove("hidden");
+          else menu.classList.add("hidden");
+        } else {
+          menu.classList.toggle("hidden");
+        }
+      }
+
+      function toggleLanguage() {
+        currentLang = currentLang === "vi" ? "en" : "vi";
+        const label = document.getElementById("langLabel");
+        if (label) label.innerText = currentLang === "vi" ? "EN" : "VI";
+
+        // Update data-i18n attributes
+        const elements = document.querySelectorAll("[data-i18n]");
+        elements.forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) {
+            el.innerText = TRANSLATIONS[currentLang][key];
+          }
+        });
+
+        renderApp();
+      }
+
+      function toggleTheme() {
+        currentTheme = currentTheme === "dark" ? "light" : "dark";
+        const html = document.documentElement;
+        const icon = document.getElementById("themeIcon");
+
+        if (currentTheme === "light") {
+          html.classList.remove("dark");
+          html.classList.add("light");
+          if (icon) icon.className = "fa-solid fa-moon text-indigo-400";
+        } else {
+          html.classList.remove("light");
+          html.classList.add("dark");
+          if (icon) icon.className = "fa-solid fa-sun text-amber-400";
+        }
+      }
+
+      function toggleRealPurchasingPower(checked) {
+        currentParams.useRealPurchasingPower = checked;
+        renderApp();
+      }
+
+      function resetToDefaults() {
+        currentParams = { ...DEFAULT_BUY_VS_RENT_PARAMS };
+        renderApp();
+        showToast(TRANSLATIONS[currentLang].toast_reset);
+      }
+
+      function showToast(msg) {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+        const toast = document.createElement("div");
+        toast.className =
+          "pointer-events-auto px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl text-xs text-white animate-fade-in";
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 3000);
+      }
+
+      function shareSimulationUrl() {
+        showToast(TRANSLATIONS[currentLang].toast_copied);
+      }
+
+      function switchAnalyticsTab(tabKey) {
+        currentTab = tabKey;
+        const tabs = ["timeline", "sunk", "cashflow", "sensitivity"];
+        tabs.forEach((t) => {
+          const btn = document.getElementById(`tabBtn_${t}`);
+          if (btn) {
+            if (t === tabKey) {
+              btn.className =
+                "px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow";
+            } else {
+              btn.className =
+                "px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200";
+            }
+          }
+        });
+      }
+
+      function exportChartPNG() {}
+
+      // Initialize application on window load
       if (typeof window !== "undefined") {
+        if (typeof window.addEventListener === "function") {
+          window.addEventListener("DOMContentLoaded", () => {
+            renderApp();
+          });
+        }
+
+        // Global exports for Node test sandbox
+        window.TRANSLATIONS = TRANSLATIONS;
         window.DEFAULT_BUY_VS_RENT_PARAMS = DEFAULT_BUY_VS_RENT_PARAMS;
         window.calculatePriceToRentRatio = calculatePriceToRentRatio;
         window.calculateGrossRentalYield = calculateGrossRentalYield;
         window.calculateMortgagePayment = calculateMortgagePayment;
         window.simulateBuyVsRent = simulateBuyVsRent;
         window.generateSensitivityMatrix = generateSensitivityMatrix;
+        window.formatCurrency = formatCurrency;
+        window.getSpelledOutAmount = getSpelledOutAmount;
+        window.formatNumberMask = formatNumberMask;
+        window.parseMaskedNumber = parseMaskedNumber;
+        window.setPropertyType = setPropertyType;
+        window.loadPersona = loadPersona;
+        window.toggleLanguage = toggleLanguage;
+        window.toggleTheme = toggleTheme;
+        window.currentParams = currentParams;
       }
     </script>
   </body>
