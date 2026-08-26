@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="vi" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Mua Nhà vs Thuê Nhà — So Sánh Tài Chính & Công Cụ Quyết Định (Buy vs. Rent
+      Home Comparison)
+    </title>
+
+    <!-- CDN Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      if (typeof tailwind !== "undefined") {
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ["Inter", "sans-serif"],
+                mono: ["JetBrains Mono", "monospace"],
+              },
+              colors: {
+                brand: {
+                  50: "#eef2ff",
+                  100: "#e0e7ff",
+                  500: "#6366f1",
+                  600: "#4f46e5",
+                  700: "#4338ca",
+                },
+                buy: {
+                  500: "#10b981",
+                  600: "#059669",
+                },
+                rent: {
+                  500: "#3b82f6",
+                  600: "#2563eb",
+                },
+              },
+            },
+          },
+        };
+      }
+    </script>
+
+    <style>
+      :root {
+        --bg-page: #0f172a;
+        --bg-card: #1e293b;
+        --border-color: #334155;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+      }
+      :root.light {
+        --bg-page: #f8fafc;
+        --bg-card: #ffffff;
+        --border-color: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+      }
+      body {
+        background-color: var(--bg-page);
+        color: var(--text-primary);
+        font-family: "Inter", sans-serif;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-radius: 9999px;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen transition-colors duration-200 antialiased flex flex-col justify-between"
+  >
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1">
+      <!-- Top Header Bar -->
+      <header
+        class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20"
+          >
+            <i class="fa-solid fa-house-chimney text-lg"></i>
+          </div>
+          <div>
+            <h1
+              class="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2"
+            >
+              <span>Mua Nhà vs Thuê Nhà</span>
+              <span
+                class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-medium border border-indigo-500/30"
+                >v1.0</span
+              >
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400">
+              Mô phỏng quyết định tài chính, dòng tiền & điểm hòa vốn dài hạn
+            </p>
+          </div>
+        </div>
+
+        <!-- Header Controls -->
+        <div class="flex items-center gap-2 self-end md:self-center">
+          <!-- Language Switcher -->
+          <button
+            id="langToggleBtn"
+            onclick="toggleLanguage()"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+          >
+            <i class="fa-solid fa-globe mr-1"></i>
+            <span id="langLabel">EN</span>
+          </button>
+
+          <!-- Theme Switcher -->
+          <button
+            id="themeToggleBtn"
+            onclick="toggleTheme()"
+            class="p-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            title="Toggle theme"
+          >
+            <i id="themeIcon" class="fa-solid fa-sun text-amber-400"></i>
+          </button>
+
+          <!-- Reset Defaults -->
+          <button
+            id="resetDefaultsBtn"
+            onclick="resetToDefaults()"
+            class="p-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            title="Khôi phục mặc định"
+          >
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+
+          <!-- Share URL -->
+          <button
+            id="shareUrlBtn"
+            onclick="shareSimulationUrl()"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow transition flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-share-nodes"></i> <span>Chia sẻ</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="mt-6">
+        <div
+          class="p-6 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-slate-300 text-sm"
+        >
+          <p class="font-medium text-white mb-2">
+            🚀 Pure Simulation Engine & Decision Framework Active
+          </p>
+          <p class="text-slate-400">
+            Hệ thống tính toán mô phỏng dòng tiền, khấu hao lãi suất và cơ hội
+            đầu tư đang hoạt động.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div
+      id="toastContainer"
+      class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"
+    ></div>
+
+    <!-- Pure Simulation Engine & Application Scripts -->
+    <script>
+      /**
+       * Default Parameters Schema
+       */
+      const DEFAULT_BUY_VS_RENT_PARAMS = {
+        // Horizon & Macro
+        horizonYears: 20,
+        currency: "VND",
+        propertyAppreciationRate: 6.0, // % per year
+        rentInflationRate: 4.0, // % per year
+        cpiInflationRate: 3.5, // % per year
+
+        // Property & Buy Profile
+        propertyType: "apartment", // 'apartment' | 'landed'
+        homePrice: 3500000000, // 3.5 Billion VND
+        downpaymentPercent: 30.0, // 30%
+
+        // Upfront Acquisition Breakdown
+        registrationTaxRate: 0.5, // % (Lệ phí trước bạ)
+        notaryAndLegalRate: 0.1, // %
+        initialFurnishingAmount: 150000000, // 150M VND
+        loanOriginationAndInsurance: 0,
+
+        // Mortgage Financing
+        loanTenureYears: 20,
+        amortizationScheme: "linear_principal", // 'linear_principal' | 'fixed_emi'
+        teaserRateMonths: 24,
+        teaserAnnualRate: 6.5,
+        floatingAnnualRate: 10.5,
+        extraMonthlyPrincipal: 0,
+
+        // Ongoing Ownership Expenses
+        monthlyBuildingManagementHOA: 1500000,
+        annualMaintenanceRate: 0.5,
+        annualPropertyTaxInsurance: 5000000,
+        sellingFrictionRate: 2.5,
+
+        // Rent Profile
+        monthlyRent: 14000000, // 14M VND
+        securityDepositMonths: 2,
+        initialRenterMoveInCost: 20000000,
+        monthlyTenantInsurance: 0,
+
+        // Opportunity Investment
+        rentInvestmentYield: 8.0, // % p.a.
+
+        // View Modes
+        useRealPurchasingPower: false,
+      };
+
+      /**
+       * Rule-of-thumb: Price-to-Rent Ratio
+       */
+      function calculatePriceToRentRatio(homePrice, monthlyRent) {
+        if (!monthlyRent || monthlyRent <= 0) return 0;
+        return homePrice / (monthlyRent * 12);
+      }
+
+      /**
+       * Rule-of-thumb: Gross Rental Yield (%)
+       */
+      function calculateGrossRentalYield(homePrice, monthlyRent) {
+        if (!homePrice || homePrice <= 0) return 0;
+        return ((monthlyRent * 12) / homePrice) * 100;
+      }
+
+      /**
+       * Mortgage Monthly Payment Calculator
+       */
+      function calculateMortgagePayment({
+        principal,
+        annualRate,
+        tenureMonths,
+        scheme = "fixed_emi",
+        currentRemainingPrincipal = null,
+      }) {
+        if (principal <= 0 || tenureMonths <= 0) return 0;
+        const monthlyRate = (annualRate || 0) / 100 / 12;
+        const remPrincipal =
+          currentRemainingPrincipal !== null
+            ? currentRemainingPrincipal
+            : principal;
+
+        if (monthlyRate === 0) {
+          return scheme === "linear_principal"
+            ? principal / tenureMonths
+            : remPrincipal / tenureMonths;
+        }
+
+        if (scheme === "linear_principal") {
+          const principalMonthly = principal / tenureMonths;
+          const interestMonthly = remPrincipal * monthlyRate;
+          return principalMonthly + interestMonthly;
+        }
+
+        // Fixed EMI (Annuity)
+        const factor = Math.pow(1 + monthlyRate, tenureMonths);
+        return (remPrincipal * (monthlyRate * factor)) / (factor - 1);
+      }
+
+      /**
+       * Pure Dual-Path Simulation Engine
+       * Evaluates Buy Path vs Rent & Invest Path month-by-month
+       */
+      function simulateBuyVsRent(rawParams = {}) {
+        const p = { ...DEFAULT_BUY_VS_RENT_PARAMS, ...rawParams };
+
+        const totalMonths = Math.max(
+          1,
+          Math.min(600, Math.round((p.horizonYears || 20) * 12))
+        );
+        const loanMonths = Math.max(
+          1,
+          Math.round((p.loanTenureYears || 20) * 12)
+        );
+
+        // Upfront Buy Calculations
+        const downpayment = p.homePrice * ((p.downpaymentPercent || 0) / 100);
+        const loanPrincipal = Math.max(0, p.homePrice - downpayment);
+        const regTax = p.homePrice * ((p.registrationTaxRate || 0) / 100);
+        const notaryLegal = p.homePrice * ((p.notaryAndLegalRate || 0) / 100);
+        const initialFurnishing = p.initialFurnishingAmount || 0;
+        const loanOrigination = p.loanOriginationAndInsurance || 0;
+
+        const initialBuyOutflow =
+          downpayment +
+          regTax +
+          notaryLegal +
+          initialFurnishing +
+          loanOrigination;
+
+        // Upfront Rent Calculations
+        const initialSecurityDeposit =
+          (p.monthlyRent || 0) * (p.securityDepositMonths || 0);
+        const initialMoveIn = p.initialRenterMoveInCost || 0;
+        const initialRentOutflow = initialSecurityDeposit + initialMoveIn;
+
+        // Starting Rent Portfolio Balance
+        const initialRentPortfolio = Math.max(
+          0,
+          initialBuyOutflow - initialRentOutflow
+        );
+
+        // Simulation State
+        let remainingLoan = loanPrincipal;
+        let currentHomeValue = p.homePrice;
+        let currentDeposit = initialSecurityDeposit;
+        let rentPortfolio = initialRentPortfolio;
+        let accumulatedDeficit = 0;
+
+        let cumulativeSunkCostBuy = regTax + notaryLegal + loanOrigination;
+        let cumulativeSunkCostRent = initialMoveIn;
+        let cumulativeBuyOutflow = initialBuyOutflow;
+        let cumulativeRentOutflow = initialRentOutflow;
+
+        let crossoverMonth = null;
+        let crossoverYear = null;
+        let winnerScenario = "rent";
+
+        const timeline = [];
+
+        const propMonthlyRate =
+          Math.pow(1 + (p.propertyAppreciationRate || 0) / 100, 1 / 12) - 1;
+        const cpiMonthlyRate =
+          Math.pow(1 + (p.cpiInflationRate || 0) / 100, 1 / 12) - 1;
+        const rentAnnualInflation = (p.rentInflationRate || 0) / 100;
+        const invMonthlyRate =
+          Math.pow(1 + (p.rentInvestmentYield || 0) / 100, 1 / 12) - 1;
+
+        for (let m = 1; m <= totalMonths; m++) {
+          // 1. Property Appreciation
+          currentHomeValue = currentHomeValue * (1 + propMonthlyRate);
+
+          // 2. Active Mortgage Rate
+          const currentMortgageRate =
+            m <= (p.teaserRateMonths || 0)
+              ? p.teaserAnnualRate || 0
+              : p.floatingAnnualRate || 0;
+          const monthlyMortgageRate = currentMortgageRate / 100 / 12;
+
+          // 3. Mortgage Payment & Amortization
+          let mortgagePayment = 0;
+          let interestPayment = 0;
+          let principalPayment = 0;
+
+          if (remainingLoan > 0 && m <= loanMonths) {
+            interestPayment = remainingLoan * monthlyMortgageRate;
+            const remMonths = loanMonths - m + 1;
+
+            if (p.amortizationScheme === "linear_principal") {
+              const basePrincipal = loanPrincipal / loanMonths;
+              principalPayment = Math.min(
+                remainingLoan,
+                basePrincipal + (p.extraMonthlyPrincipal || 0)
+              );
+            } else {
+              // Fixed EMI
+              if (monthlyMortgageRate > 0) {
+                const factor = Math.pow(1 + monthlyMortgageRate, remMonths);
+                const emi =
+                  (remainingLoan * (monthlyMortgageRate * factor)) /
+                  (factor - 1);
+                principalPayment = Math.min(
+                  remainingLoan,
+                  emi - interestPayment + (p.extraMonthlyPrincipal || 0)
+                );
+              } else {
+                principalPayment = Math.min(
+                  remainingLoan,
+                  remainingLoan / remMonths + (p.extraMonthlyPrincipal || 0)
+                );
+              }
+            }
+            mortgagePayment = interestPayment + principalPayment;
+            remainingLoan = Math.max(0, remainingLoan - principalPayment);
+          }
+
+          // 4. Ownership Expenses
+          const cpiFactor = Math.pow(
+            1 + (p.cpiInflationRate || 0) / 100,
+            (m - 1) / 12
+          );
+          const monthlyMaintenance =
+            currentHomeValue * ((p.annualMaintenanceRate || 0) / 100 / 12);
+          const monthlyHOA = (p.monthlyBuildingManagementHOA || 0) * cpiFactor;
+          const monthlyTaxIns =
+            ((p.annualPropertyTaxInsurance || 0) / 12) * cpiFactor;
+
+          const monthlyBuyOutflow =
+            mortgagePayment + monthlyMaintenance + monthlyHOA + monthlyTaxIns;
+          cumulativeBuyOutflow += monthlyBuyOutflow;
+
+          const currentMonthlySunkBuy =
+            interestPayment + monthlyMaintenance + monthlyHOA + monthlyTaxIns;
+          cumulativeSunkCostBuy += currentMonthlySunkBuy;
+
+          // 5. Rent Outflow & Deposit Escalation
+          const rentYearOffset = Math.floor((m - 1) / 12);
+          const currentMonthlyRent =
+            (p.monthlyRent || 0) *
+            Math.pow(1 + rentAnnualInflation, rentYearOffset);
+          const monthlyTenantIns = (p.monthlyTenantInsurance || 0) * cpiFactor;
+
+          const nextDeposit =
+            currentMonthlyRent * (p.securityDepositMonths || 0);
+          const depositDelta = Math.max(0, nextDeposit - currentDeposit);
+          currentDeposit = nextDeposit;
+
+          const monthlyRentOutflow =
+            currentMonthlyRent + monthlyTenantIns + depositDelta;
+          cumulativeRentOutflow += monthlyRentOutflow;
+          cumulativeSunkCostRent += currentMonthlyRent + monthlyTenantIns;
+
+          // 6. Opportunity Delta Sweep
+          const cashflowDelta = monthlyBuyOutflow - monthlyRentOutflow;
+
+          // Portfolio Yield Compounding + Delta
+          if (rentPortfolio > 0) {
+            rentPortfolio =
+              rentPortfolio * (1 + invMonthlyRate) + cashflowDelta;
+            if (rentPortfolio < 0) {
+              accumulatedDeficit += -rentPortfolio;
+              rentPortfolio = 0;
+            }
+          } else {
+            if (cashflowDelta >= 0) {
+              rentPortfolio = cashflowDelta;
+            } else {
+              accumulatedDeficit += -cashflowDelta;
+            }
+          }
+
+          // 7. Equity & Realizable Net Worth
+          const sellingFriction =
+            currentHomeValue * ((p.sellingFrictionRate || 0) / 100);
+          const netWorthBuyNominal =
+            currentHomeValue - remainingLoan - sellingFriction;
+          const netWorthRentNominal =
+            rentPortfolio - accumulatedDeficit + currentDeposit;
+
+          // 8. Continuous Purchasing Power Discount (Real Value)
+          const realDiscountFactor = Math.pow(
+            1 + (p.cpiInflationRate || 0) / 100,
+            m / 12
+          );
+          const netWorthBuyReal = netWorthBuyNominal / realDiscountFactor;
+          const netWorthRentReal = netWorthRentNominal / realDiscountFactor;
+
+          // 9. Crossover Check
+          if (
+            crossoverMonth === null &&
+            netWorthBuyNominal >= netWorthRentNominal
+          ) {
+            crossoverMonth = m;
+            crossoverYear = parseFloat((m / 12).toFixed(1));
+          }
+
+          timeline.push({
+            month: m,
+            year: parseFloat((m / 12).toFixed(2)),
+            homeMarketValue: currentHomeValue,
+            remainingLoanPrincipal: remainingLoan,
+            sellingFriction: sellingFriction,
+            mortgagePayment: mortgagePayment,
+            interestPayment: interestPayment,
+            principalPayment: principalPayment,
+            mortgageInterestRate: currentMortgageRate,
+            monthlyMaintenance: monthlyMaintenance,
+            monthlyHOA: monthlyHOA,
+            monthlyTaxIns: monthlyTaxIns,
+            monthlyBuyOutflow: monthlyBuyOutflow,
+            cumulativeBuyOutflow: cumulativeBuyOutflow,
+            cumulativeSunkCostBuy: cumulativeSunkCostBuy,
+            monthlyRent: currentMonthlyRent,
+            monthlyRentOutflow: monthlyRentOutflow,
+            cumulativeRentOutflow: cumulativeRentOutflow,
+            cumulativeSunkCostRent: cumulativeSunkCostRent,
+            cashflowDelta: cashflowDelta,
+            rentPortfolioBalance: rentPortfolio,
+            accumulatedDeficit: accumulatedDeficit,
+            rentSecurityDeposit: currentDeposit,
+            netWorthBuyNominal: netWorthBuyNominal,
+            netWorthRentNominal: netWorthRentNominal,
+            netWorthBuyReal: netWorthBuyReal,
+            netWorthRentReal: netWorthRentReal,
+            netWorthDelta: netWorthBuyNominal - netWorthRentNominal,
+          });
+        }
+
+        const lastMonth = timeline[timeline.length - 1];
+        const endingBuyWorth = p.useRealPurchasingPower
+          ? lastMonth.netWorthBuyReal
+          : lastMonth.netWorthBuyNominal;
+        const endingRentWorth = p.useRealPurchasingPower
+          ? lastMonth.netWorthRentReal
+          : lastMonth.netWorthRentNominal;
+        const netWealthDeltaAtHorizon = endingBuyWorth - endingRentWorth;
+
+        winnerScenario = netWealthDeltaAtHorizon >= 0 ? "buy" : "rent";
+
+        // Sunk costs at exit
+        const totalSunkCostBuy =
+          lastMonth.cumulativeSunkCostBuy + lastMonth.sellingFriction;
+        const totalSunkCostRent = lastMonth.cumulativeSunkCostRent;
+
+        const summary = {
+          initialBuyOutflow,
+          initialRentOutflow,
+          initialRentPortfolio,
+          loanPrincipal,
+          downpayment,
+          netWorthBuyEnding: endingBuyWorth,
+          netWorthRentEnding: endingRentWorth,
+          netWealthDeltaAtHorizon,
+          winnerScenario,
+          crossoverMonth,
+          crossoverYear,
+          totalSunkCostBuy,
+          totalSunkCostRent,
+          sunkCostDifference: totalSunkCostBuy - totalSunkCostRent,
+          priceToRentRatio: calculatePriceToRentRatio(
+            p.homePrice,
+            p.monthlyRent
+          ),
+          grossRentalYield: calculateGrossRentalYield(
+            p.homePrice,
+            p.monthlyRent
+          ),
+          finalHomeMarketValue: lastMonth.homeMarketValue,
+          finalRentPortfolio: lastMonth.rentPortfolioBalance,
+        };
+
+        return {
+          params: p,
+          timeline,
+          summary,
+        };
+      }
+
+      /**
+       * 2D Sensitivity Matrix Generator
+       * Evaluates Crossover Year across Property Appreciation Rates vs Rent Investment Yields
+       */
+      function generateSensitivityMatrix(baseParams, options = {}) {
+        const propRates = options.propertyAppreciationRates || [
+          3.0, 4.5, 6.0, 7.5, 9.0, 10.5,
+        ];
+        const invRates = options.rentInvestmentYields || [
+          5.0, 6.5, 8.0, 9.5, 11.0, 12.5,
+        ];
+
+        const matrix = [];
+
+        for (const propRate of propRates) {
+          const row = {
+            propertyAppreciationRate: propRate,
+            cells: [],
+          };
+
+          for (const invRate of invRates) {
+            const testParams = {
+              ...baseParams,
+              propertyAppreciationRate: propRate,
+              rentInvestmentYield: invRate,
+            };
+            const res = simulateBuyVsRent(testParams);
+            row.cells.push({
+              propertyAppreciationRate: propRate,
+              rentInvestmentYield: invRate,
+              crossoverMonth: res.summary.crossoverMonth,
+              crossoverYear: res.summary.crossoverYear,
+              winnerScenario: res.summary.winnerScenario,
+              netWealthDelta: res.summary.netWealthDeltaAtHorizon,
+            });
+          }
+          matrix.push(row);
+        }
+
+        return matrix;
+      }
+
+      // Expose functions globally for UI & Node test sandbox
+      if (typeof window !== "undefined") {
+        window.DEFAULT_BUY_VS_RENT_PARAMS = DEFAULT_BUY_VS_RENT_PARAMS;
+        window.calculatePriceToRentRatio = calculatePriceToRentRatio;
+        window.calculateGrossRentalYield = calculateGrossRentalYield;
+        window.calculateMortgagePayment = calculateMortgagePayment;
+        window.simulateBuyVsRent = simulateBuyVsRent;
+        window.generateSensitivityMatrix = generateSensitivityMatrix;
+      }
+    </script>
+  </body>
+</html>
