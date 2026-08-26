@@ -60,13 +60,13 @@ npm run test:build    # Compacted build pipeline & release packaging verificatio
 | **R38** | Light Theme Contrast Overrides   | Explicit high-contrast CSS overrides for slate surfaces, timeframe buttons, and badge chips in Light mode                                   | [`ADR-0016`](./docs/adr/0016-semantic-token-light-theme-and-responsive-mobile-ergonomics.md)                                                                                      | P1       |
 | **R39** | AI Financial Health Dossier      | Standalone client-side Markdown dossier generator modal with monospaced preview, 1-click clipboard copy, and `.md` file download            | [`ADR-0017`](./docs/adr/0017-ai-advisor-markdown-summary-engine.md)                                                                                                               | P1       |
 | **R40** | AI Blueprints & Privacy Mask     | 5 tailored advisory prompt blueprints, custom inquiry notes, and zero-leak privacy mask (salary multiples & % shares)                       | [`ADR-0017`](./docs/adr/0017-ai-advisor-markdown-summary-engine.md)                                                                                                               | P1       |
-| **R51** | Interactive Tooltip Engine       | Floating popover engine with instant hover, touch toggle isolation from labels, keyboard accessibility, and 100% parameter/KPI coverage     | [`ADR-0018`](./docs/adr/0018-interactive-tooltip-engine-and-parameter-explanations.md)                                                                                            | P1       |
+| **R41** | Interactive Tooltip Engine       | Floating popover engine with instant hover, touch toggle isolation from labels, keyboard accessibility, and 100% parameter/KPI coverage     | [`ADR-0018`](./docs/adr/0018-interactive-tooltip-engine-and-parameter-explanations.md)                                                                                            | P1       |
 
 ---
 
 ## 🏗️ Automated Test Suites
 
-The repository features a high-performance, zero-dependency Node.js test framework with a unified test runner (`scripts/test-runner.js`) generating interactive HTML, structured JSON, and standard JUnit XML reports in `test-reports/`.
+The repository features a high-performance, zero-dependency Node.js test framework with a unified test runner (`scripts/run-tests.js`) generating interactive HTML, structured JSON, and standard JUnit XML reports in `test-reports/`.
 
 ```mermaid
 flowchart TD

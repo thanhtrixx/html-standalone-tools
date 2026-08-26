@@ -26,25 +26,40 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── build.test.js                           # Compacted build pipeline tests
 │   ├── helpers.test.js                         # Utilities, maskers & recurring cashflow tests
 │   ├── i18n.test.js                            # Bilingual translation dictionary parity tests
-│   ├── simulation.test.js                      # Pure simulation engine mathematical tests
-│   └── ui-ux.test.js                           # UI/UX DOM component interaction tests
+│   ├── simulation.test.js                      # Pure savings simulation engine tests
+│   ├── ui-ux.test.js                           # Savings UI/UX DOM component interaction tests
+│   ├── buy-vs-rent-simulation.test.js          # Buy vs Rent pure math & amortization tests
+│   ├── buy-vs-rent-ui-i18n.test.js             # Buy vs Rent UI shell & i18n parity tests
+│   ├── buy-vs-rent-charts.test.js              # Buy vs Rent Chart.js & sensitivity tests
+│   ├── buy-vs-rent-sharing-dossier.test.js     # Buy vs Rent URL state & AI dossier tests
+│   └── buy-vs-rent-tooltips-formulas.test.js   # Buy vs Rent tooltips & formula hub tests
 ├── docs/
-│   ├── adr/                                    # System-wide Architecture Decision Records
+│   ├── adr/                                    # System-wide Architecture Decision Records (0001–0005)
 │   │   ├── 0001-multi-tool-repository-structure.md
 │   │   ├── 0002-zero-build-standalone-single-file-html-constraint.md (superseded)
 │   │   ├── 0003-compacted-standalone-html-build-pipeline.md
 │   │   ├── 0004-ci-pr-verification-and-automated-release-pipeline.md
 │   │   └── 0005-unified-test-runner-and-multi-format-reporting.md
 │   └── agents/                                 # Issue tracker & skill specifications
-└── personal-finance-savings-predictor/         # Standalone Tool Directory
+├── personal-finance-savings-predictor/         # Standalone Tool: Savings Predictor
+│   ├── index.html                              # Source application (HTML/CSS/JS)
+│   ├── dist/                                   # Compacted standalone production output
+│   │   └── index.html
+│   ├── CONTEXT.md                              # Tool-specific domain glossary
+│   ├── docs/
+│   │   └── adr/                                # Tool-specific architecture decisions (0001–0018)
+│   ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R41)
+│   └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
+└── buy-vs-rent-home-comparison/                # Standalone Tool: Buy vs Rent Comparison
     ├── index.html                              # Source application (HTML/CSS/JS)
     ├── dist/                                   # Compacted standalone production output
     │   └── index.html
     ├── CONTEXT.md                              # Tool-specific domain glossary
     ├── docs/
-    │   └── adr/                                # Tool-specific architecture decisions (0001–0017)
-    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R40)
-    └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist (502 tests)
+    │   └── adr/                                # Tool-specific architecture decisions (0001–0006)
+    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R35)
+    ├── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
+    └── buy-home-research.md                    # Real estate market & financial math research
 ```
 
 ### Core Architecture Principles
@@ -65,9 +80,10 @@ npm run build
 
 # Build a specific standalone tool
 npm run build:predictor
+npm run build:buy-rent
 # or: node scripts/build.js --tool <tool-name>
 
-# Run automated tests and generate interactive reports (HTML, JSON, JUnit)
+# Run all automated tests and generate interactive reports (HTML, JSON, JUnit)
 npm test
 # or: npm run test:report
 
@@ -77,6 +93,11 @@ npm run test:i18n
 npm run test:sim
 npm run test:helpers
 npm run test:ui
+npm run test:buy-rent
+npm run test:buy-rent:ui
+npm run test:buy-rent:charts
+npm run test:buy-rent:dossier
+npm run test:buy-rent:tooltips
 
 # Verify code formatting with Prettier (CI Gate)
 npm run lint:check
@@ -94,26 +115,39 @@ npm run pack:release
 
 ### 💰 [Personal Finance Savings Predictor](./personal-finance-savings-predictor/)
 
-A client-side wealth forecasting and multi-tier savings simulation tool supporting compound salary escalation, inflation purchasing power discounting, scheduled withdrawals, automatic 6-month term reinvestment, and bilingual Vietnamese/English localization.
+A client-side wealth forecasting and multi-tier savings simulation tool supporting compound salary escalation, inflation purchasing power discounting, scheduled withdrawals, automatic term reinvestment, and bilingual Vietnamese/English localization.
 
 - **Source Entry:** [`personal-finance-savings-predictor/index.html`](./personal-finance-savings-predictor/index.html)
 - **Compacted Web Output:** [`personal-finance-savings-predictor/dist/index.html`](./personal-finance-savings-predictor/dist/index.html)
 - **Domain Model:** [`personal-finance-savings-predictor/CONTEXT.md`](./personal-finance-savings-predictor/CONTEXT.md)
 - **Requirements & Specs:** [`personal-finance-savings-predictor/ITEMS_TO_IMPLEMENT.md`](./personal-finance-savings-predictor/ITEMS_TO_IMPLEMENT.md)
+- **Test Plan:** [`personal-finance-savings-predictor/TEST_PLAN.md`](./personal-finance-savings-predictor/TEST_PLAN.md)
+
+### 🏠 [Buy vs. Rent Home Comparison](./buy-vs-rent-home-comparison/)
+
+A client-side residential real estate financial decision engine evaluating the long-term wealth outcomes of homeownership versus renting and investing the difference, supporting dual amortization schemes (Fixed EMI vs Linear Principal Reduction), promotional teaser rates, opportunity cost delta reinvestment, 2D sensitivity matrix heatmaps, and AI real estate consultation dossiers.
+
+- **Source Entry:** [`buy-vs-rent-home-comparison/index.html`](./buy-vs-rent-home-comparison/index.html)
+- **Compacted Web Output:** [`buy-vs-rent-home-comparison/dist/index.html`](./buy-vs-rent-home-comparison/dist/index.html)
+- **Domain Model:** [`buy-vs-rent-home-comparison/CONTEXT.md`](./buy-vs-rent-home-comparison/CONTEXT.md)
+- **Requirements & Specs:** [`buy-vs-rent-home-comparison/ITEMS_TO_IMPLEMENT.md`](./buy-vs-rent-home-comparison/ITEMS_TO_IMPLEMENT.md)
+- **Test Plan:** [`buy-vs-rent-home-comparison/TEST_PLAN.md`](./buy-vs-rent-home-comparison/TEST_PLAN.md)
+- **Financial Math Research:** [`buy-vs-rent-home-comparison/buy-home-research.md`](./buy-vs-rent-home-comparison/buy-home-research.md)
 
 ---
 
 ## ➕ Adding a New Standalone Tool
 
-To create and integrate a new tool into this repository:
+To create and integrate a new tool into this repository, follow the 8-point **Definition of Done (DoD)**:
 
 1. **Create a Dedicated Directory**: `mkdir <tool-name>`
-2. **Add Source Application**: Create `<tool-name>/index.html` containing markup, styles, and scripts (or modular local CSS/JS).
+2. **Add Source Application**: Create `<tool-name>/index.html` containing markup, styles, and scripts.
 3. **Define Tool Domain Model**: Create `<tool-name>/CONTEXT.md` defining key terms, entities, and avoided synonyms.
 4. **Register in Context Map**: Add the tool's entry and summary to [`CONTEXT-MAP.md`](./CONTEXT-MAP.md).
 5. **Document Architecture Decisions**: Add tool-specific decisions under `<tool-name>/docs/adr/`.
 6. **Include Test & Requirement Plans**: Provide `<tool-name>/ITEMS_TO_IMPLEMENT.md` and `<tool-name>/TEST_PLAN.md`.
-7. **Compile Deliverable**: Run `npm run build` to generate `<tool-name>/dist/index.html`.
+7. **Bilingual Parity**: Provide 100% Vietnamese (`vi`) and English (`en`) dictionary coverage.
+8. **Compile & Verify Deliverable**: Author unit/UI tests in `tests/`, add suite to `scripts/run-tests.js`, and run `npm run lint:check && npm run build && npm test`.
 
 ---
 
@@ -125,9 +159,9 @@ This repository follows a strict **GitHub Flow** and **Test-Driven Delivery** pr
 2. **Branch per Issue**: Every feature or fix is developed in an isolated branch branched from `main` (`feat/issue-<n>-<slug>` or `fix/issue-<n>-<slug>`).
 3. **Test-Driven Development (TDD)**: Automated test suites in `tests/` must be authored/updated and passing (`100%`) before PR creation.
 4. **Automated CI Quality Gate**: Opening a PR triggers `.github/workflows/pr-verify.yml` running format checks, compaction build, and tests.
-5. **Pull Request & Merge Required Before Closure**:
+5. **Pull Request & Squash Merge Required Before Closure**:
    - Open a PR linking the issue (`gh pr create --body "Closes #<n>"`).
-   - Review and merge the PR into `main` (`gh pr merge`).
+   - Review and merge the PR into `main` via **Squash & Merge** (`gh pr merge <pr-number> --squash --delete-branch`).
    - Merging to `main` triggers `.github/workflows/release.yml` for automated SemVer tagging and GitHub Release asset packaging.
    - Verify all Acceptance Criteria against the merged build.
    - Close the issue only after successful merge and verification.

@@ -75,6 +75,7 @@ flowchart TD
 2. **Domain Modeling & Architectural Decisions**:
    - Update `<tool-name>/CONTEXT.md` with ubiquitous vocabulary and explicitly avoided synonyms.
    - Record architectural trade-offs and structural changes in `docs/adr/` or `<tool-name>/docs/adr/`.
+   - Maintain feature specifications in `<tool-name>/ITEMS_TO_IMPLEMENT.md` and test coverage in `<tool-name>/TEST_PLAN.md`.
 3. **Vertical Slice Decomposition**:
    - Break large initiatives into small, independent, testable tickets (vertical slices).
    - Each ticket must have:
@@ -148,10 +149,9 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
    - **All checks must be 100% green before approval.**
 4. **Review & Merge Gate**:
    - Conduct peer review or automated agent review (standards + spec conformance).
-   - **MANDATORY**: Merge the PR into `main` before closing the issue:
+   - **MANDATORY**: Merge the PR into `main` using **Squash and Merge** before closing the issue:
    ```bash
-   gh pr merge <pr-number> --merge --delete-branch
-   # Or squash: gh pr merge <pr-number> --squash --delete-branch
+   gh pr merge <pr-number> --squash --delete-branch
    ```
 
 ---
@@ -176,12 +176,28 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
 
 ---
 
+## 💎 Standalone Tool Definition of Done (DoD)
+
+Every standalone tool added to or maintained in this repository must satisfy the following 8-point checklist before feature completion or release:
+
+1. **Directory Isolation**: Dedicated self-contained directory containing human-readable source `index.html` and compacted deliverable `dist/index.html`.
+2. **Domain Glossary (`CONTEXT.md`)**: Comprehensive bilingual domain dictionary defining ubiquitous terms, explicit avoided synonyms, and calculation rules.
+3. **Context Map Registration**: Tool cataloged with description and relative links in root [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
+4. **Architecture Decision Records (`docs/adr/`)**: All non-trivial structural, mathematical, and UI/UX design trade-offs documented under `<tool-name>/docs/adr/`.
+5. **Specification & Test Plan**: Feature requirements matrix maintained in `ITEMS_TO_IMPLEMENT.md` and complete QA verification plan in `TEST_PLAN.md`.
+6. **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary key parity with locale-aware formatters and verbal quantity helpers.
+7. **Test Suite Integration**: Pure math unit tests, UI/DOM tests, and i18n tests authored in `tests/` and registered into the unified test runner (`scripts/run-tests.js`).
+8. **CI/CD Build & Release Ready**: Passes all formatting checks (`npm run lint:check`), compaction builds (`npm run build`), test suites (`npm test`), and release packaging (`npm run pack:release`).
+
+---
+
 ## 🛡️ Non-Negotiable Quality Guardrails
 
 - **No Issue Closed Without Merged PR**: Every issue must have a corresponding PR merged into `main` prior to issue closure.
+- **Squash and Merge Standard**: All PR merges to `main` must use `gh pr merge --squash --delete-branch` to ensure linear history and clean SemVer release changelogs.
 - **CI Gate Must Be 100% Green**: No PR may be merged if the `pr-verify.yml` status check is failing or pending.
 - **Automated Release on Merge**: Releases and standalone download assets are published automatically on `main` via `release.yml`.
 - **Observable Behavior Over Implementation Details**: Tests must assert observable outputs (simulation logs, calculations, DOM state, URL payloads), not private variables.
 - **Zero-Regression Standard**: All existing tests must pass on every commit and PR.
-- **Documentation Integrity**: ADRs, `CONTEXT.md`, and translation key parity (`TRANSLATIONS.en` vs `TRANSLATIONS.vi`) must be maintained in sync with code changes.
+- **Documentation Integrity**: ADRs, `CONTEXT.md`, `ITEMS_TO_IMPLEMENT.md`, `TEST_PLAN.md`, and translation key parity (`TRANSLATIONS.en` vs `TRANSLATIONS.vi`) must be maintained in sync with code changes.
 - **Diagram Standard**: Use Mermaid as the default format for rendering diagrams in documentation. Maintain an ASCII diagram inside a collapsible backout block (`<details>`) as a fallback for plain-text viewing and rendering recovery.
