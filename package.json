@@ -20,6 +20,7 @@
     "test:buy-rent:ui": "node tests/buy-vs-rent-ui-i18n.test.js",
     "test:buy-rent:charts": "node tests/buy-vs-rent-charts.test.js",
     "test:buy-rent:dossier": "node tests/buy-vs-rent-sharing-dossier.test.js",
+    "test:buy-rent:tooltips": "node tests/buy-vs-rent-tooltips-formulas.test.js",
     "test:helpers": "node tests/helpers.test.js",
     "test:ui": "node tests/ui-ux.test.js",
     "format": "prettier --write .",

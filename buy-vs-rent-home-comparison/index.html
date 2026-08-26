@@ -89,11 +89,47 @@
         background: #475569;
         border-radius: 9999px;
       }
+      /* Global Floating Tooltip Popover Engine */
+      #appTooltip {
+        position: fixed;
+        z-index: 100;
+        max-width: 280px;
+        background-color: rgba(15, 23, 42, 0.95);
+        color: #f8fafc;
+        border: 1px solid #334155;
+        border-radius: 0.75rem;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.75rem;
+        line-height: 1.35;
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.5),
+          0 8px 10px -6px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        backdrop-filter: blur(8px);
+        transition:
+          opacity 0.15s ease-out,
+          transform 0.15s ease-out;
+      }
+      .light #appTooltip {
+        background-color: rgba(255, 255, 255, 0.98);
+        color: #0f172a;
+        border-color: #cbd5e1;
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.15),
+          0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      }
+      .tooltip-trigger {
+        cursor: help;
+        transition: color 0.15s ease;
+      }
     </style>
   </head>
   <body
     class="min-h-screen transition-colors duration-200 antialiased flex flex-col justify-between"
   >
+    <!-- Floating Tooltip Container -->
+    <div id="appTooltip" class="hidden opacity-0 transform scale-95"></div>
+
     <!-- Main Application Wrapper -->
     <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1">
       <!-- Top Header Bar -->
@@ -226,6 +262,16 @@
             </div>
           </div>
 
+          <!-- Methodology & Mathematical Formulas Modal Trigger -->
+          <button
+            id="methodologyBtn"
+            onclick="openMethodologyModal()"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 transition flex items-center gap-1.5 shadow-sm"
+          >
+            <i class="fa-solid fa-calculator text-indigo-400"></i>
+            <span data-i18n="btn_methodology">Công thức & Phương pháp</span>
+          </button>
+
           <!-- AI Dossier Modal Trigger -->
           <button
             id="aiDossierBtn"
@@ -299,9 +345,23 @@
           <div
             class="flex items-center justify-between text-xs text-slate-400 mb-2"
           >
-            <span class="font-medium" data-i18n="kpi_crossover_title"
-              >Điểm Hòa Vốn (Crossover)</span
-            >
+            <span class="font-medium flex items-center gap-1">
+              <span data-i18n="kpi_crossover_title"
+                >Điểm Hòa Vốn (Crossover)</span
+              >
+              <button
+                type="button"
+                class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_crossover"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[11px]"></i>
+              </button>
+            </span>
             <i class="fa-solid fa-scale-balanced text-indigo-400"></i>
           </div>
           <div
@@ -325,9 +385,23 @@
           <div
             class="flex items-center justify-between text-xs text-slate-400 mb-2"
           >
-            <span class="font-medium" data-i18n="kpi_net_worth_title"
-              >Tài Sản Ròng Sau Horizon</span
-            >
+            <span class="font-medium flex items-center gap-1">
+              <span data-i18n="kpi_net_worth_title"
+                >Tài Sản Ròng Sau Horizon</span
+              >
+              <button
+                type="button"
+                class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_net_worth"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[11px]"></i>
+              </button>
+            </span>
             <i class="fa-solid fa-chart-line text-emerald-400"></i>
           </div>
           <div
@@ -348,9 +422,23 @@
           <div
             class="flex items-center justify-between text-xs text-slate-400 mb-2"
           >
-            <span class="font-medium" data-i18n="kpi_sunk_costs_title"
-              >Tổng Chi Phí Mất Đi (Sunk Costs)</span
-            >
+            <span class="font-medium flex items-center gap-1">
+              <span data-i18n="kpi_sunk_costs_title"
+                >Tổng Chi Phí Mất Đi (Sunk Costs)</span
+              >
+              <button
+                type="button"
+                class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_sunk_costs"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[11px]"></i>
+              </button>
+            </span>
             <i class="fa-solid fa-money-bill-transfer text-amber-400"></i>
           </div>
           <div
@@ -371,9 +459,21 @@
           <div
             class="flex items-center justify-between text-xs text-slate-400 mb-2"
           >
-            <span class="font-medium" data-i18n="kpi_prr_title"
-              >Tỷ Lệ Giá / Tiền Thuê (PRR)</span
-            >
+            <span class="font-medium flex items-center gap-1">
+              <span data-i18n="kpi_prr_title">Tỷ Lệ Giá / Tiền Thuê (PRR)</span>
+              <button
+                type="button"
+                class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                data-tooltip-key="tooltip_kpi_prr"
+                onclick="handleTooltipClick(event, this)"
+                onmouseenter="showAppTooltip(event, this)"
+                onmouseleave="hideAppTooltip()"
+                onfocus="showAppTooltip(event, this)"
+                onblur="hideAppTooltip()"
+              >
+                <i class="fa-solid fa-circle-info text-[11px]"></i>
+              </button>
+            </span>
             <i class="fa-solid fa-building-circle-check text-sky-400"></i>
           </div>
           <div class="flex items-baseline gap-2">
@@ -406,12 +506,24 @@
           >
             <div class="flex items-center justify-between mb-3">
               <span
-                class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2"
+                class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"
               >
                 <i class="fa-solid fa-city text-indigo-400"></i>
                 <span data-i18n="sec_property_type"
                   >Loại Hình Bất Động Sản</span
                 >
+                <button
+                  type="button"
+                  class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                  data-tooltip-key="tooltip_property_type"
+                  onclick="handleTooltipClick(event, this)"
+                  onmouseenter="showAppTooltip(event, this)"
+                  onmouseleave="hideAppTooltip()"
+                  onfocus="showAppTooltip(event, this)"
+                  onblur="hideAppTooltip()"
+                >
+                  <i class="fa-solid fa-circle-info text-[11px]"></i>
+                </button>
               </span>
             </div>
             <div class="grid grid-cols-2 gap-2">
@@ -452,12 +564,26 @@
             <!-- Home Price Input -->
             <div>
               <div class="flex items-center justify-between mb-1">
-                <label
-                  for="input_homePrice"
-                  class="text-xs font-medium text-slate-300"
-                  data-i18n="label_home_price"
-                  >Giá Mua Nhà</label
-                >
+                <div class="flex items-center gap-1">
+                  <label
+                    for="input_homePrice"
+                    class="text-xs font-medium text-slate-300"
+                    data-i18n="label_home_price"
+                    >Giá Mua Nhà</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_home_price"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <span
                   id="spelled_homePrice"
                   class="text-xs font-semibold text-emerald-400 font-mono"
@@ -505,12 +631,26 @@
             <!-- Downpayment % & Amount -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label
-                  for="input_downpaymentPercent"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_downpayment"
-                  >Trả Trước (%)</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_downpaymentPercent"
+                    class="text-xs font-medium text-slate-300 block"
+                    data-i18n="label_downpayment"
+                    >Trả Trước (%)</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_downpayment"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <div class="relative">
                   <input
                     type="number"
@@ -530,11 +670,25 @@
                 </div>
               </div>
               <div>
-                <label
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_loan_amount"
-                  >Khoản Vay</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    class="text-xs font-medium text-slate-300 block"
+                    data-i18n="label_loan_amount"
+                    >Khoản Vay</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_loan_amount"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <div
                   id="display_loanPrincipal"
                   class="w-full px-3 py-2 rounded-xl bg-slate-900/60 border border-slate-800 text-sm font-semibold text-slate-400 font-mono truncate"
@@ -547,12 +701,26 @@
             <!-- Loan Tenure & Amortization Scheme -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label
-                  for="input_loanTenureYears"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_loan_tenure"
-                  >Thời Gian Vay</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_loanTenureYears"
+                    class="text-xs font-medium text-slate-300 block"
+                    data-i18n="label_loan_tenure"
+                    >Thời Gian Vay</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_loan_tenure"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <select
                   id="input_loanTenureYears"
                   onchange="handleParamChange('loanTenureYears', this.value)"
@@ -566,12 +734,26 @@
                 </select>
               </div>
               <div>
-                <label
-                  for="input_amortizationScheme"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_amortization_scheme"
-                  >Cách Trả Nợ</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_amortizationScheme"
+                    class="text-xs font-medium text-slate-300 block"
+                    data-i18n="label_amortization_scheme"
+                    >Cách Trả Nợ</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_amortization_scheme"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <select
                   id="input_amortizationScheme"
                   onchange="handleParamChange('amortizationScheme', this.value)"
@@ -595,12 +777,26 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <div class="flex items-center justify-between mb-1">
-                  <label
-                    for="input_teaserAnnualRate"
-                    class="text-xs font-medium text-slate-300"
-                    data-i18n="label_teaser_rate"
-                    >Lãi Ưu Đãi (%)</label
-                  >
+                  <div class="flex items-center gap-1">
+                    <label
+                      for="input_teaserAnnualRate"
+                      class="text-xs font-medium text-slate-300"
+                      data-i18n="label_teaser_rate"
+                      >Lãi Ưu Đãi (%)</label
+                    >
+                    <button
+                      type="button"
+                      class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                      data-tooltip-key="tooltip_teaser_rate"
+                      onclick="handleTooltipClick(event, this)"
+                      onmouseenter="showAppTooltip(event, this)"
+                      onmouseleave="hideAppTooltip()"
+                      onfocus="showAppTooltip(event, this)"
+                      onblur="hideAppTooltip()"
+                    >
+                      <i class="fa-solid fa-circle-info text-[11px]"></i>
+                    </button>
+                  </div>
                   <span class="text-[10px] text-indigo-400 font-mono"
                     >24 Th</span
                   >
@@ -620,12 +816,26 @@
                 </div>
               </div>
               <div>
-                <label
-                  for="input_floatingAnnualRate"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_floating_rate"
-                  >Lãi Thả Nổi (%)</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_floatingAnnualRate"
+                    class="text-xs font-medium text-slate-300 block"
+                    data-i18n="label_floating_rate"
+                    >Lãi Thả Nổi (%)</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_floating_rate"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <div class="relative">
                   <input
                     type="number"
@@ -656,6 +866,18 @@
                   <span data-i18n="sec_acquisition_breakdown"
                     >Chi Phí Hoàn Thiện & Thuế Ban Đầu</span
                   >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_acquisition_costs"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
                 </span>
                 <i
                   class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform group-open:rotate-180"
@@ -726,12 +948,26 @@
             <!-- Monthly Rent Input -->
             <div>
               <div class="flex items-center justify-between mb-1">
-                <label
-                  for="input_monthlyRent"
-                  class="text-xs font-medium text-slate-300"
-                  data-i18n="label_monthly_rent"
-                  >Tiền Thuê Nhà Hàng Tháng</label
-                >
+                <div class="flex items-center gap-1">
+                  <label
+                    for="input_monthlyRent"
+                    class="text-xs font-medium text-slate-300"
+                    data-i18n="label_monthly_rent"
+                    >Tiền Thuê Nhà Hàng Tháng</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_monthly_rent"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <span
                   id="spelled_monthlyRent"
                   class="text-xs font-semibold text-sky-400 font-mono"
@@ -779,12 +1015,26 @@
             <!-- Rent Inflation & Expected Investment Yield -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label
-                  for="input_rentInflationRate"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_rent_inflation"
-                  >Tăng Giá Thuê / Năm</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_rentInflationRate"
+                    class="text-xs font-medium text-slate-300 block"
+                    data-i18n="label_rent_inflation"
+                    >Tăng Giá Thuê / Năm</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_rent_inflation"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <div class="relative">
                   <input
                     type="number"
@@ -800,12 +1050,26 @@
                 </div>
               </div>
               <div>
-                <label
-                  for="input_rentInvestmentYield"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_investment_yield"
-                  >Lãi Đầu Tư Sinh Lời</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_rentInvestmentYield"
+                    class="text-xs font-medium text-slate-300 block"
+                    data-i18n="label_investment_yield"
+                    >Lãi Đầu Tư Sinh Lời</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_investment_yield"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <div class="relative">
                   <input
                     type="number"
@@ -853,9 +1117,23 @@
               class="p-3 rounded-xl bg-slate-900/60 border border-slate-700/60 text-xs space-y-1.5"
             >
               <div class="flex items-center justify-between">
-                <span class="text-slate-400" data-i18n="label_initial_portfolio"
-                  >Vốn Ban Đầu Đem Đi Đầu Tư:</span
-                >
+                <span class="text-slate-400 flex items-center gap-1">
+                  <span data-i18n="label_initial_portfolio"
+                    >Vốn Ban Đầu Đem Đi Đầu Tư:</span
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_initial_portfolio"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </span>
                 <span
                   id="display_initialRentPortfolio"
                   class="font-mono font-bold text-sky-400"
@@ -887,12 +1165,26 @@
 
             <div class="grid grid-cols-3 gap-2.5">
               <div>
-                <label
-                  for="input_propertyAppreciationRate"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_prop_appreciation"
-                  >Tăng Giá BĐS</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_propertyAppreciationRate"
+                    class="text-xs font-medium text-slate-300 block truncate"
+                    data-i18n="label_prop_appreciation"
+                    >Tăng Giá BĐS</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_prop_appreciation"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <div class="relative">
                   <input
                     type="number"
@@ -910,12 +1202,26 @@
                 </div>
               </div>
               <div>
-                <label
-                  for="input_cpiInflationRate"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_cpi_inflation"
-                  >Lạm Phát CPI</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_cpiInflationRate"
+                    class="text-xs font-medium text-slate-300 block truncate"
+                    data-i18n="label_cpi_inflation"
+                    >Lạm Phát CPI</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_cpi_inflation"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <div class="relative">
                   <input
                     type="number"
@@ -931,12 +1237,26 @@
                 </div>
               </div>
               <div>
-                <label
-                  for="input_horizonYears"
-                  class="text-xs font-medium text-slate-300 block mb-1"
-                  data-i18n="label_horizon_years"
-                  >Thời Gian (Năm)</label
-                >
+                <div class="flex items-center gap-1 mb-1">
+                  <label
+                    for="input_horizonYears"
+                    class="text-xs font-medium text-slate-300 block truncate"
+                    data-i18n="label_horizon_years"
+                    >Thời Gian</label
+                  >
+                  <button
+                    type="button"
+                    class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                    data-tooltip-key="tooltip_horizon_years"
+                    onclick="handleTooltipClick(event, this)"
+                    onmouseenter="showAppTooltip(event, this)"
+                    onmouseleave="hideAppTooltip()"
+                    onfocus="showAppTooltip(event, this)"
+                    onblur="hideAppTooltip()"
+                  >
+                    <i class="fa-solid fa-circle-info text-[11px]"></i>
+                  </button>
+                </div>
                 <select
                   id="input_horizonYears"
                   onchange="handleParamChange('horizonYears', this.value)"
@@ -976,14 +1296,6 @@
                   <span data-i18n="tab_timeline">Tài Sản Ròng</span>
                 </button>
                 <button
-                  id="tabBtn_sunk"
-                  onclick="switchAnalyticsTab('sunk')"
-                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
-                >
-                  <i class="fa-solid fa-fire mr-1"></i>
-                  <span data-i18n="tab_sunk">Chi Phí Mất Đi</span>
-                </button>
-                <button
                   id="tabBtn_cashflow"
                   onclick="switchAnalyticsTab('cashflow')"
                   class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
@@ -1015,6 +1327,18 @@
                   class="w-8 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600 relative"
                 ></div>
                 <span data-i18n="real_mode_label">Trừ lạm phát (Real)</span>
+                <button
+                  type="button"
+                  class="tooltip-trigger text-slate-500 hover:text-indigo-400 p-0.5 rounded cursor-help transition"
+                  data-tooltip-key="tooltip_real_mode"
+                  onclick="handleTooltipClick(event, this)"
+                  onmouseenter="showAppTooltip(event, this)"
+                  onmouseleave="hideAppTooltip()"
+                  onfocus="showAppTooltip(event, this)"
+                  onblur="hideAppTooltip()"
+                >
+                  <i class="fa-solid fa-circle-info text-[11px]"></i>
+                </button>
               </label>
             </div>
 
@@ -1057,6 +1381,439 @@
               </button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Methodology & Mathematical Formula Hub Modal -->
+    <div
+      id="methodologyModal"
+      class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="relative w-full max-w-4xl rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      >
+        <!-- Modal Header -->
+        <div
+          class="px-6 py-4 border-b border-slate-800 flex items-center justify-between"
+        >
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center"
+            >
+              <i class="fa-solid fa-calculator"></i>
+            </div>
+            <div>
+              <h3
+                class="text-sm sm:text-base font-bold text-white"
+                data-i18n="methodology_title"
+              >
+                Phương Pháp Luận & Công Thức Toán Học
+              </h3>
+              <p
+                class="text-xs text-slate-400"
+                data-i18n="methodology_subtitle"
+              >
+                Hệ thống công thức chi tiết, minh họa tính toán trực tiếp & từ
+                điển thuật ngữ
+              </p>
+            </div>
+          </div>
+          <button
+            onclick="closeMethodologyModal()"
+            class="text-slate-400 hover:text-white text-lg transition"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Section Switcher Tabs -->
+        <div
+          class="px-6 pt-3 border-b border-slate-800 flex items-center gap-2"
+        >
+          <button
+            id="methTab_formulas"
+            onclick="switchMethodologySection('formulas')"
+            class="px-3.5 py-2 text-xs font-bold border-b-2 border-indigo-500 text-indigo-300 transition"
+            data-i18n="meth_tab_formulas"
+          >
+            Công Thức & Thay Số Thực Tế
+          </button>
+          <button
+            id="methTab_glossary"
+            onclick="switchMethodologySection('glossary')"
+            class="px-3.5 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition"
+            data-i18n="meth_tab_glossary"
+          >
+            Từ Điển Thuật Ngữ
+          </button>
+          <button
+            id="methTab_invariants"
+            onclick="switchMethodologySection('invariants')"
+            class="px-3.5 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition"
+            data-i18n="meth_tab_invariants"
+          >
+            Giả Định & Quy Chuẩn
+          </button>
+        </div>
+
+        <!-- Modal Body Content -->
+        <div
+          class="p-6 overflow-y-auto custom-scrollbar space-y-6 text-xs flex-1"
+        >
+          <!-- 1. FORMULAS & LIVE VARIABLE TRACES SECTION -->
+          <div id="methSec_formulas" class="space-y-5">
+            <!-- Formula 1: Mortgage Repayment -->
+            <div
+              class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2.5"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-bold text-white text-sm"
+                  data-i18n="formula_mortgage_title"
+                  >1. Cơ Chế Trả Nợ Vay Mua Nhà (Mortgage Amortization)</span
+                >
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono"
+                  >EMI vs Linear Principal</span
+                >
+              </div>
+              <p
+                class="text-slate-400 leading-relaxed"
+                data-i18n="formula_mortgage_desc"
+              >
+                Công cụ hỗ trợ 2 cơ chế trả nợ phổ biến tại ngân hàng:
+                <strong>Dư nợ giảm dần</strong> (Gốc chia đều mỗi tháng + Lãi
+                tính trên dư nợ thực tế) và
+                <strong>Niên kim cố định (Fixed EMI)</strong> (Tổng tiền gốc +
+                lãi trả mỗi tháng không đổi).
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                >
+                  <div class="text-indigo-400 font-bold mb-1">
+                    Niên Kim Cố Định (Fixed EMI):
+                  </div>
+                  <div>EMI = P × [ r(1+r)^n ] / [ (1+r)^n - 1 ]</div>
+                </div>
+                <div
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                >
+                  <div class="text-indigo-400 font-bold mb-1">
+                    Dư Nợ Giảm Dần (Linear):
+                  </div>
+                  <div>Gốc hàng tháng = P / n</div>
+                  <div>Lãi tháng t = Dư nợ t × r</div>
+                </div>
+              </div>
+              <!-- Live Trace Box -->
+              <div
+                id="trace_mortgage"
+                class="p-3 rounded-lg bg-indigo-950/30 border border-indigo-900/40 text-[11px] space-y-1 font-mono text-indigo-200"
+              >
+                <div class="font-bold text-white flex items-center gap-1.5">
+                  <i class="fa-solid fa-play text-[10px] text-indigo-400"></i>
+                  <span data-i18n="trace_live_header"
+                    >Thay số thực tế với đầu vào của bạn:</span
+                  >
+                </div>
+                <div id="trace_mortgage_content">Đang tính toán...</div>
+              </div>
+            </div>
+
+            <!-- Formula 2: Realizable Home Equity -->
+            <div
+              class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2.5"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-bold text-white text-sm"
+                  data-i18n="formula_equity_title"
+                  >2. Tài Sản Ròng Thực Nhận Khi Bán Nhà (Realizable
+                  Equity)</span
+                >
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono"
+                  >Net Realizable Equity</span
+                >
+              </div>
+              <p
+                class="text-slate-400 leading-relaxed"
+                data-i18n="formula_equity_desc"
+              >
+                Giá trị tài sản ròng của người mua nhà tại tháng t sau khi đã
+                trừ đi toàn bộ dư nợ vay ngân hàng còn lại và chi phí ma sát bán
+                nhà (môi giới, thuế TNCN 2% + phí công chứng).
+              </p>
+              <div
+                class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+              >
+                Equity(t) = [ Giá Nhà Ban Đầu × (1 + g_bds)^(t/12) ] × (1 - Phí
+                Bán 3%) - Dư Nợ Còn Lại(t)
+              </div>
+              <div
+                id="trace_equity"
+                class="p-3 rounded-lg bg-emerald-950/30 border border-emerald-900/40 text-[11px] space-y-1 font-mono text-emerald-200"
+              >
+                <div class="font-bold text-white flex items-center gap-1.5">
+                  <i class="fa-solid fa-play text-[10px] text-emerald-400"></i>
+                  <span data-i18n="trace_live_header"
+                    >Thay số thực tế với đầu vào của bạn:</span
+                  >
+                </div>
+                <div id="trace_equity_content">Đang tính toán...</div>
+              </div>
+            </div>
+
+            <!-- Formula 3: Rent & Invest Portfolio Accumulation -->
+            <div
+              class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2.5"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-bold text-white text-sm"
+                  data-i18n="formula_rent_title"
+                  >3. Tích Lũy Danh Mục Đầu Tư Khi Thuê Nhà (Opportunity Cost
+                  Delta)</span
+                >
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 font-mono"
+                  >Delta Reinvestment</span
+                >
+              </div>
+              <p
+                class="text-slate-400 leading-relaxed"
+                data-i18n="formula_rent_desc"
+              >
+                Người thuê giữ lại toàn bộ số tiền trả trước + chi phí hoàn
+                thiện để làm vốn đầu tư ban đầu, đồng thời mỗi tháng tái đầu tư
+                số tiền chênh lệch dòng tiền (Chi phí Mua - Chi phí Thuê) vào
+                tài sản sinh lời (Cổ phiếu/ETF).
+              </p>
+              <div
+                class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+              >
+                Portfolio(t) = Portfolio(t-1) × (1 + Lãi ĐT/12) + [ Chi Phí
+                Mua(t) - Chi Phí Thuê(t) ]
+              </div>
+              <div
+                id="trace_rent"
+                class="p-3 rounded-lg bg-sky-950/30 border border-sky-900/40 text-[11px] space-y-1 font-mono text-sky-200"
+              >
+                <div class="font-bold text-white flex items-center gap-1.5">
+                  <i class="fa-solid fa-play text-[10px] text-sky-400"></i>
+                  <span data-i18n="trace_live_header"
+                    >Thay số thực tế với đầu vào của bạn:</span
+                  >
+                </div>
+                <div id="trace_rent_content">Đang tính toán...</div>
+              </div>
+            </div>
+
+            <!-- Formula 4: Valuation Metrics PRR & Yield -->
+            <div
+              class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2.5"
+            >
+              <div class="flex items-center justify-between">
+                <span
+                  class="font-bold text-white text-sm"
+                  data-i18n="formula_prr_title"
+                  >4. Định Giá Tỷ Lệ Giá / Tiền Thuê (Price-to-Rent Ratio &
+                  Yield)</span
+                >
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono"
+                  >Valuation Benchmarks</span
+                >
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                >
+                  <div class="text-amber-400 font-bold mb-1">
+                    Price-to-Rent Ratio:
+                  </div>
+                  <div>PRR = Giá Mua Nhà / (Tiền Thuê Tháng × 12)</div>
+                </div>
+                <div
+                  class="p-3 rounded-lg bg-slate-900 border border-slate-800 font-mono text-[11px] text-slate-300"
+                >
+                  <div class="text-amber-400 font-bold mb-1">
+                    Gross Rental Yield:
+                  </div>
+                  <div>Yield = (Tiền Thuê Năm / Giá Nhà) × 100%</div>
+                </div>
+              </div>
+              <div
+                id="trace_prr"
+                class="p-3 rounded-lg bg-amber-950/30 border border-amber-900/40 text-[11px] space-y-1 font-mono text-amber-200"
+              >
+                <div class="font-bold text-white flex items-center gap-1.5">
+                  <i class="fa-solid fa-play text-[10px] text-amber-400"></i>
+                  <span data-i18n="trace_live_header"
+                    >Thay số thực tế với đầu vào của bạn:</span
+                  >
+                </div>
+                <div id="trace_prr_content">Đang tính toán...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. GLOSSARY SECTION -->
+          <div id="methSec_glossary" class="hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div
+                class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2"
+              >
+                <div class="font-bold text-indigo-300 flex items-center gap-2">
+                  <i class="fa-solid fa-scale-balanced"></i>
+                  <span data-i18n="gloss_sunk_title"
+                    >Chi Phí Mất Đi (Sunk Costs)</span
+                  >
+                </div>
+                <p
+                  class="text-slate-400 leading-relaxed"
+                  data-i18n="gloss_sunk_desc"
+                >
+                  Là những khoản chi phí phát sinh trong quá trình ở mà bạn vĩnh
+                  viễn không thu hồi lại được khi bán nhà hay trả nhà thuê. Đối
+                  với người Mua: Lãi vay ngân hàng, phí quản lý tòa nhà, chi phí
+                  bảo trì hỏng hóc, thuế trước bạ và phí môi giới bán nhà. Đối
+                  với người Thuê: Toàn bộ tiền thuê nhà hàng tháng và chi phí
+                  chuyển nhà.
+                </p>
+              </div>
+
+              <div
+                class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2"
+              >
+                <div class="font-bold text-emerald-300 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span data-i18n="gloss_crossover_title"
+                    >Điểm Hòa Vốn (Crossover Horizon)</span
+                  >
+                </div>
+                <p
+                  class="text-slate-400 leading-relaxed"
+                  data-i18n="gloss_crossover_desc"
+                >
+                  Thời điểm mà đường tài sản ròng thực tế của người Mua Nhà bắt
+                  đầu vượt qua tổng tài sản danh mục đầu tư của người Thuê Nhà.
+                  Nếu thời gian bạn dự định sinh sống ngắn hơn điểm hòa vốn,
+                  việc thuê nhà và đem tiền đi đầu tư sẽ mang lại lợi ích tài
+                  chính lớn hơn.
+                </p>
+              </div>
+
+              <div
+                class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2"
+              >
+                <div class="font-bold text-sky-300 flex items-center gap-2">
+                  <i class="fa-solid fa-percent"></i>
+                  <span data-i18n="gloss_rates_title"
+                    >Lãi Suất Ưu Đãi vs Thả Nổi (Teaser vs Floating)</span
+                  >
+                </div>
+                <p
+                  class="text-slate-400 leading-relaxed"
+                  data-i18n="gloss_rates_desc"
+                >
+                  Gói vay ngân hàng mua nhà tại Việt Nam thường cố định lãi suất
+                  thấp trong 12–36 tháng đầu (Lãi ưu đãi). Sau thời gian này,
+                  lãi suất sẽ thả nổi theo công thức: Lãi suất cơ sở (hoặc lãi
+                  suất huy động 12–24 tháng) + Biên độ rủi ro (thường từ
+                  3.5%–4.5%/năm).
+                </p>
+              </div>
+
+              <div
+                class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2"
+              >
+                <div class="font-bold text-amber-300 flex items-center gap-2">
+                  <i class="fa-solid fa-building-circle-check"></i>
+                  <span data-i18n="gloss_prr_title"
+                    >Tỷ Lệ Giá / Tiền Thuê (PRR)</span
+                  >
+                </div>
+                <p
+                  class="text-slate-400 leading-relaxed"
+                  data-i18n="gloss_prr_desc"
+                >
+                  Chỉ số định giá nhanh: PRR &lt; 16x (Gross Yield &gt; 6.25%)
+                  cho thấy giá nhà rẻ hơn tương đối so với tiền thuê, nên ưu
+                  tiên Mua. PRR &gt; 22x (Gross Yield &lt; 4.5%) cho thấy giá
+                  nhà đang quá cao so với giá thuê, nên ưu tiên Thuê và đem vốn
+                  đi đầu tư.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. INVARIANTS & ASSUMPTIONS SECTION -->
+          <div id="methSec_invariants" class="hidden space-y-4">
+            <div
+              class="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2.5"
+            >
+              <span
+                class="font-bold text-white text-sm"
+                data-i18n="invariants_title"
+                >Các Giả Định Mô Phỏng Cốt Lõi (Simulation Invariants):</span
+              >
+              <ul
+                class="list-disc list-inside text-slate-400 space-y-1.5 leading-relaxed"
+              >
+                <li data-i18n="inv_step">
+                  <strong>Bước Nhảy Mô Phỏng:</strong> Tính toán chính xác theo
+                  từng tháng (1 đến 360 tháng) với lãi kép liên tục.
+                </li>
+                <li data-i18n="inv_maint">
+                  <strong>Khấu Hao & Bảo Trì:</strong> Chi phí bảo trì nhà ở tự
+                  động tính theo % giá trị thị trường bất động sản tại thời điểm
+                  đó (Apartment: 0.5%/năm, Landed: 0.3%/năm).
+                </li>
+                <li data-i18n="inv_hoa">
+                  <strong>Phí Quản Lý Vận Hành (HOA):</strong> Chung cư tăng
+                  tịnh tiến đều đặn theo tỷ lệ lạm phát CPI hàng năm. Nhà đất có
+                  phí HOA = 0đ.
+                </li>
+                <li data-i18n="inv_deposit">
+                  <strong>Tiền Đặt Cọc Thuê Nhà:</strong> Tiền cọc (1–3 tháng)
+                  được coi là tài sản của người thuê, được cập nhật bổ sung theo
+                  mức tăng giá thuê và hoàn trả 100% tại cuối horizon.
+                </li>
+                <li data-i18n="inv_friction">
+                  <strong>Chi Phí Bán Nhà:</strong> Mặc định 3.0% (gồm 2% thuế
+                  TNCN chuyển nhượng BĐS + 1% phí môi giới công chứng).
+                </li>
+                <li data-i18n="inv_deficit">
+                  <strong>Xử Lý Thâm Hụt Dòng Tiền (Deficit):</strong> Nếu tiền
+                  thuê nhà vào các năm cuối cao hơn số tiền người mua phải trả
+                  hàng tháng, số tiền chênh lệch sẽ được rút trực tiếp từ danh
+                  mục đầu tư của người thuê để đảm bảo mức sống tương đương.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div
+          class="px-6 py-4 border-t border-slate-800 flex items-center justify-between bg-slate-900/60"
+        >
+          <div class="text-[11px] text-slate-400">
+            <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i>
+            <span data-i18n="meth_footer_badge"
+              >Được kiểm định toán học với 740+ assertions tự động</span
+            >
+          </div>
+          <button
+            onclick="closeMethodologyModal()"
+            class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition"
+            data-i18n="btn_close"
+          >
+            Đóng
+          </button>
         </div>
       </div>
     </div>
@@ -1391,6 +2148,102 @@
           toast_undo: "Hoàn tác",
           toast_copied: "Đã sao chép liên kết vào bộ nhớ tạm!",
           toast_reset: "Đã khôi phục cài đặt mặc định.",
+
+          // Methodology Modal & Mathematical Formulations
+          btn_methodology: "Công thức & Phương pháp",
+          methodology_title: "Phương Pháp Luận & Công Thức Toán Học",
+          methodology_subtitle:
+            "Hệ thống công thức chi tiết, minh họa tính toán trực tiếp & từ điển thuật ngữ",
+          meth_tab_formulas: "Công Thức & Thay Số Thực Tế",
+          meth_tab_glossary: "Từ Điển Thuật Ngữ",
+          meth_tab_invariants: "Giả Định & Quy Chuẩn",
+          meth_footer_badge:
+            "Được kiểm định toán học với 740+ assertions tự động",
+          formula_mortgage_title:
+            "1. Cơ Chế Trả Nợ Vay Mua Nhà (Mortgage Amortization)",
+          formula_mortgage_desc:
+            "Công cụ hỗ trợ 2 cơ chế trả nợ phổ biến: Dư nợ giảm dần (Gốc chia đều + Lãi tính trên dư nợ thực tế) và Niên kim cố định Fixed EMI (Tổng tiền trả hàng tháng cố định).",
+          formula_equity_title:
+            "2. Tài Sản Ròng Thực Nhận Khi Bán Nhà (Realizable Equity)",
+          formula_equity_desc:
+            "Giá trị tài sản ròng của người mua nhà tại tháng t sau khi đã trừ đi toàn bộ dư nợ vay ngân hàng còn lại và chi phí ma sát bán nhà (3.0% gồm môi giới & thuế TNCN).",
+          formula_rent_title:
+            "3. Tích Lũy Danh Mục Đầu Tư Khi Thuê Nhà (Opportunity Cost Delta)",
+          formula_rent_desc:
+            "Người thuê giữ lại tiền trả trước + hoàn thiện để làm vốn đầu tư ban đầu, đồng thời mỗi tháng tái đầu tư số tiền chênh lệch dòng tiền (Chi phí Mua - Chi phí Thuê) vào tài sản sinh lời.",
+          formula_prr_title:
+            "4. Định Giá Tỷ Lệ Giá / Tiền Thuê (Price-to-Rent Ratio & Yield)",
+          trace_live_header: "Thay số thực tế với đầu vào của bạn:",
+          gloss_sunk_title: "Chi Phí Mất Đi (Sunk Costs)",
+          gloss_sunk_desc:
+            "Những khoản chi phí phát sinh trong quá trình ở mà bạn vĩnh viễn không thu hồi lại được (Người Mua: Lãi vay, bảo trì, HOA, thuế & phí bán; Người Thuê: Toàn bộ tiền thuê).",
+          gloss_crossover_title: "Điểm Hòa Vốn (Crossover Horizon)",
+          gloss_crossover_desc:
+            "Thời điểm mà đường tài sản ròng thực tế của người Mua bắt đầu vượt qua tổng tài sản danh mục đầu tư của người Thuê.",
+          gloss_rates_title: "Lãi Suất Ưu Đãi vs Thả Nổi (Teaser vs Floating)",
+          gloss_rates_desc:
+            "Gói vay cố định lãi suất thấp trong 12–36 tháng đầu, sau đó thả nổi theo lãi suất cơ sở + biên độ rủi ro.",
+          gloss_prr_title: "Tỷ Lệ Giá / Tiền Thuê (PRR)",
+          gloss_prr_desc:
+            "Chỉ số định giá: PRR < 16x (Yield > 6.25%) ưu tiên Mua; PRR > 22x (Yield < 4.5%) ưu tiên Thuê và Đầu tư.",
+          invariants_title:
+            "Các Giả Định Mô Phỏng Cốt Lõi (Simulation Invariants):",
+          inv_step:
+            "Bước Nhảy Mô Phỏng: Tính toán chính xác theo từng tháng (1 đến 360 tháng) với lãi kép liên tục.",
+          inv_maint:
+            "Khấu Hao & Bảo Trì: Tự động tính theo % giá trị thị trường BĐS tại thời điểm đó (Chung cư 0.5%, Nhà đất 0.3%/năm).",
+          inv_hoa:
+            "Phí Quản Lý Vận Hành (HOA): Chung cư tăng tịnh tiến theo CPI. Nhà đất = 0đ.",
+          inv_deposit:
+            "Tiền Đặt Cọc Thuê Nhà: Tiền cọc (1–3 tháng) là tài sản người thuê, tăng theo giá thuê và hoàn trả 100% khi kết thúc.",
+          inv_friction:
+            "Chi Phí Bán Nhà: Mặc định 3.0% (2% thuế TNCN chuyển nhượng BĐS + 1% phí môi giới công chứng).",
+          inv_deficit:
+            "Xử Lý Thâm Hụt Dòng Tiền: Nếu tiền thuê năm cuối vượt tiền mua hàng tháng, phần chênh lệch được rút từ danh mục đầu tư người thuê.",
+
+          // Tooltips
+          tooltip_kpi_crossover:
+            "Thời điểm tài sản ròng mua nhà vượt danh mục đầu tư thuê nhà. Nếu chuyển nhà trước mốc này, thuê nhà sẽ có lợi tài chính hơn.",
+          tooltip_kpi_net_worth:
+            "Giá trị tài sản ròng cuối kỳ đã trừ hết nợ vay, chi phí bán nhà và hoàn trả tiền cọc thuê.",
+          tooltip_kpi_sunk_costs:
+            "Tổng tiền mất đi vĩnh viễn (Lãi vay + Bảo trì + HOA + Phí bán nhà vs Toàn bộ tiền thuê nhà).",
+          tooltip_kpi_prr:
+            "Tỷ lệ Giá nhà / Tiền thuê 1 năm. PRR < 16x: Ưu tiên Mua; PRR > 22x: Ưu tiên Thuê & Đầu tư.",
+          tooltip_property_type:
+            "Chung cư có phí bảo trì/HOA và biên độ tăng giá thấp hơn; Nhà phố/Đất nền có tỷ lệ tăng giá đất cao hơn và 0đ phí HOA.",
+          tooltip_home_price:
+            "Tổng giá trị hợp đồng mua bán bất động sản nhà ở ban đầu.",
+          tooltip_downpayment:
+            "Tỷ lệ % vốn tự có thanh toán ban đầu (thường từ 20% đến 50%). Phần còn lại là vốn vay ngân hàng.",
+          tooltip_loan_amount:
+            "Số tiền vay ngân hàng = Giá nhà × (100% - Tỷ lệ trả trước).",
+          tooltip_loan_tenure:
+            "Thời hạn vay vốn ngân hàng (10 đến 30 năm). Thời gian càng dài, gốc trả mỗi tháng càng thấp nhưng tổng lãi càng cao.",
+          tooltip_amortization_scheme:
+            "Dư nợ giảm dần: Tiền trả giảm dần theo thời gian. Niên kim cố định: Tiền trả mỗi tháng bằng nhau suốt kỳ vay.",
+          tooltip_teaser_rate:
+            "Lãi suất ưu đãi cố định trong 12–36 tháng đầu tiên của gói vay ngân hàng.",
+          tooltip_floating_rate:
+            "Lãi suất thả nổi áp dụng sau khi hết thời gian ưu đãi (Lãi suất cơ sở + Biên độ ngân hàng).",
+          tooltip_acquisition_costs:
+            "Chi phí bổ sung lúc mua: Thuế trước bạ (0.5%), phí công chứng (0.1%) và chi phí nội thất ban đầu.",
+          tooltip_monthly_rent:
+            "Số tiền thuê nhà phải thanh toán mỗi tháng cho căn nhà tương đương diện tích và vị trí.",
+          tooltip_rent_inflation:
+            "Tỷ lệ tăng giá thuê nhà trung bình mỗi năm tại các kỳ tái ký hợp đồng (thường 3%–6%).",
+          tooltip_investment_yield:
+            "Tỷ suất sinh lời kỳ vọng hàng năm khi đem vốn trả trước và tiền chênh lệch dòng tiền đi đầu tư (Gửi TK 5.5%, Quỹ mở 8–10%).",
+          tooltip_initial_portfolio:
+            "Số vốn khởi điểm của người thuê = Toàn bộ tiền trả trước + chi phí mua nhà trừ đi 2 tháng cọc thuê & chuyển nhà.",
+          tooltip_prop_appreciation:
+            "Tốc độ tăng giá bất động sản hàng năm theo quy luật lãi kép (thường 5%–9%/năm).",
+          tooltip_cpi_inflation:
+            "Chỉ số giá tiêu dùng chung để chiết khấu tài sản danh nghĩa về giá trị sức mua thực tế (Real Purchasing Power).",
+          tooltip_horizon_years:
+            "Khung thời gian dự kiến nắm giữ nhà hoặc thuê nhà trước khi chốt bán/tổng kết tài sản.",
+          tooltip_real_mode:
+            "Bật chế độ này để chiết khấu toàn bộ số tiền về sức mua thực tế tại thời điểm hiện tại dựa trên lạm phát CPI.",
         },
         en: {
           app_title: "Buy vs. Rent Home",
@@ -1487,6 +2340,100 @@
           toast_undo: "Undo",
           toast_copied: "Shareable simulation link copied to clipboard!",
           toast_reset: "Reset to default parameters.",
+
+          // Methodology Modal & Mathematical Formulations
+          btn_methodology: "Methodology & Formulas",
+          methodology_title: "Methodology & Mathematical Formulas",
+          methodology_subtitle:
+            "Detailed formula proofs, live variable trace arithmetic & financial glossary",
+          meth_tab_formulas: "Formulas & Live Traces",
+          meth_tab_glossary: "Terminology Glossary",
+          meth_tab_invariants: "Assumptions & Invariants",
+          meth_footer_badge:
+            "Mathematically verified with 740+ automated assertions",
+          formula_mortgage_title: "1. Mortgage Amortization Mechanics",
+          formula_mortgage_desc:
+            "Supports 2 standard bank repayment schemes: Linear Principal (Equal principal + reducing interest) and Fixed EMI Annuity (Constant monthly out-of-pocket).",
+          formula_equity_title: "2. Realizable Home Equity",
+          formula_equity_desc:
+            "Net liquid equity of the home buyer at month t after deducting remaining mortgage debt and selling friction costs (3.0% brokerage + transfer taxes).",
+          formula_rent_title:
+            "3. Rent & Invest Portfolio Accumulation (Opportunity Delta)",
+          formula_rent_desc:
+            "The renter invests initial downpayment + fit-out capital, compounding monthly cashflow savings (Buy Outflow - Rent Outflow) into an alternative asset portfolio.",
+          formula_prr_title:
+            "4. Valuation Benchmarks (Price-to-Rent Ratio & Yield)",
+          trace_live_header: "Live dynamic arithmetic with your active inputs:",
+          gloss_sunk_title: "Cumulative Sunk Costs",
+          gloss_sunk_desc:
+            "Unrecoverable capital lost forever to housing (Buyer: Mortgage interest, maintenance, HOA, taxes & selling friction; Renter: 100% of rent paid).",
+          gloss_crossover_title: "Break-Even Crossover Horizon",
+          gloss_crossover_desc:
+            "The milestone month when realizable homebuyer equity overtakes the renter's compounded investment portfolio.",
+          gloss_rates_title: "Teaser vs. Floating Benchmark Rates",
+          gloss_rates_desc:
+            "Promotional fixed mortgage rate for the initial 12–36 months, transitioning to floating cost-of-funds benchmark plus risk margin.",
+          gloss_prr_title: "Price-to-Rent Ratio (PRR)",
+          gloss_prr_desc:
+            "Valuation benchmark: PRR < 16x (Yield > 6.25%) favors Buying; PRR > 22x (Yield < 4.5%) favors Renting and investing.",
+          invariants_title:
+            "Core Simulation Invariants & Modeling Assumptions:",
+          inv_step:
+            "Monthly Timestep: Deterministic month-by-month compounding across 1 to 360 months.",
+          inv_maint:
+            "Maintenance & Depreciation: Scaled continuously as a % of current property value (Condo: 0.5%, Landed: 0.3%/yr).",
+          inv_hoa:
+            "Building Management HOA: Escalates continuously with CPI inflation for condos; 0 VND for landed homes.",
+          inv_deposit:
+            "Security Deposits: 1–3 months rent treated as a recoverable asset, topped up with rent inflation and refunded at horizon.",
+          inv_friction:
+            "Selling Friction: Fixed at 3.0% (2% transfer tax + 1% brokerage/notary).",
+          inv_deficit:
+            "Cashflow Deficit Drawdowns: When late-stage rent exceeds buyer outflows, the deficit is drawn directly from the renter's investment portfolio.",
+
+          // Tooltips
+          tooltip_kpi_crossover:
+            "The break-even year when buying wealth surpasses renting. Moving before this horizon makes renting economically superior.",
+          tooltip_kpi_net_worth:
+            "Final liquidated wealth net of remaining loan debt, selling transaction friction, and security deposit refunds.",
+          tooltip_kpi_sunk_costs:
+            "Total capital lost forever (Mortgage interest + Maintenance + HOA + Selling friction vs Total rent paid).",
+          tooltip_kpi_prr:
+            "Home price divided by annual rent. PRR < 16x favors Buying; PRR > 22x favors Renting & Investing.",
+          tooltip_property_type:
+            "Condos carry ongoing HOA/maintenance with moderate appreciation; Landed houses feature higher land growth and 0 HOA fees.",
+          tooltip_home_price:
+            "Total acquisition purchase price of the residential real estate property.",
+          tooltip_downpayment:
+            "Initial upfront cash equity paid by buyer (typically 20% to 50%). The remainder is financed via mortgage.",
+          tooltip_loan_amount:
+            "Total mortgage loan principal = Home Price × (100% - Downpayment %).",
+          tooltip_loan_tenure:
+            "Mortgage amortization tenure (10 to 30 years). Longer tenure reduces monthly payment but increases total interest.",
+          tooltip_amortization_scheme:
+            "Linear Principal: Payments decrease as debt reduces. Fixed EMI: Identical monthly payment throughout repayment period.",
+          tooltip_teaser_rate:
+            "Discounted introductory mortgage interest rate for the initial 12–36 months.",
+          tooltip_floating_rate:
+            "Long-term floating interest rate applied after the promo teaser period expires (Cost of funds + Bank margin).",
+          tooltip_acquisition_costs:
+            "Upfront purchasing friction: Registration tax (0.5%), notary/legal (0.1%), and initial interior fit-out.",
+          tooltip_monthly_rent:
+            "Initial monthly lease payment for an equivalent residential living property.",
+          tooltip_rent_inflation:
+            "Expected annual percentage rent increase upon annual lease renewals (typically 3%–6%/year).",
+          tooltip_investment_yield:
+            "Expected annualized compound return from investing cashflow savings (Bank savings 5.5%, Balanced 8%, Stocks/ETF 10.5%).",
+          tooltip_initial_portfolio:
+            "Starting investment capital for renter = Downpayment + Fit-out minus 2 months lease deposit & move-in costs.",
+          tooltip_prop_appreciation:
+            "Expected annual compound growth rate of real estate market value (typically 5%–9%/year).",
+          tooltip_cpi_inflation:
+            "Headline consumer price inflation index used to discount nominal wealth into real purchasing power.",
+          tooltip_horizon_years:
+            "Overall investment and living comparison timeframe before liquidating assets.",
+          tooltip_real_mode:
+            "Toggle to discount all future nominal values to constant real purchasing power using CPI inflation.",
         },
       };
 
@@ -2114,6 +3061,9 @@
               "px-3 py-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200";
           }
         }
+
+        updateMethodologyLiveTraces();
+        saveParamsToStorage(currentParams);
       }
 
       function handleCurrencyInput(inputEl, paramKey) {
@@ -2973,9 +3923,208 @@
         }
       }
 
+      /**
+       * Interactive Floating Tooltip Popover Engine
+       */
+      let activeTooltipTrigger = null;
+
+      function showAppTooltip(event, triggerEl) {
+        const tooltip = document.getElementById("appTooltip");
+        if (!tooltip || !triggerEl) return;
+
+        const key = triggerEl.getAttribute("data-tooltip-key");
+        if (
+          !key ||
+          !TRANSLATIONS[currentLang] ||
+          !TRANSLATIONS[currentLang][key]
+        )
+          return;
+
+        tooltip.innerText = TRANSLATIONS[currentLang][key];
+        tooltip.classList.remove("hidden");
+
+        const rect = triggerEl.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const padding = 10;
+
+        let left = rect.left + rect.width / 2 - tooltipRect.width / 2;
+        let top = rect.top - tooltipRect.height - 8;
+
+        // Viewport boundaries
+        if (left < padding) left = padding;
+        if (left + tooltipRect.width > window.innerWidth - padding) {
+          left = window.innerWidth - tooltipRect.width - padding;
+        }
+
+        // If clipped at top, show below trigger
+        if (top < padding) {
+          top = rect.bottom + 8;
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+
+        tooltip.classList.remove("opacity-0", "scale-95");
+        tooltip.classList.add("opacity-100", "scale-100");
+        activeTooltipTrigger = triggerEl;
+      }
+
+      function hideAppTooltip() {
+        const tooltip = document.getElementById("appTooltip");
+        if (!tooltip) return;
+        tooltip.classList.remove("opacity-100", "scale-100");
+        tooltip.classList.add("opacity-0", "scale-95");
+        setTimeout(() => {
+          if (
+            tooltip &&
+            tooltip.classList &&
+            tooltip.classList.contains("opacity-0")
+          ) {
+            tooltip.classList.add("hidden");
+          }
+        }, 150);
+        activeTooltipTrigger = null;
+      }
+
+      function handleTooltipClick(event, triggerEl) {
+        if (event) {
+          if (typeof event.stopPropagation === "function")
+            event.stopPropagation();
+          if (typeof event.preventDefault === "function")
+            event.preventDefault();
+        }
+        if (activeTooltipTrigger === triggerEl) {
+          hideAppTooltip();
+        } else {
+          showAppTooltip(event, triggerEl);
+        }
+      }
+
+      /**
+       * Methodology & Mathematical Formula Modal Handlers
+       */
+      let activeMethodologySection = "formulas";
+
+      function openMethodologyModal() {
+        const modal = document.getElementById("methodologyModal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          updateMethodologyLiveTraces();
+        }
+      }
+
+      function closeMethodologyModal() {
+        const modal = document.getElementById("methodologyModal");
+        if (modal) modal.classList.add("hidden");
+      }
+
+      function switchMethodologySection(sectionKey) {
+        activeMethodologySection = sectionKey;
+        const tabs = ["formulas", "glossary", "invariants"];
+        tabs.forEach((tab) => {
+          const btn = document.getElementById(`methTab_${tab}`);
+          const sec = document.getElementById(`methSec_${tab}`);
+          if (tab === sectionKey) {
+            if (btn) {
+              btn.classList.add("border-indigo-500", "text-indigo-300");
+              btn.classList.remove("border-transparent", "text-slate-400");
+            }
+            if (sec) sec.classList.remove("hidden");
+          } else {
+            if (btn) {
+              btn.classList.remove("border-indigo-500", "text-indigo-300");
+              btn.classList.add("border-transparent", "text-slate-400");
+            }
+            if (sec) sec.classList.add("hidden");
+          }
+        });
+      }
+
+      function updateMethodologyLiveTraces() {
+        const p = currentParams;
+        const isVi = currentLang === "vi";
+
+        // 1. Mortgage Trace
+        const downpaymentAmt = (p.homePrice * p.downpaymentPercent) / 100;
+        const loanPrincipal = p.homePrice - downpaymentAmt;
+        const nMonths = p.loanTenureYears * 12;
+        const rPromo = p.teaserAnnualRate / 100 / 12;
+
+        let initialMonthlyPayment = 0;
+        if (p.amortizationScheme === "fixed_emi") {
+          initialMonthlyPayment =
+            rPromo > 0
+              ? (loanPrincipal * (rPromo * Math.pow(1 + rPromo, nMonths))) /
+                (Math.pow(1 + rPromo, nMonths) - 1)
+              : loanPrincipal / nMonths;
+        } else {
+          initialMonthlyPayment =
+            loanPrincipal / nMonths + loanPrincipal * rPromo;
+        }
+
+        const traceMortgageEl = document.getElementById(
+          "trace_mortgage_content"
+        );
+        if (traceMortgageEl) {
+          traceMortgageEl.innerText = isVi
+            ? `Khoản vay P = ${formatCurrency(loanPrincipal, p.currency)} (${100 - p.downpaymentPercent}%) · Kỳ hạn n = ${nMonths} tháng (${p.loanTenureYears} năm) · Lãi ưu đãi r = ${p.teaserAnnualRate}%/năm → Tháng đầu trả: ${formatCurrency(Math.round(initialMonthlyPayment), p.currency)}/tháng (${p.amortizationScheme === "fixed_emi" ? "Niên kim cố định EMI" : "Dư nợ giảm dần: Gốc " + formatCurrency(Math.round(loanPrincipal / nMonths), p.currency) + " + Lãi " + formatCurrency(Math.round(loanPrincipal * rPromo), p.currency)})`
+            : `Loan P = ${formatCurrency(loanPrincipal, p.currency)} (${100 - p.downpaymentPercent}%) · Tenure n = ${nMonths} mos (${p.loanTenureYears} yrs) · Promo rate r = ${p.teaserAnnualRate}%/yr → Month 1 Payment: ${formatCurrency(Math.round(initialMonthlyPayment), p.currency)}/mo (${p.amortizationScheme === "fixed_emi" ? "Fixed EMI" : "Linear: Principal " + formatCurrency(Math.round(loanPrincipal / nMonths), p.currency) + " + Interest " + formatCurrency(Math.round(loanPrincipal * rPromo), p.currency)})`;
+        }
+
+        // 2. Realizable Equity Trace
+        const sim = simulateBuyVsRent(p);
+        const lastEntry =
+          sim.timeline && sim.timeline.length > 0
+            ? sim.timeline[sim.timeline.length - 1]
+            : null;
+        const traceEquityEl = document.getElementById("trace_equity_content");
+        if (traceEquityEl && lastEntry) {
+          const homeValueAtHorizon = lastEntry.homeMarketValue;
+          const sellingFrictionAmt =
+            (homeValueAtHorizon * p.sellingFrictionRate) / 100;
+          traceEquityEl.innerText = isVi
+            ? `Giá trị nhà sau ${p.horizonYears} năm = ${formatCurrency(Math.round(homeValueAtHorizon), p.currency)} (Tăng trưởng ${p.propertyAppreciationRate}%/năm) · Chi phí bán (${p.sellingFrictionRate}%) = ${formatCurrency(Math.round(sellingFrictionAmt), p.currency)} · Dư nợ còn lại = ${formatCurrency(Math.round(lastEntry.loanBalance), p.currency)} → Tài sản ròng thực nhận = ${formatCurrency(Math.round(lastEntry.netWorthBuyNominal), p.currency)}`
+            : `Home value after ${p.horizonYears} yrs = ${formatCurrency(Math.round(homeValueAtHorizon), p.currency)} (+${p.propertyAppreciationRate}%/yr) · Selling friction (${p.sellingFrictionRate}%) = ${formatCurrency(Math.round(sellingFrictionAmt), p.currency)} · Remaining loan = ${formatCurrency(Math.round(lastEntry.loanBalance), p.currency)} → Net Realizable Equity = ${formatCurrency(Math.round(lastEntry.netWorthBuyNominal), p.currency)}`;
+        }
+
+        // 3. Rent & Invest Portfolio Trace
+        const regTax = (p.homePrice * p.registrationTaxRate) / 100;
+        const notary = (p.homePrice * p.notaryAndLegalRate) / 100;
+        const totalUpfrontBuy =
+          downpaymentAmt +
+          regTax +
+          notary +
+          p.initialFurnishingAmount +
+          p.loanOriginationAndInsurance;
+        const securityDeposit = p.monthlyRent * p.securityDepositMonths;
+        const initialRentPortfolio =
+          totalUpfrontBuy - securityDeposit - p.initialRenterMoveInCost;
+        const traceRentEl = document.getElementById("trace_rent_content");
+        if (traceRentEl && lastEntry) {
+          traceRentEl.innerText = isVi
+            ? `Vốn khởi điểm = ${formatCurrency(Math.round(initialRentPortfolio), p.currency)} (Sau khi trừ tiền cọc & chuyển nhà) · Tỷ suất sinh lời = ${p.rentInvestmentYield}%/năm → Danh mục đầu tư sau ${p.horizonYears} năm = ${formatCurrency(Math.round(lastEntry.rentPortfolioBalance), p.currency)} (Tổng tài sản thuê gồm cọc = ${formatCurrency(Math.round(lastEntry.netWorthRentNominal), p.currency)})`
+            : `Initial seed = ${formatCurrency(Math.round(initialRentPortfolio), p.currency)} (Net of deposit & move-in) · Yield = ${p.rentInvestmentYield}%/yr → Invested portfolio after ${p.horizonYears} yrs = ${formatCurrency(Math.round(lastEntry.rentPortfolioBalance), p.currency)} (Total rent wealth with deposit = ${formatCurrency(Math.round(lastEntry.netWorthRentNominal), p.currency)})`;
+        }
+
+        // 4. Valuation PRR Trace
+        const prr = calculatePriceToRentRatio(p.homePrice, p.monthlyRent);
+        const grossYield = calculateGrossRentalYield(
+          p.homePrice,
+          p.monthlyRent
+        );
+        const tracePrrEl = document.getElementById("trace_prr_content");
+        if (tracePrrEl) {
+          tracePrrEl.innerText = isVi
+            ? `PRR = ${formatCurrency(p.homePrice, p.currency)} / (${formatCurrency(p.monthlyRent, p.currency)} × 12) = ${prr.toFixed(1)}x · Gross Rental Yield = (${formatCurrency(p.monthlyRent * 12, p.currency)} / ${formatCurrency(p.homePrice, p.currency)}) × 100% = ${grossYield.toFixed(2)}%/năm (${prr < 16 ? "Vùng Mua Tốt" : prr > 22 ? "Vùng Nên Thuê & Đầu Tư" : "Định Giá Cân Bằng"})`
+            : `PRR = ${formatCurrency(p.homePrice, p.currency)} / (${formatCurrency(p.monthlyRent, p.currency)} × 12) = ${prr.toFixed(1)}x · Gross Rental Yield = (${formatCurrency(p.monthlyRent * 12, p.currency)} / ${formatCurrency(p.homePrice, p.currency)}) × 100% = ${grossYield.toFixed(2)}%/yr (${prr < 16 ? "Strong Buy" : prr > 22 ? "Strong Rent & Invest" : "Fair Valuation"})`;
+        }
+      }
+
       function dismissAllModals() {
         closeAIDossierModal();
         closeOnboardingTour();
+        closeMethodologyModal();
+        hideAppTooltip();
         togglePersonaMenu(false);
       }
 
@@ -3052,6 +4201,13 @@
         window.serializeStateToHash = serializeStateToHash;
         window.deserializeStateFromHash = deserializeStateFromHash;
         window.shareSimulationUrl = shareSimulationUrl;
+        window.showAppTooltip = showAppTooltip;
+        window.hideAppTooltip = hideAppTooltip;
+        window.handleTooltipClick = handleTooltipClick;
+        window.openMethodologyModal = openMethodologyModal;
+        window.closeMethodologyModal = closeMethodologyModal;
+        window.switchMethodologySection = switchMethodologySection;
+        window.updateMethodologyLiveTraces = updateMethodologyLiveTraces;
         window.dismissAllModals = dismissAllModals;
         window.currentParams = currentParams;
       }

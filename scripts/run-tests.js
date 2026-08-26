@@ -55,6 +55,11 @@ const TEST_SUITES = [
     category: "AI & State",
   },
   {
+    name: "Buy vs Rent Contextual Tooltips & Methodology Hub",
+    file: "tests/buy-vs-rent-tooltips-formulas.test.js",
+    category: "UI/UX",
+  },
+  {
     name: "Calculation & Utility Helpers",
     file: "tests/helpers.test.js",
     category: "Helpers",
