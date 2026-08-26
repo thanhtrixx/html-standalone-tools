@@ -226,6 +226,26 @@
             </div>
           </div>
 
+          <!-- AI Dossier Modal Trigger -->
+          <button
+            id="aiDossierBtn"
+            onclick="openAIDossierModal()"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1.5 shadow-sm"
+          >
+            <i class="fa-solid fa-brain text-emerald-400"></i>
+            <span data-i18n="btn_ai_dossier">Hồ sơ AI</span>
+          </button>
+
+          <!-- Onboarding Tour Trigger -->
+          <button
+            id="onboardingTourBtn"
+            onclick="startOnboardingTour()"
+            class="p-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            title="Hướng dẫn sử dụng"
+          >
+            <i class="fa-solid fa-circle-question text-sky-400"></i>
+          </button>
+
           <!-- Language Switcher -->
           <button
             id="langToggleBtn"
@@ -1041,6 +1061,232 @@
       </div>
     </div>
 
+    <!-- AI Real Estate Decision Dossier Modal -->
+    <div
+      id="aiDossierModal"
+      class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="relative w-full max-w-3xl rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      >
+        <!-- Modal Header -->
+        <div
+          class="px-6 py-4 border-b border-slate-800 flex items-center justify-between"
+        >
+          <div class="flex items-center gap-2.5">
+            <div
+              class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center"
+            >
+              <i class="fa-solid fa-brain"></i>
+            </div>
+            <div>
+              <h3
+                class="text-sm sm:text-base font-bold text-white"
+                data-i18n="dossier_title"
+              >
+                Hồ Sơ Tư Vấn Bất Động Sản AI
+              </h3>
+              <p class="text-xs text-slate-400" data-i18n="dossier_subtitle">
+                Xuất Markdown phân tích quyết định tài chính cho ChatGPT /
+                Claude / Gemini
+              </p>
+            </div>
+          </div>
+          <button
+            onclick="closeAIDossierModal()"
+            class="text-slate-400 hover:text-white text-lg transition"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div
+          class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-xs flex-1"
+        >
+          <!-- Blueprint Selector Chips -->
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 mb-2"
+              data-i18n="dossier_blueprint_label"
+              >Chọn Mục Tiêu Tư Vấn (Prompt Blueprint):</label
+            >
+            <div class="flex items-center gap-2 flex-wrap">
+              <button
+                id="bpBtn_verdict"
+                onclick="setDossierBlueprint('verdict')"
+                class="px-3 py-1.5 rounded-lg border font-semibold transition bg-emerald-600/20 border-emerald-500 text-emerald-300"
+              >
+                <i class="fa-solid fa-scale-balanced mr-1"></i>
+                <span data-i18n="bp_verdict">Đánh Giá Toàn Diện</span>
+              </button>
+              <button
+                id="bpBtn_stress_test"
+                onclick="setDossierBlueprint('stress_test')"
+                class="px-3 py-1.5 rounded-lg border font-semibold transition bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200"
+              >
+                <i class="fa-solid fa-shield-halved mr-1"></i>
+                <span data-i18n="bp_stress">Kiểm Tra Căng Thẳng Lãi Suất</span>
+              </button>
+              <button
+                id="bpBtn_fire"
+                onclick="setDossierBlueprint('fire')"
+                class="px-3 py-1.5 rounded-lg border font-semibold transition bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200"
+              >
+                <i class="fa-solid fa-fire mr-1"></i>
+                <span data-i18n="bp_fire">Tối Ưu Hóa FIRE</span>
+              </button>
+              <button
+                id="bpBtn_asset_allocation"
+                onclick="setDossierBlueprint('asset_allocation')"
+                class="px-3 py-1.5 rounded-lg border font-semibold transition bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200"
+              >
+                <i class="fa-solid fa-pie-chart mr-1"></i>
+                <span data-i18n="bp_allocation">Phân Bổ Tài Sản & Nợ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Privacy Anonymization Toggle -->
+          <div
+            class="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800"
+          >
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-user-shield text-indigo-400"></i>
+              <div>
+                <div
+                  class="font-bold text-white text-xs"
+                  data-i18n="dossier_privacy_title"
+                >
+                  Chế Độ Ẩn Danh Dữ Liệu (Zero-Leak Privacy)
+                </div>
+                <div
+                  class="text-[11px] text-slate-400"
+                  data-i18n="dossier_privacy_desc"
+                >
+                  Chuyển đổi số tiền tuyệt đối thành tỷ lệ % và bội số giá nhà
+                  trước khi gửi AI
+                </div>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                id="dossierPrivacyToggle"
+                onchange="toggleDossierPrivacy(this.checked)"
+                class="sr-only peer"
+              />
+              <div
+                class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"
+              ></div>
+            </label>
+          </div>
+
+          <!-- Live Markdown Preview -->
+          <div>
+            <label
+              class="block text-xs font-semibold text-slate-300 mb-1"
+              data-i18n="dossier_preview_label"
+              >Xem Trước Nội Dung Markdown:</label
+            >
+            <textarea
+              id="dossierMarkdownTextarea"
+              readonly
+              class="w-full h-48 px-3 py-2.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 focus:outline-none custom-scrollbar select-all"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div
+          class="px-6 py-4 border-t border-slate-800 flex items-center justify-between bg-slate-900/60"
+        >
+          <button
+            onclick="closeAIDossierModal()"
+            class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
+            data-i18n="btn_close"
+          >
+            Đóng
+          </button>
+          <div class="flex items-center gap-2">
+            <button
+              id="downloadDossierBtn"
+              onclick="downloadDossierMarkdown()"
+              class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-file-arrow-down"></i>
+              <span data-i18n="btn_download_md">Tải File .md</span>
+            </button>
+            <button
+              id="copyDossierBtn"
+              onclick="copyDossierMarkdown()"
+              class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-copy"></i>
+              <span data-i18n="btn_copy_md">Sao Chép Markdown</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onboarding Guided Walkthrough Modal -->
+    <div
+      id="onboardingTourModal"
+      class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700 shadow-2xl p-6 space-y-4"
+      >
+        <div class="flex items-center justify-between">
+          <span
+            id="tourStepBadge"
+            class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold text-[10px] uppercase tracking-wider"
+            >Bước 1 / 4</span
+          >
+          <button
+            onclick="closeOnboardingTour()"
+            class="text-slate-400 hover:text-white transition"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="text-center py-2 space-y-2">
+          <div
+            id="tourIcon"
+            class="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center mx-auto text-xl"
+          >
+            <i class="fa-solid fa-house-chimney"></i>
+          </div>
+          <h4 id="tourTitle" class="text-base font-bold text-white">
+            1. Chọn Loại Hình & Thông Số Mua
+          </h4>
+          <p id="tourDesc" class="text-xs text-slate-400 leading-relaxed">
+            Nhập giá mua nhà, tỷ lệ trả trước và chọn cơ chế vay (Dư nợ giảm dần
+            hoặc Niên kim cố định).
+          </p>
+        </div>
+        <div
+          class="flex items-center justify-between pt-2 border-t border-slate-800"
+        >
+          <button
+            id="tourPrevBtn"
+            onclick="prevTourStep()"
+            class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition"
+          >
+            Quay lại
+          </button>
+          <button
+            id="tourNextBtn"
+            onclick="nextTourStep()"
+            class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition"
+          >
+            Tiếp tục
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast Notification Container -->
     <div
       id="toastContainer"
@@ -1122,6 +1368,24 @@
           persona_expat_title: "Ngắn Hạn & Linh Hoạt (5 Năm)",
           persona_expat_desc: "Horizon 5 năm · Tránh chi phí giao dịch bán nhà",
 
+          // AI Dossier & Blueprints
+          btn_ai_dossier: "Hồ sơ AI",
+          dossier_title: "Hồ Sơ Tư Vấn Bất Động Sản AI",
+          dossier_subtitle:
+            "Xuất Markdown phân tích quyết định tài chính cho ChatGPT / Claude / Gemini",
+          dossier_blueprint_label: "Chọn Mục Tiêu Tư Vấn (Prompt Blueprint):",
+          bp_verdict: "Đánh Giá Toàn Diện",
+          bp_stress: "Kiểm Tra Căng Thẳng Lãi Suất",
+          bp_fire: "Tối Ưu Hóa FIRE",
+          bp_allocation: "Phân Bổ Tài Sản & Nợ",
+          dossier_privacy_title: "Chế Độ Ẩn Danh Dữ Liệu (Zero-Leak Privacy)",
+          dossier_privacy_desc:
+            "Chuyển đổi số tiền tuyệt đối thành tỷ lệ % và bội số giá nhà trước khi gửi AI",
+          dossier_preview_label: "Xem Trước Nội Dung Markdown:",
+          btn_close: "Đóng",
+          btn_download_md: "Tải File .md",
+          btn_copy_md: "Sao Chép Markdown",
+
           // Toasts
           toast_preset_loaded: "Đã tải chiến lược mẫu",
           toast_undo: "Hoàn tác",
@@ -1198,6 +1462,25 @@
           persona_expat_title: "Short-Term Mobility (5 Years)",
           persona_expat_desc:
             "5-year horizon · Avoid high real estate friction",
+
+          // AI Dossier & Blueprints
+          btn_ai_dossier: "AI Dossier",
+          dossier_title: "AI Real Estate Decision Dossier",
+          dossier_subtitle:
+            "Export structured Markdown decision analysis for ChatGPT / Claude / Gemini",
+          dossier_blueprint_label:
+            "Select Advisory Objective (Prompt Blueprint):",
+          bp_verdict: "Comprehensive Verdict",
+          bp_stress: "Interest Rate Stress-Test",
+          bp_fire: "FIRE Optimization",
+          bp_allocation: "Asset & Debt Allocation",
+          dossier_privacy_title: "Data Anonymization Mode (Zero-Leak Privacy)",
+          dossier_privacy_desc:
+            "Mask absolute currency sums into home price multiples and percentage shares",
+          dossier_preview_label: "Markdown Content Preview:",
+          btn_close: "Close",
+          btn_download_md: "Download .md File",
+          btn_copy_md: "Copy Markdown",
 
           // Toasts
           toast_preset_loaded: "Strategy preset loaded",
@@ -2344,7 +2627,6 @@
         offscreen.height = canvas.height;
         const offCtx = offscreen.getContext("2d");
 
-        // Solid background fill
         offCtx.fillStyle = currentTheme === "dark" ? "#0f172a" : "#ffffff";
         offCtx.fillRect(0, 0, offscreen.width, offscreen.height);
         offCtx.drawImage(canvas, 0, 0);
@@ -2358,12 +2640,379 @@
         showToast(TRANSLATIONS[currentLang].toast_copied);
       }
 
+      /**
+       * AI Decision Dossier Generator & Modal Handlers
+       */
+      let currentDossierBlueprint = "verdict";
+      let isDossierAnonymized = false;
+
+      function generateAIDossierMarkdown(params, options = {}) {
+        const isAnonymized =
+          options.anonymize !== undefined
+            ? options.anonymize
+            : isDossierAnonymized;
+        const blueprintKey = options.blueprint || currentDossierBlueprint;
+        const customQuery = options.customQuery || "";
+        const lang = options.lang || currentLang;
+        const isVi = lang === "vi";
+
+        const sim = simulateBuyVsRent(params);
+        const s = sim.summary;
+        const p = sim.params;
+
+        function fmtVal(amt) {
+          if (!isAnonymized) return formatCurrency(amt, p.currency);
+          const multiple = (amt / p.homePrice).toFixed(2);
+          return `${(multiple * 100).toFixed(1)}% of Home Price (${multiple}x Home Price)`;
+        }
+
+        let md = `# 📊 ${isVi ? "Hồ Sơ Tư Vấn Quyết Định: Mua Nhà vs Thuê Nhà" : "Real Estate Decision Dossier: Buy vs. Rent Comparison"}\n\n`;
+        md += `> **${isVi ? "Chế độ bảo mật" : "Privacy Mode"}:** ${isAnonymized ? "🔒 ANONYMIZED (Home Multiples & Shares)" : "🔓 STANDARD (Absolute Currency)"}\n`;
+        md += `> **${isVi ? "Khung thời gian" : "Time Horizon"}:** ${p.horizonYears} ${isVi ? "Năm" : "Years"} (${p.horizonYears * 12} ${isVi ? "tháng" : "months"})\n`;
+        md += `> **${isVi ? "Loại hình BĐS" : "Property Type"}:** ${p.propertyType === "apartment" ? "Apartment / Condo" : "Landed House / Townhouse"}\n\n`;
+
+        md += `## 1. ${isVi ? "Tổng Quan Thông Số Đầu Vào" : "Simulation Input Parameters"}\n\n`;
+        md += `| ${isVi ? "Thông số" : "Parameter"} | ${isVi ? "Giá trị" : "Value"} |\n`;
+        md += `| :--- | :--- |\n`;
+        md += `| ${isVi ? "Giá mua nhà" : "Home Purchase Price"} | ${isAnonymized ? "1.0x (Baseline Home Price)" : formatCurrency(p.homePrice, p.currency)} |\n`;
+        md += `| ${isVi ? "Tỷ lệ trả trước" : "Downpayment Ratio"} | ${p.downpaymentPercent}% (${fmtVal(s.downpayment)}) |\n`;
+        md += `| ${isVi ? "Khoản vay thế chấp" : "Mortgage Principal"} | ${fmtVal(s.loanPrincipal)} (${p.loanTenureYears}y, ${p.amortizationScheme === "linear_principal" ? "Linear Principal" : "Fixed EMI"}) |\n`;
+        md += `| ${isVi ? "Lãi suất vay" : "Mortgage Interest"} | ${p.teaserAnnualRate}% (${p.teaserRateMonths}M Promo) → ${p.floatingAnnualRate}% (Floating) |\n`;
+        md += `| ${isVi ? "Chi phí mua ban đầu" : "Total Upfront Buy Outflow"} | ${fmtVal(s.initialBuyOutflow)} |\n`;
+        md += `| ${isVi ? "Tiền thuê ban đầu" : "Initial Monthly Rent"} | ${fmtVal(p.monthlyRent)}/mo (Deposit: ${p.securityDepositMonths}M) |\n`;
+        md += `| ${isVi ? "Tăng giá thuê / Lãi đầu tư" : "Rent Inflation / Inv Yield"} | Rent +${p.rentInflationRate}%/yr · Investment Yield +${p.rentInvestmentYield}%/yr |\n`;
+        md += `| ${isVi ? "Tăng giá BĐS / Lạm phát CPI" : "Property Growth / CPI"} | Property +${p.propertyAppreciationRate}%/yr · CPI +${p.cpiInflationRate}%/yr |\n\n`;
+
+        md += `## 2. ${isVi ? "Kết Quả & Chỉ Số Tài Chính Chính" : "Key Financial Outcomes & Decision Metrics"}\n\n`;
+        md += `- **${isVi ? "Người chiến thắng tài chính" : "Winning Financial Path"}:** ${s.winnerScenario.toUpperCase()} (+${fmtVal(Math.abs(s.netWealthDeltaAtHorizon))})\n`;
+        md += `- **${isVi ? "Điểm hòa vốn (Crossover)" : "Net Worth Crossover Horizon"}:** ${s.crossoverYear !== null ? (isVi ? "Sau " + s.crossoverYear + " năm (" + s.crossoverMonth + " tháng)" : "After " + s.crossoverYear + " years (" + s.crossoverMonth + " months)") : isVi ? "Không hòa vốn (Thuê thắng toàn bộ horizon)" : "No Crossover (Rent leads throughout horizon)"}\n`;
+        md += `- **${isVi ? "Tài sản ròng kết thúc (Mua)" : "Ending Realizable Equity (Buy)"}:** ${fmtVal(s.netWorthBuyEnding)}\n`;
+        md += `- **${isVi ? "Tài sản ròng kết thúc (Thuê)" : "Ending Portfolio (Rent)"}:** ${fmtVal(s.netWorthRentEnding)}\n`;
+        md += `- **${isVi ? "Tổng chi phí mất đi (Mua)" : "Total Cumulative Sunk Costs (Buy)"}:** ${fmtVal(s.totalSunkCostBuy)}\n`;
+        md += `- **${isVi ? "Tổng chi phí mất đi (Thuê)" : "Total Cumulative Sunk Costs (Rent)"}:** ${fmtVal(s.totalSunkCostRent)}\n`;
+        md += `- **Price-to-Rent Ratio (PRR):** ${s.priceToRentRatio.toFixed(1)}x (Gross Yield: ${s.grossRentalYield.toFixed(1)}%/yr)\n\n`;
+
+        md += `## 3. ${isVi ? "Hướng Dẫn & Yêu Cầu Chuyên Gia AI (Prompt Blueprint)" : "AI Advisor Consultation Blueprint"}\n\n`;
+
+        if (blueprintKey === "verdict") {
+          md += `> **Mục tiêu tư vấn / Advisory Objective:** Phân tích toàn diện quyết định mua vs thuê nhà dựa trên điểm hòa vốn, chi phí cơ hội của tiền đặt cọc và mức độ an toàn tài chính.\n\n`;
+          md += `Vui lòng phân tích:\n1. Điểm hòa vốn ${s.crossoverYear !== null ? s.crossoverYear + " năm" : "không đạt được"} có thực tế với chu kỳ di chuyển việc làm / gia đình không?\n2. Chi phí mất đi (Sunk Costs) giữa trả lãi vay + phí bảo trì so với tiền thuê nhà?\n3. Khuyến nghị chiến lược hành động cụ thể cho người mua/người thuê trong 3–5 năm tới.`;
+        } else if (blueprintKey === "stress_test") {
+          md += `> **Mục tiêu tư vấn / Advisory Objective:** Kiểm tra độ căng thẳng tài chính (Stress-Test) trước rủi ro lãi suất thả nổi tăng vọt, mất việc làm hoặc thị trường BĐS đi ngang.\n\n`;
+          md += `Vui lòng đánh giá:\n1. Rủi ro khi lãi suất thả nổi vượt 12%–14% sau khi hết kỳ ưu đãi ${p.teaserRateMonths} tháng?\n2. Áp lực dòng tiền hàng tháng so với thu nhập và quỹ dự phòng thanh khoản?\n3. Kịch bản thoát hiểm nếu giá nhà không tăng trưởng như kỳ vọng (${p.propertyAppreciationRate}%).`;
+        } else if (blueprintKey === "fire") {
+          md += `> **Mục tiêu tư vấn / Advisory Objective:** Tối ưu hóa lộ trình Tự do Tài chính & Nghỉ hưu sớm (FIRE).\n\n`;
+          md += `Vui lòng phân tích:\n1. Tác động của việc khóa vốn lớn vào tài sản cố định (nhà ở) đối với tỷ lệ tự do tài chính và dòng tiền thụ động?\n2. So sánh hiệu quả sinh lời giữa BĐS vs Danh mục cổ phiếu/ETF (${p.rentInvestmentYield}% p.a.)?\n3. Chiến lược nào giúp rút ngắn thời gian đạt mục tiêu FIRE nhanh hơn?`;
+        } else if (blueprintKey === "asset_allocation") {
+          md += `> **Mục tiêu tư vấn / Advisory Objective:** Đánh giá phân bổ danh mục tài sản và tỷ trọng đòn bẩy tài chính.\n\n`;
+          md += `Vui lòng tư vấn:\n1. Tỷ lệ đòn bẩy vay (${100 - p.downpaymentPercent}%) có tối ưu trên tổng tài sản không?\n2. Đa dạng hóa danh mục đầu tư giữa đất đai / căn hộ và tài sản thanh khoản cao?\n3. Thời điểm thích hợp để tái cấu trúc nợ hoặc chốt lời BĐS.`;
+        } else {
+          md += `> **Yêu cầu tùy chỉnh:** ${customQuery || "Đánh giá tổng thể phương án tối ưu tài chính."}\n`;
+        }
+
+        return md;
+      }
+
+      function openAIDossierModal() {
+        const modal = document.getElementById("aiDossierModal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          updateDossierMarkdownPreview();
+        }
+      }
+
+      function closeAIDossierModal() {
+        const modal = document.getElementById("aiDossierModal");
+        if (modal) modal.classList.add("hidden");
+      }
+
+      function setDossierBlueprint(bpKey) {
+        currentDossierBlueprint = bpKey;
+        const keys = ["verdict", "stress_test", "fire", "asset_allocation"];
+        keys.forEach((k) => {
+          const btn = document.getElementById(`bpBtn_${k}`);
+          if (btn) {
+            if (k === bpKey) {
+              btn.className =
+                "px-3 py-1.5 rounded-lg border font-semibold transition bg-emerald-600/20 border-emerald-500 text-emerald-300";
+            } else {
+              btn.className =
+                "px-3 py-1.5 rounded-lg border font-semibold transition bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200";
+            }
+          }
+        });
+        updateDossierMarkdownPreview();
+      }
+
+      function toggleDossierPrivacy(checked) {
+        isDossierAnonymized = !!checked;
+        updateDossierMarkdownPreview();
+      }
+
+      function updateDossierMarkdownPreview() {
+        const textarea = document.getElementById("dossierMarkdownTextarea");
+        if (textarea) {
+          textarea.value = generateAIDossierMarkdown(currentParams);
+        }
+      }
+
+      function copyDossierMarkdown() {
+        const md = generateAIDossierMarkdown(currentParams);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(md).then(() => {
+            showToast(TRANSLATIONS[currentLang].toast_copied);
+          });
+        } else {
+          const textarea = document.getElementById("dossierMarkdownTextarea");
+          if (textarea) {
+            textarea.select();
+            document.execCommand("copy");
+            showToast(TRANSLATIONS[currentLang].toast_copied);
+          }
+        }
+      }
+
+      function downloadDossierMarkdown() {
+        const md = generateAIDossierMarkdown(currentParams);
+        const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `buy-vs-rent-dossier-${currentDossierBlueprint}.md`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast(TRANSLATIONS[currentLang].toast_copied);
+      }
+
+      /**
+       * Onboarding Walkthrough Tour Handlers
+       */
+      let currentTourStep = 0;
+      const TOUR_STEPS = [
+        {
+          icon: "fa-house-chimney",
+          titleVi: "1. Chọn Loại Hình & Thông Số Mua",
+          descVi:
+            "Nhập giá mua nhà, tỷ lệ trả trước và cơ chế vay (Dư nợ giảm dần hoặc Niên kim cố định).",
+          titleEn: "1. Select Property Type & Purchase Terms",
+          descEn:
+            "Enter home purchase price, downpayment percentage, and mortgage repayment structure.",
+        },
+        {
+          icon: "fa-key",
+          titleVi: "2. Thiết Lập Phương Án Thuê",
+          descVi:
+            "Nhập tiền thuê hàng tháng, số tháng đặt cọc và tỷ suất sinh lời kỳ vọng khi đầu tư vốn chênh lệch.",
+          titleEn: "2. Configure Renting Scenario",
+          descEn:
+            "Set monthly rent, security deposit months, and expected annual return on invested capital.",
+        },
+        {
+          icon: "fa-chart-line",
+          titleVi: "3. Theo Dõi 4 Tab Phân Tích",
+          descVi:
+            "Xem đường tài sản ròng, tổng chi phí mất đi, dòng tiền thực tế và ma trận độ nhạy hòa vốn.",
+          titleEn: "3. Explore 4 Analytics Tabs",
+          descEn:
+            "Track net wealth trajectories, cumulative sunk costs, monthly cashflows, and sensitivity matrix.",
+        },
+        {
+          icon: "fa-brain",
+          titleVi: "4. Xuất Hồ Sơ Tư Vấn AI",
+          descVi:
+            "Mở hồ sơ AI với 4 kịch bản tư vấn và chế độ ẩn danh bảo mật để hỏi ChatGPT, Claude, Gemini.",
+          titleEn: "4. Export AI Consultation Dossier",
+          descEn:
+            "Generate structured Markdown dossiers with zero-leak privacy masking for AI chatbots.",
+        },
+      ];
+
+      function startOnboardingTour() {
+        currentTourStep = 0;
+        const modal = document.getElementById("onboardingTourModal");
+        if (modal) {
+          modal.classList.remove("hidden");
+          renderTourStep();
+        }
+      }
+
+      function closeOnboardingTour() {
+        const modal = document.getElementById("onboardingTourModal");
+        if (modal) modal.classList.add("hidden");
+      }
+
+      function nextTourStep() {
+        if (currentTourStep < TOUR_STEPS.length - 1) {
+          currentTourStep++;
+          renderTourStep();
+        } else {
+          closeOnboardingTour();
+        }
+      }
+
+      function prevTourStep() {
+        if (currentTourStep > 0) {
+          currentTourStep--;
+          renderTourStep();
+        }
+      }
+
+      function renderTourStep() {
+        const step = TOUR_STEPS[currentTourStep];
+        const isVi = currentLang === "vi";
+
+        const badge = document.getElementById("tourStepBadge");
+        if (badge)
+          badge.innerText = `${isVi ? "Bước" : "Step"} ${currentTourStep + 1} / ${TOUR_STEPS.length}`;
+
+        const icon = document.getElementById("tourIcon");
+        if (icon) icon.innerHTML = `<i class="fa-solid ${step.icon}"></i>`;
+
+        const title = document.getElementById("tourTitle");
+        if (title) title.innerText = isVi ? step.titleVi : step.titleEn;
+
+        const desc = document.getElementById("tourDesc");
+        if (desc) desc.innerText = isVi ? step.descVi : step.descEn;
+
+        const prevBtn = document.getElementById("tourPrevBtn");
+        if (prevBtn)
+          prevBtn.style.visibility =
+            currentTourStep === 0 ? "hidden" : "visible";
+
+        const nextBtn = document.getElementById("tourNextBtn");
+        if (nextBtn) {
+          nextBtn.innerText =
+            currentTourStep === TOUR_STEPS.length - 1
+              ? isVi
+                ? "Hoàn tất"
+                : "Finish"
+              : isVi
+                ? "Tiếp tục"
+                : "Next";
+        }
+      }
+
+      /**
+       * State Persistence & URL Compression Handlers
+       */
+      const STORAGE_KEY = "buyVsRent_params_v1";
+
+      function saveParamsToStorage(params) {
+        try {
+          if (typeof localStorage !== "undefined") {
+            localStorage.setItem(
+              STORAGE_KEY,
+              JSON.stringify({ version: 1, params })
+            );
+          }
+        } catch (e) {}
+      }
+
+      function loadParamsFromStorage() {
+        try {
+          if (typeof localStorage !== "undefined") {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            const data = JSON.parse(raw);
+            if (data && data.params) return data.params;
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      function serializeStateToHash(params) {
+        try {
+          const jsonStr = JSON.stringify(params);
+          if (typeof LZString !== "undefined") {
+            return "#" + LZString.compressToEncodedURIComponent(jsonStr);
+          }
+          if (typeof btoa === "function") {
+            return "#" + encodeURIComponent(btoa(jsonStr));
+          }
+          return "#" + encodeURIComponent(jsonStr);
+        } catch (e) {
+          return "";
+        }
+      }
+
+      function deserializeStateFromHash(hash) {
+        if (!hash || hash.length <= 1) return null;
+        const raw = hash.startsWith("#") ? hash.slice(1) : hash;
+        try {
+          if (typeof LZString !== "undefined") {
+            const decompressed =
+              LZString.decompressFromEncodedURIComponent(raw);
+            if (decompressed) return JSON.parse(decompressed);
+          }
+        } catch (e) {}
+        try {
+          if (typeof atob === "function") {
+            const base64Decoded = atob(decodeURIComponent(raw));
+            return JSON.parse(base64Decoded);
+          }
+        } catch (e) {}
+        try {
+          return JSON.parse(decodeURIComponent(raw));
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function shareSimulationUrl() {
+        const hash = serializeStateToHash(currentParams);
+        const fullUrl =
+          window.location.origin + window.location.pathname + hash;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(fullUrl).then(() => {
+            showToast(TRANSLATIONS[currentLang].toast_copied);
+          });
+        } else {
+          showToast(TRANSLATIONS[currentLang].toast_copied);
+        }
+      }
+
+      function dismissAllModals() {
+        closeAIDossierModal();
+        closeOnboardingTour();
+        togglePersonaMenu(false);
+      }
+
       // Initialize application on window load
       if (typeof window !== "undefined") {
         if (typeof window.addEventListener === "function") {
           window.addEventListener("DOMContentLoaded", () => {
+            // Check URL state first
+            if (window.location && window.location.hash) {
+              const urlParams = deserializeStateFromHash(window.location.hash);
+              if (urlParams)
+                currentParams = { ...DEFAULT_BUY_VS_RENT_PARAMS, ...urlParams };
+            } else {
+              const stored = loadParamsFromStorage();
+              if (stored)
+                currentParams = { ...DEFAULT_BUY_VS_RENT_PARAMS, ...stored };
+            }
+
             renderApp();
             renderActiveTabChart();
+          });
+
+          window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+              dismissAllModals();
+            }
+          });
+
+          window.addEventListener("hashchange", () => {
+            if (window.location && window.location.hash) {
+              const urlParams = deserializeStateFromHash(window.location.hash);
+              if (urlParams) {
+                currentParams = { ...DEFAULT_BUY_VS_RENT_PARAMS, ...urlParams };
+                renderApp();
+                renderActiveTabChart();
+              }
+            }
           });
         }
 
@@ -2387,6 +3036,23 @@
         window.renderActiveTabChart = renderActiveTabChart;
         window.renderSensitivityMatrixHtml = renderSensitivityMatrixHtml;
         window.exportChartPNG = exportChartPNG;
+        window.generateAIDossierMarkdown = generateAIDossierMarkdown;
+        window.openAIDossierModal = openAIDossierModal;
+        window.closeAIDossierModal = closeAIDossierModal;
+        window.setDossierBlueprint = setDossierBlueprint;
+        window.toggleDossierPrivacy = toggleDossierPrivacy;
+        window.copyDossierMarkdown = copyDossierMarkdown;
+        window.downloadDossierMarkdown = downloadDossierMarkdown;
+        window.startOnboardingTour = startOnboardingTour;
+        window.closeOnboardingTour = closeOnboardingTour;
+        window.nextTourStep = nextTourStep;
+        window.prevTourStep = prevTourStep;
+        window.saveParamsToStorage = saveParamsToStorage;
+        window.loadParamsFromStorage = loadParamsFromStorage;
+        window.serializeStateToHash = serializeStateToHash;
+        window.deserializeStateFromHash = deserializeStateFromHash;
+        window.shareSimulationUrl = shareSimulationUrl;
+        window.dismissAllModals = dismissAllModals;
         window.currentParams = currentParams;
       }
     </script>

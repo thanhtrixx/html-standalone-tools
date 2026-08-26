@@ -50,6 +50,11 @@ const TEST_SUITES = [
     category: "UI/UX",
   },
   {
+    name: "Buy vs Rent URL Sharing & AI Decision Dossier",
+    file: "tests/buy-vs-rent-sharing-dossier.test.js",
+    category: "AI & State",
+  },
+  {
     name: "Calculation & Utility Helpers",
     file: "tests/helpers.test.js",
     category: "Helpers",
