@@ -50,26 +50,16 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   │   └── adr/                                # Tool-specific architecture decisions (0001–0018)
 │   ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R41)
 │   └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
-├── buy-vs-rent-home-comparison/                # Standalone Tool: Buy vs Rent Comparison
-│   ├── index.html                              # Source application (HTML/CSS/JS)
-│   ├── dist/                                   # Compacted standalone production output
-│   │   └── index.html
-│   ├── CONTEXT.md                              # Tool-specific domain glossary
-│   ├── docs/
-│   │   └── adr/                                # Tool-specific architecture decisions (0001–0007)
-│   ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R36)
-│   ├── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
-│   └── buy-home-research.md                    # Real estate market & financial math research
-└── lumentree-solar-monitor/                    # Standalone Tool: Solar Monitor & Payback Forecaster
+└── buy-vs-rent-home-comparison/                # Standalone Tool: Buy vs Rent Comparison
     ├── index.html                              # Source application (HTML/CSS/JS)
     ├── dist/                                   # Compacted standalone production output
     │   └── index.html
     ├── CONTEXT.md                              # Tool-specific domain glossary
     ├── docs/
-    │   └── adr/                                # Tool-specific architecture decisions (0001–0004)
-    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & component matrix
+    │   └── adr/                                # Tool-specific architecture decisions (0001–0007)
+    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R36)
     ├── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
-    └── EXPLORATION.md                          # Technical exploration & telemetry contracts
+    └── buy-home-research.md                    # Real estate market & financial math research
 ```
 
 ### Core Architecture Principles
@@ -143,17 +133,6 @@ A client-side residential real estate financial decision engine evaluating the l
 - **Requirements & Specs:** [`buy-vs-rent-home-comparison/ITEMS_TO_IMPLEMENT.md`](./buy-vs-rent-home-comparison/ITEMS_TO_IMPLEMENT.md)
 - **Test Plan:** [`buy-vs-rent-home-comparison/TEST_PLAN.md`](./buy-vs-rent-home-comparison/TEST_PLAN.md)
 - **Financial Math Research:** [`buy-vs-rent-home-comparison/buy-home-research.md`](./buy-vs-rent-home-comparison/buy-home-research.md)
-
-### ☀️ [Lumentree Solar Monitor](./lumentree-solar-monitor/)
-
-A client-side solar energy monitoring dashboard and financial analytics tool featuring pure live telemetry direct from Lumentree inverters (2s polling + 5s heartbeat), animated SVG particle energy flow hub, JK BMS 16-cell balancing diagnostics with setup guide fallback, Open-Meteo solar irradiance forecasting, 24-hour historical power timeline, progressive 6-tier EVN electricity bill savings calculator, and Solar CapEx break-even ROI forecaster in 100% native Vietnamese.
-
-- **Source Entry:** [`lumentree-solar-monitor/index.html`](./lumentree-solar-monitor/index.html)
-- **Compacted Web Output:** [`lumentree-solar-monitor/dist/index.html`](./lumentree-solar-monitor/dist/index.html)
-- **Domain Model:** [`lumentree-solar-monitor/CONTEXT.md`](./lumentree-solar-monitor/CONTEXT.md)
-- **Requirements & Specs:** [`lumentree-solar-monitor/ITEMS_TO_IMPLEMENT.md`](./lumentree-solar-monitor/ITEMS_TO_IMPLEMENT.md)
-- **Test Plan:** [`lumentree-solar-monitor/TEST_PLAN.md`](./lumentree-solar-monitor/TEST_PLAN.md)
-- **Technical Exploration:** [`lumentree-solar-monitor/EXPLORATION.md`](./lumentree-solar-monitor/EXPLORATION.md)
 
 ---
 
