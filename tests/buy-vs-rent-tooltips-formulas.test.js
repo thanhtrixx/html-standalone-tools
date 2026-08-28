@@ -230,14 +230,27 @@ assert(
   "hideAppTooltip sets opacity-0 transition class on container"
 );
 
-// 4. Methodology Modal
-const modalEl = documentStub.getElementById("methodologyModal");
-modalEl.classList.add("hidden");
-
-sandbox.window.openMethodologyModal();
+// 4. In-Page Methodology & Formula Hub
 assert(
-  !modalEl.classList.contains("hidden"),
-  "openMethodologyModal displays methodologyModal"
+  htmlContent.includes('id="methodologySection"'),
+  "In-page #methodologySection exists in HTML DOM"
+);
+assert(
+  htmlContent.includes('id="scrollTopBtn"') ||
+    htmlContent.includes('data-i18n="btn_scroll_top"'),
+  "Back-to-top button exists in methodology section footer"
+);
+
+const secEl = documentStub.getElementById("methodologySection");
+let scrolledTo = false;
+secEl.scrollIntoView = () => {
+  scrolledTo = true;
+};
+
+sandbox.window.scrollToMethodologySection();
+assert(
+  scrolledTo,
+  "scrollToMethodologySection smoothly scrolls to #methodologySection"
 );
 
 sandbox.window.switchMethodologySection("glossary");
@@ -256,10 +269,10 @@ assert(
   "switchMethodologySection switches active view to invariants"
 );
 
-sandbox.window.closeMethodologyModal();
+sandbox.window.switchMethodologySection("formulas");
 assert(
-  modalEl.classList.contains("hidden"),
-  "closeMethodologyModal hides methodologyModal"
+  !secFormulas.classList.contains("hidden"),
+  "switchMethodologySection switches active view back to formulas"
 );
 
 // 5. Dynamic Interactive Formula Traces - Mortgage
@@ -336,21 +349,18 @@ assert(
 );
 
 // 10. dismissAllModals lifecycle
-const methModal = documentStub.getElementById("methodologyModal");
 const tourModal = documentStub.getElementById("onboardingTourModal");
 const dossierModal = documentStub.getElementById("aiDossierModal");
 
-methModal.classList.remove("hidden");
 tourModal.classList.remove("hidden");
 dossierModal.classList.remove("hidden");
 
 sandbox.window.dismissAllModals();
 
 assert(
-  methModal.classList.contains("hidden") &&
-    tourModal.classList.contains("hidden") &&
+  tourModal.classList.contains("hidden") &&
     dossierModal.classList.contains("hidden"),
-  "dismissAllModals cleanly closes methodology modal, tour modal, and AI dossier modal"
+  "dismissAllModals cleanly closes tour modal, and AI dossier modal"
 );
 
 // 11. KaTeX & LaTeX Formulations Verification

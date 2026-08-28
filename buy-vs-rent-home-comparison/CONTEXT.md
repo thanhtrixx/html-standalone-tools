@@ -153,7 +153,7 @@ A responsive floating micro-dialog triggered via hover or tap on information `(i
 _Avoid_: Static title attribute, inline helper text, popup drawer
 
 **Methodology & Formula Hub**:
-A dedicated in-app modal repository delivering complete mathematical proofs, variable definitions, live variable substitution traces, and bilingual glossary references for the underlying simulation engine.
+A dedicated in-page repository delivering complete mathematical proofs, variable definitions, live variable substitution traces, and bilingual glossary references for the underlying simulation engine, accessible via direct scroll and top header anchor.
 _Avoid_: Math docs, formula sheet, help guide
 
 **Dynamic Formula Trace**:
