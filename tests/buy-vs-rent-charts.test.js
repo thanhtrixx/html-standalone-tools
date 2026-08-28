@@ -233,6 +233,73 @@ try {
     true,
     "exportChartPNG executed cleanly with offscreen canvas rendering"
   );
+
+  // Test 7: tabBtn_sunk button exists in DOM and switches tab
+  const sunkTabBtn = app.document.getElementById("tabBtn_sunk");
+  assert(sunkTabBtn !== null, "tabBtn_sunk element exists in DOM");
+  app.switchAnalyticsTab("sunk");
+  assert(
+    app.currentTab === "sunk",
+    "switchAnalyticsTab('sunk') updates currentTab to sunk"
+  );
+
+  // Test 8: Adaptive Sensitivity Matrix Centering & Baseline Flag
+  const customParams = {
+    ...app.DEFAULT_BUY_VS_RENT_PARAMS,
+    propertyAppreciationRate: 9.0,
+    rentInvestmentYield: 10.5,
+  };
+  const adaptiveMatrix = app.generateSensitivityMatrix(customParams);
+  assert(
+    adaptiveMatrix.length === 6,
+    "generateSensitivityMatrix produces 6 rows"
+  );
+  assert(
+    adaptiveMatrix[0].cells.length === 6,
+    "generateSensitivityMatrix produces 6 columns"
+  );
+  const baselineCell = adaptiveMatrix
+    .flatMap((r) => r.cells)
+    .find((c) => c.isCurrentBaseline);
+  assert(
+    baselineCell !== undefined,
+    "generateSensitivityMatrix marks isCurrentBaseline: true on matching active coordinate"
+  );
+  assert(
+    baselineCell.propertyAppreciationRate === 9.0 &&
+      baselineCell.rentInvestmentYield === 10.5,
+    "Baseline cell matches active parameter rates (9.0% vs 10.5%)"
+  );
+
+  // Test 9: Sensitivity HTML renders dynamic headers & baseline badge
+  app.currentParams = customParams;
+  app.renderSensitivityMatrixHtml(matrixContainer);
+  assert(
+    matrixContainer.innerHTML.includes("10.5%"),
+    "Sensitivity table header dynamically renders centered 10.5% yield column"
+  );
+  assert(
+    matrixContainer.innerHTML.includes("★"),
+    "Sensitivity table renders ★ star badge on active baseline cell"
+  );
+  assert(
+    matrixContainer.innerHTML.includes("ring-2 ring-indigo-400"),
+    "Sensitivity table applies ring-2 highlight styling to active baseline cell"
+  );
+
+  // Test 10: renderApp reactively invokes chart re-rendering
+  let chartRenderCount = 0;
+  const originalRenderActiveTabChart = app.renderActiveTabChart;
+  app.renderActiveTabChart = function () {
+    chartRenderCount++;
+    return originalRenderActiveTabChart.apply(this, arguments);
+  };
+  app.renderApp();
+  assert(
+    chartRenderCount > 0,
+    "renderApp() reliably triggers renderActiveTabChart() on parameter update"
+  );
+  app.renderActiveTabChart = originalRenderActiveTabChart;
 } catch (err) {
   console.error("❌ Test suite encountered runtime exception:", err);
   failed++;

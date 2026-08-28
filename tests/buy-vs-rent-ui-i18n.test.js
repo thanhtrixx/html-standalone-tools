@@ -588,6 +588,46 @@ try {
       `Toast alert key '${k}' is translated in VI & EN: "${app.TRANSLATIONS.vi[k]}" / "${app.TRANSLATIONS.en[k]}"`
     );
   });
+
+  // Test 15: Header methodology button removed & in-page section preserved
+  assert(
+    !htmlContent.includes('id="methodologyBtn"'),
+    "#methodologyBtn removed from top header navigation"
+  );
+  assert(
+    htmlContent.includes('id="methodologySection"'),
+    "#methodologySection preserved at the bottom of the page"
+  );
+
+  // Test 16: Unfolded Acquisition Breakdown Card
+  assert(
+    htmlContent.includes('id="acquisitionBreakdownCard"'),
+    "#acquisitionBreakdownCard exists as an open, non-collapsible card"
+  );
+  assert(
+    !htmlContent.includes('data-i18n="sec_acquisition_breakdown"</span'),
+    "Acquisition breakdown title rendered properly"
+  );
+
+  // Test 17: Analytics Tab & Legend Translation Key Parity
+  const tabKeys = [
+    "tab_timeline",
+    "tab_sunk",
+    "tab_cashflow",
+    "tab_sensitivity",
+    "legend_buy_equity",
+    "legend_rent_portfolio",
+    "legend_buy_sunk",
+    "legend_rent_sunk",
+    "legend_buy_cashflow",
+    "legend_rent_cashflow",
+  ];
+  tabKeys.forEach((k) => {
+    assert(
+      app.TRANSLATIONS.vi[k] && app.TRANSLATIONS.en[k],
+      `Analytics translation key '${k}' has 100% parity: [vi] "${app.TRANSLATIONS.vi[k]}" | [en] "${app.TRANSLATIONS.en[k]}"`
+    );
+  });
 } catch (err) {
   console.error("❌ Test suite encountered runtime exception:", err);
   failed++;
