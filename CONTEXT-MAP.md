@@ -6,7 +6,6 @@ This repository is a collection of standalone, client-side HTML tools. Each tool
 
 - [Personal Finance Savings Predictor](./personal-finance-savings-predictor/CONTEXT.md): Client-side savings simulation, compound salary escalation, multi-tier deposit, inflation forecasting, and portfolio management tool.
 - [Buy vs. Rent Home Comparison](./buy-vs-rent-home-comparison/CONTEXT.md): Standalone client-side housing decision engine, dual-path wealth projection, mortgage amortization modeling, opportunity cost sweep, and sensitivity matrix analysis.
-- [Lumentree Solar Monitor](./lumentree-solar-monitor/CONTEXT.md): Pure live solar inverter telemetry dashboard, animated particle energy flow hub, JK BMS 16-cell balancing diagnostics, Open-Meteo solar radiation forecast, 24-hour historical power timeline, EVN progressive tiered electricity savings engine, and Solar CapEx Payback Forecaster.
 
 ## Relationships & Isolation
 
