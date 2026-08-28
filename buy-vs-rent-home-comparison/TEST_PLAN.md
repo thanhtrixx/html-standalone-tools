@@ -57,6 +57,7 @@ npm run test:buy-rent:tooltips# Floating tooltips, methodology hub & dynamic for
 | **R35** | Zero-Build Compaction Deliverable           | Single standalone HTML source file compacted into `dist/` verifying 100% offline standalone capability                                                          | Root [`ADR-0003`](../docs/adr/0003-compacted-standalone-html-build-pipeline.md)                   | P0       |
 | **R36** | In-Page Methodology & Bottom Chart          | Balanced 2-column parameter workbench, full-width 12-col bottom analytics chart hub, and dedicated in-page methodology section with header smooth-scroll anchor | [`ADR-0007`](./docs/adr/0007-in-page-methodology-and-full-width-chart-layout.md)                  | P1       |
 | **R37** | Sensitivity Reactivity & Unfolded Breakdown | Reactive 6x6 adaptive sensitivity matrix centered around active parameters with baseline cell highlight, unfolded acquisition sub-card, and 4-tab analytics hub | [`ADR-0008`](./docs/adr/0008-sensitivity-matrix-reactivity-and-unfolded-acquisition-breakdown.md) | P1       |
+| **R38** | Sensitivity Clarity & Timeline Navigation   | Dynamic Analytics Hub header context, context-aware Real CPI toggle, in-tab matrix CSV export, and actionable toast timeline navigation                         | [`ADR-0010`](./docs/adr/0010-sensitivity-matrix-visual-clarity-and-timeline-navigation.md)        | P1       |
 
 ---
 
