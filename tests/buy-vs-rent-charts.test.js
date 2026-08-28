@@ -148,6 +148,13 @@ console.log(
 
 try {
   const app = loadBuyVsRentChartSandbox();
+  const htmlPath = path.join(
+    __dirname,
+    "..",
+    "buy-vs-rent-home-comparison",
+    "index.html"
+  );
+  const htmlContent = fs.readFileSync(htmlPath, "utf8");
 
   // Test 1: Global chart functions exported
   assert(
@@ -272,7 +279,8 @@ try {
   );
 
   // Test 9: Sensitivity HTML renders dynamic headers & baseline badge
-  app.currentParams = customParams;
+  Object.assign(app.currentParams, customParams);
+  app.renderApp();
   app.renderSensitivityMatrixHtml(matrixContainer);
   assert(
     matrixContainer.innerHTML.includes("10.5%"),
@@ -300,6 +308,139 @@ try {
     "renderApp() reliably triggers renderActiveTabChart() on parameter update"
   );
   app.renderActiveTabChart = originalRenderActiveTabChart;
+
+  // Test 11: applySensitivityScenario updates rates and re-renders
+  app.applySensitivityScenario(7.5, 9.0);
+  assert(
+    app.currentParams.propertyAppreciationRate === 7.5,
+    "applySensitivityScenario updates currentParams.propertyAppreciationRate to 7.5%"
+  );
+  assert(
+    app.currentParams.rentInvestmentYield === 9.0,
+    "applySensitivityScenario updates currentParams.rentInvestmentYield to 9.0%"
+  );
+  assert(
+    matrixContainer.innerHTML.includes('onclick="applySensitivityScenario('),
+    "Sensitivity table cells contain interactive applySensitivityScenario click handlers"
+  );
+
+  // Test 12: Section ordering: #methodologySection appears before #analyticsHubSection in DOM
+  const methIndex = htmlContent.indexOf('id="methodologySection"');
+  const analyticsIndex = htmlContent.indexOf('id="analyticsHubSection"');
+  assert(
+    methIndex !== -1 && analyticsIndex !== -1 && methIndex < analyticsIndex,
+    "#methodologySection is positioned higher in the DOM than #analyticsHubSection"
+  );
+
+  // Test 13: Methodology clean UI/UX toggle button and container
+  assert(
+    htmlContent.includes('id="toggleMethodologyVisibilityBtn"'),
+    "#toggleMethodologyVisibilityBtn toggle button exists in methodology header"
+  );
+  assert(
+    htmlContent.includes('id="methodologyBodyContainer"'),
+    "#methodologyBodyContainer collapsible container wraps methodology body"
+  );
+  assert(
+    typeof app.toggleMethodologyVisibility === "function",
+    "toggleMethodologyVisibility function is defined and globally exported"
+  );
+
+  // Test 14: Currency Stepper Buttons
+  const initialHomePrice = app.currentParams.homePrice;
+  app.stepCurrencyValue("homePrice", 500000000);
+  assert(
+    app.currentParams.homePrice === initialHomePrice + 500000000,
+    "stepCurrencyValue('homePrice', +500M) increments home price accurately"
+  );
+  app.stepCurrencyValue("homePrice", -500000000);
+  assert(
+    app.currentParams.homePrice === initialHomePrice,
+    "stepCurrencyValue('homePrice', -500M) decrements home price accurately"
+  );
+
+  // Test 15: Preset Chips Highlighting in DOM
+  assert(
+    htmlContent.includes('class="price-chip') &&
+      htmlContent.includes('class="rent-chip'),
+    "Price chips and Rent chips have dedicated class names for active selection state"
+  );
+
+  // Test 16: Dynamic Analytics Hub Subtitles
+  app.switchAnalyticsTab("timeline");
+  const subtitleEl = app.document.getElementById("chartSubtitleExplainer");
+  assert(
+    subtitleEl !== null &&
+      subtitleEl.innerText === app.TRANSLATIONS[app.currentLang].sub_timeline,
+    "Analytics Hub subtitle displays timeline context description on timeline tab"
+  );
+  app.switchAnalyticsTab("sensitivity");
+  assert(
+    subtitleEl.innerText === app.TRANSLATIONS[app.currentLang].sub_sensitivity,
+    "Analytics Hub subtitle dynamically updates to 2D heatmap description on sensitivity tab"
+  );
+
+  // Test 17: Context-Aware Real CPI Toggle & Sensitivity Badge
+  const realModeContainer = app.document.getElementById("realModeContainer");
+  const sensitivityNotice = app.document.getElementById(
+    "sensitivityModeNotice"
+  );
+  assert(
+    realModeContainer.classList.contains("hidden"),
+    "Real CPI Discount container is hidden when on sensitivity matrix tab"
+  );
+  assert(
+    !sensitivityNotice.classList.contains("hidden"),
+    "Sensitivity mode badge notice is visible when on sensitivity matrix tab"
+  );
+  app.switchAnalyticsTab("timeline");
+  assert(
+    !realModeContainer.classList.contains("hidden"),
+    "Real CPI Discount container is restored when switching back to timeline chart tab"
+  );
+  assert(
+    sensitivityNotice.classList.contains("hidden"),
+    "Sensitivity mode badge notice is hidden on timeline chart tab"
+  );
+
+  // Test 18: In-Tab Matrix CSV Export
+  assert(
+    typeof app.exportSensitivityCSV === "function",
+    "exportSensitivityCSV function is defined and globally exported"
+  );
+  app.switchAnalyticsTab("sensitivity");
+  const matrixHtmlBox = app.document.getElementById("sensitivityContainer");
+  assert(
+    matrixHtmlBox.innerHTML.includes('onclick="exportSensitivityCSV()"'),
+    "Sensitivity matrix toolbar includes interactive Export CSV button"
+  );
+  app.exportSensitivityCSV();
+  assert(
+    true,
+    "exportSensitivityCSV() executes cleanly without runtime exception"
+  );
+
+  // Test 19: Actionable Toast Timeline Navigation
+  let lastToastMsg = "";
+  let lastToastAction = "";
+  const origShowToast = app.showToast;
+  app.showToast = function (msg, actionHtml) {
+    lastToastMsg = msg;
+    lastToastAction = actionHtml;
+    return origShowToast.apply(this, arguments);
+  };
+  app.applySensitivityScenario(6.5, 8.0);
+  assert(
+    lastToastAction.includes("switchAnalyticsTab('timeline')") ||
+      lastToastAction.includes('switchAnalyticsTab("timeline")'),
+    "applySensitivityScenario toast includes direct 1-click timeline navigation action"
+  );
+  assert(
+    lastToastAction.includes("Xem Đồ Thị →") ||
+      lastToastAction.includes("View Timeline →"),
+    "applySensitivityScenario toast renders localized timeline navigation button"
+  );
+  app.showToast = origShowToast;
 } catch (err) {
   console.error("❌ Test suite encountered runtime exception:", err);
   failed++;

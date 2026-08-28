@@ -62,6 +62,7 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R35** | **Zero-Build Compaction Deliverable**           | Single standalone HTML source file compacted into `dist/` verifying 100% offline standalone capability.                                                          | P0       | ADR-0001 (Root) |
 | **R36** | **In-Page Methodology & Bottom Chart Layout**   | Balanced 2-column parameter workbench, full-width 12-col bottom analytics chart hub, and dedicated in-page methodology section with header smooth-scroll anchor. | P1       | ADR-0007        |
 | **R37** | **Sensitivity Reactivity & Unfolded Breakdown** | Reactive 6x6 adaptive sensitivity matrix centered around active parameters with baseline cell highlight, unfolded acquisition sub-card, and 4-tab analytics hub. | P1       | ADR-0008        |
+| **R38** | **Sensitivity Clarity & Timeline Navigation**   | Dynamic Analytics Hub header context, context-aware Real CPI toggle, in-tab matrix CSV export, and actionable toast timeline navigation.                         | P1       | ADR-0010        |
 
 ---
 

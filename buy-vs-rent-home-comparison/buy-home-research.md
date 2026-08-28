@@ -76,69 +76,68 @@ flowchart TD
 
 ---
 
-## 🏛️ 3. Proposed Target Layout Architecture (To-Be)
+## 🏛️ 3. Implemented Modern UI/UX Layout Architecture
 
 ```mermaid
 flowchart TD
-    Header["Top Header & Navigation<br/>(Logo, Title, Strategy Personas, Anchor to Methodology, AI Dossier, Tour, Lang, Theme, Share)"]
+    Header["Top Header & Navigation<br/>(Logo, Title, Strategy Personas, AI Dossier, Tour, Lang, Theme, Share)"]
     KPI["Top KPI Summary Bar (4 Cards)<br/>[Crossover Horizon | Ending Net Wealth | Total Sunk Costs | PRR & Yield]"]
 
-    subgraph Inputs["Parameter Configuration Workbench (Side-by-Side 2-Column or 3-Column Grid)"]
-        BuyCol["BUY PATH CONFIGURATION (Left)<br/>• Property Type (Apartment vs. Landed)<br/>• Home Price (Input + Chips + Spelled Helper)<br/>• Downpayment % & Loan Principal Display<br/>• Loan Tenure & Amortization Scheme<br/>• Teaser Rate & Floating Rate<br/>• Upfront Acquisition Breakdown Accordion"]
-        RentCol["RENT PATH & MACRO CONFIGURATION (Right)<br/>• Monthly Rent (Input + Chips + Spelled Helper)<br/>• Rent Inflation & Expected Yield (Chips + Sliders)<br/>• Initial Rent Portfolio Breakdown Display<br/>• Property Appreciation Rate & CPI Inflation<br/>• Simulation Horizon Selector (5 to 30 Years)"]
+    subgraph Inputs["Streamlined Parameter Configuration Workbench (2-Column Grid)"]
+        BuyCol["BUY PATH CONFIGURATION (Left)<br/>• Home Price (₫ adornment, -500Tr / +500Tr / +1Tỷ steppers, active chips, live spelled badge)<br/>• Downpayment % & Loan Principal Display<br/>• Loan Tenure & Amortization Scheme<br/>• Teaser Rate & Floating Rate<br/>• Upfront Acquisition Breakdown (Tax 0.6%, Fit-out, Total Buy Cash)"]
+        RentCol["RENT PATH & MACRO CONFIGURATION (Right)<br/>• Monthly Rent (₫ adornment, /tháng suffix, -1Tr / +1Tr / +5Tr steppers, active chips, live spelled badge)<br/>• Rent Inflation & Expected Yield (Chips + Number Inputs)<br/>• Initial Rent Portfolio Seed Display<br/>• Property Appreciation Rate & CPI Inflation<br/>• Simulation Horizon Selector (5 to 30 Years)"]
+    end
+
+    subgraph Methodology["In-Page Methodology & Formula Hub (#methodologySection - Positioned ABOVE Charts)"]
+        MethHeader["Section Header with Clean UI/UX Toggle Collapse/Expand Button (#toggleMethodologyVisibilityBtn)"]
+        MethBody["Collapsible Container (#methodologyBodyContainer)<br/>• Switcher Tabs: [Formulas & Live Traces] | [Glossary] | [Invariants]<br/>• KaTeX Math Formulations + Live Dynamic User Parameter Variable Traces<br/>• Domain Glossary & Verified 134 Assertions Badge"]
     end
 
     subgraph Analytics["Full-Width Analytics & Visualization Hub (12 Columns)"]
-        AnalyticsHeader["Tab Switcher (Net Wealth Timeline | Cashflow Outflows | Sensitivity Heatmap)<br/>+ Real Purchasing Power (CPI Discount) Toggle"]
-        CanvasContainer["Expansive Full-Width Chart Canvas (100% Width, Min Height 450px)<br/>/ Full-Width Sensitivity Matrix"]
+        AnalyticsHeader["Tab Switcher (Net Wealth Timeline | Sunk Costs | Cashflow Outflows | Interactive Sensitivity Matrix)<br/>+ Real Purchasing Power (CPI Discount) Toggle"]
+        CanvasContainer["Expansive Full-Width Chart Canvas / Interactive 2D Sensitivity Matrix (Click any cell to apply scenario)"]
         AnalyticsFooter["Color-Coded Interactive Legend + High-Res PNG Export Button"]
-    end
-
-    subgraph Methodology["In-Page Methodology & Formula Hub Section (#methodologySection)"]
-        MethNav["Section Tabs / Accordion: [Formulas & Live Traces] | [Domain Glossary] | [Simulation Invariants]"]
-        MethFormulas["KaTeX LaTeX Math Formulations + Live Dynamic User Parameter Variable Traces"]
-        MethGlossary["Bilingual Financial Glossary Grid (Sunk Costs, Crossover, Teaser Rates, PRR)"]
-        MethInvariants["Simulation Invariants & Automated Test Verification Badge"]
     end
 
     Header --> KPI
     KPI --> Inputs
-    Inputs --> Analytics
-    Analytics --> Methodology
+    Inputs --> Methodology
+    Methodology --> Analytics
 ```
 
 <details>
-<summary>ASCII Target Diagram (Text Fallback)</summary>
+<summary>ASCII Layout Diagram (Text Fallback)</summary>
 
 ```text
 +---------------------------------------------------------------------------------------------------+
-| HEADER: Title, Strategy Personas, [Methodology Anchor], [AI Dossier], Tour, Lang, Theme, Share    |
+| HEADER: Title, Strategy Personas, [AI Dossier], Tour, Lang (VI/EN), Theme (Dark/Light), Share     |
 +---------------------------------------------------------------------------------------------------+
 | KPI SUMMARY ROW: [1. Crossover] | [2. Net Wealth] | [3. Total Sunk Costs] | [4. Price-to-Rent]    |
 +---------------------------------------------------------------------------------------------------+
-| CONFIGURATION WORKBENCH (Side-by-Side Dual Column Grid):                                          |
+| CONFIGURATION WORKBENCH (Streamlined Dual Column Grid):                                           |
 |  [LEFT: Buy Path Parameters]                   | [RIGHT: Rent Path & Macro Parameters]            |
-|  • Property Type Selector                      | • Monthly Rent & Quick Chips                     |
-|  • Home Purchase Price + Quick Chips           | • Rent Inflation & Investment Yield              |
-|  • Downpayment % & Loan Principal              | • Initial Rent Portfolio Summary                 |
-|  • Loan Tenure & Amortization Mode             | • Property Growth Rate & CPI Inflation           |
-|  • Teaser & Floating Interest Rates            | • Simulation Horizon Selector                    |
-|  • Upfront Fees & Renovation Breakdown         |                                                  |
+|  • Home Purchase Price (₫, Steppers, Chips)    | • Monthly Rent (₫, /mo, Steppers, Chips)         |
+|  • Downpayment % & Loan Principal Display      | • Rent Inflation & Investment Yield              |
+|  • Loan Tenure & Amortization Mode             | • Initial Rent Portfolio Seed Summary            |
+|  • Teaser & Floating Interest Rates            | • Property Growth Rate & CPI Inflation           |
+|  • Upfront Acquisition Breakdown Card          | • Simulation Horizon Selector                    |
++---------------------------------------------------------------------------------------------------+
+| IN-PAGE METHODOLOGY & MATHEMATICAL FORMULAS (Collapsible - Above Charts):                        |
+|  [Header: Title + 4 Formulas Badge]                           [Toggle: Thu gọn / Mở rộng ▼]       |
+|  -----------------------------------------------------------------------------------------------  |
+|  [Tabs: Formulas & Live Traces | Financial Glossary | Simulation Invariants]                      |
+|  • Formula 1: Mortgage Amortization (Fixed EMI vs Linear) + LIVE DYNAMIC NUMERIC TRACE           |
+|  • Formula 2: Realizable Home Equity with Friction + LIVE DYNAMIC NUMERIC TRACE                 |
+|  • Formula 3: Rent Opportunity Delta Sweep + LIVE DYNAMIC NUMERIC TRACE                         |
+|  • Formula 4: Price-to-Rent Ratio & Gross Yield + LIVE DYNAMIC NUMERIC TRACE                    |
 +---------------------------------------------------------------------------------------------------+
 | FULL-WIDTH ANALYTICS & VISUALIZATION HUB:                                                         |
-|  [Tabs: Net Wealth Timeline | Cashflow Outflow | Sensitivity Matrix]    [Toggle: Real (CPI-Adj)]  |
+|  [Tabs: Net Wealth Timeline | Sunk Costs | Cashflow | Sensitivity Matrix] [Toggle: Real (CPI)]   |
 |  ===============================================================================================  |
-|  [ Expansive Full-Width Interactive Chart Canvas (1200px wide, high-resolution curves)        ]  |
+|  [ Expansive Full-Width Chart Canvas or Interactive 2D Sensitivity Heatmap Table               ]  |
+|  [ (Clicking any cell in Sensitivity Matrix applies the scenario instantly with reactive toast) ]  |
 |  ===============================================================================================  |
-|  [Interactive Chart Legend & Milestone Badges]                         [Export High-Res PNG]      |
-+---------------------------------------------------------------------------------------------------+
-| IN-PAGE METHODOLOGY & MATHEMATICAL FORMULA HUB:                                                   |
-|  [Tabs or Collapsible: Formulas & Live Traces | Financial Glossary | Simulation Invariants]        |
-|  • Formula 1: Mortgage Amortization (Fixed EMI vs Linear) + LIVE VARIABLE SUBSTITUTION TRACE     |
-|  • Formula 2: Realizable Home Equity with Friction + LIVE VARIABLE SUBSTITUTION TRACE           |
-|  • Formula 3: Rent Opportunity Delta Sweep + LIVE VARIABLE SUBSTITUTION TRACE                   |
-|  • Formula 4: Price-to-Rent Ratio & Gross Yield + LIVE VARIABLE SUBSTITUTION TRACE              |
-|  • Ubiquitous Bilingual Terminology Dictionary & Modeling Invariants                             |
+|  [Interactive Chart Legend & Breakdown Badges]                         [Export High-Res PNG]      |
 +---------------------------------------------------------------------------------------------------+
 ```
 
@@ -146,16 +145,16 @@ flowchart TD
 
 ---
 
-## 📐 4. Design Decision Tree & Architectural Trade-offs
+## 📐 4. Implemented Enhancements Summary
 
-1. **Workbench Layout (Inputs)**:
-   - _Option A (Recommended)_: **Balanced 2-Column Grid** (`grid-cols-1 md:grid-cols-2`). Left side contains all Buy & Mortgage inputs; right side contains Rent, Yield, and Macro inputs. Both columns align naturally with identical visual height (~550px).
-   - _Option B_: **3-Column Grid** (`grid-cols-1 lg:grid-cols-3`). Col 1: Buy, Col 2: Rent, Col 3: Macro & Presets. Can feel tight on 1024px screens.
-
-2. **Methodology Hub Presentation**:
-   - _Option A (Recommended)_: **In-Page Dedicated Card with Tabbed Internal Views** (Formulas & Traces, Glossary, Invariants) with smooth-scroll jump from the top header button (`#methodologyBtn` scrolls to `#methodologySection`).
-   - _Option B_: **In-Page Collapsible Section (`<details>` / Accordion)** where users can expand or collapse the entire methodology section.
-   - _Option C_: **Multi-Column Linear Document** rendering all formulas, glossary, and invariants without tabs.
-
-3. **Chart Placement & Sizing**:
-   - _Option A (Recommended)_: Full-width container directly below the configuration workbench with an optimized aspect ratio (~16:9 on desktop, min-height 420px–480px), ensuring the 360-month time-series and crossover markers render with maximum legibility.
+1. **Removed Redundant `Property Type Profile`**:
+   - Eliminated the separate 120px Property Type selector card from the input stack.
+   - Streamlined the workbench directly into Home Purchase Price and core parameters.
+2. **Upgraded `Home Purchase Price` and `Monthly Rent` UX**:
+   - Added currency symbol adornment `₫`, `/tháng` suffix, prominent live spelled amount chips (e.g. `3.5 Tỷ VND`, `14 Triệu VND`), quick stepper buttons (`-500Tr`, `+500Tr`, `+1Tỷ` for buy; `-1Tr`, `+1Tr`, `+5Tr` for rent), and curated preset chips with active styling.
+3. **Positioned `Methodology & Mathematical Formulas` Above Charts with Clean UI/UX Toggle**:
+   - Swapped DOM ordering so `#methodologySection` sits directly above `#analyticsHubSection`.
+   - Added `#toggleMethodologyVisibilityBtn` with collapse/expand state persistence (`localStorage`), smooth icon transitions, and auto-expand when invoked.
+4. **Interactive Sensitivity Matrix (`applySensitivityScenario`)**:
+   - Transformed the static sensitivity table into a fully interactive 2D scenario engine.
+   - Clicking any matrix cell dynamically updates `propertyAppreciationRate` and `rentInvestmentYield`, triggers immediate re-simulation and chart re-rendering, highlights the active baseline cell with a gold star `★`, and displays feedback toast notifications.
