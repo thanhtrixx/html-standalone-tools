@@ -114,6 +114,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-stores-grouping-gestures.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Differentiated Card UX & In-Store Ergonomics",
+    file: "tests/smart-buy-list-differentiated-cards.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {
