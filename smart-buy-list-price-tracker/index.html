@@ -1187,6 +1187,14 @@
             <span>🔗</span> <span id="btnCopyUrlText">Copy Shareable Link</span>
           </button>
           <button
+            onclick="copyBuyListJson()"
+            id="btnCopyListJson"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
+          >
+            <span>📋</span>
+            <span id="btnCopyListJsonText">Copy Buy-List JSON</span>
+          </button>
+          <button
             onclick="exportJsonBackup()"
             id="btnExportJson"
             class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
@@ -1246,6 +1254,59 @@
           >
             <span>🆕</span>
             <span id="btnImportReplaceText">Import as New List</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3.5. PASTE JSON / SHARE LINK FALLBACK MODAL -->
+    <div
+      id="pasteJsonModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <h3
+            id="pasteModalTitle"
+            class="text-base font-bold text-white flex items-center gap-2"
+          >
+            <span>📋</span>
+            <span id="pasteModalTitleText">Paste JSON / Share Link</span>
+          </h3>
+          <button
+            onclick="closeModal('pasteJsonModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <p id="pasteModalDesc" class="text-xs text-slate-400">
+          Paste a JSON backup, buy-list JSON, or shared link below:
+        </p>
+
+        <textarea
+          id="pasteJsonTextarea"
+          rows="5"
+          placeholder="Paste JSON or #share= link here..."
+          class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 font-mono focus:ring-1 focus:ring-emerald-500 focus:outline-none custom-scroll"
+        ></textarea>
+
+        <div class="flex items-center justify-end gap-2 pt-1">
+          <button
+            onclick="closeModal('pasteJsonModal')"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="submitPasteJson()"
+            id="btnSubmitPasteJson"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md"
+          >
+            <span id="btnSubmitPasteJsonText">Import Data</span>
           </button>
         </div>
       </div>
@@ -1822,11 +1883,19 @@
               <span>💾</span>
               <span id="btnExportBackupText">Export JSON</span>
             </button>
+            <button
+              onclick="copyBackupJson()"
+              id="btnCopyBackupJson"
+              class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>📋</span>
+              <span id="btnCopyBackupJsonText">Copy JSON</span>
+            </button>
             <label
               class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
             >
               <span>📥</span>
-              <span id="btnImportBackupText">Import JSON</span>
+              <span id="btnImportBackupText">Import File</span>
               <input
                 type="file"
                 accept=".json"
@@ -1834,6 +1903,14 @@
                 class="hidden"
               />
             </label>
+            <button
+              onclick="pasteJsonFromClipboard()"
+              id="btnPasteJson"
+              class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>📋</span>
+              <span id="btnPasteJsonText">Paste JSON</span>
+            </button>
           </div>
 
           <div
@@ -2596,7 +2673,21 @@
           grouping_by_store: "By Store",
           settings_data_heading: "Data Management & Backup",
           btn_export_json_backup: "Export JSON",
-          btn_import_json_backup: "Import JSON",
+          btn_import_json_backup: "Import File",
+          btn_copy_list_json: "Copy Buy-List JSON",
+          btn_copy_backup_json: "Copy JSON",
+          btn_paste_json: "Paste JSON",
+          paste_modal_title: "Paste JSON / Share Link",
+          paste_modal_desc:
+            "Paste a JSON backup, buy-list JSON, or shared link below:",
+          paste_modal_placeholder: "Paste JSON or #share= link here...",
+          btn_submit_paste: "Import Data",
+          toast_list_json_copied: "Buy-List JSON copied to clipboard!",
+          toast_backup_json_copied: "Full backup JSON copied to clipboard!",
+          toast_invalid_clipboard_data:
+            "Invalid clipboard data. Expected JSON or share link.",
+          confirm_restore_backup:
+            "Restore full database backup? This will replace current active list, store history, and settings.",
           btn_load_sample_data: "Load Sample Data",
           btn_clear_all_data: "Clear All Data",
           settings_sync_title: "Storage & Cloud Sync",
@@ -2781,7 +2872,24 @@
           grouping_by_store: "Theo Cửa Hàng",
           settings_data_heading: "Quản Lý & Sao Lưu Dữ Liệu",
           btn_export_json_backup: "Xuất JSON",
-          btn_import_json_backup: "Nhập JSON",
+          btn_import_json_backup: "Nhập Từ File",
+          btn_copy_list_json: "Sao Chép JSON Danh Sách",
+          btn_copy_backup_json: "Sao Chép JSON",
+          btn_paste_json: "Dán JSON",
+          paste_modal_title: "Dán JSON / Liên Kết Chia Sẻ",
+          paste_modal_desc:
+            "Dán bản sao lưu JSON, JSON danh sách, hoặc liên kết chia sẻ vào ô bên dưới:",
+          paste_modal_placeholder:
+            "Dán dữ liệu JSON hoặc liên kết #share= vào đây...",
+          btn_submit_paste: "Nhập Dữ Liệu",
+          toast_list_json_copied:
+            "Đã sao chép JSON danh sách mua sắm vào bộ nhớ tạm!",
+          toast_backup_json_copied:
+            "Đã sao chép JSON toàn bộ dữ liệu vào bộ nhớ tạm!",
+          toast_invalid_clipboard_data:
+            "Dữ liệu không hợp lệ. Vui lòng dán JSON hoặc liên kết chia sẻ hợp lệ.",
+          confirm_restore_backup:
+            "Khôi phục toàn bộ dữ liệu sao lưu? Thao tác này sẽ thay thế danh sách hiện tại, lịch sử giá và cài đặt.",
           btn_load_sample_data: "Tải Dữ Liệu Mẫu",
           btn_clear_all_data: "Xoá Tất Cả Dữ Liệu",
           settings_sync_title: "Lưu Trữ & Đồng Bộ Đám Mây",
@@ -4474,7 +4582,208 @@
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
-        showToast("Backup file downloaded");
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_backup_exported ||
+            "JSON backup exported!"
+        );
+      }
+
+      function copyBuyListJson() {
+        const payload = {
+          title: memoryState.activeList.title || "Shopping List",
+          items: memoryState.activeList.items || [],
+        };
+        const str = JSON.stringify(payload, null, 2);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(str).then(() => {
+            showToast(
+              TRANSLATIONS[currentLanguage].toast_list_json_copied ||
+                "Buy-List JSON copied to clipboard!"
+            );
+          });
+        }
+      }
+
+      function copyBackupJson() {
+        const str = JSON.stringify(memoryState, null, 2);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(str).then(() => {
+            showToast(
+              TRANSLATIONS[currentLanguage].toast_backup_json_copied ||
+                "Full backup JSON copied to clipboard!"
+            );
+          });
+        }
+      }
+
+      function pasteJsonFromClipboard() {
+        if (navigator.clipboard && navigator.clipboard.readText) {
+          return navigator.clipboard
+            .readText()
+            .then((text) => {
+              if (text && text.trim()) {
+                return processImportData(text.trim());
+              } else {
+                openPasteJsonModal();
+              }
+            })
+            .catch(() => {
+              openPasteJsonModal();
+            });
+        } else {
+          openPasteJsonModal();
+        }
+      }
+
+      function openPasteJsonModal() {
+        const textarea = document.getElementById("pasteJsonTextarea");
+        if (textarea) textarea.value = "";
+        openModal("pasteJsonModal");
+        if (textarea) textarea.focus();
+      }
+
+      function submitPasteJson() {
+        const textarea = document.getElementById("pasteJsonTextarea");
+        const val = textarea && textarea.value ? textarea.value.trim() : "";
+        if (!val) {
+          showToast(
+            TRANSLATIONS[currentLanguage].toast_invalid_clipboard_data ||
+              "Invalid clipboard data. Expected JSON or share link."
+          );
+          return;
+        }
+        processImportData(val);
+      }
+
+      function processImportData(rawText) {
+        if (!rawText || typeof rawText !== "string") {
+          showToast(
+            TRANSLATIONS[currentLanguage].toast_invalid_clipboard_data ||
+              "Invalid clipboard data. Expected JSON or share link."
+          );
+          return false;
+        }
+
+        const trimmed = rawText.trim();
+
+        // 1. URL / Hash detection: #share=<payload>
+        if (trimmed.includes("#share=")) {
+          const hashPart = trimmed.split("#share=")[1];
+          const payload = hashPart ? hashPart.split("&")[0] : "";
+          const decoded = decodeSharePayload(payload);
+          if (decoded && Array.isArray(decoded.items)) {
+            window.pendingSharedList = decoded;
+            closeModal("pasteJsonModal");
+            closeModal("settingsModal");
+            openModal("importModal");
+            applyTranslations();
+            return true;
+          }
+        }
+
+        // 2. Direct Base64 Share Payload string (e.g. from decodeSharePayload)
+        if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+          const decoded = decodeSharePayload(trimmed);
+          if (
+            decoded &&
+            Array.isArray(decoded.items) &&
+            decoded.items.length > 0
+          ) {
+            window.pendingSharedList = decoded;
+            closeModal("pasteJsonModal");
+            closeModal("settingsModal");
+            openModal("importModal");
+            applyTranslations();
+            return true;
+          }
+        }
+
+        // 3. JSON parsing
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (parsed && typeof parsed === "object") {
+            // 3A. Full Database Backup
+            if (
+              parsed.activeList ||
+              Array.isArray(parsed.purchaseLedger) ||
+              Array.isArray(parsed.stores)
+            ) {
+              const t = TRANSLATIONS[currentLanguage];
+              const confirmed =
+                typeof confirm === "function"
+                  ? confirm(
+                      t.confirm_restore_backup ||
+                        "Restore full database backup? This will replace current active list, store history, and settings."
+                    )
+                  : true;
+              if (confirmed) {
+                if (parsed.activeList)
+                  memoryState.activeList = parsed.activeList;
+                if (Array.isArray(parsed.purchaseLedger))
+                  memoryState.purchaseLedger = parsed.purchaseLedger;
+                if (Array.isArray(parsed.stores))
+                  memoryState.stores = parsed.stores;
+                if (parsed.settings)
+                  memoryState.settings = Object.assign(
+                    memoryState.settings,
+                    parsed.settings
+                  );
+                saveToLocalStorage();
+                renderApp();
+                showToast(
+                  t.toast_backup_imported || "Backup imported successfully!"
+                );
+                closeModal("pasteJsonModal");
+                closeModal("settingsModal");
+                return true;
+              }
+              return false;
+            }
+
+            // 3B. Active Buy-List JSON ({ title, items } or { t, i })
+            if (Array.isArray(parsed.items) || Array.isArray(parsed.i)) {
+              let title = parsed.title || parsed.t || "Shared List";
+              let items = [];
+              if (Array.isArray(parsed.items)) {
+                items = parsed.items.map((it, idx) => ({
+                  id: it.id || `shared_${idx}_${Date.now()}`,
+                  name: it.name || "Item",
+                  category: it.category || "other",
+                  store: it.store || "Supermarket",
+                  quantity: parseFloat(it.quantity) || 1,
+                  unit: it.unit || "unit",
+                  price: parseFloat(it.price) || 0,
+                  checked: !!it.checked,
+                }));
+              } else if (Array.isArray(parsed.i)) {
+                items = parsed.i.map((arr, idx) => ({
+                  id: `shared_${idx}_${Date.now()}`,
+                  name: arr[0] || "Item",
+                  category: arr[1] || "other",
+                  store: arr[2] || "Supermarket",
+                  quantity: parseFloat(arr[3]) || 1,
+                  unit: arr[4] || "unit",
+                  price: parseFloat(arr[5]) || 0,
+                  checked: false,
+                }));
+              }
+              window.pendingSharedList = { title, items };
+              closeModal("pasteJsonModal");
+              closeModal("settingsModal");
+              openModal("importModal");
+              applyTranslations();
+              return true;
+            }
+          }
+        } catch (e) {
+          // not valid JSON
+        }
+
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_invalid_clipboard_data ||
+            "Invalid clipboard data. Expected JSON or share link."
+        );
+        return false;
       }
 
       /* =========================================================================
@@ -5085,6 +5394,7 @@
         el("qrHintText", t.qr_hint_text);
         el("btnNativeShareText", t.btn_native_share);
         el("btnCopyUrlText", t.btn_copy_url);
+        el("btnCopyListJsonText", t.btn_copy_list_json || "Copy Buy-List JSON");
         el("btnExportJsonText", t.btn_export_json);
 
         // 3. Import Modal
@@ -5099,6 +5409,18 @@
         );
         el("btnImportMergeText", t.btn_import_merge);
         el("btnImportReplaceText", t.btn_import_replace);
+
+        // 3.5. Paste JSON Fallback Modal
+        el(
+          "pasteModalTitleText",
+          t.paste_modal_title || "Paste JSON / Share Link"
+        );
+        el("pasteModalDesc", t.paste_modal_desc);
+        el("btnSubmitPasteJsonText", t.btn_submit_paste || "Import Data");
+        const pasteTextarea = document.getElementById("pasteJsonTextarea");
+        if (pasteTextarea)
+          pasteTextarea.placeholder =
+            t.paste_modal_placeholder || "Paste JSON or #share= link here...";
 
         // 4. Trip Complete Modal
         el("tripModalTitleText", t.trip_modal_title);
@@ -5176,7 +5498,9 @@
         if (langSelect) langSelect.value = currentLanguage;
         el("settingsDataHeading", t.settings_data_heading);
         el("btnExportBackupText", t.btn_export_json_backup);
+        el("btnCopyBackupJsonText", t.btn_copy_backup_json || "Copy JSON");
         el("btnImportBackupText", t.btn_import_json_backup);
+        el("btnPasteJsonText", t.btn_paste_json || "Paste JSON");
         el("btnResetSampleData", t.btn_load_sample_data);
         el("btnClearAllDataInSettings", t.btn_clear_all_data);
         el("settingsSyncTitle", t.settings_sync_title);
@@ -5620,6 +5944,12 @@
         window.openSettingsModal = openSettingsModal;
         window.closeSettingsModal = closeSettingsModal;
         window.handleBackupFileImport = handleBackupFileImport;
+        window.copyBuyListJson = copyBuyListJson;
+        window.copyBackupJson = copyBackupJson;
+        window.pasteJsonFromClipboard = pasteJsonFromClipboard;
+        window.openPasteJsonModal = openPasteJsonModal;
+        window.submitPasteJson = submitPasteJson;
+        window.processImportData = processImportData;
         window.handleTouchStart = handleTouchStart;
         window.handleTouchMove = handleTouchMove;
         window.handleTouchEnd = handleTouchEnd;

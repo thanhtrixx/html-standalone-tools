@@ -7,11 +7,13 @@ Accepted
 ## Context
 
 In the Smart Buy-List & Unit Price Tracker application, data sharing and backup mechanisms relied on:
+
 1. URL hash state sharing (`#share=<payload>`) via `navigator.share()` or link copying.
 2. Dynamic QR code generation for the recipient to scan with an external device.
 3. JSON file export and file upload (`<input type="file" accept=".json">`).
 
 While URL sharing is lightweight for chat apps, shoppers regularly face practical friction:
+
 - **Chat app URL truncation**: Messaging apps occasionally truncate or mangle long URL hash fragments.
 - **Copying raw JSON or payloads**: Users frequently paste JSON snippets or copied share URLs directly across clipboards.
 - **Lack of in-app camera scanning**: Users had to rely on native camera apps to scan the generated QR codes, requiring app switching and browser URL re-hydration.
@@ -23,6 +25,7 @@ A unified clipboard interchange architecture and native in-app QR scanner are re
 ## Decision
 
 We implement:
+
 1. **Contextual Dual Clipboard Export**:
    - **Active Buy-List JSON (`#shareModal`)**: Copies the formatted active list (`{ "title": "...", "items": [...] }`) to the system clipboard for lightweight messaging.
    - **Full State Backup JSON (`#settingsModal`)**: Copies the complete database (`memoryState` with active list, historical purchase ledger, stores, settings) for backup archiving.
@@ -30,10 +33,10 @@ We implement:
 2. **Smart Multi-Format Clipboard Import & Fallback Dialog**:
    - **Clipboard API Detection**: Attempts `navigator.clipboard.readText()`. If permissions are denied or unsupported, opens a dedicated **Paste Dialog Modal** with a `<textarea>`.
    - **Auto-Detection Hierarchy**:
-     - *Full Backup* (`activeList`, `purchaseLedger`, or `stores` present): Displays confirmation modal before restoring application state.
-     - *Active Buy-List JSON* (`{ title, items }` or `{ t, i }`): Decodes and routes to **Smart Recipient Import Modal** (`#importModal`) with *Merge into Active List* (`🔀`) and *Import as New List* (`🆕`).
-     - *Share URL / Payload* (`#share=` URL or raw Base64): Decodes via `decodeSharePayload()` and routes to `#importModal`.
-     - *Invalid Data*: Displays localized warning toast.
+     - _Full Backup_ (`activeList`, `purchaseLedger`, or `stores` present): Displays confirmation modal before restoring application state.
+     - _Active Buy-List JSON_ (`{ title, items }` or `{ t, i }`): Decodes and routes to **Smart Recipient Import Modal** (`#importModal`) with _Merge into Active List_ (`🔀`) and _Import as New List_ (`🆕`).
+     - _Share URL / Payload_ (`#share=` URL or raw Base64): Decodes via `decodeSharePayload()` and routes to `#importModal`.
+     - _Invalid Data_: Displays localized warning toast.
 
 3. **Native `BarcodeDetector` In-Settings QR Scanner**:
    - Integrated camera viewfinder modal (`#qrScannerModal`) with live `<video>`, green targeting reticle, camera facing flip toggle (`environment` back camera by default), and static image file upload fallback (`<input type="file" accept="image/*">`).
@@ -78,6 +81,7 @@ flowchart TD
                                                               │       ├── Buy-List / Share Link ──► Smart Import Modal (#importModal)
                                                               │       └── Invalid ──► Error Toast
 ```
+
 </details>
 
 ---
