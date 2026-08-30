@@ -458,6 +458,18 @@ console.log("--- Section 4: Mobile Touch Swipe Gestures ---");
       openedComparatorId === "item-swipe",
       "SWIPE-04: Swiping left invokes openItemComparator for that item"
     );
+
+    // Test Card Opaque Styling for Checked vs Unchecked
+    sandbox.memoryState.activeList.items[0].checked = true;
+    const itemCheckedHtml = sandbox.renderItemCard(
+      sandbox.memoryState.activeList.items[0]
+    );
+    assert(
+      !itemCheckedHtml.includes("bg-slate-950/40") &&
+        (itemCheckedHtml.includes("bg-slate-950") ||
+          itemCheckedHtml.includes("bg-slate-900")),
+      "SWIPE-05: Checked cards use solid opaque surface to prevent swipe under-text bleed"
+    );
   } else {
     // If handled via DOM simulation or direct gesture dispatch
     assert(
