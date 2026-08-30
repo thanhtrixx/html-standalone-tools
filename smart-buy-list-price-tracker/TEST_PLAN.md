@@ -169,3 +169,21 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **DIFF-06** | Planning Mode Expanded Header      | In Planning Mode, item cards render Category icon, Item name, Store badge, and Deal rating badge in row 1.                            |
 | **DIFF-07** | Planning Mode Metrics Intelligence | Quantity & unit pill, normalized unit price ($/kg, $/L, $/ea), and historical ATL baseline are rendered.                              |
 | **DIFF-08** | Planning Mode Action Toolbar       | Action row renders 1-tap Compare (`⚖️`), Edit (`✏️`), Remove (`🗑️`) buttons alongside estimated price.                                |
+
+---
+
+### 12. Network-First Navigation, PWA Update Lifecycle & QA Cache Controls
+
+| Test ID        | Scenario                              | Assertion                                                                                                             |
+| :------------- | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
+| **PWA-UPD-01** | Service Worker Version Bump (v3)      | `sw.js` bumps cache name to `"smart-buy-list-v3"`.                                                                    |
+| **PWA-UPD-02** | Network-First Navigation Handling     | `sw.js` intercepts navigation requests with network-first strategy and 2.5s timeout fallback to cached `index.html`.  |
+| **PWA-UPD-03** | Cache-First Static Asset Retention    | `sw.js` preserves cache-first strategy for static assets (`./icon.svg`, `./manifest.webmanifest`, CDN resources).     |
+| **PWA-UPD-04** | `SKIP_WAITING` Message Listener       | `sw.js` responds to `{ type: 'SKIP_WAITING' }` messages by calling `self.skipWaiting()`.                              |
+| **PWA-UPD-05** | Client `controllerchange` Auto-Reload | `index.html` listens for `controllerchange` on `navigator.serviceWorker` and triggers `window.location.reload()`.     |
+| **PWA-UPD-06** | Material 3 Update Notification Toast  | When a new worker is in `installed`/`waiting` state, `showUpdateToast()` renders the M3 update notification.          |
+| **PWA-UPD-07** | Update Button Message Dispatch        | Clicking the "Update Now" button in the toast posts `{ type: 'SKIP_WAITING' }` to the waiting worker.                 |
+| **PWA-UPD-08** | Multi-Trigger Update Discovery        | `registration.update()` is called on startup, on `visibilitychange` (when document becomes visible), and on interval. |
+| **PWA-UPD-09** | Option Hub "Check for Updates"        | Clicking "Check for Updates" in Option Hub invokes `registration.update()` and shows user feedback toast.             |
+| **PWA-UPD-10** | Option Hub "Purge Cache & Reload"     | Clicking "Purge Cache & Reload" clears all CacheStorage keys, unregisters service workers, and reloads the window.    |
+| **PWA-UPD-11** | Bilingual Parity for Update UI        | 100% of update and cache-purge strings exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                         |

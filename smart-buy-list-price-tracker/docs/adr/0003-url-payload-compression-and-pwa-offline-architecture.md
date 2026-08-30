@@ -27,7 +27,7 @@ Users need to:
 3. **Dual Delivery PWA Architecture & Dedicated Vector Icon**:
    - The source application `index.html` functions completely as a self-contained portable HTML tool.
    - A dedicated 512x512 scalable vector icon (`icon.svg`) provides high-fidelity branding across favicons, desktop shortcuts, and mobile home screens.
-   - For web hosting / GitHub Pages deployment, provide a companion `manifest.webmanifest` defining dual `any` and `maskable` icon entries and Service Worker `sw.js` (version `smart-buy-list-v2`) implementing a **Cache-First** strategy for all core assets including `./icon.svg`.
+   - For web hosting / GitHub Pages deployment, provide a companion `manifest.webmanifest` defining dual `any` and `maskable` icon entries and Service Worker `sw.js` (see [`ADR-0007`](./0007-pwa-service-worker-lifecycle-and-update-strategy.md) for Network-First HTML navigation and update lifecycle).
    - `<head>` includes `<link rel="icon" type="image/svg+xml" href="./icon.svg" />`, `<link rel="apple-touch-icon" href="./icon.svg" />`, and iOS standalone web app meta tags.
 
 ## Consequences

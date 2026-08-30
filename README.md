@@ -42,12 +42,13 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── smart-buy-list-material-you.test.js     # Smart Buy-List Material You navigation tests
 │   └── smart-buy-list-pacing-touch-polish.test.js # Smart Buy-List progress pacing & touch tests
 ├── docs/
-│   ├── adr/                                    # System-wide Architecture Decision Records (0001–0005)
+│   ├── adr/                                    # System-wide Architecture Decision Records (0001–0006)
 │   │   ├── 0001-multi-tool-repository-structure.md
 │   │   ├── 0002-zero-build-standalone-single-file-html-constraint.md (superseded)
 │   │   ├── 0003-compacted-standalone-html-build-pipeline.md
 │   │   ├── 0004-ci-pr-verification-and-automated-release-pipeline.md
-│   │   └── 0005-unified-test-runner-and-multi-format-reporting.md
+│   │   ├── 0005-unified-test-runner-and-multi-format-reporting.md
+│   │   └── 0006-configurable-external-distribution-sync.md
 │   └── agents/                                 # Issue tracker & skill specifications
 ├── personal-finance-savings-predictor/         # Standalone Tool: Savings Predictor
 │   ├── index.html                              # Source application (HTML/CSS/JS)
