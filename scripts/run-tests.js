@@ -129,6 +129,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-clipboard-interchange.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List Settings In-App QR Scanner",
+    file: "tests/smart-buy-list-settings-qr-scanner.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {
