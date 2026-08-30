@@ -139,6 +139,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-ledger-delete-comparator-prefill.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Google Drive Cloud Sync Seam",
+    file: "tests/smart-buy-list-cloud-sync.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {

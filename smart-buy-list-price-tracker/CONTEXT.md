@@ -137,9 +137,13 @@ The recipient client protocol that parses an incoming shared URL payload or JSON
 A centralized modal dialog accessible via the top app bar (`⚙️`) providing comprehensive user preferences (Default Currency, Language selection `EN`/`VI`, Default Grouping `By Aisle`/`By Store`), elevated store management access (`z-[60]` modal stacking), data backup/restore, IndexedDB storage sync status, and PWA version/update controls.
 _Avoid_: Prefs panel, control center, admin menu.
 
-**Storage Provider Seam**:
-An abstracted TypeScript/JavaScript client-side storage interface (`IStorageProvider`) decoupling domain data operations from physical storage implementations (`IndexedDBStorageProvider` for offline-first local persistence, and `GoogleDriveStorageProvider` for user-owned cloud synchronization).
-_Avoid_: Database driver, storage hook, backend adapter.
+**Storage Provider Seam & Google Drive Cloud Sync**:
+An abstracted TypeScript/JavaScript client-side storage architecture (`IStorageProvider`) decoupling domain data operations from physical storage implementations:
+
+- `IndexedDBStorageProvider`: Default offline-first local persistence engine with memory and `localStorage` fallback.
+- `GoogleDriveStorageProvider`: Composite cloud provider wrapping local storage and syncing with Google Drive's Application Data folder (`spaces=appDataFolder`) via REST API v3 and Google Identity Services (GIS `initTokenClient`) OAuth 2.0.
+- `Deterministic Cloud Smart Merge`: Non-destructive multi-device conflict resolution uniting purchase ledger transactions, synchronizing active list items by `updatedAt` timestamps, merging store profiles, and pushing consolidated state back to both local storage and the cloud.
+  _Avoid_: Database driver, storage hook, backend adapter, cloud server sync.
 
 **Clipboard JSON Interchange**:
 A bidirectional clipboard transfer interface allowing shoppers to copy active buy-list JSON (`{ title, items }`) from the Share modal or full state backups from the Settings Option Hub, and paste multi-format payloads with automatic schema classification (full backup restore vs smart list merge) and a fallback text entry dialog.
@@ -154,7 +158,7 @@ _Avoid_: External QR scanner, barcode reader app, camera popup.
 ### 6. PWA & Mobile Ergonomics
 
 **Standalone PWA Shell & Version Invalidation Rule**:
-An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.2.0`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
+An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.3.0`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
 _Avoid_: Web app wrapper, mobile site, hybrid app.
 
 **Material You (MD3) In-Aisle Navigation**:
