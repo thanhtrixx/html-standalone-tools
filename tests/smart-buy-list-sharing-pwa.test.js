@@ -353,9 +353,9 @@ try {
 
   const swContent = fs.readFileSync(swPath, "utf8");
   assert(
-    swContent.includes('CACHE_NAME = "smart-buy-list-v2"') ||
-      swContent.includes("smart-buy-list-v2"),
-    "PWA-14: sw.js bumps cache version to smart-buy-list-v2"
+    swContent.includes('CACHE_NAME = "smart-buy-list-v3"') ||
+      swContent.includes("smart-buy-list-v3"),
+    "PWA-14: sw.js bumps cache version to smart-buy-list-v3"
   );
   assert(
     swContent.includes('"./icon.svg"') || swContent.includes("'./icon.svg'"),
@@ -365,8 +365,78 @@ try {
     swContent.includes("CACHE_NAME") &&
       swContent.includes("fetch") &&
       swContent.includes("caches.match"),
-    "PWA-16: sw.js implements Cache-First fetch interceptor"
+    "PWA-16: sw.js implements fetch interceptor"
   );
+  assert(
+    swContent.includes("navigate") &&
+      swContent.includes("text/html") &&
+      (swContent.includes("Promise.race") || swContent.includes("setTimeout")),
+    "PWA-17: sw.js implements Network-First strategy with timeout for navigation/HTML requests"
+  );
+  assert(
+    swContent.includes("SKIP_WAITING") && swContent.includes("skipWaiting"),
+    "PWA-18: sw.js handles message event with SKIP_WAITING to invoke skipWaiting()"
+  );
+
+  // 5. CLIENT UPDATE LIFECYCLE & OPTION HUB CACHE CONTROLS
+  console.log(
+    "\n--- Section 5: Client Update Lifecycle & Option Hub QA Controls ---"
+  );
+
+  assert(
+    rawHtml.includes('id="pwaUpdateToast"'),
+    "PWA-19: index.html contains #pwaUpdateToast element"
+  );
+  assert(
+    rawHtml.includes('id="btnApplyPwaUpdate"') ||
+      rawHtml.includes("applyPwaUpdate()"),
+    "PWA-20: index.html contains update trigger button"
+  );
+  assert(
+    typeof sandbox.showUpdateToast === "function",
+    "PWA-21: showUpdateToast function is exported globally"
+  );
+  assert(
+    typeof sandbox.applyPwaUpdate === "function",
+    "PWA-22: applyPwaUpdate function is exported globally"
+  );
+  assert(
+    typeof sandbox.checkForUpdates === "function",
+    "PWA-23: checkForUpdates function is exported globally"
+  );
+  assert(
+    typeof sandbox.purgeCacheAndReload === "function",
+    "PWA-24: purgeCacheAndReload function is exported globally"
+  );
+  assert(
+    rawHtml.includes("checkForUpdates()") &&
+      rawHtml.includes("purgeCacheAndReload()"),
+    "PWA-25: Option Hub settings modal contains Check Updates and Purge Cache actions"
+  );
+
+  // Check translation dictionary parity for PWA update keys
+  const enDict = sandbox.TRANSLATIONS?.en || {};
+  const viDict = sandbox.TRANSLATIONS?.vi || {};
+  const updateKeys = [
+    "update_available_title",
+    "update_available_desc",
+    "update_btn_refresh",
+    "check_updates_btn",
+    "purge_cache_btn",
+    "up_to_date_msg",
+    "checking_updates_msg",
+  ];
+
+  updateKeys.forEach((k) => {
+    assert(
+      typeof enDict[k] === "string" && enDict[k].length > 0,
+      `PWA-I18N: English translation exists for '${k}'`
+    );
+    assert(
+      typeof viDict[k] === "string" && viDict[k].length > 0,
+      `PWA-I18N: Vietnamese translation exists for '${k}'`
+    );
+  });
 } catch (err) {
   console.error("❌ Test Execution Error:", err);
   failed++;

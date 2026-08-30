@@ -1799,6 +1799,42 @@
           >
         </div>
 
+        <!-- Section 5: PWA App Updates & Cache (QA & Maintenance) -->
+        <div
+          class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 space-y-2 text-xs"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-base">⚡</span>
+              <span id="settingsPwaTitle" class="font-bold text-slate-200">
+                App Updates & Cache (PWA)
+              </span>
+            </div>
+            <span
+              class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
+              >v3.0.0</span
+            >
+          </div>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button
+              onclick="checkForUpdates()"
+              id="btnCheckUpdates"
+              class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold transition-all"
+            >
+              <span>🔄</span>
+              <span id="btnCheckUpdatesText">Check for Updates</span>
+            </button>
+            <button
+              onclick="purgeCacheAndReload()"
+              id="btnPurgeCache"
+              class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800/80 hover:bg-red-950/60 hover:text-red-300 hover:border-red-800/60 border border-transparent active:scale-95 text-slate-300 rounded-xl font-semibold transition-all"
+            >
+              <span>🧹</span>
+              <span id="btnPurgeCacheText">Purge Cache & Reload</span>
+            </button>
+          </div>
+        </div>
+
         <div class="pt-2 flex justify-end">
           <button
             onclick="closeModal('settingsModal')"
@@ -1807,6 +1843,38 @@
             Close
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- ==================== PWA UPDATE NOTIFICATION TOAST ==================== -->
+    <div
+      id="pwaUpdateToast"
+      class="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-50 hidden transform transition-all duration-300"
+    >
+      <div
+        class="bg-slate-900/95 backdrop-blur-md border border-emerald-500/60 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-3 text-slate-100"
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">✨</span>
+          <div>
+            <h4
+              class="font-bold text-sm text-emerald-400"
+              id="updateToastTitle"
+            >
+              New Version Available
+            </h4>
+            <p class="text-xs text-slate-300" id="updateToastDesc">
+              A new version of Smart Buy-List is ready.
+            </p>
+          </div>
+        </div>
+        <button
+          id="btnApplyPwaUpdate"
+          onclick="applyPwaUpdate()"
+          class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-colors whitespace-nowrap active:scale-95"
+        >
+          Update Now
+        </button>
       </div>
     </div>
 
@@ -2310,6 +2378,14 @@
           new_item: "New Item",
           atl_price_label: "ATL:",
           swipe_undo_cue: "Undo",
+          update_available_title: "New Version Available",
+          update_available_desc: "A new version of Smart Buy-List is ready.",
+          update_btn_refresh: "Update Now",
+          check_updates_btn: "Check for Updates",
+          purge_cache_btn: "Purge Cache & Reload",
+          up_to_date_msg: "You are using the latest version.",
+          checking_updates_msg: "Checking for updates...",
+          pwa_section_title: "App Updates & Cache (PWA)",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -2383,6 +2459,14 @@
           est_price_label: "Dự kiến:",
           new_item: "Hàng mới",
           atl_price_label: "Giá thấp nhất:",
+          update_available_title: "Đã Có Phiên Bản Mới",
+          update_available_desc: "Phiên bản mới đã sẵn sàng để cập nhật.",
+          update_btn_refresh: "Cập Nhật Ngay",
+          check_updates_btn: "Kiểm Tra Cập Nhật",
+          purge_cache_btn: "Xóa Bộ Nhớ Đệm & Tải Lại",
+          up_to_date_msg: "Bạn đang sử dụng phiên bản mới nhất.",
+          checking_updates_msg: "Đang kiểm tra bản cập nhật...",
+          pwa_section_title: "Cập Nhật & Bộ Nhớ Đệm (PWA)",
         },
       };
 
@@ -4209,6 +4293,21 @@
         );
         el("storeManagerHeading", t.manage_stores_title || "Manage Stores");
         el("btnAddStoreSubmitText", t.add_store_btn || "Add Store");
+        el(
+          "settingsPwaTitle",
+          t.pwa_section_title || "App Updates & Cache (PWA)"
+        );
+        el("btnCheckUpdatesText", t.check_updates_btn || "Check for Updates");
+        el("btnPurgeCacheText", t.purge_cache_btn || "Purge Cache & Reload");
+        el(
+          "updateToastTitle",
+          t.update_available_title || "New Version Available"
+        );
+        el(
+          "updateToastDesc",
+          t.update_available_desc || "A new version of Smart Buy-List is ready."
+        );
+        el("btnApplyPwaUpdate", t.update_btn_refresh || "Update Now");
 
         const inputName = document.getElementById("inputItemName");
         if (inputName) inputName.placeholder = t.item_name_placeholder;
@@ -4311,14 +4410,155 @@
           // Keyboard navigation shortcuts
           document.addEventListener("keydown", handleGlobalKeyDown);
 
-          // Register Service Worker if supported
-          if (
-            "serviceWorker" in navigator &&
-            window.location.protocol.startsWith("http")
-          ) {
-            navigator.serviceWorker.register("./sw.js").catch(() => {});
+          // Register Service Worker with update lifecycle
+          initServiceWorker();
+        });
+      }
+
+      let waitingServiceWorker = null;
+
+      function initServiceWorker() {
+        if (
+          !("serviceWorker" in navigator) ||
+          !window.location.protocol.startsWith("http")
+        ) {
+          return;
+        }
+
+        navigator.serviceWorker
+          .register("./sw.js")
+          .then((reg) => {
+            window.swRegistration = reg;
+
+            // Check if a worker is already waiting
+            if (reg.waiting) {
+              waitingServiceWorker = reg.waiting;
+              showUpdateToast();
+            }
+
+            reg.addEventListener("updatefound", () => {
+              const newWorker = reg.installing;
+              if (!newWorker) return;
+              newWorker.addEventListener("statechange", () => {
+                if (
+                  newWorker.state === "installed" &&
+                  navigator.serviceWorker.controller
+                ) {
+                  waitingServiceWorker = newWorker;
+                  showUpdateToast();
+                }
+              });
+            });
+          })
+          .catch(() => {});
+
+        // Reload page when new worker takes control
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (!refreshing) {
+            refreshing = true;
+            window.location.reload();
           }
         });
+
+        // Trigger update check when tab becomes visible
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible" && window.swRegistration) {
+            window.swRegistration.update().catch(() => {});
+          }
+        });
+
+        // Periodic check every 60 minutes
+        setInterval(
+          () => {
+            if (window.swRegistration) {
+              window.swRegistration.update().catch(() => {});
+            }
+          },
+          60 * 60 * 1000
+        );
+      }
+
+      function showUpdateToast() {
+        const toast = document.getElementById("pwaUpdateToast");
+        if (!toast) return;
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+        const titleEl = document.getElementById("updateToastTitle");
+        const descEl = document.getElementById("updateToastDesc");
+        const btnEl = document.getElementById("btnApplyPwaUpdate");
+        if (titleEl) titleEl.textContent = t.update_available_title;
+        if (descEl) descEl.textContent = t.update_available_desc;
+        if (btnEl) btnEl.textContent = t.update_btn_refresh;
+        toast.classList.remove("hidden");
+      }
+
+      function applyPwaUpdate() {
+        if (waitingServiceWorker) {
+          waitingServiceWorker.postMessage({ type: "SKIP_WAITING" });
+        } else if (window.swRegistration && window.swRegistration.waiting) {
+          window.swRegistration.waiting.postMessage({ type: "SKIP_WAITING" });
+        } else {
+          window.location.reload();
+        }
+      }
+
+      function checkForUpdates() {
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+        if (!("serviceWorker" in navigator) || !window.swRegistration) {
+          showToast(t.up_to_date_msg || "You are using the latest version.");
+          return;
+        }
+        showToast(t.checking_updates_msg || "Checking for updates...");
+        window.swRegistration
+          .update()
+          .then((reg) => {
+            if (reg && reg.waiting) {
+              waitingServiceWorker = reg.waiting;
+              showUpdateToast();
+            } else {
+              setTimeout(() => {
+                if (!waitingServiceWorker) {
+                  showToast(
+                    t.up_to_date_msg || "You are using the latest version."
+                  );
+                }
+              }, 1000);
+            }
+          })
+          .catch(() => {
+            showToast(t.up_to_date_msg || "You are using the latest version.");
+          });
+      }
+
+      function purgeCacheAndReload() {
+        if ("caches" in window) {
+          caches
+            .keys()
+            .then((keys) => {
+              return Promise.all(keys.map((key) => caches.delete(key)));
+            })
+            .then(() => {
+              if ("serviceWorker" in navigator) {
+                navigator.serviceWorker
+                  .getRegistrations()
+                  .then((registrations) => {
+                    return Promise.all(
+                      registrations.map((r) => r.unregister())
+                    );
+                  })
+                  .then(() => {
+                    window.location.reload(true);
+                  });
+              } else {
+                window.location.reload(true);
+              }
+            })
+            .catch(() => {
+              window.location.reload(true);
+            });
+        } else {
+          window.location.reload(true);
+        }
       }
 
       if (
@@ -4410,6 +4650,11 @@
         window.renderItemList = renderItemList;
         window.renderItemCard = renderItemCard;
         window.onStoreFilterChange = onStoreFilterChange;
+        window.initServiceWorker = initServiceWorker;
+        window.showUpdateToast = showUpdateToast;
+        window.applyPwaUpdate = applyPwaUpdate;
+        window.checkForUpdates = checkForUpdates;
+        window.purgeCacheAndReload = purgeCacheAndReload;
         Object.defineProperty(window, "currentPhase", {
           get: () => currentPhase,
           set: (v) => {
