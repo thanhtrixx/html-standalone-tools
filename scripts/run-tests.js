@@ -94,6 +94,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-sharing-pwa.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List i18n Parity, Multi-Currency & Theming",
+    file: "tests/smart-buy-list-i18n-theming.test.js",
+    category: "i18n",
+  },
 ];
 
 function escapeXml(str) {

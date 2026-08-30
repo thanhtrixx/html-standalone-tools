@@ -2384,6 +2384,65 @@
         renderApp();
       }
 
+      function getVerbalAmount(amount, lang = currentLanguage) {
+        const num = Math.abs(parseFloat(amount) || 0);
+        if (lang === "vi") {
+          if (num >= 1e9) {
+            const b = (num / 1e9).toFixed(1).replace(/\.0$/, "");
+            return `${b} Tỷ VND`;
+          }
+          if (num >= 1e6) {
+            const m = (num / 1e6).toFixed(1).replace(/\.0$/, "");
+            return `${m} Triệu VND`;
+          }
+          if (num >= 1e3) {
+            const k = (num / 1e3).toFixed(1).replace(/\.0$/, "");
+            return `${k} Nghìn VND`;
+          }
+          return `${num} VND`;
+        } else {
+          if (num >= 1e9) {
+            const b = (num / 1e9).toFixed(1).replace(/\.0$/, "");
+            return `${b} Billion ${currentCurrency}`;
+          }
+          if (num >= 1e6) {
+            const m = (num / 1e6).toFixed(1).replace(/\.0$/, "");
+            return `${m} Million ${currentCurrency}`;
+          }
+          if (num >= 1e3) {
+            const k = (num / 1e3).toFixed(1).replace(/\.0$/, "");
+            return `${k} Thousand ${currentCurrency}`;
+          }
+          return `${num} ${currentCurrency}`;
+        }
+      }
+
+      function handleGlobalKeyDown(e) {
+        if (e.key === "Escape") {
+          [
+            "comparatorModal",
+            "shareModal",
+            "importModal",
+            "tripCompleteModal",
+            "priceLedgerModal",
+            "itemHistoryModal",
+          ].forEach((id) => closeModal(id));
+        }
+        const tag = (e.target && e.target.tagName) || "";
+        if (["INPUT", "SELECT", "TEXTAREA"].includes(tag)) return;
+        if (e.key === "n" || e.key === "N") {
+          e.preventDefault();
+          const input = document.getElementById("inputItemName");
+          if (input) input.focus();
+        } else if (e.key === "c" || e.key === "C") {
+          e.preventDefault();
+          openComparatorModal();
+        } else if (e.key === "s" || e.key === "S") {
+          e.preventDefault();
+          openShareModal();
+        }
+      }
+
       function applyTranslations() {
         const t = TRANSLATIONS[currentLanguage];
         const el = (id, text) => {
@@ -2524,6 +2583,9 @@
 
           renderApp();
 
+          // Keyboard navigation shortcuts
+          document.addEventListener("keydown", handleGlobalKeyDown);
+
           // Register Service Worker if supported
           if (
             "serviceWorker" in navigator &&
@@ -2577,6 +2639,12 @@
         window.encodeSharePayload = encodeSharePayload;
         window.decodeSharePayload = decodeSharePayload;
         window.confirmImport = confirmImport;
+        window.getVerbalAmount = getVerbalAmount;
+        window.toggleTheme = toggleTheme;
+        window.toggleLanguage = toggleLanguage;
+        window.setCurrency = setCurrency;
+        window.formatCurrency = formatCurrency;
+        window.handleGlobalKeyDown = handleGlobalKeyDown;
       }
     </script>
   </body>
