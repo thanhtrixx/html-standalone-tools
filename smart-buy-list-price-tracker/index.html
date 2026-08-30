@@ -188,6 +188,16 @@
             <span>📤</span>
             <span id="btnShareText" class="hidden sm:inline">Share</span>
           </button>
+
+          <!-- Settings Button (Option Hub) -->
+          <button
+            id="btnOpenSettings"
+            onclick="openSettingsModal()"
+            class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors"
+            title="Settings / Option Hub"
+          >
+            ⚙️
+          </button>
         </div>
       </div>
     </header>
@@ -228,25 +238,13 @@
       >
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2">
-            <!-- Phase Indicator Pills -->
-            <div
-              class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 text-xs font-semibold"
+            <span class="text-base">🛒</span>
+            <span
+              id="tripSummaryHeading"
+              class="text-xs font-bold uppercase tracking-wider text-slate-300"
             >
-              <button
-                id="tabPlanning"
-                onclick="setTripPhase('PLANNING')"
-                class="px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm"
-              >
-                📝 <span id="labelPlanning">Planning</span>
-              </button>
-              <button
-                id="tabInStore"
-                onclick="setTripPhase('IN_STORE')"
-                class="px-3 py-1 rounded-lg transition-all text-slate-400 hover:text-slate-200"
-              >
-                🛒 <span id="labelInStore">In-Store</span>
-              </button>
-            </div>
+              Shopping Trip
+            </span>
           </div>
 
           <!-- Store Filter Pill / Dropdown -->
@@ -358,14 +356,6 @@
           >
             <span>➕</span> Add Item to List
           </h2>
-          <!-- Quick Aisle Comparator Trigger -->
-          <button
-            onclick="openComparatorModal()"
-            class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1"
-          >
-            <span>⚖️</span>
-            <span id="btnOpenComparatorHint">Compare Package Sizes</span>
-          </button>
         </div>
 
         <!-- Form Elements -->
@@ -1377,6 +1367,269 @@
       </div>
     </div>
 
+    <!-- 7. STORE MANAGER MODAL -->
+    <div
+      id="storeManagerModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🏪</span>
+            <h3
+              id="storeManagerModalTitle"
+              class="font-bold text-base text-slate-100"
+            >
+              Manage Stores
+            </h3>
+          </div>
+          <button
+            onclick="closeModal('storeManagerModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Add Store Form -->
+        <form onsubmit="handleStoreAddSubmit(event)" class="flex gap-2">
+          <input
+            type="text"
+            id="inputNewStoreName"
+            placeholder="New store name (e.g. Sprouts, ALDI)..."
+            required
+            class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+          />
+          <button
+            type="submit"
+            id="btnAddStoreSubmit"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shrink-0 transition-transform active:scale-95"
+          >
+            Add Store
+          </button>
+        </form>
+
+        <!-- Store List -->
+        <div class="space-y-2">
+          <div
+            id="storeManagerListLabel"
+            class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-1"
+          >
+            Existing Stores
+          </div>
+          <div id="storeManagerList" class="space-y-1.5"></div>
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <button
+            onclick="closeModal('storeManagerModal')"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. OPTION HUB / SETTINGS MODAL -->
+    <div
+      id="settingsModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">⚙️</span>
+            <div>
+              <h3
+                id="settingsModalTitle"
+                class="font-bold text-base text-slate-100"
+              >
+                Settings & Option Hub
+              </h3>
+              <p id="settingsModalSubtitle" class="text-xs text-slate-400">
+                Configure stores, preferences, and data backups
+              </p>
+            </div>
+          </div>
+          <button
+            onclick="closeModal('settingsModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Section 1: Store Management -->
+        <div
+          class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 space-y-2"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🏪</span>
+              <div>
+                <div
+                  id="settingsStoreTitle"
+                  class="text-xs font-bold text-slate-200"
+                >
+                  Store Management
+                </div>
+                <div id="settingsStoreDesc" class="text-[11px] text-slate-400">
+                  Configure retail store list & defaults
+                </div>
+              </div>
+            </div>
+            <button
+              onclick="openStoreManagerModal()"
+              id="btnManageStoresInSettings"
+              class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 rounded-xl text-xs font-semibold transition-colors"
+            >
+              Manage Stores
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 2: Preferences -->
+        <div
+          class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 space-y-3"
+        >
+          <div
+            class="text-xs font-bold uppercase tracking-wider text-slate-400"
+            id="settingsPrefHeading"
+          >
+            Preferences
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label
+                id="settingsDefaultCurrencyLabel"
+                class="text-xs text-slate-300 font-medium block mb-1"
+                >Default Currency</label
+              >
+              <select
+                id="settingsCurrencySelect"
+                onchange="setCurrency(this.value)"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-emerald-500"
+              >
+                <option value="USD">USD ($)</option>
+                <option value="VND">VND (₫)</option>
+                <option value="EUR">EUR (€)</option>
+                <option value="GBP">GBP (£)</option>
+                <option value="JPY">JPY (¥)</option>
+                <option value="AUD">AUD ($)</option>
+                <option value="CAD">CAD ($)</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                id="settingsDefaultGroupingLabel"
+                class="text-xs text-slate-300 font-medium block mb-1"
+                >Default Grouping</label
+              >
+              <select
+                id="settingsGroupingSelect"
+                onchange="setGrouping(this.value)"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-emerald-500"
+              >
+                <option value="AISLE">By Aisle (Department)</option>
+                <option value="STORE">By Store</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Data Management & Backup -->
+        <div
+          class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 space-y-2.5"
+        >
+          <div
+            class="text-xs font-bold uppercase tracking-wider text-slate-400"
+            id="settingsDataHeading"
+          >
+            Data Management & Backup
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              onclick="exportJsonBackup()"
+              id="btnExportBackup"
+              class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>💾</span>
+              <span id="btnExportBackupText">Export JSON</span>
+            </button>
+            <label
+              class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <span>📥</span>
+              <span id="btnImportBackupText">Import JSON</span>
+              <input
+                type="file"
+                accept=".json"
+                onchange="handleBackupFileImport(event)"
+                class="hidden"
+              />
+            </label>
+          </div>
+
+          <div
+            class="flex items-center justify-between pt-1 border-t border-slate-800/80"
+          >
+            <button
+              onclick="loadSampleData()"
+              id="btnResetSampleData"
+              class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
+            >
+              Load Sample Data
+            </button>
+            <button
+              onclick="clearAllData(false)"
+              id="btnClearAllDataInSettings"
+              class="text-xs text-red-400 hover:text-red-300 font-semibold"
+            >
+              Clear All Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 4: Cloud Sync Seam -->
+        <div
+          class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between text-xs"
+        >
+          <div class="flex items-center gap-2">
+            <span class="text-base">☁️</span>
+            <div>
+              <div id="settingsSyncTitle" class="font-bold text-slate-200">
+                Storage & Cloud Sync
+              </div>
+              <div id="settingsSyncStatus" class="text-[11px] text-emerald-400">
+                IndexedDB Active (Offline-First)
+              </div>
+            </div>
+          </div>
+          <span
+            class="text-[11px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800"
+            >Local Only</span
+          >
+        </div>
+
+        <div class="pt-2 flex justify-end">
+          <button
+            onclick="closeModal('settingsModal')"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
     <div
       id="toastContainer"
@@ -1707,17 +1960,31 @@
       const DB_VERSION = 1;
       let dbInstance = null;
 
+      const DEFAULT_STORES = [
+        "Costco",
+        "Trader Joe's",
+        "Target",
+        "Whole Foods",
+        "WinMart",
+        "Bach Hoa Xanh",
+        "Local Market",
+      ];
+
       // In-memory fallback state
       let memoryState = {
         activeList: { id: "default", title: "Weekly Groceries", items: [] },
         catalog: [],
         purchaseLedger: [],
+        stores: [...DEFAULT_STORES],
         settings: {
           language: "en",
           currency: "USD",
           theme: "dark",
           tripPhase: "PLANNING",
           grouping: "AISLE",
+          unitSystem: "metric",
+          density: "comfortable",
+          vibrate: true,
         },
       };
 
@@ -1773,7 +2040,15 @@
         try {
           const raw = localStorage.getItem("smart_buy_list_state");
           if (raw) {
-            memoryState = Object.assign(memoryState, JSON.parse(raw));
+            const parsed = JSON.parse(raw);
+            memoryState = Object.assign(memoryState, parsed);
+            if (
+              !memoryState.stores ||
+              !Array.isArray(memoryState.stores) ||
+              memoryState.stores.length === 0
+            ) {
+              memoryState.stores = [...DEFAULT_STORES];
+            }
           }
         } catch (e) {
           console.warn("Failed to parse localStorage state", e);
@@ -1795,7 +2070,6 @@
           kpi_spent: "Checked Spend",
           kpi_estimated: "Estimated Total",
           add_item_title: "Add Item to List",
-          compare_package_hint: "Compare Package Sizes",
           item_name_placeholder: "e.g. Whole Milk, Jasmine Rice...",
           label_qty: "Quantity / Size",
           label_unit: "Unit",
@@ -1834,6 +2108,22 @@
           toast_item_added: "Item added to shopping list",
           toast_item_checked: "Item updated",
           toast_trip_completed: "Trip recorded into purchase ledger!",
+          settings_title: "Settings & Option Hub",
+          settings_subtitle: "Configure stores, preferences, and data backups",
+          manage_stores_title: "Manage Stores",
+          add_store_btn: "Add Store",
+          swipe_done_cue: "Done",
+          swipe_compare_cue: "Compare",
+          toast_store_added: "Store added successfully",
+          toast_store_exists: "Store already exists",
+          toast_store_renamed: "Store renamed successfully",
+          toast_store_deleted: "Store deleted",
+          toast_store_min_guard: "Must keep at least one store",
+          prompt_rename_store: "Enter new name for store:",
+          toast_backup_exported: "JSON backup exported!",
+          toast_backup_imported: "Backup imported successfully!",
+          all_items_checked: "All items checked! Ready to complete trip.",
+          trip_summary_heading: "Shopping Trip",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -1846,14 +2136,13 @@
           kpi_spent: "Đã Mua",
           kpi_estimated: "Tổng Dự Kiến",
           add_item_title: "Thêm Mặt Hàng Vào Danh Sách",
-          compare_package_hint: "So Sánh Quy Cách Đóng Gói",
           item_name_placeholder: "vd: Sữa Tươi, Gạo Jasmine, Dầu Oliu...",
           label_qty: "Số Lượng / Quy Cách",
           label_unit: "Đơn Vị",
           label_price: "Giá Bao Bì / Gói",
           btn_add_item: "Thêm Hàng",
           list_title: "Danh Sách Mua Sắm",
-          by_aisle: "Theo Khu Vực",
+          by_aisle: "Theo Quầy",
           by_store: "Theo Cửa Hàng",
           empty_title: "Danh sách mua sắm đang trống",
           empty_desc:
@@ -1885,6 +2174,23 @@
           toast_item_added: "Đã thêm vào danh sách mua sắm",
           toast_item_checked: "Đã cập nhật trạng thái",
           toast_trip_completed: "Đã lưu lịch sử mua hàng vào sổ nhật ký!",
+          settings_title: "Cài Đặt & Tuỳ Chọn",
+          settings_subtitle: "Quản lý cửa hàng, tuỳ chọn và sao lưu dữ liệu",
+          manage_stores_title: "Quản Lý Cửa Hàng",
+          add_store_btn: "Thêm Cửa Hàng",
+          swipe_done_cue: "Đã Mua",
+          swipe_compare_cue: "So Sánh",
+          toast_store_added: "Đã thêm cửa hàng thành công",
+          toast_store_exists: "Cửa hàng đã tồn tại",
+          toast_store_renamed: "Đã đổi tên cửa hàng thành công",
+          toast_store_deleted: "Đã xoá cửa hàng",
+          toast_store_min_guard: "Phải giữ lại ít nhất một cửa hàng",
+          prompt_rename_store: "Nhập tên mới cho cửa hàng:",
+          toast_backup_exported: "Đã xuất bản sao lưu JSON!",
+          toast_backup_imported: "Đã nhập bản sao lưu thành công!",
+          all_items_checked:
+            "Đã chọn xong tất cả mặt hàng! Sẵn sàng hoàn tất chuyến đi.",
+          trip_summary_heading: "Chuyến Mua Sắm",
         },
       };
 
@@ -2110,6 +2416,11 @@
         currentGrouping = grouping;
         const btnAisle = document.getElementById("btnGroupByAisle");
         const btnStore = document.getElementById("btnGroupByStore");
+        const settingsSelect = document.getElementById(
+          "settingsGroupingSelect"
+        );
+        if (settingsSelect) settingsSelect.value = grouping;
+
         if (grouping === "AISLE") {
           if (btnAisle)
             btnAisle.className =
@@ -2131,6 +2442,12 @@
       let currentCategoryFilter = "ALL";
 
       function onStoreFilterChange(store) {
+        if (store === "MANAGE_STORES") {
+          openStoreManagerModal();
+          const select = document.getElementById("storeFilterSelect");
+          if (select) select.value = currentStoreFilter;
+          return;
+        }
         currentStoreFilter = store;
         renderApp();
       }
@@ -2139,6 +2456,233 @@
         currentCategoryFilter = category;
         renderCategoryFilterChips();
         renderItemList();
+      }
+
+      /* =========================================================================
+       6b. STORE MANAGEMENT CRUD & CASCADE
+       ========================================================================= */
+      function addStore(storeName) {
+        if (!storeName || typeof storeName !== "string") return false;
+        const name = storeName.trim();
+        if (!name) return false;
+        if (!memoryState.stores) memoryState.stores = [...DEFAULT_STORES];
+        if (
+          memoryState.stores.some((s) => s.toLowerCase() === name.toLowerCase())
+        ) {
+          showToast(
+            TRANSLATIONS[currentLanguage].toast_store_exists ||
+              "Store already exists"
+          );
+          return false;
+        }
+        memoryState.stores.push(name);
+        saveToLocalStorage();
+        renderStoreFilterOptions();
+        renderStoreManagerList();
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_store_added ||
+            "Store added successfully"
+        );
+        return true;
+      }
+
+      function renameStore(oldName, newName) {
+        if (!oldName || !newName || typeof newName !== "string") return false;
+        const name = newName.trim();
+        if (!name || name === oldName) return false;
+        if (!memoryState.stores) memoryState.stores = [...DEFAULT_STORES];
+        const idx = memoryState.stores.indexOf(oldName);
+        if (idx === -1) return false;
+
+        memoryState.stores[idx] = name;
+
+        // Cascade rename to active list items
+        if (
+          memoryState.activeList &&
+          Array.isArray(memoryState.activeList.items)
+        ) {
+          memoryState.activeList.items.forEach((item) => {
+            if (item.store === oldName) {
+              item.store = name;
+            }
+          });
+        }
+
+        // Cascade rename to purchase ledger
+        if (Array.isArray(memoryState.purchaseLedger)) {
+          memoryState.purchaseLedger.forEach((entry) => {
+            if (entry.store === oldName) {
+              entry.store = name;
+            }
+          });
+        }
+
+        if (currentStoreFilter === oldName) {
+          currentStoreFilter = name;
+        }
+
+        saveToLocalStorage();
+        renderApp();
+        renderStoreManagerList();
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_store_renamed ||
+            "Store renamed successfully"
+        );
+        return true;
+      }
+
+      function deleteStore(storeName) {
+        if (!storeName) return false;
+        if (!memoryState.stores) memoryState.stores = [...DEFAULT_STORES];
+        if (memoryState.stores.length <= 1) {
+          showToast(
+            TRANSLATIONS[currentLanguage].toast_store_min_guard ||
+              "Must keep at least one store"
+          );
+          return false;
+        }
+
+        memoryState.stores = memoryState.stores.filter((s) => s !== storeName);
+        const fallbackStore = memoryState.stores[0] || "Other";
+
+        // Reassign active items using this store to fallback
+        if (
+          memoryState.activeList &&
+          Array.isArray(memoryState.activeList.items)
+        ) {
+          memoryState.activeList.items.forEach((item) => {
+            if (item.store === storeName) {
+              item.store = fallbackStore;
+            }
+          });
+        }
+
+        if (currentStoreFilter === storeName) {
+          currentStoreFilter = "ALL";
+        }
+
+        saveToLocalStorage();
+        renderApp();
+        renderStoreManagerList();
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_store_deleted || "Store deleted"
+        );
+        return true;
+      }
+
+      function renderStoreManagerList() {
+        const container = document.getElementById("storeManagerList");
+        if (!container) return;
+        const stores = memoryState.stores || DEFAULT_STORES;
+        container.innerHTML = stores
+          .map(
+            (s, idx) => `
+          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+            <span class="font-semibold text-slate-200" id="storeNameDisplay-${idx}">${s}</span>
+            <div class="flex items-center gap-1.5">
+              <button onclick="promptRenameStore('${s}')" class="text-slate-400 hover:text-emerald-400 p-1" title="Rename">✏️</button>
+              <button onclick="deleteStore('${s}')" class="text-slate-400 hover:text-red-400 p-1" title="Delete">🗑️</button>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+      }
+
+      function promptRenameStore(oldName) {
+        const promptText =
+          TRANSLATIONS[currentLanguage].prompt_rename_store ||
+          `Enter new name for store '${oldName}':`;
+        const newName = prompt(promptText, oldName);
+        if (newName && newName.trim()) {
+          renameStore(oldName, newName.trim());
+        }
+      }
+
+      function handleStoreAddSubmit(e) {
+        e.preventDefault();
+        const input = document.getElementById("inputNewStoreName");
+        if (input && input.value.trim()) {
+          const added = addStore(input.value.trim());
+          if (added) input.value = "";
+        }
+      }
+
+      function openStoreManagerModal() {
+        renderStoreManagerList();
+        openModal("storeManagerModal");
+      }
+
+      function closeStoreManagerModal() {
+        closeModal("storeManagerModal");
+      }
+
+      /* =========================================================================
+       6c. OPTION HUB & SETTINGS CONTROLLER
+       ========================================================================= */
+      function openSettingsModal() {
+        const curSelect = document.getElementById("settingsCurrencySelect");
+        const grpSelect = document.getElementById("settingsGroupingSelect");
+        if (curSelect) curSelect.value = currentCurrency;
+        if (grpSelect) grpSelect.value = currentGrouping;
+        openModal("settingsModal");
+      }
+
+      function closeSettingsModal() {
+        closeModal("settingsModal");
+      }
+
+      function exportJsonBackup() {
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(memoryState, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute(
+          "download",
+          `smart_buy_list_backup_${new Date().toISOString().slice(0, 10)}.json`
+        );
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_backup_exported ||
+            "JSON backup exported!"
+        );
+      }
+
+      function handleBackupFileImport(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const parsed = JSON.parse(e.target.result);
+            if (parsed && typeof parsed === "object") {
+              if (parsed.activeList) memoryState.activeList = parsed.activeList;
+              if (Array.isArray(parsed.purchaseLedger))
+                memoryState.purchaseLedger = parsed.purchaseLedger;
+              if (Array.isArray(parsed.stores))
+                memoryState.stores = parsed.stores;
+              if (parsed.settings)
+                memoryState.settings = Object.assign(
+                  memoryState.settings,
+                  parsed.settings
+                );
+              saveToLocalStorage();
+              renderApp();
+              showToast(
+                TRANSLATIONS[currentLanguage].toast_backup_imported ||
+                  "Backup imported successfully!"
+              );
+              closeModal("settingsModal");
+            }
+          } catch (err) {
+            console.error("Failed to parse backup JSON", err);
+            showToast("Invalid JSON backup file");
+          }
+        };
+        reader.readAsText(file);
       }
 
       function renderCategoryFilterChips() {
@@ -2240,29 +2784,36 @@
 
       function renderStoreFilterOptions() {
         const select = document.getElementById("storeFilterSelect");
-        if (!select) return;
-        const stores = new Set([
-          "Costco",
-          "Trader Joe's",
-          "Target",
-          "Whole Foods",
-          "WinMart",
-          "Bach Hoa Xanh",
-          "Local Market",
-        ]);
-        memoryState.activeList.items.forEach((i) => {
-          if (i.store) stores.add(i.store);
-        });
+        const addStoreSelect = document.getElementById("inputItemStore");
+        const stores = memoryState.stores || DEFAULT_STORES;
 
-        const currentVal = currentStoreFilter;
-        select.innerHTML = `<option value="ALL">All Stores</option>`;
-        stores.forEach((store) => {
-          const opt = document.createElement("option");
-          opt.value = store;
-          opt.textContent = store;
-          if (store === currentVal) opt.selected = true;
-          select.appendChild(opt);
-        });
+        if (select) {
+          const currentVal = currentStoreFilter;
+          select.innerHTML = `<option value="ALL">${TRANSLATIONS[currentLanguage].store_all || "All Stores"}</option>`;
+          stores.forEach((store) => {
+            const opt = document.createElement("option");
+            opt.value = store;
+            opt.textContent = store;
+            if (store === currentVal) opt.selected = true;
+            select.appendChild(opt);
+          });
+          const manageOpt = document.createElement("option");
+          manageOpt.value = "MANAGE_STORES";
+          manageOpt.textContent = `⚙️ ${TRANSLATIONS[currentLanguage].manage_stores_title || "Manage Stores..."}`;
+          select.appendChild(manageOpt);
+        }
+
+        if (addStoreSelect) {
+          const prevVal = addStoreSelect.value;
+          addStoreSelect.innerHTML = "";
+          stores.forEach((store) => {
+            const opt = document.createElement("option");
+            opt.value = store;
+            opt.textContent = store;
+            if (store === prevVal) opt.selected = true;
+            addStoreSelect.appendChild(opt);
+          });
+        }
       }
 
       function updateTripProgress() {
@@ -2373,10 +2924,114 @@
         const uncheckedItems = filtered.filter((i) => !i.checked);
         const checkedItems = filtered.filter((i) => i.checked);
 
-        // Render Active (Unchecked) Items
-        container.innerHTML = uncheckedItems
-          .map((item) => renderItemCard(item))
-          .join("");
+        // Render Active (Unchecked) Items with Grouping
+        if (uncheckedItems.length === 0) {
+          container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 italic bg-slate-950/40 rounded-2xl border border-slate-800/60">${TRANSLATIONS[currentLanguage].all_items_checked || "All items checked! Ready to complete trip."}</div>`;
+        } else if (currentGrouping === "STORE") {
+          // Group By Store
+          const storeMap = new Map();
+          uncheckedItems.forEach((item) => {
+            const sName = item.store || "General";
+            if (!storeMap.has(sName)) storeMap.set(sName, []);
+            storeMap.get(sName).push(item);
+          });
+
+          let storeHtml = "";
+          storeMap.forEach((storeItems, sName) => {
+            const storeSubtotal = storeItems.reduce(
+              (sum, it) => sum + (parseFloat(it.price) || 0),
+              0
+            );
+            storeHtml += `
+              <div class="space-y-2">
+                <div class="flex items-center justify-between pt-2 pb-1 px-1">
+                  <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-300">
+                    <span>🏪</span>
+                    <span>${sName}</span>
+                  </div>
+                  <span class="text-[11px] font-semibold text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
+                    ${storeItems.length} items • ${formatCurrency(storeSubtotal)}
+                  </span>
+                </div>
+                <div class="space-y-2">
+                  ${storeItems.map((item) => renderItemCard(item)).join("")}
+                </div>
+              </div>
+            `;
+          });
+          container.innerHTML = storeHtml;
+        } else {
+          // Group By Aisle (Department)
+          const catOrder = [
+            "produce",
+            "dairy_eggs",
+            "meat_seafood",
+            "bakery",
+            "pantry",
+            "frozen",
+            "beverages",
+            "household",
+            "personal_care",
+            "other",
+          ];
+          const catMap = new Map();
+          uncheckedItems.forEach((item) => {
+            const cat = item.category || "other";
+            if (!catMap.has(cat)) catMap.set(cat, []);
+            catMap.get(cat).push(item);
+          });
+
+          let aisleHtml = "";
+          catOrder.forEach((catKey) => {
+            if (catMap.has(catKey)) {
+              const catItems = catMap.get(catKey);
+              const catInfo = CATEGORIES[catKey] || CATEGORIES.other;
+              const catLabel =
+                currentLanguage === "vi" ? catInfo.vi : catInfo.en;
+              aisleHtml += `
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between pt-2 pb-1 px-1">
+                    <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-300">
+                      <span>${catInfo.icon}</span>
+                      <span>${catLabel}</span>
+                    </div>
+                    <span class="text-[11px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
+                      ${catItems.length}
+                    </span>
+                  </div>
+                  <div class="space-y-2">
+                    ${catItems.map((item) => renderItemCard(item)).join("")}
+                  </div>
+                </div>
+              `;
+              catMap.delete(catKey);
+            }
+          });
+
+          // Any remaining categories
+          catMap.forEach((catItems, catKey) => {
+            const catInfo = CATEGORIES[catKey] || CATEGORIES.other;
+            const catLabel = currentLanguage === "vi" ? catInfo.vi : catInfo.en;
+            aisleHtml += `
+              <div class="space-y-2">
+                <div class="flex items-center justify-between pt-2 pb-1 px-1">
+                  <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-300">
+                    <span>${catInfo.icon}</span>
+                    <span>${catLabel}</span>
+                  </div>
+                  <span class="text-[11px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
+                    ${catItems.length}
+                  </span>
+                </div>
+                <div class="space-y-2">
+                  ${catItems.map((item) => renderItemCard(item)).join("")}
+                </div>
+              </div>
+            `;
+          });
+
+          container.innerHTML = aisleHtml;
+        }
 
         // Render Checked Items
         if (checkedItems.length > 0) {
@@ -2388,6 +3043,106 @@
               .join("");
         } else {
           if (checkedSection) checkedSection.classList.add("hidden");
+        }
+      }
+
+      /* =========================================================================
+       6d. TOUCH SWIPE GESTURE CONTROLLER
+       ========================================================================= */
+      let touchState = {
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        itemId: null,
+        isSwiping: false,
+      };
+
+      function handleTouchStart(e, itemId) {
+        if (!e.touches || e.touches.length === 0) return;
+        touchState.startX = e.touches[0].clientX;
+        touchState.startY = e.touches[0].clientY;
+        touchState.currentX = touchState.startX;
+        touchState.itemId = itemId;
+        touchState.isSwiping = false;
+
+        const card = document.getElementById(`itemCard-${itemId}`);
+        if (card) {
+          card.style.transition = "none";
+        }
+      }
+
+      function handleTouchMove(e, itemId) {
+        if (
+          touchState.itemId !== itemId ||
+          !e.touches ||
+          e.touches.length === 0
+        )
+          return;
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        const deltaX = currentX - touchState.startX;
+        const deltaY = currentY - touchState.startY;
+
+        if (Math.abs(deltaY) > Math.abs(deltaX) && !touchState.isSwiping) {
+          return;
+        }
+
+        touchState.isSwiping = true;
+        touchState.currentX = currentX;
+
+        const clampedDelta = Math.max(-120, Math.min(120, deltaX));
+        const card = document.getElementById(`itemCard-${itemId}`);
+        if (card) {
+          card.style.transform = `translateX(${clampedDelta}px)`;
+        }
+      }
+
+      function handleTouchEnd(e, itemId) {
+        if (touchState.itemId !== itemId) return;
+        const deltaX = touchState.currentX - touchState.startX;
+        const card = document.getElementById(`itemCard-${itemId}`);
+
+        if (card) {
+          card.style.transition =
+            "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)";
+          card.style.transform = "translateX(0px)";
+        }
+
+        const SWIPE_THRESHOLD = 60;
+        if (touchState.isSwiping) {
+          if (deltaX > SWIPE_THRESHOLD) {
+            handleItemSwipeAction(itemId, "RIGHT");
+          } else if (deltaX < -SWIPE_THRESHOLD) {
+            handleItemSwipeAction(itemId, "LEFT");
+          }
+        }
+
+        touchState.itemId = null;
+        touchState.isSwiping = false;
+      }
+
+      function handleTouchCancel(e, itemId) {
+        const card = document.getElementById(`itemCard-${itemId}`);
+        if (card) {
+          card.style.transition =
+            "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)";
+          card.style.transform = "translateX(0px)";
+        }
+        touchState.itemId = null;
+        touchState.isSwiping = false;
+      }
+
+      function handleItemSwipeAction(itemId, direction) {
+        if (direction === "RIGHT") {
+          toggleItemCheck(itemId);
+          if (
+            typeof navigator !== "undefined" &&
+            typeof navigator.vibrate === "function"
+          ) {
+            navigator.vibrate([15]);
+          }
+        } else if (direction === "LEFT") {
+          openItemComparator(itemId);
         }
       }
 
@@ -2405,51 +3160,79 @@
 
         let dealBadgeHtml = "";
         if (deal.score === "GREAT_DEAL") {
-          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50">🟢 Great Deal</span>`;
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50">🟢 ${TRANSLATIONS[currentLanguage].badge_great_deal || "Great Deal"}</span>`;
         } else if (deal.score === "PRICE_SPIKE") {
-          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50">🔴 Price Spike</span>`;
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50">🔴 ${TRANSLATIONS[currentLanguage].badge_price_spike || "Price Spike"}</span>`;
         } else if (deal.score === "FAIR_PRICE") {
-          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50">🟡 Fair Price</span>`;
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50">🟡 ${TRANSLATIONS[currentLanguage].badge_fair_price || "Fair Price"}</span>`;
         }
 
         const catInfo = CATEGORIES[item.category] || CATEGORIES.other;
+        const swipeDoneCue =
+          TRANSLATIONS[currentLanguage].swipe_done_cue || "Done";
+        const swipeCompCue =
+          TRANSLATIONS[currentLanguage].swipe_compare_cue || "Compare";
 
         return `
-        <div class="bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3 sm:p-4 transition-all shadow-sm flex items-center justify-between gap-3">
-          <div class="flex items-center gap-3 flex-1 min-w-0">
-            <!-- Big Thumb-Friendly Checkbox -->
-            <button onclick="toggleItemCheck('${item.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
-              ✓
-            </button>
-
-            <!-- Item Info -->
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="text-sm">${catInfo.icon}</span>
-                <span class="font-bold text-sm text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
-                ${dealBadgeHtml}
-              </div>
-              <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                <button onclick="openQuickPriceEdit('${item.id}')" class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60 transition-colors" title="Adjust price / size">
-                  ${item.quantity} ${item.unit}
-                </button>
-                <span>•</span>
-                <span class="text-slate-400 font-normal">${item.store || "Supermarket"}</span>
-                ${unitPrice > 0 ? `<span>•</span><span class="text-emerald-400 font-semibold">${formatCurrency(unitPrice)}/${baseUnit}</span>` : ""}
-              </div>
+        <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
+          <!-- Swipe Action Backgrounds -->
+          <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
+            <!-- Left Reveal (Green on Right Swipe) -->
+            <div class="h-full bg-emerald-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
+              <span>✓</span>
+              <span>${swipeDoneCue}</span>
+            </div>
+            <!-- Right Reveal (Indigo on Left Swipe) -->
+            <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
+              <span>⚖️</span>
+              <span>${swipeCompCue}</span>
             </div>
           </div>
 
-          <!-- Price & Actions -->
-          <div class="flex items-center gap-2 shrink-0">
-            <button onclick="openItemComparator('${item.id}')" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-xl transition-colors" title="Compare Pack Sizes">
-              ⚖️
-            </button>
-            <div class="text-right">
-              <button onclick="openQuickPriceEdit('${item.id}')" class="font-bold text-sm text-slate-100 hover:text-emerald-400 transition-colors block text-right" title="Update Price">
-                ${formatCurrency(item.price)}
+          <!-- Foreground Swipeable Card -->
+          <div 
+            id="itemCard-${item.id}"
+            ontouchstart="handleTouchStart(event, '${item.id}')"
+            ontouchmove="handleTouchMove(event, '${item.id}')"
+            ontouchend="handleTouchEnd(event, '${item.id}')"
+            ontouchcancel="handleTouchCancel(event, '${item.id}')"
+            class="relative z-10 bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3 sm:p-4 transition-transform duration-200 ease-out flex items-center justify-between gap-3"
+          >
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <!-- Big Thumb-Friendly Checkbox -->
+              <button onclick="toggleItemCheck('${item.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
+                ✓
               </button>
-              <button onclick="deleteItem('${item.id}')" class="text-[11px] text-slate-500 hover:text-red-400 transition-colors mt-0.5" title="Remove Item">Remove</button>
+
+              <!-- Item Info -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">${catInfo.icon}</span>
+                  <span class="font-bold text-sm text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
+                  ${dealBadgeHtml}
+                </div>
+                <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                  <button onclick="openQuickPriceEdit('${item.id}')" class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60 transition-colors" title="Adjust price / size">
+                    ${item.quantity} ${item.unit}
+                  </button>
+                  <span>•</span>
+                  <span class="text-slate-400 font-normal">${item.store || "Supermarket"}</span>
+                  ${unitPrice > 0 ? `<span>•</span><span class="text-emerald-400 font-semibold">${formatCurrency(unitPrice)}/${baseUnit}</span>` : ""}
+                </div>
+              </div>
+            </div>
+
+            <!-- Price & Actions -->
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="openItemComparator('${item.id}')" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-xl transition-colors" title="Compare Pack Sizes">
+                ⚖️
+              </button>
+              <div class="text-right">
+                <button onclick="openQuickPriceEdit('${item.id}')" class="font-bold text-sm text-slate-100 hover:text-emerald-400 transition-colors block text-right" title="Update Price">
+                  ${formatCurrency(item.price)}
+                </button>
+                <button onclick="deleteItem('${item.id}')" class="text-[11px] text-slate-500 hover:text-red-400 transition-colors mt-0.5" title="Remove Item">Remove</button>
+              </div>
             </div>
           </div>
         </div>
@@ -3068,6 +3851,8 @@
             "tripCompleteModal",
             "priceLedgerModal",
             "itemHistoryModal",
+            "storeManagerModal",
+            "settingsModal",
           ].forEach((id) => closeModal(id));
         }
         const tag = (e.target && e.target.tagName) || "";
@@ -3094,13 +3879,10 @@
 
         el("headerTitle", t.app_title);
         el("headerSubtitle", t.app_subtitle);
-        el("labelPlanning", t.tab_planning);
-        el("labelInStore", t.tab_in_store);
         el("kpiItemsLabel", t.kpi_items);
         el("kpiSpentLabel", t.kpi_spent);
         el("kpiEstimatedLabel", t.kpi_estimated);
         el("addItemHeading", t.add_item_title);
-        el("btnOpenComparatorHint", t.compare_package_hint);
         el("labelItemQty", t.label_qty);
         el("labelItemUnit", t.label_unit);
         el("labelItemPrice", t.label_price);
@@ -3128,6 +3910,14 @@
         el("btnSaveQuickPrice", t.btn_save_price || "Update Price");
         el("tripProgressTitle", t.progress_pacing || "Shopping Progress");
         el("tripRemainingSpendLabel", t.remaining_spend || "Remaining");
+        el("settingsModalTitle", t.settings_title || "Settings & Option Hub");
+        el(
+          "settingsModalSubtitle",
+          t.settings_subtitle ||
+            "Configure stores, preferences, and data backups"
+        );
+        el("storeManagerHeading", t.manage_stores_title || "Manage Stores");
+        el("btnAddStoreSubmitText", t.add_store_btn || "Add Store");
 
         const inputName = document.getElementById("inputItemName");
         if (inputName) inputName.placeholder = t.item_name_placeholder;
@@ -3268,6 +4058,7 @@
 
       // Global exports for test runner and Node vm sandbox
       if (typeof window !== "undefined") {
+        window.DEFAULT_STORES = DEFAULT_STORES;
         window.normalizeUnitPrice = normalizeUnitPrice;
         window.normalizeQuantity = normalizeQuantity;
         window.comparePackages = comparePackages;
@@ -3307,6 +4098,27 @@
         window.filterByCategory = filterByCategory;
         window.stepQuickPrice = stepQuickPrice;
         window.updateTripProgress = updateTripProgress;
+        window.addStore = addStore;
+        window.renameStore = renameStore;
+        window.deleteStore = deleteStore;
+        window.renderStoreManagerList = renderStoreManagerList;
+        window.promptRenameStore = promptRenameStore;
+        window.handleStoreAddSubmit = handleStoreAddSubmit;
+        window.openStoreManagerModal = openStoreManagerModal;
+        window.closeStoreManagerModal = closeStoreManagerModal;
+        window.setGrouping = setGrouping;
+        window.openSettingsModal = openSettingsModal;
+        window.closeSettingsModal = closeSettingsModal;
+        window.handleBackupFileImport = handleBackupFileImport;
+        window.handleTouchStart = handleTouchStart;
+        window.handleTouchMove = handleTouchMove;
+        window.handleTouchEnd = handleTouchEnd;
+        window.handleTouchCancel = handleTouchCancel;
+        window.handleItemSwipeAction = handleItemSwipeAction;
+        window.renderStoreFilterOptions = renderStoreFilterOptions;
+        window.renderItemList = renderItemList;
+        window.renderItemCard = renderItemCard;
+        window.onStoreFilterChange = onStoreFilterChange;
         Object.defineProperty(window, "currentPhase", {
           get: () => currentPhase,
           set: (v) => {
@@ -3325,6 +4137,20 @@
           get: () => activeComparingItemId,
           set: (v) => {
             activeComparingItemId = v;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentGrouping", {
+          get: () => currentGrouping,
+          set: (v) => {
+            currentGrouping = v;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentStoreFilter", {
+          get: () => currentStoreFilter,
+          set: (v) => {
+            currentStoreFilter = v;
           },
           configurable: true,
         });

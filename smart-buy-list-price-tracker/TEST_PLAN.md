@@ -1,7 +1,7 @@
 # 🧪 Test Plan — Smart Buy-List & Unit Price Tracker
 
 > **Target File:** `smart-buy-list-price-tracker/index.html`  
-> **Test Location:** `tests/smart-buy-list-price-tracker.test.js`  
+> **Test Location:** `tests/smart-buy-list-*.test.js`  
 > **Test Runner:** `scripts/run-tests.js` (`npm test`)
 
 ---
@@ -15,6 +15,9 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 3. **Payload Compression & Sharing Tests**: Verifying LZ-String encoding/decoding, URL length constraints, and non-destructive merge deduplication.
 4. **DOM & UI Interaction Tests**: JSDOM-driven tests asserting shopping trip phase transitions, live running total updates, in-aisle package comparisons, and modal lifecycle invariants.
 5. **Localization & Parity Tests**: 100% dictionary key parity between English (`en`) and Vietnamese (`vi`), translation string completeness, and currency masking.
+6. **Store Management & Grouping Tests**: Custom store CRUD, cascade renames to active items and ledger records, active item grouping under aisle/store headers with computed subtotals.
+7. **Mobile Swipe Gestures Tests**: Swipe right (Mark Done) and Swipe left (Open Comparator) touch gesture lifecycle.
+8. **Option Hub Configuration Tests**: Centralized settings modal management, backup export/import, and UI preferences.
 
 ---
 
@@ -135,3 +138,19 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **PWA-14** | Service Worker Cache Version Bump | `sw.js` defines `CACHE_NAME = "smart-buy-list-v2"`.                                                  |
 | **PWA-15** | Service Worker Icon Pre-cache     | `sw.js` includes `"./icon.svg"` in `ASSETS_TO_CACHE`.                                                |
 | **PWA-16** | Service Worker Cache-First Fetch  | `sw.js` intercepts fetch requests with Cache-First matching strategy.                                |
+
+---
+
+### 10. Store Management, Grouping, Swipe Gestures & Option Hub
+
+| Test ID          | Scenario                        | Assertion                                                                                                          |
+| :--------------- | :------------------------------ | :----------------------------------------------------------------------------------------------------------------- |
+| **STORE-01**     | Custom Store Creation           | Adding a new store 'Sprouts' persists it to `memoryState.stores` and updates store select dropdowns.               |
+| **STORE-02**     | Store Rename Cascade            | Renaming 'Costco' to 'Costco Wholesale' updates all active items and ledger records assigned to that store.        |
+| **STORE-03**     | Store Deletion Guard            | Deleting a store safely reassigns active items to 'Other' / general fallback.                                      |
+| **GROUP-01**     | Group By Aisle                  | Active items render with department category headers (`🥦 Produce & Fruits`) in walking route sequence.            |
+| **GROUP-02**     | Group By Store with Subtotal    | Active items render with store section headers (`🏪 Costco (3 items • $18.50)`).                                   |
+| **SWIPE-01**     | Swipe Right Mark Done Gesture   | Dragging item card right by >60px triggers `toggleItemCheck(id)` and haptic vibration.                             |
+| **SWIPE-02**     | Swipe Left Open Compare Gesture | Dragging item card left by <-60px triggers `openItemComparator(id)`.                                               |
+| **SETTINGS-01**  | Option Hub Modal Trigger        | Tapping `⚙️` in top bar opens Settings modal with Store Manager, Preferences, and Data Backup sections.            |
+| **NAV-CLEAN-01** | Redundancy Removal              | Duplicate Planning/In-Store pill buttons in top card and Compare button in Add Item header are eliminated cleanly. |
