@@ -32,7 +32,15 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── buy-vs-rent-ui-i18n.test.js             # Buy vs Rent UI shell & i18n parity tests
 │   ├── buy-vs-rent-charts.test.js              # Buy vs Rent Chart.js & sensitivity tests
 │   ├── buy-vs-rent-sharing-dossier.test.js     # Buy vs Rent URL state & AI dossier tests
-│   └── buy-vs-rent-tooltips-formulas.test.js   # Buy vs Rent tooltips & formula hub tests
+│   ├── buy-vs-rent-tooltips-formulas.test.js   # Buy vs Rent tooltips & formula hub tests
+│   ├── smart-buy-list-price-tracker.test.js    # Smart Buy-List unit price & deal scoring tests
+│   ├── smart-buy-list-storage.test.js          # Smart Buy-List IndexedDB storage & migration tests
+│   ├── smart-buy-list-lifecycle.test.js        # Smart Buy-List trip lifecycle & in-store mode tests
+│   ├── smart-buy-list-comparator-sparklines.test.js # Smart Buy-List comparator & sparklines tests
+│   ├── smart-buy-list-sharing-pwa.test.js      # Smart Buy-List URL state sharing & PWA tests
+│   ├── smart-buy-list-i18n-theming.test.js     # Smart Buy-List i18n parity, currency & theme tests
+│   ├── smart-buy-list-material-you.test.js     # Smart Buy-List Material You navigation tests
+│   └── smart-buy-list-pacing-touch-polish.test.js # Smart Buy-List progress pacing & touch tests
 ├── docs/
 │   ├── adr/                                    # System-wide Architecture Decision Records (0001–0005)
 │   │   ├── 0001-multi-tool-repository-structure.md
@@ -46,20 +54,35 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── dist/                                   # Compacted standalone production output
 │   │   └── index.html
 │   ├── CONTEXT.md                              # Tool-specific domain glossary
+│   ├── I18N.md                                 # Bilingual terminology & translation guide
 │   ├── docs/
 │   │   └── adr/                                # Tool-specific architecture decisions (0001–0018)
 │   ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R41)
 │   └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
-└── buy-vs-rent-home-comparison/                # Standalone Tool: Buy vs Rent Comparison
+├── buy-vs-rent-home-comparison/                # Standalone Tool: Buy vs Rent Comparison
+│   ├── index.html                              # Source application (HTML/CSS/JS)
+│   ├── dist/                                   # Compacted standalone production output
+│   │   └── index.html
+│   ├── CONTEXT.md                              # Tool-specific domain glossary
+│   ├── I18N.md                                 # Bilingual terminology & translation guide
+│   ├── docs/
+│   │   └── adr/                                # Tool-specific architecture decisions (0001–0010)
+│   ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R38)
+│   ├── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
+│   └── buy-home-research.md                    # Real estate market & financial math research
+└── smart-buy-list-price-tracker/               # Standalone Tool: Smart Buy-List & Unit Price Tracker
     ├── index.html                              # Source application (HTML/CSS/JS)
     ├── dist/                                   # Compacted standalone production output
     │   └── index.html
     ├── CONTEXT.md                              # Tool-specific domain glossary
+    ├── I18N.md                                 # Bilingual terminology & translation guide
     ├── docs/
-    │   └── adr/                                # Tool-specific architecture decisions (0001–0007)
-    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R36)
+    │   └── adr/                                # Tool-specific architecture decisions (0001–0004)
+    ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R35)
     ├── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
-    └── buy-home-research.md                    # Real estate market & financial math research
+    ├── icon.svg                                # Vector application icon
+    ├── manifest.webmanifest                    # Progressive Web App manifest
+    └── sw.js                                   # Offline Cache-First service worker
 ```
 
 ### Core Architecture Principles
@@ -81,6 +104,7 @@ npm run build
 # Build a specific standalone tool
 npm run build:predictor
 npm run build:buy-rent
+npm run build:tracker
 # or: node scripts/build.js --tool <tool-name>
 
 # Run all automated tests and generate interactive reports (HTML, JSON, JUnit)
@@ -98,6 +122,14 @@ npm run test:buy-rent:ui
 npm run test:buy-rent:charts
 npm run test:buy-rent:dossier
 npm run test:buy-rent:tooltips
+npm run test:tracker
+npm run test:tracker:storage
+npm run test:tracker:lifecycle
+npm run test:tracker:comparator
+npm run test:tracker:sharing
+npm run test:tracker:i18n
+npm run test:tracker:material
+npm run test:tracker:pacing
 
 # Verify code formatting with Prettier (CI Gate)
 npm run lint:check
@@ -107,6 +139,13 @@ npm run format
 
 # Package release assets (standalone HTMLs + unified zip)
 npm run pack:release
+
+# Build and automatically mirror deliverables to an external directory (e.g., static hosting)
+# Option 1: Configure in .env.local (recommended):
+#   TOOLS_DEST_DIR=/path/to/external/static/tools
+#   npm run build
+# Option 2: CLI argument:
+#   npm run build -- --dest-dir=/path/to/external/static/tools
 ```
 
 ---
@@ -120,6 +159,7 @@ A client-side wealth forecasting and multi-tier savings simulation tool supporti
 - **Source Entry:** [`personal-finance-savings-predictor/index.html`](./personal-finance-savings-predictor/index.html)
 - **Compacted Web Output:** [`personal-finance-savings-predictor/dist/index.html`](./personal-finance-savings-predictor/dist/index.html)
 - **Domain Model:** [`personal-finance-savings-predictor/CONTEXT.md`](./personal-finance-savings-predictor/CONTEXT.md)
+- **Terminology & i18n Guide:** [`personal-finance-savings-predictor/I18N.md`](./personal-finance-savings-predictor/I18N.md)
 - **Requirements & Specs:** [`personal-finance-savings-predictor/ITEMS_TO_IMPLEMENT.md`](./personal-finance-savings-predictor/ITEMS_TO_IMPLEMENT.md)
 - **Test Plan:** [`personal-finance-savings-predictor/TEST_PLAN.md`](./personal-finance-savings-predictor/TEST_PLAN.md)
 
@@ -130,9 +170,21 @@ A client-side residential real estate financial decision engine evaluating the l
 - **Source Entry:** [`buy-vs-rent-home-comparison/index.html`](./buy-vs-rent-home-comparison/index.html)
 - **Compacted Web Output:** [`buy-vs-rent-home-comparison/dist/index.html`](./buy-vs-rent-home-comparison/dist/index.html)
 - **Domain Model:** [`buy-vs-rent-home-comparison/CONTEXT.md`](./buy-vs-rent-home-comparison/CONTEXT.md)
+- **Terminology & i18n Guide:** [`buy-vs-rent-home-comparison/I18N.md`](./buy-vs-rent-home-comparison/I18N.md)
 - **Requirements & Specs:** [`buy-vs-rent-home-comparison/ITEMS_TO_IMPLEMENT.md`](./buy-vs-rent-home-comparison/ITEMS_TO_IMPLEMENT.md)
 - **Test Plan:** [`buy-vs-rent-home-comparison/TEST_PLAN.md`](./buy-vs-rent-home-comparison/TEST_PLAN.md)
 - **Financial Math Research:** [`buy-vs-rent-home-comparison/buy-home-research.md`](./buy-vs-rent-home-comparison/buy-home-research.md)
+
+### 🛒 [Smart Buy-List & Unit Price Tracker](./smart-buy-list-price-tracker/)
+
+A mobile-first standalone Progressive Web Application (PWA) designed for grocery shopping list management, multi-store purchase ledger tracking, package unit price normalization ($/kg, $/L, $/ea), and in-aisle deal intelligence. Features Material You (MD3) navigation, distraction-free Buy Mode with $\ge 48\text{px}$ touch targets, item-centric side-by-side package comparator, linear shopping progress pacing, horizontal aisle category filter chips, serverless LZ-String URL state sharing, and Cache-First offline PWA support.
+
+- **Source Entry:** [`smart-buy-list-price-tracker/index.html`](./smart-buy-list-price-tracker/index.html)
+- **Compacted Web Output:** [`smart-buy-list-price-tracker/dist/index.html`](./smart-buy-list-price-tracker/dist/index.html)
+- **Domain Model:** [`smart-buy-list-price-tracker/CONTEXT.md`](./smart-buy-list-price-tracker/CONTEXT.md)
+- **Terminology & i18n Guide:** [`smart-buy-list-price-tracker/I18N.md`](./smart-buy-list-price-tracker/I18N.md)
+- **Requirements & Specs:** [`smart-buy-list-price-tracker/ITEMS_TO_IMPLEMENT.md`](./smart-buy-list-price-tracker/ITEMS_TO_IMPLEMENT.md)
+- **Test Plan:** [`smart-buy-list-price-tracker/TEST_PLAN.md`](./smart-buy-list-price-tracker/TEST_PLAN.md)
 
 ---
 

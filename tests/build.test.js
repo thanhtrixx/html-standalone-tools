@@ -5,6 +5,10 @@ const {
   discoverTools,
   buildTool,
   inlineLocalAssets,
+  parseEnvContent,
+  loadEnvFiles,
+  resolveDestDir,
+  syncToolToExternal,
 } = require("../scripts/build");
 
 async function runTests() {
@@ -24,10 +28,18 @@ async function runTests() {
 
   // Test 1: Tool discovery
   const tools = discoverTools();
-  assert(tools.length >= 1, `Found ${tools.length} tool(s) in repository`);
+  assert(tools.length >= 3, `Found ${tools.length} tool(s) in repository`);
   assert(
     tools.some((t) => t.name === "personal-finance-savings-predictor"),
     'Discovered "personal-finance-savings-predictor" tool'
+  );
+  assert(
+    tools.some((t) => t.name === "buy-vs-rent-home-comparison"),
+    'Discovered "buy-vs-rent-home-comparison" tool'
+  );
+  assert(
+    tools.some((t) => t.name === "smart-buy-list-price-tracker"),
+    'Discovered "smart-buy-list-price-tracker" tool'
   );
 
   // Test 2: Inlining local assets helper
@@ -321,6 +333,158 @@ async function runTests() {
       "test-reports/junit.xml JUnit XML report exists and is non-empty"
     );
   }
+
+  // Test 12: parseEnvContent parser robustness
+  const sampleEnv = `
+# Comment line
+TOOLS_DEST_DIR="/custom/path/to/tools"
+DIST_DEST_DIR='/fallback/path'
+SIMPLE_KEY=plain_value
+SPACED_KEY = spaced value
+# ANOTHER_COMMENT=ignored
+EMPTY_KEY=
+  `;
+  const parsed = parseEnvContent(sampleEnv);
+  assert(
+    parsed.TOOLS_DEST_DIR === "/custom/path/to/tools",
+    "parseEnvContent correctly parses double-quoted values and strips quotes"
+  );
+  assert(
+    parsed.DIST_DEST_DIR === "/fallback/path",
+    "parseEnvContent correctly parses single-quoted values and strips quotes"
+  );
+  assert(
+    parsed.SIMPLE_KEY === "plain_value",
+    "parseEnvContent correctly parses plain unquoted values"
+  );
+  assert(
+    parsed.SPACED_KEY === "spaced value",
+    "parseEnvContent correctly parses keys with whitespace around delimiter"
+  );
+  assert(
+    parsed.ANOTHER_COMMENT === undefined,
+    "parseEnvContent ignores commented lines"
+  );
+
+  // Test 13: loadEnvFiles file loading & .env.local precedence
+  const tempEnvDir = path.join(__dirname, "temp_env_test");
+  fs.mkdirSync(tempEnvDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(tempEnvDir, ".env"),
+    "TOOLS_DEST_DIR=/base/env/path\nBASE_VAR=base_val",
+    "utf8"
+  );
+  fs.writeFileSync(
+    path.join(tempEnvDir, ".env.local"),
+    "TOOLS_DEST_DIR=/override/local/path",
+    "utf8"
+  );
+
+  const loadedEnv = loadEnvFiles(tempEnvDir);
+  assert(
+    loadedEnv.TOOLS_DEST_DIR === "/override/local/path",
+    ".env.local overrides values in .env"
+  );
+  assert(
+    loadedEnv.BASE_VAR === "base_val",
+    ".env values are preserved when not overridden in .env.local"
+  );
+
+  // Clean up temp env dir
+  fs.rmSync(tempEnvDir, { recursive: true, force: true });
+
+  // Test 14: resolveDestDir precedence cascade (CLI > env > fileEnv > null)
+  const tempCascadeDir = path.join(__dirname, "temp_cascade_test");
+  fs.mkdirSync(tempCascadeDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(tempCascadeDir, ".env.local"),
+    "TOOLS_DEST_DIR=/from/env/local",
+    "utf8"
+  );
+
+  // Case 14a: CLI flag takes top priority
+  const cliResolved = resolveDestDir(
+    ["--dest-dir=/cli/target/path"],
+    tempCascadeDir
+  );
+  assert(
+    cliResolved === "/cli/target/path",
+    "resolveDestDir prioritizes CLI argument (--dest-dir) over env files"
+  );
+
+  const exportResolved = resolveDestDir(
+    ["--export-dir=/cli/export/path"],
+    tempCascadeDir
+  );
+  assert(
+    exportResolved === "/cli/export/path",
+    "resolveDestDir prioritizes CLI argument (--export-dir) over env files"
+  );
+
+  // Case 14b: process.env takes precedence over fileEnv
+  const originalEnv = process.env.TOOLS_DEST_DIR;
+  try {
+    process.env.TOOLS_DEST_DIR = "/from/process/env";
+    const envResolved = resolveDestDir([], tempCascadeDir);
+    assert(
+      envResolved === "/from/process/env",
+      "resolveDestDir prioritizes process.env over local file env"
+    );
+  } finally {
+    if (originalEnv !== undefined) {
+      process.env.TOOLS_DEST_DIR = originalEnv;
+    } else {
+      delete process.env.TOOLS_DEST_DIR;
+    }
+  }
+
+  // Case 14c: Fallback to .env.local
+  const fileResolved = resolveDestDir([], tempCascadeDir);
+  assert(
+    fileResolved === "/from/env/local",
+    "resolveDestDir falls back to .env.local when CLI and process.env are absent"
+  );
+
+  // Case 14d: Null when unconfigured
+  const emptyDir = path.join(__dirname, "temp_empty_dir");
+  fs.mkdirSync(emptyDir, { recursive: true });
+  const nullResolved = resolveDestDir([], emptyDir);
+  assert(
+    nullResolved === null,
+    "resolveDestDir returns null when no destination is configured"
+  );
+  fs.rmSync(emptyDir, { recursive: true, force: true });
+  fs.rmSync(tempCascadeDir, { recursive: true, force: true });
+
+  // Test 15: syncToolToExternal directory mirroring & companion asset sync
+  const tempSyncDest = path.join(__dirname, "temp_external_sync");
+  const trackerTool = tools.find(
+    (t) => t.name === "smart-buy-list-price-tracker"
+  );
+  if (trackerTool) {
+    await buildTool(trackerTool);
+    const syncRes = syncToolToExternal(trackerTool, tempSyncDest);
+    assert(syncRes !== null, "syncToolToExternal returned sync result object");
+    assert(
+      fs.existsSync(path.join(tempSyncDest, trackerTool.name, "index.html")),
+      "Synced deliverable index.html exists in mirrored destination"
+    );
+    assert(
+      fs.existsSync(
+        path.join(tempSyncDest, trackerTool.name, "manifest.webmanifest")
+      ),
+      "Synced companion asset manifest.webmanifest exists in destination"
+    );
+    assert(
+      fs.existsSync(path.join(tempSyncDest, trackerTool.name, "sw.js")),
+      "Synced companion asset sw.js exists in destination"
+    );
+    assert(
+      fs.existsSync(path.join(tempSyncDest, trackerTool.name, "icon.svg")),
+      "Synced companion asset icon.svg exists in destination"
+    );
+  }
+  fs.rmSync(tempSyncDest, { recursive: true, force: true });
 
   console.log(`\n📊 Test Summary: ${passCount} Passed, ${failCount} Failed\n`);
   if (failCount > 0) {

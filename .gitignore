@@ -8,6 +8,13 @@ release-assets
 test-reports
 coverage
 
+# Local environment & secrets
+.env
+.env.local
+.env.*
+!.env.example
+*.local.json
+
 ### IntelliJ IDEA ###
 .idea
 .idea/**

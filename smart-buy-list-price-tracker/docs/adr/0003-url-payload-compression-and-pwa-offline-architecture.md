@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-The repository mandate ([`ADR-0002`](file:///Users/trile/dev/trile/html-standalone-tools/docs/adr/0002-zero-build-standalone-single-file-html-constraint.md)) requires standalone single-file HTML deliverables with zero server infrastructure.
+The repository mandate ([`ADR-0002`](../../../docs/adr/0002-zero-build-standalone-single-file-html-constraint.md)) requires standalone single-file HTML deliverables with zero server infrastructure.
 
 Users need to:
 
