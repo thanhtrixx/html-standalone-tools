@@ -144,21 +144,6 @@
 
         <!-- Quick Action Controls -->
         <div class="flex items-center gap-1 sm:gap-2">
-          <!-- Currency Selector -->
-          <select
-            id="currencySelector"
-            onchange="setCurrency(this.value)"
-            class="bg-slate-800 text-xs font-semibold text-slate-200 border border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-          >
-            <option value="USD">USD ($)</option>
-            <option value="VND">VND (₫)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="JPY">JPY (¥)</option>
-            <option value="AUD">AUD ($)</option>
-            <option value="CAD">CAD ($)</option>
-          </select>
-
           <!-- Language Switcher -->
           <button
             id="langToggleBtn"
@@ -405,12 +390,17 @@
             <div class="sm:col-span-3">
               <select
                 id="inputItemStore"
+                onchange="onAddStoreSelectChange(this.value)"
                 class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
               >
                 <option value="Costco">Costco</option>
                 <option value="Trader Joe's">Trader Joe's</option>
+                <option value="Target">Target</option>
+                <option value="Whole Foods">Whole Foods</option>
+                <option value="WinMart">WinMart</option>
+                <option value="Bach Hoa Xanh">Bach Hoa Xanh</option>
                 <option value="Local Market">Local Market</option>
-                <option value="Supermarket">Supermarket</option>
+                <option value="MANAGE_STORES">⚙️ Manage Stores...</option>
               </select>
             </div>
           </div>
@@ -641,16 +631,6 @@
         </div>
       </div>
     </main>
-
-    <!-- MD3 Floating Action Button (Planning Mode) -->
-    <button
-      id="fabAddItem"
-      onclick="focusAddItemInput()"
-      class="fixed right-6 bottom-20 z-20 w-14 h-14 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-2xl flex items-center justify-center text-2xl active:scale-95 transition-all no-print"
-      title="Add Item"
-    >
-      ➕
-    </button>
 
     <!-- ==================== BOTTOM IN-AISLE THUMB NAVIGATION (MD3) ==================== -->
     <nav
@@ -2129,6 +2109,7 @@
           est_price_label: "Estimated:",
           new_item: "New Item",
           atl_price_label: "ATL:",
+          swipe_undo_cue: "Undo",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -2185,6 +2166,7 @@
           add_store_btn: "Thêm Cửa Hàng",
           swipe_done_cue: "Đã Mua",
           swipe_compare_cue: "So Sánh",
+          swipe_undo_cue: "Bỏ chọn",
           toast_store_added: "Đã thêm cửa hàng thành công",
           toast_store_exists: "Cửa hàng đã tồn tại",
           toast_store_renamed: "Đã đổi tên cửa hàng thành công",
@@ -2357,7 +2339,6 @@
         const tabInStore = document.getElementById("tabInStore");
         const finishBar = document.getElementById("finishTripBar");
         const addItemSection = document.getElementById("addItemSection");
-        const fab = document.getElementById("fabAddItem");
 
         const navPlanningPill = document.getElementById("navPlanningPill");
         const navBuyModePill = document.getElementById("navBuyModePill");
@@ -2375,7 +2356,6 @@
           }
           if (finishBar) finishBar.classList.add("hidden");
           if (addItemSection) addItemSection.classList.remove("hidden");
-          if (fab) fab.classList.remove("hidden");
 
           if (navPlanningPill) {
             navPlanningPill.className =
@@ -2402,7 +2382,6 @@
           }
           if (finishBar) finishBar.classList.remove("hidden");
           if (addItemSection) addItemSection.classList.add("hidden");
-          if (fab) fab.classList.add("hidden");
 
           if (navPlanningPill) {
             navPlanningPill.className =
@@ -2823,6 +2802,21 @@
             if (store === prevVal) opt.selected = true;
             addStoreSelect.appendChild(opt);
           });
+          const manageOpt = document.createElement("option");
+          manageOpt.value = "MANAGE_STORES";
+          manageOpt.textContent = `⚙️ ${TRANSLATIONS[currentLanguage].manage_stores_title || "Manage Stores..."}`;
+          addStoreSelect.appendChild(manageOpt);
+        }
+      }
+
+      function onAddStoreSelectChange(val) {
+        if (val === "MANAGE_STORES") {
+          openStoreManagerModal();
+          const addStoreSelect = document.getElementById("inputItemStore");
+          if (addStoreSelect) {
+            const stores = memoryState.stores || DEFAULT_STORES;
+            addStoreSelect.value = stores[0] || "Costco";
+          }
         }
       }
 
@@ -3162,8 +3156,12 @@
       }
 
       function renderItemCard(item) {
-        const swipeDoneCue =
-          TRANSLATIONS[currentLanguage].swipe_done_cue || "Done";
+        const isChecked = Boolean(item.checked);
+        const swipeRightCue = isChecked
+          ? TRANSLATIONS[currentLanguage].swipe_undo_cue || "Undo"
+          : TRANSLATIONS[currentLanguage].swipe_done_cue || "Done";
+        const swipeRightBg = isChecked ? "bg-amber-600" : "bg-emerald-600";
+        const swipeRightIcon = isChecked ? "↺" : "✓";
         const swipeCompCue =
           TRANSLATIONS[currentLanguage].swipe_compare_cue || "Compare";
 
@@ -3172,10 +3170,10 @@
           <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
             <!-- Swipe Action Backgrounds -->
             <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
-              <!-- Left Reveal (Green on Right Swipe) -->
-              <div class="h-full bg-emerald-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
-                <span>✓</span>
-                <span>${swipeDoneCue}</span>
+              <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
+              <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
+                <span>${swipeRightIcon}</span>
+                <span>${swipeRightCue}</span>
               </div>
               <!-- Right Reveal (Indigo on Left Swipe) -->
               <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
@@ -3243,10 +3241,10 @@
         <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
           <!-- Swipe Action Backgrounds -->
           <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
-            <!-- Left Reveal (Green on Right Swipe) -->
-            <div class="h-full bg-emerald-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
-              <span>✓</span>
-              <span>${swipeDoneCue}</span>
+            <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
+            <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
+              <span>${swipeRightIcon}</span>
+              <span>${swipeRightCue}</span>
             </div>
             <!-- Right Reveal (Indigo on Left Swipe) -->
             <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
