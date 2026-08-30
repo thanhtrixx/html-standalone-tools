@@ -2,7 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
 
-function loadBuyListStorageEngine(customIndexedDB = null) {
+function loadBuyListStorageEngine(
+  customIndexedDB = null,
+  initialStorageMock = {}
+) {
   const htmlPath = path.join(
     __dirname,
     "..",
@@ -15,7 +18,41 @@ function loadBuyListStorageEngine(customIndexedDB = null) {
   ];
   const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
 
-  const storageMock = {};
+  const storageMock = { ...initialStorageMock };
+  const elements = {};
+  function getOrCreateElement(id) {
+    if (!elements[id]) {
+      elements[id] = {
+        id,
+        tagName: "DIV",
+        value: "",
+        textContent: "",
+        innerHTML: "",
+        className: "",
+        classList: {
+          classes: new Set(),
+          contains: function (cls) {
+            return this.classes.has(cls);
+          },
+          add: function (cls) {
+            this.classes.add(cls);
+          },
+          remove: function (cls) {
+            this.classes.delete(cls);
+          },
+        },
+        style: {},
+        focus: () => {},
+        scrollIntoView: () => {},
+        appendChild: () => {},
+        setAttribute: () => {},
+        removeAttribute: () => {},
+        remove: () => {},
+      };
+    }
+    return elements[id];
+  }
+
   const sandbox = {
     console,
     Math,
@@ -33,6 +70,10 @@ function loadBuyListStorageEngine(customIndexedDB = null) {
     Set,
     Map,
     Promise,
+    setTimeout: (fn) => fn(),
+    clearTimeout: () => {},
+    setInterval: () => {},
+    clearInterval: () => {},
     tailwind: {},
     addEventListener: () => {},
     scrollTo: () => {},
@@ -42,12 +83,28 @@ function loadBuyListStorageEngine(customIndexedDB = null) {
       share: undefined,
     },
     document: {
-      getElementById: () => null,
-      querySelector: () => null,
+      getElementById: (id) => getOrCreateElement(id),
+      querySelector: (sel) => getOrCreateElement(sel.replace("#", "")),
       querySelectorAll: () => [],
+      createElement: (tag) => {
+        const el = getOrCreateElement(`dyn_${Date.now()}_${Math.random()}`);
+        el.tagName = tag.toUpperCase();
+        return el;
+      },
       addEventListener: () => {},
       documentElement: {
-        classList: { contains: () => false, add: () => {}, remove: () => {} },
+        classList: {
+          classes: new Set(["dark"]),
+          contains: function (cls) {
+            return this.classes.has(cls);
+          },
+          add: function (cls) {
+            this.classes.add(cls);
+          },
+          remove: function (cls) {
+            this.classes.delete(cls);
+          },
+        },
       },
       body: { style: {} },
     },
@@ -167,6 +224,148 @@ async function runStorageTests() {
     assert(
       clearedState.purchaseLedger.length === 0,
       "STORE-07: clearAllData clears purchase ledger"
+    );
+
+    // 5. PAGE REFRESH HYDRATION & SETTINGS PERSISTENCE (Issue #178)
+    console.log(
+      "\n--- Section 5: Page Refresh Hydration & Settings Persistence (Issue #178) ---"
+    );
+
+    // Prepare a mock state representing an active user's session
+    const userSessionState = {
+      activeList: {
+        id: "default",
+        title: "Weekly Groceries",
+        items: [
+          {
+            id: "user-item-1",
+            name: "Dragonfruit",
+            price: 5.0,
+            quantity: 2,
+            unit: "kg",
+            checked: false,
+            store: "WinMart",
+            category: "produce",
+          },
+        ],
+      },
+      catalog: [],
+      purchaseLedger: [
+        {
+          id: 1,
+          itemName: "Dragonfruit",
+          store: "WinMart",
+          unitPrice: 2.5,
+          date: "2026-08-30",
+        },
+      ],
+      stores: ["WinMart", "Bach Hoa Xanh", "Costco"],
+      settings: {
+        language: "vi",
+        currency: "VND",
+        theme: "light",
+        tripPhase: "IN_STORE",
+        grouping: "STORE",
+        unitSystem: "metric",
+        density: "comfortable",
+        vibrate: true,
+      },
+    };
+
+    const initialStorage = {
+      smart_buy_list_state: JSON.stringify(userSessionState),
+    };
+
+    // Standard Browser with IndexedDB support
+    const browserIndexedDB = {
+      open: () => {
+        const req = {
+          result: {
+            objectStoreNames: { contains: () => true },
+            createObjectStore: () => {},
+          },
+          onsuccess: null,
+          onerror: null,
+          onupgradeneeded: null,
+        };
+        setTimeout(() => {
+          if (req.onsuccess) req.onsuccess({ target: req });
+        }, 0);
+        return req;
+      },
+    };
+
+    // Simulate opening the app on page refresh
+    const freshSession = loadBuyListStorageEngine(
+      browserIndexedDB,
+      initialStorage
+    );
+    await freshSession.sandbox.initDatabase();
+
+    // Verify data is hydrated into memoryState despite IndexedDB onsuccess
+    assert(
+      freshSession.sandbox.memoryState.activeList.items.length === 1 &&
+        freshSession.sandbox.memoryState.activeList.items[0].name ===
+          "Dragonfruit",
+      "STORE-REFRESH-01: initDatabase() hydronates activeList items from storage on app startup"
+    );
+    assert(
+      freshSession.sandbox.memoryState.stores.includes("WinMart") &&
+        freshSession.sandbox.memoryState.stores.length === 3,
+      "STORE-REFRESH-02: initDatabase() hydronates custom stores array on app startup"
+    );
+    assert(
+      freshSession.sandbox.memoryState.purchaseLedger.length === 1 &&
+        freshSession.sandbox.memoryState.purchaseLedger[0].itemName ===
+          "Dragonfruit",
+      "STORE-REFRESH-03: initDatabase() hydronates historical purchase ledger on app startup"
+    );
+    assert(
+      freshSession.sandbox.memoryState.settings.language === "vi" &&
+        freshSession.sandbox.memoryState.settings.currency === "VND" &&
+        freshSession.sandbox.memoryState.settings.theme === "light" &&
+        freshSession.sandbox.memoryState.settings.tripPhase === "IN_STORE" &&
+        freshSession.sandbox.memoryState.settings.grouping === "STORE",
+      "STORE-REFRESH-04: initDatabase() hydronates all user settings on app startup"
+    );
+
+    // Verify settings mutators persist immediately
+    freshSession.sandbox.setLanguage("en");
+    let persisted = JSON.parse(
+      freshSession.storageMock["smart_buy_list_state"]
+    );
+    assert(
+      persisted.settings.language === "en",
+      "STORE-SETTINGS-01: setLanguage updates and persists settings.language to storage"
+    );
+
+    freshSession.sandbox.setCurrency("EUR");
+    persisted = JSON.parse(freshSession.storageMock["smart_buy_list_state"]);
+    assert(
+      persisted.settings.currency === "EUR",
+      "STORE-SETTINGS-02: setCurrency updates and persists settings.currency to storage"
+    );
+
+    freshSession.sandbox.setTripPhase("PLANNING");
+    persisted = JSON.parse(freshSession.storageMock["smart_buy_list_state"]);
+    assert(
+      persisted.settings.tripPhase === "PLANNING",
+      "STORE-SETTINGS-03: setTripPhase updates and persists settings.tripPhase to storage"
+    );
+
+    freshSession.sandbox.setGrouping("AISLE");
+    persisted = JSON.parse(freshSession.storageMock["smart_buy_list_state"]);
+    assert(
+      persisted.settings.grouping === "AISLE",
+      "STORE-SETTINGS-04: setGrouping updates and persists settings.grouping to storage"
+    );
+
+    freshSession.sandbox.toggleTheme();
+    persisted = JSON.parse(freshSession.storageMock["smart_buy_list_state"]);
+    assert(
+      typeof persisted.settings.theme === "string" &&
+        persisted.settings.theme.length > 0,
+      "STORE-SETTINGS-05: toggleTheme updates and persists settings.theme to storage"
     );
   } catch (err) {
     console.error("❌ Test Execution Error:", err);
