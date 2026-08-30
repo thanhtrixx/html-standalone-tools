@@ -69,6 +69,11 @@ const TEST_SUITES = [
     file: "tests/ui-ux.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Unit Price & Deal Intelligence Engine",
+    file: "tests/smart-buy-list-price-tracker.test.js",
+    category: "Core Math",
+  },
 ];
 
 function escapeXml(str) {

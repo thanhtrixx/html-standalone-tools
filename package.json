@@ -10,6 +10,7 @@
     "build": "node scripts/build.js",
     "build:predictor": "node scripts/build.js --tool personal-finance-savings-predictor",
     "build:buy-rent": "node scripts/build.js --tool buy-vs-rent-home-comparison",
+    "slides:buy-rent": "npx @slidev/cli buy-vs-rent-home-comparison/slides.md",
     "test": "node scripts/run-tests.js",
     "test:all": "node scripts/run-tests.js",
     "test:report": "node scripts/run-tests.js",

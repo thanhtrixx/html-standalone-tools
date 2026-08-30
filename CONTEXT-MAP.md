@@ -6,6 +6,7 @@ This repository is a collection of standalone, client-side HTML tools. Each tool
 
 - [Personal Finance Savings Predictor](./personal-finance-savings-predictor/CONTEXT.md): Client-side savings simulation, compound salary escalation, multi-tier deposit, inflation forecasting, and portfolio management tool.
 - [Buy vs. Rent Home Comparison](./buy-vs-rent-home-comparison/CONTEXT.md): Standalone client-side housing decision engine, dual-path wealth projection, mortgage amortization modeling, opportunity cost sweep, and sensitivity matrix analysis.
+- [Smart Buy-List & Unit Price Tracker](./smart-buy-list-price-tracker/CONTEXT.md): Mobile-first standalone PWA buy-list, multi-store purchase ledger, package unit-price normalization ($/kg, $/L, $/ea), and in-aisle deal intelligence.
 
 ## Relationships & Isolation
 
