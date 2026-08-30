@@ -99,4 +99,16 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **MD3-04** | Winner Application to Active Item      | Applying winning Package B from the pre-populated comparator directly updates the active list item's price and quantity.                               |
 | **MD3-05** | Top Bar Share & Utility Placement      | Share (`📤`) button is mounted in the sticky top App Bar and excluded from bottom navigation bar.                                                      |
 | **MD3-06** | Quick In-Store Price Adjustment        | Tapping price in Buy Mode allows rapid inline/sheet price editing to reflect actual shelf price before checking off.                                   |
-| **MD3-07** | MD3 Theme Tokens                       | CSS custom properties define `--md-sys-color-primary`, `--md-sys-color-surface-container`, and dark/light tonal tokens with zero runtime dependencies. |
+| **MD3-07** | **MD3 Theme Tokens**                   | CSS custom properties define `--md-sys-color-primary`, `--md-sys-color-surface-container`, and dark/light tonal tokens with zero runtime dependencies. |
+
+---
+
+### 8. In-Store Progress Pacing, Aisle Filter Chips & Touch Ergonomics
+
+| Test ID             | Scenario                         | Assertion                                                                                                                                   |
+| :------------------ | :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| **PACE-01**         | Buy Mode Linear Progress Bar     | Progress bar element updates width percentage and label (`X of Y items (Z%)`) as items are checked off.                                     |
+| **AISLE-01**        | Category Department Filter Chips | Selecting an aisle filter chip (e.g. `Dairy`) isolates active list items to that category and updates active chip pill styling.             |
+| **SHEET-01**        | 1-Tap Fast Price Step Chips      | Quick Price bottom sheet step chips (`+0.50`, `+1.00`, `-0.50`, `-1.00`) immediately adjust the price input value without opening keyboard. |
+| **HAPTIC-01**       | Tactile Check Feedback           | Toggling an item check invokes `navigator.vibrate?.([15])` safely without errors.                                                           |
+| **COMP-VERDICT-01** | Explicit Comparator Verdict      | When comparing two packages, modal displays calculated total package savings and distinct advice for switching vs keeping Package A.        |
