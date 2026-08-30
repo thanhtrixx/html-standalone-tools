@@ -67,6 +67,10 @@ A real-time visual assessment of a product's current shelf price compared agains
 A dedicated rapid-entry modal enabling shoppers to compare 2 or more package configurations side-by-side (e.g. _Brand A: 450g @ $3.20_ vs _Brand B: 1.2kg @ $7.80_) with real-time percentage savings calculations and 1-tap list updating. Can be invoked globally as a scratchpad or pre-populated directly from any active list item (Package A pre-filled).
 _Avoid_: Price calculator, aisle widget, package comparison tool.
 
+**Ledger-to-BuyList Re-order & Batch Restocking**:
+The workflow enabling shoppers to review past purchases in the Historical Purchase Ledger and instantly stage or transfer them back onto the active Buy List using 1-tap quick add (`+`) or multi-select batch adding with sticky summary action bar, snapshot attribute inheritance, and case-insensitive quantity consolidation.
+_Avoid_: History copy, receipt cloner, repeat order button.
+
 ---
 
 ### 3. Stores, Aisles & Organization
@@ -142,7 +146,7 @@ _Avoid_: Database driver, storage hook, backend adapter.
 ### 6. PWA & Mobile Ergonomics
 
 **Standalone PWA Shell & Version Invalidation Rule**:
-An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.0.1`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
+An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.1.0`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
 _Avoid_: Web app wrapper, mobile site, hybrid app.
 
 **Material You (MD3) In-Aisle Navigation**:
