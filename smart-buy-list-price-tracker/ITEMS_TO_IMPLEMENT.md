@@ -57,6 +57,11 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R28** | **Distraction-Free Buy Mode with Inline Edit**   | In-store high-speed checklist with $\ge 48\text{px}$ touch targets, running basket spend, and rapid inline/bottom-sheet price adjustments.                                                                | P0       | ADR-0004      |
 | **R29** | **Item-Centric In-Aisle Comparator Trigger**     | 1-tap `⚖️` trigger on list items pre-populating Package A with item's name/price/unit, prompting only Package B, with 1-tap winner application.                                                           | P0       | ADR-0004      |
 | **R30** | **Top App Bar Utility Relocation**               | Move Share (`📤`), Language, Currency, and Theme exclusively into the Top App Bar to maximize bottom thumb navigation ergonomics.                                                                         | P1       | ADR-0004      |
+| **R31** | **In-Store Shopping Progress Pacing**            | Linear progress bar in Buy Mode showing `Checked X of Y items (Z%)` and remaining estimated unpurchased expenditure.                                                                                      | P0       | CONTEXT.md    |
+| **R32** | **Aisle / Department Quick Filter Chips**        | Horizontal scrollable department filter chips (`All`, `Produce`, `Dairy`, `Meat`, `Bakery`, `Pantry`, `Household`, etc.) for in-aisle item isolation.                                                     | P0       | CONTEXT.md    |
+| **R33** | **MD3 Mobile Bottom Sheet Presentation**         | Mobile-anchored bottom sheet modal display (`items-end`, `rounded-t-3xl`, drag handle bar) for quick price adjustments and package comparisons.                                                           | P1       | CONTEXT.md    |
+| **R34** | **1-Tap Fast Price Adjustment Step Chips**       | Rapid delta chips (`+0.25`, `+0.50`, `+1.00`, `-0.25`, `-0.50`, `-1.00`) inside the Quick Price sheet for zero-keyboard price updates.                                                                    | P1       | CONTEXT.md    |
+| **R35** | **Enhanced Comparator Decision Intelligence**    | Comprehensive savings summary banner in comparator calculating total money saved and explicit active item comparison advice.                                                                              | P1       | CONTEXT.md    |
 
 ---
 
@@ -70,7 +75,8 @@ flowchart TD
     S4["Slice 4: In-Aisle Comparator &amp; Price Intelligence<br/>(Package Comparator Modal, Sparklines &amp; Deal Badges)"]
     S5["Slice 5: Sharing &amp; PWA Integration<br/>(LZ URL Compression, QR Modal, Merge Flow, Service Worker)"]
     S6["Slice 6: i18n Parity, Theming &amp; Polish<br/>(English/Vietnamese Parity, Multi-Currency, Dark/Light Theme)"]
-    S7["Slice 7: Material You &amp; Item-Centric Comparator<br/>(MD3 Navigation, Buy Mode, Item Pre-filled Comparator, Top Bar Share)"]
+    S7["Slice 7: Material You &amp; Item-Centric Comparator<br/>(MD3 Navigation, Buy Mode, Pre-filled Comparator, Top Bar Share)"]
+    S8["Slice 8: In-Store Progress Pacing &amp; Aisle Touch Polish<br/>(Progress Bar, Department Filter Chips, Bottom Sheets, Price Step Chips)"]
 
     S1 --> S2
     S2 --> S3
@@ -78,6 +84,7 @@ flowchart TD
     S4 --> S5
     S5 --> S6
     S6 --> S7
+    S7 --> S8
 ```
 
 <details>
@@ -103,6 +110,9 @@ flowchart TD
       │
       ▼
 [Slice 7: Material You & Item-Centric Comparator] (MD3 Navigation, Buy Mode, Pre-filled Comparator, Top Bar Share)
+      │
+      ▼
+[Slice 8: In-Store Progress Pacing & Aisle Touch Polish] (Progress Bar, Department Filter Chips, Bottom Sheets, Price Step Chips)
 ```
 
 </details>

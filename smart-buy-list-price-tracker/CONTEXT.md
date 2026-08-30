@@ -130,3 +130,15 @@ _Avoid_: Web app wrapper, mobile site, hybrid app.
 **Material You (MD3) In-Aisle Navigation**:
 A 4-destination bottom navigation bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`) built with Material 3 surface containers, pill active indicators, and thumb-friendly touch targets ($\ge 48\text{px}$).
 _Avoid_: Footer controls, bottom tabs, static menu.
+
+**In-Store Shopping Progress Pacing**:
+A visual progress bar and completion indicator in Buy Mode displaying real-time checked metrics (`X of Y items checked (Z%)`) and estimated remaining unpurchased spend.
+_Avoid_: Cart counter, checklist meter.
+
+**Aisle / Category Department Quick Filters**:
+Horizontal scrollable category chips (`All`, `Produce`, `Dairy`, `Meat`, `Bakery`, `Pantry`, `Frozen`, `Beverages`, `Household`, `Personal Care`, `Other`) enabling shoppers to instantly isolate items located in the specific store aisle they are standing in.
+_Avoid_: Tag filter, section tabs.
+
+**MD3 Bottom Sheet Modal & Fast Adjustment Chips**:
+Mobile-anchored bottom sheet dialogs with top drag indicators and 1-tap quick adjustment delta chips (`+0.25`, `+0.50`, `+1.00`, `-0.25`, `-0.50`, `-1.00`) for rapid shelf price edits without opening the soft keyboard.
+_Avoid_: Popup window, custom drawer.
