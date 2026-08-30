@@ -441,6 +441,33 @@ try {
     "applySensitivityScenario toast renders localized timeline navigation button"
   );
   app.showToast = origShowToast;
+
+  // Test 20: Dedicated Application Vector Icon Validation
+  const iconSvgPath = path.join(
+    __dirname,
+    "..",
+    "buy-vs-rent-home-comparison",
+    "icon.svg"
+  );
+  assert(
+    fs.existsSync(iconSvgPath),
+    "Dedicated icon.svg exists in tool directory"
+  );
+  const iconContent = fs.readFileSync(iconSvgPath, "utf8");
+  assert(
+    iconContent.includes("<svg") &&
+      iconContent.includes('viewBox="0 0 512 512"'),
+    "icon.svg defines valid 512x512 SVG viewport"
+  );
+  assert(
+    iconContent.includes("bvrBgGrad") && iconContent.includes("bvrCardShadow"),
+    "icon.svg defines custom Buy vs. Rent gradients and shadows"
+  );
+  assert(
+    iconContent.includes("bvrAmberGrad") &&
+      iconContent.includes("bvrEmeraldGrad"),
+    "icon.svg incorporates theme color ramps for Buy and Rent paths"
+  );
 } catch (err) {
   console.error("❌ Test suite encountered runtime exception:", err);
   failed++;
