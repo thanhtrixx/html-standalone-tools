@@ -232,3 +232,21 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **SCAN-05** | Static QR Image Upload Fallback      | Selecting an image file via `#qrImageFileInput` decodes the QR code from image bitmap and routes payload to `#importModal`.                       |
 | **SCAN-06** | Camera Flip / Facing Mode Toggle     | Clicking 'Flip Camera' toggles facingMode between `environment` and `user` and restarts video stream cleanly.                                     |
 | **SCAN-07** | Bilingual Parity for Scanner UI      | 100% of scanner modal, camera permission, and error strings exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                |
+
+---
+
+### 16. Ledger Deletion, Comparator Unit Sync & Form Pre-fill (v3.2.0)
+
+| Test ID        | Scenario                                       | Assertion                                                                                                                                           |
+| :------------- | :--------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LEDGER-01**  | Row-Level Delete Action                        | Clicking `🗑️` on a ledger row executes `deleteLedgerItem(id)`, removes entry from `memoryState.purchaseLedger`, and refreshes table.                |
+| **LEDGER-02**  | Multi-Select Batch Delete                      | Selecting multiple ledger checkboxes and clicking `#btnDeleteSelectedLedger` removes all selected entries and hides batch bar.                      |
+| **LEDGER-03**  | Dynamic ATL & Deal Rating Recalculation        | Deleting the lowest price record dynamically recomputes All-Time Low (ATL) and deal scoring on active list cards without reload.                    |
+| **COMP-01**    | 13-Unit Dropdown Population                    | `#compUnitA` and `#compUnitB` contain all 13 supported units (`kg`, `g`, `lb`, `oz`, `L`, `ml`, `gal`, `fl oz`, `ea`, `pk`, `box`, `can`, `bunch`). |
+| **COMP-02**    | Unit Casing & Active Item Unit Sync            | `openItemComparator(itemId)` sets `#compUnitA` to `item.unit` (including `L`, `lb`, `pk`, `box`, etc.) without defaulting to `g`.                   |
+| **COMP-03**    | Dimension Auto-Alignment                       | `openItemComparator(itemId)` initializes `#compUnitB` to the matching dimension base unit (`kg`, `L`, `ea`), avoiding immediate mismatch.           |
+| **PREFILL-01** | Apply Winner to Form (Price/Qty/Unit)          | `applyComparatorWinner()` transfers winning price, quantity, and unit into `#inputItemPrice`, `#inputItemQty`, `#inputItemUnit`.                    |
+| **PREFILL-02** | Apply Winner to Form (Domain Context Pre-fill) | When comparing an active item, `applyComparatorWinner()` pre-fills `#inputItemName`, `#inputItemCategory` (Aisle), and `#inputItemStore`.           |
+| **PREFILL-03** | Planning Navigation & Form Focus               | `applyComparatorWinner()` sets trip phase to `PLANNING`, invokes `updateLiveUnitPreview()`, and closes `#comparatorModal`.                          |
+| **PWA-01**     | PWA Version Bump Synchronization               | `sw.js` bumps cache name to `smart-buy-list-v3.2.0` and `index.html` displays synchronized version badge `v3.2.0`.                                  |
+| **I18N-01**    | Bilingual Parity for New Actions               | 100% of ledger delete and comparator prefill translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                |

@@ -134,6 +134,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-settings-qr-scanner.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Ledger Deletion & Comparator Prefill",
+    file: "tests/smart-buy-list-ledger-delete-comparator-prefill.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {

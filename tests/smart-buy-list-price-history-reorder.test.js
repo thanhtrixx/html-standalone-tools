@@ -245,8 +245,8 @@ assert(
 );
 assert(
   htmlContent.includes('id="pwaVersionBadge"') &&
-    htmlContent.includes("v3.1.0"),
-  "REORDER-06: PWA version badge updated to v3.1.0"
+    htmlContent.includes("v3.2.0"),
+  "REORDER-06: PWA version badge updated to v3.2.0"
 );
 
 // --- Section 2: Single-Item 1-Tap Quick-Add from Ledger ---

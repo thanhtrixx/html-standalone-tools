@@ -998,12 +998,25 @@
                   onchange="runComparatorCalc()"
                   class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
                 >
-                  <option value="g">g</option>
-                  <option value="kg">kg</option>
-                  <option value="ml">ml</option>
-                  <option value="l">L</option>
-                  <option value="ea">ea</option>
-                  <option value="can">can</option>
+                  <optgroup label="Weight">
+                    <option value="kg">kg (Kilogram)</option>
+                    <option value="g" selected>g (Gram)</option>
+                    <option value="lb">lb (Pound)</option>
+                    <option value="oz">oz (Ounce)</option>
+                  </optgroup>
+                  <optgroup label="Volume">
+                    <option value="L">L (Litre)</option>
+                    <option value="ml">ml (Millilitre)</option>
+                    <option value="gal">gal (Gallon)</option>
+                    <option value="fl oz">fl oz (Fl Ounce)</option>
+                  </optgroup>
+                  <optgroup label="Count / Units">
+                    <option value="ea">ea (Piece / Unit)</option>
+                    <option value="pk">pk (Pack)</option>
+                    <option value="box">box (Box)</option>
+                    <option value="can">can (Can / Bottle)</option>
+                    <option value="bunch">bunch (Bunch)</option>
+                  </optgroup>
                 </select>
               </div>
             </div>
@@ -1062,12 +1075,25 @@
                   onchange="runComparatorCalc()"
                   class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
                 >
-                  <option value="g">g</option>
-                  <option value="kg" selected>kg</option>
-                  <option value="ml">ml</option>
-                  <option value="l">L</option>
-                  <option value="ea">ea</option>
-                  <option value="can">can</option>
+                  <optgroup label="Weight">
+                    <option value="kg" selected>kg (Kilogram)</option>
+                    <option value="g">g (Gram)</option>
+                    <option value="lb">lb (Pound)</option>
+                    <option value="oz">oz (Ounce)</option>
+                  </optgroup>
+                  <optgroup label="Volume">
+                    <option value="L">L (Litre)</option>
+                    <option value="ml">ml (Millilitre)</option>
+                    <option value="gal">gal (Gallon)</option>
+                    <option value="fl oz">fl oz (Fl Ounce)</option>
+                  </optgroup>
+                  <optgroup label="Count / Units">
+                    <option value="ea">ea (Piece / Unit)</option>
+                    <option value="pk">pk (Pack)</option>
+                    <option value="box">box (Box)</option>
+                    <option value="can">can (Can / Bottle)</option>
+                    <option value="bunch">bunch (Bunch)</option>
+                  </optgroup>
                 </select>
               </div>
             </div>
@@ -1594,15 +1620,28 @@
               (Est. Total: $0.00)
             </span>
           </div>
-          <button
-            type="button"
-            id="btnAddSelectedLedgerToBuyList"
-            onclick="addSelectedLedgerItemsToBuyList()"
-            class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-          >
-            <span>🛒</span>
-            <span id="btnTextAddSelectedLedger">Add Selected to Buy List</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              id="btnDeleteSelectedLedger"
+              onclick="deleteSelectedLedgerItems()"
+              class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <span>🗑️</span>
+              <span id="btnTextDeleteSelectedLedger">Delete Selected</span>
+            </button>
+            <button
+              type="button"
+              id="btnAddSelectedLedgerToBuyList"
+              onclick="addSelectedLedgerItemsToBuyList()"
+              class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+            >
+              <span>🛒</span>
+              <span id="btnTextAddSelectedLedger"
+                >Add Selected to Buy List</span
+              >
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -2066,7 +2105,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.1.0</span
+              >v3.2.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -2744,6 +2783,14 @@
           th_action: "Action",
           ledger_empty_msg: "No historical purchase records found.",
           ledger_add_to_list: "Add",
+          ledger_delete_item: "Delete record",
+          ledger_delete_selected: "Delete Selected",
+          confirm_delete_ledger_item: "Delete this historical purchase record?",
+          confirm_delete_selected_ledger:
+            "Delete {count} selected purchase records from history?",
+          toast_ledger_item_deleted: "Deleted purchase record from history!",
+          toast_ledger_selected_deleted:
+            "Deleted {count} records from history!",
           ledger_quick_add_title: "Add this item to Buy List",
           ledger_select_all: "Select All",
           ledger_deselect_all: "Deselect All",
@@ -2953,6 +3000,14 @@
           th_action: "Thao tác",
           ledger_empty_msg: "Chưa có dữ liệu lịch sử mua hàng.",
           ledger_add_to_list: "Thêm",
+          ledger_delete_item: "Xoá bản ghi",
+          ledger_delete_selected: "Xoá Đã Chọn",
+          confirm_delete_ledger_item: "Xoá bản ghi lịch sử mua hàng này?",
+          confirm_delete_selected_ledger:
+            "Xoá {count} bản ghi lịch sử mua hàng đã chọn?",
+          toast_ledger_item_deleted: "Đã xoá bản ghi khỏi sổ nhật ký!",
+          toast_ledger_selected_deleted:
+            "Đã xoá {count} bản ghi khỏi sổ nhật ký!",
           ledger_quick_add_title: "Thêm món này vào danh sách mua",
           ledger_select_all: "Chọn tất cả",
           ledger_deselect_all: "Bỏ chọn tất cả",
@@ -3622,21 +3677,36 @@
 
       function renderUnitOptions() {
         const select = document.getElementById("inputItemUnit");
-        if (!select) return;
-        const currentVal = select.value || "kg";
+        const compUnitA = document.getElementById("compUnitA");
+        const compUnitB = document.getElementById("compUnitB");
         const lang = currentLanguage === "vi" ? "vi" : "en";
-        select.innerHTML = UNIT_GROUPS.map(
-          (group) => `
-          <optgroup label="${group[lang]}">
-            ${group.units
-              .map(
-                (u) =>
-                  `<option value="${u.key}" ${u.key === currentVal ? "selected" : ""}>${u[lang]}</option>`
-              )
-              .join("")}
-          </optgroup>
-        `
-        ).join("");
+
+        const generateOptions = (currentVal) =>
+          UNIT_GROUPS.map(
+            (group) => `
+            <optgroup label="${group[lang]}">
+              ${group.units
+                .map(
+                  (u) =>
+                    `<option value="${u.key}" ${u.key === currentVal ? "selected" : ""}>${u[lang]}</option>`
+                )
+                .join("")}
+            </optgroup>
+          `
+          ).join("");
+
+        if (select) {
+          const currentVal = select.value || "kg";
+          select.innerHTML = generateOptions(currentVal);
+        }
+        if (compUnitA) {
+          const currentValA = compUnitA.value || "g";
+          compUnitA.innerHTML = generateOptions(currentValA);
+        }
+        if (compUnitB) {
+          const currentValB = compUnitB.value || "kg";
+          compUnitB.innerHTML = generateOptions(currentValB);
+        }
       }
 
       function formatCurrency(
@@ -4349,6 +4419,7 @@
           const compPriceA = document.getElementById("compPriceA");
           const compQtyA = document.getElementById("compQtyA");
           const compUnitA = document.getElementById("compUnitA");
+          const compUnitB = document.getElementById("compUnitB");
           const banner = document.getElementById("compComparingItemBanner");
           const nameLabel = document.getElementById("compItemNameLabel");
           const unitLabel = document.getElementById("compItemCurrentUnitLabel");
@@ -4358,7 +4429,37 @@
 
           if (compPriceA) compPriceA.value = item.price;
           if (compQtyA) compQtyA.value = item.quantity;
-          if (compUnitA) compUnitA.value = item.unit;
+          if (compUnitA && item.unit) {
+            const target = item.unit.trim().toLowerCase();
+            let matched = null;
+            if (compUnitA.options && compUnitA.options.length > 0) {
+              matched = Array.from(compUnitA.options).find(
+                (o) => o.value.toLowerCase() === target
+              );
+            }
+            compUnitA.value = matched
+              ? matched.value
+              : target === "l"
+                ? "L"
+                : item.unit;
+          }
+          if (compUnitB && item.unit) {
+            const norm = normalizeQuantity(1, item.unit);
+            if (norm && norm.baseUnit) {
+              const targetBase = norm.baseUnit.toLowerCase();
+              let matched = null;
+              if (compUnitB.options && compUnitB.options.length > 0) {
+                matched = Array.from(compUnitB.options).find(
+                  (o) => o.value.toLowerCase() === targetBase
+                );
+              }
+              compUnitB.value = matched
+                ? matched.value
+                : targetBase === "l"
+                  ? "L"
+                  : norm.baseUnit;
+            }
+          }
           if (nameLabel) nameLabel.textContent = item.name;
           if (unitLabel) {
             const activeLabel =
@@ -4521,12 +4622,45 @@
         const winQty = res.winner === "A" ? qA : qB;
         const winUnit = res.winner === "A" ? uA : uB;
 
-        document.getElementById("inputItemPrice").value = winPrice;
-        document.getElementById("inputItemQty").value = winQty;
-        document.getElementById("inputItemUnit").value = winUnit;
+        const priceInput = document.getElementById("inputItemPrice");
+        const qtyInput = document.getElementById("inputItemQty");
+        const unitInput = document.getElementById("inputItemUnit");
+        const nameInput = document.getElementById("inputItemName");
+        const catInput = document.getElementById("inputItemCategory");
+        const storeInput = document.getElementById("inputItemStore");
 
+        if (priceInput) priceInput.value = winPrice;
+        if (qtyInput) qtyInput.value = winQty;
+        if (unitInput) {
+          const matched = Array.from(unitInput.options || []).find(
+            (o) => o.value.toLowerCase() === winUnit.toLowerCase()
+          );
+          unitInput.value = matched ? matched.value : winUnit;
+        }
+
+        if (activeComparingItemId) {
+          const item = memoryState.activeList.items.find(
+            (i) => i.id === activeComparingItemId
+          );
+          if (item) {
+            if (nameInput && item.name) nameInput.value = item.name;
+            if (catInput && item.category) catInput.value = item.category;
+            if (storeInput && item.store && item.store !== "—")
+              storeInput.value = item.store;
+          }
+        }
+
+        setTripPhase("PLANNING");
         updateLiveUnitPreview();
         closeModal("comparatorModal");
+
+        if (nameInput) {
+          try {
+            nameInput.focus();
+            nameInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          } catch (e) {}
+        }
+
         showToast(
           TRANSLATIONS[currentLanguage].toast_winner_form_applied ||
             "Winner package applied to form!"
@@ -5445,6 +5579,50 @@
         });
       }
 
+      function deleteLedgerItem(id) {
+        if (id === undefined || id === null) return;
+        const initialLen = memoryState.purchaseLedger.length;
+        memoryState.purchaseLedger = memoryState.purchaseLedger.filter(
+          (l) => String(l.id) !== String(id)
+        );
+        if (memoryState.purchaseLedger.length === initialLen) return;
+
+        selectedLedgerIds.delete(String(id));
+        saveToLocalStorage();
+        renderApp();
+        renderPriceLedgerTable(
+          document.getElementById("ledgerSearchInput")?.value || ""
+        );
+
+        const t = TRANSLATIONS[currentLanguage];
+        showToast(
+          t.toast_ledger_item_deleted || "Deleted purchase record from history!"
+        );
+      }
+
+      function deleteSelectedLedgerItems() {
+        if (selectedLedgerIds.size === 0) return;
+
+        const count = selectedLedgerIds.size;
+        memoryState.purchaseLedger = memoryState.purchaseLedger.filter(
+          (l) => !selectedLedgerIds.has(String(l.id))
+        );
+
+        selectedLedgerIds.clear();
+        saveToLocalStorage();
+        renderApp();
+        renderPriceLedgerTable(
+          document.getElementById("ledgerSearchInput")?.value || ""
+        );
+
+        const t = TRANSLATIONS[currentLanguage];
+        const raw =
+          t.toast_ledger_selected_deleted ||
+          "Deleted {count} records from history!";
+        const msg = raw.replace("{count}", count);
+        showToast(msg);
+      }
+
       function renderPriceLedgerTable(query = "") {
         const tbody = document.getElementById("ledgerTableBody");
         if (!tbody) return;
@@ -5494,7 +5672,7 @@
             <td class="p-2.5 text-slate-400">${l.quantity} ${l.unit}</td>
             <td class="p-2.5 font-semibold text-white">${formatCurrency(l.price)}</td>
             <td class="p-2.5 font-bold text-emerald-400">${formatCurrency(l.unitPrice)} / ${baseUnit}</td>
-            <td class="p-2.5 text-right whitespace-nowrap">
+            <td class="p-2.5 text-right whitespace-nowrap space-x-1">
               <button
                 type="button"
                 onclick="addLedgerItemToBuyList('${l.id}')"
@@ -5503,6 +5681,14 @@
               >
                 <span>+</span>
                 <span>${t.ledger_add_to_list || "Add"}</span>
+              </button>
+              <button
+                type="button"
+                onclick="deleteLedgerItem('${l.id}')"
+                class="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold px-2 py-1 rounded-lg border border-red-500/40 text-xs transition-colors cursor-pointer"
+                title="${t.ledger_delete_item || "Delete record"}"
+              >
+                <span>🗑️</span>
               </button>
             </td>
           </tr>
@@ -5802,6 +5988,10 @@
         el(
           "btnTextAddSelectedLedger",
           t.btn_add_selected_ledger || "Add Selected to Buy List"
+        );
+        el(
+          "btnTextDeleteSelectedLedger",
+          t.ledger_delete_selected || "Delete Selected"
         );
 
         // 6. Quick Price Modal
@@ -6326,6 +6516,8 @@
         window.addLedgerItemToBuyList = addLedgerItemToBuyList;
         window.addSelectedLedgerItemsToBuyList =
           addSelectedLedgerItemsToBuyList;
+        window.deleteLedgerItem = deleteLedgerItem;
+        window.deleteSelectedLedgerItems = deleteSelectedLedgerItems;
         window.processLedgerEntryIntoBuyList = processLedgerEntryIntoBuyList;
         window.updateLedgerBatchBar = updateLedgerBatchBar;
         window.showToast = showToast;
