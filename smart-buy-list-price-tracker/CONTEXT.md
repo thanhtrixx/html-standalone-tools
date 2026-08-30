@@ -64,7 +64,7 @@ A real-time visual assessment of a product's current shelf price compared agains
   _Avoid_: Bargain score, discount level, sale badge.
 
 **In-Aisle Package Comparator**:
-A dedicated rapid-entry modal enabling shoppers to compare 2 or more package configurations side-by-side (e.g. _Brand A: 450g @ $3.20* vs *Brand B: 1.2kg @ $7.80_) with real-time percentage savings calculations and 1-tap list updating.
+A dedicated rapid-entry modal enabling shoppers to compare 2 or more package configurations side-by-side (e.g. _Brand A: 450g @ $3.20_ vs _Brand B: 1.2kg @ $7.80_) with real-time percentage savings calculations and 1-tap list updating. Can be invoked globally as a scratchpad or pre-populated directly from any active list item (Package A pre-filled).
 _Avoid_: Price calculator, aisle widget, package comparison tool.
 
 ---
@@ -90,8 +90,8 @@ _Avoid_: Aisle sorter, path optimizer, walking layout.
 **Shopping Trip**:
 A structured shopping session transitioning through three explicit lifecycle stages:
 
-1. **Planning Phase**: Adding items, adjusting quantities, assigning target stores/aisles, and reviewing estimated trip spend.
-2. **In-Store Shopping Phase**: Focus mode with large thumb-friendly checkboxes, live running total, strike-through item completion, and rapid in-aisle unit price checking.
+1. **Planning Mode**: Adding items via Material 3 Floating Action Button (FAB), adjusting quantities, assigning target stores/aisles, estimating trip spend.
+2. **In-Store Buy Mode**: Focused in-aisle shopping mode with large thumb-friendly checkboxes, live running total, rapid inline price/quantity adjustments, and 1-tap package comparisons.
 3. **Trip Summary & Completion Phase**: Prompting to log verified purchase prices into the historical ledger, calculate actual trip expenditure, and offer unpurchased item rollover or discard.
    _Avoid_: Shopping cart run, checkout session, shopping list run.
 
@@ -104,7 +104,7 @@ _Avoid_: Carryover, push to next, leftover migrate.
 ### 5. Sharing, Backup & Data Portability
 
 **URL State Payload**:
-A compressed, URL-safe Base64 string (using LZ-String compression) encoding the active buy-list state for instant, serverless peer-to-peer sharing via deep links, dynamic QR codes, and `navigator.share()`.
+A compressed, URL-safe Base64 string (using LZ-String compression) encoding the active buy-list state for instant, serverless peer-to-peer sharing via deep links, dynamic QR codes, and `navigator.share()`. Located in the Top App Bar.
 _Avoid_: Share query, URL data, hash link.
 
 **Smart Merge Protocol**:
@@ -127,6 +127,6 @@ _Avoid_: Database driver, storage hook, backend adapter.
 An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies.
 _Avoid_: Web app wrapper, mobile site, hybrid app.
 
-**In-Aisle Thumb Zone**:
-A mobile UI layout paradigm placing primary interactive elements (check item, add item, unit price comparator, barcode/QR trigger) within the bottom 40% of the viewport for comfortable single-handed operation.
-_Avoid_: Bottom bar, thumb layout, footer controls.
+**Material You (MD3) In-Aisle Navigation**:
+A 4-destination bottom navigation bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`) built with Material 3 surface containers, pill active indicators, and thumb-friendly touch targets ($\ge 48\text{px}$).
+_Avoid_: Footer controls, bottom tabs, static menu.

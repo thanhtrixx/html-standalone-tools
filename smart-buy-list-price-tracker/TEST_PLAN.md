@@ -86,3 +86,17 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **I18N-01** | 100% Key Parity        | Every key in `TRANSLATIONS.en` exists in `TRANSLATIONS.vi` with non-empty string values.          |
 | **I18N-02** | Locale Formatting      | `formatCurrency(1500000, 'VND', 'vi')` produces valid Vietnamese currency format (`1.500.000 ₫`). |
 | **I18N-03** | Verbal Quantity Helper | `getVerbalAmount(25000000, 'vi')` returns `"25 Triệu VND"`.                                       |
+
+---
+
+### 7. Material You (MD3) Bottom Navigation & Item Comparator
+
+| Test ID    | Scenario                               | Assertion                                                                                                                                              |
+| :--------- | :------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MD3-01** | 4-Destination Navigation Bar Switching | Tapping Planning, Buy Mode, Price History, and Comparator updates the active bottom bar indicator pill and activates the corresponding UI mode/modal.  |
+| **MD3-02** | Buy Mode Focus & Ergonomics            | Buy mode collapses add-item form, onboarding alerts, and highlights remaining checklist with $\ge 48\text{px}$ touch targets and live basket total.    |
+| **MD3-03** | Item-Centric Comparator Pre-fill       | Tapping `⚖️` on an item card (e.g. Rice 5kg @ $12.00) opens the comparator with Package A pre-populated with item name, price, quantity, and unit.     |
+| **MD3-04** | Winner Application to Active Item      | Applying winning Package B from the pre-populated comparator directly updates the active list item's price and quantity.                               |
+| **MD3-05** | Top Bar Share & Utility Placement      | Share (`📤`) button is mounted in the sticky top App Bar and excluded from bottom navigation bar.                                                      |
+| **MD3-06** | Quick In-Store Price Adjustment        | Tapping price in Buy Mode allows rapid inline/sheet price editing to reflect actual shelf price before checking off.                                   |
+| **MD3-07** | MD3 Theme Tokens                       | CSS custom properties define `--md-sys-color-primary`, `--md-sys-color-surface-container`, and dark/light tonal tokens with zero runtime dependencies. |

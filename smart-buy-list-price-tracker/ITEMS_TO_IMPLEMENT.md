@@ -53,6 +53,10 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R24** | **Non-Blocking Toast Notification Engine**       | Slide-in feedback and undo toasts with auto-dismiss timers.                                                                                                                                               | P1       | CONTEXT.md    |
 | **R25** | **Printable Shopping List**                      | Clean `@media print` layout for generating paper grocery checklists with aisle grouping.                                                                                                                  | P2       | CONTEXT.md    |
 | **R26** | **Keyboard Shortcuts**                           | `N` (new item), `C` (open comparator), `S` (share list), `Esc` (close modal).                                                                                                                             | P2       | CONTEXT.md    |
+| **R27** | **Material You (MD3) Design & Navigation Bar**   | MD3 surface container tokens, active indicator pills, and a 4-destination bottom bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`).                                                             | P0       | ADR-0004      |
+| **R28** | **Distraction-Free Buy Mode with Inline Edit**   | In-store high-speed checklist with $\ge 48\text{px}$ touch targets, running basket spend, and rapid inline/bottom-sheet price adjustments.                                                                | P0       | ADR-0004      |
+| **R29** | **Item-Centric In-Aisle Comparator Trigger**     | 1-tap `⚖️` trigger on list items pre-populating Package A with item's name/price/unit, prompting only Package B, with 1-tap winner application.                                                           | P0       | ADR-0004      |
+| **R30** | **Top App Bar Utility Relocation**               | Move Share (`📤`), Language, Currency, and Theme exclusively into the Top App Bar to maximize bottom thumb navigation ergonomics.                                                                         | P1       | ADR-0004      |
 
 ---
 
@@ -66,12 +70,14 @@ flowchart TD
     S4["Slice 4: In-Aisle Comparator &amp; Price Intelligence<br/>(Package Comparator Modal, Sparklines &amp; Deal Badges)"]
     S5["Slice 5: Sharing &amp; PWA Integration<br/>(LZ URL Compression, QR Modal, Merge Flow, Service Worker)"]
     S6["Slice 6: i18n Parity, Theming &amp; Polish<br/>(English/Vietnamese Parity, Multi-Currency, Dark/Light Theme)"]
+    S7["Slice 7: Material You &amp; Item-Centric Comparator<br/>(MD3 Navigation, Buy Mode, Item Pre-filled Comparator, Top Bar Share)"]
 
     S1 --> S2
     S2 --> S3
     S3 --> S4
     S4 --> S5
     S5 --> S6
+    S6 --> S7
 ```
 
 <details>
@@ -94,6 +100,9 @@ flowchart TD
       │
       ▼
 [Slice 6: i18n Parity, Theming & Polish] (English/Vietnamese Parity, Multi-Currency, Dark/Light Theme)
+      │
+      ▼
+[Slice 7: Material You & Item-Centric Comparator] (MD3 Navigation, Buy Mode, Pre-filled Comparator, Top Bar Share)
 ```
 
 </details>
