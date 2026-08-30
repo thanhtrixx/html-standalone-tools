@@ -62,7 +62,14 @@ function createMockSandbox() {
         style: {},
         focus: () => {},
         scrollIntoView: () => {},
-        appendChild: () => {},
+        appendChild: function (child) {
+          if (child) {
+            const val = child.value || "";
+            const txt = child.textContent || "";
+            this.innerHTML += `<option value="${val}">${txt}</option>`;
+            this.textContent += txt;
+          }
+        },
         setAttribute: () => {},
         removeAttribute: () => {},
         remove: () => {},
@@ -364,6 +371,61 @@ assert(
 assert(
   planCardHtml.includes("toggleItemCheck"),
   "DIFF-PLAN-13: Planning Mode card retains functional checkbox for staging"
+);
+
+// -------------------------------------------------------------------------
+// SECTION 4: QA Fixes (Checked Swipe Undo, Store Sync, FAB & Header Cleanup)
+// -------------------------------------------------------------------------
+console.log("\n--- Section 4: QA Bugfixes & Ergonomics Polish ---");
+const sb3 = createMockSandbox();
+sb3.loadSampleData();
+
+// 1. Checked item swipe right reveal
+const checkedMilk = { ...sb3.memoryState.activeList.items[0], checked: true };
+const checkedCardHtml = sb3.renderItemCard(checkedMilk);
+
+assert(
+  checkedCardHtml.includes("bg-amber-600") ||
+    checkedCardHtml.includes("bg-orange-600"),
+  "DIFF-QA-01: Checked item swipe right uses amber background (bg-amber-600)"
+);
+
+assert(
+  checkedCardHtml.includes("Undo") ||
+    checkedCardHtml.includes("Bỏ chọn") ||
+    checkedCardHtml.includes("↺"),
+  "DIFF-QA-02: Checked item swipe right displays Undo cue (↺ Undo)"
+);
+
+assert(
+  !checkedCardHtml.includes(
+    'bg-emerald-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal'
+  ),
+  "DIFF-QA-03: Checked item swipe right does not use green Done cue"
+);
+
+// 2. FAB and Header Currency removal in HTML
+assert(
+  !htmlContent.includes('id="fabAddItem"'),
+  "DIFF-QA-04: Floating Action Button (#fabAddItem) is removed from HTML"
+);
+
+assert(
+  !htmlContent.includes('id="currencySelector"'),
+  "DIFF-QA-05: Currency selector (#currencySelector) is removed from Header bar HTML"
+);
+
+// 3. Store dropdown sync in Add Item form
+sb3.addStore("Sprouts Farmers Market");
+const addStoreEl = sb3.document.getElementById("inputItemStore");
+assert(
+  addStoreEl.innerHTML.includes("Sprouts Farmers Market"),
+  "DIFF-QA-06: Add Item store dropdown (#inputItemStore) syncs newly added store"
+);
+
+assert(
+  addStoreEl.innerHTML.includes("MANAGE_STORES"),
+  "DIFF-QA-07: Add Item store dropdown (#inputItemStore) includes MANAGE_STORES option"
 );
 
 // -------------------------------------------------------------------------

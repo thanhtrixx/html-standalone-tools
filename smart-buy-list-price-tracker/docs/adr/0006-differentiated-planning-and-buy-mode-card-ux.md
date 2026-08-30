@@ -22,7 +22,10 @@ Previously, `renderItemCard(item)` rendered an identical, hybrid card layout reg
      - Tapping the Checkbox toggles checked status with tactile haptic vibration (`navigator.vibrate([15])`).
      - Tapping the Shelf Price opens the bottom-sheet Quick Price Update modal with fast delta chips (`+0.25`, `+0.50`, etc.) for zero-friction shelf price corrections.
      - Tapping the card background toggles checked status.
-   - **Fluid Swipe Gestures**: Touch swipes remain active (Swipe Right marks Done, Swipe Left opens the In-Aisle Package Comparator pre-filled).
+   - **Fluid Swipe Gestures**: Touch swipes remain active:
+     - On unchecked items: Swipe Right marks Done (`✓`, `bg-emerald-600`).
+     - On checked items: Swipe Right unchecks/restores the item with distinct amber styling (`↺ Undo` / `Bỏ chọn`, `bg-amber-600`).
+     - Swipe Left opens the In-Aisle Package Comparator pre-filled.
 
 2. **Rich Expanded Planning Mode Card UX (`PLANNING`)**:
    - **Row 1 (Header)**: Staging checkbox (`✓`) + Category emoji icon + bold item name + retail store tag (`🏪 Costco`) + Deal Score Badge (`🟢 Great Deal` / `🟡 Fair Price` / `🔴 Price Spike`).
@@ -34,12 +37,18 @@ Previously, `renderItemCard(item)` rendered an identical, hybrid card layout reg
      - Total estimated spend (`formatCurrency(item.price)`).
    - **Staging Checkbox**: Checkbox remains functional in Planning Mode for pre-shopping pantry audits.
 
-3. **Ubiquitous Language & Bilingual Parity**:
-   - Both English (`en`) and Vietnamese (`vi`) translation dictionaries in `TRANSLATIONS` include keys for `edit_btn`, `remove_btn`, `est_price_label`, `new_item`, and `atl_price_label`.
+3. **Form & Layout Simplification**:
+   - **Store Selector Synchronization**: The Add Item form's store selector (`#inputItemStore`) is dynamically bound to `memoryState.stores` and includes a direct `⚙️ Manage Stores...` shortcut to open the Store Manager.
+   - **Floating Action Button Removal**: The redundant `#fabAddItem` is removed from the DOM to eliminate floating target collisions over list items and bottom navigation.
+   - **Header Decluttering**: The redundant `#currencySelector` is removed from the Top App Bar, centralizing currency configuration in Settings / Option Hub.
+
+4. **Ubiquitous Language & Bilingual Parity**:
+   - Both English (`en`) and Vietnamese (`vi`) translation dictionaries in `TRANSLATIONS` include keys for `edit_btn`, `remove_btn`, `est_price_label`, `new_item`, `atl_price_label`, and `swipe_undo_cue`.
 
 ## Consequences
 
-- **Superior In-Aisle Ergonomics**: Buy Mode provides zero-distraction scanning with massive hit targets and rapid checking.
+- **Superior In-Aisle Ergonomics**: Buy Mode provides zero-distraction scanning with massive hit targets, rapid checking, and clear `↺ Undo` feedback when swiping checked items.
 - **Comprehensive Planning Intelligence**: Planning Mode offers full analytical transparency into pack sizes, unit economics, and historical deal context.
 - **Zero-Accident Shopping**: Deleting or opening complex modal flows by accidental tap during in-store walking is eliminated in Buy Mode while preserving power-user swipe access.
+- **Clean Layout**: Removing the floating action button and header currency dropdown ensures a clutter-free interface on all mobile devices.
 - **100% Backward Compatibility**: Data models (`memoryState.activeList.items`, `memoryState.purchaseLedger`) and storage structures remain completely unchanged.
