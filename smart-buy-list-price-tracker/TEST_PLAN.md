@@ -154,3 +154,18 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **SWIPE-02**     | Swipe Left Open Compare Gesture | Dragging item card left by <-60px triggers `openItemComparator(id)`.                                               |
 | **SETTINGS-01**  | Option Hub Modal Trigger        | Tapping `⚙️` in top bar opens Settings modal with Store Manager, Preferences, and Data Backup sections.            |
 | **NAV-CLEAN-01** | Redundancy Removal              | Duplicate Planning/In-Store pill buttons in top card and Compare button in Add Item header are eliminated cleanly. |
+
+---
+
+### 11. Differentiated Planning & Buy Mode Card Ergonomics
+
+| Test ID     | Scenario                           | Assertion                                                                                                                             |
+| :---------- | :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| **DIFF-01** | Buy Mode Ultra-Minimalist Content  | In Buy Mode, item cards render only Checkbox, Item Name, and Shelf Price.                                                             |
+| **DIFF-02** | Buy Mode Secondary Element Hiding  | Category icon, quantity pill, store badge, normalized unit price, deal rating badge, comparator button, and remove button are hidden. |
+| **DIFF-03** | Buy Mode Tap Price Modal Trigger   | Tapping shelf price in Buy Mode opens the Quick Price bottom sheet modal for instant price correction.                                |
+| **DIFF-04** | Buy Mode Tap Check Interaction     | Tapping checkbox or card background in Buy Mode marks item as checked with haptic vibration.                                          |
+| **DIFF-05** | Buy Mode Touch Swipe Retention     | Swipe Right marks Done; Swipe Left opens In-Aisle Comparator pre-filled.                                                              |
+| **DIFF-06** | Planning Mode Expanded Header      | In Planning Mode, item cards render Category icon, Item name, Store badge, and Deal rating badge in row 1.                            |
+| **DIFF-07** | Planning Mode Metrics Intelligence | Quantity & unit pill, normalized unit price ($/kg, $/L, $/ea), and historical ATL baseline are rendered.                              |
+| **DIFF-08** | Planning Mode Action Toolbar       | Action row renders 1-tap Compare (`⚖️`), Edit (`✏️`), Remove (`🗑️`) buttons alongside estimated price.                                |

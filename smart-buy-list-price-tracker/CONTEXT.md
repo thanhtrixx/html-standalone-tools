@@ -97,10 +97,17 @@ _Avoid_: Aisle sorter, path optimizer, walking layout.
 **Shopping Trip**:
 A structured shopping session transitioning through three explicit lifecycle stages:
 
-1. **Planning Mode**: Adding items via Material 3 Floating Action Button (FAB), adjusting quantities, assigning target stores/aisles, estimating trip spend.
-2. **In-Store Buy Mode**: Focused in-aisle shopping mode with large thumb-friendly checkboxes, live running total, rapid inline price/quantity adjustments, and 1-tap package comparisons.
+1. **Planning Mode**: Adding items via Material 3 Floating Action Button (FAB), adjusting quantities, assigning target stores/aisles, estimating trip spend with rich expanded item cards (header with store & deal badges, metrics with $/unit & historical ATL reference, action toolbar with 1-tap Compare, Edit, and Remove).
+2. **In-Store Buy Mode**: Focused distraction-free in-aisle shopping mode with ultra-minimalist cards displaying exclusively the large checkbox, item name, and clickable shelf price, backed by live running totals, pacing progress, and touch swipe gestures.
 3. **Trip Summary & Completion Phase**: Prompting to log verified purchase prices into the historical ledger, calculate actual trip expenditure, and offer unpurchased item rollover or discard.
    _Avoid_: Shopping cart run, checkout session, shopping list run.
+
+**Differentiated Item Card Ergonomics**:
+Tailored visual density and interaction models per lifecycle phase:
+
+- **Planning Mode Card**: Expanded multi-row container presenting rich domain context (Category Icon, Item Name, Store Tag, Deal Score Badge, Quantity & Package Size Pill, Normalized Unit Price, Historical All-Time Low, Compare `⚖️`, Edit `✏️`, Remove `🗑️`, and Estimated Spend).
+- **Buy Mode Card**: Ultra-minimalist single-row container presenting solely the essential check-off primitives (Thumb-friendly Checkbox `✓`, Pure Item Name, and Clickable Shelf Price for fast price corrections). Secondary metadata and destructive buttons are hidden.
+  _Avoid_: Uniform card layout, static list item.
 
 **Item Rollover**:
 The process during Trip Completion where unchecked/unpurchased items are automatically transferred into a new draft list for the next shopping trip.
