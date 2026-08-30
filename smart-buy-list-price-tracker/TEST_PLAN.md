@@ -187,3 +187,19 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **PWA-UPD-09** | Option Hub "Check for Updates"        | Clicking "Check for Updates" in Option Hub invokes `registration.update()` and shows user feedback toast.             |
 | **PWA-UPD-10** | Option Hub "Purge Cache & Reload"     | Clicking "Purge Cache & Reload" clears all CacheStorage keys, unregisters service workers, and reloads the window.    |
 | **PWA-UPD-11** | Bilingual Parity for Update UI        | 100% of update and cache-purge strings exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                         |
+
+---
+
+### 13. Price History Re-order & Batch Restocking
+
+| Test ID        | Scenario                          | Assertion                                                                                                                                                   |
+| :------------- | :-------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **REORDER-01** | Single Item Quick-Add from Ledger | Clicking 1-tap `+` on a ledger entry creates a new active Buy List item with inherited name, store, category, quantity, unit, and price.                    |
+| **REORDER-02** | Case-Insensitive Deduplication    | Re-ordering an item that already exists on the active list increments its target quantity by the ledger entry's quantity and updates reference price.       |
+| **REORDER-03** | Multi-Select Checkbox Selection   | Checking one or more ledger rows updates selection state and reveals the sticky batch action toolbar (`#ledgerBatchBar`).                                   |
+| **REORDER-04** | Sticky Batch Bar Metrics          | Batch action bar accurately displays the count of selected items and computed estimated subtotal cost.                                                      |
+| **REORDER-05** | Select All / Deselect All Toggle  | Tapping `[Select All]` checks all visible filtered rows; tapping again deselects all rows and hides the batch bar.                                          |
+| **REORDER-06** | Batch Re-order Execution          | Clicking `Add Selected to Buy List` transfers all selected ledger entries into active list, clears selections, and hides the batch bar.                     |
+| **REORDER-07** | Actionable Toast Navigation       | After adding items from ledger, toast displays actionable `[View List]` button which closes Price History modal, sets phase to `PLANNING`, and scrolls top. |
+| **REORDER-08** | PWA Version Bump Synchronization  | `sw.js` bumps cache name to `smart-buy-list-v3.1.0` and `index.html` displays synchronized version badge `v3.1.0`.                                          |
+| **REORDER-09** | Bilingual Parity for Re-order UI  | 100% of ledger re-order and batch restocking strings exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                                 |

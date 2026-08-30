@@ -119,6 +119,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-differentiated-cards.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Price History Re-order & Batch Restocking",
+    file: "tests/smart-buy-list-price-history-reorder.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {
