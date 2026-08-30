@@ -74,8 +74,16 @@ flowchart TD
 6. **100% Bilingual Parity**:
    - All update notifications, Option Hub buttons, and status toasts provide complete English (`en`) and Vietnamese (`vi`) translations.
 
+7. **Mandatory PWA Version Bumping & Cache Invalidation Rule**:
+   - Every code modification affecting runtime assets (`index.html`, JavaScript logic, styles) MUST increment the version in both:
+     1. `sw.js`: `const CACHE_NAME = "smart-buy-list-v<semver>";`
+     2. `index.html`: `<span id="pwaVersionBadge">v<semver></span>`
+   - Bumping `CACHE_NAME` ensures browser Service Worker registration triggers `updatefound` / `installed` states immediately, allowing `checkForUpdates()` to discover the pending worker and prompt the user with the non-blocking update toast.
+   - Automated zero-regression test gates in `tests/smart-buy-list-sharing-pwa.test.js` enforce version synchronization between `sw.js` and `index.html`.
+
 ## Consequences
 
+- **Deterministic Update Discovery**: Bumping `CACHE_NAME` on every release guarantees `Check for Updates` reliably discovers new code and triggers cache replacement.
 - **Instant Freshness**: Online users automatically receive the latest code on reload without clearing browser data.
 - **Reliable Offline Operation**: Offline users continue enjoying instant startup from cache even without an internet connection.
 - **Non-Destructive UX**: In-flight shopping sessions are never unexpectedly interrupted by silent reloads; the user explicitly decides when to update.

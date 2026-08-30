@@ -1560,7 +1560,7 @@
     <!-- 7. STORE MANAGER MODAL -->
     <div
       id="storeManagerModal"
-      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+      class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
         class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll shadow-2xl"
@@ -1624,7 +1624,7 @@
       </div>
     </div>
 
-    <!-- 8. OPTION HUB / SETTINGS MODAL -->
+    <!-- 8. SETTINGS MODAL -->
     <div
       id="settingsModal"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
@@ -1640,10 +1640,10 @@
                 id="settingsModalTitle"
                 class="font-bold text-base text-slate-100"
               >
-                Settings & Option Hub
+                Settings
               </h3>
               <p id="settingsModalSubtitle" class="text-xs text-slate-400">
-                Configure stores, preferences, and data backups
+                Configure stores, preferences, language, and data backups
               </p>
             </div>
           </div>
@@ -1695,7 +1695,7 @@
             Preferences
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label
                 id="settingsDefaultCurrencyLabel"
@@ -1714,6 +1714,22 @@
                 <option value="JPY">JPY (¥)</option>
                 <option value="AUD">AUD ($)</option>
                 <option value="CAD">CAD ($)</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                id="settingsLanguageLabel"
+                class="text-xs text-slate-300 font-medium block mb-1"
+                >Language</label
+              >
+              <select
+                id="settingsLanguageSelect"
+                onchange="setLanguage(this.value)"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-emerald-500"
+              >
+                <option value="en">English (EN)</option>
+                <option value="vi">Tiếng Việt (VI)</option>
               </select>
             </div>
 
@@ -1825,8 +1841,9 @@
               </span>
             </div>
             <span
+              id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.0.0</span
+              >v3.0.1</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -2408,8 +2425,10 @@
           toast_item_added: "Item added to shopping list",
           toast_item_checked: "Item updated",
           toast_trip_completed: "Trip recorded into purchase ledger!",
-          settings_title: "Settings & Option Hub",
-          settings_subtitle: "Configure stores, preferences, and data backups",
+          settings_title: "Settings",
+          settings_subtitle:
+            "Configure stores, preferences, language, and data backups",
+          settings_language_label: "Language",
           manage_stores_title: "Manage Stores",
           add_store_btn: "Add Store",
           swipe_done_cue: "Done",
@@ -2572,8 +2591,10 @@
           toast_item_added: "Đã thêm vào danh sách mua sắm",
           toast_item_checked: "Đã cập nhật trạng thái",
           toast_trip_completed: "Đã lưu lịch sử mua hàng vào sổ nhật ký!",
-          settings_title: "Cài Đặt & Tuỳ Chọn",
-          settings_subtitle: "Quản lý cửa hàng, tuỳ chọn và sao lưu dữ liệu",
+          settings_title: "Cài Đặt",
+          settings_subtitle:
+            "Quản lý cửa hàng, tuỳ chọn, ngôn ngữ và sao lưu dữ liệu",
+          settings_language_label: "Ngôn Ngữ",
           manage_stores_title: "Quản Lý Cửa Hàng",
           add_store_btn: "Thêm Cửa Hàng",
           swipe_done_cue: "Đã Mua",
@@ -3084,13 +3105,27 @@
           <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs">
             <span class="font-semibold text-slate-200" id="storeNameDisplay-${idx}">${s}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="promptRenameStore('${s}')" class="text-slate-400 hover:text-emerald-400 p-1" title="Rename">✏️</button>
-              <button onclick="deleteStore('${s}')" class="text-slate-400 hover:text-red-400 p-1" title="Delete">🗑️</button>
+              <button onclick="promptRenameStoreByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1" title="Rename">✏️</button>
+              <button onclick="deleteStoreByIndex(${idx})" class="text-slate-400 hover:text-red-400 p-1" title="Delete">🗑️</button>
             </div>
           </div>
         `
           )
           .join("");
+      }
+
+      function promptRenameStoreByIndex(idx) {
+        const stores = memoryState.stores || DEFAULT_STORES;
+        if (idx < 0 || idx >= stores.length) return;
+        const oldName = stores[idx];
+        promptRenameStore(oldName);
+      }
+
+      function deleteStoreByIndex(idx) {
+        const stores = memoryState.stores || DEFAULT_STORES;
+        if (idx < 0 || idx >= stores.length) return;
+        const name = stores[idx];
+        deleteStore(name);
       }
 
       function promptRenameStore(oldName) {
@@ -3127,8 +3162,10 @@
       function openSettingsModal() {
         const curSelect = document.getElementById("settingsCurrencySelect");
         const grpSelect = document.getElementById("settingsGroupingSelect");
+        const langSelect = document.getElementById("settingsLanguageSelect");
         if (curSelect) curSelect.value = currentCurrency;
         if (grpSelect) grpSelect.value = currentGrouping;
+        if (langSelect) langSelect.value = currentLanguage;
         openModal("settingsModal");
       }
 
@@ -4491,14 +4528,22 @@
         }
       }
 
-      function toggleLanguage() {
-        currentLanguage = currentLanguage === "en" ? "vi" : "en";
-        document.getElementById("langToggleBtn").textContent =
-          currentLanguage === "en" ? "VI" : "EN";
+      function setLanguage(lang) {
+        if (lang !== "en" && lang !== "vi") return;
+        currentLanguage = lang;
+        const langBtn = document.getElementById("langToggleBtn");
+        if (langBtn)
+          langBtn.textContent = currentLanguage === "en" ? "VI" : "EN";
+        const langSelect = document.getElementById("settingsLanguageSelect");
+        if (langSelect) langSelect.value = currentLanguage;
         applyTranslations();
         renderApp();
         runComparatorCalc();
         updateLiveUnitPreview();
+      }
+
+      function toggleLanguage() {
+        setLanguage(currentLanguage === "en" ? "vi" : "en");
       }
 
       function setCurrency(cur) {
@@ -4542,13 +4587,13 @@
       function handleGlobalKeyDown(e) {
         if (e.key === "Escape") {
           [
+            "storeManagerModal",
             "comparatorModal",
             "shareModal",
             "importModal",
             "tripCompleteModal",
             "priceLedgerModal",
             "itemHistoryModal",
-            "storeManagerModal",
             "settingsModal",
           ].forEach((id) => closeModal(id));
         }
@@ -4714,20 +4759,23 @@
         el("btnCloseStoreManager", t.btn_close);
 
         // 8. Settings Modal
-        el("settingsModalTitle", t.settings_title || "Settings & Option Hub");
+        el("settingsModalTitle", t.settings_title || "Settings");
         el(
           "settingsModalSubtitle",
           t.settings_subtitle ||
-            "Configure stores, preferences, and data backups"
+            "Configure stores, preferences, language, and data backups"
         );
         el("settingsStoreTitle", t.settings_store_title);
         el("settingsStoreDesc", t.settings_store_desc);
         el("btnManageStoresInSettings", t.manage_stores_title);
         el("settingsPrefHeading", t.settings_pref_heading);
         el("settingsDefaultCurrencyLabel", t.settings_default_currency);
+        el("settingsLanguageLabel", t.settings_language_label || "Language");
         el("settingsDefaultGroupingLabel", t.settings_default_grouping);
         el("optGroupingAisle", t.grouping_by_aisle);
         el("optGroupingStore", t.grouping_by_store);
+        const langSelect = document.getElementById("settingsLanguageSelect");
+        if (langSelect) langSelect.value = currentLanguage;
         el("settingsDataHeading", t.settings_data_heading);
         el("btnExportBackupText", t.btn_export_json_backup);
         el("btnImportBackupText", t.btn_import_json_backup);
@@ -5086,6 +5134,9 @@
         window.deleteStore = deleteStore;
         window.renderStoreManagerList = renderStoreManagerList;
         window.promptRenameStore = promptRenameStore;
+        window.promptRenameStoreByIndex = promptRenameStoreByIndex;
+        window.deleteStoreByIndex = deleteStoreByIndex;
+        window.setLanguage = setLanguage;
         window.handleStoreAddSubmit = handleStoreAddSubmit;
         window.openStoreManagerModal = openStoreManagerModal;
         window.closeStoreManagerModal = closeStoreManagerModal;
@@ -5139,6 +5190,20 @@
           get: () => currentStoreFilter,
           set: (v) => {
             currentStoreFilter = v;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentLanguage", {
+          get: () => currentLanguage,
+          set: (v) => {
+            currentLanguage = v;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentCurrency", {
+          get: () => currentCurrency,
+          set: (v) => {
+            currentCurrency = v;
           },
           configurable: true,
         });

@@ -299,6 +299,28 @@ console.log("--- Section 2: Store Management & Custom Store Persistence ---");
         sandbox.memoryState.activeList.items[0].store === "Costco",
       "STORE-10: deleteStore safely reassigns active items away from deleted store"
     );
+
+    // Test Quote-Safe Store Dispatch (Trader Joe's)
+    sandbox.memoryState.stores = ["Costco", "Trader Joe's", "Other"];
+    assert(
+      typeof sandbox.promptRenameStoreByIndex === "function",
+      "STORE-11a: promptRenameStoreByIndex function is exported globally"
+    );
+    assert(
+      typeof sandbox.deleteStoreByIndex === "function",
+      "STORE-11b: deleteStoreByIndex function is exported globally"
+    );
+    sandbox.deleteStoreByIndex(1); // Delete "Trader Joe's"
+    assert(
+      !sandbox.memoryState.stores.includes("Trader Joe's"),
+      "STORE-11c: deleteStoreByIndex safely removes 'Trader Joe\\'s' with apostrophe without throwing"
+    );
+
+    assert(
+      htmlContent.includes("z-[60]") &&
+        htmlContent.includes("storeManagerModal"),
+      "STORE-12: storeManagerModal markup uses elevated z-[60] for stacked modal layering"
+    );
   } else {
     assert(false, "STORE-09: deleteStore function is defined globally");
   }
@@ -485,6 +507,28 @@ console.log("--- Section 5: Option Hub (Settings Modal) ---");
       htmlContent.includes("openSettingsModal()"),
     "SETTINGS-06: Settings gear button integrated into Top App Bar"
   );
+
+  assert(
+    htmlContent.includes('id="settingsLanguageSelect"'),
+    "SETTINGS-07: Settings modal contains language selector #settingsLanguageSelect"
+  );
+
+  assert(
+    typeof sandbox.setLanguage === "function",
+    "SETTINGS-08: setLanguage function is exported globally"
+  );
+
+  sandbox.setLanguage("vi");
+  assert(
+    sandbox.currentLanguage === "vi",
+    "SETTINGS-09: setLanguage('vi') updates currentLanguage to Vietnamese"
+  );
+
+  sandbox.setLanguage("en");
+  assert(
+    sandbox.currentLanguage === "en",
+    "SETTINGS-10: setLanguage('en') updates currentLanguage to English"
+  );
 }
 
 // ----------------------------------------------------
@@ -509,18 +553,19 @@ console.log("--- Section 6: Bilingual Translation Key Parity ---");
     `I18N-PARITY-02: 100% Vietnamese keys exist in English (Missing: ${missingInEn.join(", ") || "none"})`
   );
 
-  // Check critical new keys
-  const expectedNewKeys = [
+  const keysToCheck = [
     "settings_title",
+    "settings_subtitle",
+    "settings_language_label",
     "manage_stores_title",
     "add_store_btn",
     "swipe_done_cue",
     "swipe_compare_cue",
   ];
-  expectedNewKeys.forEach((key) => {
+  keysToCheck.forEach((k) => {
     assert(
-      key in sandbox.TRANSLATIONS.en && key in sandbox.TRANSLATIONS.vi,
-      `I18N-KEY-EXISTS: Key '${key}' is defined in both language dictionaries`
+      k in sandbox.TRANSLATIONS.en && k in sandbox.TRANSLATIONS.vi,
+      `I18N-KEY-EXISTS: Key '${k}' is defined in both language dictionaries`
     );
   });
 }

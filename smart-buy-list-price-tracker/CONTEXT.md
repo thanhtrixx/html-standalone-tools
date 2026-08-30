@@ -129,8 +129,8 @@ The recipient client protocol that parses an incoming shared URL payload or JSON
 3. _Sync Price Catalog_ (optionally adopt historical store prices).
    _Avoid_: Overwrite import, blind merge, data replace.
 
-**Option Hub (Settings & Configurations)**:
-A centralized modal dialog accessible via the top app bar (`⚙️`) providing comprehensive user preferences, store management access, card density toggles, haptic vibration control, JSON backup/restore, and cloud sync status.
+**Settings (Preferences & Option Hub)**:
+A centralized modal dialog accessible via the top app bar (`⚙️`) providing comprehensive user preferences (Default Currency, Language selection `EN`/`VI`, Default Grouping `By Aisle`/`By Store`), elevated store management access (`z-[60]` modal stacking), data backup/restore, IndexedDB storage sync status, and PWA version/update controls.
 _Avoid_: Prefs panel, control center, admin menu.
 
 **Storage Provider Seam**:
@@ -141,8 +141,8 @@ _Avoid_: Database driver, storage hook, backend adapter.
 
 ### 6. PWA & Mobile Ergonomics
 
-**Standalone PWA Shell**:
-An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies.
+**Standalone PWA Shell & Version Invalidation Rule**:
+An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.0.1`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
 _Avoid_: Web app wrapper, mobile site, hybrid app.
 
 **Material You (MD3) In-Aisle Navigation**:
