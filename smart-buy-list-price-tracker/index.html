@@ -3685,6 +3685,23 @@
         if (card) {
           card.style.transform = `translateX(${clampedDelta}px)`;
         }
+
+        const rightReveal = document.getElementById(
+          `swipeRightReveal-${itemId}`
+        );
+        const leftReveal = document.getElementById(`swipeLeftReveal-${itemId}`);
+        if (rightReveal && leftReveal) {
+          if (clampedDelta > 0) {
+            rightReveal.style.opacity = "1";
+            leftReveal.style.opacity = "0";
+          } else if (clampedDelta < 0) {
+            rightReveal.style.opacity = "0";
+            leftReveal.style.opacity = "1";
+          } else {
+            rightReveal.style.opacity = "1";
+            leftReveal.style.opacity = "1";
+          }
+        }
       }
 
       function handleTouchEnd(e, itemId) {
@@ -3697,6 +3714,13 @@
             "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)";
           card.style.transform = "translateX(0px)";
         }
+
+        const rightReveal = document.getElementById(
+          `swipeRightReveal-${itemId}`
+        );
+        const leftReveal = document.getElementById(`swipeLeftReveal-${itemId}`);
+        if (rightReveal) rightReveal.style.opacity = "";
+        if (leftReveal) leftReveal.style.opacity = "";
 
         const SWIPE_THRESHOLD = 60;
         if (touchState.isSwiping) {
@@ -3718,6 +3742,12 @@
             "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)";
           card.style.transform = "translateX(0px)";
         }
+        const rightReveal = document.getElementById(
+          `swipeRightReveal-${itemId}`
+        );
+        const leftReveal = document.getElementById(`swipeLeftReveal-${itemId}`);
+        if (rightReveal) rightReveal.style.opacity = "";
+        if (leftReveal) leftReveal.style.opacity = "";
         touchState.itemId = null;
         touchState.isSwiping = false;
       }
@@ -3776,7 +3806,7 @@
               ontouchend="handleTouchEnd(event, '${item.id}')"
               ontouchcancel="handleTouchCancel(event, '${item.id}')"
               onclick="handleCardClick(event, '${item.id}')"
-              class="relative z-10 bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out flex items-center justify-between gap-3 cursor-pointer"
+              class="relative z-10 ${item.checked ? "bg-slate-950 border-slate-800/80" : "bg-slate-900 border-slate-800"} border rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out flex items-center justify-between gap-3 cursor-pointer"
             >
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <!-- Big Thumb-Friendly Checkbox -->
@@ -3846,7 +3876,7 @@
             ontouchmove="handleTouchMove(event, '${item.id}')"
             ontouchend="handleTouchEnd(event, '${item.id}')"
             ontouchcancel="handleTouchCancel(event, '${item.id}')"
-            class="relative z-10 bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out space-y-3"
+            class="relative z-10 ${item.checked ? "bg-slate-950 border-slate-800/80" : "bg-slate-900 border-slate-800"} border rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out space-y-3"
           >
             <!-- Row 1: Header (Checkbox + Icon + Name + Store & Deal Badges) -->
             <div class="flex items-start justify-between gap-3">

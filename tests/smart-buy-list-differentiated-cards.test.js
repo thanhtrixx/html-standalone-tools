@@ -435,6 +435,18 @@ assert(
   "DIFF-QA-07: Add Item store dropdown (#inputItemStore) includes MANAGE_STORES option"
 );
 
+// 4. Checked item card opacity and reveal isolation (Issue #177)
+assert(
+  !checkedCardHtml.includes("bg-slate-950/40"),
+  "DIFF-QA-08: Checked item card does not use translucent bg-slate-950/40"
+);
+
+assert(
+  checkedCardHtml.includes("bg-slate-950") ||
+    checkedCardHtml.includes("bg-slate-900"),
+  "DIFF-QA-09: Checked item card uses solid opaque background surface"
+);
+
 // -------------------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------------------
