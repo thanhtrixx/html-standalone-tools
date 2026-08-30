@@ -2124,6 +2124,11 @@
           toast_backup_imported: "Backup imported successfully!",
           all_items_checked: "All items checked! Ready to complete trip.",
           trip_summary_heading: "Shopping Trip",
+          edit_btn: "Edit",
+          remove_btn: "Remove",
+          est_price_label: "Estimated:",
+          new_item: "New Item",
+          atl_price_label: "ATL:",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -2191,6 +2196,11 @@
           all_items_checked:
             "Đã chọn xong tất cả mặt hàng! Sẵn sàng hoàn tất chuyến đi.",
           trip_summary_heading: "Chuyến Mua Sắm",
+          edit_btn: "Sửa",
+          remove_btn: "Xoá",
+          est_price_label: "Dự kiến:",
+          new_item: "Hàng mới",
+          atl_price_label: "Giá thấp nhất:",
         },
       };
 
@@ -3245,49 +3255,67 @@
             </div>
           </div>
 
-          <!-- Foreground Swipeable Card -->
+          <!-- Foreground Swipeable Card (Planning Mode: Rich & Expanded) -->
           <div 
             id="itemCard-${item.id}"
             ontouchstart="handleTouchStart(event, '${item.id}')"
             ontouchmove="handleTouchMove(event, '${item.id}')"
             ontouchend="handleTouchEnd(event, '${item.id}')"
             ontouchcancel="handleTouchCancel(event, '${item.id}')"
-            class="relative z-10 bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3 sm:p-4 transition-transform duration-200 ease-out flex items-center justify-between gap-3"
+            class="relative z-10 bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out space-y-3"
           >
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <!-- Big Thumb-Friendly Checkbox -->
-              <button onclick="toggleItemCheck('${item.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
-                ✓
-              </button>
-
-              <!-- Item Info -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="text-sm">${catInfo.icon}</span>
-                  <span class="font-bold text-sm text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
-                  ${dealBadgeHtml}
+            <!-- Row 1: Header (Checkbox + Icon + Name + Store & Deal Badges) -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0 flex-1">
+                <button onclick="toggleItemCheck('${item.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}" title="Toggle Check">
+                  ✓
+                </button>
+                <div class="flex items-center gap-2 min-w-0 flex-1">
+                  <span class="text-base">${catInfo.icon}</span>
+                  <span class="font-bold text-sm sm:text-base text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
                 </div>
-                <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                  <button onclick="openQuickPriceEdit('${item.id}')" class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60 transition-colors" title="Adjust price / size">
-                    ${item.quantity} ${item.unit}
-                  </button>
-                  <span>•</span>
-                  <span class="text-slate-400 font-normal">${item.store || "Supermarket"}</span>
-                  ${unitPrice > 0 ? `<span>•</span><span class="text-emerald-400 font-semibold">${formatCurrency(unitPrice)}/${baseUnit}</span>` : ""}
-                </div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/60">
+                  🏪 ${item.store || "General"}
+                </span>
+                ${dealBadgeHtml}
               </div>
             </div>
 
-            <!-- Price & Actions -->
-            <div class="flex items-center gap-2 shrink-0">
-              <button onclick="openItemComparator('${item.id}')" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-xl transition-colors" title="Compare Pack Sizes">
-                ⚖️
-              </button>
+            <!-- Row 2: Metrics & Unit Pricing Intelligence -->
+            <div class="flex items-center justify-between gap-2 text-xs bg-slate-950/60 p-2 sm:p-2.5 rounded-xl border border-slate-800/80">
+              <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="openQuickPriceEdit('${item.id}')" class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 transition-colors" title="Adjust quantity / package size">
+                  📦 ${item.quantity} ${item.unit}
+                </button>
+                ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
+              </div>
+              <div class="text-right text-[11px] text-slate-400">
+                ${history.length > 0 ? `<span title="All-Time Low recorded price">ATL: <strong class="text-emerald-400 font-semibold">${formatCurrency(deal.minPrice)}/${baseUnit}</strong></span>` : `<span class="text-slate-500 italic">${TRANSLATIONS[currentLanguage].new_item || "New Item"}</span>`}
+              </div>
+            </div>
+
+            <!-- Row 3: Action Toolbar & Total Estimated Spend -->
+            <div class="flex items-center justify-between pt-1 border-t border-slate-800/60">
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <button onclick="openItemComparator('${item.id}')" class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-900/60 rounded-lg border border-slate-700/60 hover:border-indigo-500/50 transition-colors flex items-center gap-1" title="Compare Pack Sizes">
+                  <span>⚖️</span>
+                  <span>${TRANSLATIONS[currentLanguage].nav_compare || "Compare"}</span>
+                </button>
+                <button onclick="openQuickPriceEdit('${item.id}')" class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700/60 transition-colors flex items-center gap-1" title="Edit Item Details">
+                  <span>✏️</span>
+                  <span>${TRANSLATIONS[currentLanguage].edit_btn || "Edit"}</span>
+                </button>
+                <button onclick="deleteItem('${item.id}')" class="px-2 py-1 text-xs font-semibold text-slate-400 hover:text-red-300 hover:bg-red-950/40 rounded-lg border border-transparent hover:border-red-800/50 transition-colors flex items-center gap-1" title="Remove Item">
+                  <span>🗑️</span>
+                  <span>${TRANSLATIONS[currentLanguage].remove_btn || "Remove"}</span>
+                </button>
+              </div>
               <div class="text-right">
-                <button onclick="openQuickPriceEdit('${item.id}')" class="font-bold text-sm text-slate-100 hover:text-emerald-400 transition-colors block text-right" title="Update Price">
+                <button onclick="openQuickPriceEdit('${item.id}')" class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 transition-colors block text-right" title="Update Price">
                   ${formatCurrency(item.price)}
                 </button>
-                <button onclick="deleteItem('${item.id}')" class="text-[11px] text-slate-500 hover:text-red-400 transition-colors mt-0.5" title="Remove Item">Remove</button>
               </div>
             </div>
           </div>
