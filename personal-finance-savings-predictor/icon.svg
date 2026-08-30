@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none" width="128" height="128">
+  <defs>
+    <!-- Nền chuyển sắc phong cách Fintech sang trọng -->
+    <linearGradient id="appBg" x1="16" y1="16" x2="112" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#064E3B"/>
+    </linearGradient>
+
+    <!-- Diện tích vùng tăng trưởng (Area Chart) -->
+    <linearGradient id="areaGlow" x1="64" y1="36" x2="64" y2="98" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#10B981" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.0"/>
+    </linearGradient>
+
+    <!-- Gradient đồng tiền vàng -->
+    <linearGradient id="badgeCoin" x1="72" y1="20" x2="88" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 1. Nền App Icon bo góc (Squircle) -->
+  <rect width="128" height="128" rx="28" fill="url(#appBg)"/>
+  <rect x="1" y="1" width="126" height="126" rx="27" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2"/>
+
+  <!-- 2. Lưới biểu đồ mờ (Subtle Chart Grid) -->
+  <line x1="24" y1="46" x2="104" y2="46" stroke="#ffffff" stroke-opacity="0.07" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="24" y1="72" x2="104" y2="72" stroke="#ffffff" stroke-opacity="0.07" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <line x1="24" y1="98" x2="104" y2="98" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1.5"/>
+
+  <!-- 3. Vùng diện tích tăng trưởng tài sản (Area Fill) -->
+  <path d="M 24 98 L 24 88 C 46 88, 64 74, 98 40 L 98 98 Z" fill="url(#areaGlow)"/>
+
+  <!-- 4. Heo đất tối giản màu trắng/xanh bạc -->
+  <g transform="translate(18, 56) scale(0.9)">
+    <rect x="6" y="24" width="4" height="8" rx="2" fill="#94A3B8"/>
+    <path d="M 10 24 C 10 19, 13 16, 18 16 L 19 10 C 19.5 9, 23 9, 24 13 C 26 13, 29 13, 33 13 C 41 13, 46 18, 46 25 C 46 29, 44 32, 43 34 L 43 40 C 43 41.5, 41.5 42, 39 42 C 36.5 42, 36 41.5, 36 40 L 36 36 L 24 36 L 24 40 C 24 41.5, 22.5 42, 20 42 C 17.5 42, 17 41.5, 17 40 L 17 33 C 13 32, 10 29, 10 24 Z" 
+          fill="#F8FAFC" fill-opacity="0.9"/>
+    <circle cx="16" cy="21" r="1.5" fill="#0F172A"/>
+    <line x1="26" y1="13" x2="34" y2="13" stroke="#0F172A" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- 5. Đường cong lãi kép & Dự báo (Compounding & Predictor Curve) -->
+  <!-- Nét liền: Tích lũy cơ sở -->
+  <path d="M 24 88 C 42 88, 54 80, 68 68" stroke="#34D399" stroke-width="4.5" stroke-linecap="round"/>
+  
+  <!-- Nét đứt: Dự báo tương lai -->
+  <path d="M 68 68 C 80 56, 88 48, 98 38" stroke="#34D399" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="6 5"/>
+  
+  <!-- Mũi tên đỉnh dự báo -->
+  <path d="M 85 37 H 99 V 51" stroke="#34D399" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Điểm mốc kiểm tra (Milestone Node) -->
+  <circle cx="68" cy="68" r="5" fill="#10B981" stroke="#ffffff" stroke-width="2.5"/>
+
+  <!-- 6. Đồng xu vàng phát sáng (Lợi nhuận / Đạt mốc) -->
+  <circle cx="82" cy="26" r="8" fill="url(#badgeCoin)"/>
+  <circle cx="82" cy="26" r="6" stroke="#FEF08A" stroke-width="1.2" stroke-opacity="0.8"/>
+  <path d="M 82 22 V 30 M 78 26 H 86" stroke="#78350F" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- 7. Ngôi sao mục tiêu tài sản -->
+  <path d="M 106 20 L 107.5 24 L 111.5 25.5 L 107.5 27 L 106 31 L 104.5 27 L 100.5 25.5 L 104.5 24 Z" fill="#FBBF24"/>
+</svg>

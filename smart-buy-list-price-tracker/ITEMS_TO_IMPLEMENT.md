@@ -18,12 +18,16 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 - **Deal Indicator**: 🟢 Great Deal ($\le$ All-Time Low / $\ge 10\%$ discount), 🟡 Fair Price, 🔴 Price Spike.
 - **In-Aisle Package Comparator**: Side-by-side package size evaluator with real-time percentage savings and 1-tap list update.
 - **Shopping Trip Lifecycle**: `Planning` ➔ `In-Store Shopping` ➔ `Trip Summary/Complete` (with unpurchased item rollover).
+- **Store Manager & Custom Stores**: Store list CRUD with cascade renaming to active items and ledger records.
+- **Active List Grouping**: Visual grouping by department (`By Aisle`) or retail venue (`By Store` with computed subtotals).
+- **In-Aisle Touch Swipe Gestures**: Swipe Right (Mark Done) and Swipe Left (Open Comparator).
+- **Option Hub (Settings)**: Centralized configuration modal for store management, preferences, and data portability.
 - **URL State Payload**: Compressed LZ-String shareable state with dynamic QR code and Web Share API.
 - **Storage Provider Seam**: `IndexedDBStorageProvider` with schema migrations and `GoogleDriveStorageProvider` sync seam.
 
 ---
 
-## 📊 Core Requirements Matrix (R1 – R32)
+## 📊 Core Requirements Matrix (R1 – R41)
 
 | ID      | Feature                                             | Specification                                                                                                                                                                                             | Priority | ADR Reference |
 | :------ | :-------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------------ |
@@ -62,6 +66,12 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R33** | **MD3 Mobile Bottom Sheet Presentation**            | Mobile-anchored bottom sheet modal display (`items-end`, `rounded-t-3xl`, drag handle bar) for quick price adjustments and package comparisons.                                                           | P1       | CONTEXT.md    |
 | **R34** | **1-Tap Fast Price Adjustment Step Chips**          | Rapid delta chips (`+0.25`, `+0.50`, `+1.00`, `-0.25`, `-0.50`, `-1.00`) inside the Quick Price sheet for zero-keyboard price updates.                                                                    | P1       | CONTEXT.md    |
 | **R35** | **Enhanced Comparator Decision Intelligence**       | Comprehensive savings summary banner in comparator calculating total money saved and explicit active item comparison advice.                                                                              | P1       | CONTEXT.md    |
+| **R36** | **Navigation Streamlining & Redundancy Removal**    | Eliminate redundant mode switches from the top trip summary card; remove the extra Compare button from the Add Item section header.                                                                       | P0       | ADR-0005      |
+| **R37** | **Custom Store Manager Dialog (CRUD & Cascade)**    | Dedicated modal for adding, renaming (cascading to active list and historical ledger), and deleting stores with persistent storage (`memoryState.stores`).                                                | P0       | ADR-0005      |
+| **R38** | **Active List Grouping: By Aisle**                  | Partition active items into department sections with category emoji, translated title, and item count badge.                                                                                              | P0       | ADR-0005      |
+| **R39** | **Active List Grouping: By Store with Subtotals**   | Partition active items by retail store with store name, item count, and computed store subtotal ($).                                                                                                      | P0       | ADR-0005      |
+| **R40** | **Mobile Touch Swipe Gestures**                     | Fluid horizontal swipe actions: Swipe Right ($\Delta x > 60\text{px}$) marks item as Done with haptic feedback; Swipe Left ($\Delta x < -60\text{px}$) opens the In-Aisle Comparator pre-filled.          | P0       | ADR-0005      |
+| **R41** | **Option Hub (Advanced Settings Modal)**            | Centralized settings dialog with Store Manager access, currency/unit preferences, card density options, haptic toggle, and full JSON backup/restore.                                                      | P0       | ADR-0005      |
 
 ---
 
@@ -69,50 +79,48 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 
 ```mermaid
 flowchart TD
-    S1["Slice 1: Pure Domain Engine<br/>(Unit Normalization, Price Ledger &amp; Deal Scoring)"]
-    S2["Slice 2: Storage &amp; Persistence<br/>(IndexedDB Engine, Schema Migrations &amp; Seed Data)"]
-    S3["Slice 3: Core UI &amp; In-Store Trip Lifecycle<br/>(Planning, In-Store Focus Mode, Trip Completion &amp; Rollover)"]
-    S4["Slice 4: In-Aisle Comparator &amp; Price Intelligence<br/>(Package Comparator Modal, Sparklines &amp; Deal Badges)"]
-    S5["Slice 5: Sharing &amp; PWA Integration<br/>(LZ URL Compression, QR Modal, Merge Flow, Service Worker)"]
-    S6["Slice 6: i18n Parity, Theming &amp; Polish<br/>(English/Vietnamese Parity, Multi-Currency, Dark/Light Theme)"]
-    S7["Slice 7: Material You &amp; Item-Centric Comparator<br/>(MD3 Navigation, Buy Mode, Pre-filled Comparator, Top Bar Share)"]
-    S8["Slice 8: In-Store Progress Pacing &amp; Aisle Touch Polish<br/>(Progress Bar, Department Filter Chips, Bottom Sheets, Price Step Chips)"]
+    S1["Slice 1: Pure Domain Engine"]
+    S2["Slice 2: Storage &amp; Persistence"]
+    S3["Slice 3: Core UI &amp; In-Store Trip Lifecycle"]
+    S4["Slice 4: In-Aisle Comparator &amp; Price Intelligence"]
+    S5["Slice 5: Sharing &amp; PWA Integration"]
+    S6["Slice 6: i18n Parity, Theming &amp; Polish"]
+    S7["Slice 7: Material You &amp; Item-Centric Comparator"]
+    S8["Slice 8: In-Store Progress Pacing &amp; Aisle Touch Polish"]
+    S9["Slice 9: Store Management, Grouping, Swipe Gestures &amp; Option Hub"]
 
-    S1 --> S2
-    S2 --> S3
-    S3 --> S4
-    S4 --> S5
-    S5 --> S6
-    S6 --> S7
-    S7 --> S8
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9
 ```
 
 <details>
 <summary>ASCII Roadmap (Backout Plan / Fallback)</summary>
 
 ```text
-[Slice 1: Pure Domain Engine] (Unit Normalization, Price Ledger & Deal Scoring)
+[Slice 1: Pure Domain Engine]
       │
       ▼
-[Slice 2: Storage & Persistence] (IndexedDB Engine, Schema Migrations & Seed Data)
+[Slice 2: Storage & Persistence]
       │
       ▼
-[Slice 3: Core UI & In-Store Trip Lifecycle] (Planning, In-Store Mode, Trip Completion & Rollover)
+[Slice 3: Core UI & In-Store Trip Lifecycle]
       │
       ▼
-[Slice 4: In-Aisle Comparator & Price Intelligence] (Package Comparator Modal, Sparklines & Deal Badges)
+[Slice 4: In-Aisle Comparator & Price Intelligence]
       │
       ▼
-[Slice 5: Sharing & PWA Integration] (LZ URL Compression, QR Modal, Merge Flow, Service Worker)
+[Slice 5: Sharing & PWA Integration]
       │
       ▼
-[Slice 6: i18n Parity, Theming & Polish] (English/Vietnamese Parity, Multi-Currency, Dark/Light Theme)
+[Slice 6: i18n Parity, Theming & Polish]
       │
       ▼
-[Slice 7: Material You & Item-Centric Comparator] (MD3 Navigation, Buy Mode, Pre-filled Comparator, Top Bar Share)
+[Slice 7: Material You & Item-Centric Comparator]
       │
       ▼
-[Slice 8: In-Store Progress Pacing & Aisle Touch Polish] (Progress Bar, Department Filter Chips, Bottom Sheets, Price Step Chips)
+[Slice 8: In-Store Progress Pacing & Aisle Touch Polish]
+      │
+      ▼
+[Slice 9: Store Management, Grouping, Swipe Gestures & Option Hub]
 ```
 
 </details>

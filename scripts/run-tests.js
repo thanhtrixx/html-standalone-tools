@@ -109,6 +109,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-pacing-touch-polish.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Store Management, Grouping & Settings",
+    file: "tests/smart-buy-list-stores-grouping-gestures.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {

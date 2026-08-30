@@ -71,9 +71,16 @@ _Avoid_: Price calculator, aisle widget, package comparison tool.
 
 ### 3. Stores, Aisles & Organization
 
-**Store Profile**:
-A physical or online retail venue (e.g. _Costco, Trader Joe's, Local Wet Market, WinMart, Bach Hoa Xanh_) with customizable default currency, location tags, and associated price records.
+**Store Profile & Store Manager**:
+A physical or online retail venue (e.g. _Costco, Trader Joe's, Local Wet Market, WinMart, Bach Hoa Xanh_) stored in persistent state (`memoryState.stores`). Managed via a dedicated Store Manager modal supporting Add, Rename (with automatic cascade to active list items and historical ledger records), and Delete.
 _Avoid_: Merchant, shop, vendor, supermarket.
+
+**Active List Grouping (`By Aisle` vs `By Store`)**:
+A visual organization mechanism for the active buy-list:
+
+- **By Aisle (Department)**: Items partitioned by store aisle category following store walking route order, complete with department badge and item counts.
+- **By Store**: Items partitioned by retail venue with store icon, item count, and computed store subtotal ($).
+  _Avoid_: Tab sort, category flip, list splitter.
 
 **Department / Aisle Category**:
 A navigational grouping representing physical store departments (e.g. _Produce / Vegetables_, _Dairy & Eggs_, _Meat & Seafood_, _Bakery_, _Pantry & Grains_, _Frozen_, _Beverages_, _Household & Cleaning_, _Personal Care_).
@@ -115,6 +122,10 @@ The recipient client protocol that parses an incoming shared URL payload or JSON
 3. _Sync Price Catalog_ (optionally adopt historical store prices).
    _Avoid_: Overwrite import, blind merge, data replace.
 
+**Option Hub (Settings & Configurations)**:
+A centralized modal dialog accessible via the top app bar (`⚙️`) providing comprehensive user preferences, store management access, card density toggles, haptic vibration control, JSON backup/restore, and cloud sync status.
+_Avoid_: Prefs panel, control center, admin menu.
+
 **Storage Provider Seam**:
 An abstracted TypeScript/JavaScript client-side storage interface (`IStorageProvider`) decoupling domain data operations from physical storage implementations (`IndexedDBStorageProvider` for offline-first local persistence, and `GoogleDriveStorageProvider` for user-owned cloud synchronization).
 _Avoid_: Database driver, storage hook, backend adapter.
@@ -128,8 +139,15 @@ An installable Web Application utilizing Service Workers (`sw.js`) and Web App M
 _Avoid_: Web app wrapper, mobile site, hybrid app.
 
 **Material You (MD3) In-Aisle Navigation**:
-A 4-destination bottom navigation bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`) built with Material 3 surface containers, pill active indicators, and thumb-friendly touch targets ($\ge 48\text{px}$).
+A single-source-of-truth 4-destination bottom navigation bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`) built with Material 3 surface containers, pill active indicators, and thumb-friendly touch targets ($\ge 48\text{px}$). Top card mode toggle pills are eliminated to prevent duplicate navigation controls.
 _Avoid_: Footer controls, bottom tabs, static menu.
+
+**In-Aisle Touch Swipe Gestures**:
+Direct swipe actions on list item cards:
+
+- **Swipe Right**: Reveals green check indicator; releasing marks item as Done/Checked with tactile haptic vibration (`navigator.vibrate([15])`).
+- **Swipe Left**: Reveals emerald/indigo scale indicator; releasing opens the In-Aisle Package Comparator pre-filled with that item's details.
+  _Avoid_: Slide button, drag action, swipe widget.
 
 **In-Store Shopping Progress Pacing**:
 A visual progress bar and completion indicator in Buy Mode displaying real-time checked metrics (`X of Y items checked (Z%)`) and estimated remaining unpurchased spend.
