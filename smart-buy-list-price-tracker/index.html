@@ -403,12 +403,14 @@
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <button
+            id="btnKeepSample"
             onclick="dismissSampleBanner()"
             class="text-slate-400 hover:text-slate-200 underline"
           >
             Keep
           </button>
           <button
+            id="btnClearSample"
             onclick="clearAllData(true)"
             class="px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-red-200 rounded-md font-medium border border-red-700/50"
           >
@@ -767,6 +769,7 @@
             your shopping savings.
           </p>
           <button
+            id="btnLoadSampleEmpty"
             onclick="loadSampleData()"
             class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold border border-slate-700 transition-colors"
           >
@@ -912,7 +915,8 @@
             id="compModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>⚖️</span> In-Aisle Package Comparator
+            <span>⚖️</span>
+            <span id="compModalTitleText">In-Aisle Package Comparator</span>
           </h3>
           <button
             onclick="closeModal('comparatorModal')"
@@ -941,6 +945,7 @@
             ></span>
           </div>
           <span
+            id="compActiveBadge"
             class="px-2 py-0.5 bg-emerald-900/90 text-emerald-300 rounded-md text-[10px] font-bold border border-emerald-700/60"
           >
             Package A (Active)
@@ -1093,6 +1098,7 @@
         <!-- Action Buttons -->
         <div class="flex items-center justify-end gap-2 pt-2">
           <button
+            id="btnCloseComparator"
             onclick="closeModal('comparatorModal')"
             class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
           >
@@ -1130,7 +1136,7 @@
             id="shareModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>📤</span> Share Buy-List
+            <span>📤</span> <span id="shareModalTitleText">Share Buy-List</span>
           </h3>
           <button
             onclick="closeModal('shareModal')"
@@ -1205,7 +1211,8 @@
             id="importModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>📥</span> Incoming Shared Buy-List
+            <span>📥</span>
+            <span id="importModalTitleText">Incoming Shared Buy-List</span>
           </h3>
           <button
             onclick="closeModal('importModal')"
@@ -1257,7 +1264,8 @@
             id="tripModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>🏁</span> Complete Shopping Trip
+            <span>🏁</span>
+            <span id="tripModalTitleText">Complete Shopping Trip</span>
           </h3>
           <button
             onclick="closeModal('tripCompleteModal')"
@@ -1357,7 +1365,8 @@
             id="ledgerModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>📈</span> Historical Purchase Ledger
+            <span>📈</span>
+            <span id="ledgerModalTitleText">Historical Purchase Ledger</span>
           </h3>
           <button
             onclick="closeModal('priceLedgerModal')"
@@ -1383,12 +1392,12 @@
               class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider"
             >
               <tr>
-                <th class="p-2.5">Date</th>
-                <th class="p-2.5">Item</th>
-                <th class="p-2.5">Store</th>
-                <th class="p-2.5">Size</th>
-                <th class="p-2.5">Paid</th>
-                <th class="p-2.5">Unit Price</th>
+                <th id="thDate" class="p-2.5">Date</th>
+                <th id="thItem" class="p-2.5">Item</th>
+                <th id="thStore" class="p-2.5">Store</th>
+                <th id="thSize" class="p-2.5">Size</th>
+                <th id="thPaid" class="p-2.5">Paid</th>
+                <th id="thUnitPrice" class="p-2.5">Unit Price</th>
               </tr>
             </thead>
             <tbody
@@ -1477,6 +1486,7 @@
           <!-- 1-Tap Fast Price Adjustment Step Chips -->
           <div>
             <div
+              id="quickPriceAdjustLabel"
               class="text-[11px] text-slate-400 font-medium mb-1 text-center"
             >
               Quick Price Adjust:
@@ -1604,6 +1614,7 @@
 
         <div class="pt-2 flex justify-end">
           <button
+            id="btnCloseStoreManager"
             onclick="closeModal('storeManagerModal')"
             class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
           >
@@ -1717,8 +1728,10 @@
                 onchange="setGrouping(this.value)"
                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-emerald-500"
               >
-                <option value="AISLE">By Aisle (Department)</option>
-                <option value="STORE">By Store</option>
+                <option id="optGroupingAisle" value="AISLE">
+                  By Aisle (Department)
+                </option>
+                <option id="optGroupingStore" value="STORE">By Store</option>
               </select>
             </div>
           </div>
@@ -1794,6 +1807,7 @@
             </div>
           </div>
           <span
+            id="settingsSyncBadge"
             class="text-[11px] text-slate-500 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800"
             >Local Only</span
           >
@@ -1837,6 +1851,7 @@
 
         <div class="pt-2 flex justify-end">
           <button
+            id="btnCloseSettings"
             onclick="closeModal('settingsModal')"
             class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
           >
@@ -1929,6 +1944,43 @@
         can: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
         bunch: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
       };
+
+      const UNIT_GROUPS = [
+        {
+          key: "weight",
+          en: "Weight",
+          vi: "Khối Lượng",
+          units: [
+            { key: "kg", en: "kg (Kilogram)", vi: "kg (Kilôgam)" },
+            { key: "g", en: "g (Gram)", vi: "g (Gam)" },
+            { key: "lb", en: "lb (Pound)", vi: "lb (Pound)" },
+            { key: "oz", en: "oz (Ounce)", vi: "oz (Ounce)" },
+          ],
+        },
+        {
+          key: "volume",
+          en: "Volume",
+          vi: "Thể Tích",
+          units: [
+            { key: "L", en: "L (Litre)", vi: "L (Lít)" },
+            { key: "ml", en: "ml (Millilitre)", vi: "ml (Mililít)" },
+            { key: "gal", en: "gal (Gallon)", vi: "gal (Gallon)" },
+            { key: "fl oz", en: "fl oz (Fl Ounce)", vi: "fl oz (Fl Ounce)" },
+          ],
+        },
+        {
+          key: "count",
+          en: "Count / Units",
+          vi: "Số Lượng / Đơn Vị",
+          units: [
+            { key: "ea", en: "ea (Piece / Unit)", vi: "ea (Cái / Quả / Trái)" },
+            { key: "pk", en: "pk (Pack)", vi: "pk (Gói / Bịch)" },
+            { key: "box", en: "box (Box)", vi: "box (Hộp / Thùng)" },
+            { key: "can", en: "can (Can / Bottle)", vi: "can (Lon / Chai)" },
+            { key: "bunch", en: "bunch (Bunch)", vi: "bunch (Bó / Nải)" },
+          ],
+        },
+      ];
 
       const CATEGORIES = {
         produce: {
@@ -2362,6 +2414,7 @@
           add_store_btn: "Add Store",
           swipe_done_cue: "Done",
           swipe_compare_cue: "Compare",
+          swipe_undo_cue: "Undo",
           toast_store_added: "Store added successfully",
           toast_store_exists: "Store already exists",
           toast_store_renamed: "Store renamed successfully",
@@ -2377,7 +2430,6 @@
           est_price_label: "Estimated:",
           new_item: "New Item",
           atl_price_label: "ATL:",
-          swipe_undo_cue: "Undo",
           update_available_title: "New Version Available",
           update_available_desc: "A new version of Smart Buy-List is ready.",
           update_btn_refresh: "Update Now",
@@ -2386,6 +2438,90 @@
           up_to_date_msg: "You are using the latest version.",
           checking_updates_msg: "Checking for updates...",
           pwa_section_title: "App Updates & Cache (PWA)",
+          btn_share_header: "Share",
+          sample_banner_text:
+            "Sample grocery items loaded! Explore unit prices & historical deal ratings.",
+          btn_keep_sample: "Keep",
+          btn_clear_sample: "Clear",
+          total_spent_label: "Total Spent:",
+          unit_price_preview: "Unit Price:",
+          comp_modal_title: "In-Aisle Package Comparator",
+          comp_modal_desc:
+            "Compare 2 package sizes in real-time to find the best deal ($/kg, $/L, $/unit).",
+          comp_comparing_item: "Comparing Item",
+          comp_package_a_active: "Package A (Active)",
+          comp_package_a_label: "Package A (e.g. Small / Brand 1)",
+          comp_package_b_label: "Package B (e.g. Bulk / Brand 2)",
+          comp_price: "Price",
+          comp_qty: "Quantity",
+          comp_unit: "Unit",
+          comp_unit_price: "Unit Price:",
+          comp_winner_pkg_cheaper: "{package} is Cheaper!",
+          comp_saves_pct: "Saves {percent}% ({amount} / {unit} cheaper)",
+          comp_active_already_cheaper:
+            "Active Item (Package A) is already {percent}% cheaper! ({amount} / {unit} saved)",
+          comp_dim_mismatch_title: "⚠️ Different Unit Dimensions",
+          comp_dim_mismatch_desc: "Cannot compare Weight vs Volume directly",
+          comp_equal_deal_title: "🤝 Equal Value Deal",
+          comp_equal_deal_desc: "Both packages have identical unit prices",
+          btn_apply_winner_form: "Apply Winner to Form",
+          btn_close: "Close",
+          btn_cancel: "Cancel",
+          toast_winner_form_applied: "Winner package applied to form!",
+          share_modal_title: "Share Buy-List",
+          share_modal_desc:
+            "Share your active list peer-to-peer via link, QR code, or chat export without accounts or servers.",
+          qr_hint_text: "Scan to import list",
+          btn_native_share: "Share via Apps (WhatsApp / AirDrop)",
+          btn_copy_url: "Copy Shareable Link",
+          btn_export_json: "Export Backup File (.json)",
+          toast_share_copied: "Share link copied to clipboard!",
+          share_native_text: "Here is our grocery buy-list ({count} items)",
+          import_modal_title: "Incoming Shared Buy-List",
+          import_list_title: "Shared Shopping List",
+          import_item_count: "Contains {count} items",
+          btn_import_merge: "Merge into My Active List",
+          btn_import_replace: "Import as New List",
+          toast_import_shared_success: "Shared list successfully imported!",
+          trip_modal_title: "Complete Shopping Trip",
+          trip_modal_purchased_label: "Purchased Items:",
+          trip_modal_total_spent_label: "Total Trip Spend:",
+          label_rollover_choice: "What should happen to unchecked items?",
+          opt_rollover_text: "Rollover unchecked items to new draft list",
+          opt_discard_text: "Discard unchecked items",
+          btn_finalize_trip: "Record Prices & Finalize Trip",
+          ledger_modal_title: "Historical Purchase Ledger",
+          ledger_search_placeholder: "Filter history by item or store...",
+          th_date: "Date",
+          th_item: "Item",
+          th_store: "Store",
+          th_size: "Size",
+          th_paid: "Paid",
+          th_unit_price: "Unit Price",
+          ledger_empty_msg: "No historical purchase records found.",
+          quick_price_item_name: "Item Name",
+          quick_price_shelf: "Shelf Price",
+          quick_price_qty: "Quantity",
+          quick_price_adjust_label: "Quick Price Adjust:",
+          input_store_placeholder: "New store name (e.g. Sprouts, ALDI)...",
+          existing_stores_label: "Existing Stores",
+          settings_store_title: "Store Management",
+          settings_store_desc: "Configure retail store list & defaults",
+          settings_pref_heading: "Preferences",
+          settings_default_currency: "Default Currency",
+          settings_default_grouping: "Default Grouping",
+          grouping_by_aisle: "By Aisle (Department)",
+          grouping_by_store: "By Store",
+          settings_data_heading: "Data Management & Backup",
+          btn_export_json_backup: "Export JSON",
+          btn_import_json_backup: "Import JSON",
+          btn_load_sample_data: "Load Sample Data",
+          btn_clear_all_data: "Clear All Data",
+          settings_sync_title: "Storage & Cloud Sync",
+          settings_sync_status: "IndexedDB Active (Offline-First)",
+          badge_local_only: "Local Only",
+          toast_sample_loaded: "Sample grocery list loaded!",
+          toast_data_cleared: "All data cleared",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -2467,6 +2603,94 @@
           up_to_date_msg: "Bạn đang sử dụng phiên bản mới nhất.",
           checking_updates_msg: "Đang kiểm tra bản cập nhật...",
           pwa_section_title: "Cập Nhật & Bộ Nhớ Đệm (PWA)",
+          btn_share_header: "Chia Sẻ",
+          sample_banner_text:
+            "Đã tải danh sách hàng hoá mẫu! Khám phá đơn giá chuẩn & đánh giá mức giá lịch sử.",
+          btn_keep_sample: "Giữ Lại",
+          btn_clear_sample: "Xoá",
+          total_spent_label: "Tổng Đã Chi:",
+          unit_price_preview: "Đơn Giá Chuẩn:",
+          comp_modal_title: "Bộ So Sánh Quy Cách Đóng Gói",
+          comp_modal_desc:
+            "So sánh 2 quy cách đóng gói theo thời gian thực để tìm giá tốt nhất ($/kg, $/L, $/đơn vị).",
+          comp_comparing_item: "Mặt Hàng So Sánh",
+          comp_package_a_active: "Gói A (Hiện Tại)",
+          comp_package_a_label: "Gói A (vd: Loại nhỏ / Thương hiệu 1)",
+          comp_package_b_label: "Gói B (vd: Loại lớn / Thương hiệu 2)",
+          comp_price: "Giá Bán",
+          comp_qty: "Số Lượng",
+          comp_unit: "Đơn Vị",
+          comp_unit_price: "Đơn Giá Chuẩn:",
+          comp_winner_pkg_cheaper: "{package} Rẻ Hơn!",
+          comp_saves_pct: "Tiết kiệm {percent}% (rẻ hơn {amount} / {unit})",
+          comp_active_already_cheaper:
+            "Mặt hàng hiện tại (Gói A) đã rẻ hơn {percent}%! (tiết kiệm {amount} / {unit})",
+          comp_dim_mismatch_title: "⚠️ Không Cùng Đơn Vị Đo",
+          comp_dim_mismatch_desc:
+            "Không thể so sánh trực tiếp Khối Lượng và Thể Tích",
+          comp_equal_deal_title: "🤝 Giá Trị Tương Đương",
+          comp_equal_deal_desc: "Cả hai gói đều có cùng đơn giá chuẩn",
+          btn_apply_winner_form: "Áp Dụng Vào Biểu Mẫu",
+          btn_close: "Đóng",
+          btn_cancel: "Huỷ",
+          toast_winner_form_applied:
+            "Đã áp dụng quy cách chiến thắng vào biểu mẫu!",
+          share_modal_title: "Chia Sẻ Danh Sách Mua Sắm",
+          share_modal_desc:
+            "Chia sẻ danh sách trực tiếp qua liên kết, mã QR hoặc tệp sao lưu mà không cần tài khoản hay máy chủ.",
+          qr_hint_text: "Quét mã để nhập danh sách",
+          btn_native_share: "Chia Sẻ Qua Ứng Dụng (Tin Nhắn / AirDrop)",
+          btn_copy_url: "Sao Chép Liên Kết Chia Sẻ",
+          btn_export_json: "Xuất Bản Sao Lưu (.json)",
+          toast_share_copied: "Đã sao chép liên kết chia sẻ vào khay nhớ tạm!",
+          share_native_text: "Đây là danh sách mua sắm ({count} mặt hàng)",
+          import_modal_title: "Danh Sách Mua Sắm Được Chia Sẻ",
+          import_list_title: "Danh Sách Mua Sắm Được Chia Sẻ",
+          import_item_count: "Bao gồm {count} mặt hàng",
+          btn_import_merge: "Gộp Vào Danh Sách Hiện Tại",
+          btn_import_replace: "Nhập Thành Danh Sách Mới",
+          toast_import_shared_success: "Đã nhập danh sách chia sẻ thành công!",
+          trip_modal_title: "Hoàn Tất Chuyến Mua Sắm",
+          trip_modal_purchased_label: "Mặt Hàng Đã Mua:",
+          trip_modal_total_spent_label: "Tổng Chi Tiêu Chuyến Đi:",
+          label_rollover_choice: "Xử lý thế nào với các mặt hàng chưa mua?",
+          opt_rollover_text: "Chuyển hàng chưa mua sang chuyến sau",
+          opt_discard_text: "Bỏ qua các mặt hàng chưa mua",
+          btn_finalize_trip: "Lưu Giá & Hoàn Tất Chuyến Đi",
+          ledger_modal_title: "Sổ Nhật Ký Lịch Sử Mua Hàng",
+          ledger_search_placeholder:
+            "Tìm lịch sử theo mặt hàng hoặc cửa hàng...",
+          th_date: "Ngày",
+          th_item: "Mặt Hàng",
+          th_store: "Cửa Hàng",
+          th_size: "Quy Cách",
+          th_paid: "Giá Mua",
+          th_unit_price: "Đơn Giá Chuẩn",
+          ledger_empty_msg: "Chưa có dữ liệu lịch sử mua hàng.",
+          quick_price_item_name: "Tên Mặt Hàng",
+          quick_price_shelf: "Giá Bao Bì / Kệ",
+          quick_price_qty: "Số Lượng",
+          quick_price_adjust_label: "Điều Chỉnh Giá Nhanh:",
+          input_store_placeholder:
+            "Tên cửa hàng mới (vd: WinMart, Bách Hoá Xanh)...",
+          existing_stores_label: "Danh Sách Cửa Hàng Hiện Có",
+          settings_store_title: "Quản Lý Cửa Hàng",
+          settings_store_desc: "Cấu hình danh sách cửa hàng & mặc định",
+          settings_pref_heading: "Tuỳ Chọn",
+          settings_default_currency: "Tiền Tệ Mặc Định",
+          settings_default_grouping: "Nhóm Mặc Định",
+          grouping_by_aisle: "Theo Quầy (Ngành Hàng)",
+          grouping_by_store: "Theo Cửa Hàng",
+          settings_data_heading: "Quản Lý & Sao Lưu Dữ Liệu",
+          btn_export_json_backup: "Xuất JSON",
+          btn_import_json_backup: "Nhập JSON",
+          btn_load_sample_data: "Tải Dữ Liệu Mẫu",
+          btn_clear_all_data: "Xoá Tất Cả Dữ Liệu",
+          settings_sync_title: "Lưu Trữ & Đồng Bộ Đám Mây",
+          settings_sync_status: "IndexedDB Đang Hoạt Động (Offline-First)",
+          badge_local_only: "Nội Bộ / Cục Bộ",
+          toast_sample_loaded: "Đã tải danh sách hàng hoá mẫu!",
+          toast_data_cleared: "Đã xoá toàn bộ dữ liệu",
         },
       };
 
@@ -2589,7 +2813,10 @@
         memoryState.purchaseLedger = JSON.parse(JSON.stringify(SAMPLE_LEDGER));
         saveToLocalStorage();
         renderApp();
-        showToast("Sample grocery list loaded!");
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_sample_loaded ||
+            "Sample grocery list loaded!"
+        );
         const banner = document.getElementById("sampleDataBanner");
         if (banner) banner.classList.remove("hidden");
       }
@@ -2605,7 +2832,11 @@
         saveToLocalStorage();
         renderApp();
         dismissSampleBanner();
-        if (!silent) showToast("All data cleared");
+        if (!silent)
+          showToast(
+            TRANSLATIONS[currentLanguage].toast_data_cleared ||
+              "All data cleared"
+          );
       }
 
       /* =========================================================================
@@ -2967,24 +3198,20 @@
           items.map((i) => i.category || "other")
         );
 
+        const lang = currentLanguage === "vi" ? "vi" : "en";
         const cats = [
           {
             key: "ALL",
-            label: TRANSLATIONS[currentLanguage].aisle_all || "All",
+            label:
+              TRANSLATIONS[currentLanguage].aisle_all ||
+              (lang === "vi" ? "Tất Cả" : "All"),
             icon: "🛒",
           },
-          { key: "produce", label: "Produce", icon: "🥦" },
-          { key: "dairy", label: "Dairy", icon: "🥛" },
-          { key: "dairy_eggs", label: "Dairy & Eggs", icon: "🥛" },
-          { key: "meat", label: "Meat", icon: "🥩" },
-          { key: "meat_seafood", label: "Meat & Seafood", icon: "🥩" },
-          { key: "bakery", label: "Bakery", icon: "🍞" },
-          { key: "pantry", label: "Pantry", icon: "🍚" },
-          { key: "frozen", label: "Frozen", icon: "🧊" },
-          { key: "beverages", label: "Beverages", icon: "☕" },
-          { key: "household", label: "Household", icon: "🧹" },
-          { key: "personal_care", label: "Personal Care", icon: "🧴" },
-          { key: "other", label: "Other", icon: "📦" },
+          ...Object.entries(CATEGORIES).map(([key, cat]) => ({
+            key,
+            label: cat[lang],
+            icon: cat.icon,
+          })),
         ];
 
         const relevantCats = cats.filter(
@@ -3030,6 +3257,38 @@
           .join("");
       }
 
+      function renderCategoryOptions() {
+        const select = document.getElementById("inputItemCategory");
+        if (!select) return;
+        const currentVal = select.value || "produce";
+        const lang = currentLanguage === "vi" ? "vi" : "en";
+        select.innerHTML = Object.entries(CATEGORIES)
+          .map(
+            ([key, cat]) =>
+              `<option value="${key}" ${key === currentVal ? "selected" : ""}>${cat.icon} ${cat[lang]}</option>`
+          )
+          .join("");
+      }
+
+      function renderUnitOptions() {
+        const select = document.getElementById("inputItemUnit");
+        if (!select) return;
+        const currentVal = select.value || "kg";
+        const lang = currentLanguage === "vi" ? "vi" : "en";
+        select.innerHTML = UNIT_GROUPS.map(
+          (group) => `
+          <optgroup label="${group[lang]}">
+            ${group.units
+              .map(
+                (u) =>
+                  `<option value="${u.key}" ${u.key === currentVal ? "selected" : ""}>${u[lang]}</option>`
+              )
+              .join("")}
+          </optgroup>
+        `
+        ).join("");
+      }
+
       function formatCurrency(
         amount,
         currency = currentCurrency,
@@ -3049,6 +3308,8 @@
       }
 
       function renderApp() {
+        renderCategoryOptions();
+        renderUnitOptions();
         renderStoreFilterOptions();
         renderCategoryFilterChips();
         renderKpis();
@@ -3165,8 +3426,11 @@
         if (kpiSpentVal) kpiSpentVal.textContent = formatCurrency(checkedSpent);
         if (kpiEstimatedVal)
           kpiEstimatedVal.textContent = formatCurrency(totalEstimated);
-        if (tripRunningTotal)
-          tripRunningTotal.textContent = `Total Spent: ${formatCurrency(checkedSpent)}`;
+        if (tripRunningTotal) {
+          const t = TRANSLATIONS[currentLanguage];
+          const totalSpentLabel = t.total_spent_label || "Total Spent:";
+          tripRunningTotal.textContent = `${totalSpentLabel} ${formatCurrency(checkedSpent)}`;
+        }
 
         const listCountBadge = document.getElementById("listCountBadge");
         if (listCountBadge) listCountBadge.textContent = filtered.length;
@@ -3224,6 +3488,7 @@
             storeMap.get(sName).push(item);
           });
 
+          const itemsLabel = currentLanguage === "vi" ? "mặt hàng" : "items";
           let storeHtml = "";
           storeMap.forEach((storeItems, sName) => {
             const storeSubtotal = storeItems.reduce(
@@ -3238,7 +3503,7 @@
                     <span>${sName}</span>
                   </div>
                   <span class="text-[11px] font-semibold text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
-                    ${storeItems.length} items • ${formatCurrency(storeSubtotal)}
+                    ${storeItems.length} ${itemsLabel} • ${formatCurrency(storeSubtotal)}
                   </span>
                 </div>
                 <div class="space-y-2">
@@ -3574,7 +3839,7 @@
                 ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
               </div>
               <div class="text-right text-[11px] text-slate-400">
-                ${history.length > 0 ? `<span title="All-Time Low recorded price">ATL: <strong class="text-emerald-400 font-semibold">${formatCurrency(deal.minPrice)}/${baseUnit}</strong></span>` : `<span class="text-slate-500 italic">${TRANSLATIONS[currentLanguage].new_item || "New Item"}</span>`}
+                ${history.length > 0 ? `<span title="All-Time Low recorded price">${TRANSLATIONS[currentLanguage].atl_price_label || "ATL:"} <strong class="text-emerald-400 font-semibold">${formatCurrency(deal.minPrice)}/${baseUnit}</strong></span>` : `<span class="text-slate-500 italic">${TRANSLATIONS[currentLanguage].new_item || "New Item"}</span>`}
               </div>
             </div>
 
@@ -3668,12 +3933,14 @@
         const unit = document.getElementById("inputItemUnit").value;
         const previewPill = document.getElementById("liveUnitPreviewPill");
         const previewText = document.getElementById("liveUnitPreviewText");
+        const t = TRANSLATIONS[currentLanguage];
 
         if (price > 0 && qty > 0) {
           const unitPrice = normalizeUnitPrice(price, qty, unit);
           const { baseUnit } = normalizeQuantity(qty, unit);
+          const prefix = t.unit_price_preview || "Unit Price:";
           if (previewText)
-            previewText.textContent = `Unit Price: ${formatCurrency(unitPrice)} / ${baseUnit}`;
+            previewText.textContent = `${prefix} ${formatCurrency(unitPrice)} / ${baseUnit}`;
           if (previewPill) previewPill.classList.remove("hidden");
         } else {
           if (previewPill) previewPill.classList.add("hidden");
@@ -3713,8 +3980,11 @@
           if (compQtyA) compQtyA.value = item.quantity;
           if (compUnitA) compUnitA.value = item.unit;
           if (nameLabel) nameLabel.textContent = item.name;
-          if (unitLabel)
-            unitLabel.textContent = `(Active: ${item.quantity} ${item.unit} @ ${formatCurrency(item.price)})`;
+          if (unitLabel) {
+            const activeLabel =
+              currentLanguage === "vi" ? "Hiện tại" : "Active";
+            unitLabel.textContent = `(${activeLabel}: ${item.quantity} ${item.unit} @ ${formatCurrency(item.price)})`;
+          }
           if (banner) banner.classList.remove("hidden");
           if (btnApplyWinner) btnApplyWinner.classList.remove("hidden");
         }
@@ -3784,6 +4054,7 @@
         const normTextB = document.getElementById("compNormB");
         const badge = document.getElementById("compWinnerBadge");
         const details = document.getElementById("compSavingsDetails");
+        const t = TRANSLATIONS[currentLanguage];
 
         if (normTextA)
           normTextA.textContent = `${formatCurrency(res.unitPriceA || 0)} / ${res.baseUnit || "unit"}`;
@@ -3791,28 +4062,62 @@
           normTextB.textContent = `${formatCurrency(res.unitPriceB || 0)} / ${res.baseUnit || "unit"}`;
 
         if (res.error === "DIMENSION_MISMATCH") {
-          if (badge) badge.textContent = "⚠️ Different Unit Dimensions";
+          if (badge)
+            badge.textContent =
+              t.comp_dim_mismatch_title || "⚠️ Different Unit Dimensions";
           if (details)
-            details.textContent = "Cannot compare Weight vs Volume directly";
+            details.textContent =
+              t.comp_dim_mismatch_desc ||
+              "Cannot compare Weight vs Volume directly";
           return;
         }
 
         if (res.winner === "TIE") {
-          if (badge) badge.textContent = "🤝 Equal Value Deal";
+          if (badge)
+            badge.textContent =
+              t.comp_equal_deal_title || "🤝 Equal Value Deal";
           if (details)
-            details.textContent = "Both packages have identical unit prices";
+            details.textContent =
+              t.comp_equal_deal_desc ||
+              "Both packages have identical unit prices";
         } else {
-          const winnerPkg = res.winner === "A" ? "Package A" : "Package B";
-          if (badge) badge.textContent = `🏆 ${winnerPkg} is Cheaper!`;
+          const pkgName =
+            res.winner === "A"
+              ? currentLanguage === "vi"
+                ? "Gói A"
+                : "Package A"
+              : currentLanguage === "vi"
+                ? "Gói B"
+                : "Package B";
+          if (badge)
+            badge.textContent = `🏆 ${(t.comp_winner_pkg_cheaper || "{package} is Cheaper!").replace("{package}", pkgName)}`;
           if (details) {
             if (activeComparingItemId) {
               if (res.winner === "B") {
-                details.textContent = `Package B saves ${res.savingsPercent.toFixed(1)}% (${formatCurrency(res.savingsPerUnit)} / ${res.baseUnit} cheaper)`;
+                details.textContent = (
+                  t.comp_saves_pct ||
+                  "Saves {percent}% ({amount} / {unit} cheaper)"
+                )
+                  .replace("{percent}", res.savingsPercent.toFixed(1))
+                  .replace("{amount}", formatCurrency(res.savingsPerUnit))
+                  .replace("{unit}", res.baseUnit);
               } else {
-                details.textContent = `Active Item (Package A) is already ${res.savingsPercent.toFixed(1)}% cheaper! (${formatCurrency(res.savingsPerUnit)} / ${res.baseUnit} saved)`;
+                details.textContent = (
+                  t.comp_active_already_cheaper ||
+                  "Active Item (Package A) is already {percent}% cheaper! ({amount} / {unit} saved)"
+                )
+                  .replace("{percent}", res.savingsPercent.toFixed(1))
+                  .replace("{amount}", formatCurrency(res.savingsPerUnit))
+                  .replace("{unit}", res.baseUnit);
               }
             } else {
-              details.textContent = `Saves ${res.savingsPercent.toFixed(1)}% (${formatCurrency(res.savingsPerUnit)} / ${res.baseUnit} cheaper)`;
+              details.textContent = (
+                t.comp_saves_pct ||
+                "Saves {percent}% ({amount} / {unit} cheaper)"
+              )
+                .replace("{percent}", res.savingsPercent.toFixed(1))
+                .replace("{amount}", formatCurrency(res.savingsPerUnit))
+                .replace("{unit}", res.baseUnit);
             }
           }
         }
@@ -3842,7 +4147,10 @@
 
         updateLiveUnitPreview();
         closeModal("comparatorModal");
-        showToast("Winner package applied to form!");
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_winner_form_applied ||
+            "Winner package applied to form!"
+        );
       }
 
       function stepQuickPrice(delta) {
@@ -3974,18 +4282,25 @@
         const payload = encodeSharePayload(memoryState.activeList);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
         navigator.clipboard.writeText(url).then(() => {
-          showToast("Share link copied to clipboard!");
+          showToast(
+            TRANSLATIONS[currentLanguage].toast_share_copied ||
+              "Share link copied to clipboard!"
+          );
         });
       }
 
       function invokeNativeShare() {
         const payload = encodeSharePayload(memoryState.activeList);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
+        const t = TRANSLATIONS[currentLanguage];
         if (navigator.share) {
           navigator
             .share({
               title: memoryState.activeList.title,
-              text: `Here is our grocery buy-list (${memoryState.activeList.items.length} items)`,
+              text: (
+                t.share_native_text ||
+                "Here is our grocery buy-list ({count} items)"
+              ).replace("{count}", memoryState.activeList.items.length),
               url,
             })
             .catch(() => {});
@@ -4021,13 +4336,18 @@
           (sum, i) => sum + (parseFloat(i.price) || 0),
           0
         );
+        const itemsWord = currentLanguage === "vi" ? "mặt hàng" : "items";
+        const leftWord =
+          currentLanguage === "vi"
+            ? "mặt hàng chưa mua."
+            : "items left unchecked.";
 
         document.getElementById("tripModalPurchasedCount").textContent =
-          `${checkedItems.length} items`;
+          `${checkedItems.length} ${itemsWord}`;
         document.getElementById("tripModalTotalSpentVal").textContent =
           formatCurrency(totalSpent);
         document.getElementById("unpurchasedCountText").textContent =
-          `${uncheckedItems.length} items left unchecked.`;
+          `${uncheckedItems.length} ${leftWord}`;
 
         openModal("tripCompleteModal");
       }
@@ -4174,9 +4494,11 @@
       function toggleLanguage() {
         currentLanguage = currentLanguage === "en" ? "vi" : "en";
         document.getElementById("langToggleBtn").textContent =
-          currentLanguage.toUpperCase();
+          currentLanguage === "en" ? "VI" : "EN";
         applyTranslations();
         renderApp();
+        runComparatorCalc();
+        updateLiveUnitPreview();
       }
 
       function setCurrency(cur) {
@@ -4249,26 +4571,21 @@
         const t = TRANSLATIONS[currentLanguage];
         const el = (id, text) => {
           const e = document.getElementById(id);
-          if (e) e.textContent = text;
+          if (e && text !== undefined) e.textContent = text;
         };
 
+        // Header & Navigation
         el("headerTitle", t.app_title);
         el("headerSubtitle", t.app_subtitle);
+        el("btnShareText", t.btn_share_header || "Share");
+        el("langToggleBtn", currentLanguage === "en" ? "VI" : "EN");
+        el("tripSummaryHeading", t.trip_summary_heading || "Shopping Trip");
+        el("labelStoreFilter", t.store_filter || "Store:");
         el("kpiItemsLabel", t.kpi_items);
         el("kpiSpentLabel", t.kpi_spent);
         el("kpiEstimatedLabel", t.kpi_estimated);
-        el("addItemHeading", t.add_item_title);
-        el("labelItemQty", t.label_qty);
-        el("labelItemUnit", t.label_unit);
-        el("labelItemPrice", t.label_price);
-        el("btnAddItemText", t.btn_add_item);
-        el("listTitleText", t.list_title);
-        el("btnGroupByAisle", t.by_aisle);
-        el("btnGroupByStore", t.by_store);
-        el("emptyListTitle", t.empty_title);
-        el("emptyListDesc", t.empty_desc);
-        el("checkedSectionTitle", t.checked_section);
-        el("checkedToggleHint", t.tap_toggle);
+        el("tripProgressTitle", t.progress_pacing || "Shopping Progress");
+        el("tripRemainingSpendLabel", t.remaining_spend || "Remaining");
         el("tripSummaryPrompt", t.trip_active);
         el("btnFinishTripText", t.btn_finish_trip);
         el("navLabelList", t.nav_list);
@@ -4277,28 +4594,157 @@
         el("navLabelShare", t.nav_share);
         el("navLabelPlanning", t.nav_planning || t.tab_planning || "Planning");
         el("navLabelBuyMode", t.nav_buy_mode || t.tab_in_store || "Buy Mode");
+
+        // Banner & Empty State
+        el("sampleDataText", t.sample_banner_text);
+        el("btnKeepSample", t.btn_keep_sample || "Keep");
+        el("btnClearSample", t.btn_clear_sample || "Clear");
+        el("listTitleText", t.list_title);
+        el("btnGroupByAisle", t.by_aisle);
+        el("btnGroupByStore", t.by_store);
+        el("emptyListTitle", t.empty_title);
+        el("emptyListDesc", t.empty_desc);
+        el("btnLoadSampleEmpty", t.btn_load_sample);
+        el("checkedSectionTitle", t.checked_section);
+        el("checkedToggleHint", t.tap_toggle);
+
+        // Add Item Form
+        el("addItemHeading", t.add_item_title);
+        el("labelItemQty", t.label_qty);
+        el("labelItemUnit", t.label_unit);
+        el("labelItemPrice", t.label_price);
+        el("btnAddItemText", t.btn_add_item);
+        el("liveDealBadge", t.new_item || "New Item");
+        el(
+          "liveUnitPreviewText",
+          `${t.unit_price_preview || "Unit Price:"} ${formatCurrency(0)} / L`
+        );
+        const inputName = document.getElementById("inputItemName");
+        if (inputName) inputName.placeholder = t.item_name_placeholder;
+        renderCategoryOptions();
+        renderUnitOptions();
+
+        // 1. Comparator Modal
+        el("compModalTitleText", t.comp_modal_title);
+        el("compModalDesc", t.comp_modal_desc);
+        el("compItemNameLabel", t.comp_comparing_item);
+        el("compActiveBadge", t.comp_package_a_active);
+        el("labelPackageA", t.comp_package_a_label);
+        el("labelPackageB", t.comp_package_b_label);
+        el("labelPriceA", t.comp_price);
+        el("labelPriceB", t.comp_price);
+        el("labelQtyA", t.comp_qty);
+        el("labelQtyB", t.comp_qty);
+        el("labelUnitA", t.comp_unit);
+        el("labelUnitB", t.comp_unit);
+        el("labelNormPriceA", t.comp_unit_price);
+        el("labelNormPriceB", t.comp_unit_price);
+        el("btnCloseComparator", t.btn_close);
         el("btnApplyWinnerText", t.btn_apply_winner || "Apply Winner to List");
+        el("btnApplyWinner", t.btn_apply_winner_form || "Apply Winner to Form");
+
+        // 2. Share Modal
+        el("shareModalTitleText", t.share_modal_title);
+        el("shareModalDesc", t.share_modal_desc);
+        el("qrHintText", t.qr_hint_text);
+        el("btnNativeShareText", t.btn_native_share);
+        el("btnCopyUrlText", t.btn_copy_url);
+        el("btnExportJsonText", t.btn_export_json);
+
+        // 3. Import Modal
+        el("importModalTitleText", t.import_modal_title);
+        el("importListTitle", t.import_list_title);
+        el(
+          "importItemCount",
+          (t.import_item_count || "Contains {count} items").replace(
+            "{count}",
+            window.pendingSharedList ? window.pendingSharedList.items.length : 5
+          )
+        );
+        el("btnImportMergeText", t.btn_import_merge);
+        el("btnImportReplaceText", t.btn_import_replace);
+
+        // 4. Trip Complete Modal
+        el("tripModalTitleText", t.trip_modal_title);
+        el("tripModalPurchasedLabel", t.trip_modal_purchased_label);
+        el("tripModalTotalSpentLabel", t.trip_modal_total_spent_label);
+        el("tripModalTotalSpentVal", formatCurrency(0));
+        const itemsWord = currentLanguage === "vi" ? "mặt hàng" : "items";
+        const leftWord =
+          currentLanguage === "vi"
+            ? "mặt hàng chưa mua."
+            : "items left unchecked.";
+        el("tripModalPurchasedCount", `0 ${itemsWord}`);
+        el("unpurchasedCountText", `0 ${leftWord}`);
+        el("labelRolloverChoice", t.label_rollover_choice);
+        el("optRolloverText", t.opt_rollover_text);
+        el("optDiscardText", t.opt_discard_text);
+        el("btnFinalizeTrip", t.btn_finalize_trip);
+
+        // 5. Price Ledger Modal
+        el("ledgerModalTitleText", t.ledger_modal_title);
+        const ledgerInput = document.getElementById("ledgerSearchInput");
+        if (ledgerInput) ledgerInput.placeholder = t.ledger_search_placeholder;
+        el("thDate", t.th_date);
+        el("thItem", t.th_item);
+        el("thStore", t.th_store);
+        el("thSize", t.th_size);
+        el("thPaid", t.th_paid);
+        el("thUnitPrice", t.th_unit_price);
+
+        // 6. Quick Price Modal
         el(
           "quickPriceModalHeading",
           t.quick_price_title || "Quick Price Update"
         );
+        el("quickPriceItemNameLabel", t.quick_price_item_name);
+        el("quickPriceInputLabel", t.quick_price_shelf);
+        el("quickQtyInputLabel", t.quick_price_qty);
+        el("quickPriceAdjustLabel", t.quick_price_adjust_label);
+        el("btnCancelQuickPrice", t.btn_cancel);
         el("btnSaveQuickPrice", t.btn_save_price || "Update Price");
-        el("tripProgressTitle", t.progress_pacing || "Shopping Progress");
-        el("tripRemainingSpendLabel", t.remaining_spend || "Remaining");
+
+        // 7. Store Manager Modal
+        el("storeManagerModalTitle", t.manage_stores_title || "Manage Stores");
+        const newStoreInput = document.getElementById("inputNewStoreName");
+        if (newStoreInput)
+          newStoreInput.placeholder = t.input_store_placeholder;
+        el("btnAddStoreSubmit", t.add_store_btn || "Add Store");
+        el("storeManagerListLabel", t.existing_stores_label);
+        el("btnCloseStoreManager", t.btn_close);
+
+        // 8. Settings Modal
         el("settingsModalTitle", t.settings_title || "Settings & Option Hub");
         el(
           "settingsModalSubtitle",
           t.settings_subtitle ||
             "Configure stores, preferences, and data backups"
         );
-        el("storeManagerHeading", t.manage_stores_title || "Manage Stores");
-        el("btnAddStoreSubmitText", t.add_store_btn || "Add Store");
+        el("settingsStoreTitle", t.settings_store_title);
+        el("settingsStoreDesc", t.settings_store_desc);
+        el("btnManageStoresInSettings", t.manage_stores_title);
+        el("settingsPrefHeading", t.settings_pref_heading);
+        el("settingsDefaultCurrencyLabel", t.settings_default_currency);
+        el("settingsDefaultGroupingLabel", t.settings_default_grouping);
+        el("optGroupingAisle", t.grouping_by_aisle);
+        el("optGroupingStore", t.grouping_by_store);
+        el("settingsDataHeading", t.settings_data_heading);
+        el("btnExportBackupText", t.btn_export_json_backup);
+        el("btnImportBackupText", t.btn_import_json_backup);
+        el("btnResetSampleData", t.btn_load_sample_data);
+        el("btnClearAllDataInSettings", t.btn_clear_all_data);
+        el("settingsSyncTitle", t.settings_sync_title);
+        el("settingsSyncStatus", t.settings_sync_status);
+        el("settingsSyncBadge", t.badge_local_only);
         el(
           "settingsPwaTitle",
           t.pwa_section_title || "App Updates & Cache (PWA)"
         );
         el("btnCheckUpdatesText", t.check_updates_btn || "Check for Updates");
         el("btnPurgeCacheText", t.purge_cache_btn || "Purge Cache & Reload");
+        el("btnCloseSettings", t.btn_close);
+
+        // PWA Update Toast
         el(
           "updateToastTitle",
           t.update_available_title || "New Version Available"
@@ -4308,9 +4754,6 @@
           t.update_available_desc || "A new version of Smart Buy-List is ready."
         );
         el("btnApplyPwaUpdate", t.update_btn_refresh || "Update Now");
-
-        const inputName = document.getElementById("inputItemName");
-        if (inputName) inputName.placeholder = t.item_name_placeholder;
       }
 
       function showToast(message) {
@@ -4398,8 +4841,9 @@
           }
 
           // Initial Render
-          renderApp();
           applyTranslations();
+          renderApp();
+          runComparatorCalc();
 
           // Show sample data banner if items exist and never dismissed
           if (memoryState.activeList.items.length > 0) {
@@ -4584,7 +5028,10 @@
         saveToLocalStorage();
         closeModal("importModal");
         renderApp();
-        showToast("Shared list successfully imported!");
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_import_shared_success ||
+            "Shared list successfully imported!"
+        );
       }
 
       // Global exports for test runner and Node vm sandbox
@@ -4596,6 +5043,8 @@
         window.evaluateDealScore = evaluateDealScore;
         window.DIMENSIONS = DIMENSIONS;
         window.UNIT_CONVERSIONS = UNIT_CONVERSIONS;
+        window.UNIT_GROUPS = UNIT_GROUPS;
+        window.CATEGORIES = CATEGORIES;
         window.TRANSLATIONS = TRANSLATIONS;
         window.memoryState = memoryState;
         window.setTripPhase = setTripPhase;
@@ -4604,7 +5053,10 @@
         window.loadSampleData = loadSampleData;
         window.clearAllData = clearAllData;
         window.handleItemAutocomplete = handleItemAutocomplete;
+        window.renderCategoryOptions = renderCategoryOptions;
+        window.renderUnitOptions = renderUnitOptions;
         window.renderApp = renderApp;
+        window.applyTranslations = applyTranslations;
         window.initDatabase = initDatabase;
         window.exportJsonBackup = exportJsonBackup;
         window.renderSparklineSvg = renderSparklineSvg;

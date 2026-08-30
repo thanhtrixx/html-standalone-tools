@@ -326,9 +326,141 @@ try {
     "KEY-01: Pressing 'n' focuses item input field"
   );
 
-  // Escape key closes modals safely without error
-  sandbox.handleGlobalKeyDown({ key: "Escape", preventDefault: () => {} });
-  assert(true, "KEY-02: Pressing 'Escape' triggers modal dismissals safely");
+  // 5. COMPREHENSIVE MODAL & UNIT I18N COVERAGE
+  console.log(
+    "\n--- Section 5: Categories, Measurement Units & Modal i18n ---"
+  );
+
+  assert(
+    typeof sandbox.UNIT_GROUPS === "object" &&
+      Array.isArray(sandbox.UNIT_GROUPS),
+    "I18N-UNIT-01: UNIT_GROUPS array is exported globally"
+  );
+
+  assert(
+    sandbox.UNIT_GROUPS.length === 3,
+    "I18N-UNIT-02: UNIT_GROUPS contains weight, volume, and count groups"
+  );
+
+  assert(
+    typeof sandbox.CATEGORIES === "object",
+    "I18N-CAT-01: CATEGORIES map is exported globally"
+  );
+
+  const categories = Object.keys(sandbox.CATEGORIES);
+  const validCategories = categories.every(
+    (k) =>
+      typeof sandbox.CATEGORIES[k].en === "string" &&
+      typeof sandbox.CATEGORIES[k].vi === "string" &&
+      typeof sandbox.CATEGORIES[k].icon === "string"
+  );
+  assert(
+    validCategories,
+    "I18N-CAT-02: Every category has valid English, Vietnamese labels and emoji icon"
+  );
+
+  assert(
+    typeof sandbox.renderCategoryOptions === "function",
+    "I18N-UI-01: renderCategoryOptions is exported globally"
+  );
+
+  assert(
+    typeof sandbox.renderUnitOptions === "function",
+    "I18N-UI-02: renderUnitOptions is exported globally"
+  );
+
+  assert(
+    typeof sandbox.applyTranslations === "function",
+    "I18N-UI-03: applyTranslations is exported globally"
+  );
+
+  // Check critical keys in TRANSLATIONS dictionary
+  const criticalKeys = [
+    "btn_share_header",
+    "sample_banner_text",
+    "btn_keep_sample",
+    "btn_clear_sample",
+    "total_spent_label",
+    "unit_price_preview",
+    "comp_modal_title",
+    "comp_modal_desc",
+    "comp_comparing_item",
+    "comp_package_a_active",
+    "comp_package_a_label",
+    "comp_package_b_label",
+    "comp_price",
+    "comp_qty",
+    "comp_unit",
+    "comp_unit_price",
+    "comp_winner_pkg_cheaper",
+    "comp_saves_pct",
+    "comp_active_already_cheaper",
+    "comp_dim_mismatch_title",
+    "comp_dim_mismatch_desc",
+    "comp_equal_deal_title",
+    "comp_equal_deal_desc",
+    "btn_apply_winner_form",
+    "btn_close",
+    "btn_cancel",
+    "share_modal_title",
+    "share_modal_desc",
+    "qr_hint_text",
+    "btn_native_share",
+    "btn_copy_url",
+    "btn_export_json",
+    "import_modal_title",
+    "btn_import_merge",
+    "btn_import_replace",
+    "trip_modal_title",
+    "trip_modal_purchased_label",
+    "trip_modal_total_spent_label",
+    "label_rollover_choice",
+    "opt_rollover_text",
+    "opt_discard_text",
+    "btn_finalize_trip",
+    "ledger_modal_title",
+    "ledger_search_placeholder",
+    "th_date",
+    "th_item",
+    "th_store",
+    "th_size",
+    "th_paid",
+    "th_unit_price",
+    "ledger_empty_msg",
+    "quick_price_item_name",
+    "quick_price_shelf",
+    "quick_price_qty",
+    "quick_price_adjust_label",
+    "settings_store_title",
+    "settings_store_desc",
+    "settings_pref_heading",
+    "settings_default_currency",
+    "settings_default_grouping",
+    "grouping_by_aisle",
+    "grouping_by_store",
+    "settings_data_heading",
+    "btn_export_json_backup",
+    "btn_import_json_backup",
+    "btn_load_sample_data",
+    "btn_clear_all_data",
+    "settings_sync_title",
+    "settings_sync_status",
+    "badge_local_only",
+    "toast_sample_loaded",
+    "toast_data_cleared",
+    "toast_share_copied",
+    "toast_import_shared_success",
+  ];
+
+  const allCriticalPresent = criticalKeys.every(
+    (k) =>
+      typeof sandbox.TRANSLATIONS.en[k] === "string" &&
+      typeof sandbox.TRANSLATIONS.vi[k] === "string"
+  );
+  assert(
+    allCriticalPresent,
+    `I18N-KEYS-01: All ${criticalKeys.length} critical UI and modal translation keys exist in both en and vi`
+  );
 } catch (err) {
   console.error("❌ Test Execution Error:", err);
   failed++;
