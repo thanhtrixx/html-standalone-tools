@@ -141,6 +141,14 @@ _Avoid_: Prefs panel, control center, admin menu.
 An abstracted TypeScript/JavaScript client-side storage interface (`IStorageProvider`) decoupling domain data operations from physical storage implementations (`IndexedDBStorageProvider` for offline-first local persistence, and `GoogleDriveStorageProvider` for user-owned cloud synchronization).
 _Avoid_: Database driver, storage hook, backend adapter.
 
+**Clipboard JSON Interchange**:
+A bidirectional clipboard transfer interface allowing shoppers to copy active buy-list JSON (`{ title, items }`) from the Share modal or full state backups from the Settings Option Hub, and paste multi-format payloads with automatic schema classification (full backup restore vs smart list merge) and a fallback text entry dialog.
+_Avoid_: Copy-paste widget, clipboard tool, raw text dump.
+
+**In-App Native QR Scanner**:
+A camera viewfinder modal accessible in the Settings Option Hub that utilizes the browser-native `BarcodeDetector` API for real-time camera decoding with environment camera default, camera flip toggle, clean hardware track teardown, static image file upload fallback, and automatic dispatch into the Smart Merge Protocol.
+_Avoid_: External QR scanner, barcode reader app, camera popup.
+
 ---
 
 ### 6. PWA & Mobile Ergonomics

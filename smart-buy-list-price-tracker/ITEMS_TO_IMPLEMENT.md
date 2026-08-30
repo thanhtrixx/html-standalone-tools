@@ -76,6 +76,8 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R43** | **Network-First Navigation & PWA Update Notification** | Network-First strategy with 2.5s timeout for HTML navigation; non-blocking Material 3 toast (`"New version available [Update Now]"`) on waiting worker; `SKIP_WAITING` + `controllerchange` clean reload.                                                    | P0       | ADR-0007           |
 | **R44** | **Option Hub QA Update & Cache Purge Controls**        | In-app "Check for Updates" and "Purge Cache & Reload" actions inside Option Hub settings modal for QA and manual update verification.                                                                                                                        | P0       | ADR-0007           |
 | **R45** | **Price History Re-order & Batch Restocking Workflow** | Enable 1-tap quick add (`+`) and multi-select batch adding from historical purchase ledger rows into the active Buy List with sticky summary action bar, snapshot attribute inheritance, case-insensitive deduplication, and actionable `[View List]` toast. | P0       | ADR-0008           |
+| **R46** | **Clipboard JSON Interchange (Export & Multi-Format Import)** | Contextual dual export ("Copy Buy-List JSON" in Share Modal, "Copy Backup JSON" in Settings) and smart clipboard import with multi-format auto-detection (Full Backup, Active Buy-List JSON, `#share=` deep links) and graceful fallback textarea dialog. | P0       | ADR-0009           |
+| **R47** | **In-App Native QR Scanner in Settings (Option Hub)** | Integrated camera viewfinder modal (`#qrScannerModal`) with native `BarcodeDetector` API, environment camera default, camera flip toggle, hardware track release on close, image file upload fallback, and auto-routing to Smart Merge Protocol (`#importModal`). | P0       | ADR-0009           |
 
 ---
 
@@ -95,8 +97,10 @@ flowchart TD
     S10["Slice 10: Differentiated Planning &amp; Buy Mode Card Ergonomics"]
     S11["Slice 11: Network-First Navigation, PWA Update Lifecycle &amp; QA Cache Controls"]
     S12["Slice 12: Price History Re-order &amp; Batch Restocking Workflow"]
+    S13["Slice 13: Clipboard JSON Export &amp; Multi-Format Import Engine (#184)"]
+    S14["Slice 14: Native BarcodeDetector QR Scanner in Option Hub (#185)"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14
 ```
 
 <details>
@@ -137,6 +141,12 @@ flowchart TD
       │
       ▼
 [Slice 12: Price History Re-order & Batch Restocking Workflow]
+      │
+      ▼
+[Slice 13: Clipboard JSON Export & Multi-Format Import Engine (#184)]
+      │
+      ▼
+[Slice 14: Native BarcodeDetector QR Scanner in Option Hub (#185)]
 ```
 
 </details>

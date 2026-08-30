@@ -203,3 +203,32 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **REORDER-07** | Actionable Toast Navigation       | After adding items from ledger, toast displays actionable `[View List]` button which closes Price History modal, sets phase to `PLANNING`, and scrolls top. |
 | **REORDER-08** | PWA Version Bump Synchronization  | `sw.js` bumps cache name to `smart-buy-list-v3.1.0` and `index.html` displays synchronized version badge `v3.1.0`.                                          |
 | **REORDER-09** | Bilingual Parity for Re-order UI  | 100% of ledger re-order and batch restocking strings exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                                 |
+
+---
+
+### 14. Clipboard JSON Interchange (Export & Multi-Format Import)
+
+| Test ID       | Scenario                             | Assertion                                                                                                                                              |
+| :------------ | :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CLIP-01**   | Copy Buy-List JSON from Share Modal  | Clicking 'Copy Buy-List JSON' writes valid JSON `{ title, items }` to `navigator.clipboard` and shows success toast.                                   |
+| **CLIP-02**   | Copy Full Backup JSON from Settings  | Clicking 'Copy Backup JSON' in Option Hub writes full `memoryState` JSON to `navigator.clipboard` and shows success toast.                           |
+| **CLIP-03**   | Paste Full Backup JSON Auto-Restore  | Pasting JSON containing `activeList`/`purchaseLedger` shows confirmation modal and restores application state.                                         |
+| **CLIP-04**   | Paste Buy-List JSON Auto-Merge       | Pasting JSON with `{ title, items }` or `{ t, i }` stages `pendingSharedList` and launches `#importModal` (Merge or Replace).                        |
+| **CLIP-05**   | Paste `#share=` Link URL             | Pasting a URL containing `#share=<base64>` extracts hash payload, decodes items, and launches `#importModal`.                                          |
+| **CLIP-06**   | Clipboard Fallback Modal Presentation | If clipboard read is denied or unsupported, opens Paste Dialog Modal (`#pasteJsonModal`) with textarea and import trigger.                             |
+| **CLIP-07**   | Corrupted Clipboard Data Resilience  | Pasting non-JSON, non-URL garbage displays localized warning toast (`toast_invalid_clipboard_data`) without throwing.                                   |
+| **CLIP-08**   | Bilingual Parity for Clipboard UI    | 100% of clipboard export/import keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                                           |
+
+---
+
+### 15. Native BarcodeDetector QR Scanner in Option Hub
+
+| Test ID       | Scenario                            | Assertion                                                                                                                                             |
+| :------------ | :---------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SCAN-01**   | QR Scanner Modal Trigger in Settings | Clicking 'Scan QR Code' in Option Hub opens `#qrScannerModal` with video viewfinder, reticle, and camera switch controls.                             |
+| **SCAN-02**   | Camera Hardware Stream Lifecycle    | Opening scanner requests `getUserMedia({ video: { facingMode: 'environment' } })`; closing modal immediately calls `track.stop()` on all tracks.      |
+| **SCAN-03**   | BarcodeDetector QR Code Decode      | When `BarcodeDetector.detect()` identifies a `#share=` URL or Buy-List JSON, triggers haptic feedback, stops stream, and launches `#importModal`.    |
+| **SCAN-04**   | Non-Buylist Scanned Content Guard   | Scanning an arbitrary external URL displays informative toast without navigating away or corrupting state.                                           |
+| **SCAN-05**   | Static QR Image Upload Fallback     | Selecting an image file via `#qrImageFileInput` decodes the QR code from image bitmap and routes payload to `#importModal`.                         |
+| **SCAN-06**   | Camera Flip / Facing Mode Toggle    | Clicking 'Flip Camera' toggles facingMode between `environment` and `user` and restarts video stream cleanly.                                        |
+| **SCAN-07**   | Bilingual Parity for Scanner UI     | 100% of scanner modal, camera permission, and error strings exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                      |
