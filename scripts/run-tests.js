@@ -89,6 +89,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-comparator-sparklines.test.js",
     category: "Core Math",
   },
+  {
+    name: "Smart Buy-List URL State Sharing & PWA",
+    file: "tests/smart-buy-list-sharing-pwa.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {
