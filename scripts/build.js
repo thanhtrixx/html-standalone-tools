@@ -4,6 +4,7 @@
  * Build Script for HTML Standalone Tools
  *
  * Scans tool directories, processes source HTML, inlines local resources (if any),
+ * compiles Tailwind CSS (replacing the CDN play script with a static purged stylesheet),
  * minifies HTML, CSS, and JS using html-minifier-terser, and outputs compacted
  * standalone single-file HTML applications ready for web delivery.
  *
@@ -12,7 +13,9 @@
  */
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
+const { execSync } = require("child_process");
 const { minify } = require("html-minifier-terser");
 
 const ROOT_DIR = path.resolve(__dirname, "..");
@@ -60,6 +63,117 @@ const MINIFY_OPTIONS = {
     mangle: false, // Keep variable names intact for debugging & stability with dynamic DOM eval
   },
 };
+
+// Regex to match the Tailwind CDN <script> tag
+const TAILWIND_CDN_RE =
+  /<script\s+src=["']https:\/\/cdn\.tailwindcss\.com["']\s*><\/script>/gi;
+
+// Regex to match the inline tailwind.config assignment script block.
+// Captures the full <script>...</script> containing "tailwind.config ="
+// (possibly wrapped in if (typeof tailwind !== "undefined") { ... } guard).
+const TAILWIND_CONFIG_SCRIPT_RE =
+  /<script>[\s\S]*?tailwind\.config\s*=[\s\S]*?<\/script>/gi;
+
+/**
+ * Extract the raw JS object literal string assigned to tailwind.config from the HTML.
+ * Returns the object literal string (e.g. "{ darkMode: \"class\", ... }") or null.
+ */
+function extractTailwindConfigObject(htmlContent) {
+  // Match: tailwind.config = { ... }; — may be inside an if-guard block
+  const match = htmlContent.match(/tailwind\.config\s*=\s*(\{[\s\S]*?\})\s*;/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Compile Tailwind CSS for a tool at build time using the Tailwind v3 CLI.
+ *
+ * Strategy:
+ *  1. Extract the inline tailwind.config object from the source HTML.
+ *  2. Write a temporary tailwind.config.js and @tailwind input.css to a temp dir.
+ *  3. Run `npx tailwindcss` to generate a purged CSS file using the HTML as content source.
+ *  4. Return the compiled CSS string (minified by the Tailwind CLI --minify flag).
+ *
+ * Falls back to returning null if compilation fails so the build can skip inlining
+ * and leave the CDN script in place (warning printed to stderr).
+ *
+ * @param {string} htmlContent - Raw source HTML content.
+ * @param {string} toolDir - Absolute path to the tool's source directory.
+ * @returns {string|null} Compiled CSS string, or null on failure.
+ */
+function compileTailwindCSS(htmlContent, toolDir) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tw-build-"));
+
+  try {
+    // Extract the config object literal (or use empty extend if not found)
+    const configObj = extractTailwindConfigObject(htmlContent) || "{}";
+
+    // Build a temporary tailwind.config.js using the extracted config, pointing
+    // content scanning at the source HTML file.
+    const srcHtmlPath = path.join(toolDir, "index.html").replace(/\\/g, "/");
+    const configJs = `module.exports = ${configObj.replace(
+      /^(\s*\{)/,
+      `$1\n  content: [${JSON.stringify(srcHtmlPath)}],`
+    )};`;
+
+    const configPath = path.join(tmpDir, "tailwind.config.js");
+    const inputPath = path.join(tmpDir, "input.css");
+    const outputPath = path.join(tmpDir, "output.css");
+
+    fs.writeFileSync(configPath, configJs, "utf8");
+    // Minimal @tailwind directives — all three layers
+    fs.writeFileSync(
+      inputPath,
+      "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n",
+      "utf8"
+    );
+
+    // Resolve the local tailwindcss binary from node_modules
+    const twBin = path.join(ROOT_DIR, "node_modules", ".bin", "tailwindcss");
+
+    execSync(
+      `"${twBin}" --config "${configPath}" -i "${inputPath}" -o "${outputPath}" --minify`,
+      { stdio: "pipe", cwd: tmpDir }
+    );
+
+    return fs.readFileSync(outputPath, "utf8");
+  } catch (err) {
+    process.stderr.write(
+      `⚠️  Tailwind CSS compilation failed for ${toolDir}: ${err.message}\n` +
+        `   CDN script will be preserved in output.\n`
+    );
+    return null;
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+/**
+ * Strip the Tailwind CDN <script> tag and the inline tailwind.config <script> block
+ * from HTML content, replacing them with a compiled <style> tag.
+ *
+ * If compiledCSS is null (compilation failed), the original HTML is returned unchanged.
+ *
+ * @param {string} htmlContent - Raw source HTML content.
+ * @param {string|null} compiledCSS - Compiled CSS string from compileTailwindCSS().
+ * @returns {string} Processed HTML.
+ */
+function inlineTailwindCSS(htmlContent, compiledCSS) {
+  if (!compiledCSS) return htmlContent;
+
+  let result = htmlContent;
+
+  // Remove the CDN <script> tag; capture its position to insert compiled CSS there
+  let cdnPos = -1;
+  result = result.replace(TAILWIND_CDN_RE, (match, offset) => {
+    cdnPos = offset;
+    return `<style>${compiledCSS}</style>`;
+  });
+
+  // Remove the inline tailwind.config <script> block (it's no longer needed)
+  result = result.replace(TAILWIND_CONFIG_SCRIPT_RE, "");
+
+  return result;
+}
 
 /**
  * Parse .env file string content into key-value map
@@ -264,8 +378,18 @@ async function buildTool(tool) {
   const rawHtml = fs.readFileSync(tool.entryFile, "utf8");
   const originalSize = Buffer.byteLength(rawHtml, "utf8");
 
+  // Compile Tailwind CSS from the source HTML (extracts inline tailwind.config,
+  // scans HTML for used utility classes, returns minified purged CSS string).
+  const compiledCSS = compileTailwindCSS(rawHtml, tool.dir);
+
+  // Replace the Tailwind CDN <script> + tailwind.config <script> with compiled <style>
+  const twInlinedHtml = inlineTailwindCSS(rawHtml, compiledCSS);
+
   // Inline local assets if any
-  const inlinedHtml = inlineLocalAssets(rawHtml, path.dirname(tool.entryFile));
+  const inlinedHtml = inlineLocalAssets(
+    twInlinedHtml,
+    path.dirname(tool.entryFile)
+  );
 
   // Minify HTML + inline CSS + inline JS
   const minifiedHtml = await minify(inlinedHtml, MINIFY_OPTIONS);
@@ -465,6 +589,9 @@ module.exports = {
   discoverTools,
   buildTool,
   inlineLocalAssets,
+  compileTailwindCSS,
+  inlineTailwindCSS,
+  extractTailwindConfigObject,
   parseEnvContent,
   loadEnvFiles,
   resolveDestDir,
