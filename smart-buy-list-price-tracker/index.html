@@ -1,0 +1,2489 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Smart Buy-List & Unit Price Tracker</title>
+    <meta
+      name="description"
+      content="Mobile-first standalone PWA buy-list with multi-store historical purchase ledger, package unit-price normalization ($/kg, $/L, $/ea), and in-aisle deal intelligence."
+    />
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%2232%22 height=%2232%22><text y=%2226%22 font-size=%2224%22>🛒</text></svg>"
+    />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#ecfdf5",
+                100: "#d1fae5",
+                400: "#34d399",
+                500: "#10b981",
+                600: "#059669",
+                700: "#047857",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --bg-page: #0b1120;
+        --bg-card: #1e293b;
+        --bg-card-hover: #334155;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --border-color: #334155;
+        --input-bg: #0f172a;
+        --accent: #10b981;
+      }
+      :root.light {
+        --bg-page: #f8fafc;
+        --bg-card: #ffffff;
+        --bg-card-hover: #f1f5f9;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --border-color: #e2e8f0;
+        --input-bg: #f8fafc;
+        --accent: #059669;
+      }
+      body {
+        background-color: var(--bg-page);
+        color: var(--text-primary);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .custom-scroll::-webkit-scrollbar {
+        height: 6px;
+        width: 6px;
+      }
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 9999px;
+      }
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: white !important;
+          color: black !important;
+        }
+      }
+    </style>
+  </head>
+  <body class="min-h-screen pb-24 transition-colors duration-200">
+    <!-- ==================== HEADER ==================== -->
+    <header
+      class="sticky top-0 z-30 bg-slate-900/90 dark:bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-3 no-print"
+    >
+      <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🛒</span>
+          <div>
+            <h1
+              id="headerTitle"
+              class="font-bold text-base sm:text-lg leading-tight tracking-tight text-white"
+            >
+              Smart Buy-List
+            </h1>
+            <p id="headerSubtitle" class="text-xs text-emerald-400 font-medium">
+              Unit Price & Deal Tracker
+            </p>
+          </div>
+        </div>
+
+        <!-- Quick Action Controls -->
+        <div class="flex items-center gap-1 sm:gap-2">
+          <!-- Currency Selector -->
+          <select
+            id="currencySelector"
+            onchange="setCurrency(this.value)"
+            class="bg-slate-800 text-xs font-semibold text-slate-200 border border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          >
+            <option value="USD">USD ($)</option>
+            <option value="VND">VND (₫)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="JPY">JPY (¥)</option>
+            <option value="AUD">AUD ($)</option>
+            <option value="CAD">CAD ($)</option>
+          </select>
+
+          <!-- Language Switcher -->
+          <button
+            id="langToggleBtn"
+            onclick="toggleLanguage()"
+            class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold border border-slate-700 transition-colors"
+            title="Toggle Language"
+          >
+            VI
+          </button>
+
+          <!-- Theme Toggle -->
+          <button
+            id="themeToggleBtn"
+            onclick="toggleTheme()"
+            class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors"
+            title="Toggle Theme"
+          >
+            🌙
+          </button>
+
+          <!-- Share Button -->
+          <button
+            onclick="openShareModal()"
+            class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+            title="Share List"
+          >
+            <span>📤</span>
+            <span id="btnShareText" class="hidden sm:inline">Share</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+    <main class="max-w-3xl mx-auto px-4 py-4 space-y-4">
+      <!-- Sample Data Onboarding Banner -->
+      <div
+        id="sampleDataBanner"
+        class="hidden bg-emerald-950/60 border border-emerald-800/80 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs sm:text-sm"
+      >
+        <div class="flex items-center gap-2 text-emerald-200">
+          <span class="text-base">✨</span>
+          <span id="sampleDataText"
+            >Sample grocery items loaded! Explore unit prices & historical deal
+            ratings.</span
+          >
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            onclick="dismissSampleBanner()"
+            class="text-slate-400 hover:text-slate-200 underline"
+          >
+            Keep
+          </button>
+          <button
+            onclick="clearAllData(true)"
+            class="px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-red-200 rounded-md font-medium border border-red-700/50"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- ==================== TRIP LIFECYCLE CONTROLLER ==================== -->
+      <section
+        class="bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-sm space-y-3"
+      >
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <!-- Phase Indicator Pills -->
+            <div
+              class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 text-xs font-semibold"
+            >
+              <button
+                id="tabPlanning"
+                onclick="setTripPhase('PLANNING')"
+                class="px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm"
+              >
+                📝 <span id="labelPlanning">Planning</span>
+              </button>
+              <button
+                id="tabInStore"
+                onclick="setTripPhase('IN_STORE')"
+                class="px-3 py-1 rounded-lg transition-all text-slate-400 hover:text-slate-200"
+              >
+                🛒 <span id="labelInStore">In-Store</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Store Filter Pill / Dropdown -->
+          <div class="flex items-center gap-1.5">
+            <label
+              for="storeFilterSelect"
+              class="text-xs text-slate-400 font-medium hidden sm:inline"
+              id="labelStoreFilter"
+              >Store:</label
+            >
+            <select
+              id="storeFilterSelect"
+              onchange="onStoreFilterChange(this.value)"
+              class="bg-slate-800 text-xs font-medium text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500"
+            >
+              <option value="ALL">All Stores</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Trip KPI Metric Bar -->
+        <div
+          class="grid grid-cols-3 gap-2 bg-slate-950/60 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 text-center"
+        >
+          <div>
+            <div
+              id="kpiItemsLabel"
+              class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold"
+            >
+              Items
+            </div>
+            <div
+              id="kpiItemsVal"
+              class="text-base sm:text-lg font-bold text-white"
+            >
+              0 / 0
+            </div>
+          </div>
+          <div class="border-x border-slate-800">
+            <div
+              id="kpiSpentLabel"
+              class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold"
+            >
+              Checked Spend
+            </div>
+            <div
+              id="kpiSpentVal"
+              class="text-base sm:text-lg font-bold text-emerald-400"
+            >
+              $0.00
+            </div>
+          </div>
+          <div>
+            <div
+              id="kpiEstimatedLabel"
+              class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold"
+            >
+              Estimated Total
+            </div>
+            <div
+              id="kpiEstimatedVal"
+              class="text-base sm:text-lg font-bold text-slate-300"
+            >
+              $0.00
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== QUICK ITEM ADD FORM (PLANNING MODE) ==================== -->
+      <section
+        id="addItemSection"
+        class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3"
+      >
+        <div class="flex items-center justify-between">
+          <h2
+            id="addItemHeading"
+            class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5"
+          >
+            <span>➕</span> Add Item to List
+          </h2>
+          <!-- Quick Aisle Comparator Trigger -->
+          <button
+            onclick="openComparatorModal()"
+            class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1"
+          >
+            <span>⚖️</span>
+            <span id="btnOpenComparatorHint">Compare Package Sizes</span>
+          </button>
+        </div>
+
+        <form
+          id="addItemForm"
+          onsubmit="handleAddItemSubmit(event)"
+          class="space-y-3"
+        >
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+            <!-- Item Name with Autocomplete Suggest -->
+            <div class="sm:col-span-6 relative">
+              <input
+                type="text"
+                id="inputItemName"
+                required
+                placeholder="e.g. Whole Milk, Jasmine Rice..."
+                autocomplete="off"
+                oninput="handleItemAutocomplete(this.value)"
+                class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <div
+                id="autocompleteDropdown"
+                class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-40 max-h-48 overflow-y-auto custom-scroll"
+              ></div>
+            </div>
+
+            <!-- Category / Aisle -->
+            <div class="sm:col-span-3">
+              <select
+                id="inputItemCategory"
+                class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="produce">🥦 Produce & Fruits</option>
+                <option value="dairy_eggs">🥛 Dairy & Eggs</option>
+                <option value="meat_seafood">🥩 Meat & Seafood</option>
+                <option value="bakery">🍞 Bakery & Bread</option>
+                <option value="pantry">🍚 Pantry & Grains</option>
+                <option value="frozen">🧊 Frozen</option>
+                <option value="beverages">☕ Beverages</option>
+                <option value="household">🧹 Household</option>
+                <option value="personal_care">🧴 Personal Care</option>
+                <option value="other">📦 Other</option>
+              </select>
+            </div>
+
+            <!-- Store -->
+            <div class="sm:col-span-3">
+              <select
+                id="inputItemStore"
+                class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="Costco">Costco</option>
+                <option value="Trader Joe's">Trader Joe's</option>
+                <option value="Local Market">Local Market</option>
+                <option value="Supermarket">Supermarket</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Quantity, Unit, Estimated Package Price & Unit Calculation Preview -->
+          <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-center">
+            <!-- Quantity -->
+            <div class="sm:col-span-3">
+              <label
+                for="inputItemQty"
+                id="labelItemQty"
+                class="text-[11px] text-slate-400 font-medium block mb-1"
+                >Quantity / Size</label
+              >
+              <input
+                type="number"
+                id="inputItemQty"
+                step="any"
+                min="0.01"
+                value="1"
+                required
+                class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+
+            <!-- Unit Selector -->
+            <div class="sm:col-span-3">
+              <label
+                for="inputItemUnit"
+                id="labelItemUnit"
+                class="text-[11px] text-slate-400 font-medium block mb-1"
+                >Unit</label
+              >
+              <select
+                id="inputItemUnit"
+                onchange="updateLiveUnitPreview()"
+                class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+              >
+                <optgroup label="Mass / Weight">
+                  <option value="kg">kg (Kilogram)</option>
+                  <option value="g">g (Gram)</option>
+                  <option value="lb">lb (Pound)</option>
+                  <option value="oz">oz (Ounce)</option>
+                </optgroup>
+                <optgroup label="Volume / Liquid">
+                  <option value="l" selected>L (Litre)</option>
+                  <option value="ml">ml (Millilitre)</option>
+                  <option value="gal">gal (Gallon)</option>
+                  <option value="fl_oz">fl oz (Fl Ounce)</option>
+                </optgroup>
+                <optgroup label="Count / Units">
+                  <option value="ea">ea (Piece / Unit)</option>
+                  <option value="pk">pk (Pack)</option>
+                  <option value="box">box (Box)</option>
+                  <option value="can">can (Can / Bottle)</option>
+                  <option value="bunch">bunch (Bunch)</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <!-- Price -->
+            <div class="sm:col-span-3">
+              <label
+                for="inputItemPrice"
+                id="labelItemPrice"
+                class="text-[11px] text-slate-400 font-medium block mb-1"
+                >Package Price</label
+              >
+              <input
+                type="number"
+                id="inputItemPrice"
+                step="any"
+                min="0"
+                placeholder="0.00"
+                oninput="updateLiveUnitPreview()"
+                class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+
+            <!-- Submit Button -->
+            <div class="sm:col-span-3 self-end">
+              <button
+                type="submit"
+                id="btnAddItemBtn"
+                class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+              >
+                <span>➕</span>
+                <span id="btnAddItemText">Add Item</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Normalized Unit Price Preview Pill -->
+          <div
+            id="liveUnitPreviewPill"
+            class="hidden text-xs bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 flex items-center justify-between"
+          >
+            <span id="liveUnitPreviewText">Unit Price: $0.00 / L</span>
+            <span
+              id="liveDealBadge"
+              class="px-2 py-0.5 rounded-md font-semibold text-[11px] bg-slate-800 text-slate-300"
+              >New Item</span
+            >
+          </div>
+        </form>
+      </section>
+
+      <!-- ==================== ACTIVE BUY-LIST CONTAINER ==================== -->
+      <section class="space-y-3">
+        <!-- Section Header with Grouping / Sorting Tabs -->
+        <div class="flex items-center justify-between gap-2 px-1">
+          <h2
+            id="listSectionTitle"
+            class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5"
+          >
+            <span>📋</span> <span id="listTitleText">Shopping List</span>
+            <span
+              id="listCountBadge"
+              class="ml-1 text-xs px-2 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-slate-700"
+              >0</span
+            >
+          </h2>
+
+          <!-- View Grouping: By Aisle vs By Store -->
+          <div
+            class="flex items-center bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/60 text-xs"
+          >
+            <button
+              id="btnGroupByAisle"
+              onclick="setGrouping('AISLE')"
+              class="px-2.5 py-1 rounded-md transition-all bg-emerald-600 text-white font-medium"
+            >
+              By Aisle
+            </button>
+            <button
+              id="btnGroupByStore"
+              onclick="setGrouping('STORE')"
+              class="px-2.5 py-1 rounded-md transition-all text-slate-400 hover:text-slate-200"
+            >
+              By Store
+            </button>
+          </div>
+        </div>
+
+        <!-- Empty State Card -->
+        <div
+          id="emptyListCard"
+          class="hidden bg-slate-900 border border-slate-800 border-dashed rounded-2xl p-8 text-center space-y-3"
+        >
+          <div class="text-4xl">🛒</div>
+          <h3 id="emptyListTitle" class="text-base font-bold text-slate-200">
+            Your shopping list is empty
+          </h3>
+          <p
+            id="emptyListDesc"
+            class="text-xs sm:text-sm text-slate-400 max-w-sm mx-auto"
+          >
+            Add items above or compare package deals in-aisle to start tracking
+            your shopping savings.
+          </p>
+          <button
+            onclick="loadSampleData()"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold border border-slate-700 transition-colors"
+          >
+            ✨ Load Sample Grocery List
+          </button>
+        </div>
+
+        <!-- Active Items Container (Dynamic DOM injection) -->
+        <div id="activeItemsList" class="space-y-3"></div>
+
+        <!-- Completed / Checked Items Section (Collapsible) -->
+        <div id="checkedItemsSection" class="hidden space-y-2 pt-2">
+          <button
+            onclick="toggleCheckedSection()"
+            class="w-full flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 px-2 py-1"
+          >
+            <span class="flex items-center gap-1.5">
+              <span id="checkedChevron">▼</span>
+              <span id="checkedSectionTitle">Checked Items</span>
+              <span
+                id="checkedCountBadge"
+                class="text-[11px] px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300"
+                >0</span
+              >
+            </span>
+            <span
+              id="checkedToggleHint"
+              class="text-[11px] font-normal text-slate-500"
+              >Tap to toggle</span
+            >
+          </button>
+          <div id="checkedItemsList" class="space-y-2 opacity-75"></div>
+        </div>
+      </section>
+
+      <!-- ==================== IN-STORE FINISH TRIP BAR ==================== -->
+      <div
+        id="finishTripBar"
+        class="hidden sticky bottom-16 z-20 max-w-3xl mx-auto px-1 py-2"
+      >
+        <div
+          class="bg-gradient-to-r from-emerald-900 to-slate-900 border border-emerald-600/50 rounded-2xl p-3.5 shadow-2xl flex items-center justify-between gap-3"
+        >
+          <div>
+            <div
+              class="text-xs text-emerald-300 font-semibold"
+              id="tripSummaryPrompt"
+            >
+              In-Store Shopping Active
+            </div>
+            <div class="text-sm font-bold text-white" id="tripRunningTotal">
+              Total Spent: $0.00
+            </div>
+          </div>
+          <button
+            onclick="openTripCompleteModal()"
+            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center gap-1.5"
+          >
+            <span>🏁</span>
+            <span id="btnFinishTripText">Complete Trip</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ==================== BOTTOM IN-AISLE THUMB NAVIGATION ==================== -->
+    <nav
+      class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 dark:bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-4 py-2 no-print"
+    >
+      <div class="max-w-3xl mx-auto flex items-center justify-around">
+        <button
+          onclick="scrollToTop()"
+          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+        >
+          <span class="text-lg">📝</span>
+          <span id="navLabelList">List</span>
+        </button>
+        <button
+          onclick="openComparatorModal()"
+          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+        >
+          <span class="text-lg">⚖️</span>
+          <span id="navLabelCompare">Compare</span>
+        </button>
+        <button
+          onclick="openPriceLedgerModal()"
+          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+        >
+          <span class="text-lg">📈</span>
+          <span id="navLabelLedger">Price History</span>
+        </button>
+        <button
+          onclick="openShareModal()"
+          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+        >
+          <span class="text-lg">📤</span>
+          <span id="navLabelShare">Share</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- 1. IN-AISLE PACKAGE COMPARATOR MODAL -->
+    <div
+      id="comparatorModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scroll p-4 sm:p-6 space-y-4 shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <h3
+            id="compModalTitle"
+            class="text-base font-bold text-white flex items-center gap-2"
+          >
+            <span>⚖️</span> In-Aisle Package Comparator
+          </h3>
+          <button
+            onclick="closeModal('comparatorModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+        <p id="compModalDesc" class="text-xs text-slate-400">
+          Compare 2 package sizes in real-time to find the best deal ($/kg, $/L,
+          $/unit).
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Package A Card -->
+          <div
+            class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2"
+          >
+            <div class="text-xs font-bold text-emerald-400" id="labelPackageA">
+              Package A (e.g. Small / Brand 1)
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 block" id="labelPriceA"
+                >Price</label
+              >
+              <input
+                type="number"
+                id="compPriceA"
+                step="any"
+                min="0.01"
+                value="3.20"
+                oninput="runComparatorCalc()"
+                class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div>
+                <label class="text-[11px] text-slate-400 block" id="labelQtyA"
+                  >Quantity</label
+                >
+                <input
+                  type="number"
+                  id="compQtyA"
+                  step="any"
+                  min="0.01"
+                  value="450"
+                  oninput="runComparatorCalc()"
+                  class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+                />
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-400 block" id="labelUnitA"
+                  >Unit</label
+                >
+                <select
+                  id="compUnitA"
+                  onchange="runComparatorCalc()"
+                  class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
+                >
+                  <option value="g">g</option>
+                  <option value="kg">kg</option>
+                  <option value="ml">ml</option>
+                  <option value="l">L</option>
+                  <option value="ea">ea</option>
+                  <option value="can">can</option>
+                </select>
+              </div>
+            </div>
+            <div class="pt-1 border-t border-slate-800 text-xs">
+              <span class="text-slate-400" id="labelNormPriceA"
+                >Unit Price:</span
+              >
+              <span id="compNormA" class="font-bold text-white ml-1"
+                >$7.11 / kg</span
+              >
+            </div>
+          </div>
+
+          <!-- Package B Card -->
+          <div
+            class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2"
+          >
+            <div class="text-xs font-bold text-sky-400" id="labelPackageB">
+              Package B (e.g. Bulk / Brand 2)
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 block" id="labelPriceB"
+                >Price</label
+              >
+              <input
+                type="number"
+                id="compPriceB"
+                step="any"
+                min="0.01"
+                value="7.80"
+                oninput="runComparatorCalc()"
+                class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+              />
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <div>
+                <label class="text-[11px] text-slate-400 block" id="labelQtyB"
+                  >Quantity</label
+                >
+                <input
+                  type="number"
+                  id="compQtyB"
+                  step="any"
+                  min="0.01"
+                  value="1.2"
+                  oninput="runComparatorCalc()"
+                  class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+                />
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-400 block" id="labelUnitB"
+                  >Unit</label
+                >
+                <select
+                  id="compUnitB"
+                  onchange="runComparatorCalc()"
+                  class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
+                >
+                  <option value="g">g</option>
+                  <option value="kg" selected>kg</option>
+                  <option value="ml">ml</option>
+                  <option value="l">L</option>
+                  <option value="ea">ea</option>
+                  <option value="can">can</option>
+                </select>
+              </div>
+            </div>
+            <div class="pt-1 border-t border-slate-800 text-xs">
+              <span class="text-slate-400" id="labelNormPriceB"
+                >Unit Price:</span
+              >
+              <span id="compNormB" class="font-bold text-white ml-1"
+                >$6.50 / kg</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Winner Result Card -->
+        <div
+          id="compResultCard"
+          class="bg-emerald-950/70 border border-emerald-600/60 rounded-xl p-3.5 text-center space-y-1"
+        >
+          <div id="compWinnerBadge" class="text-sm font-bold text-emerald-300">
+            🏆 Package B is Cheaper!
+          </div>
+          <div id="compSavingsDetails" class="text-xs text-emerald-100">
+            Saves 8.6% ($0.61 / kg cheaper)
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button
+            onclick="closeModal('comparatorModal')"
+            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+          >
+            Close
+          </button>
+          <button
+            onclick="applyComparatorWinner()"
+            id="btnApplyWinner"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md"
+          >
+            Apply Winner to Form
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. SHARE LIST MODAL WITH DYNAMIC QR CODE -->
+    <div
+      id="shareModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <h3
+            id="shareModalTitle"
+            class="text-base font-bold text-white flex items-center gap-2"
+          >
+            <span>📤</span> Share Buy-List
+          </h3>
+          <button
+            onclick="closeModal('shareModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <p id="shareModalDesc" class="text-xs text-slate-400">
+          Share your active list peer-to-peer via link, QR code, or chat export
+          without accounts or servers.
+        </p>
+
+        <!-- Dynamic QR Code Container -->
+        <div
+          class="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-inner max-w-[200px] mx-auto"
+        >
+          <div
+            id="shareQrContainer"
+            class="w-40 h-40 flex items-center justify-center text-slate-800"
+          ></div>
+          <div
+            class="text-[10px] text-slate-500 mt-1.5 font-medium"
+            id="qrHintText"
+          >
+            Scan to import list
+          </div>
+        </div>
+
+        <!-- Share Action Buttons -->
+        <div class="space-y-2 pt-2">
+          <button
+            onclick="invokeNativeShare()"
+            id="btnNativeShare"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md"
+          >
+            <span>📱</span>
+            <span id="btnNativeShareText"
+              >Share via Apps (WhatsApp / AirDrop)</span
+            >
+          </button>
+          <button
+            onclick="copyShareUrl()"
+            id="btnCopyUrl"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
+          >
+            <span>🔗</span> <span id="btnCopyUrlText">Copy Shareable Link</span>
+          </button>
+          <button
+            onclick="exportJsonBackup()"
+            id="btnExportJson"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
+          >
+            <span>💾</span>
+            <span id="btnExportJsonText">Export Backup File (.json)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. RECIPIENT SMART IMPORT MODAL -->
+    <div
+      id="importModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <h3
+            id="importModalTitle"
+            class="text-base font-bold text-white flex items-center gap-2"
+          >
+            <span>📥</span> Incoming Shared Buy-List
+          </h3>
+          <button
+            onclick="closeModal('importModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div
+          id="importPreviewDetails"
+          class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs space-y-1.5 text-slate-300"
+        >
+          <div class="font-bold text-emerald-400" id="importListTitle">
+            Shared Shopping List
+          </div>
+          <div id="importItemCount">Contains 5 items</div>
+        </div>
+
+        <div class="space-y-2 pt-2">
+          <button
+            onclick="confirmImport('MERGE')"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md"
+          >
+            <span>🔀</span>
+            <span id="btnImportMergeText">Merge into My Active List</span>
+          </button>
+          <button
+            onclick="confirmImport('REPLACE')"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
+          >
+            <span>🆕</span>
+            <span id="btnImportReplaceText">Import as New List</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. TRIP COMPLETE & SUMMARY MODAL -->
+    <div
+      id="tripCompleteModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <h3
+            id="tripModalTitle"
+            class="text-base font-bold text-white flex items-center gap-2"
+          >
+            <span>🏁</span> Complete Shopping Trip
+          </h3>
+          <button
+            onclick="closeModal('tripCompleteModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Trip Stats Summary -->
+        <div
+          class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs"
+        >
+          <div class="flex justify-between text-slate-300">
+            <span id="tripModalPurchasedLabel">Purchased Items:</span>
+            <span
+              id="tripModalPurchasedCount"
+              class="font-bold text-emerald-400"
+              >4 items</span
+            >
+          </div>
+          <div class="flex justify-between text-slate-300">
+            <span id="tripModalTotalSpentLabel">Total Trip Spend:</span>
+            <span
+              id="tripModalTotalSpentVal"
+              class="font-bold text-white text-sm"
+              >$24.50</span
+            >
+          </div>
+          <div
+            id="unpurchasedNotice"
+            class="text-amber-400 pt-1 border-t border-slate-800"
+          >
+            <span id="unpurchasedCountText">2 items left unchecked.</span>
+          </div>
+        </div>
+
+        <!-- Rollover Choice -->
+        <div class="space-y-2">
+          <label
+            class="text-xs text-slate-400 font-medium block"
+            id="labelRolloverChoice"
+            >What should happen to unchecked items?</label
+          >
+          <div class="space-y-1.5">
+            <label
+              class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer text-xs"
+            >
+              <input
+                type="radio"
+                name="rolloverAction"
+                value="ROLLOVER"
+                checked
+                class="text-emerald-600 focus:ring-emerald-500"
+              />
+              <span id="optRolloverText"
+                >Rollover unchecked items to new draft list</span
+              >
+            </label>
+            <label
+              class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer text-xs"
+            >
+              <input
+                type="radio"
+                name="rolloverAction"
+                value="DISCARD"
+                class="text-emerald-600 focus:ring-emerald-500"
+              />
+              <span id="optDiscardText">Discard unchecked items</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Finalize Button -->
+        <div class="pt-2">
+          <button
+            onclick="finalizeTripCompletion()"
+            id="btnFinalizeTrip"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md"
+          >
+            Record Prices & Finalize Trip
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. PRICE LEDGER & CATALOG HISTORY MODAL -->
+    <div
+      id="priceLedgerModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto custom-scroll p-5 space-y-4 shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <h3
+            id="ledgerModalTitle"
+            class="text-base font-bold text-white flex items-center gap-2"
+          >
+            <span>📈</span> Historical Purchase Ledger
+          </h3>
+          <button
+            onclick="closeModal('priceLedgerModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="relative">
+          <input
+            type="text"
+            id="ledgerSearchInput"
+            placeholder="Filter history by item or store..."
+            oninput="renderPriceLedgerTable(this.value)"
+            class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500"
+          />
+        </div>
+
+        <div id="ledgerTableContainer" class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead
+              class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider"
+            >
+              <tr>
+                <th class="p-2.5">Date</th>
+                <th class="p-2.5">Item</th>
+                <th class="p-2.5">Store</th>
+                <th class="p-2.5">Size</th>
+                <th class="p-2.5">Paid</th>
+                <th class="p-2.5">Unit Price</th>
+              </tr>
+            </thead>
+            <tbody
+              id="ledgerTableBody"
+              class="divide-y divide-slate-800"
+            ></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+    <div
+      id="toastContainer"
+      class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none"
+    ></div>
+
+    <!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->
+    <script>
+      /* =========================================================================
+       1. DOMAIN CONSTANTS & CONVERSION FACTORS
+       ========================================================================= */
+      const DIMENSIONS = {
+        MASS: "MASS",
+        VOLUME: "VOLUME",
+        COUNT: "COUNT",
+      };
+
+      const UNIT_CONVERSIONS = {
+        // MASS (Base: kg)
+        kg: { dimension: DIMENSIONS.MASS, baseUnit: "kg", multiplier: 1.0 },
+        g: { dimension: DIMENSIONS.MASS, baseUnit: "kg", multiplier: 0.001 },
+        lb: {
+          dimension: DIMENSIONS.MASS,
+          baseUnit: "kg",
+          multiplier: 0.453592,
+        },
+        oz: {
+          dimension: DIMENSIONS.MASS,
+          baseUnit: "kg",
+          multiplier: 0.0283495,
+        },
+        // VOLUME (Base: l)
+        l: { dimension: DIMENSIONS.VOLUME, baseUnit: "l", multiplier: 1.0 },
+        ml: { dimension: DIMENSIONS.VOLUME, baseUnit: "l", multiplier: 0.001 },
+        gal: {
+          dimension: DIMENSIONS.VOLUME,
+          baseUnit: "l",
+          multiplier: 3.78541,
+        },
+        fl_oz: {
+          dimension: DIMENSIONS.VOLUME,
+          baseUnit: "l",
+          multiplier: 0.0295735,
+        },
+        // COUNT (Base: ea)
+        ea: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        pk: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        box: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        can: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        bunch: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+      };
+
+      const CATEGORIES = {
+        produce: {
+          en: "Produce & Fruits",
+          vi: "Rau Củ & Trái Cây",
+          icon: "🥦",
+        },
+        dairy_eggs: {
+          en: "Dairy & Eggs",
+          vi: "Sữa, Trứng & Phô Mai",
+          icon: "🥛",
+        },
+        meat_seafood: {
+          en: "Meat & Seafood",
+          vi: "Thịt & Hải Sản Tươi Sống",
+          icon: "🥩",
+        },
+        bakery: { en: "Bakery & Bread", vi: "Bánh Mì & Bánh Ngọt", icon: "🍞" },
+        pantry: {
+          en: "Pantry & Grains",
+          vi: "Gia Vị, Gạo & Đồ Khô",
+          icon: "🍚",
+        },
+        frozen: { en: "Frozen Foods", vi: "Thực Phẩm Đông Lạnh", icon: "🧊" },
+        beverages: {
+          en: "Beverages & Coffee",
+          vi: "Đồ Uống & Cà Phê",
+          icon: "☕",
+        },
+        household: {
+          en: "Household & Cleaning",
+          vi: "Đồ Gia Dụng & Tẩy Rửa",
+          icon: "🧹",
+        },
+        personal_care: {
+          en: "Personal Care",
+          vi: "Chăm Sóc Cá Nhân",
+          icon: "🧴",
+        },
+        other: { en: "Other Items", vi: "Mục Khác", icon: "📦" },
+      };
+
+      /* =========================================================================
+       2. PURE MATH & NORMALIZATION FUNCTIONS
+       ========================================================================= */
+      function normalizeQuantity(quantity, unit) {
+        const q = parseFloat(quantity);
+        if (isNaN(q) || q <= 0) {
+          return {
+            baseQuantity: 0,
+            baseUnit: "ea",
+            dimension: DIMENSIONS.COUNT,
+          };
+        }
+        const unitKey = (unit || "").toLowerCase().replace(/[\s-]/g, "_");
+        const spec = UNIT_CONVERSIONS[unitKey] || {
+          dimension: DIMENSIONS.COUNT,
+          baseUnit: "ea",
+          multiplier: 1.0,
+        };
+        return {
+          baseQuantity: q * spec.multiplier,
+          baseUnit: spec.baseUnit,
+          dimension: spec.dimension,
+        };
+      }
+
+      function normalizeUnitPrice(price, quantity, unit) {
+        const p = parseFloat(price);
+        const q = parseFloat(quantity);
+        if (isNaN(p) || p <= 0 || isNaN(q) || q <= 0) return 0;
+        const { baseQuantity } = normalizeQuantity(q, unit);
+        if (baseQuantity <= 0) return 0;
+        return p / baseQuantity;
+      }
+
+      function evaluateDealScore(candidateUnitPrice, historicalLedger = []) {
+        const price = parseFloat(candidateUnitPrice);
+        if (
+          isNaN(price) ||
+          price <= 0 ||
+          !Array.isArray(historicalLedger) ||
+          historicalLedger.length === 0
+        ) {
+          return {
+            score: "NEW_ITEM",
+            isAllTimeLow: false,
+            diffPercent: 0,
+            minPrice: price,
+            avgPrice: price,
+            lastPrice: price,
+          };
+        }
+
+        const validPrices = historicalLedger
+          .map((l) => parseFloat(l.unitPrice))
+          .filter((p) => !isNaN(p) && p > 0);
+        if (validPrices.length === 0) {
+          return {
+            score: "NEW_ITEM",
+            isAllTimeLow: false,
+            diffPercent: 0,
+            minPrice: price,
+            avgPrice: price,
+            lastPrice: price,
+          };
+        }
+
+        const minPrice = Math.min(...validPrices);
+        const avgPrice =
+          validPrices.reduce((sum, val) => sum + val, 0) / validPrices.length;
+        const lastPrice = validPrices[validPrices.length - 1];
+
+        const isAllTimeLow = price <= minPrice + 0.0001;
+        const diffPercent = ((price - avgPrice) / avgPrice) * 100;
+
+        let score = "FAIR_PRICE";
+        if (isAllTimeLow || price <= avgPrice * 0.9) {
+          score = "GREAT_DEAL";
+        } else if (price > avgPrice * 1.1 || price > lastPrice * 1.15) {
+          score = "PRICE_SPIKE";
+        }
+
+        return {
+          score,
+          isAllTimeLow,
+          diffPercent,
+          minPrice,
+          avgPrice,
+          lastPrice,
+        };
+      }
+
+      function comparePackages(pkgA, pkgB) {
+        const normA = normalizeQuantity(pkgA.quantity, pkgA.unit);
+        const normB = normalizeQuantity(pkgB.quantity, pkgB.unit);
+
+        if (normA.dimension !== normB.dimension) {
+          return {
+            error: "DIMENSION_MISMATCH",
+            winner: null,
+            savingsPercent: 0,
+            savingsPerUnit: 0,
+          };
+        }
+
+        const unitPriceA = normalizeUnitPrice(
+          pkgA.price,
+          pkgA.quantity,
+          pkgA.unit
+        );
+        const unitPriceB = normalizeUnitPrice(
+          pkgB.price,
+          pkgB.quantity,
+          pkgB.unit
+        );
+
+        if (Math.abs(unitPriceA - unitPriceB) < 0.0001) {
+          return {
+            winner: "TIE",
+            unitPriceA,
+            unitPriceB,
+            savingsPercent: 0,
+            savingsPerUnit: 0,
+            baseUnit: normA.baseUnit,
+          };
+        }
+
+        if (unitPriceA < unitPriceB) {
+          const diff = unitPriceB - unitPriceA;
+          const pct = (diff / unitPriceB) * 100;
+          return {
+            winner: "A",
+            unitPriceA,
+            unitPriceB,
+            savingsPercent: pct,
+            savingsPerUnit: diff,
+            baseUnit: normA.baseUnit,
+          };
+        } else {
+          const diff = unitPriceA - unitPriceB;
+          const pct = (diff / unitPriceA) * 100;
+          return {
+            winner: "B",
+            unitPriceA,
+            unitPriceB,
+            savingsPercent: pct,
+            savingsPerUnit: diff,
+            baseUnit: normA.baseUnit,
+          };
+        }
+      }
+
+      /* =========================================================================
+       3. STORAGE LAYER (IndexedDB with memory fallback)
+       ========================================================================= */
+      const DB_NAME = "SmartBuyListDB";
+      const DB_VERSION = 1;
+      let dbInstance = null;
+
+      // In-memory fallback state
+      let memoryState = {
+        activeList: { id: "default", title: "Weekly Groceries", items: [] },
+        catalog: [],
+        purchaseLedger: [],
+        settings: {
+          language: "en",
+          currency: "USD",
+          theme: "dark",
+          tripPhase: "PLANNING",
+          grouping: "AISLE",
+        },
+      };
+
+      function initDatabase() {
+        return new Promise((resolve) => {
+          if (!window.indexedDB) {
+            console.warn(
+              "IndexedDB unavailable, using memory/localStorage fallback."
+            );
+            loadFromLocalStorage();
+            resolve(false);
+            return;
+          }
+
+          const request = indexedDB.open(DB_NAME, DB_VERSION);
+          request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains("lists"))
+              db.createObjectStore("lists", { keyPath: "id" });
+            if (!db.objectStoreNames.contains("catalog"))
+              db.createObjectStore("catalog", { keyPath: "id" });
+            if (!db.objectStoreNames.contains("ledger"))
+              db.createObjectStore("ledger", {
+                keyPath: "id",
+                autoIncrement: true,
+              });
+            if (!db.objectStoreNames.contains("settings"))
+              db.createObjectStore("settings", { keyPath: "key" });
+          };
+          request.onsuccess = (e) => {
+            dbInstance = e.target.result;
+            resolve(true);
+          };
+          request.onerror = () => {
+            loadFromLocalStorage();
+            resolve(false);
+          };
+        });
+      }
+
+      function saveToLocalStorage() {
+        try {
+          localStorage.setItem(
+            "smart_buy_list_state",
+            JSON.stringify(memoryState)
+          );
+        } catch (e) {
+          console.warn("Failed to save to localStorage", e);
+        }
+      }
+
+      function loadFromLocalStorage() {
+        try {
+          const raw = localStorage.getItem("smart_buy_list_state");
+          if (raw) {
+            memoryState = Object.assign(memoryState, JSON.parse(raw));
+          }
+        } catch (e) {
+          console.warn("Failed to parse localStorage state", e);
+        }
+      }
+
+      /* =========================================================================
+       4. BILINGUAL TRANSLATIONS MATRIX (100% en / vi parity)
+       ========================================================================= */
+      const TRANSLATIONS = {
+        en: {
+          app_title: "Smart Buy-List",
+          app_subtitle: "Unit Price & Deal Tracker",
+          tab_planning: "Planning",
+          tab_in_store: "In-Store",
+          store_all: "All Stores",
+          store_filter: "Store:",
+          kpi_items: "Items",
+          kpi_spent: "Checked Spend",
+          kpi_estimated: "Estimated Total",
+          add_item_title: "Add Item to List",
+          compare_package_hint: "Compare Package Sizes",
+          item_name_placeholder: "e.g. Whole Milk, Jasmine Rice...",
+          label_qty: "Quantity / Size",
+          label_unit: "Unit",
+          label_price: "Package Price",
+          btn_add_item: "Add Item",
+          list_title: "Shopping List",
+          by_aisle: "By Aisle",
+          by_store: "By Store",
+          empty_title: "Your shopping list is empty",
+          empty_desc:
+            "Add items above or compare package deals in-aisle to start tracking your shopping savings.",
+          btn_load_sample: "✨ Load Sample Grocery List",
+          checked_section: "Checked Items",
+          tap_toggle: "Tap to toggle",
+          trip_active: "In-Store Shopping Active",
+          btn_finish_trip: "Complete Trip",
+          nav_list: "List",
+          nav_compare: "Compare",
+          nav_ledger: "Price History",
+          nav_share: "Share",
+          badge_great_deal: "🟢 Great Deal",
+          badge_fair_price: "🟡 Fair Price",
+          badge_price_spike: "🔴 Price Spike",
+          badge_new_item: "⚪ New Item",
+          toast_item_added: "Item added to shopping list",
+          toast_item_checked: "Item updated",
+          toast_trip_completed: "Trip recorded into purchase ledger!",
+        },
+        vi: {
+          app_title: "Danh Sách Mua Sắm",
+          app_subtitle: "So Sánh Giá & Đơn Giá Chuẩn",
+          tab_planning: "Lên Kế Hoạch",
+          tab_in_store: "Đang Đi Siêu Thị",
+          store_all: "Tất Cả Cửa Hàng",
+          store_filter: "Cửa hàng:",
+          kpi_items: "Mặt Hàng",
+          kpi_spent: "Đã Mua",
+          kpi_estimated: "Tổng Dự Kiến",
+          add_item_title: "Thêm Mặt Hàng Vào Danh Sách",
+          compare_package_hint: "So Sánh Quy Cách Đóng Gói",
+          item_name_placeholder: "vd: Sữa Tươi, Gạo Jasmine, Dầu Oliu...",
+          label_qty: "Số Lượng / Quy Cách",
+          label_unit: "Đơn Vị",
+          label_price: "Giá Bao Bì / Gói",
+          btn_add_item: "Thêm Hàng",
+          list_title: "Danh Sách Mua Sắm",
+          by_aisle: "Theo Khu Vực",
+          by_store: "Theo Cửa Hàng",
+          empty_title: "Danh sách mua sắm đang trống",
+          empty_desc:
+            "Thêm hàng ở trên hoặc dùng bộ so sánh quy cách đóng gói để mua sắm thông minh và tiết kiệm.",
+          btn_load_sample: "✨ Tải Dữ Liệu Mẫu",
+          checked_section: "Hàng Đã Mua / Đã Chọn",
+          tap_toggle: "Chạm để ẩn/hiện",
+          trip_active: "Đang Trong Chuyến Mua Sắm",
+          btn_finish_trip: "Hoàn Tất Chuyến Đi",
+          nav_list: "Danh Sách",
+          nav_compare: "So Sánh",
+          nav_ledger: "Lịch Sử Giá",
+          nav_share: "Chia Sẻ",
+          badge_great_deal: "🟢 Giá Siêu Tốt",
+          badge_fair_price: "🟡 Giá Thị Trường",
+          badge_price_spike: "🔴 Giá Tăng Cao",
+          badge_new_item: "⚪ Mới",
+          toast_item_added: "Đã thêm vào danh sách mua sắm",
+          toast_item_checked: "Đã cập nhật trạng thái",
+          toast_trip_completed: "Đã lưu lịch sử mua hàng vào sổ nhật ký!",
+        },
+      };
+
+      /* =========================================================================
+       5. STATE & SAMPLE DATA INITIALIZER
+       ========================================================================= */
+      const SAMPLE_ITEMS = [
+        {
+          id: "1",
+          name: "Fresh Whole Milk",
+          category: "dairy_eggs",
+          store: "Costco",
+          quantity: 2,
+          unit: "l",
+          price: 3.5,
+          checked: false,
+        },
+        {
+          id: "2",
+          name: "Organic Free-Range Eggs",
+          category: "dairy_eggs",
+          store: "Trader Joe's",
+          quantity: 12,
+          unit: "ea",
+          price: 4.2,
+          checked: false,
+        },
+        {
+          id: "3",
+          name: "Jasmine Fragrant Rice",
+          category: "pantry",
+          store: "Costco",
+          quantity: 5,
+          unit: "kg",
+          price: 9.99,
+          checked: false,
+        },
+        {
+          id: "4",
+          name: "Extra Virgin Olive Oil",
+          category: "pantry",
+          store: "Trader Joe's",
+          quantity: 1,
+          unit: "l",
+          price: 8.5,
+          checked: false,
+        },
+        {
+          id: "5",
+          name: "Arabica Coffee Beans",
+          category: "beverages",
+          store: "Local Market",
+          quantity: 500,
+          unit: "g",
+          price: 6.8,
+          checked: false,
+        },
+      ];
+
+      const SAMPLE_LEDGER = [
+        {
+          id: 1,
+          itemId: "1",
+          itemName: "Fresh Whole Milk",
+          store: "Costco",
+          date: "2026-07-15",
+          quantity: 2,
+          unit: "l",
+          price: 3.4,
+          unitPrice: 1.7,
+        },
+        {
+          id: 2,
+          itemId: "1",
+          itemName: "Fresh Whole Milk",
+          store: "Trader Joe's",
+          date: "2026-08-01",
+          quantity: 1,
+          unit: "l",
+          price: 1.95,
+          unitPrice: 1.95,
+        },
+        {
+          id: 3,
+          itemId: "3",
+          itemName: "Jasmine Fragrant Rice",
+          store: "Costco",
+          date: "2026-06-20",
+          quantity: 5,
+          unit: "kg",
+          price: 9.5,
+          unitPrice: 1.9,
+        },
+        {
+          id: 4,
+          itemId: "4",
+          itemName: "Extra Virgin Olive Oil",
+          store: "Costco",
+          date: "2026-07-10",
+          quantity: 2,
+          unit: "l",
+          price: 16.0,
+          unitPrice: 8.0,
+        },
+        {
+          id: 5,
+          itemId: "5",
+          itemName: "Arabica Coffee Beans",
+          store: "Local Market",
+          date: "2026-08-10",
+          quantity: 500,
+          unit: "g",
+          price: 7.0,
+          unitPrice: 14.0,
+        },
+      ];
+
+      function loadSampleData() {
+        memoryState.activeList.items = JSON.parse(JSON.stringify(SAMPLE_ITEMS));
+        memoryState.purchaseLedger = JSON.parse(JSON.stringify(SAMPLE_LEDGER));
+        saveToLocalStorage();
+        renderApp();
+        showToast("Sample grocery list loaded!");
+        const banner = document.getElementById("sampleDataBanner");
+        if (banner) banner.classList.remove("hidden");
+      }
+
+      function dismissSampleBanner() {
+        const banner = document.getElementById("sampleDataBanner");
+        if (banner) banner.classList.add("hidden");
+      }
+
+      function clearAllData(silent = false) {
+        memoryState.activeList.items = [];
+        memoryState.purchaseLedger = [];
+        saveToLocalStorage();
+        renderApp();
+        dismissSampleBanner();
+        if (!silent) showToast("All data cleared");
+      }
+
+      /* =========================================================================
+       6. UI RENDERING & COMPONENT INTERACTIONS
+       ========================================================================= */
+      let currentPhase = "PLANNING";
+      let currentGrouping = "AISLE";
+      let currentStoreFilter = "ALL";
+      let currentLanguage = "en";
+      let currentCurrency = "USD";
+
+      function setTripPhase(phase) {
+        currentPhase = phase;
+        const tabPlanning = document.getElementById("tabPlanning");
+        const tabInStore = document.getElementById("tabInStore");
+        const finishBar = document.getElementById("finishTripBar");
+        const addItemSection = document.getElementById("addItemSection");
+
+        if (phase === "PLANNING") {
+          if (tabPlanning) {
+            tabPlanning.className =
+              "px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm";
+          }
+          if (tabInStore) {
+            tabInStore.className =
+              "px-3 py-1 rounded-lg transition-all text-slate-400 hover:text-slate-200";
+          }
+          if (finishBar) finishBar.classList.add("hidden");
+          if (addItemSection) addItemSection.classList.remove("hidden");
+        } else {
+          if (tabPlanning) {
+            tabPlanning.className =
+              "px-3 py-1 rounded-lg transition-all text-slate-400 hover:text-slate-200";
+          }
+          if (tabInStore) {
+            tabInStore.className =
+              "px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm";
+          }
+          if (finishBar) finishBar.classList.remove("hidden");
+          if (addItemSection) addItemSection.classList.add("hidden");
+        }
+        renderApp();
+      }
+
+      function setGrouping(grouping) {
+        currentGrouping = grouping;
+        const btnAisle = document.getElementById("btnGroupByAisle");
+        const btnStore = document.getElementById("btnGroupByStore");
+        if (grouping === "AISLE") {
+          if (btnAisle)
+            btnAisle.className =
+              "px-2.5 py-1 rounded-md transition-all bg-emerald-600 text-white font-medium";
+          if (btnStore)
+            btnStore.className =
+              "px-2.5 py-1 rounded-md transition-all text-slate-400 hover:text-slate-200";
+        } else {
+          if (btnAisle)
+            btnAisle.className =
+              "px-2.5 py-1 rounded-md transition-all text-slate-400 hover:text-slate-200";
+          if (btnStore)
+            btnStore.className =
+              "px-2.5 py-1 rounded-md transition-all bg-emerald-600 text-white font-medium";
+        }
+        renderApp();
+      }
+
+      function onStoreFilterChange(store) {
+        currentStoreFilter = store;
+        renderApp();
+      }
+
+      function formatCurrency(
+        amount,
+        currency = currentCurrency,
+        lang = currentLanguage
+      ) {
+        const num = parseFloat(amount) || 0;
+        try {
+          return new Intl.NumberFormat(lang === "vi" ? "vi-VN" : "en-US", {
+            style: "currency",
+            currency: currency,
+            maximumFractionDigits:
+              currency === "VND" || currency === "JPY" ? 0 : 2,
+          }).format(num);
+        } catch (e) {
+          return `$${num.toFixed(2)}`;
+        }
+      }
+
+      function renderApp() {
+        renderStoreFilterOptions();
+        renderKpis();
+        renderItemList();
+      }
+
+      function renderStoreFilterOptions() {
+        const select = document.getElementById("storeFilterSelect");
+        if (!select) return;
+        const stores = new Set([
+          "Costco",
+          "Trader Joe's",
+          "Local Market",
+          "Supermarket",
+        ]);
+        memoryState.activeList.items.forEach((i) => {
+          if (i.store) stores.add(i.store);
+        });
+
+        const current = currentStoreFilter;
+        select.innerHTML =
+          `<option value="ALL">${TRANSLATIONS[currentLanguage].store_all}</option>` +
+          Array.from(stores)
+            .map(
+              (s) =>
+                `<option value="${s}" ${s === current ? "selected" : ""}>${s}</option>`
+            )
+            .join("");
+      }
+
+      function renderKpis() {
+        const items = memoryState.activeList.items;
+        const filtered =
+          currentStoreFilter === "ALL"
+            ? items
+            : items.filter((i) => i.store === currentStoreFilter);
+
+        const checkedItems = filtered.filter((i) => i.checked);
+        const totalEstimated = filtered.reduce(
+          (sum, i) => sum + (parseFloat(i.price) || 0),
+          0
+        );
+        const checkedSpent = checkedItems.reduce(
+          (sum, i) => sum + (parseFloat(i.price) || 0),
+          0
+        );
+
+        const kpiItemsVal = document.getElementById("kpiItemsVal");
+        const kpiSpentVal = document.getElementById("kpiSpentVal");
+        const kpiEstimatedVal = document.getElementById("kpiEstimatedVal");
+        const tripRunningTotal = document.getElementById("tripRunningTotal");
+
+        if (kpiItemsVal)
+          kpiItemsVal.textContent = `${checkedItems.length} / ${filtered.length}`;
+        if (kpiSpentVal) kpiSpentVal.textContent = formatCurrency(checkedSpent);
+        if (kpiEstimatedVal)
+          kpiEstimatedVal.textContent = formatCurrency(totalEstimated);
+        if (tripRunningTotal)
+          tripRunningTotal.textContent = `Total Spent: ${formatCurrency(checkedSpent)}`;
+
+        const listCountBadge = document.getElementById("listCountBadge");
+        if (listCountBadge) listCountBadge.textContent = filtered.length;
+      }
+
+      function renderItemList() {
+        const container = document.getElementById("activeItemsList");
+        const emptyCard = document.getElementById("emptyListCard");
+        const checkedContainer = document.getElementById("checkedItemsList");
+        const checkedSection = document.getElementById("checkedItemsSection");
+        const checkedBadge = document.getElementById("checkedCountBadge");
+
+        if (!container) return;
+
+        const items = memoryState.activeList.items;
+        const filtered =
+          currentStoreFilter === "ALL"
+            ? items
+            : items.filter((i) => i.store === currentStoreFilter);
+
+        if (filtered.length === 0) {
+          if (emptyCard) emptyCard.classList.remove("hidden");
+          container.innerHTML = "";
+          if (checkedSection) checkedSection.classList.add("hidden");
+          return;
+        }
+
+        if (emptyCard) emptyCard.classList.add("hidden");
+
+        const uncheckedItems = filtered.filter((i) => !i.checked);
+        const checkedItems = filtered.filter((i) => i.checked);
+
+        // Render Active (Unchecked) Items
+        container.innerHTML = uncheckedItems
+          .map((item) => renderItemCard(item))
+          .join("");
+
+        // Render Checked Items
+        if (checkedItems.length > 0) {
+          if (checkedSection) checkedSection.classList.remove("hidden");
+          if (checkedBadge) checkedBadge.textContent = checkedItems.length;
+          if (checkedContainer)
+            checkedContainer.innerHTML = checkedItems
+              .map((item) => renderItemCard(item))
+              .join("");
+        } else {
+          if (checkedSection) checkedSection.classList.add("hidden");
+        }
+      }
+
+      function renderItemCard(item) {
+        const unitPrice = normalizeUnitPrice(
+          item.price,
+          item.quantity,
+          item.unit
+        );
+        const { baseUnit } = normalizeQuantity(item.quantity, item.unit);
+        const history = memoryState.purchaseLedger.filter(
+          (l) => l.itemName === item.name || l.itemId === item.id
+        );
+        const deal = evaluateDealScore(unitPrice, history);
+
+        let dealBadgeHtml = "";
+        if (deal.score === "GREAT_DEAL") {
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50">🟢 Great Deal</span>`;
+        } else if (deal.score === "PRICE_SPIKE") {
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50">🔴 Price Spike</span>`;
+        } else if (deal.score === "FAIR_PRICE") {
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50">🟡 Fair Price</span>`;
+        }
+
+        const catInfo = CATEGORIES[item.category] || CATEGORIES.other;
+
+        return `
+        <div class="bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3 sm:p-4 transition-all shadow-sm flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <!-- Big Thumb-Friendly Checkbox -->
+            <button onclick="toggleItemCheck('${item.id}')" class="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold border transition-all ${item.checked ? "bg-emerald-600 border-emerald-500 text-white" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
+              ✓
+            </button>
+
+            <!-- Item Info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-sm">${catInfo.icon}</span>
+                <span class="font-bold text-sm text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
+                ${dealBadgeHtml}
+              </div>
+              <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                <span class="font-medium text-slate-300">${item.quantity} ${item.unit}</span>
+                <span>•</span>
+                <span class="text-slate-400 font-normal">${item.store || "Supermarket"}</span>
+                ${unitPrice > 0 ? `<span>•</span><span class="text-emerald-400 font-semibold">${formatCurrency(unitPrice)}/${baseUnit}</span>` : ""}
+              </div>
+            </div>
+          </div>
+
+          <!-- Price & Action -->
+          <div class="text-right shrink-0">
+            <div class="font-bold text-sm text-slate-100">${formatCurrency(item.price)}</div>
+            <button onclick="deleteItem('${item.id}')" class="text-[11px] text-slate-500 hover:text-red-400 transition-colors mt-0.5" title="Remove Item">Remove</button>
+          </div>
+        </div>
+      `;
+      }
+
+      function toggleItemCheck(id) {
+        const item = memoryState.activeList.items.find((i) => i.id === id);
+        if (item) {
+          item.checked = !item.checked;
+          saveToLocalStorage();
+          renderApp();
+        }
+      }
+
+      function deleteItem(id) {
+        memoryState.activeList.items = memoryState.activeList.items.filter(
+          (i) => i.id !== id
+        );
+        saveToLocalStorage();
+        renderApp();
+      }
+
+      function handleAddItemSubmit(e) {
+        e.preventDefault();
+        const nameInput = document.getElementById("inputItemName");
+        const qtyInput = document.getElementById("inputItemQty");
+        const unitInput = document.getElementById("inputItemUnit");
+        const priceInput = document.getElementById("inputItemPrice");
+        const catInput = document.getElementById("inputItemCategory");
+        const storeInput = document.getElementById("inputItemStore");
+
+        const name = nameInput.value.trim();
+        if (!name) return;
+
+        const newItem = {
+          id: Date.now().toString(),
+          name,
+          category: catInput.value,
+          store: storeInput.value,
+          quantity: parseFloat(qtyInput.value) || 1,
+          unit: unitInput.value,
+          price: parseFloat(priceInput.value) || 0,
+          checked: false,
+        };
+
+        memoryState.activeList.items.push(newItem);
+        saveToLocalStorage();
+        renderApp();
+
+        nameInput.value = "";
+        priceInput.value = "";
+        showToast(TRANSLATIONS[currentLanguage].toast_item_added);
+      }
+
+      function updateLiveUnitPreview() {
+        const price =
+          parseFloat(document.getElementById("inputItemPrice").value) || 0;
+        const qty =
+          parseFloat(document.getElementById("inputItemQty").value) || 0;
+        const unit = document.getElementById("inputItemUnit").value;
+        const previewPill = document.getElementById("liveUnitPreviewPill");
+        const previewText = document.getElementById("liveUnitPreviewText");
+
+        if (price > 0 && qty > 0) {
+          const unitPrice = normalizeUnitPrice(price, qty, unit);
+          const { baseUnit } = normalizeQuantity(qty, unit);
+          if (previewText)
+            previewText.textContent = `Unit Price: ${formatCurrency(unitPrice)} / ${baseUnit}`;
+          if (previewPill) previewPill.classList.remove("hidden");
+        } else {
+          if (previewPill) previewPill.classList.add("hidden");
+        }
+      }
+
+      /* =========================================================================
+       7. IN-AISLE PACKAGE COMPARATOR MODAL LOGIC
+       ========================================================================= */
+      function openComparatorModal() {
+        openModal("comparatorModal");
+        runComparatorCalc();
+      }
+
+      function runComparatorCalc() {
+        const pA = parseFloat(document.getElementById("compPriceA").value) || 0;
+        const qA = parseFloat(document.getElementById("compQtyA").value) || 0;
+        const uA = document.getElementById("compUnitA").value;
+
+        const pB = parseFloat(document.getElementById("compPriceB").value) || 0;
+        const qB = parseFloat(document.getElementById("compQtyB").value) || 0;
+        const uB = document.getElementById("compUnitB").value;
+
+        const res = comparePackages(
+          { price: pA, quantity: qA, unit: uA, name: "A" },
+          { price: pB, quantity: qB, unit: uB, name: "B" }
+        );
+
+        const normTextA = document.getElementById("compNormA");
+        const normTextB = document.getElementById("compNormB");
+        const badge = document.getElementById("compWinnerBadge");
+        const details = document.getElementById("compSavingsDetails");
+
+        if (normTextA)
+          normTextA.textContent = `${formatCurrency(res.unitPriceA || 0)} / ${res.baseUnit || "unit"}`;
+        if (normTextB)
+          normTextB.textContent = `${formatCurrency(res.unitPriceB || 0)} / ${res.baseUnit || "unit"}`;
+
+        if (res.error === "DIMENSION_MISMATCH") {
+          if (badge) badge.textContent = "⚠️ Different Unit Dimensions";
+          if (details)
+            details.textContent = "Cannot compare Weight vs Volume directly";
+          return;
+        }
+
+        if (res.winner === "TIE") {
+          if (badge) badge.textContent = "🤝 Equal Value Deal";
+          if (details)
+            details.textContent = "Both packages have identical unit prices";
+        } else {
+          const winnerPkg = res.winner === "A" ? "Package A" : "Package B";
+          if (badge) badge.textContent = `🏆 ${winnerPkg} is Cheaper!`;
+          if (details)
+            details.textContent = `Saves ${res.savingsPercent.toFixed(1)}% (${formatCurrency(res.savingsPerUnit)} / ${res.baseUnit} cheaper)`;
+        }
+      }
+
+      function applyComparatorWinner() {
+        const pA = parseFloat(document.getElementById("compPriceA").value) || 0;
+        const qA = parseFloat(document.getElementById("compQtyA").value) || 0;
+        const uA = document.getElementById("compUnitA").value;
+
+        const pB = parseFloat(document.getElementById("compPriceB").value) || 0;
+        const qB = parseFloat(document.getElementById("compQtyB").value) || 0;
+        const uB = document.getElementById("compUnitB").value;
+
+        const res = comparePackages(
+          { price: pA, quantity: qA, unit: uA },
+          { price: pB, quantity: qB, unit: uB }
+        );
+
+        const winPrice = res.winner === "A" ? pA : pB;
+        const winQty = res.winner === "A" ? qA : qB;
+        const winUnit = res.winner === "A" ? uA : uB;
+
+        document.getElementById("inputItemPrice").value = winPrice;
+        document.getElementById("inputItemQty").value = winQty;
+        document.getElementById("inputItemUnit").value = winUnit;
+
+        updateLiveUnitPreview();
+        closeModal("comparatorModal");
+        showToast("Winner package applied to form!");
+      }
+
+      /* =========================================================================
+       8. SHARING, QR CODE & MERGE PROTOCOL
+       ========================================================================= */
+      function openShareModal() {
+        const payload = encodeSharePayload(memoryState.activeList);
+        const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
+        renderQrCode(url);
+        openModal("shareModal");
+      }
+
+      function encodeSharePayload(list) {
+        try {
+          const compact = {
+            t: list.title,
+            i: list.items.map((it) => [
+              it.name,
+              it.category,
+              it.store,
+              it.quantity,
+              it.unit,
+              it.price,
+            ]),
+          };
+          return btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
+        } catch (e) {
+          return "";
+        }
+      }
+
+      function decodeSharePayload(encoded) {
+        try {
+          const str = decodeURIComponent(escape(atob(encoded)));
+          const data = JSON.parse(str);
+          return {
+            title: data.t || "Shared List",
+            items: (data.i || []).map((arr, idx) => ({
+              id: `shared_${idx}_${Date.now()}`,
+              name: arr[0],
+              category: arr[1],
+              store: arr[2],
+              quantity: arr[3],
+              unit: arr[4],
+              price: arr[5],
+              checked: false,
+            })),
+          };
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function renderQrCode(url) {
+        const container = document.getElementById("shareQrContainer");
+        if (!container) return;
+        // High-compatibility SVG placeholder / embedded QR visualizer
+        const safeUrl = encodeURIComponent(url);
+        container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${safeUrl}" alt="QR Code" class="w-36 h-36 rounded-lg" onerror="this.outerHTML='<div class=\\'text-xs text-slate-800 p-2 text-center\\'>Scan URL:<br><span class=\\'font-mono text-[9px] break-all\\'>${url.slice(0, 40)}...</span></div>'" />`;
+      }
+
+      function copyShareUrl() {
+        const payload = encodeSharePayload(memoryState.activeList);
+        const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
+        navigator.clipboard.writeText(url).then(() => {
+          showToast("Share link copied to clipboard!");
+        });
+      }
+
+      function invokeNativeShare() {
+        const payload = encodeSharePayload(memoryState.activeList);
+        const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
+        if (navigator.share) {
+          navigator
+            .share({
+              title: memoryState.activeList.title,
+              text: `Here is our grocery buy-list (${memoryState.activeList.items.length} items)`,
+              url,
+            })
+            .catch(() => {});
+        } else {
+          copyShareUrl();
+        }
+      }
+
+      function exportJsonBackup() {
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(memoryState, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute(
+          "download",
+          `smart-buy-list-backup-${new Date().toISOString().slice(0, 10)}.json`
+        );
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        showToast("Backup file downloaded");
+      }
+
+      /* =========================================================================
+       9. TRIP COMPLETION & LEDGER LOGGING
+       ========================================================================= */
+      function openTripCompleteModal() {
+        const items = memoryState.activeList.items;
+        const checkedItems = items.filter((i) => i.checked);
+        const uncheckedItems = items.filter((i) => !i.checked);
+        const totalSpent = checkedItems.reduce(
+          (sum, i) => sum + (parseFloat(i.price) || 0),
+          0
+        );
+
+        document.getElementById("tripModalPurchasedCount").textContent =
+          `${checkedItems.length} items`;
+        document.getElementById("tripModalTotalSpentVal").textContent =
+          formatCurrency(totalSpent);
+        document.getElementById("unpurchasedCountText").textContent =
+          `${uncheckedItems.length} items left unchecked.`;
+
+        openModal("tripCompleteModal");
+      }
+
+      function finalizeTripCompletion() {
+        const items = memoryState.activeList.items;
+        const checkedItems = items.filter((i) => i.checked);
+        const uncheckedItems = items.filter((i) => !i.checked);
+
+        const rolloverRadios = document.getElementsByName("rolloverAction");
+        let rollover = "ROLLOVER";
+        for (const r of rolloverRadios) {
+          if (r.checked) {
+            rollover = r.value;
+            break;
+          }
+        }
+
+        // 1. Append verified prices to Historical Purchase Ledger
+        const now = new Date().toISOString().slice(0, 10);
+        checkedItems.forEach((item) => {
+          const unitPrice = normalizeUnitPrice(
+            item.price,
+            item.quantity,
+            item.unit
+          );
+          memoryState.purchaseLedger.push({
+            id: Date.now() + Math.random(),
+            itemId: item.id,
+            itemName: item.name,
+            store: item.store || "Supermarket",
+            date: now,
+            quantity: item.quantity,
+            unit: item.unit,
+            price: item.price,
+            unitPrice,
+          });
+        });
+
+        // 2. Handle active items
+        if (rollover === "ROLLOVER") {
+          memoryState.activeList.items = uncheckedItems.map((i) => ({
+            ...i,
+            checked: false,
+          }));
+        } else {
+          memoryState.activeList.items = [];
+        }
+
+        saveToLocalStorage();
+        closeModal("tripCompleteModal");
+        setTripPhase("PLANNING");
+        renderApp();
+        showToast(TRANSLATIONS[currentLanguage].toast_trip_completed);
+      }
+
+      function openPriceLedgerModal() {
+        renderPriceLedgerTable("");
+        openModal("priceLedgerModal");
+      }
+
+      function renderPriceLedgerTable(query = "") {
+        const tbody = document.getElementById("ledgerTableBody");
+        if (!tbody) return;
+
+        const q = (query || "").toLowerCase();
+        const logs = memoryState.purchaseLedger
+          .filter(
+            (l) =>
+              !q ||
+              l.itemName.toLowerCase().includes(q) ||
+              (l.store && l.store.toLowerCase().includes(q))
+          )
+          .reverse();
+
+        if (logs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No historical purchase records found.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = logs
+          .map((l) => {
+            const { baseUnit } = normalizeQuantity(l.quantity, l.unit);
+            return `
+          <tr class="hover:bg-slate-800/40">
+            <td class="p-2.5 font-mono text-[11px] text-slate-400">${l.date}</td>
+            <td class="p-2.5 font-semibold text-slate-200">${l.itemName}</td>
+            <td class="p-2.5 text-slate-400">${l.store || "—"}</td>
+            <td class="p-2.5 text-slate-400">${l.quantity} ${l.unit}</td>
+            <td class="p-2.5 font-semibold text-white">${formatCurrency(l.price)}</td>
+            <td class="p-2.5 font-bold text-emerald-400">${formatCurrency(l.unitPrice)} / ${baseUnit}</td>
+          </tr>
+        `;
+          })
+          .join("");
+      }
+
+      /* =========================================================================
+       10. UTILITIES, THEMES, LOCALIZATION & MODAL CONTROLLER
+       ========================================================================= */
+      function openModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.remove("hidden");
+          document.body.style.overflow = "hidden";
+        }
+      }
+
+      function closeModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add("hidden");
+          document.body.style.overflow = "";
+        }
+      }
+
+      function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.classList.contains("dark");
+        if (isDark) {
+          html.classList.remove("dark");
+          html.classList.add("light");
+          document.getElementById("themeToggleBtn").textContent = "☀️";
+        } else {
+          html.classList.remove("light");
+          html.classList.add("dark");
+          document.getElementById("themeToggleBtn").textContent = "🌙";
+        }
+      }
+
+      function toggleLanguage() {
+        currentLanguage = currentLanguage === "en" ? "vi" : "en";
+        document.getElementById("langToggleBtn").textContent =
+          currentLanguage.toUpperCase();
+        applyTranslations();
+        renderApp();
+      }
+
+      function setCurrency(cur) {
+        currentCurrency = cur;
+        renderApp();
+      }
+
+      function applyTranslations() {
+        const t = TRANSLATIONS[currentLanguage];
+        const el = (id, text) => {
+          const e = document.getElementById(id);
+          if (e) e.textContent = text;
+        };
+
+        el("headerTitle", t.app_title);
+        el("headerSubtitle", t.app_subtitle);
+        el("labelPlanning", t.tab_planning);
+        el("labelInStore", t.tab_in_store);
+        el("kpiItemsLabel", t.kpi_items);
+        el("kpiSpentLabel", t.kpi_spent);
+        el("kpiEstimatedLabel", t.kpi_estimated);
+        el("addItemHeading", t.add_item_title);
+        el("btnOpenComparatorHint", t.compare_package_hint);
+        el("labelItemQty", t.label_qty);
+        el("labelItemUnit", t.label_unit);
+        el("labelItemPrice", t.label_price);
+        el("btnAddItemText", t.btn_add_item);
+        el("listTitleText", t.list_title);
+        el("btnGroupByAisle", t.by_aisle);
+        el("btnGroupByStore", t.by_store);
+        el("emptyListTitle", t.empty_title);
+        el("emptyListDesc", t.empty_desc);
+        el("checkedSectionTitle", t.checked_section);
+        el("checkedToggleHint", t.tap_toggle);
+        el("tripSummaryPrompt", t.trip_active);
+        el("btnFinishTripText", t.btn_finish_trip);
+        el("navLabelList", t.nav_list);
+        el("navLabelCompare", t.nav_compare);
+        el("navLabelLedger", t.nav_ledger);
+        el("navLabelShare", t.nav_share);
+
+        const inputName = document.getElementById("inputItemName");
+        if (inputName) inputName.placeholder = t.item_name_placeholder;
+      }
+
+      function showToast(message) {
+        const container = document.getElementById("toastContainer");
+        if (!container) return;
+        const toast = document.createElement("div");
+        toast.className =
+          "bg-slate-800 border border-emerald-500/80 text-slate-100 text-xs font-semibold px-3.5 py-2.5 rounded-xl shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto";
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.remove("translate-y-2", "opacity-0");
+        }, 10);
+
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "-translate-y-2");
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      function handleItemAutocomplete(val) {
+        const dropdown = document.getElementById("autocompleteDropdown");
+        if (!dropdown) return;
+        const q = (val || "").toLowerCase().trim();
+        if (q.length < 1) {
+          dropdown.classList.add("hidden");
+          return;
+        }
+
+        const matches = memoryState.purchaseLedger
+          .filter((l) => l.itemName.toLowerCase().includes(q))
+          .map((l) => l.itemName);
+        const unique = Array.from(new Set(matches)).slice(0, 5);
+
+        if (unique.length === 0) {
+          dropdown.classList.add("hidden");
+          return;
+        }
+
+        dropdown.innerHTML = unique
+          .map(
+            (name) => `
+        <button type="button" onclick="selectAutocomplete('${name}')" class="w-full text-left px-3 py-2 text-xs text-slate-200 hover:bg-emerald-600/30 hover:text-white transition-colors">
+          🔍 ${name}
+        </button>
+      `
+          )
+          .join("");
+        dropdown.classList.remove("hidden");
+      }
+
+      function selectAutocomplete(name) {
+        const input = document.getElementById("inputItemName");
+        if (input) input.value = name;
+        const dropdown = document.getElementById("autocompleteDropdown");
+        if (dropdown) dropdown.classList.add("hidden");
+      }
+
+      function toggleCheckedSection() {
+        const list = document.getElementById("checkedItemsList");
+        const chevron = document.getElementById("checkedChevron");
+        if (list) {
+          list.classList.toggle("hidden");
+          if (chevron)
+            chevron.textContent = list.classList.contains("hidden") ? "▶" : "▼";
+        }
+      }
+
+      /* =========================================================================
+       11. INITIALIZATION & SERVICE WORKER
+       ========================================================================= */
+      if (
+        typeof window !== "undefined" &&
+        typeof window.addEventListener === "function"
+      ) {
+        window.addEventListener("DOMContentLoaded", async () => {
+          await initDatabase();
+          loadFromLocalStorage();
+
+          // Check if arriving via share link
+          if (window.location.hash.startsWith("#share=")) {
+            const payload = window.location.hash.replace("#share=", "");
+            const decoded = decodeSharePayload(payload);
+            if (decoded && decoded.items.length > 0) {
+              window.pendingSharedList = decoded;
+              document.getElementById("importListTitle").textContent =
+                decoded.title;
+              document.getElementById("importItemCount").textContent =
+                `Contains ${decoded.items.length} items`;
+              openModal("importModal");
+            }
+          }
+
+          // If completely empty, auto load sample data on first visit
+          if (
+            memoryState.activeList.items.length === 0 &&
+            memoryState.purchaseLedger.length === 0
+          ) {
+            loadSampleData();
+          }
+
+          renderApp();
+
+          // Register Service Worker if supported
+          if (
+            "serviceWorker" in navigator &&
+            window.location.protocol.startsWith("http")
+          ) {
+            navigator.serviceWorker.register("./sw.js").catch(() => {});
+          }
+        });
+      }
+
+      function confirmImport(mode) {
+        if (!window.pendingSharedList) return;
+        if (mode === "MERGE") {
+          const existingNames = new Set(
+            memoryState.activeList.items.map((i) => i.name.toLowerCase())
+          );
+          const toAdd = window.pendingSharedList.items.filter(
+            (i) => !existingNames.has(i.name.toLowerCase())
+          );
+          memoryState.activeList.items.push(...toAdd);
+        } else {
+          memoryState.activeList.items = window.pendingSharedList.items;
+        }
+        saveToLocalStorage();
+        closeModal("importModal");
+        renderApp();
+        showToast("Shared list successfully imported!");
+      }
+
+      // Global exports for test runner and Node vm sandbox
+      if (typeof window !== "undefined") {
+        window.normalizeUnitPrice = normalizeUnitPrice;
+        window.normalizeQuantity = normalizeQuantity;
+        window.comparePackages = comparePackages;
+        window.evaluateDealScore = evaluateDealScore;
+        window.DIMENSIONS = DIMENSIONS;
+        window.UNIT_CONVERSIONS = UNIT_CONVERSIONS;
+        window.TRANSLATIONS = TRANSLATIONS;
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,99 @@
+# 📋 Smart Buy-List & Unit Price Tracker — Requirements & Specification
+
+> **Target File:** `smart-buy-list-price-tracker/index.html` (Compacted output: `dist/smart-buy-list-price-tracker.html` or `smart-buy-list-price-tracker/dist/index.html`)  
+> **Source Documents:** [`CONTEXT.md`](./CONTEXT.md), [`docs/adr/`](./docs/adr/)  
+> **Architecture:** Zero-Runtime Build, Standalone Single-File HTML / PWA application
+
+---
+
+## 🏛️ Domain Concepts & Terminology
+
+All requirements adhere strictly to the project domain model defined in [`CONTEXT.md`](./CONTEXT.md):
+
+- **Master Item**: Canonical product definition with default unit, aisle category, and historical purchase log.
+- **List Item (Active Item)**: Shopping list entry with target quantity, estimated price, store, aisle, and checked status.
+- **Package Size & Normalization**: Base unit conversion across Mass (`kg`), Volume (`l`), and Count (`ea`).
+- **Normalized Unit Price**: Calculated unit cost ($/kg, $/L, $/ea, ₫/kg, ₫/L, ₫/cái).
+- **Historical Purchase Ledger**: Append-only log of purchase transactions per store, date, and package size.
+- **Deal Indicator**: 🟢 Great Deal ($\le$ All-Time Low / $\ge 10\%$ discount), 🟡 Fair Price, 🔴 Price Spike.
+- **In-Aisle Package Comparator**: Side-by-side package size evaluator with real-time percentage savings and 1-tap list update.
+- **Shopping Trip Lifecycle**: `Planning` ➔ `In-Store Shopping` ➔ `Trip Summary/Complete` (with unpurchased item rollover).
+- **URL State Payload**: Compressed LZ-String shareable state with dynamic QR code and Web Share API.
+- **Storage Provider Seam**: `IndexedDBStorageProvider` with schema migrations and `GoogleDriveStorageProvider` sync seam.
+
+---
+
+## 📊 Core Requirements Matrix (R1 – R32)
+
+| ID      | Feature                                          | Specification                                                                                                                                                                                             | Priority | ADR Reference |
+| :------ | :----------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------------ |
+| **R1**  | **Pure Unit Price Normalization Engine**         | Decoupled pure utility normalizing any package price and quantity (Weight: `g`/`kg`/`oz`/`lb`, Volume: `ml`/`l`/`fl oz`/`gal`, Count: `ea`/`pk`/`box`/`can`) to standardized base unit ($/kg, $/L, $/ea). | P0       | ADR-0002      |
+| **R2**  | **Historical Purchase Ledger & Deal Scoring**    | Track historical transactions per item/store/date. Compute All-Time Low ($P_{\text{min}}$), average price, last price, and color-coded deal rating badges.                                                | P0       | ADR-0002      |
+| **R3**  | **In-Aisle Package Comparator Modal**            | Interactive dual-package comparator (Package A vs Package B) calculating normalized unit prices, % savings, and 1-tap winner application to list.                                                         | P0       | ADR-0002      |
+| **R4**  | **3-State Shopping Trip Lifecycle**              | Explicit transition between `Planning` (drafting/editing), `In-Store Shopping` (large touch targets, running total), and `Trip Summary/Complete`.                                                         | P0       | CONTEXT.md    |
+| **R5**  | **Trip Completion & Unpurchased Rollover**       | Finalize trip expenses, log verified prices to the historical ledger, and prompt to rollover unpurchased items to a new list or discard.                                                                  | P0       | CONTEXT.md    |
+| **R6**  | **Multi-Store Management & Filtering**           | Assign items to specific stores (e.g. Costco, Trader Joe's, Local Market). Filter list view by current store.                                                                                             | P1       | CONTEXT.md    |
+| **R7**  | **Aisle / Department Categorization & Ordering** | Group items by department (Produce, Dairy, Meat, Bakery, Pantry, Household, etc.) with customizable walking route order.                                                                                  | P1       | CONTEXT.md    |
+| **R8**  | **IndexedDB Storage Engine & Schema Migrations** | Persistent local storage using `IndexedDB` (`SmartBuyListDB`, v1) with automatic schema version migrations and memory fallback.                                                                           | P0       | ADR-0001      |
+| **R9**  | **Google Drive Cloud Sync Seam**                 | Abstracted `IStorageProvider` architecture ready for client-side Google OAuth 2.0 and Drive AppData sync.                                                                                                 | P1       | ADR-0001      |
+| **R10** | **URL State Compression & Share Deep Links**     | Serialize active lists into compact URL hash via LZ-String compression; invoke `navigator.share()` on mobile devices.                                                                                     | P0       | ADR-0003      |
+| **R11** | **Dynamic In-Memory QR Code Generator**          | Render dynamic QR code in an interactive modal for in-person instant scanning between smartphones without internet.                                                                                       | P1       | ADR-0003      |
+| **R12** | **Smart Recipient Import & Merge Protocol**      | Incoming share modal offering _Import as New List_, _Merge into Active List_, and _Sync Price Catalog_.                                                                                                   | P0       | ADR-0003      |
+| **R13** | **JSON Backup Export & Import**                  | 1-click JSON file backup and restore for all lists, catalog items, and historical price records.                                                                                                          | P1       | ADR-0001      |
+| **R14** | **PWA Offline Shell & Service Worker**           | Cache-First offline caching via `sw.js` and standalone `manifest.webmanifest` with installable home screen prompt.                                                                                        | P1       | ADR-0003      |
+| **R15** | **Mobile-First In-Aisle Thumb Zone Ergonomics**  | Bottom action bar, thumb-friendly hit targets ($\ge 44\text{px}$), quick item add, and single-tap check-off interactions.                                                                                 | P0       | CONTEXT.md    |
+| **R16** | **Bilingual Localization (`en` & `vi`)**         | 100% Vietnamese and English dictionary parity, persisted language preference, and dynamic text switching.                                                                                                 | P0       | I18N.md       |
+| **R17** | **Multi-Currency & Locale Masking**              | Selectable currencies (USD `$`, VND `₫`, EUR `€`, GBP `£`, JPY `¥`, AUD `$`, CAD `$`) with `Intl.NumberFormat` masking and verbal helpers (`25 Triệu VND`).                                               | P1       | CONTEXT.md    |
+| **R18** | **First-Time Seed Data Onboarding**              | Pre-load realistic sample grocery items (Milk, Eggs, Rice, Coffee, Olive Oil) and historical store prices with a 1-click clear/keep banner.                                                               | P1       | CONTEXT.md    |
+| **R19** | **Live Estimated vs Actual Spend Tracker**       | Real-time running total during in-store shopping comparing estimated budget vs actual checkout basket total.                                                                                              | P1       | CONTEXT.md    |
+| **R20** | **Historical Price Sparklines & Trend Cards**    | Compact SVG sparkline and store price comparison chips when expanding item details.                                                                                                                       | P1       | CONTEXT.md    |
+| **R21** | **Item Autocomplete & Quick Suggest**            | Instant autocomplete when typing item names, auto-filling preferred unit, department, and last paid price.                                                                                                | P1       | CONTEXT.md    |
+| **R22** | **Dark / Light High-Contrast Theme**             | WCAG 2.1 AA compliant semantic theme tokens (`:root` / `:root.light`) with persisted user preference.                                                                                                     | P1       | CONTEXT.md    |
+| **R23** | **Modal Lifecycle Manager**                      | Unified single-active dialog manager, scroll locking, backdrop dismissals, and `Esc` key handling.                                                                                                        | P1       | CONTEXT.md    |
+| **R24** | **Non-Blocking Toast Notification Engine**       | Slide-in feedback and undo toasts with auto-dismiss timers.                                                                                                                                               | P1       | CONTEXT.md    |
+| **R25** | **Printable Shopping List**                      | Clean `@media print` layout for generating paper grocery checklists with aisle grouping.                                                                                                                  | P2       | CONTEXT.md    |
+| **R26** | **Keyboard Shortcuts**                           | `N` (new item), `C` (open comparator), `S` (share list), `Esc` (close modal).                                                                                                                             | P2       | CONTEXT.md    |
+
+---
+
+## 🚀 Vertical Slice Implementation Roadmap
+
+```mermaid
+flowchart TD
+    S1["Slice 1: Pure Domain Engine<br/>(Unit Normalization, Price Ledger &amp; Deal Scoring)"]
+    S2["Slice 2: Storage &amp; Persistence<br/>(IndexedDB Engine, Schema Migrations &amp; Seed Data)"]
+    S3["Slice 3: Core UI &amp; In-Store Trip Lifecycle<br/>(Planning, In-Store Focus Mode, Trip Completion &amp; Rollover)"]
+    S4["Slice 4: In-Aisle Comparator &amp; Price Intelligence<br/>(Package Comparator Modal, Sparklines &amp; Deal Badges)"]
+    S5["Slice 5: Sharing &amp; PWA Integration<br/>(LZ URL Compression, QR Modal, Merge Flow, Service Worker)"]
+    S6["Slice 6: i18n Parity, Theming &amp; Polish<br/>(English/Vietnamese Parity, Multi-Currency, Dark/Light Theme)"]
+
+    S1 --> S2
+    S2 --> S3
+    S3 --> S4
+    S4 --> S5
+    S5 --> S6
+```
+
+<details>
+<summary>ASCII Roadmap (Backout Plan / Fallback)</summary>
+
+```text
+[Slice 1: Pure Domain Engine] (Unit Normalization, Price Ledger & Deal Scoring)
+      │
+      ▼
+[Slice 2: Storage & Persistence] (IndexedDB Engine, Schema Migrations & Seed Data)
+      │
+      ▼
+[Slice 3: Core UI & In-Store Trip Lifecycle] (Planning, In-Store Mode, Trip Completion & Rollover)
+      │
+      ▼
+[Slice 4: In-Aisle Comparator & Price Intelligence] (Package Comparator Modal, Sparklines & Deal Badges)
+      │
+      ▼
+[Slice 5: Sharing & PWA Integration] (LZ URL Compression, QR Modal, Merge Flow, Service Worker)
+      │
+      ▼
+[Slice 6: i18n Parity, Theming & Polish] (English/Vietnamese Parity, Multi-Currency, Dark/Light Theme)
+```
+
+</details>
