@@ -34,6 +34,7 @@
     "test:tracker:pacing": "node tests/smart-buy-list-pacing-touch-polish.test.js",
     "test:tracker:clipboard": "node tests/smart-buy-list-clipboard-interchange.test.js",
     "test:tracker:scanner": "node tests/smart-buy-list-settings-qr-scanner.test.js",
+    "test:tracker:cloud": "node tests/smart-buy-list-cloud-sync.test.js",
     "test:helpers": "node tests/helpers.test.js",
     "test:ui": "node tests/ui-ux.test.js",
     "format": "prettier --write .",

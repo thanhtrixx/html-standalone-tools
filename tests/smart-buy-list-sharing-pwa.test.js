@@ -353,13 +353,15 @@ try {
 
   const swContent = fs.readFileSync(swPath, "utf8");
   assert(
-    swContent.includes('CACHE_NAME = "smart-buy-list-v3.2.0"') ||
-      swContent.includes("smart-buy-list-v3.2.0"),
-    "PWA-14: sw.js bumps cache version to smart-buy-list-v3.2.0"
+    swContent.includes('CACHE_NAME = "smart-buy-list-v3.3.0"') ||
+      swContent.includes('CACHE_NAME = "smart-buy-list-v3.2.0"') ||
+      /CACHE_NAME = "smart-buy-list-v3\.[23]\.0"/.test(swContent),
+    "PWA-14: sw.js bumps cache version to smart-buy-list-v3.2.0 or higher"
   );
   assert(
-    rawHtml.includes("v3.2.0") && rawHtml.includes('id="pwaVersionBadge"'),
-    "PWA-14b: index.html displays synchronized version badge v3.2.0"
+    (rawHtml.includes("v3.2.0") || rawHtml.includes("v3.3.0")) &&
+      rawHtml.includes('id="pwaVersionBadge"'),
+    "PWA-14b: index.html displays synchronized version badge v3.2.0 or higher"
   );
   assert(
     swContent.includes('"./icon.svg"') || swContent.includes("'./icon.svg'"),

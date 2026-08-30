@@ -250,3 +250,23 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **PREFILL-03** | Planning Navigation & Form Focus               | `applyComparatorWinner()` sets trip phase to `PLANNING`, invokes `updateLiveUnitPreview()`, and closes `#comparatorModal`.                          |
 | **PWA-01**     | PWA Version Bump Synchronization               | `sw.js` bumps cache name to `smart-buy-list-v3.2.0` and `index.html` displays synchronized version badge `v3.2.0`.                                  |
 | **I18N-01**    | Bilingual Parity for New Actions               | 100% of ledger delete and comparator prefill translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                |
+
+---
+
+### 17. Google Drive Cloud Sync Storage Seam & GIS OAuth (v3.3.0)
+
+| Test ID        | Scenario                                     | Assertion                                                                                                                                            |
+| :------------- | :------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SEAM-01**    | `StorageProvider` Seam Interface             | `StorageProvider`, `IndexedDBStorageProvider`, and `GoogleDriveStorageProvider` exist and inherit common async contracts.                            |
+| **SEAM-02**    | `storageManager` Default Delegation          | `storageManager.getProvider()` defaults to `IndexedDBStorageProvider` and falls back gracefully to `localStorage` / memory state.                    |
+| **GIS-01**     | Dynamic GIS Script Loader Offline Resilience | `loadGisScript()` fails gracefully offline without throwing or blocking app boot.                                                                    |
+| **GIS-02**     | Ephemeral Token In-Memory Retention          | OAuth `access_token` is stored only in runtime memory; `localStorage` strictly stores only `google_client_id`.                                       |
+| **DRIVE-01**   | AppData File Query & Discovery               | `queryAppDataFile()` issues valid `GET` request to Drive REST v3 `spaces=appDataFolder` searching for `smart_buy_list_data.json`.                    |
+| **DRIVE-02**   | AppData Multipart File Creation              | `createAppDataFile()` issues valid multipart `POST` request with JSON metadata (`parents: ['appDataFolder']`) and state payload.                     |
+| **DRIVE-03**   | AppData Media File Update                    | `updateAppDataFile(fileId)` issues `PATCH` request with `uploadType=media` and serialized state payload.                                             |
+| **MERGE-01**   | Multi-Device Deterministic Smart Merge       | Merging local and remote states unions all purchase ledger records (preserving ATL), merges active items by latest `updatedAt`, and combines stores. |
+| **TRIGGER-01** | Sync Trigger on Mutation & Startup           | `triggerDebouncedCloudSync()` initiates background sync after 3s debounce following state mutations when connected.                                  |
+| **UI-SYNC-01** | Option Hub Cloud Sync Card Controls          | Renders Google Client ID input, Sign In/Out buttons, Last Synced timestamp, and manual Sync Now trigger in Option Hub.                               |
+| **UI-SYNC-02** | Top App Bar Live Sync Status Pill            | Renders status indicator pill next to Settings `⚙️` transitioning through Synced (🟢), Syncing (🟡), Offline (⚪), and Error (🔴).                   |
+| **PWA-01**     | PWA Version Bump Synchronization             | `sw.js` bumps cache name to `smart-buy-list-v3.3.0` and `index.html` displays synchronized version badge `v3.3.0`.                                   |
+| **I18N-01**    | Bilingual Parity for Cloud Sync UI           | 100% of cloud sync translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                                           |
