@@ -291,6 +291,82 @@ assert(
 );
 
 // -------------------------------------------------------------------------
+// SECTION 3: Planning Mode Rich Expanded Card Rendering (Issue #160)
+// -------------------------------------------------------------------------
+console.log("\n--- Section 3: Planning Mode Rich Expanded Card Rendering ---");
+const sb2 = createMockSandbox();
+sb2.loadSampleData();
+sb2.setTripPhase("PLANNING");
+
+const planItemMilk = sb2.memoryState.activeList.items[0]; // Fresh Whole Milk
+const planCardHtml = sb2.renderItemCard(planItemMilk);
+
+assert(
+  typeof planCardHtml === "string" && planCardHtml.length > 0,
+  "DIFF-PLAN-01: renderItemCard returns HTML string in PLANNING mode"
+);
+
+assert(
+  planCardHtml.includes("Fresh Whole Milk"),
+  "DIFF-PLAN-02: Planning Mode card includes item name ('Fresh Whole Milk')"
+);
+
+assert(
+  planCardHtml.includes("🥛"),
+  "DIFF-PLAN-03: Planning Mode card displays category icon ('🥛')"
+);
+
+assert(
+  planCardHtml.includes("Costco"),
+  "DIFF-PLAN-04: Planning Mode card displays retail store badge ('Costco')"
+);
+
+assert(
+  planCardHtml.includes("Fair Price") || planCardHtml.includes("Great Deal"),
+  "DIFF-PLAN-05: Planning Mode card displays deal score badge"
+);
+
+assert(
+  planCardHtml.includes("2 l"),
+  "DIFF-PLAN-06: Planning Mode card displays quantity & unit pill ('2 l')"
+);
+
+assert(
+  planCardHtml.includes("/l") || planCardHtml.includes("$1.75"),
+  "DIFF-PLAN-07: Planning Mode card displays normalized unit price ($1.75 / l)"
+);
+
+assert(
+  planCardHtml.includes("ATL:") || planCardHtml.includes("All-Time Low"),
+  "DIFF-PLAN-08: Planning Mode card displays historical ATL price reference"
+);
+
+assert(
+  planCardHtml.includes("openItemComparator") && planCardHtml.includes("⚖️"),
+  "DIFF-PLAN-09: Planning Mode card includes 1-tap comparator button (⚖️)"
+);
+
+assert(
+  planCardHtml.includes("openQuickPriceEdit") && planCardHtml.includes("✏️"),
+  "DIFF-PLAN-10: Planning Mode card includes dedicated edit button (✏️)"
+);
+
+assert(
+  planCardHtml.includes("deleteItem") && planCardHtml.includes("🗑️"),
+  "DIFF-PLAN-11: Planning Mode card includes dedicated remove button (🗑️)"
+);
+
+assert(
+  planCardHtml.includes("$3.50"),
+  "DIFF-PLAN-12: Planning Mode card displays total estimated price ($3.50)"
+);
+
+assert(
+  planCardHtml.includes("toggleItemCheck"),
+  "DIFF-PLAN-13: Planning Mode card retains functional checkbox for staging"
+);
+
+// -------------------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------------------
 console.log(`\n==================================================`);
