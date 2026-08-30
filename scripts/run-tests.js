@@ -99,6 +99,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-i18n-theming.test.js",
     category: "i18n",
   },
+  {
+    name: "Smart Buy-List Material You & In-Aisle Comparator",
+    file: "tests/smart-buy-list-material-you.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {

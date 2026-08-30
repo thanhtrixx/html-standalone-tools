@@ -42,6 +42,20 @@
 
     <style>
       :root {
+        --md-sys-color-primary: #6ee7b7;
+        --md-sys-color-on-primary: #003822;
+        --md-sys-color-primary-container: #005234;
+        --md-sys-color-on-primary-container: #8cf6c9;
+        --md-sys-color-surface: #0f172a;
+        --md-sys-color-surface-container: #1e293b;
+        --md-sys-color-surface-container-high: #334155;
+        --md-sys-color-surface-container-lowest: #0b1120;
+        --md-sys-color-outline: #475569;
+        --md-sys-color-outline-variant: #334155;
+        --md-sys-color-on-surface: #f8fafc;
+        --md-sys-color-on-surface-variant: #94a3b8;
+        --md-sys-color-secondary-container: #1e3a47;
+        --md-sys-color-on-secondary-container: #c4e7ff;
         --bg-page: #0b1120;
         --bg-card: #1e293b;
         --bg-card-hover: #334155;
@@ -52,6 +66,20 @@
         --accent: #10b981;
       }
       :root.light {
+        --md-sys-color-primary: #006c45;
+        --md-sys-color-on-primary: #ffffff;
+        --md-sys-color-primary-container: #8cf6c9;
+        --md-sys-color-on-primary-container: #002113;
+        --md-sys-color-surface: #f8fafc;
+        --md-sys-color-surface-container: #ffffff;
+        --md-sys-color-surface-container-high: #e2e8f0;
+        --md-sys-color-surface-container-lowest: #f1f5f9;
+        --md-sys-color-outline: #cbd5e1;
+        --md-sys-color-outline-variant: #e2e8f0;
+        --md-sys-color-on-surface: #0f172a;
+        --md-sys-color-on-surface-variant: #64748b;
+        --md-sys-color-secondary-container: #c4e7ff;
+        --md-sys-color-on-secondary-container: #001e2c;
         --bg-page: #f8fafc;
         --bg-card: #ffffff;
         --bg-card-hover: #f1f5f9;
@@ -584,38 +612,72 @@
       </div>
     </main>
 
-    <!-- ==================== BOTTOM IN-AISLE THUMB NAVIGATION ==================== -->
+    <!-- MD3 Floating Action Button (Planning Mode) -->
+    <button
+      id="fabAddItem"
+      onclick="focusAddItemInput()"
+      class="fixed right-6 bottom-20 z-20 w-14 h-14 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-2xl flex items-center justify-center text-2xl active:scale-95 transition-all no-print"
+      title="Add Item"
+    >
+      ➕
+    </button>
+
+    <!-- ==================== BOTTOM IN-AISLE THUMB NAVIGATION (MD3) ==================== -->
     <nav
-      class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 dark:bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-4 py-2 no-print"
+      class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 dark:bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-2 py-1.5 no-print"
     >
       <div class="max-w-3xl mx-auto flex items-center justify-around">
         <button
-          onclick="scrollToTop()"
-          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+          id="navPlanningBtn"
+          onclick="setTripPhase('PLANNING')"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors"
         >
-          <span class="text-lg">📝</span>
-          <span id="navLabelList">List</span>
+          <div
+            id="navPlanningPill"
+            class="w-14 h-7 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-base font-bold transition-all"
+          >
+            📝
+          </div>
+          <span id="navLabelPlanning">Planning</span>
         </button>
         <button
-          onclick="openComparatorModal()"
-          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+          id="navBuyModeBtn"
+          onclick="setTripPhase('IN_STORE')"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
         >
-          <span class="text-lg">⚖️</span>
-          <span id="navLabelCompare">Compare</span>
+          <div
+            id="navBuyModePill"
+            class="w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400"
+          >
+            🛒
+          </div>
+          <span id="navLabelBuyMode">Buy Mode</span>
         </button>
         <button
+          id="navLedgerBtn"
           onclick="openPriceLedgerModal()"
-          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
         >
-          <span class="text-lg">📈</span>
+          <div
+            id="navLedgerPill"
+            class="w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400"
+          >
+            📈
+          </div>
           <span id="navLabelLedger">Price History</span>
         </button>
         <button
-          onclick="openShareModal()"
-          class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 text-xs font-semibold py-1"
+          id="navCompareBtn"
+          onclick="openComparatorModal()"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
         >
-          <span class="text-lg">📤</span>
-          <span id="navLabelShare">Share</span>
+          <div
+            id="navComparePill"
+            class="w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400"
+          >
+            ⚖️
+          </div>
+          <span id="navLabelCompare">Compare</span>
         </button>
       </div>
     </nav>
@@ -648,6 +710,27 @@
           Compare 2 package sizes in real-time to find the best deal ($/kg, $/L,
           $/unit).
         </p>
+
+        <!-- Contextual Pre-Filled Item Banner -->
+        <div
+          id="compComparingItemBanner"
+          class="hidden p-2.5 bg-emerald-950/70 border border-emerald-800/80 rounded-xl text-xs text-emerald-200 flex items-center justify-between"
+        >
+          <div>
+            <span class="font-bold text-white" id="compItemNameLabel"
+              >Comparing Item</span
+            >
+            <span
+              id="compItemCurrentUnitLabel"
+              class="text-slate-300 block text-[11px] mt-0.5"
+            ></span>
+          </div>
+          <span
+            class="px-2 py-0.5 bg-emerald-900/90 text-emerald-300 rounded-md text-[10px] font-bold border border-emerald-700/60"
+          >
+            Package A (Active)
+          </span>
+        </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <!-- Package A Card -->
@@ -799,6 +882,14 @@
             class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
           >
             Close
+          </button>
+          <button
+            onclick="applyWinnerToActiveItem()"
+            id="btnApplyWinnerToList"
+            class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-transform active:scale-95 flex items-center gap-1.5"
+          >
+            <span>✨</span>
+            <span id="btnApplyWinnerText">Apply Winner to List</span>
           </button>
           <button
             onclick="applyComparatorWinner()"
@@ -1090,6 +1181,95 @@
               class="divide-y divide-slate-800"
             ></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. QUICK IN-STORE PRICE / QUANTITY ADJUSTMENT MODAL -->
+    <div
+      id="quickPriceModal"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl"
+      >
+        <div class="flex items-center justify-between">
+          <h3
+            id="quickPriceModalTitle"
+            class="text-base font-bold text-white flex items-center gap-2"
+          >
+            <span>🏷️</span>
+            <span id="quickPriceModalHeading">Quick Price Update</span>
+          </h3>
+          <button
+            onclick="closeModal('quickPriceModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+          >
+            ✕
+          </button>
+        </div>
+
+        <input type="hidden" id="quickPriceItemId" value="" />
+
+        <div class="space-y-3">
+          <div>
+            <label
+              class="text-xs text-slate-400 block mb-1"
+              id="quickPriceItemNameLabel"
+              >Item Name</label
+            >
+            <div
+              id="quickPriceItemNameDisplay"
+              class="font-bold text-sm text-slate-100 bg-slate-950 p-2.5 rounded-xl border border-slate-800"
+            ></div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label
+                class="text-xs text-slate-400 block mb-1"
+                id="quickPriceInputLabel"
+                >Shelf Price</label
+              >
+              <input
+                type="number"
+                id="quickPriceInput"
+                step="any"
+                min="0"
+                class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+            <div>
+              <label
+                class="text-xs text-slate-400 block mb-1"
+                id="quickQtyInputLabel"
+                >Quantity</label
+              >
+              <input
+                type="number"
+                id="quickQtyInput"
+                step="any"
+                min="0.01"
+                class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button
+            onclick="closeModal('quickPriceModal')"
+            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+            id="btnCancelQuickPrice"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="submitQuickPriceEdit()"
+            id="btnSaveQuickPrice"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-transform"
+          >
+            Update Price
+          </button>
         </div>
       </div>
     </div>
@@ -1533,6 +1713,14 @@
           nav_compare: "Compare",
           nav_ledger: "Price History",
           nav_share: "Share",
+          nav_planning: "Planning",
+          nav_buy_mode: "Buy Mode",
+          btn_apply_winner: "Apply Winner to List",
+          toast_winner_applied: "Applied winning deal to item!",
+          quick_price_title: "Quick Price Update",
+          btn_save_price: "Update Price",
+          toast_price_updated: "Price updated!",
+          label_compare_item: "Compare Pack Size",
           badge_great_deal: "🟢 Great Deal",
           badge_fair_price: "🟡 Fair Price",
           badge_price_spike: "🔴 Price Spike",
@@ -1573,6 +1761,14 @@
           nav_compare: "So Sánh",
           nav_ledger: "Lịch Sử Giá",
           nav_share: "Chia Sẻ",
+          nav_planning: "Kế Hoạch",
+          nav_buy_mode: "Đi Chợ",
+          btn_apply_winner: "Cập Nhật Vào Danh Sách",
+          toast_winner_applied: "Đã áp dụng mức giá tốt nhất vào món hàng!",
+          quick_price_title: "Cập Nhật Giá Nhanh",
+          btn_save_price: "Lưu Giá Mới",
+          toast_price_updated: "Đã cập nhật giá!",
+          label_compare_item: "So Sánh Quy Cách",
           badge_great_deal: "🟢 Giá Siêu Tốt",
           badge_fair_price: "🟡 Giá Thị Trường",
           badge_price_spike: "🔴 Giá Tăng Cao",
@@ -1736,6 +1932,12 @@
         const tabInStore = document.getElementById("tabInStore");
         const finishBar = document.getElementById("finishTripBar");
         const addItemSection = document.getElementById("addItemSection");
+        const fab = document.getElementById("fabAddItem");
+
+        const navPlanningPill = document.getElementById("navPlanningPill");
+        const navBuyModePill = document.getElementById("navBuyModePill");
+        const navPlanningBtn = document.getElementById("navPlanningBtn");
+        const navBuyModeBtn = document.getElementById("navBuyModeBtn");
 
         if (phase === "PLANNING") {
           if (tabPlanning) {
@@ -1748,6 +1950,22 @@
           }
           if (finishBar) finishBar.classList.add("hidden");
           if (addItemSection) addItemSection.classList.remove("hidden");
+          if (fab) fab.classList.remove("hidden");
+
+          if (navPlanningPill) {
+            navPlanningPill.className =
+              "w-14 h-7 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-base font-bold transition-all";
+          }
+          if (navBuyModePill) {
+            navBuyModePill.className =
+              "w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400";
+          }
+          if (navPlanningBtn)
+            navPlanningBtn.className =
+              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors";
+          if (navBuyModeBtn)
+            navBuyModeBtn.className =
+              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors";
         } else {
           if (tabPlanning) {
             tabPlanning.className =
@@ -1759,6 +1977,22 @@
           }
           if (finishBar) finishBar.classList.remove("hidden");
           if (addItemSection) addItemSection.classList.add("hidden");
+          if (fab) fab.classList.add("hidden");
+
+          if (navPlanningPill) {
+            navPlanningPill.className =
+              "w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400";
+          }
+          if (navBuyModePill) {
+            navBuyModePill.className =
+              "w-14 h-7 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-base font-bold transition-all";
+          }
+          if (navPlanningBtn)
+            navPlanningBtn.className =
+              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors";
+          if (navBuyModeBtn)
+            navBuyModeBtn.className =
+              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors";
         }
         renderApp();
       }
@@ -1820,22 +2054,25 @@
         const stores = new Set([
           "Costco",
           "Trader Joe's",
+          "Target",
+          "Whole Foods",
+          "WinMart",
+          "Bach Hoa Xanh",
           "Local Market",
-          "Supermarket",
         ]);
         memoryState.activeList.items.forEach((i) => {
           if (i.store) stores.add(i.store);
         });
 
-        const current = currentStoreFilter;
-        select.innerHTML =
-          `<option value="ALL">${TRANSLATIONS[currentLanguage].store_all}</option>` +
-          Array.from(stores)
-            .map(
-              (s) =>
-                `<option value="${s}" ${s === current ? "selected" : ""}>${s}</option>`
-            )
-            .join("");
+        const currentVal = currentStoreFilter;
+        select.innerHTML = `<option value="ALL">All Stores</option>`;
+        stores.forEach((store) => {
+          const opt = document.createElement("option");
+          opt.value = store;
+          opt.textContent = store;
+          if (store === currentVal) opt.selected = true;
+          select.appendChild(opt);
+        });
       }
 
       function renderKpis() {
@@ -1944,7 +2181,7 @@
         <div class="bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3 sm:p-4 transition-all shadow-sm flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 flex-1 min-w-0">
             <!-- Big Thumb-Friendly Checkbox -->
-            <button onclick="toggleItemCheck('${item.id}')" class="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold border transition-all ${item.checked ? "bg-emerald-600 border-emerald-500 text-white" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
+            <button onclick="toggleItemCheck('${item.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
               ✓
             </button>
 
@@ -1956,7 +2193,9 @@
                 ${dealBadgeHtml}
               </div>
               <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                <span class="font-medium text-slate-300">${item.quantity} ${item.unit}</span>
+                <button onclick="openQuickPriceEdit('${item.id}')" class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800/80 px-2 py-0.5 rounded-md border border-slate-700/60 transition-colors" title="Adjust price / size">
+                  ${item.quantity} ${item.unit}
+                </button>
                 <span>•</span>
                 <span class="text-slate-400 font-normal">${item.store || "Supermarket"}</span>
                 ${unitPrice > 0 ? `<span>•</span><span class="text-emerald-400 font-semibold">${formatCurrency(unitPrice)}/${baseUnit}</span>` : ""}
@@ -1964,10 +2203,17 @@
             </div>
           </div>
 
-          <!-- Price & Action -->
-          <div class="text-right shrink-0">
-            <div class="font-bold text-sm text-slate-100">${formatCurrency(item.price)}</div>
-            <button onclick="deleteItem('${item.id}')" class="text-[11px] text-slate-500 hover:text-red-400 transition-colors mt-0.5" title="Remove Item">Remove</button>
+          <!-- Price & Actions -->
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="openItemComparator('${item.id}')" class="p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-xl transition-colors" title="Compare Pack Sizes">
+              ⚖️
+            </button>
+            <div class="text-right">
+              <button onclick="openQuickPriceEdit('${item.id}')" class="font-bold text-sm text-slate-100 hover:text-emerald-400 transition-colors block text-right" title="Update Price">
+                ${formatCurrency(item.price)}
+              </button>
+              <button onclick="deleteItem('${item.id}')" class="text-[11px] text-slate-500 hover:text-red-400 transition-colors mt-0.5" title="Remove Item">Remove</button>
+            </div>
           </div>
         </div>
       `;
@@ -2043,11 +2289,89 @@
       }
 
       /* =========================================================================
-       7. IN-AISLE PACKAGE COMPARATOR MODAL LOGIC
+       7. IN-AISLE PACKAGE COMPARATOR & QUICK PRICE ADJUSTMENT
        ========================================================================= */
+      let activeComparingItemId = null;
+
       function openComparatorModal() {
+        activeComparingItemId = null;
+        const banner = document.getElementById("compComparingItemBanner");
+        const btnApplyWinner = document.getElementById("btnApplyWinnerToList");
+        if (banner) banner.classList.add("hidden");
+        if (btnApplyWinner) btnApplyWinner.classList.add("hidden");
         openModal("comparatorModal");
         runComparatorCalc();
+      }
+
+      function openItemComparator(itemId) {
+        activeComparingItemId = itemId;
+        const item = memoryState.activeList.items.find((i) => i.id === itemId);
+        if (item) {
+          const compPriceA = document.getElementById("compPriceA");
+          const compQtyA = document.getElementById("compQtyA");
+          const compUnitA = document.getElementById("compUnitA");
+          const banner = document.getElementById("compComparingItemBanner");
+          const nameLabel = document.getElementById("compItemNameLabel");
+          const unitLabel = document.getElementById("compItemCurrentUnitLabel");
+          const btnApplyWinner = document.getElementById(
+            "btnApplyWinnerToList"
+          );
+
+          if (compPriceA) compPriceA.value = item.price;
+          if (compQtyA) compQtyA.value = item.quantity;
+          if (compUnitA) compUnitA.value = item.unit;
+          if (nameLabel) nameLabel.textContent = item.name;
+          if (unitLabel)
+            unitLabel.textContent = `(Active: ${item.quantity} ${item.unit} @ ${formatCurrency(item.price)})`;
+          if (banner) banner.classList.remove("hidden");
+          if (btnApplyWinner) btnApplyWinner.classList.remove("hidden");
+        }
+        openModal("comparatorModal");
+        runComparatorCalc();
+      }
+
+      function applyWinnerToActiveItem() {
+        if (!activeComparingItemId) {
+          applyComparatorWinner();
+          return;
+        }
+        const item = memoryState.activeList.items.find(
+          (i) => i.id === activeComparingItemId
+        );
+        if (!item) {
+          closeModal("comparatorModal");
+          return;
+        }
+
+        const pA = parseFloat(document.getElementById("compPriceA").value) || 0;
+        const qA = parseFloat(document.getElementById("compQtyA").value) || 0;
+        const uA = document.getElementById("compUnitA").value;
+        const pB = parseFloat(document.getElementById("compPriceB").value) || 0;
+        const qB = parseFloat(document.getElementById("compQtyB").value) || 0;
+        const uB = document.getElementById("compUnitB").value;
+
+        const res = comparePackages(
+          { price: pA, quantity: qA, unit: uA, name: "A" },
+          { price: pB, quantity: qB, unit: uB, name: "B" }
+        );
+
+        if (res.winner === "B" || res.winner === "Package B") {
+          item.price = pB;
+          item.quantity = qB;
+          item.unit = uB;
+        } else {
+          item.price = pA;
+          item.quantity = qA;
+          item.unit = uA;
+        }
+
+        saveToLocalStorage();
+        renderApp();
+        closeModal("comparatorModal");
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_winner_applied ||
+            "Applied winning deal to item!"
+        );
       }
 
       function runComparatorCalc() {
@@ -2118,6 +2442,64 @@
         updateLiveUnitPreview();
         closeModal("comparatorModal");
         showToast("Winner package applied to form!");
+      }
+
+      function openQuickPriceEdit(itemId) {
+        const item = memoryState.activeList.items.find((i) => i.id === itemId);
+        if (!item) return;
+
+        const idInput = document.getElementById("quickPriceItemId");
+        const nameDisplay = document.getElementById(
+          "quickPriceItemNameDisplay"
+        );
+        const priceInput = document.getElementById("quickPriceInput");
+        const qtyInput = document.getElementById("quickQtyInput");
+
+        if (idInput) idInput.value = item.id;
+        if (nameDisplay)
+          nameDisplay.textContent = `${item.name} (${item.quantity} ${item.unit})`;
+        if (priceInput) priceInput.value = item.price;
+        if (qtyInput) qtyInput.value = item.quantity;
+
+        openModal("quickPriceModal");
+        if (priceInput) priceInput.focus();
+      }
+
+      function submitQuickPriceEdit() {
+        const idInput = document.getElementById("quickPriceItemId");
+        const priceInput = document.getElementById("quickPriceInput");
+        const qtyInput = document.getElementById("quickQtyInput");
+
+        if (!idInput) return;
+        const itemId = idInput.value;
+        const newPrice = parseFloat(priceInput ? priceInput.value : 0) || 0;
+        const newQty = parseFloat(qtyInput ? qtyInput.value : 1) || 1;
+
+        quickUpdateItemPrice(itemId, newPrice, newQty);
+        closeModal("quickPriceModal");
+      }
+
+      function quickUpdateItemPrice(itemId, newPrice, newQty) {
+        const item = memoryState.activeList.items.find((i) => i.id === itemId);
+        if (item) {
+          item.price = newPrice;
+          if (newQty !== undefined && newQty > 0) item.quantity = newQty;
+          saveToLocalStorage();
+          renderApp();
+          showToast(
+            TRANSLATIONS[currentLanguage].toast_price_updated ||
+              "Price updated!"
+          );
+        }
+      }
+
+      function focusAddItemInput() {
+        setTripPhase("PLANNING");
+        const input = document.getElementById("inputItemName");
+        if (input) {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+          input.focus();
+        }
       }
 
       /* =========================================================================
@@ -2476,6 +2858,14 @@
         el("navLabelCompare", t.nav_compare);
         el("navLabelLedger", t.nav_ledger);
         el("navLabelShare", t.nav_share);
+        el("navLabelPlanning", t.nav_planning || t.tab_planning || "Planning");
+        el("navLabelBuyMode", t.nav_buy_mode || t.tab_in_store || "Buy Mode");
+        el("btnApplyWinnerText", t.btn_apply_winner || "Apply Winner to List");
+        el(
+          "quickPriceModalHeading",
+          t.quick_price_title || "Quick Price Update"
+        );
+        el("btnSaveQuickPrice", t.btn_save_price || "Update Price");
 
         const inputName = document.getElementById("inputItemName");
         if (inputName) inputName.placeholder = t.item_name_placeholder;
@@ -2551,37 +2941,29 @@
       /* =========================================================================
        11. INITIALIZATION & SERVICE WORKER
        ========================================================================= */
-      if (
-        typeof window !== "undefined" &&
-        typeof window.addEventListener === "function"
-      ) {
-        window.addEventListener("DOMContentLoaded", async () => {
-          await initDatabase();
-          loadFromLocalStorage();
-
-          // Check if arriving via share link
+      function initApp() {
+        initDatabase().then(() => {
+          // Check for URL share hash
           if (window.location.hash.startsWith("#share=")) {
             const payload = window.location.hash.replace("#share=", "");
-            const decoded = decodeSharePayload(payload);
-            if (decoded && decoded.items.length > 0) {
-              window.pendingSharedList = decoded;
-              document.getElementById("importListTitle").textContent =
-                decoded.title;
-              document.getElementById("importItemCount").textContent =
-                `Contains ${decoded.items.length} items`;
+            const sharedList = decodeSharePayload(payload);
+            if (sharedList) {
+              window.pendingSharedList = sharedList;
+              const countEl = document.getElementById("importItemCountBadge");
+              if (countEl) countEl.textContent = sharedList.items.length;
               openModal("importModal");
             }
           }
 
-          // If completely empty, auto load sample data on first visit
-          if (
-            memoryState.activeList.items.length === 0 &&
-            memoryState.purchaseLedger.length === 0
-          ) {
-            loadSampleData();
-          }
-
+          // Initial Render
           renderApp();
+          applyTranslations();
+
+          // Show sample data banner if items exist and never dismissed
+          if (memoryState.activeList.items.length > 0) {
+            const banner = document.getElementById("sampleDataBanner");
+            if (banner) banner.classList.remove("hidden");
+          }
 
           // Keyboard navigation shortcuts
           document.addEventListener("keydown", handleGlobalKeyDown);
@@ -2594,6 +2976,13 @@
             navigator.serviceWorker.register("./sw.js").catch(() => {});
           }
         });
+      }
+
+      if (
+        typeof window !== "undefined" &&
+        typeof window.addEventListener === "function"
+      ) {
+        window.addEventListener("DOMContentLoaded", initApp);
       }
 
       function confirmImport(mode) {
@@ -2645,6 +3034,28 @@
         window.setCurrency = setCurrency;
         window.formatCurrency = formatCurrency;
         window.handleGlobalKeyDown = handleGlobalKeyDown;
+        window.openComparatorModal = openComparatorModal;
+        window.openItemComparator = openItemComparator;
+        window.applyWinnerToActiveItem = applyWinnerToActiveItem;
+        window.openQuickPriceEdit = openQuickPriceEdit;
+        window.submitQuickPriceEdit = submitQuickPriceEdit;
+        window.quickUpdateItemPrice = quickUpdateItemPrice;
+        window.openShareModal = openShareModal;
+        window.focusAddItemInput = focusAddItemInput;
+        Object.defineProperty(window, "currentPhase", {
+          get: () => currentPhase,
+          set: (v) => {
+            currentPhase = v;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(window, "activeComparingItemId", {
+          get: () => activeComparingItemId,
+          set: (v) => {
+            activeComparingItemId = v;
+          },
+          configurable: true,
+        });
       }
     </script>
   </body>
