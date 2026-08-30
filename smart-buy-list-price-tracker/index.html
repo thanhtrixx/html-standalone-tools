@@ -12,11 +12,15 @@
       content="Mobile-first standalone PWA buy-list with multi-store historical purchase ledger, package unit-price normalization ($/kg, $/L, $/ea), and in-aisle deal intelligence."
     />
     <meta name="theme-color" content="#0f172a" />
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%2232%22 height=%2232%22><text y=%2226%22 font-size=%2224%22>🛒</text></svg>"
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
     />
+    <meta name="apple-mobile-web-app-title" content="BuyList" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
