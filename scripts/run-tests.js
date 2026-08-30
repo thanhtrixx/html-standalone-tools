@@ -84,6 +84,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-lifecycle.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Package Comparator & Price Sparklines",
+    file: "tests/smart-buy-list-comparator-sparklines.test.js",
+    category: "Core Math",
+  },
 ];
 
 function escapeXml(str) {
