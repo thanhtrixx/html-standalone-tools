@@ -2307,11 +2307,12 @@
 
       function initDatabase() {
         return new Promise((resolve) => {
+          loadFromLocalStorage();
+
           if (!window.indexedDB) {
             console.warn(
               "IndexedDB unavailable, using memory/localStorage fallback."
             );
-            loadFromLocalStorage();
             resolve(false);
             return;
           }
@@ -2336,7 +2337,6 @@
             resolve(true);
           };
           request.onerror = () => {
-            loadFromLocalStorage();
             resolve(false);
           };
         });
@@ -2871,6 +2871,10 @@
 
       function setTripPhase(phase) {
         currentPhase = phase;
+        if (memoryState && memoryState.settings) {
+          memoryState.settings.tripPhase = phase;
+        }
+        saveToLocalStorage();
         const tabPlanning = document.getElementById("tabPlanning");
         const tabInStore = document.getElementById("tabInStore");
         const finishBar = document.getElementById("finishTripBar");
@@ -2939,6 +2943,10 @@
 
       function setGrouping(grouping) {
         currentGrouping = grouping;
+        if (memoryState && memoryState.settings) {
+          memoryState.settings.grouping = grouping;
+        }
+        saveToLocalStorage();
         const btnAisle = document.getElementById("btnGroupByAisle");
         const btnStore = document.getElementById("btnGroupByStore");
         const settingsSelect = document.getElementById(
@@ -4544,23 +4552,27 @@
           if (memoryState && memoryState.settings) {
             memoryState.settings.theme = "light";
           }
-          document.getElementById("themeToggleBtn").textContent = "☀️";
+          const themeBtn = document.getElementById("themeToggleBtn");
+          if (themeBtn) themeBtn.textContent = "☀️";
         } else {
           html.classList.remove("light");
           html.classList.add("dark");
           if (memoryState && memoryState.settings) {
             memoryState.settings.theme = "dark";
           }
-          document.getElementById("themeToggleBtn").textContent = "🌙";
+          const themeBtn = document.getElementById("themeToggleBtn");
+          if (themeBtn) themeBtn.textContent = "🌙";
         }
-        if (typeof saveState === "function") {
-          saveState();
-        }
+        saveToLocalStorage();
       }
 
       function setLanguage(lang) {
         if (lang !== "en" && lang !== "vi") return;
         currentLanguage = lang;
+        if (memoryState && memoryState.settings) {
+          memoryState.settings.language = lang;
+        }
+        saveToLocalStorage();
         const langBtn = document.getElementById("langToggleBtn");
         if (langBtn)
           langBtn.textContent = currentLanguage === "en" ? "VI" : "EN";
@@ -4578,6 +4590,12 @@
 
       function setCurrency(cur) {
         currentCurrency = cur;
+        if (memoryState && memoryState.settings) {
+          memoryState.settings.currency = cur;
+        }
+        saveToLocalStorage();
+        const curSelect = document.getElementById("settingsCurrencySelect");
+        if (curSelect) curSelect.value = currentCurrency;
         renderApp();
       }
 
@@ -4906,6 +4924,33 @@
        ========================================================================= */
       function initApp() {
         initDatabase().then(() => {
+          // Sync restored settings to runtime and UI controls
+          if (memoryState && memoryState.settings) {
+            if (memoryState.settings.language) {
+              currentLanguage = memoryState.settings.language;
+            }
+            if (memoryState.settings.currency) {
+              currentCurrency = memoryState.settings.currency;
+            }
+            if (memoryState.settings.tripPhase) {
+              currentPhase = memoryState.settings.tripPhase;
+            }
+            if (memoryState.settings.grouping) {
+              currentGrouping = memoryState.settings.grouping;
+            }
+            if (memoryState.settings.theme === "light") {
+              document.documentElement.classList.remove("dark");
+              document.documentElement.classList.add("light");
+              const themeBtn = document.getElementById("themeToggleBtn");
+              if (themeBtn) themeBtn.textContent = "☀️";
+            } else {
+              document.documentElement.classList.remove("light");
+              document.documentElement.classList.add("dark");
+              const themeBtn = document.getElementById("themeToggleBtn");
+              if (themeBtn) themeBtn.textContent = "🌙";
+            }
+          }
+
           // Check for URL share hash
           if (window.location.hash.startsWith("#share=")) {
             const payload = window.location.hash.replace("#share=", "");
@@ -4920,8 +4965,20 @@
 
           // Initial Render
           applyTranslations();
+          setTripPhase(currentPhase);
+          setGrouping(currentGrouping);
           renderApp();
           runComparatorCalc();
+
+          const langBtn = document.getElementById("langToggleBtn");
+          if (langBtn)
+            langBtn.textContent = currentLanguage === "en" ? "VI" : "EN";
+          const langSelect = document.getElementById("settingsLanguageSelect");
+          if (langSelect) langSelect.value = currentLanguage;
+          const curSelect = document.getElementById("settingsCurrencySelect");
+          if (curSelect) curSelect.value = currentCurrency;
+          const groupSelect = document.getElementById("settingsGroupingSelect");
+          if (groupSelect) groupSelect.value = currentGrouping;
 
           // Show sample data banner if items exist and never dismissed
           if (memoryState.activeList.items.length > 0) {
