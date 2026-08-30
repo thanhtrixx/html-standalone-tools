@@ -6,6 +6,9 @@
  * Scans tool directories, processes source HTML, inlines local resources (if any),
  * minifies HTML, CSS, and JS using html-minifier-terser, and outputs compacted
  * standalone single-file HTML applications ready for web delivery.
+ *
+ * Optionally mirrors/syncs built deliverables and companion assets into a configurable
+ * external distribution directory (e.g., TOOLS_DEST_DIR in .env.local or --dest-dir CLI flag).
  */
 
 const fs = require("fs");
@@ -23,7 +26,23 @@ const IGNORED_DIRS = new Set([
   "dist",
   "tests",
   "coverage",
+  "test-reports",
+  "release-assets",
 ]);
+
+const COMPANION_ASSETS = [
+  "manifest.webmanifest",
+  "manifest.json",
+  "site.webmanifest",
+  "sw.js",
+  "service-worker.js",
+  "icon.svg",
+  "icon-192.png",
+  "icon-512.png",
+  "favicon.ico",
+  "favicon.png",
+  "apple-touch-icon.png",
+];
 
 const MINIFY_OPTIONS = {
   collapseWhitespace: true,
@@ -41,6 +60,120 @@ const MINIFY_OPTIONS = {
     mangle: false, // Keep variable names intact for debugging & stability with dynamic DOM eval
   },
 };
+
+/**
+ * Parse .env file string content into key-value map
+ */
+function parseEnvContent(content) {
+  const env = {};
+  if (!content) return env;
+
+  const lines = content.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const eqIdx = trimmed.indexOf("=");
+    if (eqIdx === -1) continue;
+
+    const key = trimmed.slice(0, eqIdx).trim();
+    let val = trimmed.slice(eqIdx + 1).trim();
+
+    // Strip surrounding quotes
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
+      val = val.slice(1, -1);
+    }
+
+    if (key) {
+      env[key] = val;
+    }
+  }
+
+  return env;
+}
+
+/**
+ * Load .env and .env.local files from directory with .env.local precedence
+ */
+function loadEnvFiles(rootDir = ROOT_DIR) {
+  const envVars = {};
+
+  const envPath = path.join(rootDir, ".env");
+  if (fs.existsSync(envPath)) {
+    try {
+      Object.assign(envVars, parseEnvContent(fs.readFileSync(envPath, "utf8")));
+    } catch (_) {}
+  }
+
+  const envLocalPath = path.join(rootDir, ".env.local");
+  if (fs.existsSync(envLocalPath)) {
+    try {
+      Object.assign(
+        envVars,
+        parseEnvContent(fs.readFileSync(envLocalPath, "utf8"))
+      );
+    } catch (_) {}
+  }
+
+  return envVars;
+}
+
+/**
+ * Resolve external destination directory using priority cascade:
+ * Tier 1: CLI flags (--dest-dir, --export-dir, --sync-dir)
+ * Tier 2: process.env (TOOLS_DEST_DIR, DIST_DEST_DIR)
+ * Tier 3: Local env files (.env.local, .env)
+ * Tier 4: null (unconfigured, skip external copy)
+ */
+function resolveDestDir(args = process.argv.slice(2), rootDir = ROOT_DIR) {
+  let cliDest = null;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith("--dest-dir=")) {
+      cliDest = args[i].split("=")[1];
+    } else if (args[i] === "--dest-dir" && args[i + 1]) {
+      cliDest = args[i + 1];
+      i++;
+    } else if (args[i].startsWith("--export-dir=")) {
+      cliDest = args[i].split("=")[1];
+    } else if (args[i] === "--export-dir" && args[i + 1]) {
+      cliDest = args[i + 1];
+      i++;
+    } else if (args[i].startsWith("--sync-dir=")) {
+      cliDest = args[i].split("=")[1];
+    } else if (args[i] === "--sync-dir" && args[i + 1]) {
+      cliDest = args[i + 1];
+      i++;
+    }
+  }
+
+  // Tier 1: CLI
+  if (cliDest && cliDest.trim()) {
+    return path.resolve(rootDir, cliDest.trim());
+  }
+
+  // Tier 2: process.env
+  if (process.env.TOOLS_DEST_DIR && process.env.TOOLS_DEST_DIR.trim()) {
+    return path.resolve(rootDir, process.env.TOOLS_DEST_DIR.trim());
+  }
+  if (process.env.DIST_DEST_DIR && process.env.DIST_DEST_DIR.trim()) {
+    return path.resolve(rootDir, process.env.DIST_DEST_DIR.trim());
+  }
+
+  // Tier 3: Local environment files (.env.local, .env)
+  const fileEnv = loadEnvFiles(rootDir);
+  if (fileEnv.TOOLS_DEST_DIR && fileEnv.TOOLS_DEST_DIR.trim()) {
+    return path.resolve(rootDir, fileEnv.TOOLS_DEST_DIR.trim());
+  }
+  if (fileEnv.DIST_DEST_DIR && fileEnv.DIST_DEST_DIR.trim()) {
+    return path.resolve(rootDir, fileEnv.DIST_DEST_DIR.trim());
+  }
+
+  return null;
+}
 
 /**
  * Discover tool directories in workspace
@@ -155,6 +288,20 @@ async function buildTool(tool) {
   const rootDistFile = path.join(rootDistDir, "index.html");
   fs.writeFileSync(rootDistFile, minifiedHtml, "utf8");
 
+  const outputFiles = [toolDistFile, rootDistFile];
+
+  // Also mirror companion assets (PWA manifests, icons, service workers) into dist folders
+  for (const assetName of COMPANION_ASSETS) {
+    const srcAsset = path.join(tool.dir, assetName);
+    if (fs.existsSync(srcAsset)) {
+      const toolDistAsset = path.join(toolDistDir, assetName);
+      const rootDistAsset = path.join(rootDistDir, assetName);
+      fs.copyFileSync(srcAsset, toolDistAsset);
+      fs.copyFileSync(srcAsset, rootDistAsset);
+      outputFiles.push(toolDistAsset, rootDistAsset);
+    }
+  }
+
   const elapsed = Date.now() - startTime;
 
   return {
@@ -163,7 +310,49 @@ async function buildTool(tool) {
     minifiedSize,
     savings,
     elapsed,
-    outputFiles: [toolDistFile, rootDistFile],
+    outputFiles,
+  };
+}
+
+/**
+ * Synchronize a built tool deliverable and companion assets to an external destination directory
+ */
+function syncToolToExternal(tool, destDir) {
+  if (!destDir) return null;
+
+  const targetDir = path.join(destDir, tool.name);
+  fs.mkdirSync(targetDir, { recursive: true });
+
+  const rootDistIndex = path.join(ROOT_DIR, "dist", tool.name, "index.html");
+  const toolDistIndex = path.join(tool.dir, "dist", "index.html");
+  const sourceIndex = fs.existsSync(rootDistIndex)
+    ? rootDistIndex
+    : toolDistIndex;
+
+  if (!fs.existsSync(sourceIndex)) {
+    throw new Error(
+      `Cannot sync tool "${tool.name}": compiled deliverable not found at ${sourceIndex}`
+    );
+  }
+
+  const targetIndex = path.join(targetDir, "index.html");
+  fs.copyFileSync(sourceIndex, targetIndex);
+  const syncedFiles = [targetIndex];
+
+  // Sync companion assets if present in tool directory
+  for (const assetName of COMPANION_ASSETS) {
+    const srcAsset = path.join(tool.dir, assetName);
+    if (fs.existsSync(srcAsset)) {
+      const destAsset = path.join(targetDir, assetName);
+      fs.copyFileSync(srcAsset, destAsset);
+      syncedFiles.push(destAsset);
+    }
+  }
+
+  return {
+    name: tool.name,
+    targetDir,
+    syncedFiles,
   };
 }
 
@@ -188,6 +377,7 @@ async function main() {
     }
   }
 
+  const destDir = resolveDestDir(args, ROOT_DIR);
   const allTools = discoverTools();
 
   if (allTools.length === 0) {
@@ -209,10 +399,17 @@ async function main() {
   }
 
   console.log(
-    `\n📦 Building Compacted Standalone HTML Tools (${toolsToBuild.length} tool${toolsToBuild.length > 1 ? "s" : ""})...\n`
+    `\n📦 Building Compacted Standalone HTML Tools (${toolsToBuild.length} tool${toolsToBuild.length > 1 ? "s" : ""})...`
   );
+  if (destDir) {
+    console.log(`📁 External Distribution Target: ${destDir}\n`);
+  } else {
+    console.log(`\n`);
+  }
 
   const results = [];
+  const syncResults = [];
+
   for (const tool of toolsToBuild) {
     try {
       const res = await buildTool(tool);
@@ -228,6 +425,16 @@ async function main() {
       console.log(
         `             ${path.relative(ROOT_DIR, res.outputFiles[1])}`
       );
+
+      // Perform external sync if configured
+      if (destDir) {
+        const syncRes = syncToolToExternal(tool, destDir);
+        syncResults.push(syncRes);
+        console.log(
+          `   Synced:   ${path.relative(ROOT_DIR, syncRes.targetDir)} (${syncRes.syncedFiles.length} file${syncRes.syncedFiles.length > 1 ? "s" : ""})`
+        );
+      }
+
       console.log(`   Duration: ${res.elapsed}ms\n`);
     } catch (err) {
       console.error(`❌ Failed to build [${tool.name}]:`, err);
@@ -235,9 +442,16 @@ async function main() {
     }
   }
 
-  console.log(
-    `✨ Build completed successfully! (${results.reduce((acc, r) => acc + r.elapsed, 0)}ms total)\n`
-  );
+  if (destDir) {
+    console.log(
+      `✨ Build & external sync completed successfully! (${results.reduce((acc, r) => acc + r.elapsed, 0)}ms total)`
+    );
+    console.log(`🚀 All deliverables mirrored to: ${destDir}\n`);
+  } else {
+    console.log(
+      `✨ Build completed successfully! (${results.reduce((acc, r) => acc + r.elapsed, 0)}ms total)\n`
+    );
+  }
 }
 
 if (require.main === module) {
@@ -251,5 +465,10 @@ module.exports = {
   discoverTools,
   buildTool,
   inlineLocalAssets,
+  parseEnvContent,
+  loadEnvFiles,
+  resolveDestDir,
+  syncToolToExternal,
   MINIFY_OPTIONS,
+  COMPANION_ASSETS,
 };

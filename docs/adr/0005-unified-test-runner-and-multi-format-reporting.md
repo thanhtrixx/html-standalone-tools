@@ -11,7 +11,7 @@ Previously, tests were executed through a chained shell script in `package.json`
 We have implemented a unified test execution and reporting engine (`scripts/run-tests.js`) that manages all repository test suites:
 
 1. **Centralized Test Execution**:
-   - Executes all test suites sequentially (`tests/build.test.js`, `tests/i18n.test.js`, `tests/simulation.test.js`, `tests/helpers.test.js`, `tests/ui-ux.test.js`).
+   - Executes all test suites sequentially across all standalone tools (Build compaction, i18n dictionary parity, Savings Predictor simulation & UI, Buy vs. Rent comparison suites, Smart Buy-List price tracking suites, and calculation helpers).
    - Streams live terminal feedback while collecting per-assertion telemetry, pass/fail status, and precise execution durations.
 
 2. **Multi-Format Report Generation**:

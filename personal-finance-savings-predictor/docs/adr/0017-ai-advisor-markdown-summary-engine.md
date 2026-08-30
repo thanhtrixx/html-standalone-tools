@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-While [`personal-finance-savings-predictor`](file:///Users/trile/dev/trile/html-standalone-tools/personal-finance-savings-predictor) provides rich multi-year simulation curves, continuous heatmap matrices, and tabbed analytics, users seeking personalized financial guidance frequently export their parameters and results into modern Large Language Models (e.g. ChatGPT, Claude, Gemini).
+While [`personal-finance-savings-predictor`](../../CONTEXT.md) provides rich multi-year simulation curves, continuous heatmap matrices, and tabbed analytics, users seeking personalized financial guidance frequently export their parameters and results into modern Large Language Models (e.g. ChatGPT, Claude, Gemini).
 
 Previously, this workflow suffered from significant user friction:
 

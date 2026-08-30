@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-During comprehensive browser evaluation and user feedback on [`personal-finance-savings-predictor`](file:///Users/trile/dev/trile/html-standalone-tools/personal-finance-savings-predictor), significant UI/UX deficiencies were identified across both light theme mode and mobile/tablet form factors:
+During comprehensive browser evaluation and user feedback on [`personal-finance-savings-predictor`](../../CONTEXT.md), significant UI/UX deficiencies were identified across both light theme mode and mobile/tablet form factors:
 
 1. **Light Theme Contrast & Re-Theming Deficiencies**:
    - Toggling the `.light` class on the `<html>` root updated only three custom CSS rules (`:root.light`, `.light .glass-card`, `.light .metric-card:hover`), while the body and all interactive components retained hardcoded dark Tailwind classes (`bg-slate-900`, `bg-slate-950`, `text-slate-100`, `text-slate-200`, `text-slate-400`, `text-white`, `border-slate-800`).
