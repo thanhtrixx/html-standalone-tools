@@ -3146,7 +3146,67 @@
         }
       }
 
+      function handleCardClick(e, itemId) {
+        if (touchState.isSwiping) return;
+        toggleItemCheck(itemId);
+      }
+
       function renderItemCard(item) {
+        const swipeDoneCue =
+          TRANSLATIONS[currentLanguage].swipe_done_cue || "Done";
+        const swipeCompCue =
+          TRANSLATIONS[currentLanguage].swipe_compare_cue || "Compare";
+
+        if (currentPhase === "IN_STORE") {
+          return `
+          <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
+            <!-- Swipe Action Backgrounds -->
+            <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
+              <!-- Left Reveal (Green on Right Swipe) -->
+              <div class="h-full bg-emerald-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
+                <span>✓</span>
+                <span>${swipeDoneCue}</span>
+              </div>
+              <!-- Right Reveal (Indigo on Left Swipe) -->
+              <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
+                <span>⚖️</span>
+                <span>${swipeCompCue}</span>
+              </div>
+            </div>
+
+            <!-- Foreground Swipeable Card (Buy Mode: Ultra-Minimalist) -->
+            <div 
+              id="itemCard-${item.id}"
+              ontouchstart="handleTouchStart(event, '${item.id}')"
+              ontouchmove="handleTouchMove(event, '${item.id}')"
+              ontouchend="handleTouchEnd(event, '${item.id}')"
+              ontouchcancel="handleTouchCancel(event, '${item.id}')"
+              onclick="handleCardClick(event, '${item.id}')"
+              class="relative z-10 bg-slate-900 border ${item.checked ? "border-slate-800/60 bg-slate-950/40" : "border-slate-800"} rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out flex items-center justify-between gap-3 cursor-pointer"
+            >
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <!-- Big Thumb-Friendly Checkbox -->
+                <button onclick="event.stopPropagation(); toggleItemCheck('${item.id}')" class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
+                  ✓
+                </button>
+
+                <!-- Item Info (Clean Name Only) -->
+                <div class="flex-1 min-w-0">
+                  <span class="font-bold text-base text-slate-100 truncate block ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
+                </div>
+              </div>
+
+              <!-- Price (Clickable for quick shelf price update) -->
+              <div class="shrink-0">
+                <button onclick="event.stopPropagation(); openQuickPriceEdit('${item.id}')" class="font-bold text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors" title="Update Price">
+                  ${formatCurrency(item.price)}
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        }
+
         const unitPrice = normalizeUnitPrice(
           item.price,
           item.quantity,
@@ -3168,10 +3228,6 @@
         }
 
         const catInfo = CATEGORIES[item.category] || CATEGORIES.other;
-        const swipeDoneCue =
-          TRANSLATIONS[currentLanguage].swipe_done_cue || "Done";
-        const swipeCompCue =
-          TRANSLATIONS[currentLanguage].swipe_compare_cue || "Compare";
 
         return `
         <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
