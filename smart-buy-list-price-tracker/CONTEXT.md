@@ -44,7 +44,7 @@ $$P_{\text{unit}} = \frac{P}{\text{Normalized Base Quantity}}$$
 _Avoid_: Unit cost, per-gram price, rate, unit rate.
 
 **Historical Purchase Ledger**:
-An append-only chronological log of verified purchases recording `item_id`, `store_id`, `date`, `package_price`, `package_size`, `unit_price`, and `notes`.
+A chronological log of verified purchases recording `item_id`, `store_id`, `date`, `package_price`, `package_size`, `unit_price`, and `notes`. Supports row-level deletion (🗑️) and multi-select batch deletion to maintain accurate price records, triggering dynamic recalculation of All-Time Low (ATL) and Deal ratings.
 _Avoid_: Price history table, expense log, purchase history database.
 
 **All-Time Low (Best Price Ever)**:
@@ -64,7 +64,7 @@ A real-time visual assessment of a product's current shelf price compared agains
   _Avoid_: Bargain score, discount level, sale badge.
 
 **In-Aisle Package Comparator**:
-A dedicated rapid-entry modal enabling shoppers to compare 2 or more package configurations side-by-side (e.g. _Brand A: 450g @ $3.20_ vs _Brand B: 1.2kg @ $7.80_) with real-time percentage savings calculations and 1-tap list updating. Can be invoked globally as a scratchpad or pre-populated directly from any active list item (Package A pre-filled).
+A dedicated rapid-entry modal enabling shoppers to compare 2 or more package configurations side-by-side (e.g. _Brand A: 450g @ $3.20_ vs _Brand B: 1.2kg @ $7.80_) with universal 13-unit dimension alignment (`kg`, `g`, `lb`, `oz`, `L`, `ml`, `gal`, `fl oz`, `ea`, `pk`, `box`, `can`, `bunch`), real-time percentage savings calculations, 1-tap list updating, and "Apply Winner to Form" domain context pre-filling (Name, Aisle, Store, Qty, Unit, Price). Can be invoked globally as a scratchpad or pre-populated directly from any active list item (Package A pre-filled).
 _Avoid_: Price calculator, aisle widget, package comparison tool.
 
 **Ledger-to-BuyList Re-order & Batch Restocking**:
@@ -154,7 +154,7 @@ _Avoid_: External QR scanner, barcode reader app, camera popup.
 ### 6. PWA & Mobile Ergonomics
 
 **Standalone PWA Shell & Version Invalidation Rule**:
-An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.1.0`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
+An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.2.0`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
 _Avoid_: Web app wrapper, mobile site, hybrid app.
 
 **Material You (MD3) In-Aisle Navigation**:
