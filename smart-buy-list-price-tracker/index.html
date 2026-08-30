@@ -119,6 +119,206 @@
           color: black !important;
         }
       }
+
+      /* ==================== LIGHT THEME OVERRIDES (Issue #167) ==================== */
+      html.light body {
+        background-color: var(--bg-page) !important;
+        color: var(--text-primary) !important;
+      }
+
+      .light header {
+        background-color: rgba(255, 255, 255, 0.92) !important;
+        border-bottom-color: #e2e8f0 !important;
+      }
+
+      .light header h1,
+      .light header span.font-black,
+      .light header span.font-bold {
+        color: #0f172a !important;
+      }
+
+      .light header button,
+      .light header select {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        color: #334155 !important;
+      }
+
+      .light header button:hover {
+        background-color: #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+
+      /* Nav bottom bar in Light mode */
+      .light nav#bottomNavBar,
+      .light nav {
+        background-color: rgba(255, 255, 255, 0.96) !important;
+        border-top-color: #e2e8f0 !important;
+        box-shadow: 0 -4px 12px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .light nav button.text-slate-400 {
+        color: #64748b !important;
+      }
+
+      .light nav button.text-slate-400:hover {
+        color: #0f172a !important;
+      }
+
+      /* Surface containers and cards in Light mode */
+      .light .bg-slate-900,
+      .light .bg-slate-900\/95,
+      .light .bg-slate-900\/90,
+      .light .bg-slate-900\/80,
+      .light .bg-slate-900\/60 {
+        background-color: #ffffff !important;
+        border-color: #e2e8f0 !important;
+      }
+
+      .light .bg-slate-950,
+      .light .bg-slate-950\/90,
+      .light .bg-slate-950\/80,
+      .light .bg-slate-950\/70,
+      .light .bg-slate-950\/60,
+      .light .bg-slate-950\/50,
+      .light .bg-slate-950\/40 {
+        background-color: #f8fafc !important;
+        border-color: #e2e8f0 !important;
+      }
+
+      .light .bg-slate-800,
+      .light .bg-slate-800\/90,
+      .light .bg-slate-800\/80,
+      .light .bg-slate-800\/70,
+      .light .bg-slate-800\/60,
+      .light .bg-slate-800\/50,
+      .light .bg-slate-800\/40 {
+        background-color: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+      }
+
+      .light .hover\:bg-slate-700:hover,
+      .light .hover\:bg-slate-800:hover,
+      .light .hover\:bg-slate-800\/40:hover,
+      .light .hover\:bg-slate-900:hover {
+        background-color: #e2e8f0 !important;
+      }
+
+      /* Borders in Light mode */
+      .light .border-slate-800,
+      .light .border-slate-800\/80,
+      .light .border-slate-800\/60,
+      .light .border-slate-800\/50,
+      .light .border-slate-800\/40,
+      .light .border-slate-700,
+      .light .border-slate-700\/80,
+      .light .border-slate-700\/60,
+      .light .border-slate-700\/50,
+      .light .divide-slate-800 > :not([hidden]) ~ :not([hidden]),
+      .light .divide-slate-700 > :not([hidden]) ~ :not([hidden]) {
+        border-color: #e2e8f0 !important;
+      }
+
+      /* Text Colors in Light mode */
+      .light .text-slate-100,
+      .light .text-slate-200,
+      .light
+        .text-white:not(.bg-emerald-600 *):not(.bg-red-600 *):not(
+          .bg-amber-600 *
+        ):not(.bg-blue-600 *):not(.bg-indigo-600 *) {
+        color: #0f172a !important;
+      }
+
+      .light .text-slate-300 {
+        color: #334155 !important;
+      }
+
+      .light .text-slate-400 {
+        color: #64748b !important;
+      }
+
+      .light .text-slate-500 {
+        color: #94a3b8 !important;
+      }
+
+      .light .hover\:text-white:hover,
+      .light .hover\:text-slate-200:hover,
+      .light .hover\:text-slate-100:hover {
+        color: #0f172a !important;
+      }
+
+      /* Form Controls in Light mode */
+      .light input[type="text"],
+      .light input[type="number"],
+      .light input[type="date"],
+      .light select,
+      .light textarea {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+
+      .light input::placeholder,
+      .light textarea::placeholder {
+        color: #94a3b8 !important;
+      }
+
+      .light input:focus,
+      .light select:focus,
+      .light textarea:focus {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+      }
+
+      /* Deal Badges in Light mode */
+      .light .bg-emerald-950 {
+        background-color: #ecfdf5 !important;
+        color: #065f46 !important;
+        border-color: #a7f3d0 !important;
+      }
+
+      .light .bg-amber-950 {
+        background-color: #fffbeb !important;
+        color: #92400e !important;
+        border-color: #fde68a !important;
+      }
+
+      .light .bg-red-950 {
+        background-color: #fef2f2 !important;
+        color: #991b1b !important;
+        border-color: #fecaca !important;
+      }
+
+      /* Modals & Dialogs in Light mode */
+      .light .fixed.inset-0.bg-black\/80 {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+      }
+
+      /* Card shadow in Light mode */
+      .light div[id^="cardContainer-"] {
+        box-shadow:
+          0 1px 3px 0 rgba(0, 0, 0, 0.08),
+          0 1px 2px -1px rgba(0, 0, 0, 0.08) !important;
+      }
+
+      /* Table in Light mode */
+      .light thead {
+        background-color: #f1f5f9 !important;
+        color: #475569 !important;
+      }
+
+      .light tbody tr:hover {
+        background-color: #f8fafc !important;
+      }
+
+      /* Autocomplete Dropdown in Light mode */
+      .light #itemAutocompleteList {
+        background-color: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        box-shadow:
+          0 10px 25px -5px rgba(0, 0, 0, 0.1),
+          0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+      }
     </style>
   </head>
   <body class="min-h-screen pb-24 transition-colors duration-200">
@@ -3228,11 +3428,11 @@
 
         let dealBadgeHtml = "";
         if (deal.score === "GREAT_DEAL") {
-          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50">🟢 ${TRANSLATIONS[currentLanguage].badge_great_deal || "Great Deal"}</span>`;
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50">${TRANSLATIONS[currentLanguage].badge_great_deal || "🟢 Great Deal"}</span>`;
         } else if (deal.score === "PRICE_SPIKE") {
-          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50">🔴 ${TRANSLATIONS[currentLanguage].badge_price_spike || "Price Spike"}</span>`;
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50">${TRANSLATIONS[currentLanguage].badge_price_spike || "🔴 Price Spike"}</span>`;
         } else if (deal.score === "FAIR_PRICE") {
-          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50">🟡 ${TRANSLATIONS[currentLanguage].badge_fair_price || "Fair Price"}</span>`;
+          dealBadgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50">${TRANSLATIONS[currentLanguage].badge_fair_price || "🟡 Fair Price"}</span>`;
         }
 
         const catInfo = CATEGORIES[item.category] || CATEGORIES.other;
@@ -3870,11 +4070,20 @@
         if (isDark) {
           html.classList.remove("dark");
           html.classList.add("light");
+          if (memoryState && memoryState.settings) {
+            memoryState.settings.theme = "light";
+          }
           document.getElementById("themeToggleBtn").textContent = "☀️";
         } else {
           html.classList.remove("light");
           html.classList.add("dark");
+          if (memoryState && memoryState.settings) {
+            memoryState.settings.theme = "dark";
+          }
           document.getElementById("themeToggleBtn").textContent = "🌙";
+        }
+        if (typeof saveState === "function") {
+          saveState();
         }
       }
 

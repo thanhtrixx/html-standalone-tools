@@ -126,7 +126,12 @@ function loadBuyListI18nEngine() {
 
   vm.createContext(sandbox);
   vm.runInContext(combinedScripts, sandbox);
-  return { sandbox, docElementClasses, getActiveFocus: () => activeFocus };
+  return {
+    sandbox,
+    docElementClasses,
+    getActiveFocus: () => activeFocus,
+    htmlContent,
+  };
 }
 
 let passed = 0;
@@ -147,7 +152,7 @@ console.log(
 );
 
 try {
-  const { sandbox, docElementClasses, getActiveFocus } =
+  const { sandbox, docElementClasses, getActiveFocus, htmlContent } =
     loadBuyListI18nEngine();
 
   // 1. 100% DICTIONARY KEY PARITY TESTS
@@ -270,6 +275,40 @@ try {
   assert(
     docElementClasses.has("dark") && !docElementClasses.has("light"),
     "THEME-03: toggleTheme switches back to 'dark'"
+  );
+
+  assert(
+    sandbox.memoryState &&
+      sandbox.memoryState.settings &&
+      sandbox.memoryState.settings.theme === "dark",
+    "THEME-04: Theme state tracked in memoryState.settings.theme"
+  );
+
+  sandbox.toggleTheme();
+  assert(
+    sandbox.memoryState.settings.theme === "light",
+    "THEME-05: toggleTheme updates memoryState.settings.theme to 'light'"
+  );
+  sandbox.toggleTheme(); // switch back to dark
+
+  // Check CSS light theme rules in HTML content
+  assert(
+    htmlContent.includes(".light .bg-slate-900") &&
+      htmlContent.includes(".light .bg-slate-950") &&
+      htmlContent.includes(".light .bg-slate-800"),
+    "THEME-06: HTML contains comprehensive .light surface container CSS rules"
+  );
+
+  assert(
+    htmlContent.includes(".light .text-slate-100") &&
+      htmlContent.includes(".light .border-slate-800"),
+    "THEME-07: HTML contains .light typography and border contrast rules"
+  );
+
+  assert(
+    htmlContent.includes('.light input[type="text"]') ||
+      htmlContent.includes(".light input"),
+    "THEME-08: HTML contains .light form input styling rules"
   );
 
   // 4. KEYBOARD NAVIGATION SHORTCUTS

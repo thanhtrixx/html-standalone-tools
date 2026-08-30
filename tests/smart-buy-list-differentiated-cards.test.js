@@ -334,6 +334,13 @@ assert(
 );
 
 assert(
+  !planCardHtml.includes("🟡 🟡") &&
+    !planCardHtml.includes("🟢 🟢") &&
+    !planCardHtml.includes("🔴 🔴"),
+  "DIFF-PLAN-05B: Deal score badge contains exactly 1 emoji icon (no duplicate 🟡 🟡, 🟢 🟢, 🔴 🔴)"
+);
+
+assert(
   planCardHtml.includes("2 l"),
   "DIFF-PLAN-06: Planning Mode card displays quantity & unit pill ('2 l')"
 );
