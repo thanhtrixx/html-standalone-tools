@@ -1291,13 +1291,23 @@
           };
         }
 
+        const rawPriceA = parseFloat(pkgA.price) || 0;
+        const discountA = parseFloat(pkgA.discountPercent) || 0;
+        const effectivePriceA =
+          discountA > 0 ? rawPriceA * (1 - discountA / 100) : rawPriceA;
+
+        const rawPriceB = parseFloat(pkgB.price) || 0;
+        const discountB = parseFloat(pkgB.discountPercent) || 0;
+        const effectivePriceB =
+          discountB > 0 ? rawPriceB * (1 - discountB / 100) : rawPriceB;
+
         const unitPriceA = normalizeUnitPrice(
-          pkgA.price,
+          effectivePriceA,
           pkgA.quantity,
           pkgA.unit
         );
         const unitPriceB = normalizeUnitPrice(
-          pkgB.price,
+          effectivePriceB,
           pkgB.quantity,
           pkgB.unit
         );
@@ -1336,6 +1346,75 @@
             baseUnit: normA.baseUnit,
           };
         }
+      }
+
+      function renderSparklineSvg(prices, width = 120, height = 32) {
+        if (!Array.isArray(prices) || prices.length === 0) return "";
+        const valid = prices
+          .map((p) => parseFloat(p))
+          .filter((p) => !isNaN(p) && p > 0);
+        if (valid.length === 0) return "";
+
+        const padding = 4;
+        const w = width - padding * 2;
+        const h = height - padding * 2;
+
+        if (valid.length === 1) {
+          const y = height / 2;
+          return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="overflow-visible"><line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#10b981" stroke-width="2" stroke-dasharray="3,3" /><circle cx="${width / 2}" cy="${y}" r="3" fill="#10b981" /></svg>`;
+        }
+
+        const min = Math.min(...valid);
+        const max = Math.max(...valid);
+        const range = max - min === 0 ? 1 : max - min;
+
+        const points = valid
+          .map((p, idx) => {
+            const x = padding + (idx / (valid.length - 1)) * w;
+            const y = padding + h - ((p - min) / range) * h;
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+          })
+          .join(" ");
+
+        const isDropping = valid[valid.length - 1] <= valid[0];
+        const strokeColor = isDropping ? "#10b981" : "#f87171";
+
+        return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="overflow-visible"><polyline fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="${points}" /></svg>`;
+      }
+
+      function getItemStoreComparison(itemName) {
+        if (!itemName) return [];
+        const history = memoryState.purchaseLedger.filter(
+          (l) => l.itemName.toLowerCase() === itemName.toLowerCase()
+        );
+        if (history.length === 0) return [];
+
+        const storeMap = {};
+        history.forEach((rec) => {
+          const s = rec.store || "Supermarket";
+          if (!storeMap[s]) {
+            storeMap[s] = [];
+          }
+          storeMap[s].push(rec);
+        });
+
+        return Object.keys(storeMap).map((store) => {
+          const records = storeMap[store];
+          const prices = records.map((r) => r.unitPrice);
+          const lowestUnitPrice = Math.min(...prices);
+          const avgUnitPrice =
+            prices.reduce((a, b) => a + b, 0) / prices.length;
+          const lastRecord = records[records.length - 1];
+          return {
+            store,
+            recordCount: records.length,
+            lowestUnitPrice,
+            avgUnitPrice,
+            lastUnitPrice: lastRecord.unitPrice,
+            lastDate: lastRecord.date,
+            unit: lastRecord.unit,
+          };
+        });
       }
 
       /* =========================================================================
@@ -2493,6 +2572,8 @@
         window.renderApp = renderApp;
         window.initDatabase = initDatabase;
         window.exportJsonBackup = exportJsonBackup;
+        window.renderSparklineSvg = renderSparklineSvg;
+        window.getItemStoreComparison = getItemStoreComparison;
       }
     </script>
   </body>
