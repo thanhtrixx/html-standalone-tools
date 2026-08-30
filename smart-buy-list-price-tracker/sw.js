@@ -1,8 +1,9 @@
-const CACHE_NAME = "smart-buy-list-v1";
+const CACHE_NAME = "smart-buy-list-v2";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./icon.svg",
   "https://cdn.tailwindcss.com",
 ];
 

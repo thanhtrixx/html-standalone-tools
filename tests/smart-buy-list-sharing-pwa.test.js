@@ -250,9 +250,54 @@ try {
     "REPLACE-01: Replace mode overwrites active list with incoming items"
   );
 
-  // 4. SERVICE WORKER & WEB APP MANIFEST FILE CHECKS
+  // 4. SERVICE WORKER, ICON & WEB APP MANIFEST FILE CHECKS
   console.log(
-    "\n--- Section 4: Progressive Web Application (PWA) Artifacts ---"
+    "\n--- Section 4: Progressive Web Application (PWA) & Icon Artifacts ---"
+  );
+
+  const iconPath = path.join(
+    __dirname,
+    "..",
+    "smart-buy-list-price-tracker",
+    "icon.svg"
+  );
+  assert(fs.existsSync(iconPath), "PWA-01: icon.svg exists in tool directory");
+
+  const iconContent = fs.existsSync(iconPath)
+    ? fs.readFileSync(iconPath, "utf8")
+    : "";
+  assert(
+    iconContent.includes("<svg") &&
+      iconContent.includes('viewBox="0 0 512 512"') &&
+      iconContent.includes("</svg>"),
+    "PWA-02: icon.svg defines a valid 512x512 scalable vector graphic"
+  );
+
+  const htmlPath = path.join(
+    __dirname,
+    "..",
+    "smart-buy-list-price-tracker",
+    "index.html"
+  );
+  const rawHtml = fs.readFileSync(htmlPath, "utf8");
+  assert(
+    rawHtml.includes('rel="icon"') && rawHtml.includes('href="./icon.svg"'),
+    "PWA-03: index.html links to ./icon.svg as primary favicon"
+  );
+  assert(
+    rawHtml.includes('rel="apple-touch-icon"') &&
+      rawHtml.includes('href="./icon.svg"'),
+    "PWA-04: index.html links to ./icon.svg as apple-touch-icon"
+  );
+  assert(
+    rawHtml.includes('name="apple-mobile-web-app-capable"') &&
+      rawHtml.includes('content="yes"'),
+    "PWA-05: index.html declares apple-mobile-web-app-capable meta tag"
+  );
+  assert(
+    rawHtml.includes('name="apple-mobile-web-app-title"') &&
+      rawHtml.includes('content="BuyList"'),
+    "PWA-06: index.html declares apple-mobile-web-app-title meta tag"
   );
 
   const manifestPath = path.join(
@@ -263,21 +308,39 @@ try {
   );
   assert(
     fs.existsSync(manifestPath),
-    "PWA-01: manifest.webmanifest exists in tool directory"
+    "PWA-07: manifest.webmanifest exists in tool directory"
   );
 
   const manifestContent = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert(
     manifestContent.display === "standalone",
-    "PWA-02: Manifest display mode is configured as 'standalone'"
+    "PWA-08: Manifest display mode is configured as 'standalone'"
   );
   assert(
     manifestContent.name === "Smart Buy-List & Unit Price Tracker",
-    "PWA-03: Manifest name is correctly configured"
+    "PWA-09: Manifest name is correctly configured"
   );
   assert(
-    Array.isArray(manifestContent.icons) && manifestContent.icons.length > 0,
-    "PWA-04: Manifest contains app icons array"
+    Array.isArray(manifestContent.icons) && manifestContent.icons.length >= 2,
+    "PWA-10: Manifest contains multiple app icon configurations"
+  );
+  assert(
+    manifestContent.icons.some(
+      (icon) =>
+        icon.src === "./icon.svg" &&
+        icon.purpose === "any" &&
+        icon.type === "image/svg+xml"
+    ),
+    "PWA-11: Manifest declares ./icon.svg with purpose 'any'"
+  );
+  assert(
+    manifestContent.icons.some(
+      (icon) =>
+        icon.src === "./icon.svg" &&
+        icon.purpose === "maskable" &&
+        icon.type === "image/svg+xml"
+    ),
+    "PWA-12: Manifest declares ./icon.svg with purpose 'maskable'"
   );
 
   const swPath = path.join(
@@ -286,14 +349,23 @@ try {
     "smart-buy-list-price-tracker",
     "sw.js"
   );
-  assert(fs.existsSync(swPath), "PWA-05: sw.js exists in tool directory");
+  assert(fs.existsSync(swPath), "PWA-13: sw.js exists in tool directory");
 
   const swContent = fs.readFileSync(swPath, "utf8");
+  assert(
+    swContent.includes('CACHE_NAME = "smart-buy-list-v2"') ||
+      swContent.includes("smart-buy-list-v2"),
+    "PWA-14: sw.js bumps cache version to smart-buy-list-v2"
+  );
+  assert(
+    swContent.includes('"./icon.svg"') || swContent.includes("'./icon.svg'"),
+    "PWA-15: sw.js pre-caches ./icon.svg in ASSETS_TO_CACHE"
+  );
   assert(
     swContent.includes("CACHE_NAME") &&
       swContent.includes("fetch") &&
       swContent.includes("caches.match"),
-    "PWA-06: sw.js implements Cache-First fetch interceptor"
+    "PWA-16: sw.js implements Cache-First fetch interceptor"
   );
 } catch (err) {
   console.error("❌ Test Execution Error:", err);

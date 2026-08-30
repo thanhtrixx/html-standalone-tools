@@ -24,10 +24,11 @@ Users need to:
      - _Import as New List_ (creates an isolated list without overwriting current data).
      - _Merge into Active List_ (appends new items, deduplicates matching names).
      - _Sync Catalog Prices_ (optionally adopts shared store prices).
-3. **Dual Delivery PWA Architecture**:
+3. **Dual Delivery PWA Architecture & Dedicated Vector Icon**:
    - The source application `index.html` functions completely as a self-contained portable HTML tool.
-   - For web hosting / GitHub Pages deployment, provide a companion `manifest.webmanifest` and Service Worker `sw.js` implementing a **Cache-First** strategy for all core assets.
-   - Embed web app manifest metadata and icons directly via data URIs to maintain standalone integrity even when saved as a single local file.
+   - A dedicated 512x512 scalable vector icon (`icon.svg`) provides high-fidelity branding across favicons, desktop shortcuts, and mobile home screens.
+   - For web hosting / GitHub Pages deployment, provide a companion `manifest.webmanifest` defining dual `any` and `maskable` icon entries and Service Worker `sw.js` (version `smart-buy-list-v2`) implementing a **Cache-First** strategy for all core assets including `./icon.svg`.
+   - `<head>` includes `<link rel="icon" type="image/svg+xml" href="./icon.svg" />`, `<link rel="apple-touch-icon" href="./icon.svg" />`, and iOS standalone web app meta tags.
 
 ## Consequences
 

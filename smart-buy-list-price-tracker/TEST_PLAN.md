@@ -112,3 +112,26 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **SHEET-01**        | 1-Tap Fast Price Step Chips      | Quick Price bottom sheet step chips (`+0.50`, `+1.00`, `-0.50`, `-1.00`) immediately adjust the price input value without opening keyboard. |
 | **HAPTIC-01**       | Tactile Check Feedback           | Toggling an item check invokes `navigator.vibrate?.([15])` safely without errors.                                                           |
 | **COMP-VERDICT-01** | Explicit Comparator Verdict      | When comparing two packages, modal displays calculated total package savings and distinct advice for switching vs keeping Package A.        |
+
+---
+
+### 9. Progressive Web Application (PWA) & Icon Artifacts
+
+| Test ID    | Scenario                          | Assertion                                                                                            |
+| :--------- | :-------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| **PWA-01** | Vector Icon Existence             | `icon.svg` exists in the tool directory.                                                             |
+| **PWA-02** | Vector Icon Geometry & ViewBox    | `icon.svg` defines a valid root `<svg>` with `viewBox="0 0 512 512"`.                                |
+| **PWA-03** | HTML Head Favicon Link            | `index.html` connects `./icon.svg` via `<link rel="icon" type="image/svg+xml" href="./icon.svg" />`. |
+| **PWA-04** | Apple Touch Icon Link             | `index.html` connects `./icon.svg` via `<link rel="apple-touch-icon" href="./icon.svg" />`.          |
+| **PWA-05** | iOS Web App Meta Capability       | `index.html` declares `<meta name="apple-mobile-web-app-capable" content="yes" />`.                  |
+| **PWA-06** | iOS Web App Title                 | `index.html` declares `<meta name="apple-mobile-web-app-title" content="BuyList" />`.                |
+| **PWA-07** | Web App Manifest Existence        | `manifest.webmanifest` exists in the tool directory.                                                 |
+| **PWA-08** | Manifest Standalone Display       | `manifest.webmanifest` specifies `"display": "standalone"`.                                          |
+| **PWA-09** | Manifest Name                     | `manifest.webmanifest` specifies `"name": "Smart Buy-List & Unit Price Tracker"`.                    |
+| **PWA-10** | Manifest Icon Array Count         | `manifest.webmanifest` contains multiple icon definitions.                                           |
+| **PWA-11** | Manifest 'any' Purpose Icon       | `manifest.webmanifest` defines `./icon.svg` entry with `"purpose": "any"`.                           |
+| **PWA-12** | Manifest 'maskable' Purpose Icon  | `manifest.webmanifest` defines `./icon.svg` entry with `"purpose": "maskable"`.                      |
+| **PWA-13** | Service Worker Script Existence   | `sw.js` exists in the tool directory.                                                                |
+| **PWA-14** | Service Worker Cache Version Bump | `sw.js` defines `CACHE_NAME = "smart-buy-list-v2"`.                                                  |
+| **PWA-15** | Service Worker Icon Pre-cache     | `sw.js` includes `"./icon.svg"` in `ASSETS_TO_CACHE`.                                                |
+| **PWA-16** | Service Worker Cache-First Fetch  | `sw.js` intercepts fetch requests with Cache-First matching strategy.                                |
