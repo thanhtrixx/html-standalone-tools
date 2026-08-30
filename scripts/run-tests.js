@@ -79,6 +79,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-storage.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List Trip Lifecycle & In-Store Mode",
+    file: "tests/smart-buy-list-lifecycle.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {
