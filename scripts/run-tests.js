@@ -124,6 +124,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-price-history-reorder.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Clipboard JSON Interchange",
+    file: "tests/smart-buy-list-clipboard-interchange.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {
