@@ -174,6 +174,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-v3-11-enhancements.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List v3.12.0 Unified Trip Complete, Sample Buttons & Rate Limit Diagnostics",
+    file: "tests/smart-buy-list-v3-12-enhancements.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {

@@ -673,18 +673,17 @@ async function runTests() {
       "utf8"
     );
 
-    assertEqual(
-      manifest.version,
-      "3.11.0",
-      "manifest.webmanifest version is 3.11.0"
+    assert(
+      /^3\.(1[1-9]|[2-9]\d+)\.0$/.test(manifest.version),
+      `manifest.webmanifest version is 3.11.0 or higher (Got: ${manifest.version})`
     );
     assert(
-      swContent.includes("smart-buy-list-v3.11.0"),
-      "sw.js CACHE_NAME is smart-buy-list-v3.11.0"
+      /smart-buy-list-v3\.(1[1-9]|[2-9]\d+)\.0/.test(swContent),
+      "sw.js CACHE_NAME is smart-buy-list-v3.11.0 or higher"
     );
     assert(
-      indexContent.includes(">v3.11.0<"),
-      "index.html pwaVersionBadge displays v3.11.0"
+      />v3\.(1[1-9]|[2-9]\d+)\.0</.test(indexContent),
+      "index.html pwaVersionBadge displays v3.11.0 or higher"
     );
 
     // Verify ADR-0020

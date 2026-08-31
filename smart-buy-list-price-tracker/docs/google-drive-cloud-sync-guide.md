@@ -97,18 +97,34 @@ Once connected, synchronization runs automatically following our **Calm Cloud Sy
 
 ---
 
-## 🎛️ Manual Controls & Overrides
+## 🎛️ Manual Controls & Cloud Overrides Explained
 
-Inside Option Hub (⚙️ > Google Drive Cloud Sync), you can perform manual operations:
+Inside Option Hub (⚙️ > Google Drive Cloud Sync), you have three distinct synchronization actions:
 
-- **🔄 Sync Now**: Immediately executes a bidirectional smart merge with Google Drive.
-- **Force Upload to Cloud**: Overwrites the cloud backup with your current local device database.
-- **Force Download from Cloud**: Overwrites your local device database with the latest cloud file.
+### 1. 🔄 Sync Now (Two-Way Deterministic 3-Way Merge)
+
+- **What it does**: Fetches the latest remote file from Google Drive AppData, runs deterministic 3-way merge (`merge3Way`), and writes the unified database back to Google Drive.
+- **When to use**: Everyday routine synchronization between devices. Non-destructive and safe.
+
+### 2. ⬆️ Force Upload to Cloud (One-Way Master Push)
+
+- **What it does**: Forcefully overwrites the cloud backup in Google Drive with your current local device database without pulling remote changes.
+- **When to use**: When your cloud file is corrupted or when establishing the current device as the single source of truth.
+
+### 3. ⬇️ Force Download from Cloud (One-Way Master Pull)
+
+- **What it does**: Replaces your local device database with the cloud file from Google Drive.
+- **When to use**: Setting up a new device or discarding local changes.
+
 - **🚪 Disconnect Drive**: Revokes and purges the active in-memory access token, reverting the app to local-only mode.
 
 ---
 
 ## ❓ Frequently Asked Questions (FAQ) & Troubleshooting
+
+### Q: What is the difference between "Sync Now" and "Force Upload to Cloud"?
+
+> **A:** **`Sync Now`** is a **two-way merge** combining changes from both your device and Google Drive. In contrast, **`Force Upload to Cloud`** is a **one-way master push** that completely overwrites Google Drive with your local device's data.
 
 ### Q: Where is my data stored on Google Drive?
 
