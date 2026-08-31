@@ -2462,7 +2462,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.6.0</span
+              >v3.7.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -9479,6 +9479,7 @@
         window.memoryState = memoryState;
         window.setTripPhase = setTripPhase;
         window.toggleItemCheck = toggleItemCheck;
+        window.deleteItem = deleteItem;
         window.finalizeTripCompletion = finalizeTripCompletion;
         window.loadSampleData = loadSampleData;
         window.clearAllData = clearAllData;
@@ -9567,6 +9568,14 @@
         window.mergeCloudState = mergeCloudState;
         window.merge3Way = merge3Way;
         window.reconcileMemoryState = reconcileMemoryState;
+        window.StorageProvider = StorageProvider;
+        window.IndexedDBStorageProvider = IndexedDBStorageProvider;
+        window.GoogleDriveStorageProvider = GoogleDriveStorageProvider;
+        window.GitHubGistStorageProvider = GitHubGistStorageProvider;
+        window.StorageManager = StorageManager;
+        window.initGithubAuthState = initGithubAuthState;
+        window.githubAuthState = githubAuthState;
+        window.googleAuthState = googleAuthState;
         window.showToast = showToast;
         Object.defineProperty(window, "selectedLedgerIds", {
           get: () => selectedLedgerIds,

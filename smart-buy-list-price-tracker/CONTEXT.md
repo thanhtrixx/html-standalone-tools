@@ -141,10 +141,11 @@ _Avoid_: Prefs panel, control center, admin menu.
 An abstracted TypeScript/JavaScript client-side storage architecture (`IStorageProvider`) decoupling domain data operations from physical storage implementations:
 
 - `IndexedDBStorageProvider`: Default offline-first local persistence engine with memory and `localStorage` fallback.
-- `GoogleDriveStorageProvider`: Composite cloud provider wrapping local storage and syncing with Google Drive's Application Data folder (`spaces=appDataFolder`) via REST API v3 and Google Identity Services (GIS `initTokenClient`) OAuth 2.0.
-- `GitHubGistStorageProvider`: Composite cloud provider wrapping local storage and synchronizing with private/secret GitHub Gists (`smart_buy_list_data.json`) via GitHub REST API v3 and Personal Access Token (PAT) authentication with automatic Gist discovery and `raw_url` truncation fallback.
+- `GoogleDriveStorageProvider`: Composite cloud provider wrapping local storage and syncing with Google Drive's Application Data folder (`spaces=appDataFolder`) via REST API v3 and Google Identity Services (GIS `initTokenClient`) OAuth 2.0. Equipped with `isSyncing` mutex and trailing sync pass queueing.
+- `GitHubGistStorageProvider`: Composite cloud provider wrapping local storage and synchronizing with private/secret GitHub Gists (`smart_buy_list_data.json`) via GitHub REST API v3 and Personal Access Token (PAT) authentication with automatic Gist discovery and `raw_url` truncation fallback. Equipped with `isSyncing` mutex and trailing sync pass queueing.
 - `StorageManager Multi-Provider Registry`: Central manager orchestrating provider selection (`none`, `googledrive`, `github`) and dispatching mutation triggers.
-- `Deterministic Cloud Smart Merge`: Non-destructive multi-device conflict resolution uniting purchase ledger transactions, synchronizing active list items by `updatedAt` timestamps, merging store profiles, and pushing consolidated state back to both local storage and the cloud.
+- `Deterministic 3-Way Cloud Differential Merge Engine (Merge3)`: Non-destructive multi-device conflict resolution uniting purchase ledger transactions, synchronizing active list items by `updatedAt` timestamps, merging store profiles, and preserving user interactions made in-flight during async network requests via 3-way differential merge $\text{Merge3}(S_0, S_{\text{live}}, R)$.
+- `Deletion Tombstone Infrastructure & 30-Day TTL Pruning`: Explicit deletion tracking via `_deleted: { items, ledger, stores }` with ISO-8601 timestamps, preventing zombie item, ledger, or store resurrections across distributed devices, automatically pruned after 30 days (`TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000`).
   _Avoid_: Database driver, storage hook, backend adapter, cloud server sync.
 
 **Clipboard JSON Interchange**:
