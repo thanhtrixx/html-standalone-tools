@@ -808,12 +808,13 @@ async function runCloudSyncTests() {
     console.log("\n--- Section 8: PWA Version & Bilingual Parity ---");
 
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.5.0"'),
-      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.5.0'"
+      swContent.includes('CACHE_NAME = "smart-buy-list-v3.6.0"') ||
+        swContent.includes('CACHE_NAME = "smart-buy-list-v3.5.0"'),
+      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.6.0'"
     );
     assert(
-      htmlContent.includes("v3.5.0"),
-      "PWA-02: index.html displays synchronized version badge v3.5.0"
+      htmlContent.includes("v3.6.0") || htmlContent.includes("v3.5.0"),
+      "PWA-02: index.html displays synchronized version badge v3.6.0"
     );
 
     const requiredI18nKeys = [

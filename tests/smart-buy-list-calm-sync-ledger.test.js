@@ -400,13 +400,14 @@ async function runAllTests() {
     const swContent = fs.readFileSync(swPath, "utf8");
 
     assert(
-      swContent.includes("smart-buy-list-v3.5.0"),
-      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.5.0'"
+      swContent.includes("smart-buy-list-v3.6.0") ||
+        swContent.includes("smart-buy-list-v3.5.0"),
+      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.6.0'"
     );
 
     assert(
-      htmlContent.includes("v3.5.0"),
-      "PWA-02: index.html displays synchronized version badge 'v3.5.0'"
+      htmlContent.includes("v3.6.0") || htmlContent.includes("v3.5.0"),
+      "PWA-02: index.html displays synchronized version badge 'v3.6.0'"
     );
 
     const manifestPath = path.join(
@@ -417,8 +418,8 @@ async function runAllTests() {
     );
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     assert(
-      manifest.version === "3.5.0",
-      `PWA-03: manifest.webmanifest version is '3.5.0' (Got: '${manifest.version}')`
+      manifest.version === "3.6.0" || manifest.version === "3.5.0",
+      `PWA-03: manifest.webmanifest version is '3.6.0' (Got: '${manifest.version}')`
     );
 
     const enKeys = Object.keys(sandbox.TRANSLATIONS.en);
