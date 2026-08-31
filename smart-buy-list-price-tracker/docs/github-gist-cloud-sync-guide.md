@@ -1,4 +1,4 @@
-# GitHub Gist Cloud Sync Guide — Smart Buy-List (v3.5.0)
+# GitHub Gist Cloud Sync Guide — Smart Buy-List (v3.9.0)
 
 This guide provides step-by-step instructions for configuring, connecting, and utilizing **GitHub Gist Cloud Sync** in Smart Buy-List.
 
@@ -63,19 +63,21 @@ To allow the browser application to read and write your secret Gist without an i
 8. Upon successful authorization:
    - A success toast will appear: _"Connected to GitHub Gist!"_.
    - The Gist ID will be displayed along with a clickable link: **View on GitHub Gist ↗**.
-   - The Top App Bar will display the GitHub sync pill with a live indicator (🟢 **Synced**).
+   - The status pill in Option Hub will display 🟢 **Synced**.
 
 ---
 
 ## ⚡ Step 3: Day-to-Day Synchronization
 
-Once connected, synchronization operates seamlessly in the background:
+Once connected, synchronization operates seamlessly following our **Calm Cloud Sync** protocol:
 
-| Trigger                  | Description                                                                                                                                                                           |
-| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Data Mutations**       | Any change (adding items, editing prices, checking off items, changing stores, completing trips) automatically pushes to GitHub in the background after a 3-second debounce.          |
-| **Startup / App Launch** | Opening the app automatically pulls the latest state from your GitHub Gist, merges any remote changes made on your other devices, and updates your active buy list and price history. |
-| **Tab Re-focus**         | Returning to the browser tab after more than 60 seconds of inactivity triggers a background refresh.                                                                                  |
+| Trigger                   | Description                                                                                                                                                                                                       |
+| :------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Data Mutations**        | Any change (adding items, editing prices, checking off items, changing stores, completing trips) automatically pushes to GitHub in the background after a relaxed 15-second idle debounce (capped at 45 seconds). |
+| **Startup / App Launch**  | Opening the app automatically pulls the latest state from your GitHub Gist, merges any remote changes made on your other devices, and updates your active buy list and price history.                             |
+| **Tab Backgrounding**     | Switching away from the tab or locking your screen (`visibilitychange`) immediately flushes any pending debounced cloud sync.                                                                                     |
+| **Tab Re-focus / Wakeup** | Returning to the browser tab after more than 120 seconds of inactivity triggers a background refresh.                                                                                                             |
+| **Trip Completion**       | Finalizing a shopping trip immediately triggers an expedited cloud push.                                                                                                                                          |
 
 ---
 
@@ -117,4 +119,4 @@ Inside Option Hub (⚙️ > Cloud Sync > GitHub Gist), you can perform manual op
 
 ### Q: What happens if I hit GitHub rate limits?
 
-> **A:** Authenticated requests with a Personal Access Token have a generous limit of **5,000 requests per hour** on GitHub. Because Smart Buy-List debounces sync requests by 3 seconds, normal daily shopping list usage will only consume a tiny fraction (<0.5%) of this hourly limit.
+> **A:** Authenticated requests with a Personal Access Token have a generous limit of **5,000 requests per hour** on GitHub. Because Smart Buy-List debounces sync requests with a relaxed 15-second idle delay, normal daily shopping list usage will only consume a tiny fraction (<0.1%) of this hourly limit.

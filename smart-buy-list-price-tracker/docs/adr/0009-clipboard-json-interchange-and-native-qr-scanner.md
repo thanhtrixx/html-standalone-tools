@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-0018](./0018-share-enhancement-qr-removal-and-buy-mode-polish.md) (v3.9.0)
+
+> [!NOTE]
+> **Superseded Architectural Decision**: The in-app camera viewfinder (`#qrScannerModal`), camera streaming helpers, and browser-native `BarcodeDetector` integration were completely purged in [ADR-0018](./0018-share-enhancement-qr-removal-and-buy-mode-polish.md). Clipboard data interchange and settings file management were enhanced with a symmetrical 2x2 grid (`[Export File | Copy JSON] / [Import File | Paste JSON]`), formatted Markdown checklist copying, and standalone `.json` list downloads.
 
 ## Context
 

@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted (Extends [ADR-0001](./0001-indexeddb-storage-engine-and-google-drive-sync-seam.md))
+Partially Superseded by [ADR-0014](./0014-calm-cloud-sync-adaptive-ledger-and-vietnamese-flag-polish.md) and [ADR-0016](./0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md) (Extends [ADR-0001](./0001-indexeddb-storage-engine-and-google-drive-sync-seam.md))
+
+> [!NOTE]
+> **Active vs Superseded Decisions**: Google Drive AppData REST v3 sync, ephemeral GIS token handling, and the `IStorageProvider` seam remain active. The top-bar live status pill was relocated to Option Hub with a relaxed 15s calm debounce in [ADR-0014](./0014-calm-cloud-sync-adaptive-ledger-and-vietnamese-flag-polish.md), and the conflict resolution engine was upgraded to deterministic 3-way differential merge with deletion tombstones in [ADR-0016](./0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md).
 
 ## Context
 

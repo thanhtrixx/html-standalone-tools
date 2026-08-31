@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted
+Partially Superseded by [ADR-0014](./0014-calm-cloud-sync-adaptive-ledger-and-vietnamese-flag-polish.md), [ADR-0015](./0015-pwa-companion-asset-compaction-and-single-source-versioning.md), and [ADR-0018](./0018-share-enhancement-qr-removal-and-buy-mode-polish.md)
+
+> [!NOTE]
+> **Active vs Superseded Decisions**: URL hash state compression, Base64 encoding, Smart Merge protocol, and offline PWA architecture remain active. Dynamic third-party QR generation (`api.qrserver.com`) was purged in [ADR-0018](./0018-share-enhancement-qr-removal-and-buy-mode-polish.md), while PWA asset compaction and single-source versioning were established in [ADR-0015](./0015-pwa-companion-asset-compaction-and-single-source-versioning.md).
 
 ## Context
 
