@@ -2017,22 +2017,22 @@
             </button>
           </div>
 
-          <div
-            class="flex items-center justify-between pt-1 border-t border-slate-800/80"
-          >
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800/80">
             <button
               onclick="loadSampleData()"
               id="btnResetSampleData"
-              class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold"
+              class="px-3 py-2 bg-emerald-950/40 hover:bg-emerald-900/40 text-emerald-300 border border-emerald-800/60 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm cursor-pointer"
             >
-              Load Sample Data
+              <span>✨</span>
+              <span id="btnResetSampleDataText">Load Sample Data</span>
             </button>
             <button
               onclick="clearAllData(false)"
               id="btnClearAllDataInSettings"
-              class="text-xs text-red-400 hover:text-red-300 font-semibold"
+              class="px-3 py-2 bg-rose-950/40 hover:bg-rose-900/40 text-rose-300 border border-rose-800/60 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors active:scale-95 shadow-sm cursor-pointer"
             >
-              Clear All Data
+              <span>🗑️</span>
+              <span id="btnClearAllDataInSettingsText">Clear All Data</span>
             </button>
           </div>
         </div>
@@ -2060,6 +2060,18 @@
               class="text-[11px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800 font-medium"
               >Local / Offline</span
             >
+          </div>
+
+          <!-- Cloud Sync Diagnostic Error Alert Banner -->
+          <div
+            id="cloudSyncErrorBanner"
+            class="hidden p-2.5 bg-rose-950/50 border border-rose-800/80 rounded-xl text-rose-300 text-xs flex items-start gap-2"
+          >
+            <span class="text-sm">⚠️</span>
+            <div
+              id="cloudSyncErrorBannerText"
+              class="flex-1 leading-snug font-medium"
+            ></div>
           </div>
 
           <!-- Provider Selector Dropdown -->
@@ -2179,6 +2191,7 @@
               <button
                 id="btnGoogleSyncNow"
                 onclick="syncCloudNow()"
+                title="2-Way Smart Merge: Reconciles local and cloud changes non-destructively"
                 class="hidden items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold border border-slate-700 transition-all"
               >
                 <span>🔄</span>
@@ -2194,6 +2207,7 @@
               <button
                 id="btnForceUpload"
                 onclick="forceUploadCloud()"
+                title="1-Way Master Push: Forcefully overwrites cloud with this device's data"
                 class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-emerald-950/40 text-emerald-400 hover:text-emerald-300 border border-emerald-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
                 <span>⬆️</span>
@@ -2202,6 +2216,7 @@
               <button
                 id="btnForceDownload"
                 onclick="forceDownloadCloud()"
+                title="1-Way Master Pull: Forcefully replaces local data with cloud backup"
                 class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-sky-950/40 text-sky-400 hover:text-sky-300 border border-sky-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
                 <span>⬇️</span>
@@ -2320,6 +2335,7 @@
               <button
                 id="btnGithubSyncNow"
                 onclick="syncCloudNow()"
+                title="2-Way Smart Merge: Reconciles local and cloud changes non-destructively"
                 class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold border border-slate-700 transition-all"
               >
                 <span>🔄</span>
@@ -2335,6 +2351,7 @@
               <button
                 id="btnGithubForceUpload"
                 onclick="forceUploadCloud()"
+                title="1-Way Master Push: Forcefully overwrites cloud with this device's data"
                 class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-emerald-950/40 text-emerald-400 hover:text-emerald-300 border border-emerald-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
                 <span>⬆️</span>
@@ -2343,6 +2360,7 @@
               <button
                 id="btnGithubForceDownload"
                 onclick="forceDownloadCloud()"
+                title="1-Way Master Pull: Forcefully replaces local data with cloud backup"
                 class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-sky-950/40 text-sky-400 hover:text-sky-300 border border-sky-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
                 <span>⬇️</span>
@@ -2368,7 +2386,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.11.0</span
+              >v3.12.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -3679,8 +3697,21 @@
               if (existing) {
                 return existing.id;
               }
+            } else {
+              const errData = await listRes.json().catch(() => null);
+              const rateLimitMsg = parseGitHubRateLimitError(listRes, errData);
+              if (rateLimitMsg) {
+                throw new Error(rateLimitMsg);
+              }
             }
           } catch (e) {
+            if (
+              e.message &&
+              (e.message.includes("rate limit") ||
+                e.message.includes("giới hạn"))
+            ) {
+              throw e;
+            }
             console.warn("Gist auto-discovery error:", e);
           }
 
@@ -4459,30 +4490,87 @@
 
       async function forceUploadCloud() {
         const activeType = storageManager.getActiveProviderType();
-        if (activeType === "github" && !githubAuthState.token) return;
-        if (activeType === "googledrive" && !googleAuthState.accessToken)
-          return;
+        const lang =
+          memoryState?.settings?.language ||
+          (typeof currentLanguage !== "undefined" ? currentLanguage : "vi");
+        const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
 
-        showToast("Uploading local data to cloud...");
+        if (activeType === "github" && !githubAuthState.token) {
+          showToast(
+            tr.toast_github_missing_token ||
+              "Please connect with a valid GitHub token first."
+          );
+          return;
+        }
+        if (activeType === "googledrive" && !googleAuthState.accessToken) {
+          showToast(
+            tr.toast_gdrive_missing_auth ||
+              "Please sign in to Google Drive first."
+          );
+          return;
+        }
+
+        showToast(
+          tr.toast_uploading_cloud || "Uploading local data to cloud..."
+        );
         const res = await storageManager.sync(true, false);
-        if (res.success) showToast("Uploaded successfully!");
+        if (res && res.success) {
+          showToast(
+            tr.toast_upload_success || "Uploaded to cloud successfully!"
+          );
+        } else {
+          const errDetail = res?.error || "Unknown error";
+          const errTpl = tr.toast_upload_error || "Cloud upload failed: {msg}";
+          showToast(errTpl.replace("{msg}", errDetail));
+        }
       }
 
       async function forceDownloadCloud() {
         const activeType = storageManager.getActiveProviderType();
-        if (activeType === "github" && !githubAuthState.token) return;
-        if (activeType === "googledrive" && !googleAuthState.accessToken)
-          return;
+        const lang =
+          memoryState?.settings?.language ||
+          (typeof currentLanguage !== "undefined" ? currentLanguage : "vi");
+        const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
 
-        showToast("Downloading remote data from cloud...");
+        if (activeType === "github" && !githubAuthState.token) {
+          showToast(
+            tr.toast_github_missing_token ||
+              "Please connect with a valid GitHub token first."
+          );
+          return;
+        }
+        if (activeType === "googledrive" && !googleAuthState.accessToken) {
+          showToast(
+            tr.toast_gdrive_missing_auth ||
+              "Please sign in to Google Drive first."
+          );
+          return;
+        }
+
+        showToast(
+          tr.toast_downloading_cloud || "Downloading remote data from cloud..."
+        );
         const res = await storageManager.sync(false, true);
-        if (res.success) showToast("Downloaded and merged successfully!");
+        if (res && res.success) {
+          showToast(
+            tr.toast_download_success || "Downloaded and merged successfully!"
+          );
+        } else {
+          const errDetail = res?.error || "Unknown error";
+          const errTpl =
+            tr.toast_download_error || "Cloud download failed: {msg}";
+          showToast(errTpl.replace("{msg}", errDetail));
+        }
       }
 
       function updateSyncStatusUI(status) {
         if (typeof document === "undefined") return;
         const pill = document.getElementById("cloudSyncStatusPill");
         const lastTime = document.getElementById("cloudSyncLastTime");
+        const errorBanner = document.getElementById("cloudSyncErrorBanner");
+        const errorBannerText = document.getElementById(
+          "cloudSyncErrorBannerText"
+        );
 
         const gdrivePanel = document.getElementById("googleDriveSyncPanel");
         const githubPanel = document.getElementById("githubGistSyncPanel");
@@ -4547,13 +4635,16 @@
 
         let isConnected = false;
         let syncTime = null;
+        let currentError = null;
 
         if (activeType === "github") {
           isConnected = !!githubAuthState.token;
           syncTime = githubAuthState.lastSyncTime;
+          currentError = githubAuthState.lastError;
         } else if (activeType === "googledrive") {
           isConnected = !!googleAuthState.accessToken;
           syncTime = googleAuthState.lastSyncTime;
+          currentError = googleAuthState.lastError;
         }
 
         if (lastTime && syncTime) {
@@ -4573,24 +4664,32 @@
             pill.className =
               "text-[11px] text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-800/50 font-medium";
           }
+          if (errorBanner) errorBanner.classList.add("hidden");
+        } else if (status === "error" || (isConnected && currentError)) {
+          if (pill) {
+            pill.textContent = tr.cloud_sync_error || "Sync Error";
+            pill.className =
+              "text-[11px] text-red-400 bg-red-950/60 px-2 py-0.5 rounded-md border border-red-800/50 font-medium";
+          }
+          if (errorBanner && errorBannerText) {
+            errorBannerText.textContent =
+              currentError || tr.cloud_sync_error || "Sync Error";
+            errorBanner.classList.remove("hidden");
+          }
         } else if (status === "synced" || (isConnected && status !== "error")) {
           if (pill) {
             pill.textContent = tr.cloud_sync_synced || "Synced";
             pill.className =
               "text-[11px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-medium";
           }
-        } else if (status === "error") {
-          if (pill) {
-            pill.textContent = tr.cloud_sync_error || "Sync Error";
-            pill.className =
-              "text-[11px] text-red-400 bg-red-950/60 px-2 py-0.5 rounded-md border border-red-800/50 font-medium";
-          }
+          if (errorBanner) errorBanner.classList.add("hidden");
         } else {
           if (pill) {
             pill.textContent = tr.cloud_sync_offline || "Local / Offline";
             pill.className =
               "text-[11px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800 font-medium";
           }
+          if (errorBanner) errorBanner.classList.add("hidden");
         }
       }
 
@@ -4927,6 +5026,24 @@
             "Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)",
           lang_flag_toggle_en:
             "Language: 🇺🇸 United States (English) — Click to switch to 🇻🇳 Việt Nam (Tiếng Việt)",
+          toast_no_checked_items:
+            "Please check at least 1 purchased item before completing your trip.",
+          toast_uploading_cloud: "Uploading local data to cloud...",
+          toast_upload_success: "Uploaded to cloud successfully!",
+          toast_upload_error: "Cloud upload failed: {msg}",
+          toast_downloading_cloud: "Downloading remote data from cloud...",
+          toast_download_success: "Downloaded and merged successfully!",
+          toast_download_error: "Cloud download failed: {msg}",
+          toast_github_missing_token:
+            "Please connect with a valid GitHub token first.",
+          toast_gdrive_missing_auth: "Please sign in to Google Drive first.",
+          btn_clear_all_data_settings: "Clear All Data",
+          sync_now_tooltip:
+            "2-Way Smart Merge: Reconciles local and cloud changes non-destructively",
+          force_upload_tooltip:
+            "1-Way Master Push: Forcefully overwrites cloud with this device's data",
+          force_download_tooltip:
+            "1-Way Master Pull: Forcefully replaces local data with cloud backup",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -5225,6 +5342,24 @@
             "Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)",
           lang_flag_toggle_en:
             "Language: 🇺🇸 United States (English) — Click to switch to 🇻🇳 Việt Nam (Tiếng Việt)",
+          toast_no_checked_items:
+            "Vui lòng chọn ít nhất 1 mặt hàng đã mua trước khi hoàn thành chuyến đi.",
+          toast_uploading_cloud: "Đang tải dữ liệu lên đám mây...",
+          toast_upload_success: "Đã tải dữ liệu lên đám mây thành công!",
+          toast_upload_error: "Tải lên đám mây thất bại: {msg}",
+          toast_downloading_cloud: "Đang tải dữ liệu từ đám mây...",
+          toast_download_success: "Đã tải về và đồng bộ thành công!",
+          toast_download_error: "Tải về từ đám mây thất bại: {msg}",
+          toast_github_missing_token:
+            "Vui lòng kết nối mã Token GitHub hợp lệ trước.",
+          toast_gdrive_missing_auth: "Vui lòng đăng nhập Google Drive trước.",
+          btn_clear_all_data_settings: "Xoá Toàn Bộ Dữ Liệu",
+          sync_now_tooltip:
+            "Đồng bộ 2 chiều: Kết hợp thay đổi thiết bị và đám mây an toàn",
+          force_upload_tooltip:
+            "Tải lên cưỡng bức: Ghi đè dữ liệu thiết bị này lên đám mây",
+          force_download_tooltip:
+            "Tải về cưỡng bức: Ghi đè dữ liệu từ đám mây vào thiết bị này",
         },
       };
 
@@ -5462,13 +5597,13 @@
             tabInStore.className =
               "px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm";
           }
-          const hasItems =
+          const hasChecked =
             memoryState &&
             memoryState.activeList &&
             Array.isArray(memoryState.activeList.items) &&
-            memoryState.activeList.items.length > 0;
+            memoryState.activeList.items.some((i) => i.checked);
           if (finishBar) {
-            if (hasItems) {
+            if (hasChecked) {
               finishBar.classList.remove("hidden");
             } else {
               finishBar.classList.add("hidden");
@@ -6232,18 +6367,10 @@
 
         const finishBar = document.getElementById("finishTripBar");
         if (finishBar) {
-          if (currentPhase === "IN_STORE") {
-            if (filtered.length > 0) {
-              finishBar.classList.remove("hidden");
-            } else {
-              finishBar.classList.add("hidden");
-            }
-          } else if (currentPhase === "PLANNING") {
-            if (checkedItems.length > 0) {
-              finishBar.classList.remove("hidden");
-            } else {
-              finishBar.classList.add("hidden");
-            }
+          if (checkedItems.length > 0) {
+            finishBar.classList.remove("hidden");
+          } else {
+            finishBar.classList.add("hidden");
           }
         }
         const tripSummaryPrompt = document.getElementById("tripSummaryPrompt");
@@ -8250,9 +8377,19 @@
        9. TRIP COMPLETION & LEDGER LOGGING
        ========================================================================= */
       function openTripCompleteModal() {
-        const items = memoryState.activeList.items;
+        const items = memoryState.activeList.items || [];
         const checkedItems = items.filter((i) => i.checked);
         const uncheckedItems = items.filter((i) => !i.checked);
+
+        if (checkedItems.length === 0) {
+          const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          showToast(
+            t.toast_no_checked_items ||
+              "Please check at least 1 purchased item before completing your trip."
+          );
+          return;
+        }
+
         const totalSpent = checkedItems.reduce(
           (sum, i) => sum + (parseFloat(i.price) || 0),
           0
@@ -9177,8 +9314,16 @@
         el("btnCopyBackupJsonText", t.btn_copy_backup_json || "Copy JSON");
         el("btnImportBackupText", t.btn_import_json_backup);
         el("btnPasteJsonText", t.btn_paste_json || "Paste JSON");
-        el("btnResetSampleData", t.btn_load_sample_data);
-        el("btnClearAllDataInSettings", t.btn_clear_all_data);
+        el(
+          "btnResetSampleDataText",
+          t.btn_load_sample_data || "Load Sample Data"
+        );
+        el(
+          "btnClearAllDataInSettingsText",
+          t.btn_clear_all_data_settings ||
+            t.btn_clear_all_data ||
+            "Clear All Data"
+        );
         el("settingsSyncTitle", t.settings_sync_title);
         el("settingsSyncStatus", t.settings_sync_status);
         el("settingsSyncBadge", t.badge_local_only);
@@ -9227,6 +9372,13 @@
           t.btn_force_download || "Force Download from Cloud"
         );
 
+        const btnGSync = document.getElementById("btnGoogleSyncNow");
+        if (btnGSync) btnGSync.title = t.sync_now_tooltip || "";
+        const btnFU = document.getElementById("btnForceUpload");
+        if (btnFU) btnFU.title = t.force_upload_tooltip || "";
+        const btnFD = document.getElementById("btnForceDownload");
+        if (btnFD) btnFD.title = t.force_download_tooltip || "";
+
         // GitHub Gist Panel
         el(
           "githubTokenLabel",
@@ -9261,6 +9413,13 @@
           t.btn_force_download || "Force Download from Cloud"
         );
         el("githubViewGistLink", t.github_view_gist || "View Gist on GitHub ↗");
+
+        const btnGHSync = document.getElementById("btnGithubSyncNow");
+        if (btnGHSync) btnGHSync.title = t.sync_now_tooltip || "";
+        const btnGHFU = document.getElementById("btnGithubForceUpload");
+        if (btnGHFU) btnGHFU.title = t.force_upload_tooltip || "";
+        const btnGHFD = document.getElementById("btnGithubForceDownload");
+        if (btnGHFD) btnGHFD.title = t.force_download_tooltip || "";
 
         updateSyncStatusUI(storageManager.getCloudProviderStatus());
 
@@ -9777,6 +9936,7 @@
         window.handleTouchCancel = handleTouchCancel;
         window.handleItemSwipeAction = handleItemSwipeAction;
         window.renderStoreFilterOptions = renderStoreFilterOptions;
+        window.renderKpis = renderKpis;
         window.renderItemList = renderItemList;
         window.renderItemCard = renderItemCard;
         window.onStoreFilterChange = onStoreFilterChange;

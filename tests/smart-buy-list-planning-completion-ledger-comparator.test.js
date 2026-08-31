@@ -373,11 +373,12 @@ try {
     "PLAN-05: setTripPhase('PLANNING') hides finishTripBar when no checked items"
   );
 
-  // PLAN-06: IN_STORE shows finishTripBar when items exist in active list
+  // PLAN-06: IN_STORE shows finishTripBar when checked items exist in active list
+  sandbox.memoryState.activeList.items[0].checked = true;
   sandbox.setTripPhase("IN_STORE");
   assert(
     !elements["finishTripBar"].classList.contains("hidden"),
-    "PLAN-06A: finishTripBar is visible in IN_STORE mode when items exist"
+    "PLAN-06A: finishTripBar is visible in IN_STORE mode when checked items exist"
   );
 
   // PLAN-06B: IN_STORE hides finishTripBar when active list is empty

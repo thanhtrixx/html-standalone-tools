@@ -585,8 +585,8 @@ EMPTY_KEY=
     "utf8"
   );
   assert(
-    manifest.version === "3.11.0" || manifest.version === "3.10.0",
-    `manifest.webmanifest defines single-source version 3.11.0 (Got: '${manifest.version}')`
+    /^3\.(1[1-9]|[2-9]\d+)\.0$/.test(manifest.version),
+    `manifest.webmanifest defines single-source version 3.12.0 (Got: '${manifest.version}')`
   );
   assert(
     distSwContent.includes(

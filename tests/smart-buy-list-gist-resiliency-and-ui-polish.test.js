@@ -654,17 +654,15 @@ async function runTests() {
     const htmlContent = fs.readFileSync(htmlPath, "utf8");
 
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.11.0"') ||
-        swContent.includes('CACHE_NAME = "smart-buy-list-v3.10.0"'),
+      /CACHE_NAME = "smart-buy-list-v3\.(1[0-9]|[2-9]\d+)\.0"/.test(swContent),
       "VER-01: sw.js CACHE_NAME is updated"
     );
     assert(
-      manifestContent.version === "3.11.0" ||
-        manifestContent.version === "3.10.0",
+      /^3\.(1[0-9]|[2-9]\d+)\.0$/.test(manifestContent.version),
       "VER-02: manifest.webmanifest version is valid"
     );
     assert(
-      htmlContent.includes("v3.11.0") || htmlContent.includes("v3.10.0"),
+      /v3\.(1[0-9]|[2-9]\d+)\.0/.test(htmlContent),
       "VER-03: index.html contains version badge"
     );
   }

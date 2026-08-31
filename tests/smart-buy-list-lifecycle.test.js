@@ -185,12 +185,12 @@ try {
   );
 
   sandbox.memoryState.activeList.items = [
-    { id: "1", name: "Apple", price: 2, checked: false },
+    { id: "1", name: "Apple", price: 2, checked: true },
   ];
   sandbox.setTripPhase("IN_STORE");
   assert(
     !elements["finishTripBar"].classList.contains("hidden"),
-    "LIFE-01b: In-Store mode reveals sticky finishTripBar when active list has items"
+    "LIFE-01b: In-Store mode reveals sticky finishTripBar when active list has checked items"
   );
 
   sandbox.memoryState.activeList.items = [];

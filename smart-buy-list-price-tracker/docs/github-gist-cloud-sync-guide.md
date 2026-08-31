@@ -77,19 +77,39 @@ Once connected, synchronization operates seamlessly following our **Calm Cloud S
 
 ---
 
-## 🎛️ Manual Controls & Overrides
+## 🎛️ Manual Controls & Cloud Overrides Explained
 
-Inside Option Hub (⚙️ > Cloud Sync > GitHub Gist), you can perform manual operations:
+Inside Option Hub (⚙️ > Cloud Sync > GitHub Gist), you have three distinct synchronization actions:
 
-- **🔄 Sync Now**: Immediately executes a bidirectional smart merge with your GitHub Gist.
-- **Force Upload Local**: Overwrites your GitHub Gist with the current local device database.
-- **Force Download Cloud**: Overwrites your local device database with the latest cloud file from GitHub.
+### 1. 🔄 Sync Now (Two-Way Deterministic 3-Way Merge)
+
+- **What it does**: Fetches the latest remote data from your GitHub Gist, executes a deterministic 3-way merge (`merge3Way`) reconciling active items (by `updatedAt`), purchase ledgers (union by ID), and store profiles with 30-day deletion tombstones, then writes the unified database back to GitHub.
+- **When to use**: Everyday routine synchronization between your phone, tablet, and laptop. Safe and non-destructive.
+
+### 2. ⬆️ Force Upload to Cloud (One-Way Master Push)
+
+- **What it does**: Unconditionally serializes your current device's local database and forcefully overwrites the remote file (`smart_buy_list_data.json`) on GitHub Gist without reading or merging remote changes.
+- **When to use**: When your cloud backup is corrupted, dirty, or out-of-date, and you want your current device to be the absolute single source of truth.
+
+### 3. ⬇️ Force Download from Cloud (One-Way Master Pull)
+
+- **What it does**: Downloads the remote backup from GitHub Gist and completely replaces your local device database.
+- **When to use**: When setting up a new device or discarding local changes to restore from cloud backup.
+
 - **View on GitHub Gist ↗**: Opens your secret Gist on GitHub in a new browser tab.
 - **🚪 Disconnect**: Clears the stored token and Gist ID from memory and local storage, returning the app to local-only mode.
 
 ---
 
 ## ❓ Frequently Asked Questions (FAQ) & Troubleshooting
+
+### Q: What is the difference between "Sync Now" and "Force Upload to Cloud"?
+
+> **A:** **`Sync Now`** is a **two-way merge** that combines changes from both your device and GitHub without deleting data created on either side. In contrast, **`Force Upload to Cloud`** is a **one-way master overwrite** that replaces the entire cloud file with your local device's data, ignoring whatever was on the cloud.
+
+### Q: What happens if I encounter a GitHub API Rate Limit error?
+
+> **A:** GitHub applies an hourly request limit (5,000 requests/hour for authenticated Classic tokens) and secondary rate limits for bursts. When reached, Smart Buy-List automatically inspects the response headers (`x-ratelimit-reset` and `Retry-After`) and displays a precise countdown banner in Settings and toast alerts showing the exact local time and minutes until the limit resets (e.g., _"Đã đạt giới hạn yêu cầu GitHub API. Tự động mở lại lúc 18:45 (sau 25 phút)."_). Offline local operations continue uninterrupted during rate-limit cooldowns.
 
 ### Q: Is my GitHub Token secure?
 

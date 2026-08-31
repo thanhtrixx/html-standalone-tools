@@ -210,6 +210,7 @@ try {
     "\n--- Section 2: MD3 4-Destination Bottom Navigation Bar & Mode Switching ---"
   );
   sandbox.loadSampleData();
+  sandbox.memoryState.activeList.items[0].checked = true;
   sandbox.renderApp();
 
   // Switch to Buy Mode via setTripPhase('IN_STORE')
@@ -220,14 +221,15 @@ try {
   );
   assert(
     !elements["finishTripBar"].classList.contains("hidden"),
-    "MD3-04: Buy Mode unhides sticky finishTripBar"
+    "MD3-04: Buy Mode unhides sticky finishTripBar when checked items exist"
   );
   assert(
     elements["addItemSection"].classList.contains("hidden"),
     "MD3-05: Buy Mode collapses addItemSection for zero in-aisle distraction"
   );
 
-  // Switch back to Planning Mode
+  // Switch back to Planning Mode (with 0 checked items)
+  sandbox.memoryState.activeList.items[0].checked = false;
   sandbox.setTripPhase("PLANNING");
   assert(
     sandbox.currentPhase === "PLANNING",
@@ -240,7 +242,7 @@ try {
   );
   assert(
     elements["finishTripBar"].classList.contains("hidden"),
-    "MD3-08: Planning Mode hides finishTripBar"
+    "MD3-08: Planning Mode hides finishTripBar when no checked items"
   );
 
   // 3. ITEM-CENTRIC IN-AISLE COMPARATOR PRE-FILL
