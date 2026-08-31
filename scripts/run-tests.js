@@ -179,6 +179,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-v3-12-enhancements.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List v3.13.0 Full Item Edit, Streamlined Planning Card & Quick Add Simplification",
+    file: "tests/smart-buy-list-v3-13-enhancements.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {
