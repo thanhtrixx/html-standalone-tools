@@ -273,7 +273,7 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 
 ---
 
-### 18. GitHub Gist Cloud Sync & Multi-Provider Registry (v3.4.0)
+### 18. GitHub Gist Cloud Sync & Multi-Provider Registry (v3.5.0)
 
 | Test ID         | Scenario                                    | Assertion                                                                                                                                       |
 | :-------------- | :------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -289,7 +289,7 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **UI-GIST-01**  | Option Hub Provider Dropdown & GitHub Panel | Option Hub renders Cloud Provider dropdown (`none`, `googledrive`, `github`), PAT input with visibility toggle, Gist ID, and helper link.       |
 | **UI-GIST-02**  | Direct "View Gist on GitHub ↗" Link         | Displays clickable external link to `https://gist.github.com/<gist_id>` once Gist is identified/created.                                        |
 | **UI-GIST-03**  | Dynamic Top App Bar Octocat / Provider Pill | Top App Bar sync pill displays 🐙 GitHub icon when GitHub is active and reflects Synced (🟢), Syncing (🟡), Offline (⚪), and Error (🔴).       |
-| **PWA-02**      | PWA Version Bump Synchronization            | `sw.js` bumps cache name to `smart-buy-list-v3.4.0` and `index.html` displays synchronized version badge `v3.4.0`.                              |
+| **PWA-02**      | PWA Version Bump Synchronization            | `sw.js` bumps cache name to `smart-buy-list-v3.5.0` and `index.html` displays synchronized version badge `v3.5.0`.                              |
 | **I18N-02**     | Bilingual Parity for GitHub Gist UI         | 100% of GitHub sync translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                                     |
 
 ---

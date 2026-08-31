@@ -1,4 +1,4 @@
-# GitHub Gist Cloud Sync Guide — Smart Buy-List (v3.4.0)
+# GitHub Gist Cloud Sync Guide — Smart Buy-List (v3.5.0)
 
 This guide provides step-by-step instructions for configuring, connecting, and utilizing **GitHub Gist Cloud Sync** in Smart Buy-List.
 

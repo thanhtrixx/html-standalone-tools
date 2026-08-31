@@ -88,9 +88,9 @@ A composite provider wrapping `IndexedDBStorageProvider` as its local offline ca
   - Tab visibility focus pull (>60s inactivity).
   - Manual 1-tap "Sync Now".
 
-### 6. PWA Version Bump (`v3.4.0`)
+### 6. PWA Version Bump (`v3.5.0`)
 
-- Increments Service Worker cache to `smart-buy-list-v3.4.0` and application version badge to `v3.4.0`.
+- Increments Service Worker cache to `smart-buy-list-v3.5.0` and application version badge to `v3.5.0`.
 
 ```mermaid
 flowchart TD
