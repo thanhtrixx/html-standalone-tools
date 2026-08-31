@@ -107,352 +107,452 @@ function assert(condition, message) {
   }
 }
 
-console.log(
-  "\n🧪 Running Smart Buy-List URL Sharing & PWA Integration Test Suite...\n"
-);
-
-try {
-  const { sandbox } = loadBuyListSharingEngine();
-
-  // 1. URL STATE ENCODING & DECODING
-  console.log("--- Section 1: Serverless URL State Payload Compression ---");
-
-  assert(
-    typeof sandbox.encodeSharePayload === "function",
-    "encodeSharePayload function is exported globally"
-  );
-  assert(
-    typeof sandbox.decodeSharePayload === "function",
-    "decodeSharePayload function is exported globally"
+async function runTests() {
+  console.log(
+    "\n🧪 Running Smart Buy-List URL Sharing & PWA Integration Test Suite...\n"
   );
 
-  const sampleList = {
-    title: "Weekend Barbecue Haul",
-    items: [
+  try {
+    const { sandbox } = loadBuyListSharingEngine();
+
+    // 1. URL STATE ENCODING & DECODING
+    console.log("--- Section 1: Serverless URL State Payload Compression ---");
+
+    assert(
+      typeof sandbox.encodeSharePayload === "function",
+      "encodeSharePayload function is exported globally"
+    );
+    assert(
+      typeof sandbox.decodeSharePayload === "function",
+      "decodeSharePayload function is exported globally"
+    );
+
+    const sampleList = {
+      title: "Weekend Barbecue Haul",
+      items: [
+        {
+          id: "1",
+          name: "Ribeye Steak",
+          category: "meat_seafood",
+          store: "Costco",
+          quantity: 2,
+          unit: "kg",
+          price: 28.5,
+          checked: false,
+        },
+        {
+          id: "2",
+          name: "Charcoal Briquettes",
+          category: "household",
+          store: "Local Market",
+          quantity: 1,
+          unit: "pk",
+          price: 9.99,
+          checked: false,
+        },
+      ],
+    };
+
+    const encoded = sandbox.encodeSharePayload(sampleList);
+    assert(
+      typeof encoded === "string" && encoded.length > 0,
+      "SHARE-01a: Active list successfully serialized to base64 payload"
+    );
+
+    const decoded = sandbox.decodeSharePayload(encoded);
+    assert(
+      decoded !== null && decoded.title === "Weekend Barbecue Haul",
+      "SHARE-01b: Decoded payload preserves list title"
+    );
+    assert(
+      Array.isArray(decoded.items) && decoded.items.length === 2,
+      "SHARE-01c: Decoded payload preserves 2 shopping items"
+    );
+    assert(
+      decoded.items[0].name === "Ribeye Steak" &&
+        decoded.items[0].quantity === 2 &&
+        decoded.items[0].unit === "kg" &&
+        decoded.items[0].price === 28.5,
+      "SHARE-01d: Decoded item attributes strictly match original data"
+    );
+
+    // 1.5. HUMAN-READABLE CHECKLIST TEXT GENERATION & STANDALONE FILE EXPORT
+    console.log(
+      "\n--- Section 1.5: Human-Readable Checklist Text & Standalone File Export ---"
+    );
+
+    assert(
+      typeof sandbox.generateBuyListTextChecklist === "function",
+      "SHARE-01e: generateBuyListTextChecklist is exported globally"
+    );
+    assert(
+      typeof sandbox.copyBuyListTextChecklist === "function",
+      "SHARE-01f: copyBuyListTextChecklist is exported globally"
+    );
+    assert(
+      typeof sandbox.exportBuyListJsonFile === "function",
+      "SHARE-01g: exportBuyListJsonFile is exported globally"
+    );
+
+    const checklistText = sandbox.generateBuyListTextChecklist(sampleList);
+    assert(
+      checklistText.includes("Weekend Barbecue Haul") &&
+        checklistText.includes("- [ ] Ribeye Steak (2 kg [Costco])") &&
+        checklistText.includes(
+          "- [ ] Charcoal Briquettes (1 pk [Local Market])"
+        ) &&
+        checklistText.includes("#share="),
+      "SHARE-01h: generateBuyListTextChecklist formats title, items, store tags, and share link correctly"
+    );
+
+    let shareToast = "";
+    sandbox.showToast = (msg) => {
+      shareToast = msg;
+    };
+    sandbox.memoryState.activeList = sampleList;
+    await sandbox.copyBuyListTextChecklist();
+    assert(
+      shareToast.length > 0,
+      `SHARE-01i: copyBuyListTextChecklist triggers toast notification (Got: '${shareToast}')`
+    );
+
+    shareToast = "";
+    sandbox.exportBuyListJsonFile();
+    assert(
+      shareToast.length > 0,
+      `SHARE-01j: exportBuyListJsonFile triggers toast notification (Got: '${shareToast}')`
+    );
+
+    // 2. CORRUPTED & MALFORMED PAYLOAD RESILIENCE
+    console.log("\n--- Section 2: Error Resilience on Malformed Hash ---");
+
+    const corruptResult = sandbox.decodeSharePayload(
+      "invalid!!!not-base64-@@@"
+    );
+    assert(
+      corruptResult === null,
+      "SHARE-02: Corrupted share hash returns null gracefully without throwing"
+    );
+
+    // 3. RECIPIENT SMART MERGE PROTOCOL
+    console.log(
+      "\n--- Section 3: Smart Recipient Import & Deduplication Merge ---"
+    );
+
+    // Setup current active list with 1 existing item ("Ribeye Steak")
+    sandbox.memoryState.activeList.items = [
       {
-        id: "1",
+        id: "orig_1",
         name: "Ribeye Steak",
         category: "meat_seafood",
         store: "Costco",
-        quantity: 2,
-        unit: "kg",
-        price: 28.5,
-        checked: false,
-      },
-      {
-        id: "2",
-        name: "Charcoal Briquettes",
-        category: "household",
-        store: "Local Market",
         quantity: 1,
-        unit: "pk",
-        price: 9.99,
-        checked: false,
-      },
-    ],
-  };
-
-  const encoded = sandbox.encodeSharePayload(sampleList);
-  assert(
-    typeof encoded === "string" && encoded.length > 0,
-    "SHARE-01a: Active list successfully serialized to base64 payload"
-  );
-
-  const decoded = sandbox.decodeSharePayload(encoded);
-  assert(
-    decoded !== null && decoded.title === "Weekend Barbecue Haul",
-    "SHARE-01b: Decoded payload preserves list title"
-  );
-  assert(
-    Array.isArray(decoded.items) && decoded.items.length === 2,
-    "SHARE-01c: Decoded payload preserves 2 shopping items"
-  );
-  assert(
-    decoded.items[0].name === "Ribeye Steak" &&
-      decoded.items[0].quantity === 2 &&
-      decoded.items[0].unit === "kg" &&
-      decoded.items[0].price === 28.5,
-    "SHARE-01d: Decoded item attributes strictly match original data"
-  );
-
-  // 2. CORRUPTED & MALFORMED PAYLOAD RESILIENCE
-  console.log("\n--- Section 2: Error Resilience on Malformed Hash ---");
-
-  const corruptResult = sandbox.decodeSharePayload("invalid!!!not-base64-@@@");
-  assert(
-    corruptResult === null,
-    "SHARE-02: Corrupted share hash returns null gracefully without throwing"
-  );
-
-  // 3. RECIPIENT SMART MERGE PROTOCOL
-  console.log(
-    "\n--- Section 3: Smart Recipient Import & Deduplication Merge ---"
-  );
-
-  // Setup current active list with 1 existing item ("Ribeye Steak")
-  sandbox.memoryState.activeList.items = [
-    {
-      id: "orig_1",
-      name: "Ribeye Steak",
-      category: "meat_seafood",
-      store: "Costco",
-      quantity: 1,
-      unit: "kg",
-      price: 15.0,
-      checked: false,
-    },
-  ];
-
-  // Incoming shared list has "Ribeye Steak" (duplicate name) + "Hamburger Buns" (new item)
-  sandbox.pendingSharedList = {
-    title: "Incoming BBQ",
-    items: [
-      {
-        id: "inc_1",
-        name: "Ribeye Steak",
-        category: "meat_seafood",
-        store: "Costco",
-        quantity: 2,
         unit: "kg",
-        price: 28.5,
+        price: 15.0,
         checked: false,
       },
-      {
-        id: "inc_2",
-        name: "Hamburger Buns",
-        category: "bakery",
-        store: "Trader Joe's",
-        quantity: 1,
-        unit: "pk",
-        price: 2.99,
-        checked: false,
-      },
-    ],
-  };
+    ];
 
-  // Execute MERGE
-  sandbox.confirmImport("MERGE");
-  assert(
-    sandbox.memoryState.activeList.items.length === 2,
-    "MERGE-01: Merging deduplicates 'Ribeye Steak' and appends 'Hamburger Buns' (Total: 2 items)"
-  );
-  assert(
-    sandbox.memoryState.activeList.items.some(
-      (i) => i.name === "Hamburger Buns"
-    ),
-    "MERGE-02: New item 'Hamburger Buns' exists in merged active list"
-  );
+    // Incoming shared list has "Ribeye Steak" (duplicate name) + "Hamburger Buns" (new item)
+    sandbox.pendingSharedList = {
+      title: "Incoming BBQ",
+      items: [
+        {
+          id: "inc_1",
+          name: "Ribeye Steak",
+          category: "meat_seafood",
+          store: "Costco",
+          quantity: 2,
+          unit: "kg",
+          price: 28.5,
+          checked: false,
+        },
+        {
+          id: "inc_2",
+          name: "Hamburger Buns",
+          category: "bakery",
+          store: "Trader Joe's",
+          quantity: 1,
+          unit: "pk",
+          price: 2.99,
+          checked: false,
+        },
+      ],
+    };
 
-  // Execute REPLACE
-  sandbox.confirmImport("REPLACE");
-  assert(
-    sandbox.memoryState.activeList.items.length === 2,
-    "REPLACE-01: Replace mode overwrites active list with incoming items"
-  );
-
-  // 4. SERVICE WORKER, ICON & WEB APP MANIFEST FILE CHECKS
-  console.log(
-    "\n--- Section 4: Progressive Web Application (PWA) & Icon Artifacts ---"
-  );
-
-  const iconPath = path.join(
-    __dirname,
-    "..",
-    "smart-buy-list-price-tracker",
-    "icon.svg"
-  );
-  assert(fs.existsSync(iconPath), "PWA-01: icon.svg exists in tool directory");
-
-  const iconContent = fs.existsSync(iconPath)
-    ? fs.readFileSync(iconPath, "utf8")
-    : "";
-  assert(
-    iconContent.includes("<svg") &&
-      iconContent.includes('viewBox="0 0 512 512"') &&
-      iconContent.includes("</svg>"),
-    "PWA-02: icon.svg defines a valid 512x512 scalable vector graphic"
-  );
-
-  const htmlPath = path.join(
-    __dirname,
-    "..",
-    "smart-buy-list-price-tracker",
-    "index.html"
-  );
-  const rawHtml = fs.readFileSync(htmlPath, "utf8");
-  assert(
-    rawHtml.includes('rel="icon"') && rawHtml.includes('href="./icon.svg"'),
-    "PWA-03: index.html links to ./icon.svg as primary favicon"
-  );
-  assert(
-    rawHtml.includes('rel="apple-touch-icon"') &&
-      rawHtml.includes('href="./icon.svg"'),
-    "PWA-04: index.html links to ./icon.svg as apple-touch-icon"
-  );
-  assert(
-    rawHtml.includes('name="apple-mobile-web-app-capable"') &&
-      rawHtml.includes('content="yes"'),
-    "PWA-05: index.html declares apple-mobile-web-app-capable meta tag"
-  );
-  assert(
-    rawHtml.includes('name="apple-mobile-web-app-title"') &&
-      rawHtml.includes('content="BuyList"'),
-    "PWA-06: index.html declares apple-mobile-web-app-title meta tag"
-  );
-
-  const manifestPath = path.join(
-    __dirname,
-    "..",
-    "smart-buy-list-price-tracker",
-    "manifest.webmanifest"
-  );
-  assert(
-    fs.existsSync(manifestPath),
-    "PWA-07: manifest.webmanifest exists in tool directory"
-  );
-
-  const manifestContent = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  assert(
-    manifestContent.display === "standalone",
-    "PWA-08: Manifest display mode is configured as 'standalone'"
-  );
-  assert(
-    manifestContent.name === "Smart Buy-List & Unit Price Tracker",
-    "PWA-09: Manifest name is correctly configured"
-  );
-  assert(
-    Array.isArray(manifestContent.icons) && manifestContent.icons.length >= 2,
-    "PWA-10: Manifest contains multiple app icon configurations"
-  );
-  assert(
-    manifestContent.icons.some(
-      (icon) =>
-        icon.src === "./icon.svg" &&
-        icon.purpose === "any" &&
-        icon.type === "image/svg+xml"
-    ),
-    "PWA-11: Manifest declares ./icon.svg with purpose 'any'"
-  );
-  assert(
-    manifestContent.icons.some(
-      (icon) =>
-        icon.src === "./icon.svg" &&
-        icon.purpose === "maskable" &&
-        icon.type === "image/svg+xml"
-    ),
-    "PWA-12: Manifest declares ./icon.svg with purpose 'maskable'"
-  );
-
-  const swPath = path.join(
-    __dirname,
-    "..",
-    "smart-buy-list-price-tracker",
-    "sw.js"
-  );
-  assert(fs.existsSync(swPath), "PWA-13: sw.js exists in tool directory");
-
-  const swContent = fs.readFileSync(swPath, "utf8");
-  assert(
-    /CACHE_NAME = "smart-buy-list-v3\.[2-9]\.0"/.test(swContent),
-    "PWA-14: sw.js bumps cache version to smart-buy-list-v3.2.0 or higher"
-  );
-  assert(
-    /v3\.[2-9]\.0/.test(rawHtml) && rawHtml.includes('id="pwaVersionBadge"'),
-    "PWA-14b: index.html displays synchronized version badge v3.2.0 or higher"
-  );
-  assert(
-    swContent.includes('"./icon.svg"') || swContent.includes("'./icon.svg'"),
-    "PWA-15: sw.js pre-caches ./icon.svg in ASSETS_TO_CACHE"
-  );
-  assert(
-    swContent.includes("CACHE_NAME") &&
-      swContent.includes("fetch") &&
-      swContent.includes("caches.match"),
-    "PWA-16: sw.js implements fetch interceptor"
-  );
-  assert(
-    swContent.includes("navigate") &&
-      swContent.includes("text/html") &&
-      (swContent.includes("Promise.race") || swContent.includes("setTimeout")),
-    "PWA-17: sw.js implements Network-First strategy with timeout for navigation/HTML requests"
-  );
-  assert(
-    swContent.includes("SKIP_WAITING") && swContent.includes("skipWaiting"),
-    "PWA-18: sw.js handles message event with SKIP_WAITING to invoke skipWaiting()"
-  );
-
-  // 5. CLIENT UPDATE LIFECYCLE & OPTION HUB CACHE CONTROLS
-  console.log(
-    "\n--- Section 5: Client Update Lifecycle & Option Hub QA Controls ---"
-  );
-
-  assert(
-    rawHtml.includes('id="pwaUpdateToast"'),
-    "PWA-19: index.html contains #pwaUpdateToast element"
-  );
-  assert(
-    rawHtml.includes('id="btnApplyPwaUpdate"') ||
-      rawHtml.includes("applyPwaUpdate()"),
-    "PWA-20: index.html contains update trigger button"
-  );
-  assert(
-    typeof sandbox.showUpdateToast === "function",
-    "PWA-21: showUpdateToast function is exported globally"
-  );
-  assert(
-    typeof sandbox.applyPwaUpdate === "function",
-    "PWA-22: applyPwaUpdate function is exported globally"
-  );
-  assert(
-    typeof sandbox.checkForUpdates === "function",
-    "PWA-23: checkForUpdates function is exported globally"
-  );
-  assert(
-    typeof sandbox.purgeCacheAndReload === "function",
-    "PWA-24: purgeCacheAndReload function is exported globally"
-  );
-  assert(
-    rawHtml.includes("checkForUpdates()") &&
-      rawHtml.includes("purgeCacheAndReload()"),
-    "PWA-25: Option Hub settings modal contains Check Updates and Purge Cache actions"
-  );
-
-  // Check translation dictionary parity for PWA update keys
-  const enDict = sandbox.TRANSLATIONS?.en || {};
-  const viDict = sandbox.TRANSLATIONS?.vi || {};
-  const updateKeys = [
-    "update_available_title",
-    "update_available_desc",
-    "update_btn_refresh",
-    "check_updates_btn",
-    "purge_cache_btn",
-    "up_to_date_msg",
-    "checking_updates_msg",
-  ];
-
-  updateKeys.forEach((k) => {
+    // Execute MERGE
+    sandbox.confirmImport("MERGE");
     assert(
-      typeof enDict[k] === "string" && enDict[k].length > 0,
-      `PWA-I18N: English translation exists for '${k}'`
+      sandbox.memoryState.activeList.items.length === 2,
+      "MERGE-01: Merging deduplicates 'Ribeye Steak' and appends 'Hamburger Buns' (Total: 2 items)"
     );
     assert(
-      typeof viDict[k] === "string" && viDict[k].length > 0,
-      `PWA-I18N: Vietnamese translation exists for '${k}'`
+      sandbox.memoryState.activeList.items.some(
+        (i) => i.name === "Hamburger Buns"
+      ),
+      "MERGE-02: New item 'Hamburger Buns' exists in merged active list"
     );
-  });
-} catch (err) {
-  console.error("❌ Test Execution Error:", err);
-  failed++;
+
+    // Execute REPLACE
+    sandbox.confirmImport("REPLACE");
+    assert(
+      sandbox.memoryState.activeList.items.length === 2,
+      "REPLACE-01: Replace mode overwrites active list with incoming items"
+    );
+
+    // 4. SERVICE WORKER, ICON & WEB APP MANIFEST FILE CHECKS
+    console.log(
+      "\n--- Section 4: Progressive Web Application (PWA) & Icon Artifacts ---"
+    );
+
+    const iconPath = path.join(
+      __dirname,
+      "..",
+      "smart-buy-list-price-tracker",
+      "icon.svg"
+    );
+    assert(
+      fs.existsSync(iconPath),
+      "PWA-01: icon.svg exists in tool directory"
+    );
+
+    const iconContent = fs.existsSync(iconPath)
+      ? fs.readFileSync(iconPath, "utf8")
+      : "";
+    assert(
+      iconContent.includes("<svg") &&
+        iconContent.includes('viewBox="0 0 512 512"') &&
+        iconContent.includes("</svg>"),
+      "PWA-02: icon.svg defines a valid 512x512 scalable vector graphic"
+    );
+
+    const htmlPath = path.join(
+      __dirname,
+      "..",
+      "smart-buy-list-price-tracker",
+      "index.html"
+    );
+    const rawHtml = fs.readFileSync(htmlPath, "utf8");
+    assert(
+      rawHtml.includes('rel="icon"') && rawHtml.includes('href="./icon.svg"'),
+      "PWA-03: index.html links to ./icon.svg as primary favicon"
+    );
+    assert(
+      rawHtml.includes('rel="apple-touch-icon"') &&
+        rawHtml.includes('href="./icon.svg"'),
+      "PWA-04: index.html links to ./icon.svg as apple-touch-icon"
+    );
+    assert(
+      rawHtml.includes('name="apple-mobile-web-app-capable"') &&
+        rawHtml.includes('content="yes"'),
+      "PWA-05: index.html declares apple-mobile-web-app-capable meta tag"
+    );
+    assert(
+      rawHtml.includes('name="apple-mobile-web-app-title"') &&
+        rawHtml.includes('content="BuyList"'),
+      "PWA-06: index.html declares apple-mobile-web-app-title meta tag"
+    );
+
+    const manifestPath = path.join(
+      __dirname,
+      "..",
+      "smart-buy-list-price-tracker",
+      "manifest.webmanifest"
+    );
+    assert(
+      fs.existsSync(manifestPath),
+      "PWA-07: manifest.webmanifest exists in tool directory"
+    );
+
+    const manifestContent = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    assert(
+      manifestContent.display === "standalone",
+      "PWA-08: Manifest display mode is configured as 'standalone'"
+    );
+    assert(
+      manifestContent.name === "Smart Buy-List & Unit Price Tracker",
+      "PWA-09: Manifest name is correctly configured"
+    );
+    assert(
+      Array.isArray(manifestContent.icons) && manifestContent.icons.length >= 2,
+      "PWA-10: Manifest contains multiple app icon configurations"
+    );
+    assert(
+      manifestContent.icons.some(
+        (icon) =>
+          icon.src === "./icon.svg" &&
+          icon.purpose === "any" &&
+          icon.type === "image/svg+xml"
+      ),
+      "PWA-11: Manifest declares ./icon.svg with purpose 'any'"
+    );
+    assert(
+      manifestContent.icons.some(
+        (icon) =>
+          icon.src === "./icon.svg" &&
+          icon.purpose === "maskable" &&
+          icon.type === "image/svg+xml"
+      ),
+      "PWA-12: Manifest declares ./icon.svg with purpose 'maskable'"
+    );
+
+    const swPath = path.join(
+      __dirname,
+      "..",
+      "smart-buy-list-price-tracker",
+      "sw.js"
+    );
+    assert(fs.existsSync(swPath), "PWA-13: sw.js exists in tool directory");
+
+    const swContent = fs.readFileSync(swPath, "utf8");
+    assert(
+      /CACHE_NAME = "smart-buy-list-v3\.[2-9]\.0"/.test(swContent),
+      "PWA-14: sw.js bumps cache version to smart-buy-list-v3.2.0 or higher"
+    );
+    assert(
+      /v3\.[2-9]\.0/.test(rawHtml) && rawHtml.includes('id="pwaVersionBadge"'),
+      "PWA-14b: index.html displays synchronized version badge v3.2.0 or higher"
+    );
+    assert(
+      swContent.includes('"./icon.svg"') || swContent.includes("'./icon.svg'"),
+      "PWA-15: sw.js pre-caches ./icon.svg in ASSETS_TO_CACHE"
+    );
+    assert(
+      swContent.includes("CACHE_NAME") &&
+        swContent.includes("fetch") &&
+        swContent.includes("caches.match"),
+      "PWA-16: sw.js implements fetch interceptor"
+    );
+    assert(
+      swContent.includes("navigate") &&
+        swContent.includes("text/html") &&
+        (swContent.includes("Promise.race") ||
+          swContent.includes("setTimeout")),
+      "PWA-17: sw.js implements Network-First strategy with timeout for navigation/HTML requests"
+    );
+    assert(
+      swContent.includes("SKIP_WAITING") && swContent.includes("skipWaiting"),
+      "PWA-18: sw.js handles message event with SKIP_WAITING to invoke skipWaiting()"
+    );
+
+    // 5. CLIENT UPDATE LIFECYCLE & OPTION HUB CACHE CONTROLS
+    console.log(
+      "\n--- Section 5: Client Update Lifecycle & Option Hub QA Controls ---"
+    );
+
+    assert(
+      rawHtml.includes('id="pwaUpdateToast"'),
+      "PWA-19: index.html contains #pwaUpdateToast element"
+    );
+    assert(
+      rawHtml.includes('id="btnApplyPwaUpdate"') ||
+        rawHtml.includes("applyPwaUpdate()"),
+      "PWA-20: index.html contains update trigger button"
+    );
+    assert(
+      typeof sandbox.showUpdateToast === "function",
+      "PWA-21: showUpdateToast function is exported globally"
+    );
+    assert(
+      typeof sandbox.applyPwaUpdate === "function",
+      "PWA-22: applyPwaUpdate function is exported globally"
+    );
+    assert(
+      typeof sandbox.checkForUpdates === "function",
+      "PWA-23: checkForUpdates function is exported globally"
+    );
+    assert(
+      typeof sandbox.purgeCacheAndReload === "function",
+      "PWA-24: purgeCacheAndReload function is exported globally"
+    );
+    assert(
+      rawHtml.includes("checkForUpdates()") &&
+        rawHtml.includes("purgeCacheAndReload()"),
+      "PWA-25: Option Hub settings modal contains Check Updates and Purge Cache actions"
+    );
+
+    // Check translation dictionary parity for PWA update keys
+    const enDict = sandbox.TRANSLATIONS?.en || {};
+    const viDict = sandbox.TRANSLATIONS?.vi || {};
+    const updateKeys = [
+      "update_available_title",
+      "update_available_desc",
+      "update_btn_refresh",
+      "check_updates_btn",
+      "purge_cache_btn",
+      "up_to_date_msg",
+      "checking_updates_msg",
+    ];
+
+    updateKeys.forEach((k) => {
+      assert(
+        typeof enDict[k] === "string" && enDict[k].length > 0,
+        `PWA-I18N: English translation exists for '${k}'`
+      );
+      assert(
+        typeof viDict[k] === "string" && viDict[k].length > 0,
+        `PWA-I18N: Vietnamese translation exists for '${k}'`
+      );
+    });
+
+    // 6. ENHANCED SHARE MODAL DOM & TRANSLATION PARITY
+    console.log("\n--- Section 6: Enhanced Share Modal DOM & I18n Parity ---");
+
+    assert(
+      !rawHtml.includes('id="shareQrContainer"'),
+      "SHARE-DOM-01: #shareQrContainer is removed from share modal markup"
+    );
+    assert(
+      !rawHtml.includes('id="qrHintText"'),
+      "SHARE-DOM-02: #qrHintText is removed from share modal markup"
+    );
+    assert(
+      rawHtml.includes('id="btnCopyTextChecklist"'),
+      "SHARE-DOM-03: #btnCopyTextChecklist button exists in share modal markup"
+    );
+    assert(
+      rawHtml.includes('id="btnExportBuyListFile"'),
+      "SHARE-DOM-04: #btnExportBuyListFile button exists in share modal markup"
+    );
+
+    const shareKeys = [
+      "share_modal_title",
+      "share_modal_desc",
+      "btn_native_share",
+      "btn_copy_text_checklist",
+      "btn_copy_url",
+      "btn_export_buylist_file",
+      "toast_share_copied",
+      "toast_text_checklist_copied",
+      "toast_list_file_exported",
+    ];
+
+    shareKeys.forEach((k) => {
+      assert(
+        typeof enDict[k] === "string" && enDict[k].length > 0,
+        `SHARE-I18N: English translation exists for '${k}'`
+      );
+      assert(
+        typeof viDict[k] === "string" && viDict[k].length > 0,
+        `SHARE-I18N: Vietnamese translation exists for '${k}'`
+      );
+    });
+  } catch (err) {
+    console.error("❌ Test Execution Error:", err);
+    failed++;
+  }
+
+  console.log("\n==================================================");
+  console.log(
+    `📊 Sharing & PWA Test Summary: ${passed} Passed, ${failed} Failed`
+  );
+  console.log("==================================================\n");
+
+  if (failed > 0) {
+    process.exit(1);
+  } else {
+    process.exit(0);
+  }
 }
 
-console.log("\n==================================================");
-console.log(
-  `📊 Sharing & PWA Test Summary: ${passed} Passed, ${failed} Failed`
-);
-console.log("==================================================\n");
-
-if (failed > 0) {
-  process.exit(1);
-} else {
-  process.exit(0);
-}
+runTests();
