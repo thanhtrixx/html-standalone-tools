@@ -142,3 +142,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0022: Full Item Edit, Streamlined Planning Card, Quick Add Simplification & Store Icon Consistency](./docs/adr/0022-full-item-edit-streamlined-planning-card-quick-add-simplification-and-store-icon-consistency.md)
 - [ADR-0023: Harden parseSmartGroceryInput Parser, Store Aliases & Validation Guards](./docs/adr/0023-harden-smart-grocery-input-parser-and-store-aliases.md)
 - [ADR-0024: innerHTML User Input Sanitization & Content-Security-Policy Meta Tag](./docs/adr/0024-sanitize-innerhtml-and-content-security-policy.md)
+- [ADR-0025: IndexedDB Storage Engine & GitHub PAT Security Migration](./docs/adr/0025-indexeddb-storage-engine-and-pat-security-migration.md)
