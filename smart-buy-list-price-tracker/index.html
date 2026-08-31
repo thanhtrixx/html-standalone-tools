@@ -5443,7 +5443,18 @@
             tabInStore.className =
               "px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm";
           }
-          if (finishBar) finishBar.classList.remove("hidden");
+          const hasItems =
+            memoryState &&
+            memoryState.activeList &&
+            Array.isArray(memoryState.activeList.items) &&
+            memoryState.activeList.items.length > 0;
+          if (finishBar) {
+            if (hasItems) {
+              finishBar.classList.remove("hidden");
+            } else {
+              finishBar.classList.add("hidden");
+            }
+          }
           const tripSummaryPrompt =
             document.getElementById("tripSummaryPrompt");
           if (tripSummaryPrompt) {
@@ -6037,7 +6048,11 @@
         const finishBar = document.getElementById("finishTripBar");
         if (finishBar) {
           if (currentPhase === "IN_STORE") {
-            finishBar.classList.remove("hidden");
+            if (filtered.length > 0) {
+              finishBar.classList.remove("hidden");
+            } else {
+              finishBar.classList.add("hidden");
+            }
           } else if (currentPhase === "PLANNING") {
             if (checkedItems.length > 0) {
               finishBar.classList.remove("hidden");

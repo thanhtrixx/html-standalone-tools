@@ -373,11 +373,24 @@ try {
     "PLAN-05: setTripPhase('PLANNING') hides finishTripBar when no checked items"
   );
 
-  // PLAN-06: IN_STORE always shows finishTripBar regardless of checked count
+  // PLAN-06: IN_STORE shows finishTripBar when items exist in active list
   sandbox.setTripPhase("IN_STORE");
   assert(
     !elements["finishTripBar"].classList.contains("hidden"),
-    "PLAN-06: finishTripBar always visible in IN_STORE mode"
+    "PLAN-06A: finishTripBar is visible in IN_STORE mode when items exist"
+  );
+
+  // PLAN-06B: IN_STORE hides finishTripBar when active list is empty
+  sandbox.memoryState.activeList.items = [];
+  sandbox.setTripPhase("IN_STORE");
+  assert(
+    elements["finishTripBar"].classList.contains("hidden"),
+    "PLAN-06B: finishTripBar is hidden in IN_STORE mode when active list is empty"
+  );
+  sandbox.renderItemList();
+  assert(
+    elements["finishTripBar"].classList.contains("hidden"),
+    "PLAN-06C: renderItemList hides finishTripBar in IN_STORE mode when active list is empty"
   );
 
   // PLAN-07: tripSummaryPrompt shows in-store text in Buy mode
