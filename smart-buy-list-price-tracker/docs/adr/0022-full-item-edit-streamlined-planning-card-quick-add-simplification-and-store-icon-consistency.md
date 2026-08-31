@@ -62,13 +62,12 @@ Following user feedback on real-world grocery shopping and planning workflows in
     - **Desktop (`>= 640px`)**: Full descriptive badge (`🟢 Great Deal`, `🟡 Fair Price`, `🔴 Price Spike`, `⚪ New Item`).
   - Historical All-Time Low (ATL) benchmark (`ATL: 30.000 ₫/kg` or `New Item`).
 - **Row 3 (Actions & Spend)**:
-  - Action Toolbar: `[ ⚖️ Compare ]`, `[ ✏️ Edit ]`, and `[ 🗑️ ]` compact red-tinted icon button.
+  - Action Toolbar: `[ ⚖️ Compare ]`, `[ ✏️ Edit ]`, and `[ 🗑️ Remove ]` / `[ 🗑️ Xoá ]` red-tinted action button.
   - Right: Total estimated package price (`35.000 ₫`).
 
 ### 3. Unified Delete Action Ergonomics & Vocabulary
 
-- Standardized the Planning Card delete button to a compact red-tinted icon button `[ 🗑️ ]` (`bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded-lg`) matching the Historical Purchase Ledger design.
-- Standardized terminology across the application to **"Delete" / "Delete Item"** (`delete_btn` / `Xoá`), removing ambiguous "Remove" synonyms.
+- Standardized the Planning Card delete button to a red-tinted action button `[ 🗑️ Remove ]` / `[ 🗑️ Xoá ]` (`bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/40 rounded-lg`) matching the structural ergonomics of adjacent Compare and Edit buttons.
 
 ### 4. Quick Add Omnibox Simplification
 
@@ -87,7 +86,12 @@ Following user feedback on real-world grocery shopping and planning workflows in
   - Store Manager dialog header uses standard tool icon `⚙️ Manage Stores` / `Quản lý cửa hàng`.
   - Settings Store Manager entry uses clean standard styling.
 
-### 6. Single-Source PWA Version Bump (v3.13.0)
+### 6. Header Bar Uniform Height & Currency Order Polish
+
+- Standardized all 4 header action controls (`langToggleBtn`, `themeToggleBtn`, Share button, and `btnOpenSettings`) with uniform `h-8` height and `inline-flex items-center justify-center` alignment.
+- Elevated `VND (₫)` to the top option in Settings Default Currency (`#settingsCurrencySelect`).
+
+### 7. Single-Source PWA Version Bump (v3.13.0)
 
 - Version bumped to `3.13.0` across `manifest.webmanifest`, `sw.js` (`CACHE_NAME = "smart-buy-list-v3.13.0"`), and `index.html` badge.
 

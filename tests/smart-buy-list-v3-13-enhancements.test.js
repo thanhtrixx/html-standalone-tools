@@ -467,6 +467,10 @@ async function runTestSuite() {
     pCard.includes("🗑️"),
     "DEL-03: Planning Card delete button features 🗑️ trash icon"
   );
+  assert(
+    pCard.includes("Remove") || pCard.includes("Xoá"),
+    "DEL-04: Planning Card delete button includes text label matching TRANSLATIONS.remove_btn"
+  );
 
   // ==================== SECTION 5: Full-Width Quick Add Omnibox & Store Dropdown Removal ====================
   console.log(
@@ -516,9 +520,9 @@ async function runTestSuite() {
   // ==================== SECTION 6: Clean Store Typography & Emoji Purge ====================
   console.log("\n--- SECTION 6: Clean Store Typography & Emoji Purge ---");
   // Check Group By Store header in renderItemList
-  sb.currentGrouping = "BY_STORE";
+  sb.currentGrouping = "STORE";
   sb.renderItemList();
-  const itemListEl = sb.document.getElementById("itemListContainer");
+  const itemListEl = sb.document.getElementById("activeItemsList");
   assert(
     !itemListEl.innerHTML.includes("<span>🏪</span>"),
     "STORE-01: 'By Store' group headers do not contain 🏪 store emoji"
@@ -605,6 +609,31 @@ async function runTestSuite() {
     missingInEn.length,
     0,
     `I18N-PARITY-VI→EN: 100% Vietnamese keys exist in English (Missing: ${missingInEn.join(", ") || "None"})`
+  );
+  // ==================== SECTION 9: Header Uniform Heights & Top VND Option ====================
+  console.log("\n--- SECTION 9: Header Uniform Heights & Top VND Option ---");
+  const currencyMatch = htmlContent.match(
+    /<select[^>]*id="settingsCurrencySelect"[^>]*>([\s\S]*?)<\/select>/i
+  );
+  assert(
+    currencyMatch && currencyMatch[1].trim().startsWith('<option value="VND">'),
+    "CUR-01: #settingsCurrencySelect lists VND as the top/first option"
+  );
+
+  assert(
+    htmlContent.includes('id="langToggleBtn"') &&
+      htmlContent.includes("h-8 px-2 bg-slate-800"),
+    "HDR-01: langToggleBtn uses standardized h-8 height"
+  );
+  assert(
+    htmlContent.includes('id="themeToggleBtn"') &&
+      htmlContent.includes("h-8 w-8 bg-slate-800"),
+    "HDR-02: themeToggleBtn uses standardized h-8 height"
+  );
+  assert(
+    htmlContent.includes('id="btnOpenSettings"') &&
+      htmlContent.includes("h-8 w-8 bg-slate-800"),
+    "HDR-03: btnOpenSettings uses standardized h-8 height"
   );
 
   console.log(

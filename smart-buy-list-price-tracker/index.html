@@ -348,7 +348,7 @@
           <button
             id="langToggleBtn"
             onclick="toggleLanguage()"
-            class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-bold border border-slate-700 transition-colors"
+            class="h-8 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-bold border border-slate-700 transition-colors inline-flex items-center justify-center"
             title="Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)"
           >
             🇻🇳
@@ -358,7 +358,7 @@
           <button
             id="themeToggleBtn"
             onclick="toggleTheme()"
-            class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors"
+            class="h-8 w-8 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors inline-flex items-center justify-center"
             title="Toggle Theme"
           >
             🌙
@@ -367,7 +367,7 @@
           <!-- Share Button -->
           <button
             onclick="openShareModal()"
-            class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+            class="h-8 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-sm transition-all"
             title="Share List"
           >
             <span>📤</span>
@@ -378,7 +378,7 @@
           <button
             id="btnOpenSettings"
             onclick="openSettingsModal()"
-            class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors"
+            class="h-8 w-8 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors inline-flex items-center justify-center"
             title="Settings / Option Hub"
           >
             ⚙️
@@ -2084,8 +2084,8 @@
                 onchange="setCurrency(this.value)"
                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-emerald-500"
               >
-                <option value="USD">USD ($)</option>
                 <option value="VND">VND (₫)</option>
+                <option value="USD">USD ($)</option>
                 <option value="EUR">EUR (€)</option>
                 <option value="GBP">GBP (£)</option>
                 <option value="JPY">JPY (¥)</option>
@@ -6676,8 +6676,7 @@
             storeHtml += `
               <div class="space-y-2">
                 <div class="flex items-center justify-between pt-2 pb-1 px-1">
-                  <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-300">
-                    <span>🏪</span>
+                  <div class="font-bold text-xs uppercase tracking-wider text-slate-300">
                     <span>${sName}</span>
                   </div>
                   <span class="text-[11px] font-semibold text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
@@ -7067,8 +7066,9 @@
                   <span>✏️</span>
                   <span>${TRANSLATIONS[currentLanguage].edit_btn || "Edit"}</span>
                 </button>
-                <button onclick="deleteItem('${item.id}')" class="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-bold px-2.5 py-1.5 rounded-lg border border-red-500/40 text-xs transition-colors cursor-pointer active:scale-95" title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].delete_btn || "Delete"}">
+                <button onclick="deleteItem('${item.id}')" class="px-2.5 py-1 text-xs font-semibold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/40 transition-colors flex items-center gap-1 cursor-pointer active:scale-95" title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].remove_btn || "Remove"}">
                   <span>🗑️</span>
+                  <span>${TRANSLATIONS[currentLanguage].remove_btn || "Remove"}</span>
                 </button>
               </div>
               <div class="text-right">
