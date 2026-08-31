@@ -8080,40 +8080,47 @@
         }
 
         // 1. Append verified prices to Historical Purchase Ledger
-        const now = new Date().toISOString().slice(0, 10);
-        checkedItems.forEach((item) => {
+        const nowIso = new Date().toISOString();
+        const now = nowIso.slice(0, 10);
+        checkedItems.forEach((item, idx) => {
           const unitPrice = normalizeUnitPrice(
             item.price,
             item.quantity,
             item.unit
           );
+          const recId = `rec_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 7)}`;
           memoryState.purchaseLedger.push({
-            id: Date.now() + Math.random(),
+            id: recId,
             itemId: item.id,
             itemName: item.name,
             store: item.store || "Supermarket",
             date: now,
+            timestamp: nowIso,
             quantity: item.quantity,
             unit: item.unit,
             price: item.price,
             unitPrice,
           });
+          recordDeletedItem(item.id);
         });
 
-        // 2. Handle active items
+        // 2. Handle active items & tombstones
         if (rollover === "ROLLOVER") {
-          memoryState.activeList.items = uncheckedItems.map((i) => ({
-            ...i,
-            checked: false,
-          }));
+          memoryState.activeList.items = uncheckedItems.map((i) =>
+            touchItem({
+              ...i,
+              checked: false,
+            })
+          );
         } else {
+          uncheckedItems.forEach((i) => recordDeletedItem(i.id));
           memoryState.activeList.items = [];
         }
 
         saveToLocalStorage();
-        if (typeof flushPendingCloudSync === "function")
+        if (typeof flushPendingCloudSync === "function") {
           flushPendingCloudSync();
-        if (typeof storageManager !== "undefined") storageManager.sync();
+        }
         closeModal("tripCompleteModal");
         setTripPhase("PLANNING");
         renderApp();
