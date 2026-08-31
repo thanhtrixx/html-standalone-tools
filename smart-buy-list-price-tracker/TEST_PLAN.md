@@ -313,3 +313,26 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **UNIT-VN-01**  | Expanded Packaging Units Normalization       | Units `loc`, `thung`, `khay`, `tui`, `hu` normalize unit prices with discrete count dimension base.                                             |
 | **ICON-01**     | Icon-First Action Triggers                   | Ledger table quick add uses `➕` icon button with accessible tooltip; top bar buttons streamlined for touch.                                    |
 | **I18N-VN-01**  | Bilingual Parity for Smart Omnibox Tokens    | 100% of Smart Omnibox and Vietnamese units translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                              |
+
+---
+
+### 20. Calm Cloud Sync, Adaptive Historical Ledger & Startup Flag Parity (v3.5.0)
+
+| Test ID       | Scenario                                       | Assertion                                                                                                                                         |
+| :------------ | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **FLAG-01**   | Startup Language Flag Markup Default           | HTML markup initializes `#langToggleBtn` with `🇻🇳` national flag emoji.                                                                           |
+| **FLAG-02**   | Runtime Language Switcher Flag Synchronization | `setLanguage('vi')` sets `#langToggleBtn` to `🇻🇳`; `toggleLanguage()` switches to English with `🇺🇸`.                                              |
+| **FLAG-03**   | Startup Flag Override Elimination              | `initApp()` preserves national flag emoji on application boot without overriding with literal text `"VI"` or `"EN"`.                              |
+| **SYNC-01**   | Top App Bar Header Decluttering                | `#topBarSyncStatus` button is decommissioned from the header bar; sync status is consolidated cleanly inside Option Hub (`#cloudSyncStatusPill`). |
+| **SYNC-02**   | Calm Adaptive Idle Debounce                    | `triggerDebouncedCloudSync()` operates with a relaxed 15-second idle debounce delay (capped at 45s from initial mutation).                        |
+| **SYNC-03**   | Tab Backgrounding Flush                        | When `document.visibilityState === "hidden"`, any pending debounced cloud sync is flushed immediately before sleep/backgrounding.                 |
+| **SYNC-04**   | Tab Wakeup Pull & App Boot Sync                | When `document.visibilityState === "visible"` after $> 120\text{s}$ inactivity or on app startup, automatically syncs with active cloud provider. |
+| **SYNC-05**   | Trip Completion Immediate Push                 | `finishShoppingTrip()` flushes pending changes and triggers cloud sync immediately upon completion.                                               |
+| **GDRIVE-01** | Direct Setup Guide Link in Option Hub          | Google Drive panel renders a direct link to `docs/google-drive-cloud-sync-guide.md`.                                                              |
+| **GDRIVE-02** | 1-Click Authorized JavaScript Origin Copier    | Option Hub renders `#gdriveCurrentOrigin` container with `window.location.origin` and 1-tap `copyCurrentOriginToClipboard()` button.              |
+| **GDRIVE-03** | State-Aware Google Drive Action Controls       | Shows full-width Sign In button when disconnected; dynamically reveals Disconnect, Sync Now, and Force Push/Pull actions when authenticated.      |
+| **LEDGER-01** | Adaptive Mobile Card Representation            | `#priceLedgerModal` renders `#ledgerMobileCards` on mobile screens ($< 640\text{px}$) with bold title, store badge, date, and unit price badge.   |
+| **LEDGER-02** | Mobile Touch Targets ($\ge 44\text{px}$)       | Mobile ledger cards provide $\ge 44\text{px}$ touch targets for Quick Add (`➕`) and Delete (`🗑️`) buttons.                                       |
+| **LEDGER-03** | Spacious Desktop Data Table Layout             | `#priceLedgerModal` renders `#ledgerTableContainer` on desktop screens ($\ge 640\text{px}$) with `text-sm` typography and `h-5 w-5` checkboxes.   |
+| **PWA-03**    | PWA Cache Invalidation & Version Bump          | `sw.js` cache name is `smart-buy-list-v3.5.0`, `manifest.webmanifest` version is `3.5.0`, and UI version badge displays `v3.5.0`.                 |
+| **I18N-03**   | Bilingual Parity for v3.5.0 Polish Strings     | 100% of new cloud sync, guide link, origin copier, and adaptive ledger translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.    |

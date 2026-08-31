@@ -149,6 +149,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-vietnamese-omnibox.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List Calm Cloud Sync & Adaptive Historical Ledger",
+    file: "tests/smart-buy-list-calm-sync-ledger.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {

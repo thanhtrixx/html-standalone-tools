@@ -97,6 +97,10 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R64** | **Smart Quick-Entry Omnibox & NLP Parser Engine**                | Omnibox parser (`parseSmartGroceryInput`) extracting item, quantity, unit, VND price (e.g. `35k`, `35.000`), store (`@winmart`), and auto-categorizing departments with real-time live preview pill and 1-tap add.                                                | P0       | ADR-0013           |
 | **R65** | **Multi-Line Clipboard Batch Paste Ingest**                      | Automatic multi-line paste detection parsing grocery lists copied from Zalo/Notes in parallel and staging into active list with Undo toast.                                                                                                                       | P0       | ADR-0013           |
 | **R66** | **Expanded Vietnamese Packaging Units & Icon Polish**            | New units (`loc`, `thung`, `khay`, `tui`, `hu`) with normalization formulas and icon-first button streamlining (`+ Add` -> `➕`).                                                                                                                                 | P0       | ADR-0013           |
+| **R67** | **Startup Language Switcher Flag Parity**                        | Ensure `#langToggleBtn` reliably renders `🇻🇳` / `🇺🇸` on initial application boot without literal text override in `initApp()`.                                                                                                                                    | P0       | ADR-0014           |
+| **R68** | **Header Sync Status Removal & Calm Adaptive Cloud Sync**        | Decommission `#topBarSyncStatus` from top app bar, extend idle debounce to 15s (capped at 45s), flush sync on tab backgrounding (`visibilitychange`), sync on trip finish, and pull on boot / tab wakeup.                                                         | P0       | ADR-0014           |
+| **R69** | **Google Drive Cloud Sync UI/UX Guidance & Origin Copier**       | Add direct link to setup guide, 1-click `copyCurrentOriginToClipboard()` helper for Authorized JavaScript Origins in Option Hub, and state-aware Sign In / Disconnect action buttons.                                                                             | P0       | ADR-0014           |
+| **R70** | **Adaptive Historical Purchase Ledger Mobile Cards & Table**     | Dual-representation layout for `#priceLedgerModal`: mobile cards (`#ledgerMobileCards`) with bold titles, store badges, prominent unit price badges, and $\ge 44\text{px}$ touch targets; desktop table (`#ledgerTableContainer`) with roomy typography.          | P0       | ADR-0014           |
 
 ---
 
@@ -122,8 +126,9 @@ flowchart TD
     S16["Slice 16: Google Drive Cloud Sync Seam &amp; GIS OAuth Integration (#190)"]
     S17["Slice 17: GitHub Gist Cloud Storage Provider &amp; Multi-Provider Registry (#192)"]
     S18["Slice 18: Vietnamese-First Defaults, Smart Omnibox &amp; Currency Ergonomics (#193)"]
+    S19["Slice 19: Calm Cloud Sync, Adaptive Historical Ledger &amp; Flag Polish (#196)"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18 --> S19
 ```
 
 <details>
@@ -182,6 +187,9 @@ flowchart TD
       │
       ▼
 [Slice 18: Vietnamese-First Defaults, Smart Omnibox & Currency Ergonomics (#193)]
+      │
+      ▼
+[Slice 19: Calm Cloud Sync, Adaptive Historical Ledger & Flag Polish (#196)]
 ```
 
 </details>
