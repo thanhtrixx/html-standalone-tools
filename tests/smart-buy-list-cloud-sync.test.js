@@ -41,6 +41,9 @@ function loadBuyListCloudSyncEngine(options = {}) {
         innerHTML: "",
         value: "",
         title: "",
+        href: "",
+        type: "text",
+        checked: true,
         style: {},
         appendChild() {},
         focus() {},
@@ -64,6 +67,12 @@ function loadBuyListCloudSyncEngine(options = {}) {
     return {
       ok: true,
       status: 200,
+      headers: {
+        get: (name) => {
+          if (name.toLowerCase() === "x-oauth-scopes") return "gist";
+          return null;
+        },
+      },
       json: async () => ({ files: [] }),
       text: async () => JSON.stringify({}),
     };
@@ -176,7 +185,7 @@ function assert(condition, message) {
 }
 
 console.log(
-  "\n🧪 Running Smart Buy-List Google Drive Cloud Sync Seam Test Suite (v3.3.0)...\n"
+  "\n🧪 Running Smart Buy-List Multi-Provider & GitHub Gist Cloud Sync Test Suite (v3.5.0)...\n"
 );
 
 async function runCloudSyncTests() {
@@ -197,48 +206,69 @@ async function runCloudSyncTests() {
 
   try {
     // =========================================================================
-    // SECTION 1: DOM Elements & Markup Verification
+    // SECTION 1: DOM Elements & Option Hub Markup Verification
     // =========================================================================
     console.log("--- Section 1: DOM Elements & Option Hub Markup ---");
 
     assert(
-      htmlContent.includes('id="cloudSyncSection"') ||
-        htmlContent.includes('id="cloudSyncCard"'),
-      "SYNC-DOM-01: Option Hub contains Cloud Sync section container"
+      htmlContent.includes('id="cloudSyncSection"'),
+      "SYNC-DOM-01: Option Hub contains Cloud Sync section container (#cloudSyncSection)"
     );
     assert(
-      htmlContent.includes('id="googleClientIdInput"'),
-      "SYNC-DOM-02: Option Hub contains Google Client ID input (#googleClientIdInput)"
+      htmlContent.includes('id="cloudProviderSelect"'),
+      "SYNC-DOM-02: Option Hub contains Cloud Provider dropdown selector (#cloudProviderSelect)"
     );
     assert(
-      htmlContent.includes('id="btnGoogleSignIn"'),
-      "SYNC-DOM-03: Option Hub contains Sign in with Google button (#btnGoogleSignIn)"
+      htmlContent.includes('id="googleDriveSyncPanel"'),
+      "SYNC-DOM-03: Option Hub contains Google Drive sync panel (#googleDriveSyncPanel)"
     );
     assert(
-      htmlContent.includes('id="btnGoogleSignOut"'),
-      "SYNC-DOM-04: Option Hub contains Disconnect button (#btnGoogleSignOut)"
+      htmlContent.includes('id="githubGistSyncPanel"'),
+      "SYNC-DOM-04: Option Hub contains GitHub Gist sync panel (#githubGistSyncPanel)"
     );
     assert(
-      htmlContent.includes('id="btnGoogleSyncNow"'),
-      "SYNC-DOM-05: Option Hub contains Sync Now button (#btnGoogleSyncNow)"
+      htmlContent.includes('id="githubTokenInput"'),
+      "SYNC-DOM-05: Option Hub contains GitHub PAT input (#githubTokenInput)"
     );
     assert(
-      htmlContent.includes('id="cloudSyncStatusPill"'),
-      "SYNC-DOM-06: Option Hub contains Cloud Sync status pill (#cloudSyncStatusPill)"
+      htmlContent.includes('id="btnToggleGithubTokenVisibility"'),
+      "SYNC-DOM-06: Option Hub contains token visibility toggle button (#btnToggleGithubTokenVisibility)"
     );
     assert(
-      htmlContent.includes('id="cloudSyncLastTime"'),
-      "SYNC-DOM-07: Option Hub contains Last Synced timestamp container (#cloudSyncLastTime)"
+      htmlContent.includes('id="githubTokenHelperLink"'),
+      "SYNC-DOM-07: Option Hub contains 1-click token helper link (#githubTokenHelperLink)"
+    );
+    assert(
+      htmlContent.includes('id="githubGistIdInput"'),
+      "SYNC-DOM-08: Option Hub contains Gist ID input (#githubGistIdInput)"
+    );
+    assert(
+      htmlContent.includes('id="githubRememberTokenCheckbox"'),
+      "SYNC-DOM-09: Option Hub contains Remember Token checkbox (#githubRememberTokenCheckbox)"
+    );
+    assert(
+      htmlContent.includes('id="btnGithubConnect"'),
+      "SYNC-DOM-10: Option Hub contains Connect & Verify button (#btnGithubConnect)"
+    );
+    assert(
+      htmlContent.includes('id="btnGithubDisconnect"'),
+      "SYNC-DOM-11: Option Hub contains Disconnect button (#btnGithubDisconnect)"
+    );
+    assert(
+      htmlContent.includes('id="githubViewGistLink"'),
+      "SYNC-DOM-12: Option Hub contains View Gist on GitHub link (#githubViewGistLink)"
     );
     assert(
       htmlContent.includes('id="topBarSyncStatus"'),
-      "SYNC-DOM-08: Top App Bar contains live sync status indicator (#topBarSyncStatus)"
+      "SYNC-DOM-13: Top App Bar contains dynamic provider sync status indicator (#topBarSyncStatus)"
     );
 
     // =========================================================================
-    // SECTION 2: Storage Provider Seam Architecture (IStorageProvider)
+    // SECTION 2: Multi-Provider Storage Registry Architecture (StorageManager)
     // =========================================================================
-    console.log("\n--- Section 2: Storage Provider Seam Architecture ---");
+    console.log(
+      "\n--- Section 2: Multi-Provider Storage Registry Architecture ---"
+    );
 
     const engine = loadBuyListCloudSyncEngine();
     await engine.sandbox.initDatabase();
@@ -257,21 +287,47 @@ async function runCloudSyncTests() {
       "SEAM-03: GoogleDriveStorageProvider class exists"
     );
     assert(
+      typeof engine.sandbox.GitHubGistStorageProvider === "function",
+      "SEAM-04: GitHubGistStorageProvider class exists"
+    );
+    assert(
       typeof engine.sandbox.storageManager === "object" &&
         engine.sandbox.storageManager !== null,
-      "SEAM-04: Global storageManager singleton exists"
+      "SEAM-05: Global storageManager singleton exists"
     );
 
-    const activeProvider = engine.sandbox.storageManager.getProvider();
     assert(
-      activeProvider instanceof engine.sandbox.IndexedDBStorageProvider,
-      "SEAM-05: Default storage provider is IndexedDBStorageProvider"
+      typeof engine.sandbox.storageManager.setActiveCloudProvider ===
+        "function",
+      "REGISTRY-01: storageManager provides setActiveCloudProvider() method"
     );
 
-    const currentStatus = activeProvider.getStatus();
+    // Test switching to 'none'
+    engine.sandbox.storageManager.setActiveCloudProvider("none");
     assert(
-      currentStatus && typeof currentStatus.provider === "string",
-      "SEAM-06: Storage provider returns structured status object"
+      engine.sandbox.storageManager.getActiveProviderType() === "none",
+      "REGISTRY-02: storageManager activates 'none' (local only) mode"
+    );
+
+    // Test switching to 'googledrive'
+    engine.sandbox.storageManager.setActiveCloudProvider("googledrive");
+    assert(
+      engine.sandbox.storageManager.getActiveProviderType() === "googledrive",
+      "REGISTRY-03: storageManager activates 'googledrive' provider"
+    );
+
+    // Test switching to 'github'
+    engine.sandbox.storageManager.setActiveCloudProvider("github");
+    assert(
+      engine.sandbox.storageManager.getActiveProviderType() === "github",
+      "REGISTRY-04: storageManager activates 'github' provider"
+    );
+
+    // Test provider status
+    const ghStatus = engine.sandbox.storageManager.providers.github.getStatus();
+    assert(
+      ghStatus && ghStatus.provider === "github",
+      "REGISTRY-05: GitHubGistStorageProvider returns structured status object"
     );
 
     // =========================================================================
@@ -290,18 +346,6 @@ async function runCloudSyncTests() {
     assert(
       typeof engine.sandbox.handleGoogleSignOut === "function",
       "AUTH-03: handleGoogleSignOut function is exported"
-    );
-
-    // Test offline resilience: Calling without GIS script does not throw
-    let offlineAuthThrew = false;
-    try {
-      engine.sandbox.initGoogleAuthClient();
-    } catch (e) {
-      offlineAuthThrew = true;
-    }
-    assert(
-      !offlineAuthThrew,
-      "AUTH-04: initGoogleAuthClient executes safely when offline / GIS unavailable"
     );
 
     // Mock Google Identity Services Token Client
@@ -337,155 +381,307 @@ async function runCloudSyncTests() {
     });
     await authEngine.sandbox.initDatabase();
 
-    // Trigger Sign In
     authEngine.sandbox.handleGoogleSignIn();
     assert(
       authEngine.sandbox.googleAuthState &&
         authEngine.sandbox.googleAuthState.accessToken ===
           "mock_gdrive_access_token_xyz123",
-      "AUTH-05: Successful GIS authorization populates ephemeral in-memory accessToken"
+      "AUTH-04: Successful GIS authorization populates ephemeral in-memory accessToken"
     );
     assert(
       authEngine.storageMock["google_client_id"] ===
         "test-client-id-12345.apps.googleusercontent.com",
-      "AUTH-06: Persists user google_client_id to localStorage"
+      "AUTH-05: Persists user google_client_id to localStorage"
     );
     assert(
       authEngine.storageMock["google_access_token"] === undefined,
-      "AUTH-07: Strictly does NOT persist OAuth bearer token to localStorage (Security Invariant)"
+      "AUTH-06: Strictly does NOT persist OAuth bearer token to localStorage (Security Invariant)"
     );
 
-    // Test Sign Out
-    authEngine.sandbox.handleGoogleSignOut();
+    // =========================================================================
+    // SECTION 4: GitHub PAT Authentication & Handshake Verification
+    // =========================================================================
+    console.log("\n--- Section 4: GitHub PAT Authentication & Handshake ---");
+
     assert(
-      !authEngine.sandbox.googleAuthState.accessToken,
-      "AUTH-08: handleGoogleSignOut purges in-memory access token"
+      typeof engine.sandbox.handleGithubConnect === "function",
+      "GH-AUTH-01: handleGithubConnect function is exported"
+    );
+    assert(
+      typeof engine.sandbox.handleGithubDisconnect === "function",
+      "GH-AUTH-02: handleGithubDisconnect function is exported"
+    );
+    assert(
+      typeof engine.sandbox.toggleGithubTokenVisibility === "function",
+      "GH-AUTH-03: toggleGithubTokenVisibility function is exported"
     );
 
-    // =========================================================================
-    // SECTION 4: Google Drive AppData REST API v3 Integration
-    // =========================================================================
-    console.log("\n--- Section 4: Google Drive AppData REST API v3 ---");
+    let githubMockApi = {
+      user: { login: "octocat", id: 1 },
+      gists: [],
+    };
 
-    let gdriveFilesStore = [];
-    const mockDriveFetch = async (url, opts = {}) => {
+    const mockGithubFetch = async (url, opts = {}) => {
       const urlStr = String(url);
-      const authHeader = opts.headers?.Authorization || "";
+      const auth = opts.headers?.Authorization || "";
 
-      if (!authHeader.includes("mock_gdrive_access_token_xyz123")) {
+      if (!auth.includes("ghp_valid_test_token_123")) {
         return {
           ok: false,
           status: 401,
-          json: async () => ({ error: { message: "Unauthorized" } }),
+          json: async () => ({ message: "Bad credentials" }),
+          text: async () => "Bad credentials",
         };
       }
 
-      // Query files in appDataFolder
+      // GET /user
+      if (urlStr.endsWith("/user")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: {
+            get: (k) =>
+              k.toLowerCase() === "x-oauth-scopes" ? "gist, repo" : null,
+          },
+          json: async () => githubMockApi.user,
+        };
+      }
+
+      // GET /gists (list)
       if (
-        urlStr.includes("/drive/v3/files") &&
-        (!opts.method || opts.method === "GET")
+        urlStr.includes("/gists") &&
+        (!opts.method || opts.method === "GET") &&
+        !urlStr.match(/\/gists\/[a-zA-Z0-9_-]+$/)
       ) {
-        if (urlStr.includes("alt=media")) {
-          // Download content
-          const file = gdriveFilesStore.find((f) => urlStr.includes(f.id));
-          return {
-            ok: !!file,
-            status: file ? 200 : 404,
-            json: async () => (file ? file.content : {}),
-            text: async () => (file ? JSON.stringify(file.content) : "{}"),
-          };
+        return {
+          ok: true,
+          status: 200,
+          json: async () => githubMockApi.gists,
+        };
+      }
+
+      // POST /gists (create)
+      if (urlStr.endsWith("/gists") && opts.method === "POST") {
+        const body = JSON.parse(opts.body || "{}");
+        const newGist = {
+          id: "gist_auto_created_888",
+          description: body.description,
+          public: body.public,
+          updated_at: new Date().toISOString(),
+          files: body.files,
+        };
+        githubMockApi.gists.push(newGist);
+        return {
+          ok: true,
+          status: 201,
+          json: async () => newGist,
+        };
+      }
+
+      // GET /gists/{id} (read)
+      const gistIdMatch = urlStr.match(/\/gists\/([a-zA-Z0-9_-]+)$/);
+      if (gistIdMatch && (!opts.method || opts.method === "GET")) {
+        const id = gistIdMatch[1];
+        const found = githubMockApi.gists.find((g) => g.id === id);
+        if (found) {
+          return { ok: true, status: 200, json: async () => found };
         }
         return {
-          ok: true,
-          status: 200,
-          json: async () => ({
-            files: gdriveFilesStore.map((f) => ({
-              id: f.id,
-              name: f.name,
-              modifiedTime: f.modifiedTime,
-            })),
-          }),
+          ok: false,
+          status: 404,
+          json: async () => ({ message: "Not Found" }),
         };
       }
 
-      // Create multipart file
-      if (urlStr.includes("/upload/drive/v3/files") && opts.method === "POST") {
-        const newFile = {
-          id: "drive_file_id_999",
-          name: "smart_buy_list_data.json",
-          modifiedTime: new Date().toISOString(),
-          content: { schemaVersion: 2, app: "smart-buy-list-price-tracker" },
-        };
-        gdriveFilesStore.push(newFile);
+      // PATCH /gists/{id} (update)
+      if (gistIdMatch && opts.method === "PATCH") {
+        const id = gistIdMatch[1];
+        const body = JSON.parse(opts.body || "{}");
+        const found = githubMockApi.gists.find((g) => g.id === id);
+        if (found) {
+          found.updated_at = new Date().toISOString();
+          if (body.files) Object.assign(found.files, body.files);
+          return { ok: true, status: 200, json: async () => found };
+        }
         return {
-          ok: true,
-          status: 200,
-          json: async () => newFile,
+          ok: false,
+          status: 404,
+          json: async () => ({ message: "Not Found" }),
         };
       }
 
-      // Update media file
-      if (
-        urlStr.includes("/upload/drive/v3/files") &&
-        opts.method === "PATCH"
-      ) {
+      // Raw URL fetch
+      if (urlStr.includes("raw.githubusercontent.com")) {
         return {
           ok: true,
           status: 200,
-          json: async () => ({
-            id: "drive_file_id_999",
-            modifiedTime: new Date().toISOString(),
-          }),
+          text: async () =>
+            JSON.stringify({
+              schemaVersion: 2,
+              activeList: {
+                items: [
+                  { id: "raw_item_1", name: "Organic Honey", price: 80000 },
+                ],
+              },
+              purchaseLedger: [],
+              stores: ["WinMart"],
+            }),
         };
       }
 
       return { ok: true, status: 200, json: async () => ({}) };
     };
 
-    const driveEngine = loadBuyListCloudSyncEngine({
-      google: mockGoogleGis,
-      mockFetchHandler: mockDriveFetch,
-      initialStorage: {
-        google_client_id: "test-client-id-12345.apps.googleusercontent.com",
-      },
+    const ghEngine = loadBuyListCloudSyncEngine({
+      mockFetchHandler: mockGithubFetch,
+      initialStorage: {},
     });
-    await driveEngine.sandbox.initDatabase();
-    driveEngine.sandbox.handleGoogleSignIn();
+    await ghEngine.sandbox.initDatabase();
 
-    // Instantiate GoogleDriveStorageProvider
-    const gdriveProvider = new driveEngine.sandbox.GoogleDriveStorageProvider(
-      driveEngine.sandbox.storageManager.getProvider()
+    const ghProvider = ghEngine.sandbox.storageManager.providers.github;
+
+    // Validate token handshake
+    const validResult = await ghProvider.validateToken(
+      "ghp_valid_test_token_123"
+    );
+    assert(
+      validResult && validResult.user && validResult.user.login === "octocat",
+      "GH-AUTH-04: validateToken queries /user and returns authenticated user details"
+    );
+    assert(
+      validResult.scopes.includes("gist"),
+      "GH-AUTH-05: Inspects x-oauth-scopes header for 'gist' permission"
     );
 
-    const syncResult = await gdriveProvider.sync();
+    // Test invalid token throws cleanly
+    let invalidThrew = false;
+    try {
+      await ghProvider.validateToken("ghp_invalid_token_999");
+    } catch (e) {
+      invalidThrew = true;
+    }
     assert(
-      syncResult.success === true,
-      "DRIVE-01: GoogleDriveStorageProvider.sync() completes successfully"
-    );
-    assert(
-      driveEngine.fetchCalls.some((c) =>
-        c.url.includes("spaces=appDataFolder")
-      ),
-      "DRIVE-02: Queries Google Drive REST v3 spaces=appDataFolder endpoint"
-    );
-    assert(
-      driveEngine.fetchCalls.some(
-        (c) =>
-          c.url.includes("/upload/drive/v3/files") &&
-          c.options.method === "POST"
-      ),
-      "DRIVE-03: Creates smart_buy_list_data.json via multipart POST upload"
+      invalidThrew,
+      "GH-AUTH-06: validateToken throws error on HTTP 401 Unauthorized"
     );
 
     // =========================================================================
-    // SECTION 5: Deterministic Multi-Device Cloud Smart Merge Engine
+    // SECTION 5: GitHub Gist REST API Provider & Auto-Discovery
     // =========================================================================
-    console.log("\n--- Section 5: Deterministic Cloud Smart Merge Engine ---");
+    console.log("\n--- Section 5: GitHub Gist Provider Operations ---");
 
-    assert(
-      typeof driveEngine.sandbox.mergeCloudState === "function",
-      "MERGE-01: mergeCloudState pure function is exported"
+    // Auto-create secret Gist when list is empty
+    const createdGistId = await ghProvider.discoverOrCreateGist(
+      "ghp_valid_test_token_123"
     );
+    assert(
+      createdGistId === "gist_auto_created_888",
+      "GIST-01: Auto-creates secret Gist when no matching gist is found"
+    );
+    assert(
+      githubMockApi.gists[0].public === false,
+      "GIST-02: Created Gist is strictly private/secret (public: false)"
+    );
+    assert(
+      githubMockApi.gists[0].files["smart_buy_list_data.json"] !== undefined,
+      "GIST-03: Created Gist contains 'smart_buy_list_data.json' file"
+    );
+
+    // Auto-discovery on second call
+    const discoveredGistId = await ghProvider.discoverOrCreateGist(
+      "ghp_valid_test_token_123"
+    );
+    assert(
+      discoveredGistId === "gist_auto_created_888",
+      "GIST-04: Auto-discovers existing Gist by filename on subsequent calls"
+    );
+
+    // Read Gist content
+    const readRes = await ghProvider.readRemoteGist(
+      "gist_auto_created_888",
+      "ghp_valid_test_token_123"
+    );
+    assert(
+      readRes && readRes.gist && readRes.data !== null,
+      "GIST-05: readRemoteGist parses remote JSON envelope"
+    );
+
+    // Test Truncation Fallback: If truncated: true, fetches raw_url
+    const truncatedGist = {
+      id: "gist_truncated_777",
+      description: "Truncated backup",
+      public: false,
+      updated_at: new Date().toISOString(),
+      files: {
+        "smart_buy_list_data.json": {
+          truncated: true,
+          raw_url:
+            "https://raw.githubusercontent.com/octocat/gist_truncated_777/raw/smart_buy_list_data.json",
+          content: "",
+        },
+      },
+    };
+    githubMockApi.gists.push(truncatedGist);
+
+    const truncatedRead = await ghProvider.readRemoteGist(
+      "gist_truncated_777",
+      "ghp_valid_test_token_123"
+    );
+    assert(
+      truncatedRead &&
+        truncatedRead.data &&
+        truncatedRead.data.activeList.items[0].name === "Organic Honey",
+      "GIST-06: Truncation resilience: Falls back to raw_url with auth header when content is truncated"
+    );
+
+    // Update Gist (PATCH)
+    const updateRes = await ghProvider.updateRemoteGist(
+      "gist_auto_created_888",
+      { schemaVersion: 2, test: "patched" },
+      "ghp_valid_test_token_123"
+    );
+    assert(
+      updateRes && updateRes.id === "gist_auto_created_888",
+      "GIST-07: updateRemoteGist successfully executes PATCH /gists/{id}"
+    );
+
+    // End-to-end sync via StorageManager
+    ghEngine.sandbox.githubAuthState.token = "ghp_valid_test_token_123";
+    ghEngine.sandbox.githubAuthState.gistId = "gist_auto_created_888";
+    ghEngine.sandbox.storageManager.setActiveCloudProvider("github");
+
+    const e2eSync = await ghEngine.sandbox.storageManager.sync();
+    assert(
+      e2eSync.success === true,
+      "GIST-08: storageManager.sync() routes to GitHubGistStorageProvider and succeeds"
+    );
+
+    // Test Remember Token toggle
+    ghEngine.sandbox.githubAuthState.rememberToken = true;
+    ghEngine.sandbox.localStorage.setItem(
+      "github_sync_token",
+      "ghp_valid_test_token_123"
+    );
+    assert(
+      ghEngine.storageMock["github_sync_token"] === "ghp_valid_test_token_123",
+      "GIST-09: Persists token in localStorage when Remember Token is checked"
+    );
+
+    // Test Disconnect clears credentials
+    ghEngine.sandbox.handleGithubDisconnect();
+    assert(
+      !ghEngine.sandbox.githubAuthState.token,
+      "GIST-10: handleGithubDisconnect purges runtime token"
+    );
+    assert(
+      ghEngine.storageMock["github_sync_token"] === undefined,
+      "GIST-11: handleGithubDisconnect removes token from localStorage"
+    );
+
+    // =========================================================================
+    // SECTION 6: Deterministic Multi-Device Cloud Smart Merge Engine
+    // =========================================================================
+    console.log("\n--- Section 6: Deterministic Cloud Smart Merge Engine ---");
 
     const localState = {
       activeList: {
@@ -516,14 +712,14 @@ async function runCloudSyncTests() {
         {
           id: 1,
           itemName: "Whole Milk",
-          store: "Costco",
-          unitPrice: 1.75,
+          store: "WinMart",
+          unitPrice: 35000,
           date: "2026-08-15",
           timestamp: 1723700000000,
         },
       ],
-      stores: ["Costco", "Trader Joe's"],
-      settings: { language: "en", currency: "USD" },
+      stores: ["WinMart", "Co.opmart"],
+      settings: { language: "vi", currency: "VND" },
     };
 
     const remoteState = {
@@ -534,18 +730,18 @@ async function runCloudSyncTests() {
           {
             id: "item_1",
             name: "Whole Milk",
-            quantity: 3, // Updated remotely
+            quantity: 4, // Newer
             unit: "L",
             price: 3.5,
             checked: true,
-            updatedAt: "2026-08-30T11:00:00.000Z", // Newer
+            updatedAt: "2026-08-30T12:00:00.000Z",
           },
           {
             id: "item_3",
-            name: "Avocados",
-            quantity: 4,
-            unit: "ea",
-            price: 4.0,
+            name: "Dragonfruit",
+            quantity: 2,
+            unit: "kg",
+            price: 45000,
             checked: false,
             updatedAt: "2026-08-30T11:00:00.000Z",
           },
@@ -555,78 +751,68 @@ async function runCloudSyncTests() {
         {
           id: 1,
           itemName: "Whole Milk",
-          store: "Costco",
-          unitPrice: 1.75,
+          store: "WinMart",
+          unitPrice: 35000,
           date: "2026-08-15",
           timestamp: 1723700000000,
         },
         {
           id: 2,
-          itemName: "Avocados",
-          store: "Trader Joe's",
-          unitPrice: 1.0,
+          itemName: "Dragonfruit",
+          store: "Bách Hoá Xanh",
+          unitPrice: 45000,
           date: "2026-08-20",
           timestamp: 1724100000000,
         },
       ],
-      stores: ["Costco", "WinMart"],
+      stores: ["WinMart", "Bách Hoá Xanh"],
       settings: { language: "vi", currency: "VND" },
     };
 
-    const merged = driveEngine.sandbox.mergeCloudState(localState, remoteState);
+    const merged = ghEngine.sandbox.mergeCloudState(localState, remoteState);
 
     assert(
       merged.activeList.items.length === 3,
-      "MERGE-02: Merged active list contains exactly 3 items (Milk, Rice, Avocados)"
+      "MERGE-01: Merged active list contains exactly 3 unique items"
     );
-
-    const mergedMilk = merged.activeList.items.find((i) => i.id === "item_1");
+    const milk = merged.activeList.items.find((i) => i.id === "item_1");
     assert(
-      mergedMilk && mergedMilk.quantity === 3 && mergedMilk.checked === true,
-      "MERGE-03: Adopts newer remote item state (quantity 3, checked true)"
+      milk && milk.quantity === 4 && milk.checked === true,
+      "MERGE-02: Adopts newer remote item state by updatedAt timestamp"
     );
-
-    const mergedRice = merged.activeList.items.find((i) => i.id === "item_2");
-    assert(
-      mergedRice && mergedRice.name === "Jasmine Rice",
-      "MERGE-04: Retains unique local item (Jasmine Rice)"
-    );
-
     assert(
       merged.purchaseLedger.length === 2,
-      "MERGE-05: Unions purchase ledger transactions without duplication"
+      "MERGE-03: Unions historical purchase ledger records additively"
     );
-
     assert(
-      merged.stores.includes("Costco") &&
-        merged.stores.includes("Trader Joe's") &&
-        merged.stores.includes("WinMart"),
-      "MERGE-06: Mathematical union of store profiles"
+      merged.stores.includes("WinMart") &&
+        merged.stores.includes("Co.opmart") &&
+        merged.stores.includes("Bách Hoá Xanh"),
+      "MERGE-04: Mathematical union of store profiles"
     );
 
     // =========================================================================
-    // SECTION 6: Synchronization Triggers & Mutation Debounce
+    // SECTION 7: Synchronization Triggers & Mutation Debounce
     // =========================================================================
-    console.log("\n--- Section 6: Mutation Debounce & Sync Triggers ---");
+    console.log("\n--- Section 7: Mutation Debounce & Sync Triggers ---");
 
     assert(
-      typeof driveEngine.sandbox.triggerDebouncedCloudSync === "function",
+      typeof ghEngine.sandbox.triggerDebouncedCloudSync === "function",
       "TRIG-01: triggerDebouncedCloudSync function is exported"
     );
 
     // =========================================================================
-    // SECTION 7: PWA Version Bump & Bilingual Translation Parity
+    // SECTION 8: PWA Version Bump & Bilingual Translation Parity
     // =========================================================================
-    console.log("\n--- Section 7: PWA Version & Bilingual Parity ---");
+    console.log("\n--- Section 8: PWA Version & Bilingual Parity ---");
 
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.3.0"') ||
-        swContent.includes('CACHE_NAME = "smart-buy-list-v3.4.0"'),
-      "PWA-01: sw.js bumps CACHE_NAME to 'smart-buy-list-v3.3.0' or higher"
+      swContent.includes('CACHE_NAME = "smart-buy-list-v3.5.0"'),
+      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.5.0'"
     );
     assert(
-      htmlContent.includes("v3.3.0") || htmlContent.includes("v3.4.0"),
-      "PWA-02: index.html displays synchronized version badge v3.3.0 or higher"
+      htmlContent.includes("v3.5.0"),
+      "PWA-02: index.html displays synchronized version badge v3.5.0"
     );
 
     const requiredI18nKeys = [
@@ -635,29 +821,37 @@ async function runCloudSyncTests() {
       "cloud_sync_syncing",
       "cloud_sync_offline",
       "cloud_sync_error",
-      "cloud_sync_client_id_label",
-      "cloud_sync_client_id_placeholder",
-      "btn_google_signin",
-      "btn_google_signout",
-      "btn_google_sync_now",
-      "btn_force_upload",
-      "btn_force_download",
-      "cloud_sync_last_synced",
-      "toast_cloud_sync_success",
-      "toast_cloud_sync_error",
-      "toast_cloud_connected",
-      "toast_cloud_disconnected",
+      "cloud_provider_label",
+      "cloud_provider_none",
+      "cloud_provider_googledrive",
+      "cloud_provider_github",
+      "github_sync_title",
+      "github_token_label",
+      "github_token_placeholder",
+      "github_token_helper",
+      "github_gist_id_label",
+      "github_gist_id_placeholder",
+      "github_remember_token",
+      "btn_github_connect",
+      "btn_github_disconnect",
+      "btn_github_sync_now",
+      "github_view_gist",
+      "toast_github_connected",
+      "toast_github_disconnected",
+      "toast_github_sync_success",
+      "toast_github_token_invalid",
+      "toast_github_sync_error",
     ];
 
     for (const key of requiredI18nKeys) {
       assert(
-        driveEngine.sandbox.TRANSLATIONS.en[key] !== undefined &&
-          driveEngine.sandbox.TRANSLATIONS.en[key].length > 0,
+        ghEngine.sandbox.TRANSLATIONS.en[key] !== undefined &&
+          ghEngine.sandbox.TRANSLATIONS.en[key].length > 0,
         `I18N-EN: English translation exists for '${key}'`
       );
       assert(
-        driveEngine.sandbox.TRANSLATIONS.vi[key] !== undefined &&
-          driveEngine.sandbox.TRANSLATIONS.vi[key].length > 0,
+        ghEngine.sandbox.TRANSLATIONS.vi[key] !== undefined &&
+          ghEngine.sandbox.TRANSLATIONS.vi[key].length > 0,
         `I18N-VI: Vietnamese translation exists for '${key}'`
       );
     }

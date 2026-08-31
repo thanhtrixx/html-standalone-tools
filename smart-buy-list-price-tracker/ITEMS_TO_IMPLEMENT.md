@@ -120,7 +120,7 @@ flowchart TD
     S14["Slice 14: Native BarcodeDetector QR Scanner in Option Hub (#185)"]
     S15["Slice 15: Ledger Deletion, Comparator Unit Sync &amp; Form Pre-fill (#188)"]
     S16["Slice 16: Google Drive Cloud Sync Seam &amp; GIS OAuth Integration (#190)"]
-    S17["Slice 17: GitHub Gist Cloud Storage Provider &amp; Multi-Provider Registry (#191)"]
+    S17["Slice 17: GitHub Gist Cloud Storage Provider &amp; Multi-Provider Registry (#192)"]
     S18["Slice 18: Vietnamese-First Defaults, Smart Omnibox &amp; Currency Ergonomics (#193)"]
 
     S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18
@@ -178,7 +178,7 @@ flowchart TD
 [Slice 16: Google Drive Cloud Sync Seam & GIS OAuth Integration (#190)]
       │
       ▼
-[Slice 17: GitHub Gist Cloud Storage Provider & Multi-Provider Registry (#191)]
+[Slice 17: GitHub Gist Cloud Storage Provider & Multi-Provider Registry (#192)]
       │
       ▼
 [Slice 18: Vietnamese-First Defaults, Smart Omnibox & Currency Ergonomics (#193)]

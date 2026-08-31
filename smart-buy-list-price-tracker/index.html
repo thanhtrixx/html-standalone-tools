@@ -2142,16 +2142,17 @@
         </div>
 
         <!-- Section 4: Cloud Sync Seam & Google Drive (Option Hub) -->
+        <!-- Section 4: Cloud Sync Seam & Multi-Provider Registry (Option Hub) -->
         <div
           id="cloudSyncSection"
           class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 space-y-3 text-xs"
         >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="text-base">☁️</span>
+              <span class="text-base" id="cloudSyncHeaderIcon">☁️</span>
               <div>
                 <div id="cloudSyncTitle" class="font-bold text-slate-200">
-                  Google Drive Cloud Sync
+                  Cloud Synchronization
                 </div>
                 <div id="cloudSyncLastTime" class="text-[11px] text-slate-400">
                   Last synced: Never
@@ -2165,80 +2166,251 @@
             >
           </div>
 
-          <!-- OAuth Client ID Input -->
+          <!-- Provider Selector Dropdown -->
           <div class="space-y-1">
             <label
-              id="cloudSyncClientIdLabel"
-              for="googleClientIdInput"
+              id="cloudProviderLabel"
+              for="cloudProviderSelect"
               class="block text-[11px] font-semibold text-slate-300"
             >
-              Google OAuth 2.0 Client ID
+              Active Cloud Storage Provider
             </label>
-            <div class="flex items-center gap-1.5">
-              <input
-                type="text"
-                id="googleClientIdInput"
-                placeholder="e.g. 12345-abc.apps.googleusercontent.com"
-                class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
-              />
-              <button
-                id="btnSaveClientId"
-                onclick="saveGoogleClientIdFromInput()"
-                class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold border border-slate-700 active:scale-95 transition-all text-xs"
-                title="Save Client ID"
+            <select
+              id="cloudProviderSelect"
+              onchange="handleCloudProviderChange(this.value)"
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500 font-medium"
+            >
+              <option value="none" id="optProviderNone">
+                Disabled (Local Only)
+              </option>
+              <option value="googledrive" id="optProviderGDrive">
+                Google Drive (AppData)
+              </option>
+              <option value="github" id="optProviderGitHub">
+                GitHub Gist (Secret)
+              </option>
+            </select>
+          </div>
+
+          <!-- Google Drive Panel -->
+          <div
+            id="googleDriveSyncPanel"
+            class="hidden space-y-2.5 pt-1 border-t border-slate-800/80"
+          >
+            <!-- OAuth Client ID Input -->
+            <div class="space-y-1">
+              <label
+                id="cloudSyncClientIdLabel"
+                for="googleClientIdInput"
+                class="block text-[11px] font-semibold text-slate-300"
               >
-                💾
+                Google OAuth 2.0 Client ID
+              </label>
+              <div class="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  id="googleClientIdInput"
+                  placeholder="e.g. 12345-abc.apps.googleusercontent.com"
+                  class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+                />
+                <button
+                  id="btnSaveClientId"
+                  onclick="saveGoogleClientIdFromInput()"
+                  class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold border border-slate-700 active:scale-95 transition-all text-xs"
+                  title="Save Client ID"
+                >
+                  💾
+                </button>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+              <button
+                id="btnGoogleSignIn"
+                onclick="handleGoogleSignIn()"
+                class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl font-semibold transition-all shadow-sm"
+              >
+                <span>🔑</span>
+                <span id="btnGoogleSignInText">Sign in with Google</span>
+              </button>
+              <button
+                id="btnGoogleSignOut"
+                onclick="handleGoogleSignOut()"
+                class="hidden items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-red-950/60 hover:text-red-300 hover:border-red-800/60 border border-slate-700 active:scale-95 text-slate-300 rounded-xl font-semibold transition-all"
+              >
+                <span>🚪</span>
+                <span id="btnGoogleSignOutText">Disconnect Drive</span>
+              </button>
+              <button
+                id="btnGoogleSyncNow"
+                onclick="syncCloudNow()"
+                class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold border border-slate-700 transition-all"
+              >
+                <span>🔄</span>
+                <span id="btnGoogleSyncNowText">Sync Now</span>
+              </button>
+            </div>
+
+            <!-- Manual Overrides (Force Push / Pull) -->
+            <div
+              id="cloudSyncAdvancedActions"
+              class="hidden flex items-center justify-between pt-1 border-t border-slate-800/80"
+            >
+              <button
+                id="btnForceUpload"
+                onclick="forceUploadCloud()"
+                class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold"
+              >
+                Force Upload to Cloud
+              </button>
+              <button
+                id="btnForceDownload"
+                onclick="forceDownloadCloud()"
+                class="text-[11px] text-sky-400 hover:text-sky-300 font-semibold"
+              >
+                Force Download from Cloud
               </button>
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="grid grid-cols-2 gap-2 pt-0.5">
-            <button
-              id="btnGoogleSignIn"
-              onclick="handleGoogleSignIn()"
-              class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl font-semibold transition-all shadow-sm"
-            >
-              <span>🔑</span>
-              <span id="btnGoogleSignInText">Sign in with Google</span>
-            </button>
-            <button
-              id="btnGoogleSignOut"
-              onclick="handleGoogleSignOut()"
-              class="hidden items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-red-950/60 hover:text-red-300 hover:border-red-800/60 border border-slate-700 active:scale-95 text-slate-300 rounded-xl font-semibold transition-all"
-            >
-              <span>🚪</span>
-              <span id="btnGoogleSignOutText">Disconnect Drive</span>
-            </button>
-            <button
-              id="btnGoogleSyncNow"
-              onclick="syncCloudNow()"
-              class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold border border-slate-700 transition-all"
-            >
-              <span>🔄</span>
-              <span id="btnGoogleSyncNowText">Sync Now</span>
-            </button>
-          </div>
-
-          <!-- Manual Overrides (Force Push / Pull) -->
+          <!-- GitHub Gist Panel -->
           <div
-            id="cloudSyncAdvancedActions"
-            class="hidden flex items-center justify-between pt-1 border-t border-slate-800/80"
+            id="githubGistSyncPanel"
+            class="hidden space-y-2.5 pt-1 border-t border-slate-800/80"
           >
-            <button
-              id="btnForceUpload"
-              onclick="forceUploadCloud()"
-              class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold"
+            <!-- PAT Input -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between">
+                <label
+                  id="githubTokenLabel"
+                  for="githubTokenInput"
+                  class="block text-[11px] font-semibold text-slate-300"
+                >
+                  GitHub Personal Access Token (PAT)
+                </label>
+                <a
+                  id="githubTokenHelperLink"
+                  href="https://github.com/settings/tokens/new?scopes=gist&description=Smart+Buy+List+PWA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-[10px] text-emerald-400 hover:underline font-medium"
+                >
+                  Create token on GitHub ↗
+                </a>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <input
+                  type="password"
+                  id="githubTokenInput"
+                  placeholder="ghp_... or github_pat_..."
+                  class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+                />
+                <button
+                  id="btnToggleGithubTokenVisibility"
+                  onclick="toggleGithubTokenVisibility()"
+                  type="button"
+                  class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold border border-slate-700 active:scale-95 transition-all text-xs"
+                  title="Toggle Token Visibility"
+                >
+                  👁️
+                </button>
+              </div>
+            </div>
+
+            <!-- Gist ID Input -->
+            <div class="space-y-1">
+              <div class="flex items-center justify-between">
+                <label
+                  id="githubGistIdLabel"
+                  for="githubGistIdInput"
+                  class="block text-[11px] font-semibold text-slate-300"
+                >
+                  Gist ID (Optional)
+                </label>
+                <a
+                  id="githubViewGistLink"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hidden text-[10px] text-sky-400 hover:underline font-medium"
+                >
+                  View Gist on GitHub ↗
+                </a>
+              </div>
+              <input
+                type="text"
+                id="githubGistIdInput"
+                placeholder="Auto-discovered or paste Gist ID"
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+              />
+            </div>
+
+            <!-- Remember Token Checkbox -->
+            <div class="flex items-center gap-2 pt-0.5">
+              <input
+                type="checkbox"
+                id="githubRememberTokenCheckbox"
+                checked
+                class="w-3.5 h-3.5 rounded bg-slate-900 border-slate-700 text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer"
+              />
+              <label
+                id="githubRememberTokenLabel"
+                for="githubRememberTokenCheckbox"
+                class="text-[11px] text-slate-300 cursor-pointer select-none"
+              >
+                Remember token on this device
+              </label>
+            </div>
+
+            <!-- GitHub Action Buttons -->
+            <div class="grid grid-cols-2 gap-2 pt-0.5">
+              <button
+                id="btnGithubConnect"
+                onclick="handleGithubConnect()"
+                class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl font-semibold transition-all shadow-sm"
+              >
+                <span>🐙</span>
+                <span id="btnGithubConnectText">Connect & Verify</span>
+              </button>
+              <button
+                id="btnGithubDisconnect"
+                onclick="handleGithubDisconnect()"
+                class="hidden items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-red-950/60 hover:text-red-300 hover:border-red-800/60 border border-slate-700 active:scale-95 text-slate-300 rounded-xl font-semibold transition-all"
+              >
+                <span>🚪</span>
+                <span id="btnGithubDisconnectText">Disconnect</span>
+              </button>
+              <button
+                id="btnGithubSyncNow"
+                onclick="syncCloudNow()"
+                class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold border border-slate-700 transition-all"
+              >
+                <span>🔄</span>
+                <span id="btnGithubSyncNowText">Sync Now</span>
+              </button>
+            </div>
+
+            <!-- GitHub Manual Overrides (Force Push / Pull) -->
+            <div
+              id="githubGistActions"
+              class="hidden flex items-center justify-between pt-1 border-t border-slate-800/80"
             >
-              Force Upload to Cloud
-            </button>
-            <button
-              id="btnForceDownload"
-              onclick="forceDownloadCloud()"
-              class="text-[11px] text-sky-400 hover:text-sky-300 font-semibold"
-            >
-              Force Download from Cloud
-            </button>
+              <button
+                id="btnGithubForceUpload"
+                onclick="forceUploadCloud()"
+                class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold"
+              >
+                Force Upload to Cloud
+              </button>
+              <button
+                id="btnGithubForceDownload"
+                onclick="forceDownloadCloud()"
+                class="text-[11px] text-sky-400 hover:text-sky-300 font-semibold"
+              >
+                Force Download from Cloud
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2256,7 +2428,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.4.0</span
+              >v3.5.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -3196,48 +3368,596 @@
         }
       }
 
-      // Storage Manager (Singleton)
+      // GitHub Gist Storage Provider
+      class GitHubGistStorageProvider extends StorageProvider {
+        constructor(localProvider) {
+          super();
+          this.local = localProvider;
+          this.filename = "smart_buy_list_data.json";
+          this.description =
+            "Smart Buy-List & Unit Price Tracker Cloud Sync Data";
+          this.isSyncing = false;
+        }
+
+        async init() {
+          if (this.local) await this.local.init();
+        }
+
+        async getState() {
+          return this.local.getState();
+        }
+
+        async saveState(state) {
+          await this.local.saveState(state);
+          triggerDebouncedCloudSync();
+          return true;
+        }
+
+        getStatus() {
+          return {
+            provider: "github",
+            connected: !!githubAuthState.token,
+            lastSync: githubAuthState.lastSyncTime,
+            gistId: githubAuthState.gistId,
+            syncing: this.isSyncing,
+            lastError: githubAuthState.lastError,
+          };
+        }
+
+        async validateToken(token) {
+          const res = await fetch("https://api.github.com/user", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+          });
+          if (!res.ok) {
+            throw new Error(`Invalid token: HTTP ${res.status}`);
+          }
+          const scopes =
+            res.headers && typeof res.headers.get === "function"
+              ? res.headers.get("x-oauth-scopes") || ""
+              : "";
+          const user = await res.json();
+          return { user, scopes };
+        }
+
+        async discoverOrCreateGist(token, explicitGistId) {
+          if (explicitGistId && explicitGistId.trim()) {
+            const gistRes = await fetch(
+              `https://api.github.com/gists/${explicitGistId.trim()}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                },
+              }
+            );
+            if (gistRes.ok) {
+              const gist = await gistRes.json();
+              return gist.id;
+            }
+          }
+
+          // Auto-Discovery across user gists
+          try {
+            const listRes = await fetch(
+              "https://api.github.com/gists?per_page=100",
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  Accept: "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                },
+              }
+            );
+            if (listRes.ok) {
+              const gists = await listRes.json();
+              if (Array.isArray(gists)) {
+                const matching = gists.filter((g) => {
+                  const hasFile = g.files && g.files[this.filename];
+                  const hasDesc =
+                    g.description && g.description.includes("Smart Buy-List");
+                  return hasFile || hasDesc;
+                });
+                if (matching.length > 0) {
+                  matching.sort(
+                    (a, b) =>
+                      new Date(b.updated_at).getTime() -
+                      new Date(a.updated_at).getTime()
+                  );
+                  return matching[0].id;
+                }
+              }
+            }
+          } catch (e) {
+            console.warn("Gist auto-discovery error:", e);
+          }
+
+          // Auto-create new secret Gist
+          const localState = await this.local.getState();
+          const payload = createCloudPayload(localState || memoryState);
+          const createRes = await fetch("https://api.github.com/gists", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+              "Content-Type": "application/json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+            body: JSON.stringify({
+              description: this.description,
+              public: false,
+              files: {
+                [this.filename]: {
+                  content: JSON.stringify(payload, null, 2),
+                },
+              },
+            }),
+          });
+          if (!createRes.ok) {
+            throw new Error(
+              `Failed to create secret Gist: HTTP ${createRes.status}`
+            );
+          }
+          const createdGist = await createRes.json();
+          return createdGist.id;
+        }
+
+        async readRemoteGist(gistId, token) {
+          const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+          });
+          if (!res.ok) {
+            throw new Error(`Failed to read Gist: HTTP ${res.status}`);
+          }
+          const gist = await res.json();
+          const file = gist.files && gist.files[this.filename];
+          if (!file) {
+            return { gist, data: null };
+          }
+
+          let contentText = file.content;
+          if ((file.truncated || !contentText) && file.raw_url) {
+            const rawRes = await fetch(file.raw_url, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            if (rawRes.ok) {
+              contentText = await rawRes.text();
+            }
+          }
+
+          if (!contentText) {
+            return { gist, data: null };
+          }
+
+          try {
+            const data =
+              typeof contentText === "string"
+                ? JSON.parse(contentText)
+                : contentText;
+            return { gist, data };
+          } catch (e) {
+            console.warn("Failed to parse remote Gist JSON:", e);
+            return { gist, data: null };
+          }
+        }
+
+        async updateRemoteGist(gistId, payload, token) {
+          const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/vnd.github+json",
+              "Content-Type": "application/json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+            body: JSON.stringify({
+              description: this.description,
+              files: {
+                [this.filename]: {
+                  content: JSON.stringify(payload, null, 2),
+                },
+              },
+            }),
+          });
+          if (!res.ok) {
+            throw new Error(`Failed to update Gist: HTTP ${res.status}`);
+          }
+          return res.json();
+        }
+
+        async sync(forcePush = false, forcePull = false) {
+          if (!githubAuthState.token) {
+            return { success: false, error: "Not authenticated with GitHub" };
+          }
+          if (this.isSyncing) {
+            return { success: false, error: "Already syncing" };
+          }
+
+          this.isSyncing = true;
+          updateSyncStatusUI("syncing");
+
+          try {
+            const token = githubAuthState.token;
+            if (!githubAuthState.gistId) {
+              const gistId = await this.discoverOrCreateGist(
+                token,
+                githubAuthState.gistId
+              );
+              githubAuthState.gistId = gistId;
+              if (githubAuthState.rememberToken) {
+                try {
+                  localStorage.setItem("github_sync_gist_id", gistId);
+                } catch (e) {}
+              }
+            }
+
+            const gistId = githubAuthState.gistId;
+            if (!gistId) throw new Error("Could not locate or create Gist ID");
+
+            const { gist, data: remoteData } = await this.readRemoteGist(
+              gistId,
+              token
+            );
+            const localState = (await this.local.getState()) || memoryState;
+
+            if (forcePush || (!remoteData && !forcePull)) {
+              const payload = createCloudPayload(localState);
+              await this.updateRemoteGist(gistId, payload, token);
+            } else if (forcePull) {
+              if (remoteData) {
+                const merged = mergeCloudState(
+                  {
+                    activeList: { items: [] },
+                    purchaseLedger: [],
+                    stores: [],
+                  },
+                  remoteData
+                );
+                Object.assign(memoryState, merged);
+                await this.local.saveState(memoryState);
+              }
+            } else {
+              // Deterministic Merge with Optimistic Concurrency
+              if (remoteData) {
+                const merged = mergeCloudState(localState, remoteData);
+                Object.assign(memoryState, merged);
+                await this.local.saveState(memoryState);
+                const payload = createCloudPayload(merged);
+                await this.updateRemoteGist(gistId, payload, token);
+              } else {
+                const payload = createCloudPayload(localState);
+                await this.updateRemoteGist(gistId, payload, token);
+              }
+            }
+
+            githubAuthState.lastSyncTime = new Date().toISOString();
+            githubAuthState.lastError = null;
+            githubAuthState.isSyncing = false;
+            updateSyncStatusUI("synced");
+            updateGithubGistUI();
+            if (typeof renderApp === "function") renderApp();
+            return {
+              success: true,
+              timestamp: githubAuthState.lastSyncTime,
+              gistId: githubAuthState.gistId,
+            };
+          } catch (err) {
+            console.error("GitHub Gist sync failed:", err);
+            githubAuthState.lastError = err.message || "Sync failed";
+            githubAuthState.isSyncing = false;
+            updateSyncStatusUI("error");
+            return { success: false, error: githubAuthState.lastError };
+          } finally {
+            this.isSyncing = false;
+          }
+        }
+      }
+
+      // Storage Manager (Singleton Registry)
       class StorageManager {
         constructor() {
-          this.provider = new IndexedDBStorageProvider();
-          this.cloudProvider = new GoogleDriveStorageProvider(this.provider);
+          this.local = new IndexedDBStorageProvider();
+          this.providers = {
+            none: this.local,
+            googledrive: new GoogleDriveStorageProvider(this.local),
+            github: new GitHubGistStorageProvider(this.local),
+          };
+          this.activeProviderType = "none";
         }
+
         getProvider() {
-          return this.provider;
+          return this.local;
         }
+
         getCloudProvider() {
-          return this.cloudProvider;
+          return this.providers[this.activeProviderType] || this.local;
         }
-        setProvider(provider) {
-          this.provider = provider;
+
+        getActiveProviderType() {
+          return this.activeProviderType;
         }
-        async init() {
-          return this.provider.init();
-        }
-        async getState() {
-          return this.provider.getState();
-        }
-        async saveState(state) {
-          return this.provider.saveState(state);
-        }
-        async sync() {
-          if (googleAuthState.accessToken) {
-            return this.cloudProvider.sync();
+
+        setActiveCloudProvider(type) {
+          const valid = ["none", "googledrive", "github"].includes(type)
+            ? type
+            : "none";
+          this.activeProviderType = valid;
+          if (typeof memoryState !== "undefined" && memoryState.settings) {
+            memoryState.settings.cloudProvider = valid;
+            this.local.saveState(memoryState).catch(() => {});
           }
-          return this.provider.sync();
+          if (typeof localStorage !== "undefined") {
+            try {
+              localStorage.setItem("smart_buy_cloud_provider", valid);
+            } catch (e) {}
+          }
+          updateSyncStatusUI(this.getCloudProviderStatus());
+        }
+
+        getCloudProviderStatus() {
+          if (this.activeProviderType === "github") {
+            return githubAuthState.token
+              ? githubAuthState.lastError
+                ? "error"
+                : "synced"
+              : "offline";
+          }
+          if (this.activeProviderType === "googledrive") {
+            return googleAuthState.accessToken
+              ? googleAuthState.lastError
+                ? "error"
+                : "synced"
+              : "offline";
+          }
+          return "offline";
+        }
+
+        async init() {
+          await this.local.init();
+          if (typeof localStorage !== "undefined") {
+            try {
+              const saved = localStorage.getItem("smart_buy_cloud_provider");
+              if (saved && ["none", "googledrive", "github"].includes(saved)) {
+                this.activeProviderType = saved;
+              }
+            } catch (e) {}
+          }
+        }
+
+        async getState() {
+          return this.local.getState();
+        }
+
+        async saveState(state) {
+          await this.local.saveState(state);
+          triggerDebouncedCloudSync();
+          return true;
+        }
+
+        async sync(forcePush = false, forcePull = false) {
+          if (this.activeProviderType === "github" && githubAuthState.token) {
+            return this.providers.github.sync(forcePush, forcePull);
+          }
+          if (
+            this.activeProviderType === "googledrive" &&
+            googleAuthState.accessToken
+          ) {
+            return this.providers.googledrive.sync(forcePush, forcePull);
+          }
+          return this.local.sync(forcePush, forcePull);
         }
       }
 
       const storageManager = new StorageManager();
 
+      const githubAuthState = {
+        token: null,
+        gistId: null,
+        user: null,
+        lastSyncTime: null,
+        rememberToken: true,
+        isSyncing: false,
+        lastError: null,
+      };
+
+      function initGithubAuthState() {
+        if (typeof localStorage === "undefined") return;
+        try {
+          const savedToken = localStorage.getItem("github_sync_token");
+          const savedGistId = localStorage.getItem("github_sync_gist_id");
+          if (savedToken) {
+            githubAuthState.token = savedToken;
+            githubAuthState.rememberToken = true;
+            const tokenInput = document.getElementById("githubTokenInput");
+            if (tokenInput) tokenInput.value = savedToken;
+          }
+          if (savedGistId) {
+            githubAuthState.gistId = savedGistId;
+            const gistIdInput = document.getElementById("githubGistIdInput");
+            if (gistIdInput) gistIdInput.value = savedGistId;
+          }
+        } catch (e) {}
+      }
+
       let syncDebounceTimer = null;
 
       function triggerDebouncedCloudSync() {
-        if (!googleAuthState.accessToken) return;
+        const providerType = storageManager.getActiveProviderType();
+        if (providerType === "github" && !githubAuthState.token) return;
+        if (providerType === "googledrive" && !googleAuthState.accessToken)
+          return;
+        if (providerType === "none") return;
+
         if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
         syncDebounceTimer = setTimeout(() => {
-          storageManager.getCloudProvider().sync();
+          storageManager.sync();
         }, 3000);
+      }
+
+      function handleCloudProviderChange(type) {
+        storageManager.setActiveCloudProvider(type);
+        const lang = memoryState?.settings?.language || "vi";
+        const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
+
+        if (type === "github") {
+          if (!githubAuthState.token) {
+            showToast(
+              tr.github_token_placeholder ||
+                "Please configure your GitHub Personal Access Token"
+            );
+          } else {
+            storageManager.sync();
+          }
+        } else if (type === "googledrive") {
+          if (!googleAuthState.accessToken) {
+            handleGoogleSignIn();
+          } else {
+            storageManager.sync();
+          }
+        }
+      }
+
+      async function handleGithubConnect() {
+        const tokenInput = document.getElementById("githubTokenInput");
+        const gistIdInput = document.getElementById("githubGistIdInput");
+        const rememberCheckbox = document.getElementById(
+          "githubRememberTokenCheckbox"
+        );
+
+        const token = tokenInput ? tokenInput.value.trim() : "";
+        const gistId = gistIdInput ? gistIdInput.value.trim() : "";
+        const remember = rememberCheckbox ? rememberCheckbox.checked : true;
+
+        const lang = memoryState?.settings?.language || "vi";
+        const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
+
+        if (!token) {
+          showToast(
+            tr.toast_github_token_invalid ||
+              "Please enter a GitHub Personal Access Token"
+          );
+          return;
+        }
+
+        showToast(
+          tr.cloud_sync_syncing || "Connecting & verifying GitHub token..."
+        );
+        try {
+          const ghProvider = storageManager.providers.github;
+          const { user } = await ghProvider.validateToken(token);
+          githubAuthState.token = token;
+          githubAuthState.user = user;
+          githubAuthState.gistId = gistId || null;
+          githubAuthState.rememberToken = remember;
+
+          if (remember && typeof localStorage !== "undefined") {
+            try {
+              localStorage.setItem("github_sync_token", token);
+              if (gistId) localStorage.setItem("github_sync_gist_id", gistId);
+            } catch (e) {}
+          } else if (typeof localStorage !== "undefined") {
+            try {
+              localStorage.removeItem("github_sync_token");
+              localStorage.removeItem("github_sync_gist_id");
+            } catch (e) {}
+          }
+
+          storageManager.setActiveCloudProvider("github");
+          showToast(tr.toast_github_connected || "Connected to GitHub Gist!");
+          await ghProvider.sync();
+          if (gistIdInput && githubAuthState.gistId) {
+            gistIdInput.value = githubAuthState.gistId;
+          }
+          updateGithubGistUI();
+        } catch (err) {
+          console.error("GitHub connect error:", err);
+          showToast(
+            tr.toast_github_token_invalid ||
+              "Invalid GitHub token or missing gist scope"
+          );
+          updateSyncStatusUI("error");
+        }
+      }
+
+      function handleGithubDisconnect() {
+        githubAuthState.token = null;
+        githubAuthState.gistId = null;
+        githubAuthState.user = null;
+        githubAuthState.lastSyncTime = null;
+        githubAuthState.lastError = null;
+        if (typeof localStorage !== "undefined") {
+          try {
+            localStorage.removeItem("github_sync_token");
+            localStorage.removeItem("github_sync_gist_id");
+          } catch (e) {}
+        }
+        const tokenInput = document.getElementById("githubTokenInput");
+        const gistIdInput = document.getElementById("githubGistIdInput");
+        if (tokenInput) tokenInput.value = "";
+        if (gistIdInput) gistIdInput.value = "";
+
+        const lang = memoryState?.settings?.language || "vi";
+        const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
+        showToast(
+          tr.toast_github_disconnected || "Disconnected from GitHub Gist."
+        );
+        updateGithubGistUI();
+        updateSyncStatusUI("offline");
+      }
+
+      function toggleGithubTokenVisibility() {
+        const input = document.getElementById("githubTokenInput");
+        const btn = document.getElementById("btnToggleGithubTokenVisibility");
+        if (!input) return;
+        if (input.type === "password") {
+          input.type = "text";
+          if (btn) btn.textContent = "🙈";
+        } else {
+          input.type = "password";
+          if (btn) btn.textContent = "👁️";
+        }
+      }
+
+      function updateGithubGistUI() {
+        if (typeof document === "undefined") return;
+        const isConnected = !!githubAuthState.token;
+        const btnConnect = document.getElementById("btnGithubConnect");
+        const btnDisconnect = document.getElementById("btnGithubDisconnect");
+        const actions = document.getElementById("githubGistActions");
+        const viewLink = document.getElementById("githubViewGistLink");
+
+        if (btnConnect && btnDisconnect) {
+          if (isConnected) {
+            btnConnect.classList.add("hidden");
+            btnDisconnect.classList.remove("hidden");
+            btnDisconnect.classList.add("flex");
+            if (actions) actions.classList.remove("hidden");
+          } else {
+            btnConnect.classList.remove("hidden");
+            btnDisconnect.classList.add("hidden");
+            btnDisconnect.classList.remove("flex");
+            if (actions) actions.classList.add("hidden");
+          }
+        }
+
+        if (viewLink) {
+          if (githubAuthState.gistId) {
+            viewLink.href = `https://gist.github.com/${githubAuthState.gistId}`;
+            viewLink.classList.remove("hidden");
+          } else {
+            viewLink.classList.add("hidden");
+          }
+        }
       }
 
       function loadGisScript() {
@@ -3306,7 +4026,7 @@
                       "Connected to Google Drive!"
                   );
                   updateSyncStatusUI("synced");
-                  storageManager.getCloudProvider().sync();
+                  storageManager.sync();
                 } else if (tokenResponse?.error) {
                   console.error("OAuth error:", tokenResponse.error);
                   googleAuthState.lastError = tokenResponse.error;
@@ -3402,43 +4122,69 @@
       }
 
       async function syncCloudNow() {
-        if (!googleAuthState.accessToken) {
-          handleGoogleSignIn();
+        const activeType = storageManager.getActiveProviderType();
+        const lang = memoryState?.settings?.language || "vi";
+        const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
+
+        if (activeType === "github") {
+          if (!githubAuthState.token) {
+            handleGithubConnect();
+            return;
+          }
+          showToast(tr.cloud_sync_syncing || "Syncing with GitHub Gist...");
+          const res = await storageManager.sync();
+          if (res.success) {
+            showToast(
+              tr.toast_github_sync_success || "GitHub Gist sync completed!"
+            );
+          } else {
+            showToast(
+              tr.toast_github_sync_error ||
+                `GitHub sync failed: ${res.error || "Unknown"}`
+            );
+          }
           return;
         }
-        showToast(
-          (typeof t === "function" && t("cloud_sync_syncing")) ||
-            "Syncing with Google Drive..."
-        );
-        const res = await storageManager.getCloudProvider().sync();
-        if (res.success) {
-          showToast(
-            (typeof t === "function" && t("toast_cloud_sync_success")) ||
-              "Google Drive sync completed!"
-          );
-        } else {
-          showToast(
-            (typeof t === "function" && t("toast_cloud_sync_error")) ||
-              "Google Drive sync failed."
-          );
+
+        if (activeType === "googledrive") {
+          if (!googleAuthState.accessToken) {
+            handleGoogleSignIn();
+            return;
+          }
+          showToast(tr.cloud_sync_syncing || "Syncing with Google Drive...");
+          const res = await storageManager.sync();
+          if (res.success) {
+            showToast(
+              tr.toast_cloud_sync_success || "Google Drive sync completed!"
+            );
+          } else {
+            showToast(tr.toast_cloud_sync_error || "Google Drive sync failed.");
+          }
+          return;
         }
+
+        showToast(tr.cloud_sync_offline || "Local / Offline mode active");
       }
 
       async function forceUploadCloud() {
-        if (!googleAuthState.accessToken) return;
-        showToast("Uploading local data to Google Drive...");
-        const res = await storageManager.getCloudProvider().sync(true, false);
-        if (res.success)
-          showToast(
-            (typeof t === "function" && t("toast_cloud_sync_success")) ||
-              "Uploaded successfully!"
-          );
+        const activeType = storageManager.getActiveProviderType();
+        if (activeType === "github" && !githubAuthState.token) return;
+        if (activeType === "googledrive" && !googleAuthState.accessToken)
+          return;
+
+        showToast("Uploading local data to cloud...");
+        const res = await storageManager.sync(true, false);
+        if (res.success) showToast("Uploaded successfully!");
       }
 
       async function forceDownloadCloud() {
-        if (!googleAuthState.accessToken) return;
-        showToast("Downloading remote data from Google Drive...");
-        const res = await storageManager.getCloudProvider().sync(false, true);
+        const activeType = storageManager.getActiveProviderType();
+        if (activeType === "github" && !githubAuthState.token) return;
+        if (activeType === "googledrive" && !googleAuthState.accessToken)
+          return;
+
+        showToast("Downloading remote data from cloud...");
+        const res = await storageManager.sync(false, true);
         if (res.success) showToast("Downloaded and merged successfully!");
       }
 
@@ -3449,31 +4195,74 @@
         const topBarIcon = document.getElementById("topBarSyncIcon");
         const topBarText = document.getElementById("topBarSyncText");
         const lastTime = document.getElementById("cloudSyncLastTime");
+
+        const gdrivePanel = document.getElementById("googleDriveSyncPanel");
+        const githubPanel = document.getElementById("githubGistSyncPanel");
+        const providerSelect = document.getElementById("cloudProviderSelect");
+
+        const lang = memoryState?.settings?.language || "vi";
+        const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
+
+        const activeType = storageManager.getActiveProviderType();
+        if (providerSelect && providerSelect.value !== activeType) {
+          providerSelect.value = activeType;
+        }
+
+        if (gdrivePanel) {
+          if (activeType === "googledrive") {
+            gdrivePanel.classList.remove("hidden");
+          } else {
+            gdrivePanel.classList.add("hidden");
+          }
+        }
+        if (githubPanel) {
+          if (activeType === "github") {
+            githubPanel.classList.remove("hidden");
+          } else {
+            githubPanel.classList.add("hidden");
+          }
+        }
+
         const btnSignIn = document.getElementById("btnGoogleSignIn");
         const btnSignOut = document.getElementById("btnGoogleSignOut");
-        const advActions = document.getElementById("cloudSyncAdvancedActions");
-
-        const lang = memoryState?.settings?.language || "en";
-        const tr = TRANSLATIONS[lang] || TRANSLATIONS.en;
-
-        const isConnected = !!googleAuthState.accessToken;
-
+        const gdriveAdv = document.getElementById("cloudSyncAdvancedActions");
+        const isGDriveConnected = !!googleAuthState.accessToken;
         if (btnSignIn && btnSignOut) {
-          if (isConnected) {
+          if (isGDriveConnected) {
             btnSignIn.classList.add("hidden");
             btnSignOut.classList.remove("hidden");
             btnSignOut.classList.add("flex");
-            if (advActions) advActions.classList.remove("hidden");
+            if (gdriveAdv) gdriveAdv.classList.remove("hidden");
           } else {
             btnSignIn.classList.remove("hidden");
             btnSignOut.classList.add("hidden");
             btnSignOut.classList.remove("flex");
-            if (advActions) advActions.classList.add("hidden");
+            if (gdriveAdv) gdriveAdv.classList.add("hidden");
           }
         }
 
-        if (lastTime && googleAuthState.lastSyncTime) {
-          const date = new Date(googleAuthState.lastSyncTime);
+        updateGithubGistUI();
+
+        // Update Top Bar icon based on provider
+        if (topBarIcon) {
+          if (activeType === "github") topBarIcon.textContent = "🐙";
+          else if (activeType === "googledrive") topBarIcon.textContent = "📁";
+          else topBarIcon.textContent = "⚪";
+        }
+
+        let isConnected = false;
+        let syncTime = null;
+
+        if (activeType === "github") {
+          isConnected = !!githubAuthState.token;
+          syncTime = githubAuthState.lastSyncTime;
+        } else if (activeType === "googledrive") {
+          isConnected = !!googleAuthState.accessToken;
+          syncTime = googleAuthState.lastSyncTime;
+        }
+
+        if (lastTime && syncTime) {
+          const date = new Date(syncTime);
           const timeStr = date.toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -3493,7 +4282,6 @@
             topBar.classList.remove("hidden");
             topBar.classList.add("flex");
           }
-          if (topBarIcon) topBarIcon.textContent = "🟡";
           if (topBarText)
             topBarText.textContent = tr.cloud_sync_syncing || "Syncing...";
         } else if (status === "synced" || (isConnected && status !== "error")) {
@@ -3506,7 +4294,6 @@
             topBar.classList.remove("hidden");
             topBar.classList.add("flex");
           }
-          if (topBarIcon) topBarIcon.textContent = "🟢";
           if (topBarText)
             topBarText.textContent = tr.cloud_sync_synced || "Synced";
         } else if (status === "error") {
@@ -3519,7 +4306,6 @@
             topBar.classList.remove("hidden");
             topBar.classList.add("flex");
           }
-          if (topBarIcon) topBarIcon.textContent = "🔴";
           if (topBarText)
             topBarText.textContent = tr.cloud_sync_error || "Error";
         } else {
@@ -3529,13 +4315,21 @@
               "text-[11px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800 font-medium";
           }
           if (topBar) {
-            topBar.classList.add("hidden");
-            topBar.classList.remove("flex");
+            if (activeType === "none") {
+              topBar.classList.add("hidden");
+              topBar.classList.remove("flex");
+            } else {
+              topBar.classList.remove("hidden");
+              topBar.classList.add("flex");
+            }
           }
+          if (topBarText)
+            topBarText.textContent = tr.cloud_sync_offline || "Local";
         }
       }
 
       function initDatabase() {
+        initGithubAuthState();
         return storageManager.init();
       }
 
@@ -3803,6 +4597,27 @@
             "Google Drive sync failed. Using local storage.",
           toast_cloud_connected: "Connected to Google Drive!",
           toast_cloud_disconnected: "Disconnected from Google Drive.",
+          cloud_provider_label: "Active Cloud Storage Provider",
+          cloud_provider_none: "Disabled (Local Only)",
+          cloud_provider_googledrive: "Google Drive (AppData)",
+          cloud_provider_github: "GitHub Gist (Secret)",
+          github_sync_title: "GitHub Gist Cloud Sync",
+          github_token_label: "GitHub Personal Access Token (PAT)",
+          github_token_placeholder: "ghp_... or github_pat_...",
+          github_token_helper: "Create token on GitHub with 'gist' scope ↗",
+          github_gist_id_label: "Gist ID (Optional)",
+          github_gist_id_placeholder: "Auto-discovered or paste Gist ID",
+          github_remember_token: "Remember token on this device",
+          btn_github_connect: "Connect & Verify",
+          btn_github_disconnect: "Disconnect",
+          btn_github_sync_now: "Sync Now",
+          github_view_gist: "View Gist on GitHub ↗",
+          toast_github_connected: "Connected to GitHub Gist!",
+          toast_github_disconnected: "Disconnected from GitHub Gist.",
+          toast_github_sync_success: "GitHub Gist sync completed!",
+          toast_github_token_invalid:
+            "Invalid GitHub token or missing gist scope",
+          toast_github_sync_error: "GitHub sync failed: {msg}",
           toast_sample_loaded: "Sample grocery list loaded!",
           toast_data_cleared: "All data cleared",
           smart_quick_heading: "Quick Add Item",
@@ -4056,6 +4871,27 @@
             "Đồng bộ Google Drive thất bại. Đang dùng bộ nhớ máy.",
           toast_cloud_connected: "Đã kết nối với Google Drive!",
           toast_cloud_disconnected: "Đã ngắt kết nối với Google Drive.",
+          cloud_provider_label: "Nhà Cung Cấp Đồng Bộ Đám Mây",
+          cloud_provider_none: "Tắt (Chỉ Lưu Cục Bộ)",
+          cloud_provider_googledrive: "Google Drive (AppData)",
+          cloud_provider_github: "GitHub Gist (Bảo Mật)",
+          github_sync_title: "Đồng Bộ Đám Mây GitHub Gist",
+          github_token_label: "Mã Truy Cập Cá Nhân GitHub (PAT)",
+          github_token_placeholder: "ghp_... hoặc github_pat_...",
+          github_token_helper: "Tạo mã trên GitHub với quyền 'gist' ↗",
+          github_gist_id_label: "Mã Gist (Tuỳ Chọn)",
+          github_gist_id_placeholder: "Tự động tìm hoặc dán mã Gist",
+          github_remember_token: "Ghi nhớ mã trên thiết bị này",
+          btn_github_connect: "Kết Nối & Xác Thực",
+          btn_github_disconnect: "Ngắt Kết Nối",
+          btn_github_sync_now: "Đồng Bộ Ngay",
+          github_view_gist: "Xem Gist trên GitHub ↗",
+          toast_github_connected: "Đã kết nối với GitHub Gist!",
+          toast_github_disconnected: "Đã ngắt kết nối với GitHub Gist.",
+          toast_github_sync_success: "Đồng bộ GitHub Gist thành công!",
+          toast_github_token_invalid:
+            "Mã GitHub không hợp lệ hoặc thiếu quyền gist",
+          toast_github_sync_error: "Lỗi đồng bộ GitHub: {msg}",
           toast_sample_loaded: "Đã tải danh sách hàng hoá mẫu!",
           toast_data_cleared: "Đã xoá toàn bộ dữ liệu",
           smart_quick_heading: "Nhập Nhanh Mặt Hàng",
@@ -7714,8 +8550,23 @@
         el("settingsSyncStatus", t.settings_sync_status);
         el("settingsSyncBadge", t.badge_local_only);
 
-        // 8.1. Google Drive Cloud Sync Section
-        el("cloudSyncTitle", t.cloud_sync_title || "Google Drive Cloud Sync");
+        // 8.1. Multi-Provider Cloud Sync Section
+        el("cloudSyncTitle", t.cloud_sync_title || "Cloud Synchronization");
+        el(
+          "cloudProviderLabel",
+          t.cloud_provider_label || "Active Cloud Storage Provider"
+        );
+        el("optProviderNone", t.cloud_provider_none || "Disabled (Local Only)");
+        el(
+          "optProviderGDrive",
+          t.cloud_provider_googledrive || "Google Drive (AppData)"
+        );
+        el(
+          "optProviderGitHub",
+          t.cloud_provider_github || "GitHub Gist (Secret)"
+        );
+
+        // Google Drive Panel
         el(
           "cloudSyncClientIdLabel",
           t.cloud_sync_client_id_label || "Google OAuth 2.0 Client ID"
@@ -7733,7 +8584,43 @@
           "btnForceDownload",
           t.btn_force_download || "Force Download from Cloud"
         );
-        updateSyncStatusUI(googleAuthState.accessToken ? "synced" : "offline");
+
+        // GitHub Gist Panel
+        el(
+          "githubTokenLabel",
+          t.github_token_label || "GitHub Personal Access Token (PAT)"
+        );
+        el(
+          "githubTokenHelperLink",
+          t.github_token_helper || "Create token on GitHub ↗"
+        );
+        const tokenInput = document.getElementById("githubTokenInput");
+        if (tokenInput)
+          tokenInput.placeholder =
+            t.github_token_placeholder || "ghp_... or github_pat_...";
+        el("githubGistIdLabel", t.github_gist_id_label || "Gist ID (Optional)");
+        const gistIdInput = document.getElementById("githubGistIdInput");
+        if (gistIdInput)
+          gistIdInput.placeholder =
+            t.github_gist_id_placeholder || "Auto-discovered or paste Gist ID";
+        el(
+          "githubRememberTokenLabel",
+          t.github_remember_token || "Remember token on this device"
+        );
+        el("btnGithubConnectText", t.btn_github_connect || "Connect & Verify");
+        el("btnGithubDisconnectText", t.btn_github_disconnect || "Disconnect");
+        el("btnGithubSyncNowText", t.btn_github_sync_now || "Sync Now");
+        el(
+          "btnGithubForceUpload",
+          t.btn_force_upload || "Force Upload to Cloud"
+        );
+        el(
+          "btnGithubForceDownload",
+          t.btn_force_download || "Force Download from Cloud"
+        );
+        el("githubViewGistLink", t.github_view_gist || "View Gist on GitHub ↗");
+
+        updateSyncStatusUI(storageManager.getCloudProviderStatus());
 
         el(
           "settingsPwaTitle",
@@ -8288,11 +9175,17 @@
         window.IStorageProvider = StorageProvider;
         window.IndexedDBStorageProvider = IndexedDBStorageProvider;
         window.GoogleDriveStorageProvider = GoogleDriveStorageProvider;
+        window.GitHubGistStorageProvider = GitHubGistStorageProvider;
         window.storageManager = storageManager;
         window.initGoogleAuthClient = initGoogleAuthClient;
         window.handleGoogleSignIn = handleGoogleSignIn;
         window.handleGoogleSignOut = handleGoogleSignOut;
         window.saveGoogleClientIdFromInput = saveGoogleClientIdFromInput;
+        window.handleGithubConnect = handleGithubConnect;
+        window.handleGithubDisconnect = handleGithubDisconnect;
+        window.toggleGithubTokenVisibility = toggleGithubTokenVisibility;
+        window.handleCloudProviderChange = handleCloudProviderChange;
+        window.updateGithubGistUI = updateGithubGistUI;
         window.syncCloudNow = syncCloudNow;
         window.forceUploadCloud = forceUploadCloud;
         window.forceDownloadCloud = forceDownloadCloud;
@@ -8315,6 +9208,13 @@
           get: () => googleAuthState,
           set: (v) => {
             googleAuthState = v;
+          },
+          configurable: true,
+        });
+        Object.defineProperty(window, "githubAuthState", {
+          get: () => githubAuthState,
+          set: (v) => {
+            githubAuthState = v;
           },
           configurable: true,
         });
