@@ -3,6 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://accounts.google.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob: https://trile.dev https://*.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://www.googleapis.com https://accounts.google.com https://cloudflareinsights.com https://static.cloudflareinsights.com; font-src 'self' data:; manifest-src 'self';"
+    />
     <title>Smart Buy-List & Unit Price Tracker</title>
     <meta
       name="description"
@@ -6215,17 +6219,18 @@
         const stores = memoryState.stores || DEFAULT_STORES;
         const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
         container.innerHTML = stores
-          .map(
-            (s, idx) => `
+          .map((s, idx) => {
+            const safeStore = sanitizeHTML(s);
+            return `
           <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-            <span class="font-semibold text-slate-200" id="storeNameDisplay-${idx}">${s}</span>
+            <span class="font-semibold text-slate-200" id="storeNameDisplay-${idx}">${safeStore}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="promptRenameStoreByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer" title="${t.aria_rename_store || "Rename"}" aria-label="${(t.aria_rename_store || "Rename store") + ": " + s}"><span aria-hidden="true">✏️</span></button>
-              <button onclick="deleteStoreByIndex(${idx})" class="text-slate-400 hover:text-red-400 p-1 cursor-pointer" title="${t.aria_delete_store || "Delete"}" aria-label="${(t.aria_delete_store || "Delete store") + ": " + s}"><span aria-hidden="true">🗑️</span></button>
+              <button onclick="promptRenameStoreByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer" title="${t.aria_rename_store || "Rename"}" aria-label="${(t.aria_rename_store || "Rename store") + ": " + safeStore}"><span aria-hidden="true">✏️</span></button>
+              <button onclick="deleteStoreByIndex(${idx})" class="text-slate-400 hover:text-red-400 p-1 cursor-pointer" title="${t.aria_delete_store || "Delete"}" aria-label="${(t.aria_delete_store || "Delete store") + ": " + safeStore}"><span aria-hidden="true">🗑️</span></button>
             </div>
           </div>
-        `
-          )
+        `;
+          })
           .join("");
       }
 
@@ -6400,19 +6405,20 @@
 
         storeChips.forEach((chip) => {
           const isActive = currentStoreFilter === chip.key;
-          const escapedKey = chip.key.replace(/'/g, "\\'");
+          const escapedKey = sanitizeHTML(chip.key).replace(/'/g, "\\'");
+          const safeLabel = sanitizeHTML(chip.label);
           html += `
             <button
               type="button"
               onclick="onStoreFilterChange('${escapedKey}')"
-              aria-label="${chip.label} (${chip.count})"
+              aria-label="${safeLabel} (${chip.count})"
               class="px-2.5 py-1 rounded-full text-xs shrink-0 transition-all flex items-center gap-1 cursor-pointer ${
                 isActive
                   ? "bg-emerald-600 text-white shadow-sm font-semibold"
                   : "bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium"
               }"
             >
-              <span>${chip.label}</span>
+              <span>${safeLabel}</span>
               <span class="text-[10px] px-1.5 py-0.5 rounded-full ${
                 isActive
                   ? "bg-emerald-700 text-emerald-100"
@@ -6564,6 +6570,16 @@
           const currentValB = compUnitB.value || "kg";
           compUnitB.innerHTML = generateOptions(currentValB);
         }
+      }
+
+      function sanitizeHTML(str) {
+        if (str === null || str === undefined) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
       }
 
       function formatCurrency(
@@ -6868,7 +6884,7 @@
               <div class="space-y-2">
                 <div class="flex items-center justify-between pt-2 pb-1 px-1">
                   <div class="font-bold text-xs uppercase tracking-wider text-slate-300">
-                    <span>${sName}</span>
+                    <span>${sanitizeHTML(sName)}</span>
                   </div>
                   <span class="text-[11px] font-semibold text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
                     ${storeItems.length} ${itemsLabel} • ${formatCurrency(storeSubtotal)}
@@ -7112,6 +7128,9 @@
         const swipeRightIcon = isChecked ? "↺" : "✓";
         const swipeCompCue = t.swipe_compare_cue || "Compare";
 
+        const safeName = sanitizeHTML(item.name);
+        const safeUnit = sanitizeHTML(item.unit);
+
         if (currentPhase === "IN_STORE") {
           return `
           <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
@@ -7144,7 +7163,7 @@
                 <button
                   type="button"
                   onclick="event.stopPropagation(); toggleItemCheck('${item.id}')"
-                  aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + item.name}"
+                  aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
                   class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}"
                 >
                   <span aria-hidden="true">✓</span>
@@ -7152,7 +7171,7 @@
 
                 <!-- Item Info (Clean Name Only) -->
                 <div class="flex-1 min-w-0">
-                  <span class="font-bold text-base text-slate-100 truncate block ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
+                  <span class="font-bold text-base text-slate-100 truncate block ${item.checked ? "line-through text-slate-500" : ""}">${safeName}</span>
                 </div>
               </div>
 
@@ -7161,7 +7180,7 @@
                 <button
                   type="button"
                   onclick="event.stopPropagation(); openQuickPriceEdit('${item.id}')"
-                  aria-label="${(t.aria_edit_price || "Update item price") + ": " + item.name}"
+                  aria-label="${(t.aria_edit_price || "Update item price") + ": " + safeName}"
                   class="font-bold text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors"
                   title="Update Price"
                 >
@@ -7237,7 +7256,7 @@
               <button
                 type="button"
                 onclick="toggleItemCheck('${item.id}')"
-                aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + item.name}"
+                aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer"
                 title="Toggle Check"
               >
@@ -7245,7 +7264,7 @@
               </button>
               <div class="flex items-center gap-2 min-w-0 flex-1">
                 <span class="text-base shrink-0" aria-hidden="true">${catInfo.icon}</span>
-                <span class="font-bold text-sm sm:text-base text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
+                <span class="font-bold text-sm sm:text-base text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${safeName}</span>
               </div>
             </div>
 
@@ -7255,11 +7274,11 @@
                 <button
                   type="button"
                   onclick="openFullItemEdit('${item.id}')"
-                  aria-label="${(t.aria_edit_item || "Edit item details") + ": " + item.name}"
+                  aria-label="${(t.aria_edit_item || "Edit item details") + ": " + safeName}"
                   class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 transition-colors cursor-pointer"
                   title="Adjust details"
                 >
-                  <span aria-hidden="true">📦</span> ${item.quantity} ${item.unit}
+                  <span aria-hidden="true">📦</span> ${item.quantity} ${safeUnit}
                 </button>
                 ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
                 ${dealBadgeHtml}
@@ -7275,7 +7294,7 @@
                 <button
                   type="button"
                   onclick="openItemComparator('${item.id}')"
-                  aria-label="${(t.aria_nav_compare || "Compare") + ": " + item.name}"
+                  aria-label="${(t.aria_nav_compare || "Compare") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-900/60 rounded-lg border border-slate-700/60 hover:border-indigo-500/50 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Compare Pack Sizes"
                 >
@@ -7285,7 +7304,7 @@
                 <button
                   type="button"
                   onclick="openFullItemEdit('${item.id}')"
-                  aria-label="${(t.aria_edit_item || "Edit") + ": " + item.name}"
+                  aria-label="${(t.aria_edit_item || "Edit") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700/60 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Edit Item Details"
                 >
@@ -7295,7 +7314,7 @@
                 <button
                   type="button"
                   onclick="deleteItem('${item.id}')"
-                  aria-label="${(t.aria_delete_item || "Delete item") + ": " + item.name}"
+                  aria-label="${(t.aria_delete_item || "Delete item") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/40 transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
                   title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].remove_btn || "Remove"}"
                 >
@@ -7307,7 +7326,7 @@
                 <button
                   type="button"
                   onclick="openFullItemEdit('${item.id}')"
-                  aria-label="${(t.aria_edit_item || "Edit item") + ": " + item.name}"
+                  aria-label="${(t.aria_edit_item || "Edit item") + ": " + safeName}"
                   class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 transition-colors block text-right cursor-pointer"
                   title="Update Price / Details"
                 >
@@ -9381,6 +9400,10 @@
             .map((l) => {
               const { baseUnit } = normalizeQuantity(l.quantity, l.unit);
               const isSelected = selectedLedgerIds.has(String(l.id));
+              const safeName = sanitizeHTML(l.itemName);
+              const safeStore = sanitizeHTML(l.store || "—");
+              const safeUnit = sanitizeHTML(l.unit);
+              const safeDate = sanitizeHTML(l.date);
               return `
             <tr class="hover:bg-slate-800/40 transition-colors ${isSelected ? "bg-emerald-950/20" : ""}">
               <td class="p-3 text-center">
@@ -9388,15 +9411,15 @@
                   type="checkbox"
                   class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
                   data-ledger-id="${l.id}"
-                  aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + l.itemName}"
+                  aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + safeName}"
                   onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
                   ${isSelected ? "checked" : ""}
                 />
               </td>
-              <td class="p-3 font-mono text-xs text-slate-400">${l.date}</td>
-              <td class="p-3 font-bold text-sm text-slate-100">${l.itemName}</td>
-              <td class="p-3 text-sm text-slate-300">${l.store || "—"}</td>
-              <td class="p-3 text-sm text-slate-300 font-medium">${l.quantity} ${l.unit}</td>
+              <td class="p-3 font-mono text-xs text-slate-400">${safeDate}</td>
+              <td class="p-3 font-bold text-sm text-slate-100">${safeName}</td>
+              <td class="p-3 text-sm text-slate-300">${safeStore}</td>
+              <td class="p-3 text-sm text-slate-300 font-medium">${l.quantity} ${safeUnit}</td>
               <td class="p-3 font-bold text-sm text-white">${formatCurrency(l.price)}</td>
               <td class="p-3 font-bold text-sm text-emerald-400">${formatCurrency(l.unitPrice)} / ${baseUnit}</td>
               <td class="p-3 text-right whitespace-nowrap space-x-1.5">
@@ -9405,7 +9428,7 @@
                   onclick="addLedgerItemToBuyList('${l.id}')"
                   class="inline-flex items-center justify-center bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold px-3 py-1.5 rounded-lg border border-emerald-500/40 text-xs transition-colors cursor-pointer active:scale-95"
                   title="${t.ledger_quick_add_title || "Add this item to Buy List"}"
-                  aria-label="${(t.aria_add_ledger_row || "Add record to buy list") + ": " + l.itemName}"
+                  aria-label="${(t.aria_add_ledger_row || "Add record to buy list") + ": " + safeName}"
                 >
                   <span aria-hidden="true">➕</span>
                 </button>
@@ -9414,7 +9437,7 @@
                   onclick="deleteLedgerItem('${l.id}')"
                   class="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-bold px-2.5 py-1.5 rounded-lg border border-red-500/40 text-xs transition-colors cursor-pointer active:scale-95"
                   title="${t.ledger_delete_item || "Delete record"}"
-                  aria-label="${(t.aria_delete_ledger_row || "Delete purchase record") + ": " + l.itemName}"
+                  aria-label="${(t.aria_delete_ledger_row || "Delete purchase record") + ": " + safeName}"
                 >
                   <span aria-hidden="true">🗑️</span>
                 </button>
@@ -9431,6 +9454,10 @@
             .map((l) => {
               const { baseUnit } = normalizeQuantity(l.quantity, l.unit);
               const isSelected = selectedLedgerIds.has(String(l.id));
+              const safeName = sanitizeHTML(l.itemName);
+              const safeStore = sanitizeHTML(l.store || "—");
+              const safeUnit = sanitizeHTML(l.unit);
+              const safeDate = sanitizeHTML(l.date);
               return `
             <div class="p-3.5 bg-slate-950/80 rounded-2xl border ${isSelected ? "border-emerald-500/60 bg-emerald-950/20" : "border-slate-800"} space-y-2.5 shadow-sm transition-all">
               <div class="flex items-start justify-between gap-2">
@@ -9439,15 +9466,15 @@
                     type="checkbox"
                     class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer mt-0.5 shrink-0"
                     data-ledger-id="${l.id}"
-                    aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + l.itemName}"
+                    aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + safeName}"
                     onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
                     ${isSelected ? "checked" : ""}
                   />
                   <div class="min-w-0 flex-1">
-                    <div class="text-sm font-bold text-slate-100 leading-snug break-words">${l.itemName}</div>
+                    <div class="text-sm font-bold text-slate-100 leading-snug break-words">${safeName}</div>
                     <div class="flex items-center gap-2 mt-1 flex-wrap">
-                      <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/60">${l.store || "—"}</span>
-                      <span class="text-[11px] font-mono text-slate-400">${l.date}</span>
+                      <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/60">${safeStore}</span>
+                      <span class="text-[11px] font-mono text-slate-400">${safeDate}</span>
                     </div>
                   </div>
                 </div>
@@ -9455,7 +9482,7 @@
 
               <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
                 <div class="text-xs text-slate-300">
-                  <span class="text-slate-500">${t.th_size || "Size"}:</span> <span class="font-semibold text-slate-200">${l.quantity} ${l.unit}</span>
+                  <span class="text-slate-500">${t.th_size || "Size"}:</span> <span class="font-semibold text-slate-200">${l.quantity} ${safeUnit}</span>
                   <span class="text-slate-600 mx-1">·</span>
                   <span class="text-slate-500">${t.th_paid || "Paid"}:</span> <span class="font-bold text-slate-100">${formatCurrency(l.price)}</span>
                 </div>
@@ -9468,7 +9495,7 @@
                 <button
                   type="button"
                   onclick="addLedgerItemToBuyList('${l.id}')"
-                  aria-label="${(t.btn_add_selected_ledger || "Add to Buy List") + ": " + l.itemName}"
+                  aria-label="${(t.btn_add_selected_ledger || "Add to Buy List") + ": " + safeName}"
                   class="flex-1 min-h-[44px] px-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-colors"
                 >
                   <span aria-hidden="true">➕</span>
@@ -9479,7 +9506,7 @@
                   onclick="deleteLedgerItem('${l.id}')"
                   class="min-h-[44px] px-3 bg-red-950/40 hover:bg-red-900/60 active:scale-95 text-red-300 font-semibold rounded-xl text-xs border border-red-800/40 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                   title="${t.ledger_delete_item || "Delete record"}"
-                  aria-label="${(t.ledger_delete_item || "Delete record") + ": " + l.itemName}"
+                  aria-label="${(t.ledger_delete_item || "Delete record") + ": " + safeName}"
                 >
                   <span aria-hidden="true">🗑️</span>
                   <span>${t.btn_delete_ledger_item || "Delete"}</span>
@@ -10196,13 +10223,15 @@
         }
 
         dropdown.innerHTML = unique
-          .map(
-            (name) => `
-        <button type="button" onclick="selectAutocomplete('${name}')" class="w-full text-left px-3 py-2 text-xs text-slate-200 hover:bg-emerald-600/30 hover:text-white transition-colors">
-          🔍 ${name}
+          .map((name) => {
+            const safeName = sanitizeHTML(name);
+            const escapedName = safeName.replace(/'/g, "\\'");
+            return `
+        <button type="button" onclick="selectAutocomplete('${escapedName}')" class="w-full text-left px-3 py-2 text-xs text-slate-200 hover:bg-emerald-600/30 hover:text-white transition-colors">
+          <span aria-hidden="true">🔍</span> ${safeName}
         </button>
-      `
-          )
+      `;
+          })
           .join("");
         dropdown.classList.remove("hidden");
       }
@@ -10569,6 +10598,7 @@
         window.toggleLanguage = toggleLanguage;
         window.setCurrency = setCurrency;
         window.formatCurrency = formatCurrency;
+        window.sanitizeHTML = sanitizeHTML;
         window.handleGlobalKeyDown = handleGlobalKeyDown;
         window.openComparatorModal = openComparatorModal;
         window.openItemComparator = openItemComparator;

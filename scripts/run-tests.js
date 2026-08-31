@@ -184,6 +184,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-v3-13-enhancements.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List innerHTML Sanitization & Content Security Policy",
+    file: "tests/smart-buy-list-security-csp.test.js",
+    category: "Security",
+  },
 ];
 
 function escapeXml(str) {
