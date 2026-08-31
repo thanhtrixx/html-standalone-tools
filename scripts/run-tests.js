@@ -189,6 +189,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-security-csp.test.js",
     category: "Security",
   },
+  {
+    name: "Smart Buy-List Parser Hardening & Store Aliases",
+    file: "tests/smart-buy-list-parser-hardening.test.js",
+    category: "Core Math",
+  },
 ];
 
 function escapeXml(str) {

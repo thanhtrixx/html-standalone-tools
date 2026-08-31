@@ -3149,12 +3149,35 @@
         "Cửa hàng tiện lợi",
       ];
 
+      const DEFAULT_STORE_ALIASES = {
+        WinMart: ["wm", "winmart", "vinmart", "vm"],
+        "Bách Hoá Xanh": ["bhx", "bachhoaxanh", "bach hoa xanh"],
+        "Co.opmart": ["coop", "coopmart", "co.op", "co.opmart"],
+        "Big C / GO!": ["bigc", "go", "big c", "go!"],
+        "Lotte Mart": ["lotte", "lottemart"],
+        "Chợ truyền thống": [
+          "cho",
+          "chotruyenthong",
+          "cho truyen thong",
+          "market",
+        ],
+        "Cửa hàng tiện lợi": [
+          "chtl",
+          "convenience",
+          "7eleven",
+          "familymart",
+          "circlek",
+          "gs25",
+        ],
+      };
+
       // In-memory fallback / active working state
       let memoryState = {
         activeList: { id: "default", title: "Danh Sách Mua Sắm", items: [] },
         catalog: [],
         purchaseLedger: [],
         stores: [...DEFAULT_STORES],
+        storeAliases: { ...DEFAULT_STORE_ALIASES },
         settings: {
           language: "vi",
           currency: "VND",
@@ -5384,6 +5407,13 @@
           aria_delete_store: "Delete store",
           aria_save_client_id: "Save Client ID",
           aria_toggle_token_visibility: "Toggle token visibility",
+          store_aliases_label: "Aliases",
+          no_aliases: "None",
+          prompt_edit_store_aliases:
+            "Enter comma-separated aliases for store '{store}':",
+          toast_store_aliases_updated: "Store aliases updated!",
+          aria_edit_store_aliases: "Edit aliases",
+          warn_price_too_high: "Warning: Price exceeds normal limit",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -5735,6 +5765,13 @@
           aria_delete_store: "Xoá cửa hàng",
           aria_save_client_id: "Lưu Client ID",
           aria_toggle_token_visibility: "Hiện/ẩn mã token",
+          store_aliases_label: "Tên viết tắt / Alias",
+          no_aliases: "Chưa có",
+          prompt_edit_store_aliases:
+            "Nhập các tên viết tắt (cách nhau bởi dấu phẩy) cho cửa hàng '{store}':",
+          toast_store_aliases_updated: "Đã cập nhật tên viết tắt cho cửa hàng!",
+          aria_edit_store_aliases: "Sửa tên viết tắt",
+          warn_price_too_high: "Cảnh báo: Giá vượt quá giới hạn thông thường",
         },
       };
 
@@ -6093,7 +6130,63 @@
       /* =========================================================================
        6b. STORE MANAGEMENT CRUD & CASCADE
        ========================================================================= */
-      function addStore(storeName) {
+      function getStoreAliases(storeName) {
+        if (!storeName) return [];
+        if (memoryState && memoryState.storeAliases) {
+          return Array.isArray(memoryState.storeAliases[storeName])
+            ? memoryState.storeAliases[storeName]
+            : [];
+        }
+        if (
+          DEFAULT_STORE_ALIASES &&
+          Array.isArray(DEFAULT_STORE_ALIASES[storeName])
+        ) {
+          return DEFAULT_STORE_ALIASES[storeName];
+        }
+        return [];
+      }
+
+      function setStoreAliases(storeName, aliases) {
+        if (!storeName) return false;
+        if (!memoryState.storeAliases) {
+          memoryState.storeAliases = { ...DEFAULT_STORE_ALIASES };
+        }
+        let arr = [];
+        if (Array.isArray(aliases)) {
+          arr = aliases.map((a) => String(a).trim()).filter(Boolean);
+        } else if (typeof aliases === "string") {
+          arr = aliases
+            .split(",")
+            .map((a) => a.trim())
+            .filter(Boolean);
+        }
+        memoryState.storeAliases[storeName] = Array.from(new Set(arr));
+        saveToLocalStorage();
+        renderStoreManagerList();
+        return true;
+      }
+
+      function promptEditStoreAliases(storeName) {
+        const current = getStoreAliases(storeName).join(", ");
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
+        const promptTpl =
+          t.prompt_edit_store_aliases ||
+          "Enter comma-separated aliases for store '{store}':";
+        const promptText = promptTpl.replace("{store}", storeName);
+        const res = prompt(promptText, current);
+        if (res !== null) {
+          setStoreAliases(storeName, res);
+          showToast(t.toast_store_aliases_updated || "Store aliases updated!");
+        }
+      }
+
+      function promptEditStoreAliasesByIndex(idx) {
+        const stores = memoryState.stores || DEFAULT_STORES;
+        if (idx < 0 || idx >= stores.length) return;
+        promptEditStoreAliases(stores[idx]);
+      }
+
+      function addStore(storeName, aliases) {
         if (!storeName || typeof storeName !== "string") return false;
         const name = storeName.trim();
         if (!name) return false;
@@ -6111,6 +6204,23 @@
           delete memoryState._deleted.stores[name];
         }
         memoryState.stores.push(name);
+        if (!memoryState.storeAliases) {
+          memoryState.storeAliases = { ...DEFAULT_STORE_ALIASES };
+        }
+        if (aliases) {
+          let arr = [];
+          if (Array.isArray(aliases)) {
+            arr = aliases.map((a) => String(a).trim()).filter(Boolean);
+          } else if (typeof aliases === "string") {
+            arr = aliases
+              .split(",")
+              .map((a) => a.trim())
+              .filter(Boolean);
+          }
+          memoryState.storeAliases[name] = Array.from(new Set(arr));
+        } else {
+          memoryState.storeAliases[name] = [];
+        }
         saveToLocalStorage();
         renderStoreFilterOptions();
         renderStoreManagerList();
@@ -6135,6 +6245,17 @@
         }
 
         memoryState.stores[idx] = name;
+
+        // Migrate aliases to new name
+        if (!memoryState.storeAliases) {
+          memoryState.storeAliases = { ...DEFAULT_STORE_ALIASES };
+        }
+        if (memoryState.storeAliases[oldName]) {
+          memoryState.storeAliases[name] = [
+            ...memoryState.storeAliases[oldName],
+          ];
+          delete memoryState.storeAliases[oldName];
+        }
 
         // Cascade rename to active list items
         if (
@@ -6185,6 +6306,9 @@
 
         recordDeletedStore(storeName);
         memoryState.stores = memoryState.stores.filter((s) => s !== storeName);
+        if (memoryState.storeAliases) {
+          delete memoryState.storeAliases[storeName];
+        }
         const fallbackStore = memoryState.stores[0] || "Other";
 
         // Reassign active items using this store to fallback
@@ -6221,12 +6345,21 @@
         container.innerHTML = stores
           .map((s, idx) => {
             const safeStore = sanitizeHTML(s);
+            const aliases = getStoreAliases(s);
+            const safeAliases = sanitizeHTML(aliases.join(", "));
             return `
-          <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-            <span class="font-semibold text-slate-200" id="storeNameDisplay-${idx}">${safeStore}</span>
-            <div class="flex items-center gap-1.5">
-              <button onclick="promptRenameStoreByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer" title="${t.aria_rename_store || "Rename"}" aria-label="${(t.aria_rename_store || "Rename store") + ": " + safeStore}"><span aria-hidden="true">✏️</span></button>
-              <button onclick="deleteStoreByIndex(${idx})" class="text-slate-400 hover:text-red-400 p-1 cursor-pointer" title="${t.aria_delete_store || "Delete"}" aria-label="${(t.aria_delete_store || "Delete store") + ": " + safeStore}"><span aria-hidden="true">🗑️</span></button>
+          <div class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2.5 text-xs space-y-1.5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-slate-200" id="storeNameDisplay-${idx}">${safeStore}</span>
+              <div class="flex items-center gap-1">
+                <button onclick="promptEditStoreAliasesByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer transition-colors" title="${t.aria_edit_store_aliases || "Edit aliases"}" aria-label="${(t.aria_edit_store_aliases || "Edit aliases for") + ": " + safeStore}"><span aria-hidden="true">🏷️</span></button>
+                <button onclick="promptRenameStoreByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer transition-colors" title="${t.aria_rename_store || "Rename"}" aria-label="${(t.aria_rename_store || "Rename store") + ": " + safeStore}"><span aria-hidden="true">✏️</span></button>
+                <button onclick="deleteStoreByIndex(${idx})" class="text-slate-400 hover:text-red-400 p-1 cursor-pointer transition-colors" title="${t.aria_delete_store || "Delete"}" aria-label="${(t.aria_delete_store || "Delete store") + ": " + safeStore}"><span aria-hidden="true">🗑️</span></button>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-400 flex items-center gap-1.5 flex-wrap">
+              <span class="text-slate-500">${t.store_aliases_label || "Aliases"}:</span>
+              <span class="text-emerald-400 font-mono text-[10px]">${safeAliases || `<span class="text-slate-600 italic">${t.no_aliases || "none"}</span>`}</span>
             </div>
           </div>
         `;
@@ -7519,6 +7652,24 @@
         if (!name) return "other";
         const n = name.toLowerCase();
 
+        // Household & Cleaning (Specific compound rules first)
+        if (
+          /nước rửa chén|bột giặt|nước giặt|nước xả|nước lau nhà|khăn giấy|giấy vệ sinh|túi rác|xà bông|xà phòng|sunlight|omo|comfort|downy|vim|detergent|cleaner|paper/i.test(
+            n
+          )
+        ) {
+          return "household";
+        }
+
+        // Pantry, Rice & Grains (Specific compound rules first)
+        if (
+          /gạo|dầu ăn|nước mắm|nước tương|xì dầu|tương ớt|gia vị|muối|đường|mì|hảo hảo|hạt nêm|tiêu|bột ngọt|ngũ cốc|st25|simply|nam ngư|chinsu|cholimex|maggi|ketchup|oil|rice|spice|flour|sugar|salt/i.test(
+            n
+          )
+        ) {
+          return "pantry";
+        }
+
         // Produce & Fruits
         if (
           /rau|củ|quả|trái|cà chua|dưa|khoai|cà rốt|táo|chuối|cam|xà lách|hành|tỏi|ớt|nấm|xoài|thanh long|bưởi|chanh|bắp|ngô|nho|dâu|súp lơ|bông cải|mướp|bầu|bí|gừng|sả/i.test(
@@ -7558,18 +7709,9 @@
           return "bakery";
         }
 
-        // Pantry, Rice & Grains
+        // Beverages & Coffee (Broad beverage patterns including standalone "nước")
         if (
-          /gạo|dầu ăn|nước mắm|nước tương|xì dầu|tương ớt|gia vị|muối|đường|mì|hảo hảo|hạt nêm|tiêu|bột ngọt|ngũ cốc|st25|simply|nam ngư|chinsu|cholimex|maggi|ketchup|oil|rice|spice|flour|sugar|salt/i.test(
-            n
-          )
-        ) {
-          return "pantry";
-        }
-
-        // Beverages & Coffee
-        if (
-          /nước ngọt|bia|trà|cà phê|cafe|nước suối|pepsi|coca|coke|sting|heineken|tiger|lavie|aquafina|7up|mirinda|redbull|coffee|tea|beer|beverage|water|juice|wine/i.test(
+          /\bnước\b|nước ngọt|nước suối|nước khoáng|nước ép|nước lọc|nước dừa|nước giải khát|nước tăng lực|nước mát|sinh tố|bia|trà|cà phê|cafe|pepsi|coca|coke|sting|heineken|tiger|lavie|aquafina|7up|mirinda|redbull|coffee|tea|beer|beverage|water|juice|wine|drink|soda/i.test(
             n
           )
         ) {
@@ -7583,15 +7725,6 @@
           )
         ) {
           return "frozen";
-        }
-
-        // Household & Cleaning
-        if (
-          /nước rửa chén|bột giặt|nước giặt|nước xả|nước lau nhà|khăn giấy|giấy vệ sinh|túi rác|xà bông|xà phòng|sunlight|omo|comfort|downy|vim|detergent|cleaner|paper/i.test(
-            n
-          )
-        ) {
-          return "household";
         }
 
         // Personal Care
@@ -7631,6 +7764,80 @@
         );
       }
 
+      function parseMultiplierNumber(numStr, mult) {
+        numStr = (numStr || "").trim();
+        let numVal = 0;
+        if (/^\d{1,3}(?:,\d{3})+$/.test(numStr)) {
+          numVal = parseFloat(numStr.replace(/,/g, ""));
+        } else if (/^\d{1,3}(?:\.\d{3})+$/.test(numStr)) {
+          numVal = parseFloat(numStr.replace(/\./g, ""));
+        } else {
+          numVal = parseFloat(numStr.replace(/,/g, "."));
+        }
+
+        if (isNaN(numVal)) return 0;
+        const m = (mult || "").toLowerCase();
+        if (m === "k" || m === "nghìn" || m === "ngàn") {
+          return numVal * 1000;
+        } else if (m === "tr" || m === "triệu") {
+          return numVal * 1000000;
+        } else {
+          return numVal;
+        }
+      }
+
+      function resolveStoreFromTag(tagText, knownStores) {
+        if (!tagText) return null;
+        const rawTag = tagText.trim();
+        const cleanTag = stripVnDiacritics(rawTag)
+          .replace(/[\s\/\-\.]/g, "")
+          .toLowerCase();
+        if (!cleanTag) return null;
+
+        // 1. Check user-defined and default store aliases
+        const allAliases = {
+          ...DEFAULT_STORE_ALIASES,
+          ...(memoryState?.storeAliases || {}),
+        };
+        for (const [storeName, aliases] of Object.entries(allAliases)) {
+          if (Array.isArray(aliases)) {
+            for (const alias of aliases) {
+              const cleanAlias = stripVnDiacritics(alias)
+                .replace(/[\s\/\-\.]/g, "")
+                .toLowerCase();
+              if (
+                cleanAlias === cleanTag ||
+                alias.toLowerCase() === rawTag.toLowerCase()
+              ) {
+                return storeName;
+              }
+            }
+          }
+        }
+
+        // 2. Check direct store names in known stores
+        for (const s of knownStores) {
+          const cleanS = stripVnDiacritics(s)
+            .replace(/[\s\/\-\.]/g, "")
+            .toLowerCase();
+          if (cleanS === cleanTag || s.toLowerCase() === rawTag.toLowerCase()) {
+            return s;
+          }
+        }
+
+        // 3. Substring match
+        for (const s of knownStores) {
+          const cleanS = stripVnDiacritics(s)
+            .replace(/[\s\/\-\.]/g, "")
+            .toLowerCase();
+          if (cleanS.includes(cleanTag) || cleanTag.includes(cleanS)) {
+            return s;
+          }
+        }
+
+        return rawTag;
+      }
+
       function parseSmartGroceryInput(rawText) {
         if (!rawText || typeof rawText !== "string") {
           return {
@@ -7659,6 +7866,8 @@
         let quantity = 1;
         let unit = "";
         let category = "";
+        let parsedPrice = false;
+        let parsedQty = false;
 
         const knownStores = (memoryState && memoryState.stores) ||
           DEFAULT_STORES || [
@@ -7671,38 +7880,18 @@
             "Cửa hàng tiện lợi",
           ];
 
-        // 1. Extract Store
-        const atMatch =
-          text.match(/@([\p{L}\d_\-\.\/\s]+)$/u) ||
-          text.match(/@([a-zA-Z0-9_\-\.\/]+)/);
+        // 1. Extract Store Tag (@store anywhere: leading, inline, trailing)
+        const atRegex =
+          /(?:^|\s)@([a-zA-Z0-9_\u00C0-\u024F\u1EA0-\u1EF9\.\-]+)/i;
+        const atMatch = text.match(atRegex);
         if (atMatch) {
-          const rawTag = stripVnDiacritics(atMatch[1]).replace(
-            /[\s\/\-\.]/g,
-            ""
-          );
-          const matched = knownStores.find((s) => {
-            const cleanS = stripVnDiacritics(s).replace(/[\s\/\-\.]/g, "");
-            return cleanS.includes(rawTag) || rawTag.includes(cleanS);
-          });
-          if (matched) {
-            store = matched;
-          } else {
-            store = atMatch[1].trim();
+          const matchedStore = resolveStoreFromTag(atMatch[1], knownStores);
+          if (matchedStore) {
+            store = matchedStore;
           }
-          text = text.replace(atMatch[0], "").trim();
-
-          const quickStoreSelect = document.getElementById(
-            "smartQuickStoreSelect"
-          );
-          if (
-            quickStoreSelect &&
-            store &&
-            quickStoreSelect.options &&
-            Array.from(quickStoreSelect.options).some((o) => o.value === store)
-          ) {
-            quickStoreSelect.value = store;
-          }
+          text = text.replace(atMatch[0], " ").replace(/\s+/g, " ").trim();
         } else {
+          // Trailing store without @
           for (const s of knownStores) {
             const regex = new RegExp(
               `(?:\\s|^)${s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}$`,
@@ -7710,17 +7899,7 @@
             );
             if (regex.test(text)) {
               store = s;
-              text = text.replace(regex, "").trim();
-              const quickStoreSelect = document.getElementById(
-                "smartQuickStoreSelect"
-              );
-              if (
-                quickStoreSelect &&
-                quickStoreSelect.options &&
-                Array.from(quickStoreSelect.options).some((o) => o.value === s)
-              ) {
-                quickStoreSelect.value = s;
-              }
+              text = text.replace(regex, " ").replace(/\s+/g, " ").trim();
               break;
             }
           }
@@ -7730,28 +7909,24 @@
           store = getQuickAddDefaultStore();
         }
 
-        // 2. Extract Price with fraction (e.g. "35k/l", "35000/kg", "35k/1kg", "120k/500g", "30k/10 quả")
+        // 2. Extract Price with fraction (e.g. "35k/l", "35000/kg", "1,234k/kg", "120k/500g", "-35k/l")
         const fracRegex =
-          /(?:^|\s)(\d+(?:[\.,]\d+)?)\s*(k|nghìn|ngàn|tr|triệu|đ|vnd)?\s*\/\s*(\d+(?:[\.,]\d+)?)?\s*([a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]+)/i;
+          /(?:^|\s)-?(\d{1,3}(?:[,\.]\d{3})+|\d+(?:[,\.]\d+)?)\s*(k|nghìn|ngàn|tr|triệu|đ|vnd)?\s*\/\s*(\d+(?:[\.,]\d+)?)?\s*([a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]+)/i;
         const fracMatch = text.match(fracRegex);
         if (fracMatch) {
-          let rawNum = parseFloat(fracMatch[1].replace(/,/g, "."));
-          const mult = (fracMatch[2] || "").toLowerCase();
-          if (mult === "k" || mult === "nghìn" || mult === "ngàn") {
-            price = rawNum * 1000;
-          } else if (mult === "tr" || mult === "triệu") {
-            price = rawNum * 1000000;
-          } else if (
-            rawNum < 1000 &&
-            (currentCurrency === "VND" || (!mult && rawNum >= 10))
+          price = parseMultiplierNumber(fracMatch[1], fracMatch[2]);
+          if (
+            !fracMatch[2] &&
+            price < 1000 &&
+            (currentCurrency === "VND" || price >= 10)
           ) {
-            price = rawNum * 1000;
-          } else {
-            price = rawNum;
+            price = price * 1000;
           }
+          parsedPrice = true;
 
           if (fracMatch[3]) {
             quantity = parseFloat(fracMatch[3].replace(/,/g, ".")) || 1;
+            parsedQty = true;
           }
           if (fracMatch[4]) {
             unit = normalizeUnitCode(fracMatch[4]) || "ea";
@@ -7760,7 +7935,7 @@
         }
 
         // 3. Extract Quantity and Unit FIRST before standalone numbers
-        // Matches e.g. "1 lốc", "2 chai", "1 thùng", "500g", "10 quả", "1 bó", "2l", "1.5kg"
+        // Matches e.g. "1 lốc", "2 chai", "1 thùng", "500g", "10 quả", "1 bó", "2l", "1.5kg", "10 cái"
         const qtyUnitRegex =
           /(?:^|\s)(\d+(?:[\.,]\d+)?)\s*(kg|g|gr|gam|gram|lb|lbs|pound|oz|ounce|l|lit|lít|litre|liter|ml|mililit|mililít|millilitre|gal|gallon|fl\s*oz|loc|lốc|thung|thùng|ket|két|khay|tui|túi|bich|bịch|hu|hũ|lo|lọ|bunch|bo|bó|nai|nải|can|lon|chai|btl|bottle|box|hop|hộp|pk|pack|goi|gói|ea|cai|cái|qua|quả|trai|trái|unit|trung|trứng)(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
         let qMatch = text.match(qtyUnitRegex);
@@ -7771,46 +7946,45 @@
           if (recognizedUnit) {
             quantity = rawQty;
             unit = recognizedUnit;
+            parsedQty = true;
             text = text.replace(qMatch[0], " ").trim();
           }
         }
 
-        // 4. Extract Price with explicit multiplier (e.g. "28k", "90k", "115k", "120k", "1.5tr", "35 ngàn")
-        if (!price) {
+        // 4. Extract Price with explicit multiplier (e.g. "28k", "1,234k", "90k", "1.5tr", "35 ngàn", "-35k")
+        if (!parsedPrice) {
           const explicitPriceRegex =
-            /(?:^|\s)(\d+(?:[\.,]\d+)?)\s*(k|nghìn|ngàn|tr|triệu|đ|vnd)(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
+            /(?:^|\s)-?(\d{1,3}(?:[,\.]\d{3})+|\d+(?:[,\.]\d+)?)\s*(k|nghìn|ngàn|tr|triệu|đ|vnd)(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
           const epMatch = text.match(explicitPriceRegex);
           if (epMatch) {
-            let numVal = parseFloat(epMatch[1].replace(/,/g, "."));
-            let mult = epMatch[2].toLowerCase();
-            if (mult === "k" || mult === "nghìn" || mult === "ngàn") {
-              price = numVal * 1000;
-            } else if (mult === "tr" || mult === "triệu") {
-              price = numVal * 1000000;
-            } else {
-              price = numVal;
-            }
+            price = parseMultiplierNumber(epMatch[1], epMatch[2]);
+            parsedPrice = true;
             text = text.replace(epMatch[0], " ").trim();
           }
         }
 
-        // 5. Extract Standard Large/Formatted Price (e.g. "30.000", "120.000", "35000")
-        if (!price) {
+        // 5. Extract Standard Large/Formatted Price (e.g. "30.000", "120.000", "35000", "1,234,000", "-50000")
+        if (!parsedPrice) {
           const numPriceRegex =
-            /(?:^|\s)(\d{1,3}(?:\.\d{3})+|\d{4,})(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
+            /(?:^|\s)-?(\d{1,3}(?:[\.,]\d{3})+|\d{4,})(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
           const npMatch = text.match(numPriceRegex);
           if (npMatch) {
             let strVal = npMatch[1];
             if (
-              strVal.includes(".") &&
-              strVal
-                .split(".")
-                .every((part, idx) => idx === 0 || part.length === 3)
+              (strVal.includes(".") &&
+                strVal
+                  .split(".")
+                  .every((part, idx) => idx === 0 || part.length === 3)) ||
+              (strVal.includes(",") &&
+                strVal
+                  .split(",")
+                  .every((part, idx) => idx === 0 || part.length === 3))
             ) {
-              price = parseFloat(strVal.replace(/\./g, ""));
+              price = parseFloat(strVal.replace(/[\.,]/g, ""));
             } else {
               price = parseFloat(strVal.replace(/,/g, "."));
             }
+            parsedPrice = true;
             text = text.replace(npMatch[0], " ").trim();
           }
         }
@@ -7831,9 +8005,22 @@
 
         if (!unit) unit = "ea";
 
-        // Clean up item name: strip leading/trailing punctuation & multiple spaces
-        let itemName = text.replace(/\s+/g, " ").trim();
-        itemName = itemName.replace(/^[-–—:,/]+|[-–—:,/]+$/g, "").trim();
+        // 7. Clean up item name
+        let itemName = text;
+
+        // Strip emojis from item name (e.g. Milk 🥛 -> Milk)
+        itemName = itemName.replace(/\p{Extended_Pictographic}/gu, "");
+
+        // If we already parsed price or quantity, drop trailing unmatched numbers (e.g. "Thức ăn 100k 10 cái 5" -> "Thức ăn")
+        if (parsedPrice || parsedQty) {
+          itemName = itemName.replace(/\s+\d+(?:[\.,]\d+)?$/g, "");
+        }
+
+        // Strip leading/trailing punctuation & multiple spaces
+        itemName = itemName.replace(/\s+/g, " ").trim();
+        itemName = itemName
+          .replace(/^[\s\-_–—:,.\/•*~+]+|[\s\-_–—:,.\/•*~+]+$/g, "")
+          .trim();
 
         if (itemName.length > 0) {
           itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1);
@@ -7842,7 +8029,13 @@
         category = classifyGroceryCategory(itemName);
 
         return {
-          name: itemName || rawText.trim(),
+          name:
+            itemName ||
+            rawText
+              .replace(/@\S+/g, "")
+              .replace(/\p{Extended_Pictographic}/gu, "")
+              .trim() ||
+            "Item",
           price: Math.max(0, price),
           quantity: quantity > 0 ? quantity : 1,
           unit: unit || "ea",
@@ -10616,6 +10809,11 @@
         window.filterByCategory = filterByCategory;
         window.stepQuickPrice = stepQuickPrice;
         window.updateTripProgress = updateTripProgress;
+        window.DEFAULT_STORE_ALIASES = DEFAULT_STORE_ALIASES;
+        window.getStoreAliases = getStoreAliases;
+        window.setStoreAliases = setStoreAliases;
+        window.promptEditStoreAliases = promptEditStoreAliases;
+        window.promptEditStoreAliasesByIndex = promptEditStoreAliasesByIndex;
         window.addStore = addStore;
         window.renameStore = renameStore;
         window.deleteStore = deleteStore;
