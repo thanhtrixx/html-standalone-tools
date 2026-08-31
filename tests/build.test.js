@@ -4,6 +4,8 @@ const vm = require("vm");
 const {
   discoverTools,
   buildTool,
+  buildCompanionAssets,
+  extractToolVersion,
   inlineLocalAssets,
   parseEnvContent,
   loadEnvFiles,
@@ -485,6 +487,178 @@ EMPTY_KEY=
     );
   }
   fs.rmSync(tempSyncDest, { recursive: true, force: true });
+
+  // Test 16: Companion Asset Minification & Syntax Verification
+  const trackerSrcSw = path.join(
+    __dirname,
+    "..",
+    "smart-buy-list-price-tracker",
+    "sw.js"
+  );
+  const trackerDistSw = path.join(
+    __dirname,
+    "..",
+    "smart-buy-list-price-tracker",
+    "dist",
+    "sw.js"
+  );
+  const rootDistSw = path.join(
+    __dirname,
+    "..",
+    "dist",
+    "smart-buy-list-price-tracker",
+    "sw.js"
+  );
+
+  assert(fs.existsSync(trackerDistSw), "Tool-scoped dist/sw.js exists");
+  assert(
+    fs.existsSync(rootDistSw),
+    "Root dist/smart-buy-list-price-tracker/sw.js exists"
+  );
+
+  const srcSwContent = fs.readFileSync(trackerSrcSw, "utf8");
+  const distSwContent = fs.readFileSync(trackerDistSw, "utf8");
+
+  assert(
+    Buffer.byteLength(distSwContent, "utf8") <
+      Buffer.byteLength(srcSwContent, "utf8"),
+    `Minified sw.js (${Buffer.byteLength(distSwContent, "utf8")} B) is smaller than source (${Buffer.byteLength(srcSwContent, "utf8")} B)`
+  );
+  assert(
+    !distSwContent.includes("// Network-First strategy") &&
+      !distSwContent.includes("/*"),
+    "Minified sw.js stripped comments"
+  );
+
+  // Validate executable syntax of minified sw.js in mock ServiceWorker sandbox
+  let swEvalSuccess = false;
+  try {
+    const swSandbox = {
+      self: {
+        addEventListener: () => {},
+        skipWaiting: () => {},
+        clients: { claim: () => {} },
+      },
+      caches: {
+        open: async () => ({ addAll: async () => {}, put: async () => {} }),
+        keys: async () => [],
+      },
+      fetch: async () => ({ status: 200, clone: () => ({}) }),
+      Promise: Promise,
+      setTimeout: setTimeout,
+      Error: Error,
+      console: console,
+    };
+    swSandbox.self.self = swSandbox.self;
+    vm.createContext(swSandbox);
+    vm.runInContext(distSwContent, swSandbox);
+    swEvalSuccess = true;
+  } catch (e) {
+    swEvalSuccess = false;
+    console.error("Syntax/Execution error in dist/sw.js:", e);
+  }
+  assert(
+    swEvalSuccess,
+    "Minified dist/sw.js is syntactically valid and executes without error in ServiceWorker context"
+  );
+
+  // Test 17: Single-Source Version Consistency
+  const manifest = JSON.parse(
+    fs.readFileSync(
+      path.join(
+        __dirname,
+        "..",
+        "smart-buy-list-price-tracker",
+        "manifest.webmanifest"
+      ),
+      "utf8"
+    )
+  );
+  const distHtml = fs.readFileSync(
+    path.join(
+      __dirname,
+      "..",
+      "smart-buy-list-price-tracker",
+      "dist",
+      "index.html"
+    ),
+    "utf8"
+  );
+  assert(
+    manifest.version === "3.6.0",
+    `manifest.webmanifest defines single-source version 3.6.0 (Got: '${manifest.version}')`
+  );
+  assert(
+    distSwContent.includes(
+      `CACHE_NAME="smart-buy-list-v${manifest.version}"`
+    ) ||
+      distSwContent.includes(
+        `CACHE_NAME = "smart-buy-list-v${manifest.version}"`
+      ),
+    `dist/sw.js CACHE_NAME dynamically injected with version ${manifest.version}`
+  );
+  assert(
+    distHtml.includes(`id="pwaVersionBadge"`) &&
+      distHtml.includes(`v${manifest.version}`),
+    `dist/index.html statically stamped with version badge v${manifest.version}`
+  );
+
+  // Test 18: Service Worker Cache Whitelist Integrity & Tailwind CDN Purging
+  assert(
+    !distSwContent.includes("https://cdn.tailwindcss.com"),
+    "dist/sw.js purges static inlined Tailwind CDN script from ASSETS_TO_CACHE"
+  );
+  const cacheMatch = distSwContent.match(/ASSETS_TO_CACHE\s*=\s*(\[[^\]]+\])/);
+  assert(cacheMatch !== null, "Found ASSETS_TO_CACHE array in minified sw.js");
+  if (cacheMatch) {
+    const assetsList = JSON.parse(cacheMatch[1]);
+    assert(
+      Array.isArray(assetsList) && assetsList.length >= 3,
+      `ASSETS_TO_CACHE contains ${assetsList.length} items`
+    );
+    for (const asset of assetsList) {
+      if (asset === "./" || asset.startsWith("http")) continue;
+      const cleanRel = asset.replace(/^\.\//, "");
+      const assetPath = path.join(
+        __dirname,
+        "..",
+        "smart-buy-list-price-tracker",
+        "dist",
+        cleanRel
+      );
+      assert(
+        fs.existsSync(assetPath),
+        `PWA cache entry '${asset}' physically exists at ${cleanRel}`
+      );
+    }
+  }
+
+  // Test 19: Release Packager PWA Archive Verification
+  const testPwaReleaseDir = path.join(__dirname, "test_pwa_release_assets");
+  const { main: packPwaReleaseMain } = require("../scripts/pack-release");
+  process.argv = [
+    "node",
+    "scripts/pack-release.js",
+    `--out-dir=${testPwaReleaseDir}`,
+    "--version=v3.6.0",
+  ];
+  await packPwaReleaseMain();
+
+  const stagedPwaZip = path.join(
+    testPwaReleaseDir,
+    "smart-buy-list-price-tracker-v3.6.0.zip"
+  );
+  assert(
+    fs.existsSync(stagedPwaZip),
+    "Release packager created dedicated PWA tool ZIP bundle"
+  );
+  assert(
+    fs.statSync(stagedPwaZip).size > 1000,
+    "Dedicated PWA ZIP bundle is non-empty"
+  );
+
+  // Clean up test release dir
+  fs.rmSync(testPwaReleaseDir, { recursive: true, force: true });
 
   console.log(`\n📊 Test Summary: ${passCount} Passed, ${failCount} Failed\n`);
   if (failCount > 0) {
