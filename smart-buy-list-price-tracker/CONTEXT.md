@@ -122,7 +122,7 @@ _Avoid_: Carryover, push to next, leftover migrate.
 ### 5. Sharing, Backup & Data Portability
 
 **URL State Payload**:
-A compressed, URL-safe Base64 string (using LZ-String compression) encoding the active buy-list state for instant, serverless peer-to-peer sharing via deep links, dynamic QR codes, and `navigator.share()`. Located in the Top App Bar.
+A compressed, URL-safe Base64 string (using standard Base64/URI encoding) encoding the active buy-list state for instant, serverless peer-to-peer sharing via deep links, messaging apps, and `navigator.share()`. Located in the Top App Bar.
 _Avoid_: Share query, URL data, hash link.
 
 **Smart Merge Protocol**:
@@ -232,3 +232,4 @@ _Avoid_: Asymmetric compare, manual unit realignment.
 - [ADR-0015: PWA Companion Asset Compaction & Single-Source Versioning](./docs/adr/0015-pwa-companion-asset-compaction-and-single-source-versioning.md)
 - [ADR-0016: Deterministic 3-Way Cloud Merge, Deletion Tombstones & Mutation Concurrency](./docs/adr/0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md)
 - [ADR-0017: Planning Trip Completion, Clean Empty State, Ledger Ergonomics & Comparator Unit Sync](./docs/adr/0017-planning-trip-completion-ledger-ergonomics-and-comparator-unit-sync.md)
+- [ADR-0018: Share Enhancement, QR Removal and Buy Mode Polish](./docs/adr/0018-share-enhancement-qr-removal-and-buy-mode-polish.md)

@@ -112,6 +112,12 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R79** | **PWA Version Synchronization (v3.8.0) & Test Suite**            | Synchronize version `3.8.0` in `index.html`, `sw.js`, and `manifest.webmanifest`; author comprehensive test suite in `tests/smart-buy-list-planning-completion-ledger-comparator.test.js`.                                                                        | P0       | ADR-0017           |
 | **R80** | **Bilingual Localization Parity for v3.8.0 Keys**                | Maintain 100% dictionary symmetry for `empty_planning_desc`, `empty_buy_mode_desc`, `btn_empty_switch_to_planning`, `trip_planning_prompt`, and `btn_delete_ledger_item`.                                                                                         | P0       | ADR-0017, I18N.md  |
 
+| **R81** | **In-Store Empty Buy-List Complete Trip Bar Hide** | Hide `#finishTripBar` in Buy Mode (`IN_STORE`) when active shopping list is empty (`items.length === 0`). | P0 | ADR-0018 |
+| **R82** | **GitHub Gist Sync Detailed Error Message Interpolation** | Interpolate detailed error diagnostics (`res.error || "Unknown"`) in `toast_github_sync_error` across English and Vietnamese. | P0 | ADR-0018 |
+| **R83** | **Complete QR Scanner Purge & Symmetrical Settings 2x2 Grid** | Purge `#qrScannerModal`, camera streams, and barcode detection; update Settings to symmetrical 2x2 grid `[Export File | Copy JSON] / [Import File | Paste JSON]`. | P0 | ADR-0018 |
+| **R84** | **Enhanced Share Buy-List Hub & Human-Readable Checklist** | Re-architect Share modal without QR: Formatted text checklist copy, rich native share with item count & total, web share URL, and standalone active buy-list `.json` file download. | P0 | ADR-0018 |
+| **R85** | **PWA Version Synchronization (v3.9.0) & Bilingual Parity** | Synchronize version `3.9.0` in `index.html`, `sw.js`, and `manifest.webmanifest`; maintain 100% dictionary symmetry for all new share and settings keys; author ADR-0018. | P0 | ADR-0018, I18N.md |
+
 ---
 
 ## 🚀 Vertical Slice Implementation Roadmap
@@ -143,30 +149,35 @@ flowchart TD
     S23["Slice 23: Ledger Delete Button Alignment &amp; Text Labels (#224)"]
     S24["Slice 24: Comparator Unit Group Sync &amp; Real-Time Recalculation (#225)"]
     S25["Slice 25: Automated Test Suite, ADR-0017 &amp; PWA v3.8.0 (#226)"]
+    S26["Slice 26: In-Store Empty Buy-List Complete Trip Bar Hide (#229)"]
+    S27["Slice 27: GitHub Gist Sync Detailed Error Diagnostics (#230)"]
+    S28["Slice 28: Purge QR Scanner &amp; Settings Export File 2x2 Grid (#231)"]
+    S29["Slice 29: Enhanced Share Buy-List, Checklist Text &amp; Standalone File (#232)"]
+    S30["Slice 30: Automated Test Suite, ADR-0018 &amp; PWA v3.9.0 (#233)"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18 --> S19 --> S20 --> S21 --> S22 --> S23 --> S24 --> S25
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18 --> S19 --> S20 --> S21 --> S22 --> S23 --> S24 --> S25 --> S26 --> S27 --> S28 --> S29 --> S30
 ```
 
 <details>
 <summary>ASCII Diagram (Fallback)</summary>
 
 ```text
-[Slice 20: CI/CD Build Pipeline & Single-Source Versioning (#203)]
-      │
-      ▼
-[Slice 21: Clean Empty State & Sample Data Removal (#222)]
-      │
-      ▼
-[Slice 22: Complete Trip in Planning Mode (#223)]
-      │
-      ▼
-[Slice 23: Ledger Delete Button Alignment & Text Labels (#224)]
-      │
-      ▼
-[Slice 24: Comparator Unit Group Sync & Real-Time Recalculation (#225)]
-      │
-      ▼
 [Slice 25: Automated Test Suite, ADR-0017 & PWA v3.8.0 (#226)]
+      │
+      ▼
+[Slice 26: In-Store Empty Buy-List Complete Trip Bar Hide (#229)]
+      │
+      ▼
+[Slice 27: GitHub Gist Sync Detailed Error Diagnostics (#230)]
+      │
+      ▼
+[Slice 28: Purge QR Scanner & Settings Export File 2x2 Grid (#231)]
+      │
+      ▼
+[Slice 29: Enhanced Share Buy-List, Checklist Text & Standalone File (#232)]
+      │
+      ▼
+[Slice 30: Automated Test Suite, ADR-0018 & PWA v3.9.0 (#233)]
 ```
 
 </details>

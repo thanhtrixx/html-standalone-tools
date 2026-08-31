@@ -495,15 +495,17 @@ console.log(
       swContent.includes("smart-buy-list-v3.5.0") ||
       swContent.includes("smart-buy-list-v3.6.0") ||
       swContent.includes("smart-buy-list-v3.7.0") ||
-      swContent.includes("smart-buy-list-v3.8.0"),
-    "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.8.0'"
+      swContent.includes("smart-buy-list-v3.8.0") ||
+      swContent.includes("smart-buy-list-v3.9.0"),
+    "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.9.0'"
   );
   assert(
     htmlContent.includes("v3.4.0") ||
       htmlContent.includes("v3.5.0") ||
       htmlContent.includes("v3.6.0") ||
       htmlContent.includes("v3.7.0") ||
-      htmlContent.includes("v3.8.0"),
+      htmlContent.includes("v3.8.0") ||
+      htmlContent.includes("v3.9.0"),
     "PWA-02: index.html displays synchronized version badge"
   );
 

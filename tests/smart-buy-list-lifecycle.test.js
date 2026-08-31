@@ -176,14 +176,24 @@ try {
 
   sandbox.setTripPhase("IN_STORE");
   assert(
-    !elements["finishTripBar"].classList.contains("hidden"),
-    "LIFE-01: In-Store mode reveals sticky finishTripBar"
+    elements["finishTripBar"].classList.contains("hidden"),
+    "LIFE-01a: In-Store mode hides finishTripBar when active list is empty"
   );
   assert(
     elements["addItemSection"].classList.contains("hidden"),
     "LIFE-02: In-Store mode collapses addItemSection to focus on shopping"
   );
 
+  sandbox.memoryState.activeList.items = [
+    { id: "1", name: "Apple", price: 2, checked: false },
+  ];
+  sandbox.setTripPhase("IN_STORE");
+  assert(
+    !elements["finishTripBar"].classList.contains("hidden"),
+    "LIFE-01b: In-Store mode reveals sticky finishTripBar when active list has items"
+  );
+
+  sandbox.memoryState.activeList.items = [];
   sandbox.setTripPhase("PLANNING");
   assert(
     elements["finishTripBar"].classList.contains("hidden"),
