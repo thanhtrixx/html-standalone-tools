@@ -1208,7 +1208,7 @@
       </div>
     </div>
 
-    <!-- 2. SHARE LIST MODAL WITH DYNAMIC QR CODE -->
+    <!-- 2. SHARE LIST MODAL -->
     <div
       id="shareModal"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
@@ -1232,32 +1232,16 @@
         </div>
 
         <p id="shareModalDesc" class="text-xs text-slate-400">
-          Share your active list peer-to-peer via link, QR code, or chat export
-          without accounts or servers.
+          Share your active list via messaging apps, formatted checklist,
+          shareable link, or JSON file.
         </p>
 
-        <!-- Dynamic QR Code Container -->
-        <div
-          class="flex flex-col items-center justify-center p-4 bg-white rounded-xl shadow-inner max-w-[200px] mx-auto"
-        >
-          <div
-            id="shareQrContainer"
-            class="w-40 h-40 flex items-center justify-center text-slate-800"
-          ></div>
-          <div
-            class="text-[10px] text-slate-500 mt-1.5 font-medium"
-            id="qrHintText"
-          >
-            Scan to import list
-          </div>
-        </div>
-
         <!-- Share Action Buttons -->
-        <div class="space-y-2 pt-2">
+        <div class="space-y-2 pt-1">
           <button
             onclick="invokeNativeShare()"
             id="btnNativeShare"
-            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95"
           >
             <span>📱</span>
             <span id="btnNativeShareText"
@@ -1265,27 +1249,29 @@
             >
           </button>
           <button
+            onclick="copyBuyListTextChecklist()"
+            id="btnCopyTextChecklist"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors"
+          >
+            <span>📋</span>
+            <span id="btnCopyTextChecklistText">Copy Formatted Checklist</span>
+          </button>
+          <button
             onclick="copyShareUrl()"
             id="btnCopyUrl"
-            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors"
           >
             <span>🔗</span> <span id="btnCopyUrlText">Copy Shareable Link</span>
           </button>
           <button
-            onclick="copyBuyListJson()"
-            id="btnCopyListJson"
-            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
+            onclick="exportBuyListJsonFile()"
+            id="btnExportBuyListFile"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors"
           >
-            <span>📋</span>
-            <span id="btnCopyListJsonText">Copy Buy-List JSON</span>
-          </button>
-          <button
-            onclick="exportJsonBackup()"
-            id="btnExportJson"
-            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
-          >
-            <span>💾</span>
-            <span id="btnExportJsonText">Export Backup File (.json)</span>
+            <span>📥</span>
+            <span id="btnExportBuyListFileText"
+              >Download Buy-List File (.json)</span
+            >
           </button>
         </div>
       </div>
@@ -4659,15 +4645,18 @@
           btn_apply_winner_form: "Apply Winner to Form",
           btn_close: "Close",
           btn_cancel: "Cancel",
-          toast_winner_form_applied: "Winner package applied to form!",
           share_modal_title: "Share Buy-List",
           share_modal_desc:
-            "Share your active list peer-to-peer via link, QR code, or chat export without accounts or servers.",
+            "Share your active list via messaging apps, formatted checklist, shareable link, or JSON file.",
           qr_hint_text: "Scan to import list",
           btn_native_share: "Share via Apps (WhatsApp / AirDrop)",
+          btn_copy_text_checklist: "Copy Formatted Checklist",
           btn_copy_url: "Copy Shareable Link",
+          btn_export_buylist_file: "Download Buy-List File (.json)",
           btn_export_json: "Export Backup File (.json)",
           toast_share_copied: "Share link copied to clipboard!",
+          toast_text_checklist_copied: "Text checklist copied to clipboard!",
+          toast_list_file_exported: "Buy-List file (.json) exported!",
           share_native_text: "Here is our grocery buy-list ({count} items)",
           import_modal_title: "Incoming Shared Buy-List",
           import_list_title: "Shared Shopping List",
@@ -4944,12 +4933,17 @@
             "Đã áp dụng quy cách chiến thắng vào biểu mẫu!",
           share_modal_title: "Chia Sẻ Danh Sách Mua Sắm",
           share_modal_desc:
-            "Chia sẻ danh sách trực tiếp qua liên kết, mã QR hoặc tệp sao lưu mà không cần tài khoản hay máy chủ.",
+            "Chia sẻ danh sách qua ứng dụng nhắn tin, danh sách kiểm tra văn bản, liên kết hoặc tệp JSON.",
           qr_hint_text: "Quét mã để nhập danh sách",
           btn_native_share: "Chia Sẻ Qua Ứng Dụng (Tin Nhắn / AirDrop)",
+          btn_copy_text_checklist: "Sao Chép Danh Sách Văn Bản",
           btn_copy_url: "Sao Chép Liên Kết Chia Sẻ",
+          btn_export_buylist_file: "Tải Tệp Danh Sách (.json)",
           btn_export_json: "Xuất Bản Sao Lưu (.json)",
           toast_share_copied: "Đã sao chép liên kết chia sẻ vào khay nhớ tạm!",
+          toast_text_checklist_copied:
+            "Đã sao chép danh sách văn bản vào bộ nhớ tạm!",
+          toast_list_file_exported: "Đã xuất tệp danh sách mua sắm (.json)!",
           share_native_text: "Đây là danh sách mua sắm ({count} mặt hàng)",
           import_modal_title: "Danh Sách Mua Sắm Được Chia Sẻ",
           import_list_title: "Danh Sách Mua Sắm Được Chia Sẻ",
@@ -7550,12 +7544,9 @@
       }
 
       /* =========================================================================
-       8. SHARING, QR CODE & MERGE PROTOCOL
+       8. SHARING, TEXT CHECKLIST & MERGE PROTOCOL
        ========================================================================= */
       function openShareModal() {
-        const payload = encodeSharePayload(memoryState.activeList);
-        const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
-        renderQrCode(url);
         openModal("shareModal");
       }
 
@@ -7563,7 +7554,7 @@
         try {
           const compact = {
             t: list.title,
-            i: list.items.map((it) => [
+            i: (list.items || []).map((it) => [
               it.name,
               it.category,
               it.store,
@@ -7600,43 +7591,104 @@
         }
       }
 
-      function renderQrCode(url) {
-        const container = document.getElementById("shareQrContainer");
-        if (!container) return;
-        // High-compatibility SVG placeholder / embedded QR visualizer
-        const safeUrl = encodeURIComponent(url);
-        container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${safeUrl}" alt="QR Code" class="w-36 h-36 rounded-lg" onerror="this.outerHTML='<div class=\\'text-xs text-slate-800 p-2 text-center\\'>Scan URL:<br><span class=\\'font-mono text-[9px] break-all\\'>${url.slice(0, 40)}...</span></div>'" />`;
+      function generateBuyListTextChecklist(list) {
+        const target = list ||
+          (memoryState && memoryState.activeList) || {
+            title: "Shopping List",
+            items: [],
+          };
+        const title = target.title || "Shopping List";
+        const items = Array.isArray(target.items) ? target.items : [];
+        const lines = [`🛒 ${title} (${items.length} items):`];
+
+        let totalEst = 0;
+        items.forEach((it) => {
+          const priceVal = parseFloat(it.price) || 0;
+          totalEst += priceVal;
+          const storeTag = it.store ? ` [${it.store}]` : "";
+          const qtyTag = `${it.quantity || 1} ${it.unit || "unit"}`;
+          const priceTag = priceVal > 0 ? ` ~ ${formatCurrency(priceVal)}` : "";
+          lines.push(`- [ ] ${it.name} (${qtyTag}${storeTag})${priceTag}`);
+        });
+
+        if (totalEst > 0) {
+          const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          const estLabel = t.kpi_estimated || "Total Estimated";
+          lines.push(`\n💰 ${estLabel}: ${formatCurrency(totalEst)}`);
+        }
+
+        const payload = encodeSharePayload(target);
+        if (payload && typeof window !== "undefined" && window.location) {
+          const shareUrl = `${window.location.origin}${window.location.pathname}#share=${payload}`;
+          lines.push(`\n🔗 Import List: ${shareUrl}`);
+        }
+
+        return lines.join("\n");
+      }
+
+      function copyBuyListTextChecklist() {
+        const text = generateBuyListTextChecklist(memoryState.activeList);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text).then(() => {
+            showToast(
+              TRANSLATIONS[currentLanguage].toast_text_checklist_copied ||
+                "Text checklist copied to clipboard!"
+            );
+          });
+        }
       }
 
       function copyShareUrl() {
         const payload = encodeSharePayload(memoryState.activeList);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
-        navigator.clipboard.writeText(url).then(() => {
-          showToast(
-            TRANSLATIONS[currentLanguage].toast_share_copied ||
-              "Share link copied to clipboard!"
-          );
-        });
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(url).then(() => {
+            showToast(
+              TRANSLATIONS[currentLanguage].toast_share_copied ||
+                "Share link copied to clipboard!"
+            );
+          });
+        }
       }
 
       function invokeNativeShare() {
         const payload = encodeSharePayload(memoryState.activeList);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
-        const t = TRANSLATIONS[currentLanguage];
+        const text = generateBuyListTextChecklist(memoryState.activeList);
         if (navigator.share) {
           navigator
             .share({
-              title: memoryState.activeList.title,
-              text: (
-                t.share_native_text ||
-                "Here is our grocery buy-list ({count} items)"
-              ).replace("{count}", memoryState.activeList.items.length),
-              url,
+              title: memoryState.activeList.title || "Smart Buy-List",
+              text: text,
+              url: url,
             })
             .catch(() => {});
         } else {
           copyShareUrl();
         }
+      }
+
+      function exportBuyListJsonFile() {
+        const payload = {
+          title: memoryState.activeList.title || "Shopping List",
+          items: memoryState.activeList.items || [],
+        };
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(payload, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute(
+          "download",
+          `smart-buy-list-${new Date().toISOString().slice(0, 10)}.json`
+        );
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_list_file_exported ||
+            "Buy-List file (.json) exported!"
+        );
       }
 
       function exportJsonBackup() {
@@ -8667,11 +8719,16 @@
         // 2. Share Modal
         el("shareModalTitleText", t.share_modal_title);
         el("shareModalDesc", t.share_modal_desc);
-        el("qrHintText", t.qr_hint_text);
         el("btnNativeShareText", t.btn_native_share);
+        el(
+          "btnCopyTextChecklistText",
+          t.btn_copy_text_checklist || "Copy Formatted Checklist"
+        );
         el("btnCopyUrlText", t.btn_copy_url);
-        el("btnCopyListJsonText", t.btn_copy_list_json || "Copy Buy-List JSON");
-        el("btnExportJsonText", t.btn_export_json);
+        el(
+          "btnExportBuyListFileText",
+          t.btn_export_buylist_file || "Download Buy-List File (.json)"
+        );
 
         // 3. Import Modal
         el("importModalTitleText", t.import_modal_title);
@@ -9344,6 +9401,11 @@
         window.submitQuickPriceEdit = submitQuickPriceEdit;
         window.quickUpdateItemPrice = quickUpdateItemPrice;
         window.openShareModal = openShareModal;
+        window.generateBuyListTextChecklist = generateBuyListTextChecklist;
+        window.copyBuyListTextChecklist = copyBuyListTextChecklist;
+        window.copyShareUrl = copyShareUrl;
+        window.invokeNativeShare = invokeNativeShare;
+        window.exportBuyListJsonFile = exportBuyListJsonFile;
         window.focusAddItemInput = focusAddItemInput;
         window.filterByCategory = filterByCategory;
         window.stepQuickPrice = stepQuickPrice;
