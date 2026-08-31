@@ -17,7 +17,7 @@
     <meta name="apple-mobile-web-app-title" content="BuyList" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
-    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -348,9 +348,34 @@
           0 10px 25px -5px rgba(0, 0, 0, 0.1),
           0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
       }
+
+      /* Utility hidden override to guarantee display:none when toggled */
+      .hidden {
+        display: none !important;
+      }
     </style>
   </head>
   <body class="min-h-screen pb-24 transition-colors duration-200">
+    <noscript>
+      <div
+        class="p-4 sm:p-6 max-w-xl mx-auto my-6 bg-amber-950/80 border border-amber-600 rounded-2xl text-amber-200 text-center space-y-2"
+      >
+        <h2 class="text-base sm:text-lg font-bold text-white">
+          JavaScript Required / Yêu cầu JavaScript
+        </h2>
+        <p class="text-xs sm:text-sm text-amber-300">
+          Smart Buy-List &amp; Unit Price Tracker is an offline-first
+          single-page web application that requires JavaScript to perform
+          calculations, store lists, and compare unit prices.
+        </p>
+        <p class="text-xs sm:text-sm text-amber-400">
+          Ứng dụng cần JavaScript để hoạt động ngoại tuyến, tính toán đơn giá và
+          quản lý danh sách mua sắm. Vui lòng bật JavaScript trên trình duyệt
+          của bạn.
+        </p>
+      </div>
+    </noscript>
+
     <!-- ==================== HEADER ==================== -->
     <header
       class="sticky top-0 z-30 bg-slate-900/90 dark:bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-3 no-print"
@@ -2312,6 +2337,7 @@
                 <a
                   href="docs/google-drive-cloud-sync-guide.md"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1 font-medium text-[11px]"
                   id="gdriveGuideLink"
                 >
@@ -5060,6 +5086,8 @@
           btn_export_buylist_file: "Download Buy-List File (.json)",
           btn_export_json: "Export Backup File (.json)",
           toast_share_copied: "Share link copied to clipboard!",
+          toast_share_url_too_long:
+            "Warning: Share URL exceeds 2,048 characters. Consider exporting a JSON file instead.",
           toast_text_checklist_copied: "Text checklist copied to clipboard!",
           toast_list_file_exported: "Buy-List file (.json) exported!",
           share_native_text: "Here is our grocery buy-list ({count} items)",
@@ -5379,6 +5407,8 @@
           btn_export_buylist_file: "Tải Tệp Danh Sách (.json)",
           btn_export_json: "Xuất Bản Sao Lưu (.json)",
           toast_share_copied: "Đã sao chép liên kết chia sẻ vào khay nhớ tạm!",
+          toast_share_url_too_long:
+            "Cảnh báo: Liên kết chia sẻ vượt quá 2.048 ký tự. Bạn nên dùng tính năng xuất tệp JSON.",
           toast_text_checklist_copied:
             "Đã sao chép danh sách văn bản vào bộ nhớ tạm!",
           toast_list_file_exported: "Đã xuất tệp danh sách mua sắm (.json)!",
@@ -8451,6 +8481,13 @@
       function copyShareUrl() {
         const payload = encodeSharePayload(memoryState.activeList);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
+        if (url.length > 2048) {
+          const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          showToast(
+            t.toast_share_url_too_long ||
+              "Warning: Share URL exceeds 2,048 characters. Consider exporting a JSON file instead."
+          );
+        }
         if (navigator.clipboard && navigator.clipboard.writeText) {
           return navigator.clipboard.writeText(url).then(() => {
             showToast(
@@ -8464,6 +8501,13 @@
       function invokeNativeShare() {
         const payload = encodeSharePayload(memoryState.activeList);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
+        if (url.length > 2048) {
+          const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          showToast(
+            t.toast_share_url_too_long ||
+              "Warning: Share URL exceeds 2,048 characters. Consider exporting a JSON file instead."
+          );
+        }
         const text = generateBuyListTextChecklist(memoryState.activeList);
         if (navigator.share) {
           navigator
@@ -10342,76 +10386,13 @@
         window.merge3Way = merge3Way;
         window.reconcileMemoryState = reconcileMemoryState;
         window.StorageProvider = StorageProvider;
-        window.IndexedDBStorageProvider = IndexedDBStorageProvider;
-        window.GoogleDriveStorageProvider = GoogleDriveStorageProvider;
-        window.GitHubGistStorageProvider = GitHubGistStorageProvider;
-        window.StorageManager = StorageManager;
-        window.initGithubAuthState = initGithubAuthState;
-        window.githubAuthState = githubAuthState;
-        window.googleAuthState = googleAuthState;
-        window.showToast = showToast;
-        Object.defineProperty(window, "selectedLedgerIds", {
-          get: () => selectedLedgerIds,
-          set: (v) => {
-            selectedLedgerIds = v;
-          },
-          configurable: true,
-        });
-        Object.defineProperty(window, "currentPhase", {
-          get: () => currentPhase,
-          set: (v) => {
-            currentPhase = v;
-          },
-          configurable: true,
-        });
-        Object.defineProperty(window, "currentCategoryFilter", {
-          get: () => currentCategoryFilter,
-          set: (v) => {
-            currentCategoryFilter = v;
-          },
-          configurable: true,
-        });
-        Object.defineProperty(window, "activeComparingItemId", {
-          get: () => activeComparingItemId,
-          set: (v) => {
-            activeComparingItemId = v;
-          },
-          configurable: true,
-        });
-        Object.defineProperty(window, "currentGrouping", {
-          get: () => currentGrouping,
-          set: (v) => {
-            currentGrouping = v;
-          },
-          configurable: true,
-        });
-        Object.defineProperty(window, "currentStoreFilter", {
-          get: () => currentStoreFilter,
-          set: (v) => {
-            currentStoreFilter = v;
-          },
-          configurable: true,
-        });
-        Object.defineProperty(window, "currentLanguage", {
-          get: () => currentLanguage,
-          set: (v) => {
-            currentLanguage = v;
-          },
-          configurable: true,
-        });
-        Object.defineProperty(window, "currentCurrency", {
-          get: () => currentCurrency,
-          set: (v) => {
-            currentCurrency = v;
-          },
-          configurable: true,
-        });
-        window.StorageProvider = StorageProvider;
         window.IStorageProvider = StorageProvider;
         window.IndexedDBStorageProvider = IndexedDBStorageProvider;
         window.GoogleDriveStorageProvider = GoogleDriveStorageProvider;
         window.GitHubGistStorageProvider = GitHubGistStorageProvider;
+        window.StorageManager = StorageManager;
         window.storageManager = storageManager;
+        window.initGithubAuthState = initGithubAuthState;
         window.initGoogleAuthClient = initGoogleAuthClient;
         window.handleGoogleSignIn = handleGoogleSignIn;
         window.handleGoogleSignOut = handleGoogleSignOut;
@@ -10424,7 +10405,6 @@
         window.syncCloudNow = syncCloudNow;
         window.forceUploadCloud = forceUploadCloud;
         window.forceDownloadCloud = forceDownloadCloud;
-        window.mergeCloudState = mergeCloudState;
         window.triggerDebouncedCloudSync = triggerDebouncedCloudSync;
         window.updateSyncStatusUI = updateSyncStatusUI;
         window.createCloudPayload = createCloudPayload;
@@ -10450,11 +10430,78 @@
         window.onEditStoreSelectChange = onEditStoreSelectChange;
         window.copyCurrentOriginToClipboard = copyCurrentOriginToClipboard;
         window.flushPendingCloudSync = flushPendingCloudSync;
+        window.showToast = showToast;
+
+        Object.defineProperty(window, "selectedLedgerIds", {
+          get: () => selectedLedgerIds,
+          set: (v) => {
+            selectedLedgerIds = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentPhase", {
+          get: () => currentPhase,
+          set: (v) => {
+            currentPhase = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentCategoryFilter", {
+          get: () => currentCategoryFilter,
+          set: (v) => {
+            currentCategoryFilter = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "activeComparingItemId", {
+          get: () => activeComparingItemId,
+          set: (v) => {
+            activeComparingItemId = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentGrouping", {
+          get: () => currentGrouping,
+          set: (v) => {
+            currentGrouping = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentStoreFilter", {
+          get: () => currentStoreFilter,
+          set: (v) => {
+            currentStoreFilter = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentLanguage", {
+          get: () => currentLanguage,
+          set: (v) => {
+            currentLanguage = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentCurrency", {
+          get: () => currentCurrency,
+          set: (v) => {
+            currentCurrency = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
         Object.defineProperty(window, "googleAuthState", {
           get: () => googleAuthState,
           set: (v) => {
             googleAuthState = v;
           },
+          enumerable: true,
           configurable: true,
         });
         Object.defineProperty(window, "githubAuthState", {
@@ -10462,13 +10509,7 @@
           set: (v) => {
             githubAuthState = v;
           },
-          configurable: true,
-        });
-        Object.defineProperty(window, "currentCameraFacingMode", {
-          get: () => currentCameraFacingMode,
-          set: (v) => {
-            currentCameraFacingMode = v;
-          },
+          enumerable: true,
           configurable: true,
         });
       }

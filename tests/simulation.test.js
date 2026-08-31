@@ -889,14 +889,14 @@ async function runSimulationTests() {
     },
     {
       "Account Name": "Outflow 1 (Car Deposit)",
-      Principal: "30000000", // 30M outflow in Month 1 -> pool = -20M
+      Principal: "50000000", // 50M outflow in Month 1 -> pool deficit
       "Start Date": formatDate(today),
       "End Date": formatDate(addMonths(today, 1)),
       Type: "Withdrawal",
     },
     {
       "Account Name": "Outflow 2 (Insurance)",
-      Principal: "20000000", // 20M outflow in Month 2 -> pool = -40M (before salary)
+      Principal: "30000000", // 30M outflow in Month 2
       "Start Date": formatDate(today),
       "End Date": formatDate(addMonths(today, 2)),
       Type: "Withdrawal",
@@ -924,13 +924,13 @@ async function runSimulationTests() {
     `Recorded ${deficitLogs.length} deficit warnings during successive large withdrawals`
   );
   assert(
-    deepDeficitSim.totals.totalWithdrawals === 50000000,
-    "Sum of all withdrawals tracked accurately (50M VND)"
+    deepDeficitSim.totals.totalWithdrawals === 80000000,
+    "Sum of all withdrawals tracked accurately (80M VND)"
   );
-  // Deficit should eventually be repaid by month 5 (10M start + 6*15M salary - 50M withdrawals = 50M net)
+  // Deficit should eventually be repaid by month 5 (10M start + 6*15M salary - 80M withdrawals > 15M net)
   const finalPool = deepDeficitSim.finalSnapshot.poolBalance;
   assert(
-    finalPool > 45000000,
+    finalPool > 15000000,
     `Flexible pool recovered from negative deficit to positive balance (${Math.round(finalPool).toLocaleString()} VND)`
   );
 

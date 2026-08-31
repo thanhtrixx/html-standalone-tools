@@ -339,8 +339,8 @@ async function runTests() {
     );
     assert(
       rawHtml.includes('rel="apple-touch-icon"') &&
-        rawHtml.includes('href="./icon.svg"'),
-      "PWA-04: index.html links to ./icon.svg as apple-touch-icon"
+        rawHtml.includes('href="./icon-180.png"'),
+      "PWA-04: index.html links to ./icon-180.png as apple-touch-icon"
     );
     assert(
       rawHtml.includes('name="apple-mobile-web-app-capable"') &&
@@ -606,6 +606,114 @@ async function runTests() {
     assert(
       ogImgWidth >= 1200 && ogImgHeight >= 630,
       `OG-ASSET-03: og-image.png meets social resolution standard (>=1200x630, got ${ogImgWidth}x${ogImgHeight})`
+    );
+
+    // 8. CODE HYGIENE & PWA CLEANUP (ISSUE #257)
+    console.log("\n--- Section 8: Code Hygiene & PWA Cleanup (Issue #257) ---");
+
+    // 8.1 Apple touch icon PNG file
+    const touchIconPath = path.join(
+      __dirname,
+      "..",
+      "smart-buy-list-price-tracker",
+      "icon-180.png"
+    );
+    assert(
+      fs.existsSync(touchIconPath),
+      "HYGIENE-01: icon-180.png exists in tool directory"
+    );
+    const touchIconBuf = fs.readFileSync(touchIconPath);
+    assert(
+      touchIconBuf.readUInt32BE(16) === 180 &&
+        touchIconBuf.readUInt32BE(20) === 180,
+      "HYGIENE-02: icon-180.png is exactly 180x180 resolution"
+    );
+
+    // 8.2 noscript element
+    assert(
+      /<noscript>[\s\S]*?<\/noscript>/i.test(rawHtml),
+      "HYGIENE-03: <noscript> fallback element is present in body"
+    );
+
+    // 8.3 rel="noopener noreferrer" on all target="_blank" links
+    const blankMatches = [
+      ...rawHtml.matchAll(/<a\s+[^>]*target=["']_blank["'][^>]*>/gi),
+    ];
+    assert(
+      blankMatches.length >= 3,
+      `HYGIENE-04a: Found ${blankMatches.length} target="_blank" links`
+    );
+    const allSecured = blankMatches.every((m) =>
+      /rel=["'][^"']*noopener[^"']*noreferrer[^"']*["']/i.test(m[0])
+    );
+    assert(
+      allSecured,
+      "HYGIENE-04b: All target='_blank' anchor tags specify rel='noopener noreferrer'"
+    );
+
+    // 8.4 Service Worker fetch routing
+    assert(
+      swContent.includes('request.mode === "navigate"') &&
+        swContent.includes('caches.match("./index.html")'),
+      "HYGIENE-05a: sw.js returns cached index.html fallback for navigation requests"
+    );
+    const cacheFirstSection = swContent.split(
+      "// Cache-First strategy for static assets"
+    )[1];
+    assert(
+      cacheFirstSection &&
+        !cacheFirstSection.includes('caches.match("./index.html")'),
+      "HYGIENE-05b: sw.js does not return index.html for failed static asset / API requests"
+    );
+
+    // 8.5 Share URL size guard
+    const longItems = [];
+    for (let i = 0; i < 40; i++) {
+      longItems.push({
+        id: `item_${i}`,
+        name: `Very Long Grocery Item Name Number ${i} With Extra Details`,
+        category: "produce",
+        store: "Supermarket Extra Long Store Name",
+        quantity: 10,
+        unit: "kg",
+        price: 150000,
+        checked: false,
+      });
+    }
+    sandbox.memoryState.activeList = {
+      title: "Extremely Long Grocery Shopping List",
+      items: longItems,
+    };
+    let lastToast = null;
+    sandbox.showToast = (msg) => {
+      lastToast = msg;
+    };
+    sandbox.copyShareUrl();
+    assert(
+      typeof lastToast === "string" &&
+        (lastToast.includes("2,048") || lastToast.includes("2.048")),
+      "HYGIENE-06: copyShareUrl displays warning toast when URL exceeds 2048 chars"
+    );
+
+    // 8.6 Single source window exports
+    const exportBlockMatch = rawHtml.match(
+      /\/\/\s*Global exports for test runner[\s\S]*?<\/script>/
+    );
+    assert(
+      Boolean(exportBlockMatch),
+      "HYGIENE-07a: Global exports block exists at end of script"
+    );
+    const exportMatches = [
+      ...exportBlockMatch[0].matchAll(/window\.([a-zA-Z0-9_$]+)\s*=/g),
+    ].map((m) => m[1]);
+    const counts = {};
+    exportMatches.forEach((prop) => {
+      counts[prop] = (counts[prop] || 0) + 1;
+    });
+    const duplicateExports = Object.keys(counts).filter((k) => counts[k] > 1);
+    assert(
+      duplicateExports.length === 0,
+      `HYGIENE-07b: Zero duplicate window.* assignments in export block (Duplicates: ${duplicateExports.join(", ") || "none"})`
     );
   } catch (err) {
     console.error("❌ Test Execution Error:", err);

@@ -7854,6 +7854,17 @@
           // 1. Monthly Salary Inflow & Annual Bonus (ADR-0002)
           if (isMonthStart) {
             if (monthlySalary > 0) {
+              // Anniversary-based escalation (ADR-0002)
+              const yearDiff = getMonthDiff(simStartDate, currentDate) / 12;
+              if (
+                yearDiff > 0 &&
+                Math.abs(yearDiff - Math.round(yearDiff)) < 0.01 &&
+                salaryGrowthRate > 0
+              ) {
+                currentSalary =
+                  monthlySalary * Math.pow(1 + salaryGrowthRate, yearDiff);
+              }
+
               currentPoolBalance += currentSalary;
               cumulativeSalary += currentSalary;
               salaryCount++;
@@ -7900,17 +7911,6 @@
                   amount: secBonusAmount,
                   multiplier: secondaryBonusMultiplier,
                 });
-              }
-
-              // Anniversary-based escalation (ADR-0002)
-              const yearDiff = getMonthDiff(simStartDate, currentDate) / 12;
-              if (
-                yearDiff > 0 &&
-                Math.abs(yearDiff - Math.round(yearDiff)) < 0.01 &&
-                salaryGrowthRate > 0
-              ) {
-                currentSalary =
-                  monthlySalary * Math.pow(1 + salaryGrowthRate, yearDiff);
               }
             }
           }
