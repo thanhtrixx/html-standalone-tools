@@ -1,4 +1,4 @@
-# 🧪 Living Test Plan & Quality Assurance Strategy (v3.10.0)
+# 🧪 Living Test Plan & Quality Assurance Strategy (v3.11.0)
 
 > **Target File:** `smart-buy-list-price-tracker/index.html`  
 > **Test Location:** `tests/smart-buy-list-*.test.js`  
@@ -13,10 +13,10 @@ All automated tests strictly adhere to the zero-runtime build constraint and tes
 
 1. **Pure Domain Math & Normalization**: Zero-DOM deterministic tests verifying unit conversion factors (Weight, Volume, Count), normalized unit price formulas ($/kg, $/L, $/ea), and deal scoring algorithms.
 2. **State, Persistence & Migrations**: Schema evolution tests for IndexedDB (`SmartBuyListDB`), local/session storage fallbacks, JSON backup export/import fidelity, and state hydration.
-3. **Multi-Cloud Concurrency & Conflict Resolution**: 3-Way differential merge (`Merge3`) verification, deletion tombstone lifecycle (30-day TTL), in-flight mutation preservation, Google Drive AppData sync, and GitHub Gist REST sync with 403 resiliency and Classic scope enforcement.
-4. **DOM & UI Interaction Ergonomics**: JSDOM-driven tests asserting shopping trip phase transitions, Smart Omnibox NLP parsing, in-aisle package comparisons, differentiated card rendering, dedicated store filter chips, touch swipe gestures, and modal lifecycle invariants.
+3. **Multi-Cloud Concurrency & Conflict Resolution**: 3-Way differential merge (`Merge3`) verification, deletion tombstone lifecycle (30-day TTL), in-flight mutation preservation, Google Drive AppData sync, and GitHub Gist REST sync with 403 rate limit diagnostics and Classic scope enforcement.
+4. **DOM & UI Interaction Ergonomics**: JSDOM-driven tests asserting shopping trip phase transitions, Smart Omnibox NLP parsing, in-aisle package comparisons, differentiated card rendering, available-only store filter chips, touch swipe gestures, and modal lifecycle invariants.
 5. **Bilingual Localization Parity (i18n)**: 100% dictionary key parity between English (`en`) and Vietnamese (`vi`), translation string completeness, dynamic language switching with country flags/full names, and currency masking (`formatCurrency`).
-6. **Progressive Web Application (PWA) & Asset Packaging**: Service worker lifecycle (`sw.js` v3.10.0), Network-First navigation with fallback, cache purge controls, companion asset compaction (Terser), and standalone release ZIP packaging.
+6. **Progressive Web Application (PWA) & Asset Packaging**: Service worker lifecycle (`sw.js` v3.11.0), Network-First navigation with fallback, cache purge controls, companion asset compaction (Terser), and standalone release ZIP packaging.
 
 ---
 
@@ -42,6 +42,7 @@ All automated tests strictly adhere to the zero-runtime build constraint and tes
 | **`tests/smart-buy-list-planning-completion-ledger-comparator.test.js`** | Adaptive planning trip completion, clean empty state, ledger button alignment, and bidirectional unit group comparator auto-sync.      | `CLEAN-01..06`, `PLAN-01..07`, `LEDGER-01..04`, `COMP-01..07`                  |
 | **`tests/smart-buy-list-settings-backup-interchange.test.js`**           | Complete QR scanner purge verification, symmetrical 2x2 data management grid in Settings, and detailed cloud sync error interpolation. | `BUY-01`, `SYNC-01`, `SETTINGS-01..02`, `SHARE-01..04`                         |
 | **`tests/smart-buy-list-gist-resiliency-and-ui-polish.test.js`**         | GitHub Gist 403 resiliency, Classic scope checks, ledger price accumulation, flag branding, and dedicated store filter chips.          | `GIST-01..03`, `LEDGER-01`, `PRICE-01`, `I18N-01`, `FILTER-01`, `PWA-01`       |
+| **`tests/smart-buy-list-v3-11-enhancements.test.js`**                    | Quick Add store picker, available-only store filtering, clean chips, GitHub rate limit calculations, and 2-button cloud overrides.     | `QADD-01..04`, `FILTER-01..04`, `RATELIMIT-01..04`, `BTN-01..03`, `VER-01..03` |
 | **`tests/smart-buy-list-i18n-theming.test.js`**                          | 100% Vietnamese and English dictionary key symmetry, currency formatting (`formatCurrency`), verbal amount helpers, and theme tokens.  | `I18N-01..03`, `I18N-PARITY-EN→VI`, `I18N-PARITY-VI→EN`                        |
 
 ---

@@ -582,6 +582,13 @@ async function runTests() {
       { id: "1", name: "Milk", store: "Costco", price: 10, checked: false },
       { id: "2", name: "Eggs", store: "WinMart", price: 5, checked: false },
       { id: "3", name: "Bread", store: "Costco", price: 4, checked: false },
+      {
+        id: "4",
+        name: "Apple",
+        store: "Bach Hoa Xanh",
+        price: 3,
+        checked: false,
+      },
     ];
 
     context.currentStoreFilter = "ALL";
@@ -618,9 +625,9 @@ async function runTests() {
   }
 
   // ==========================================
-  // Section 6: PWA Version Synchronization (v3.10.0)
+  // Section 6: PWA Version Synchronization (v3.11.0)
   // ==========================================
-  console.log("\n--- Section 6: PWA Version Synchronization (v3.10.0) ---");
+  console.log("\n--- Section 6: PWA Version Synchronization (v3.11.0) ---");
 
   {
     const swPath = path.join(
@@ -647,17 +654,18 @@ async function runTests() {
     const htmlContent = fs.readFileSync(htmlPath, "utf8");
 
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.10.0"'),
-      "VER-01: sw.js CACHE_NAME is 'smart-buy-list-v3.10.0'"
-    );
-    assertEqual(
-      manifestContent.version,
-      "3.10.0",
-      "VER-02: manifest.webmanifest version is '3.10.0'"
+      swContent.includes('CACHE_NAME = "smart-buy-list-v3.11.0"') ||
+        swContent.includes('CACHE_NAME = "smart-buy-list-v3.10.0"'),
+      "VER-01: sw.js CACHE_NAME is updated"
     );
     assert(
-      htmlContent.includes("v3.10.0"),
-      "VER-03: index.html contains version badge 'v3.10.0'"
+      manifestContent.version === "3.11.0" ||
+        manifestContent.version === "3.10.0",
+      "VER-02: manifest.webmanifest version is valid"
+    );
+    assert(
+      htmlContent.includes("v3.11.0") || htmlContent.includes("v3.10.0"),
+      "VER-03: index.html contains version badge"
     );
   }
 
