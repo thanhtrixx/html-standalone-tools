@@ -130,9 +130,9 @@ const TEST_SUITES = [
     category: "AI & State",
   },
   {
-    name: "Smart Buy-List Settings In-App QR Scanner",
-    file: "tests/smart-buy-list-settings-qr-scanner.test.js",
-    category: "UI/UX",
+    name: "Smart Buy-List Settings Backup File & Clipboard Interchange",
+    file: "tests/smart-buy-list-settings-backup-interchange.test.js",
+    category: "AI & State",
   },
   {
     name: "Smart Buy-List Ledger Deletion & Comparator Prefill",
