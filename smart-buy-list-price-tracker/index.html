@@ -3160,22 +3160,73 @@
       }
 
       function mergeCloudState(local, remote) {
+        if (!local && !remote) {
+          return {
+            activeList: {
+              id: "default",
+              title: "Danh Sách Mua Sắm",
+              items: [],
+            },
+            catalog: [],
+            purchaseLedger: [],
+            stores: [...DEFAULT_STORES],
+            settings: {},
+            _deleted: { items: {}, ledger: {}, stores: {} },
+          };
+        }
+        if (!local) return remote;
+        if (!remote) return local;
+
         const result = {
           activeList: {
             id: local.activeList?.id || remote.activeList?.id || "default",
             title:
               local.activeList?.title ||
               remote.activeList?.title ||
-              "Weekly Groceries",
+              "Danh Sách Mua Sắm",
             items: [],
           },
           catalog: [],
           purchaseLedger: [],
           stores: [],
           settings: { ...(local.settings || {}) },
+          _deleted: { items: {}, ledger: {}, stores: {} },
         };
 
-        // 1. Merge Active List Items
+        const getTs = (obj) => {
+          if (!obj) return 0;
+          if (typeof obj === "string" || typeof obj === "number") {
+            return new Date(obj).getTime() || 0;
+          }
+          if (obj.updatedAt) return new Date(obj.updatedAt).getTime() || 0;
+          if (obj.createdAt) return new Date(obj.createdAt).getTime() || 0;
+          if (obj.date) return new Date(obj.date).getTime() || 0;
+          return 0;
+        };
+
+        // 1. Merge _deleted Tombstones
+        const localDel = local._deleted || {};
+        const remoteDel = remote._deleted || {};
+        ["items", "ledger", "stores"].forEach((cat) => {
+          const lMap = localDel[cat] || {};
+          const rMap = remoteDel[cat] || {};
+          const combined = { ...lMap };
+          Object.keys(rMap).forEach((id) => {
+            const rTs = getTs(rMap[id]);
+            const lTs = getTs(lMap[id]);
+            if (rTs >= lTs) {
+              combined[id] = rMap[id];
+            }
+          });
+          result._deleted[cat] = combined;
+        });
+        pruneDeletedTombstones(result._deleted);
+
+        const tombItems = result._deleted.items;
+        const tombLedger = result._deleted.ledger;
+        const tombStores = result._deleted.stores;
+
+        // 2. Merge Active List Items
         const localItems = Array.isArray(local.activeList?.items)
           ? local.activeList.items
           : [];
@@ -3184,27 +3235,28 @@
           : [];
         const itemMap = new Map();
 
-        const getTs = (item) => {
-          if (item.updatedAt) return new Date(item.updatedAt).getTime() || 0;
-          if (item.createdAt) return new Date(item.createdAt).getTime() || 0;
-          return 0;
-        };
-
         localItems.forEach((item) => {
           const key = (item.id || item.name || "").trim().toLowerCase();
-          if (key) itemMap.set(key, { ...item });
+          if (!key) return;
+          const delTs = getTs(tombItems[item.id] || tombItems[key]);
+          const itemTs = getTs(item);
+          if (delTs > 0 && delTs >= itemTs) return;
+          itemMap.set(key, { ...item });
         });
 
         remoteItems.forEach((remItem) => {
           const key = (remItem.id || remItem.name || "").trim().toLowerCase();
           if (!key) return;
+          const delTs = getTs(tombItems[remItem.id] || tombItems[key]);
+          const remTs = getTs(remItem);
+          if (delTs > 0 && delTs >= remTs) return;
+
           if (!itemMap.has(key)) {
             itemMap.set(key, { ...remItem });
           } else {
             const locItem = itemMap.get(key);
             const locTs = getTs(locItem);
-            const remTs = getTs(remItem);
-            if (remTs >= locTs) {
+            if (remTs > locTs) {
               itemMap.set(key, {
                 ...locItem,
                 ...remItem,
@@ -3231,7 +3283,7 @@
         });
         result.activeList.items = Array.from(itemMap.values());
 
-        // 2. Merge Purchase Ledger (Union by transaction ID / timestamp / item+store+date)
+        // 3. Merge Purchase Ledger (Union with tombstone exclusion)
         const localLedger = Array.isArray(local.purchaseLedger)
           ? local.purchaseLedger
           : [];
@@ -3247,32 +3299,49 @@
         };
 
         localLedger.forEach((rec) => {
-          ledgerMap.set(getLedgerKey(rec), { ...rec });
+          const k = getLedgerKey(rec);
+          const delTs = getTs(
+            tombLedger[rec.id] || tombLedger[String(rec.id)] || tombLedger[k]
+          );
+          if (delTs > 0) return;
+          ledgerMap.set(k, { ...rec });
         });
+
         remoteLedger.forEach((rec) => {
           const k = getLedgerKey(rec);
+          const delTs = getTs(
+            tombLedger[rec.id] || tombLedger[String(rec.id)] || tombLedger[k]
+          );
+          if (delTs > 0) return;
           if (!ledgerMap.has(k)) {
             ledgerMap.set(k, { ...rec });
           }
         });
         result.purchaseLedger = Array.from(ledgerMap.values());
 
-        // 3. Merge Stores (Union)
+        // 4. Merge Stores (Union with tombstone exclusion)
         const localStores = Array.isArray(local.stores)
           ? local.stores
           : DEFAULT_STORES;
         const remoteStores = Array.isArray(remote.stores) ? remote.stores : [];
         const storesSet = new Set([...localStores, ...remoteStores]);
-        result.stores = Array.from(storesSet).filter(Boolean);
+        result.stores = Array.from(storesSet).filter((s) => {
+          if (!s) return false;
+          const delTs = getTs(tombStores[s] || tombStores[s.toLowerCase()]);
+          return delTs === 0;
+        });
+        if (result.stores.length === 0) {
+          result.stores = [...DEFAULT_STORES];
+        }
 
-        // 4. Merge Settings
+        // 5. Merge Settings
         if (remote.settings) {
           result.settings = {
             ...local.settings,
             language:
-              remote.settings.language || local.settings?.language || "en",
+              remote.settings.language || local.settings?.language || "vi",
             currency:
-              remote.settings.currency || local.settings?.currency || "USD",
+              remote.settings.currency || local.settings?.currency || "VND",
             tripPhase:
               local.settings?.tripPhase ||
               remote.settings.tripPhase ||
@@ -3285,12 +3354,53 @@
         return result;
       }
 
+      function merge3Way(baseSnapshot, liveState, remoteData) {
+        if (!baseSnapshot) return mergeCloudState(liveState, remoteData);
+        if (!remoteData) return liveState;
+        const baseMergedRemote = mergeCloudState(baseSnapshot, remoteData);
+        return mergeCloudState(baseMergedRemote, liveState);
+      }
+
+      function reconcileMemoryState(newState) {
+        if (!newState) return;
+        memoryState.activeList = newState.activeList || {
+          id: "default",
+          title: "Danh Sách Mua Sắm",
+          items: [],
+        };
+        memoryState.catalog = newState.catalog || [];
+        memoryState.purchaseLedger = newState.purchaseLedger || [];
+        memoryState.stores =
+          Array.isArray(newState.stores) && newState.stores.length > 0
+            ? newState.stores
+            : [...DEFAULT_STORES];
+        memoryState._deleted = newState._deleted || {
+          items: {},
+          ledger: {},
+          stores: {},
+        };
+        if (newState.settings) {
+          memoryState.settings = {
+            ...memoryState.settings,
+            ...newState.settings,
+          };
+        }
+        saveToLocalStorage();
+        if (typeof renderApp === "function") renderApp();
+        if (typeof renderPriceLedgerTable === "function") {
+          const searchInput = document.getElementById("ledgerSearchInput");
+          renderPriceLedgerTable(searchInput ? searchInput.value : "");
+        }
+      }
+
       // Google Drive Cloud Sync Provider (Composite Provider)
       class GoogleDriveStorageProvider extends StorageProvider {
         constructor(localProvider = null) {
           super();
           this.local = localProvider || new IndexedDBStorageProvider();
           this.remoteFileId = null;
+          this.isSyncing = false;
+          this.needsTrailingSync = false;
         }
 
         async init() {
@@ -3313,7 +3423,7 @@
             provider: "googledrive",
             connected: !!googleAuthState.accessToken,
             lastSync: googleAuthState.lastSyncTime,
-            syncing: googleAuthState.isSyncing,
+            syncing: this.isSyncing || googleAuthState.isSyncing,
             lastError: googleAuthState.lastError,
           };
         }
@@ -3322,8 +3432,17 @@
           if (!googleAuthState.accessToken) {
             return { success: false, error: "Not authenticated" };
           }
+          if (this.isSyncing) {
+            this.needsTrailingSync = true;
+            return { success: true, queued: true };
+          }
+
+          this.isSyncing = true;
+          this.needsTrailingSync = false;
           googleAuthState.isSyncing = true;
           updateSyncStatusUI("syncing");
+
+          const snapshotBase = JSON.parse(JSON.stringify(memoryState));
 
           try {
             const fileMeta = await this.findRemoteFile();
@@ -3346,11 +3465,11 @@
                       activeList: { items: [] },
                       purchaseLedger: [],
                       stores: [],
+                      _deleted: { items: {}, ledger: {}, stores: {} },
                     },
                     remoteData
                   );
-                  Object.assign(memoryState, merged);
-                  await this.local.saveState(memoryState);
+                  reconcileMemoryState(merged);
                 }
               }
             } else {
@@ -3359,10 +3478,9 @@
                 remoteData = await this.readRemoteFile(this.remoteFileId);
               }
               if (remoteData) {
-                const merged = mergeCloudState(memoryState, remoteData);
-                Object.assign(memoryState, merged);
-                await this.local.saveState(memoryState);
-                const updatedPayload = createCloudPayload(memoryState);
+                const merged = merge3Way(snapshotBase, memoryState, remoteData);
+                reconcileMemoryState(merged);
+                const updatedPayload = createCloudPayload(merged);
                 await this.updateRemoteFile(this.remoteFileId, updatedPayload);
               } else {
                 const payload = createCloudPayload(memoryState);
@@ -3386,6 +3504,13 @@
             googleAuthState.isSyncing = false;
             updateSyncStatusUI("error");
             return { success: false, error: googleAuthState.lastError };
+          } finally {
+            this.isSyncing = false;
+            googleAuthState.isSyncing = false;
+            if (this.needsTrailingSync) {
+              this.needsTrailingSync = false;
+              setTimeout(() => this.sync(), 100);
+            }
           }
         }
 
@@ -3486,6 +3611,7 @@
           this.description =
             "Smart Buy-List & Unit Price Tracker Cloud Sync Data";
           this.isSyncing = false;
+          this.needsTrailingSync = false;
         }
 
         async init() {
@@ -3508,7 +3634,7 @@
             connected: !!githubAuthState.token,
             lastSync: githubAuthState.lastSyncTime,
             gistId: githubAuthState.gistId,
-            syncing: this.isSyncing,
+            syncing: this.isSyncing || githubAuthState.isSyncing,
             lastError: githubAuthState.lastError,
           };
         }
@@ -3545,12 +3671,11 @@
               }
             );
             if (gistRes.ok) {
-              const gist = await gistRes.json();
-              return gist.id;
+              return explicitGistId.trim();
             }
           }
 
-          // Auto-Discovery across user gists
+          // Search user gists for smart_buy_list_data.json
           try {
             const listRes = await fetch(
               "https://api.github.com/gists?per_page=100",
@@ -3564,21 +3689,11 @@
             );
             if (listRes.ok) {
               const gists = await listRes.json();
-              if (Array.isArray(gists)) {
-                const matching = gists.filter((g) => {
-                  const hasFile = g.files && g.files[this.filename];
-                  const hasDesc =
-                    g.description && g.description.includes("Smart Buy-List");
-                  return hasFile || hasDesc;
-                });
-                if (matching.length > 0) {
-                  matching.sort(
-                    (a, b) =>
-                      new Date(b.updated_at).getTime() -
-                      new Date(a.updated_at).getTime()
-                  );
-                  return matching[0].id;
-                }
+              const existing = gists.find(
+                (g) => g.files && g.files[this.filename]
+              );
+              if (existing) {
+                return existing.id;
               }
             }
           } catch (e) {
@@ -3689,11 +3804,16 @@
             return { success: false, error: "Not authenticated with GitHub" };
           }
           if (this.isSyncing) {
-            return { success: false, error: "Already syncing" };
+            this.needsTrailingSync = true;
+            return { success: true, queued: true };
           }
 
           this.isSyncing = true;
+          this.needsTrailingSync = false;
+          githubAuthState.isSyncing = true;
           updateSyncStatusUI("syncing");
+
+          const snapshotBase = JSON.parse(JSON.stringify(memoryState));
 
           try {
             const token = githubAuthState.token;
@@ -3729,18 +3849,17 @@
                     activeList: { items: [] },
                     purchaseLedger: [],
                     stores: [],
+                    _deleted: { items: {}, ledger: {}, stores: {} },
                   },
                   remoteData
                 );
-                Object.assign(memoryState, merged);
-                await this.local.saveState(memoryState);
+                reconcileMemoryState(merged);
               }
             } else {
-              // Deterministic Merge with Optimistic Concurrency
+              // Deterministic 3-Way Merge with In-Flight Concurrency Protection
               if (remoteData) {
-                const merged = mergeCloudState(localState, remoteData);
-                Object.assign(memoryState, merged);
-                await this.local.saveState(memoryState);
+                const merged = merge3Way(snapshotBase, memoryState, remoteData);
+                reconcileMemoryState(merged);
                 const payload = createCloudPayload(merged);
                 await this.updateRemoteGist(gistId, payload, token);
               } else {
@@ -3768,6 +3887,11 @@
             return { success: false, error: githubAuthState.lastError };
           } finally {
             this.isSyncing = false;
+            githubAuthState.isSyncing = false;
+            if (this.needsTrailingSync) {
+              this.needsTrailingSync = false;
+              setTimeout(() => this.sync(), 100);
+            }
           }
         }
       }
@@ -9433,6 +9557,9 @@
         window.deleteSelectedLedgerItems = deleteSelectedLedgerItems;
         window.processLedgerEntryIntoBuyList = processLedgerEntryIntoBuyList;
         window.updateLedgerBatchBar = updateLedgerBatchBar;
+        window.mergeCloudState = mergeCloudState;
+        window.merge3Way = merge3Way;
+        window.reconcileMemoryState = reconcileMemoryState;
         window.showToast = showToast;
         Object.defineProperty(window, "selectedLedgerIds", {
           get: () => selectedLedgerIds,
