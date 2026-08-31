@@ -24,6 +24,8 @@ function loadBuyListI18nEngine() {
       focus: () => {
         activeFocus = "inputItemName";
       },
+      setAttribute: () => {},
+      getAttribute: () => null,
     },
     comparatorModal: {
       classList: {
@@ -31,6 +33,8 @@ function loadBuyListI18nEngine() {
         remove: () => {},
         contains: (c) => c === "hidden",
       },
+      setAttribute: () => {},
+      getAttribute: () => null,
     },
     shareModal: {
       classList: {
@@ -38,14 +42,26 @@ function loadBuyListI18nEngine() {
         remove: () => {},
         contains: (c) => c === "hidden",
       },
+      setAttribute: () => {},
+      getAttribute: () => null,
     },
-    themeToggleBtn: { textContent: "🌙" },
-    langToggleBtn: { textContent: "🇻🇳" },
+    themeToggleBtn: {
+      textContent: "🌙",
+      setAttribute: () => {},
+      getAttribute: () => null,
+    },
+    langToggleBtn: {
+      textContent: "🇻🇳",
+      setAttribute: () => {},
+      getAttribute: () => null,
+    },
     smartQuickInput: {
       value: "",
       focus: () => {
         activeFocus = "smartQuickInput";
       },
+      setAttribute: () => {},
+      getAttribute: () => null,
     },
   };
 
@@ -95,6 +111,8 @@ function loadBuyListI18nEngine() {
           innerHTML: "",
           style: {},
           appendChild: () => {},
+          setAttribute: () => {},
+          getAttribute: () => null,
           focus: () => {
             activeFocus = id;
           },
@@ -104,6 +122,8 @@ function loadBuyListI18nEngine() {
         textContent: "",
         classList: { add: () => {}, remove: () => {}, contains: () => false },
         remove: () => {},
+        setAttribute: () => {},
+        getAttribute: () => null,
       }),
       querySelector: () => null,
       querySelectorAll: () => [],
@@ -488,6 +508,187 @@ try {
   assert(
     allCriticalPresent,
     `I18N-KEYS-01: All ${criticalKeys.length} critical UI and modal translation keys exist in both en and vi`
+  );
+
+  console.log("\n--- Section 7: ARIA Audit & Accessibility Semantics ---");
+
+  // 1. Modal dialog attributes
+  const modalIds = [
+    "comparatorModal",
+    "shareModal",
+    "importModal",
+    "pasteJsonModal",
+    "tripCompleteModal",
+    "priceLedgerModal",
+    "editItemModal",
+    "quickPriceModal",
+    "storeManagerModal",
+    "settingsModal",
+  ];
+
+  modalIds.forEach((mId) => {
+    const modalTagMatch = htmlContent.match(
+      new RegExp(`<div[^>]*id=["']${mId}["'][^>]*>`, "i")
+    );
+    assert(
+      Boolean(modalTagMatch),
+      `ARIA-MODAL-01: Modal #${mId} exists in HTML markup`
+    );
+
+    if (modalTagMatch) {
+      const tagStr = modalTagMatch[0];
+      const hasRoleDialog = /role=["']dialog["']/i.test(tagStr);
+      const hasAriaModal = /aria-modal=["']true["']/i.test(tagStr);
+      const hasAriaLabelledby = /aria-labelledby=["']([^"']+)["']/i.test(
+        tagStr
+      );
+
+      assert(hasRoleDialog, `ARIA-MODAL-02: Modal #${mId} has role="dialog"`);
+      assert(
+        hasAriaModal,
+        `ARIA-MODAL-03: Modal #${mId} has aria-modal="true"`
+      );
+      assert(
+        hasAriaLabelledby,
+        `ARIA-MODAL-04: Modal #${mId} has aria-labelledby attribute`
+      );
+
+      if (hasAriaLabelledby) {
+        const labelledById = tagStr.match(
+          /aria-labelledby=["']([^"']+)["']/i
+        )[1];
+        const labelledByElem =
+          htmlContent.includes(`id="${labelledById}"`) ||
+          htmlContent.includes(`id='${labelledById}'`);
+        assert(
+          labelledByElem,
+          `ARIA-MODAL-05: Modal #${mId} labelledby target #${labelledById} exists in HTML`
+        );
+      }
+    }
+  });
+
+  // 2. Modal close buttons have aria-label and data-i18n-aria
+  const closeButtonMatches = [
+    ...htmlContent.matchAll(
+      /<button[^>]*onclick=["']closeModal\([^)]+\)["'][^>]*>([\s\S]*?)<\/button>/gi
+    ),
+  ];
+  assert(
+    closeButtonMatches.length >= 10,
+    `ARIA-CLOSE-01: Found at least 10 modal close button elements (Found: ${closeButtonMatches.length})`
+  );
+
+  closeButtonMatches.forEach((btnMatch, idx) => {
+    const btnTag = btnMatch[0];
+    const hasAriaLabel =
+      /aria-label=["'][^"']+["']/i.test(btnTag) ||
+      btnTag.includes("Close") ||
+      btnTag.includes("Đóng");
+    assert(
+      hasAriaLabel,
+      `ARIA-CLOSE-02: Close button #${idx + 1} has accessible text or aria-label`
+    );
+  });
+
+  // 3. Header icon-only buttons have aria-label and aria-hidden icons
+  const headerBtnIds = [
+    "langToggleBtn",
+    "themeToggleBtn",
+    "btnOpenShareModal",
+    "btnOpenSettings",
+  ];
+  headerBtnIds.forEach((btnId) => {
+    const btnMatch = htmlContent.match(
+      new RegExp(`<button[^>]*id=["']${btnId}["'][^>]*>`, "i")
+    );
+    assert(
+      Boolean(btnMatch),
+      `ARIA-HEADER-01: Header button #${btnId} exists in markup`
+    );
+    if (btnMatch) {
+      const hasAria = /aria-label=["'][^"']+["']/i.test(btnMatch[0]);
+      assert(
+        hasAria,
+        `ARIA-HEADER-02: Header button #${btnId} has explicit aria-label`
+      );
+    }
+  });
+
+  // 4. Bottom navigation tabs have role="tab" and aria-label
+  const navBtnIds = [
+    "navPlanningBtn",
+    "navBuyModeBtn",
+    "navLedgerBtn",
+    "navCompareBtn",
+  ];
+  navBtnIds.forEach((navId) => {
+    const navMatch = htmlContent.match(
+      new RegExp(`<button[^>]*id=["']${navId}["'][^>]*>`, "i")
+    );
+    assert(
+      Boolean(navMatch),
+      `ARIA-NAV-01: Navigation tab #${navId} exists in markup`
+    );
+    if (navMatch) {
+      assert(
+        /role=["']tab["']/i.test(navMatch[0]),
+        `ARIA-NAV-02: Navigation tab #${navId} has role="tab"`
+      );
+      assert(
+        /aria-label=["'][^"']+["']/i.test(navMatch[0]),
+        `ARIA-NAV-03: Navigation tab #${navId} has aria-label`
+      );
+    }
+  });
+
+  // 5. Dynamic Render functions generate aria-labels
+  const sampleItem = {
+    id: "test-item-1",
+    name: "Organic Whole Milk",
+    category: "dairy",
+    quantity: 1,
+    unit: "L",
+    price: 35000,
+    store: "WinMart",
+    checked: false,
+  };
+
+  sandbox.currentPhase = "IN_STORE";
+  const buyModeHtml = sandbox.renderItemCard(sampleItem);
+  assert(
+    buyModeHtml.includes("aria-label="),
+    "ARIA-RENDER-01: Buy mode item card renders aria-label for interactive controls"
+  );
+  assert(
+    buyModeHtml.includes("aria-hidden="),
+    "ARIA-RENDER-02: Buy mode item card marks decorative icons as aria-hidden"
+  );
+
+  sandbox.currentPhase = "PLANNING";
+  const planningModeHtml = sandbox.renderItemCard(sampleItem);
+  assert(
+    planningModeHtml.includes("aria-label="),
+    "ARIA-RENDER-03: Planning mode item card renders aria-label for checkbox, edit, comparator, and delete buttons"
+  );
+
+  // 6. 100% Translation Dictionary Parity
+  const allEnKeys = Object.keys(sandbox.TRANSLATIONS.en);
+  const allViKeys = Object.keys(sandbox.TRANSLATIONS.vi);
+  const missingInViKeys = allEnKeys.filter(
+    (k) => sandbox.TRANSLATIONS.vi[k] === undefined
+  );
+  const missingInEnKeys = allViKeys.filter(
+    (k) => sandbox.TRANSLATIONS.en[k] === undefined
+  );
+
+  assert(
+    missingInViKeys.length === 0,
+    `I18N-PARITY-01: All ${allEnKeys.length} keys in TRANSLATIONS.en exist in TRANSLATIONS.vi (Missing: ${missingInViKeys.join(", ") || "none"})`
+  );
+  assert(
+    missingInEnKeys.length === 0,
+    `I18N-PARITY-02: All ${allViKeys.length} keys in TRANSLATIONS.vi exist in TRANSLATIONS.en (Missing: ${missingInEnKeys.join(", ") || "none"})`
   );
 } catch (err) {
   console.error("❌ Test Execution Error:", err);

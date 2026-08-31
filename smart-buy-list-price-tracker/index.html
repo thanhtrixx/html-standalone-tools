@@ -404,8 +404,9 @@
             onclick="toggleLanguage()"
             class="h-8 px-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-bold border border-slate-700 transition-colors inline-flex items-center justify-center"
             title="Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)"
+            aria-label="Đổi sang Tiếng Anh"
           >
-            🇻🇳
+            <span id="langToggleFlag" aria-hidden="true">🇻🇳</span>
           </button>
 
           <!-- Theme Toggle -->
@@ -414,18 +415,21 @@
             onclick="toggleTheme()"
             class="h-8 w-8 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors inline-flex items-center justify-center"
             title="Toggle Theme"
+            aria-label="Chuyển giao diện sáng/tối"
           >
-            🌙
+            <span id="themeToggleIcon" aria-hidden="true">🌙</span>
           </button>
 
           <!-- Share Button -->
           <button
+            id="btnOpenShareModal"
             onclick="openShareModal()"
             class="h-8 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-sm transition-all"
             title="Share List"
+            aria-label="Mở tuỳ chọn chia sẻ"
           >
-            <span>📤</span>
-            <span id="btnShareText" class="hidden sm:inline">Share</span>
+            <span aria-hidden="true">📤</span>
+            <span id="btnShareText" class="hidden sm:inline">Chia Sẻ</span>
           </button>
 
           <!-- Settings Button (Option Hub) -->
@@ -434,8 +438,9 @@
             onclick="openSettingsModal()"
             class="h-8 w-8 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors inline-flex items-center justify-center"
             title="Settings / Option Hub"
+            aria-label="Mở cài đặt"
           >
-            ⚙️
+            <span aria-hidden="true">⚙️</span>
           </button>
         </div>
       </div>
@@ -958,15 +963,23 @@
     <nav
       class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 dark:bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-2 py-1.5 no-print"
     >
-      <div class="max-w-3xl mx-auto flex items-center justify-around">
+      <div
+        class="max-w-3xl mx-auto flex items-center justify-around"
+        role="tablist"
+        aria-label="Main Navigation"
+      >
         <button
           id="navPlanningBtn"
           onclick="setTripPhase('PLANNING')"
           class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors"
+          role="tab"
+          aria-selected="true"
+          aria-label="Chuyển sang chế độ Lập kế hoạch"
         >
           <div
             id="navPlanningPill"
             class="w-14 h-7 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-base font-bold transition-all"
+            aria-hidden="true"
           >
             📝
           </div>
@@ -976,10 +989,14 @@
           id="navBuyModeBtn"
           onclick="setTripPhase('IN_STORE')"
           class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
+          role="tab"
+          aria-selected="false"
+          aria-label="Chuyển sang chế độ Mua sắm"
         >
           <div
             id="navBuyModePill"
             class="w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400"
+            aria-hidden="true"
           >
             🛒
           </div>
@@ -989,10 +1006,14 @@
           id="navLedgerBtn"
           onclick="openPriceLedgerModal()"
           class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
+          role="tab"
+          aria-selected="false"
+          aria-label="Mở sổ tay lịch sử giá"
         >
           <div
             id="navLedgerPill"
             class="w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400"
+            aria-hidden="true"
           >
             📈
           </div>
@@ -1002,10 +1023,14 @@
           id="navCompareBtn"
           onclick="openComparatorModal()"
           class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
+          role="tab"
+          aria-selected="false"
+          aria-label="Mở bộ so sánh giá"
         >
           <div
             id="navComparePill"
             class="w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400"
+            aria-hidden="true"
           >
             ⚖️
           </div>
@@ -1019,6 +1044,9 @@
     <!-- 1. IN-AISLE PACKAGE COMPARATOR MODAL -->
     <div
       id="comparatorModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="compModalTitleText"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
@@ -1034,14 +1062,16 @@
             id="compModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>⚖️</span>
+            <span aria-hidden="true">⚖️</span>
             <span id="compModalTitleText">In-Aisle Package Comparator</span>
           </h3>
           <button
             onclick="closeModal('comparatorModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <p id="compModalDesc" class="text-xs text-slate-400">
@@ -1245,22 +1275,22 @@
           <button
             id="btnCloseComparator"
             onclick="closeModal('comparatorModal')"
-            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
           >
             Close
           </button>
           <button
             onclick="applyWinnerToActiveItem()"
             id="btnApplyWinnerToList"
-            class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-transform active:scale-95 flex items-center gap-1.5"
+            class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
           >
-            <span>✨</span>
+            <span aria-hidden="true">✨</span>
             <span id="btnApplyWinnerText">Apply Winner to List</span>
           </button>
           <button
             onclick="applyComparatorWinner()"
             id="btnApplyWinner"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
           >
             Apply Winner to Form
           </button>
@@ -1271,6 +1301,9 @@
     <!-- 2. SHARE LIST MODAL -->
     <div
       id="shareModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="shareModalTitleText"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
@@ -1281,13 +1314,16 @@
             id="shareModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>📤</span> <span id="shareModalTitleText">Share Buy-List</span>
+            <span aria-hidden="true">📤</span>
+            <span id="shareModalTitleText">Share Buy-List</span>
           </h3>
           <button
             onclick="closeModal('shareModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -1301,9 +1337,9 @@
           <button
             onclick="invokeNativeShare()"
             id="btnNativeShare"
-            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-transform active:scale-95 cursor-pointer"
           >
-            <span>📱</span>
+            <span aria-hidden="true">📱</span>
             <span id="btnNativeShareText"
               >Share via Apps (WhatsApp / AirDrop)</span
             >
@@ -1311,24 +1347,25 @@
           <button
             onclick="copyBuyListTextChecklist()"
             id="btnCopyTextChecklist"
-            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors cursor-pointer"
           >
-            <span>📋</span>
+            <span aria-hidden="true">📋</span>
             <span id="btnCopyTextChecklistText">Copy Formatted Checklist</span>
           </button>
           <button
             onclick="copyShareUrl()"
             id="btnCopyUrl"
-            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors cursor-pointer"
           >
-            <span>🔗</span> <span id="btnCopyUrlText">Copy Shareable Link</span>
+            <span aria-hidden="true">🔗</span>
+            <span id="btnCopyUrlText">Copy Shareable Link</span>
           </button>
           <button
             onclick="exportBuyListJsonFile()"
             id="btnExportBuyListFile"
-            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 transition-colors cursor-pointer"
           >
-            <span>📥</span>
+            <span aria-hidden="true">📥</span>
             <span id="btnExportBuyListFileText"
               >Download Buy-List File (.json)</span
             >
@@ -1340,6 +1377,9 @@
     <!-- 3. RECIPIENT SMART IMPORT MODAL -->
     <div
       id="importModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="importModalTitleText"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
@@ -1350,14 +1390,16 @@
             id="importModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>📥</span>
+            <span aria-hidden="true">📥</span>
             <span id="importModalTitleText">Incoming Shared Buy-List</span>
           </h3>
           <button
             onclick="closeModal('importModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -1374,16 +1416,16 @@
         <div class="space-y-2 pt-2">
           <button
             onclick="confirmImport('MERGE')"
-            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md cursor-pointer"
           >
-            <span>🔀</span>
+            <span aria-hidden="true">🔀</span>
             <span id="btnImportMergeText">Merge into My Active List</span>
           </button>
           <button
             onclick="confirmImport('REPLACE')"
-            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 border border-slate-700 cursor-pointer"
           >
-            <span>🆕</span>
+            <span aria-hidden="true">🆕</span>
             <span id="btnImportReplaceText">Import as New List</span>
           </button>
         </div>
@@ -1393,6 +1435,9 @@
     <!-- 3.5. PASTE JSON / SHARE LINK FALLBACK MODAL -->
     <div
       id="pasteJsonModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pasteModalTitleText"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
@@ -1403,14 +1448,16 @@
             id="pasteModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>📋</span>
+            <span aria-hidden="true">📋</span>
             <span id="pasteModalTitleText">Paste JSON / Share Link</span>
           </h3>
           <button
             onclick="closeModal('pasteJsonModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -1427,15 +1474,17 @@
 
         <div class="flex items-center justify-end gap-2 pt-1">
           <button
+            type="button"
             onclick="closeModal('pasteJsonModal')"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+            aria-label="Cancel"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
           >
             Cancel
           </button>
           <button
             onclick="submitPasteJson()"
             id="btnSubmitPasteJson"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
           >
             <span id="btnSubmitPasteJsonText">Import Data</span>
           </button>
@@ -1446,6 +1495,9 @@
     <!-- 4. TRIP COMPLETE & SUMMARY MODAL -->
     <div
       id="tripCompleteModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tripModalTitleText"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
@@ -1456,14 +1508,16 @@
             id="tripModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>🏁</span>
+            <span aria-hidden="true">🏁</span>
             <span id="tripModalTitleText">Complete Shopping Trip</span>
           </h3>
           <button
             onclick="closeModal('tripCompleteModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -1536,7 +1590,7 @@
           <button
             onclick="finalizeTripCompletion()"
             id="btnFinalizeTrip"
-            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
           >
             Record Prices & Finalize Trip
           </button>
@@ -1547,6 +1601,9 @@
     <!-- 5. PRICE LEDGER & CATALOG HISTORY MODAL -->
     <div
       id="priceLedgerModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ledgerModalTitleText"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
     >
       <div
@@ -1557,14 +1614,16 @@
             id="ledgerModalTitle"
             class="text-base sm:text-lg font-bold text-white flex items-center gap-2"
           >
-            <span>📈</span>
+            <span aria-hidden="true">📈</span>
             <span id="ledgerModalTitleText">Historical Purchase Ledger</span>
           </h3>
           <button
             onclick="closeModal('priceLedgerModal')"
-            class="text-slate-400 hover:text-slate-200 text-xl p-1.5 transition-colors"
+            class="text-slate-400 hover:text-slate-200 text-xl p-1.5 transition-colors cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -1651,7 +1710,7 @@
               onclick="addSelectedLedgerItemsToBuyList()"
               class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
             >
-              <span>🛒</span>
+              <span aria-hidden="true">🛒</span>
               <span id="btnTextAddSelectedLedger">Add to Buy List</span>
             </button>
             <button
@@ -1660,7 +1719,7 @@
               onclick="deleteSelectedLedgerItems()"
               class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
             >
-              <span>🗑️</span>
+              <span aria-hidden="true">🗑️</span>
               <span id="btnTextDeleteSelectedLedger">Delete Selected</span>
             </button>
           </div>
@@ -1671,6 +1730,9 @@
     <!-- 5.5. FULL ITEM EDIT MODAL (PLANNING MODE) -->
     <div
       id="editItemModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="editItemModalHeading"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
@@ -1686,15 +1748,16 @@
             id="editItemModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>✏️</span>
+            <span aria-hidden="true">✏️</span>
             <span id="editItemModalHeading">Edit Item Details</span>
           </h3>
           <button
             onclick="closeModal('editItemModal')"
             class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
-            title="Close"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -1820,6 +1883,7 @@
             <button
               type="button"
               onclick="closeModal('editItemModal')"
+              aria-label="Cancel"
               class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
               id="btnCancelEditItem"
             >
@@ -1840,6 +1904,9 @@
     <!-- 6. QUICK IN-STORE PRICE / QUANTITY ADJUSTMENT MODAL -->
     <div
       id="quickPriceModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="quickPriceModalHeading"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
@@ -1855,14 +1922,16 @@
             id="quickPriceModalTitle"
             class="text-base font-bold text-white flex items-center gap-2"
           >
-            <span>🏷️</span>
+            <span aria-hidden="true">🏷️</span>
             <span id="quickPriceModalHeading">Quick Price Update</span>
           </h3>
           <button
             onclick="closeModal('quickPriceModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -1971,8 +2040,10 @@
 
         <div class="flex items-center justify-end gap-2 pt-2">
           <button
+            type="button"
             onclick="closeModal('quickPriceModal')"
-            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+            aria-label="Cancel"
+            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
             id="btnCancelQuickPrice"
           >
             Cancel
@@ -1980,7 +2051,7 @@
           <button
             onclick="submitQuickPriceEdit()"
             id="btnSaveQuickPrice"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-transform"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md active:scale-95 transition-transform cursor-pointer"
           >
             Update Price
           </button>
@@ -1991,6 +2062,9 @@
     <!-- 7. STORE MANAGER MODAL -->
     <div
       id="storeManagerModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="storeManagerModalTitle"
       class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
@@ -1998,7 +2072,7 @@
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-xl">⚙️</span>
+            <span class="text-xl" aria-hidden="true">⚙️</span>
             <h3
               id="storeManagerModalTitle"
               class="font-bold text-base text-slate-100"
@@ -2008,9 +2082,11 @@
           </div>
           <button
             onclick="closeModal('storeManagerModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -2026,7 +2102,7 @@
           <button
             type="submit"
             id="btnAddStoreSubmit"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shrink-0 transition-transform active:scale-95"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shrink-0 transition-transform active:scale-95 cursor-pointer"
           >
             Add Store
           </button>
@@ -2047,7 +2123,7 @@
           <button
             id="btnCloseStoreManager"
             onclick="closeModal('storeManagerModal')"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
           >
             Close
           </button>
@@ -2058,6 +2134,9 @@
     <!-- 8. SETTINGS MODAL -->
     <div
       id="settingsModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="settingsModalTitle"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
@@ -2065,7 +2144,7 @@
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="text-xl">⚙️</span>
+            <span class="text-xl" aria-hidden="true">⚙️</span>
             <div>
               <h3
                 id="settingsModalTitle"
@@ -2080,9 +2159,11 @@
           </div>
           <button
             onclick="closeModal('settingsModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
           >
-            ✕
+            <span aria-hidden="true">&times;</span>
           </button>
         </div>
 
@@ -2357,8 +2438,9 @@
                   onclick="saveGoogleClientIdFromInput()"
                   class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold border border-slate-700 active:scale-95 transition-all text-xs"
                   title="Save Client ID"
+                  aria-label="Save Client ID"
                 >
-                  💾
+                  <span aria-hidden="true">💾</span>
                 </button>
               </div>
             </div>
@@ -2481,8 +2563,9 @@
                   type="button"
                   class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-semibold border border-slate-700 active:scale-95 transition-all text-xs"
                   title="Toggle Token Visibility"
+                  aria-label="Toggle Token Visibility"
                 >
-                  👁️
+                  <span aria-hidden="true">👁️</span>
                 </button>
               </div>
             </div>
@@ -5275,6 +5358,28 @@
           toast_item_updated: "Item details updated!",
           delete_btn: "Delete",
           delete_item_title: "Delete item",
+          modal_close_btn: "Close dialog",
+          aria_toggle_language: "Switch language to Vietnamese",
+          aria_toggle_theme: "Toggle dark/light theme",
+          aria_open_settings: "Open settings",
+          aria_open_share: "Open share options",
+          aria_nav_planning: "Switch to Planning mode",
+          aria_nav_buymode: "Switch to Buy mode",
+          aria_nav_ledger: "Open price history ledger",
+          aria_nav_compare: "Open package comparator",
+          aria_quick_add_btn: "Add item to buy list",
+          aria_edit_item: "Edit item details",
+          aria_edit_price: "Update item price",
+          aria_delete_item: "Delete item from list",
+          aria_check_item: "Mark as purchased",
+          aria_uncheck_item: "Mark as unpurchased",
+          aria_select_ledger_row: "Select purchase record",
+          aria_delete_ledger_row: "Delete purchase record",
+          aria_add_ledger_row: "Add record to buy list",
+          aria_rename_store: "Rename store",
+          aria_delete_store: "Delete store",
+          aria_save_client_id: "Save Client ID",
+          aria_toggle_token_visibility: "Toggle token visibility",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -5604,6 +5709,28 @@
           toast_item_updated: "Đã cập nhật chi tiết mặt hàng!",
           delete_btn: "Xoá",
           delete_item_title: "Xoá mặt hàng",
+          modal_close_btn: "Đóng hộp thoại",
+          aria_toggle_language: "Đổi sang Tiếng Anh",
+          aria_toggle_theme: "Chuyển giao diện sáng/tối",
+          aria_open_settings: "Mở cài đặt",
+          aria_open_share: "Mở tuỳ chọn chia sẻ",
+          aria_nav_planning: "Chuyển sang chế độ Lập kế hoạch",
+          aria_nav_buymode: "Chuyển sang chế độ Mua sắm",
+          aria_nav_ledger: "Mở sổ tay lịch sử giá",
+          aria_nav_compare: "Mở bộ so sánh giá",
+          aria_quick_add_btn: "Thêm mặt hàng vào danh sách",
+          aria_edit_item: "Chỉnh sửa chi tiết mặt hàng",
+          aria_edit_price: "Cập nhật giá mặt hàng",
+          aria_delete_item: "Xoá mặt hàng khỏi danh sách",
+          aria_check_item: "Đánh dấu đã mua",
+          aria_uncheck_item: "Bỏ đánh dấu đã mua",
+          aria_select_ledger_row: "Chọn bản ghi mua hàng",
+          aria_delete_ledger_row: "Xoá bản ghi mua hàng",
+          aria_add_ledger_row: "Thêm bản ghi vào danh sách mua",
+          aria_rename_store: "Đổi tên cửa hàng",
+          aria_delete_store: "Xoá cửa hàng",
+          aria_save_client_id: "Lưu Client ID",
+          aria_toggle_token_visibility: "Hiện/ẩn mã token",
         },
       };
 
@@ -6086,14 +6213,15 @@
         const container = document.getElementById("storeManagerList");
         if (!container) return;
         const stores = memoryState.stores || DEFAULT_STORES;
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
         container.innerHTML = stores
           .map(
             (s, idx) => `
           <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs">
             <span class="font-semibold text-slate-200" id="storeNameDisplay-${idx}">${s}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="promptRenameStoreByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1" title="Rename">✏️</button>
-              <button onclick="deleteStoreByIndex(${idx})" class="text-slate-400 hover:text-red-400 p-1" title="Delete">🗑️</button>
+              <button onclick="promptRenameStoreByIndex(${idx})" class="text-slate-400 hover:text-emerald-400 p-1 cursor-pointer" title="${t.aria_rename_store || "Rename"}" aria-label="${(t.aria_rename_store || "Rename store") + ": " + s}"><span aria-hidden="true">✏️</span></button>
+              <button onclick="deleteStoreByIndex(${idx})" class="text-slate-400 hover:text-red-400 p-1 cursor-pointer" title="${t.aria_delete_store || "Delete"}" aria-label="${(t.aria_delete_store || "Delete store") + ": " + s}"><span aria-hidden="true">🗑️</span></button>
             </div>
           </div>
         `
@@ -6254,6 +6382,7 @@
           <button
             type="button"
             onclick="onStoreFilterChange('ALL')"
+            aria-label="${allChip.label} (${allChip.count})"
             class="px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1 cursor-pointer ${
               currentStoreFilter === "ALL"
                 ? "bg-emerald-600 text-white shadow-sm"
@@ -6276,6 +6405,7 @@
             <button
               type="button"
               onclick="onStoreFilterChange('${escapedKey}')"
+              aria-label="${chip.label} (${chip.count})"
               class="px-2.5 py-1 rounded-full text-xs shrink-0 transition-all flex items-center gap-1 cursor-pointer ${
                 isActive
                   ? "bg-emerald-600 text-white shadow-sm font-semibold"
@@ -6298,8 +6428,9 @@
             onclick="openStoreManagerModal()"
             class="px-2.5 py-1 rounded-full text-xs font-medium shrink-0 transition-all flex items-center gap-1 bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-700 border border-dashed border-slate-700 cursor-pointer"
             title="${t.manage_stores_title || "Manage Stores..."}"
+            aria-label="${t.manage_stores_title || "Manage Stores..."}"
           >
-            <span>⚙️</span>
+            <span aria-hidden="true">⚙️</span>
             <span>${t.manage_stores_title || "Manage Stores..."}</span>
           </button>
         `;
@@ -6360,13 +6491,14 @@
             <button
               type="button"
               onclick="filterByCategory('${c.key}')"
+              aria-label="${c.label} (${count})"
               class="px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1 border ${
                 isActive
                   ? "bg-emerald-600 border-emerald-500 text-white shadow-sm"
                   : "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:bg-slate-700 hover:text-white"
               }"
             >
-              <span>${c.icon}</span>
+              <span aria-hidden="true">${c.icon}</span>
               <span>${c.label}</span>
               <span class="text-[10px] opacity-75">(${count})</span>
             </button>
@@ -6971,14 +7103,14 @@
       }
 
       function renderItemCard(item) {
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
         const isChecked = Boolean(item.checked);
         const swipeRightCue = isChecked
-          ? TRANSLATIONS[currentLanguage].swipe_undo_cue || "Undo"
-          : TRANSLATIONS[currentLanguage].swipe_done_cue || "Done";
+          ? t.swipe_undo_cue || "Undo"
+          : t.swipe_done_cue || "Done";
         const swipeRightBg = isChecked ? "bg-amber-600" : "bg-emerald-600";
         const swipeRightIcon = isChecked ? "↺" : "✓";
-        const swipeCompCue =
-          TRANSLATIONS[currentLanguage].swipe_compare_cue || "Compare";
+        const swipeCompCue = t.swipe_compare_cue || "Compare";
 
         if (currentPhase === "IN_STORE") {
           return `
@@ -6987,12 +7119,12 @@
             <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
               <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
               <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
-                <span>${swipeRightIcon}</span>
+                <span aria-hidden="true">${swipeRightIcon}</span>
                 <span>${swipeRightCue}</span>
               </div>
               <!-- Right Reveal (Indigo on Left Swipe) -->
               <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
-                <span>⚖️</span>
+                <span aria-hidden="true">⚖️</span>
                 <span>${swipeCompCue}</span>
               </div>
             </div>
@@ -7009,8 +7141,13 @@
             >
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <!-- Big Thumb-Friendly Checkbox -->
-                <button onclick="event.stopPropagation(); toggleItemCheck('${item.id}')" class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}">
-                  ✓
+                <button
+                  type="button"
+                  onclick="event.stopPropagation(); toggleItemCheck('${item.id}')"
+                  aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + item.name}"
+                  class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}"
+                >
+                  <span aria-hidden="true">✓</span>
                 </button>
 
                 <!-- Item Info (Clean Name Only) -->
@@ -7021,7 +7158,13 @@
 
               <!-- Price (Clickable for quick shelf price update) -->
               <div class="shrink-0">
-                <button onclick="event.stopPropagation(); openQuickPriceEdit('${item.id}')" class="font-bold text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors" title="Update Price">
+                <button
+                  type="button"
+                  onclick="event.stopPropagation(); openQuickPriceEdit('${item.id}')"
+                  aria-label="${(t.aria_edit_price || "Update item price") + ": " + item.name}"
+                  class="font-bold text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors"
+                  title="Update Price"
+                >
                   ${formatCurrency(item.price)}
                 </button>
               </div>
@@ -7045,19 +7188,19 @@
         if (deal.score === "GREAT_DEAL") {
           dealBadgeHtml = `
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${TRANSLATIONS[currentLanguage].badge_great_deal || "🟢 Great Deal"}">
-              <span class="sm:hidden">🟢</span>
+              <span class="sm:hidden" aria-hidden="true">🟢</span>
               <span class="hidden sm:inline">${TRANSLATIONS[currentLanguage].badge_great_deal || "🟢 Great Deal"}</span>
             </span>`;
         } else if (deal.score === "PRICE_SPIKE") {
           dealBadgeHtml = `
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${TRANSLATIONS[currentLanguage].badge_price_spike || "🔴 Price Spike"}">
-              <span class="sm:hidden">🔴</span>
+              <span class="sm:hidden" aria-hidden="true">🔴</span>
               <span class="hidden sm:inline">${TRANSLATIONS[currentLanguage].badge_price_spike || "🔴 Price Spike"}</span>
             </span>`;
         } else if (deal.score === "FAIR_PRICE") {
           dealBadgeHtml = `
             <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${TRANSLATIONS[currentLanguage].badge_fair_price || "🟡 Fair Price"}">
-              <span class="sm:hidden">🟡</span>
+              <span class="sm:hidden" aria-hidden="true">🟡</span>
               <span class="hidden sm:inline">${TRANSLATIONS[currentLanguage].badge_fair_price || "🟡 Fair Price"}</span>
             </span>`;
         }
@@ -7070,12 +7213,12 @@
           <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
             <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
             <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
-              <span>${swipeRightIcon}</span>
+              <span aria-hidden="true">${swipeRightIcon}</span>
               <span>${swipeRightCue}</span>
             </div>
             <!-- Right Reveal (Indigo on Left Swipe) -->
             <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
-              <span>⚖️</span>
+              <span aria-hidden="true">⚖️</span>
               <span>${swipeCompCue}</span>
             </div>
           </div>
@@ -7091,11 +7234,17 @@
           >
             <!-- Row 1: Header (Checkbox + Category Icon + Item Name) -->
             <div class="flex items-center gap-3 min-w-0">
-              <button onclick="toggleItemCheck('${item.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer" title="Toggle Check">
-                ✓
+              <button
+                type="button"
+                onclick="toggleItemCheck('${item.id}')"
+                aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + item.name}"
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer"
+                title="Toggle Check"
+              >
+                <span aria-hidden="true">✓</span>
               </button>
               <div class="flex items-center gap-2 min-w-0 flex-1">
-                <span class="text-base shrink-0">${catInfo.icon}</span>
+                <span class="text-base shrink-0" aria-hidden="true">${catInfo.icon}</span>
                 <span class="font-bold text-sm sm:text-base text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${item.name}</span>
               </div>
             </div>
@@ -7103,8 +7252,14 @@
             <!-- Row 2: Metrics & Unit Pricing Intelligence -->
             <div class="flex items-center justify-between gap-2 text-xs bg-slate-950/60 p-2 sm:p-2.5 rounded-xl border border-slate-800/80">
               <div class="flex items-center gap-2 flex-wrap min-w-0">
-                <button onclick="openFullItemEdit('${item.id}')" class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 transition-colors cursor-pointer" title="Adjust details">
-                  📦 ${item.quantity} ${item.unit}
+                <button
+                  type="button"
+                  onclick="openFullItemEdit('${item.id}')"
+                  aria-label="${(t.aria_edit_item || "Edit item details") + ": " + item.name}"
+                  class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 transition-colors cursor-pointer"
+                  title="Adjust details"
+                >
+                  <span aria-hidden="true">📦</span> ${item.quantity} ${item.unit}
                 </button>
                 ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
                 ${dealBadgeHtml}
@@ -7117,21 +7272,45 @@
             <!-- Row 3: Action Toolbar & Total Estimated Spend -->
             <div class="flex items-center justify-between pt-1 border-t border-slate-800/60">
               <div class="flex items-center gap-1.5 sm:gap-2">
-                <button onclick="openItemComparator('${item.id}')" class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-900/60 rounded-lg border border-slate-700/60 hover:border-indigo-500/50 transition-colors flex items-center gap-1 cursor-pointer" title="Compare Pack Sizes">
-                  <span>⚖️</span>
+                <button
+                  type="button"
+                  onclick="openItemComparator('${item.id}')"
+                  aria-label="${(t.aria_nav_compare || "Compare") + ": " + item.name}"
+                  class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-900/60 rounded-lg border border-slate-700/60 hover:border-indigo-500/50 transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Compare Pack Sizes"
+                >
+                  <span aria-hidden="true">⚖️</span>
                   <span>${TRANSLATIONS[currentLanguage].nav_compare || "Compare"}</span>
                 </button>
-                <button onclick="openFullItemEdit('${item.id}')" class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700/60 transition-colors flex items-center gap-1 cursor-pointer" title="Edit Item Details">
-                  <span>✏️</span>
+                <button
+                  type="button"
+                  onclick="openFullItemEdit('${item.id}')"
+                  aria-label="${(t.aria_edit_item || "Edit") + ": " + item.name}"
+                  class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700/60 transition-colors flex items-center gap-1 cursor-pointer"
+                  title="Edit Item Details"
+                >
+                  <span aria-hidden="true">✏️</span>
                   <span>${TRANSLATIONS[currentLanguage].edit_btn || "Edit"}</span>
                 </button>
-                <button onclick="deleteItem('${item.id}')" class="px-2.5 py-1 text-xs font-semibold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/40 transition-colors flex items-center gap-1 cursor-pointer active:scale-95" title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].remove_btn || "Remove"}">
-                  <span>🗑️</span>
+                <button
+                  type="button"
+                  onclick="deleteItem('${item.id}')"
+                  aria-label="${(t.aria_delete_item || "Delete item") + ": " + item.name}"
+                  class="px-2.5 py-1 text-xs font-semibold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/40 transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
+                  title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].remove_btn || "Remove"}"
+                >
+                  <span aria-hidden="true">🗑️</span>
                   <span>${TRANSLATIONS[currentLanguage].remove_btn || "Remove"}</span>
                 </button>
               </div>
               <div class="text-right">
-                <button onclick="openFullItemEdit('${item.id}')" class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 transition-colors block text-right cursor-pointer" title="Update Price / Details">
+                <button
+                  type="button"
+                  onclick="openFullItemEdit('${item.id}')"
+                  aria-label="${(t.aria_edit_item || "Edit item") + ": " + item.name}"
+                  class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 transition-colors block text-right cursor-pointer"
+                  title="Update Price / Details"
+                >
                   ${formatCurrency(item.price)}
                 </button>
               </div>
@@ -8174,6 +8353,7 @@
             <button
               type="button"
               onclick="stepQuickPrice(${s.delta})"
+              aria-label="${s.delta > 0 ? "Increase price by " + s.label.replace("+", "") : "Decrease price by " + s.label.replace("-", "")}"
               class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 ${s.color} rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
             >
               ${s.label}
@@ -9208,6 +9388,7 @@
                   type="checkbox"
                   class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
                   data-ledger-id="${l.id}"
+                  aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + l.itemName}"
                   onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
                   ${isSelected ? "checked" : ""}
                 />
@@ -9224,16 +9405,18 @@
                   onclick="addLedgerItemToBuyList('${l.id}')"
                   class="inline-flex items-center justify-center bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold px-3 py-1.5 rounded-lg border border-emerald-500/40 text-xs transition-colors cursor-pointer active:scale-95"
                   title="${t.ledger_quick_add_title || "Add this item to Buy List"}"
+                  aria-label="${(t.aria_add_ledger_row || "Add record to buy list") + ": " + l.itemName}"
                 >
-                  <span>➕</span>
+                  <span aria-hidden="true">➕</span>
                 </button>
                 <button
                   type="button"
                   onclick="deleteLedgerItem('${l.id}')"
                   class="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-bold px-2.5 py-1.5 rounded-lg border border-red-500/40 text-xs transition-colors cursor-pointer active:scale-95"
                   title="${t.ledger_delete_item || "Delete record"}"
+                  aria-label="${(t.aria_delete_ledger_row || "Delete purchase record") + ": " + l.itemName}"
                 >
-                  <span>🗑️</span>
+                  <span aria-hidden="true">🗑️</span>
                 </button>
               </td>
             </tr>
@@ -9256,6 +9439,7 @@
                     type="checkbox"
                     class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer mt-0.5 shrink-0"
                     data-ledger-id="${l.id}"
+                    aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + l.itemName}"
                     onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
                     ${isSelected ? "checked" : ""}
                   />
@@ -9284,9 +9468,10 @@
                 <button
                   type="button"
                   onclick="addLedgerItemToBuyList('${l.id}')"
+                  aria-label="${(t.btn_add_selected_ledger || "Add to Buy List") + ": " + l.itemName}"
                   class="flex-1 min-h-[44px] px-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-colors"
                 >
-                  <span>➕</span>
+                  <span aria-hidden="true">➕</span>
                   <span>${t.btn_add_selected_ledger || "Add to Buy List"}</span>
                 </button>
                 <button
@@ -9294,8 +9479,9 @@
                   onclick="deleteLedgerItem('${l.id}')"
                   class="min-h-[44px] px-3 bg-red-950/40 hover:bg-red-900/60 active:scale-95 text-red-300 font-semibold rounded-xl text-xs border border-red-800/40 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
                   title="${t.ledger_delete_item || "Delete record"}"
+                  aria-label="${(t.ledger_delete_item || "Delete record") + ": " + l.itemName}"
                 >
-                  <span>🗑️</span>
+                  <span aria-hidden="true">🗑️</span>
                   <span>${t.btn_delete_ledger_item || "Delete"}</span>
                 </button>
               </div>
@@ -9864,6 +10050,72 @@
           t.update_available_desc || "A new version of Smart Buy-List is ready."
         );
         el("btnApplyPwaUpdate", t.update_btn_refresh || "Update Now");
+
+        // Dynamic ARIA Labels
+        const setAria = (element, val) => {
+          if (element && typeof element.setAttribute === "function") {
+            element.setAttribute("aria-label", val);
+          }
+        };
+
+        setAria(
+          langBtn,
+          t.aria_toggle_language ||
+            (currentLanguage === "vi"
+              ? "Đổi sang Tiếng Anh"
+              : "Switch language to Vietnamese")
+        );
+        setAria(
+          document.getElementById("themeToggleBtn"),
+          t.aria_toggle_theme || "Toggle dark/light theme"
+        );
+        setAria(
+          document.getElementById("btnOpenSettings"),
+          t.aria_open_settings || "Open settings"
+        );
+        setAria(
+          document.getElementById("btnOpenShareModal"),
+          t.aria_open_share || "Open share options"
+        );
+        setAria(smartAddBtn, t.aria_quick_add_btn || "Add item to buy list");
+        setAria(
+          document.getElementById("navPlanningBtn"),
+          t.aria_nav_planning || "Switch to Planning mode"
+        );
+        setAria(
+          document.getElementById("navBuyModeBtn"),
+          t.aria_nav_buymode || "Switch to Buy mode"
+        );
+        setAria(
+          document.getElementById("navLedgerBtn"),
+          t.aria_nav_ledger || "Open price history ledger"
+        );
+        setAria(
+          document.getElementById("navCompareBtn"),
+          t.aria_nav_compare || "Open package comparator"
+        );
+        setAria(
+          document.getElementById("btnSaveClientId"),
+          t.aria_save_client_id || "Save Client ID"
+        );
+        setAria(
+          document.getElementById("btnToggleGithubTokenVisibility"),
+          t.aria_toggle_token_visibility || "Toggle token visibility"
+        );
+
+        if (
+          typeof document !== "undefined" &&
+          typeof document.querySelectorAll === "function"
+        ) {
+          const closeBtns = document.querySelectorAll(
+            '[data-i18n-aria="modal_close_btn"]'
+          );
+          if (closeBtns && typeof closeBtns.forEach === "function") {
+            closeBtns.forEach((btn) => {
+              setAria(btn, t.modal_close_btn || "Close dialog");
+            });
+          }
+        }
       }
 
       function showToast(message, options = {}) {
