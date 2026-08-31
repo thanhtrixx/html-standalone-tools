@@ -803,6 +803,46 @@ async function runCloudSyncTests() {
     );
 
     // =========================================================================
+    // SECTION 7.5: Sync Error Message Interpolation & Detail Diagnostics
+    // =========================================================================
+    console.log(
+      "\n--- Section 7.5: Sync Error Message Interpolation & Diagnostics ---"
+    );
+
+    let lastToast = "";
+    ghEngine.sandbox.showToast = (msg) => {
+      lastToast = msg;
+    };
+    ghEngine.sandbox.storageManager.getActiveProviderType = () => "github";
+    ghEngine.sandbox.githubAuthState.token = "ghp_valid_mock_token";
+    ghEngine.sandbox.storageManager.sync = async () => ({
+      success: false,
+      error: "401 Bad credentials (Bad Token)",
+    });
+
+    ghEngine.sandbox.memoryState.settings.language = "en";
+    await ghEngine.sandbox.syncCloudNow();
+    assert(
+      lastToast.includes("401 Bad credentials (Bad Token)"),
+      `ERR-01: English GitHub sync error toast contains actual error detail (Got: '${lastToast}')`
+    );
+    assert(
+      !lastToast.includes("{msg}"),
+      "ERR-02: English toast does not contain literal '{msg}' token"
+    );
+
+    ghEngine.sandbox.memoryState.settings.language = "vi";
+    await ghEngine.sandbox.syncCloudNow();
+    assert(
+      lastToast.includes("401 Bad credentials (Bad Token)"),
+      `ERR-03: Vietnamese GitHub sync error toast contains actual error detail (Got: '${lastToast}')`
+    );
+    assert(
+      !lastToast.includes("{msg}"),
+      "ERR-04: Vietnamese toast does not contain literal '{msg}' token"
+    );
+
+    // =========================================================================
     // SECTION 8: PWA Version Bump & Bilingual Translation Parity
     // =========================================================================
     console.log("\n--- Section 8: PWA Version & Bilingual Parity ---");

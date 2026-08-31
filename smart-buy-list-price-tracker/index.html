@@ -4427,10 +4427,10 @@
               tr.toast_github_sync_success || "GitHub Gist sync completed!"
             );
           } else {
-            showToast(
-              tr.toast_github_sync_error ||
-                `GitHub sync failed: ${res.error || "Unknown"}`
-            );
+            const errDetail = res.error || "Unknown";
+            const errTpl =
+              tr.toast_github_sync_error || "GitHub sync failed: {msg}";
+            showToast(errTpl.replace("{msg}", errDetail));
           }
           return;
         }
