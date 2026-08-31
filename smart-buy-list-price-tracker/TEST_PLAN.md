@@ -270,3 +270,46 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **UI-SYNC-02** | Top App Bar Live Sync Status Pill            | Renders status indicator pill next to Settings `⚙️` transitioning through Synced (🟢), Syncing (🟡), Offline (⚪), and Error (🔴).                   |
 | **PWA-01**     | PWA Version Bump Synchronization             | `sw.js` bumps cache name to `smart-buy-list-v3.3.0` and `index.html` displays synchronized version badge `v3.3.0`.                                   |
 | **I18N-01**    | Bilingual Parity for Cloud Sync UI           | 100% of cloud sync translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                                           |
+
+---
+
+### 18. GitHub Gist Cloud Sync & Multi-Provider Registry (v3.4.0)
+
+| Test ID         | Scenario                                    | Assertion                                                                                                                                       |
+| :-------------- | :------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SEAM-06**     | `GitHubGistStorageProvider` Inheritance     | `GitHubGistStorageProvider` exists, inherits `StorageProvider`, and implements `init`, `getState`, `saveState`, `sync`, `getStatus`.            |
+| **REGISTRY-01** | `StorageManager` Multi-Provider Switching   | `storageManager.setActiveCloudProvider(type)` cleanly activates `none`, `googledrive`, or `github`, persisting choice in settings.              |
+| **GIST-01**     | GitHub PAT Authentication & Headers         | `GitHubGistStorageProvider` requests attach `Authorization: Bearer <token>`, `Accept: application/vnd.github+json`, and `X-GitHub-Api-Version`. |
+| **GIST-02**     | Secret Gist Creation Payload                | Creating a new Gist sends `POST /gists` with `"public": false`, description, and `files["smart_buy_list_data.json"]`.                           |
+| **GIST-03**     | Gist Auto-Discovery via List                | Queries `GET /gists?per_page=100` and correctly detects Gist containing `smart_buy_list_data.json` or matching description.                     |
+| **GIST-04**     | Gist Update (Patch)                         | Updates remote backup via `PATCH /gists/{gist_id}` with updated serialized JSON payload envelope.                                               |
+| **GIST-05**     | Gist Read & `raw_url` Truncation Fallback   | If Gist API returns `truncated: true` or missing `content`, fetches full payload from `file.raw_url` with authorization header.                 |
+| **GIST-06**     | Multi-Device Deterministic Smart Merge      | Merges GitHub Gist remote state with local IndexedDB state additively for ledger and by `updatedAt` for active items.                           |
+| **TOKEN-01**    | Optional "Remember Token" Storage           | If "Remember Token" is checked, stores token in `localStorage.github_sync_token`; if unchecked, stores strictly in ephemeral memory.            |
+| **UI-GIST-01**  | Option Hub Provider Dropdown & GitHub Panel | Option Hub renders Cloud Provider dropdown (`none`, `googledrive`, `github`), PAT input with visibility toggle, Gist ID, and helper link.       |
+| **UI-GIST-02**  | Direct "View Gist on GitHub ↗" Link         | Displays clickable external link to `https://gist.github.com/<gist_id>` once Gist is identified/created.                                        |
+| **UI-GIST-03**  | Dynamic Top App Bar Octocat / Provider Pill | Top App Bar sync pill displays 🐙 GitHub icon when GitHub is active and reflects Synced (🟢), Syncing (🟡), Offline (⚪), and Error (🔴).       |
+| **PWA-02**      | PWA Version Bump Synchronization            | `sw.js` bumps cache name to `smart-buy-list-v3.4.0` and `index.html` displays synchronized version badge `v3.4.0`.                              |
+| **I18N-02**     | Bilingual Parity for GitHub Gist UI         | 100% of GitHub sync translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                                                     |
+
+---
+
+### 19. Vietnamese-First Defaults, Smart Omnibox & Currency Ergonomics (v3.4.0)
+
+| Test ID         | Scenario                                     | Assertion                                                                                                                                       |
+| :-------------- | :------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **VN-DEF-01**   | Vietnam-First Default State Initialization   | Initial state defaults to `language: 'vi'`, `currency: 'VND'`, `unitSystem: 'metric'`, empty `items: []`, and empty `purchaseLedger: []`.       |
+| **VN-DEF-02**   | Default Vietnam Retail Store Roster          | `DEFAULT_STORES` contains `WinMart`, `Bách Hoá Xanh`, `Co.opmart`, `Big C / GO!`, `Lotte Mart`, `Chợ truyền thống`, `Cửa hàng tiện lợi`.        |
+| **VN-DEF-03**   | Decommissioned Sample Banner                 | `#sampleDataBanner` element is removed from DOM and does not render on app initialization.                                                      |
+| **VN-FLAG-01**  | Flag Emoji Language Toggle                   | Header language switcher `#langToggleBtn` renders `🇻🇳` in Vietnamese mode and `🇺🇸` in English mode; clicking toggles language without reload.   |
+| **VND-CHIP-01** | Currency-Aware Step Chips (VND Mode)         | When `currency === 'VND'`, quick price adjustment chips render `[-50k, -10k, -5k, +5k, +10k, +50k]` and step by ±5000, ±10000, ±50000 ₫ safely. |
+| **VND-CHIP-02** | Currency-Aware Step Chips (USD/Decimal Mode) | When `currency !== 'VND'`, quick price adjustment chips render `[-1.00, -0.50, -0.25, +0.25, +0.50, +1.00]`.                                    |
+| **SMART-01**    | Smart Omnibox Price Extraction               | `parseSmartGroceryInput('Sữa 35k/l')` correctly extracts name 'Sữa', price 35000, quantity 1, and unit 'L'.                                     |
+| **SMART-02**    | Smart Omnibox Vietnamese Number Formatting   | `parseSmartGroceryInput('Thịt bò 120.000 500g')` correctly extracts price 120000, quantity 500, unit 'g'.                                       |
+| **SMART-03**    | Smart Omnibox Auto-Category Classification   | Automatically assigns category: `produce` for vegetables, `dairy_eggs` for milk/eggs, `meat_seafood` for beef/fish, `pantry` for spices/rice.   |
+| **SMART-04**    | Smart Omnibox Store Extraction               | `parseSmartGroceryInput('Rau muống 10k @winmart')` extracts store 'WinMart' and item 'Rau muống'.                                               |
+| **SMART-05**    | 1-Tap Direct Add with Enter / ➕             | Submitting Smart Omnibox stages item into active list, resets input, updates KPIs, and shows Undo toast.                                        |
+| **SMART-06**    | Multi-Line Clipboard Batch Ingest            | Pasting multi-line text into `#smartQuickInput` parses all lines in parallel and stages all items with batch summary toast.                     |
+| **UNIT-VN-01**  | Expanded Packaging Units Normalization       | Units `loc`, `thung`, `khay`, `tui`, `hu` normalize unit prices with discrete count dimension base.                                             |
+| **ICON-01**     | Icon-First Action Triggers                   | Ledger table quick add uses `➕` icon button with accessible tooltip; top bar buttons streamlined for touch.                                    |
+| **I18N-VN-01**  | Bilingual Parity for Smart Omnibox Tokens    | 100% of Smart Omnibox and Vietnamese units translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.                              |

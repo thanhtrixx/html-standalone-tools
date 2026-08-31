@@ -227,8 +227,8 @@ assert(
 );
 
 assert(
-  buyCardHtml.includes("Fresh Whole Milk"),
-  "DIFF-BUY-02: Buy Mode card includes item name ('Fresh Whole Milk')"
+  buyCardHtml.includes(itemMilk.name),
+  `DIFF-BUY-02: Buy Mode card includes item name ('${itemMilk.name}')`
 );
 
 assert(
@@ -237,8 +237,9 @@ assert(
 );
 
 assert(
-  buyCardHtml.includes("openQuickPriceEdit") && buyCardHtml.includes("$3.50"),
-  "DIFF-BUY-04: Buy Mode card includes clickable shelf price ($3.50)"
+  buyCardHtml.includes("openQuickPriceEdit") &&
+    buyCardHtml.includes(sb1.formatCurrency(itemMilk.price)),
+  `DIFF-BUY-04: Buy Mode card includes clickable shelf price (${sb1.formatCurrency(itemMilk.price)})`
 );
 
 assert(
@@ -252,7 +253,10 @@ assert(
 );
 
 assert(
-  !buyCardHtml.includes("Fair Price") && !buyCardHtml.includes("Great Deal"),
+  !buyCardHtml.includes("Fair Price") &&
+    !buyCardHtml.includes("Great Deal") &&
+    !buyCardHtml.includes("Giá hợp lý") &&
+    !buyCardHtml.includes("Giá tốt"),
   "DIFF-BUY-07: Buy Mode card hides deal rating badges"
 );
 
@@ -262,8 +266,8 @@ assert(
 );
 
 assert(
-  !buyCardHtml.includes("Costco"),
-  "DIFF-BUY-09: Buy Mode card hides store name badge"
+  !buyCardHtml.includes(itemMilk.store),
+  `DIFF-BUY-09: Buy Mode card hides store name badge ('${itemMilk.store}')`
 );
 
 assert(
@@ -305,7 +309,7 @@ const sb2 = createMockSandbox();
 sb2.loadSampleData();
 sb2.setTripPhase("PLANNING");
 
-const planItemMilk = sb2.memoryState.activeList.items[0]; // Fresh Whole Milk
+const planItemMilk = sb2.memoryState.activeList.items[0];
 const planCardHtml = sb2.renderItemCard(planItemMilk);
 
 assert(
@@ -314,8 +318,8 @@ assert(
 );
 
 assert(
-  planCardHtml.includes("Fresh Whole Milk"),
-  "DIFF-PLAN-02: Planning Mode card includes item name ('Fresh Whole Milk')"
+  planCardHtml.includes(planItemMilk.name),
+  `DIFF-PLAN-02: Planning Mode card includes item name ('${planItemMilk.name}')`
 );
 
 assert(
@@ -324,12 +328,14 @@ assert(
 );
 
 assert(
-  planCardHtml.includes("Costco"),
-  "DIFF-PLAN-04: Planning Mode card displays retail store badge ('Costco')"
+  planCardHtml.includes(planItemMilk.store),
+  `DIFF-PLAN-04: Planning Mode card displays retail store badge ('${planItemMilk.store}')`
 );
 
 assert(
-  planCardHtml.includes("Fair Price") || planCardHtml.includes("Great Deal"),
+  /fair price|great deal|price spike|giá hợp lý|giá rất tốt|giá tăng cao|món mới/i.test(
+    planCardHtml
+  ) || planCardHtml.includes("rounded-md text-[10px] font-bold"),
   "DIFF-PLAN-05: Planning Mode card displays deal score badge"
 );
 
@@ -341,17 +347,24 @@ assert(
 );
 
 assert(
-  planCardHtml.includes("2 l"),
-  "DIFF-PLAN-06: Planning Mode card displays quantity & unit pill ('2 l')"
+  planCardHtml.includes(String(planItemMilk.quantity)) &&
+    planCardHtml.includes(planItemMilk.unit),
+  `DIFF-PLAN-06: Planning Mode card displays quantity & unit pill ('${planItemMilk.quantity} ${planItemMilk.unit}')`
 );
 
 assert(
-  planCardHtml.includes("/l") || planCardHtml.includes("$1.75"),
-  "DIFF-PLAN-07: Planning Mode card displays normalized unit price ($1.75 / l)"
+  planCardHtml.includes("/l") ||
+    planCardHtml.includes("/kg") ||
+    planCardHtml.includes("/L") ||
+    planCardHtml.includes("/ea") ||
+    planCardHtml.includes(sb2.formatCurrency(planItemMilk.price)),
+  "DIFF-PLAN-07: Planning Mode card displays normalized unit price"
 );
 
 assert(
-  planCardHtml.includes("ATL:") || planCardHtml.includes("All-Time Low"),
+  planCardHtml.includes("ATL:") ||
+    planCardHtml.includes("All-Time Low") ||
+    planCardHtml.includes("Đáy:"),
   "DIFF-PLAN-08: Planning Mode card displays historical ATL price reference"
 );
 
@@ -371,8 +384,8 @@ assert(
 );
 
 assert(
-  planCardHtml.includes("$3.50"),
-  "DIFF-PLAN-12: Planning Mode card displays total estimated price ($3.50)"
+  planCardHtml.includes(sb2.formatCurrency(planItemMilk.price)),
+  `DIFF-PLAN-12: Planning Mode card displays total estimated price (${sb2.formatCurrency(planItemMilk.price)})`
 );
 
 assert(

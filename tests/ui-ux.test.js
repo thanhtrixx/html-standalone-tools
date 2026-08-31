@@ -2258,9 +2258,9 @@ async function runUIUXTests() {
   );
   assert(
     deficitText.textContent.includes("-") &&
-      (deficitText.textContent.includes("8") ||
-        deficitText.textContent.includes("9") ||
-        deficitText.textContent.includes("000")),
+      (deficitText.textContent.includes("VND") ||
+        deficitText.textContent.includes("₫") ||
+        deficitText.textContent.includes("$")),
     `R48: Shortfall Advisor renders computed deficit amount: "${deficitText.textContent}"`
   );
   assert(

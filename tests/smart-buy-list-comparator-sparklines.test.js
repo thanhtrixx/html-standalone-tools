@@ -209,7 +209,24 @@ try {
     "getItemStoreComparison function is exported globally"
   );
 
-  engine.loadSampleData();
+  engine.memoryState.purchaseLedger = [
+    {
+      id: "comp-1",
+      itemName: "Fresh Whole Milk",
+      store: "Costco",
+      unitPrice: 1.7,
+      unit: "L",
+      date: "2026-08-01",
+    },
+    {
+      id: "comp-2",
+      itemName: "Fresh Whole Milk",
+      store: "Trader Joe's",
+      unitPrice: 1.95,
+      unit: "L",
+      date: "2026-08-05",
+    },
+  ];
   const milkStoreComparison = engine.getItemStoreComparison("Fresh Whole Milk");
 
   assert(

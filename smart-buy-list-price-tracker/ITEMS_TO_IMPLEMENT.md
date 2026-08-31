@@ -86,6 +86,17 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R53** | **Google Drive AppData REST v3 Sync Engine**                     | Read, query, multipart create, and media update operations targeting `smart_buy_list_data.json` inside Google Drive hidden `appDataFolder`.                                                                                                                       | P0       | ADR-0011           |
 | **R54** | **Deterministic Multi-Device Cloud Smart Merge**                 | Non-destructive conflict resolution uniting purchase ledger transactions, synchronizing active list items by `updatedAt` timestamps, merging store profiles, and pushing consolidated state back.                                                                 | P0       | ADR-0011           |
 | **R55** | **Option Hub Cloud Sync Card & Top Bar Live Status Pill**        | Option Hub settings interface for Client ID config, Connect/Disconnect button, Last Synced timestamp, manual Sync Now, and live Top App Bar sync status pill (🟢 Synced / 🟡 Syncing / ⚪ Offline / 🔴 Sync Error).                                               | P0       | ADR-0011           |
+| **R56** | **Multi-Provider Cloud Storage Registry Architecture**           | Extend `StorageManager` into a pluggable registry with dynamic provider selection (`none`, `googledrive`, `github`), delegating mutations to the active cloud engine.                                                                                             | P0       | ADR-0012           |
+| **R57** | **GitHub Gist Storage Provider (`GitHubGistStorageProvider`)**   | Composite cloud provider wrapping `IndexedDBStorageProvider` and syncing `smart_buy_list_data.json` with GitHub Secret Gists via REST API with `raw_url` truncation fallback.                                                                                     | P0       | ADR-0012           |
+| **R58** | **GitHub Personal Access Token (PAT) Authentication**            | Personal Access Token authentication with password masking, 1-click helper generator link, and optional "Remember Token" persistence in `localStorage`.                                                                                                           | P0       | ADR-0012           |
+| **R59** | **Secret Gist Auto-Discovery & Cross-Device Linking**            | Auto-create secret Gist (`public: false`) with description lookup auto-discovery across user gists and manual Gist ID override field for multi-device pairing.                                                                                                    | P0       | ADR-0012           |
+| **R60** | **Option Hub GitHub Panel & Dynamic Top Bar Octocat Pill**       | Option Hub provider dropdown, GitHub credentials card, direct "View Gist on GitHub ↗" link, and dynamic Top App Bar sync pill reflecting active provider (🐙 GitHub / 📁 Google Drive / ⚪ Local).                                                                | P0       | ADR-0012           |
+| **R61** | **Vietnam-First Baseline Defaults & Banner Decommissioning**     | Out-of-the-box defaults for Vietnamese shoppers (`language: 'vi'`, `currency: 'VND'`, Vietnam store roster: `WinMart`, `Bách Hoá Xanh`, `Co.opmart`, `Big C / GO!`, `Lotte Mart`, `Chợ truyền thống`, `Cửa hàng tiện lợi`; remove `#sampleDataBanner`).           | P0       | ADR-0013           |
+| **R62** | **Flag Emoji Language Switcher (`🇻🇳` / `🇺🇸`)**                   | Compact 1-tap flag emoji header switcher displaying active language flag and toggling between Vietnamese and English.                                                                                                                                             | P0       | ADR-0013           |
+| **R63** | **Currency-Aware Quick Price Adjustment Chips**                  | Dynamic step chips in Quick Price modal adapting to currency: `[-50k, -10k, -5k, +5k, +10k, +50k]` when in VND, and `[±0.25, ±0.50, ±1.00]` when in USD.                                                                                                          | P0       | ADR-0013           |
+| **R64** | **Smart Quick-Entry Omnibox & NLP Parser Engine**                | Omnibox parser (`parseSmartGroceryInput`) extracting item, quantity, unit, VND price (e.g. `35k`, `35.000`), store (`@winmart`), and auto-categorizing departments with real-time live preview pill and 1-tap add.                                                | P0       | ADR-0013           |
+| **R65** | **Multi-Line Clipboard Batch Paste Ingest**                      | Automatic multi-line paste detection parsing grocery lists copied from Zalo/Notes in parallel and staging into active list with Undo toast.                                                                                                                       | P0       | ADR-0013           |
+| **R66** | **Expanded Vietnamese Packaging Units & Icon Polish**            | New units (`loc`, `thung`, `khay`, `tui`, `hu`) with normalization formulas and icon-first button streamlining (`+ Add` -> `➕`).                                                                                                                                 | P0       | ADR-0013           |
 
 ---
 
@@ -109,12 +120,14 @@ flowchart TD
     S14["Slice 14: Native BarcodeDetector QR Scanner in Option Hub (#185)"]
     S15["Slice 15: Ledger Deletion, Comparator Unit Sync &amp; Form Pre-fill (#188)"]
     S16["Slice 16: Google Drive Cloud Sync Seam &amp; GIS OAuth Integration (#190)"]
+    S17["Slice 17: GitHub Gist Cloud Storage Provider &amp; Multi-Provider Registry (#191)"]
+    S18["Slice 18: Vietnamese-First Defaults, Smart Omnibox &amp; Currency Ergonomics (#193)"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18
 ```
 
 <details>
-<summary>ASCII Roadmap (Backout Plan / Fallback)</summary>
+<summary>ASCII Diagram (Fallback)</summary>
 
 ```text
 [Slice 1: Pure Domain Engine]
@@ -163,6 +176,12 @@ flowchart TD
       │
       ▼
 [Slice 16: Google Drive Cloud Sync Seam & GIS OAuth Integration (#190)]
+      │
+      ▼
+[Slice 17: GitHub Gist Cloud Storage Provider & Multi-Provider Registry (#191)]
+      │
+      ▼
+[Slice 18: Vietnamese-First Defaults, Smart Omnibox & Currency Ergonomics (#193)]
 ```
 
 </details>

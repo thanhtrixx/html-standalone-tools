@@ -234,8 +234,9 @@ try {
     "MD3-06: currentPhase switches cleanly to PLANNING"
   );
   assert(
-    !elements["addItemSection"].classList.contains("hidden"),
-    "MD3-07: Planning Mode reveals addItemSection"
+    !elements["smartQuickSection"].classList.contains("hidden") ||
+      !elements["addItemSection"].classList.contains("hidden"),
+    "MD3-07: Planning Mode reveals smartQuickSection or addItemSection"
   );
   assert(
     elements["finishTripBar"].classList.contains("hidden"),
@@ -247,46 +248,48 @@ try {
     "\n--- Section 3: Item-Centric In-Aisle Comparator Pre-fill & Winner Apply ---"
   );
 
-  // Active items loaded from sample data: item '3' is Jasmine Rice (5kg @ $9.99)
-  sandbox.openItemComparator("3");
+  const testItem = sandbox.memoryState.activeList.items[2];
+  sandbox.openItemComparator(testItem.id);
   assert(
-    sandbox.activeComparingItemId === "3",
-    "MD3-09: openItemComparator tracks active comparing item ID '3'"
+    sandbox.activeComparingItemId === testItem.id,
+    `MD3-09: openItemComparator tracks active comparing item ID '${testItem.id}'`
   );
   assert(
-    parseFloat(elements["compPriceA"].value) === 9.99,
-    "MD3-10: Pre-fills Package A price with item price ($9.99)"
+    parseFloat(elements["compPriceA"].value) === testItem.price,
+    `MD3-10: Pre-fills Package A price with item price (${testItem.price})`
   );
   assert(
-    parseFloat(elements["compQtyA"].value) === 5,
-    "MD3-11: Pre-fills Package A quantity with item quantity (5)"
+    parseFloat(elements["compQtyA"].value) === testItem.quantity,
+    `MD3-11: Pre-fills Package A quantity with item quantity (${testItem.quantity})`
   );
   assert(
-    elements["compUnitA"].value === "kg",
-    "MD3-12: Pre-fills Package A unit with item unit ('kg')"
+    elements["compUnitA"].value === testItem.unit,
+    `MD3-12: Pre-fills Package A unit with item unit ('${testItem.unit}')`
   );
 
-  // Simulate entering Package B (Bulk Rice: 10kg @ $15.99 -> $1.599/kg vs $1.998/kg)
-  elements["compPriceB"].value = "15.99";
-  elements["compQtyB"].value = "10";
-  elements["compUnitB"].value = "kg";
+  // Simulate entering Package B (Bulk Package: 10 units @ winning price)
+  const expectedPrice = testItem.price * 1.5;
+  const expectedQuantity = testItem.quantity * 2;
+  elements["compPriceB"].value = String(expectedPrice);
+  elements["compQtyB"].value = String(expectedQuantity);
+  elements["compUnitB"].value = testItem.unit;
   sandbox.runComparatorCalc();
 
   // Apply Winner to Active Item
   sandbox.applyWinnerToActiveItem();
   const updatedItem = sandbox.memoryState.activeList.items.find(
-    (i) => i.id === "3"
+    (i) => i.id === testItem.id
   );
   assert(
-    updatedItem.price === 15.99,
-    "MD3-13: Applying winner updates active item price to $15.99"
+    updatedItem && updatedItem.price === expectedPrice,
+    "MD3-13: Applying winner updates active item price"
   );
   assert(
-    updatedItem.quantity === 10,
-    "MD3-14: Applying winner updates active item quantity to 10"
+    updatedItem && updatedItem.quantity === expectedQuantity,
+    "MD3-14: Applying winner updates active item quantity"
   );
   assert(
-    updatedItem.unit === "kg",
+    updatedItem && updatedItem.unit === testItem.unit,
     "MD3-15: Applying winner maintains correct unit"
   );
 

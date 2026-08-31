@@ -556,13 +556,11 @@ assert(
 // ==========================================
 console.log("--- Section 7: PWA Version Bump Synchronization ---");
 assert(
-  swContent.includes('const CACHE_NAME = "smart-buy-list-v3.2.0";') ||
-    swContent.includes('const CACHE_NAME = "smart-buy-list-v3.3.0";') ||
-    /CACHE_NAME = "smart-buy-list-v3\.[23]\.0"/.test(swContent),
+  /CACHE_NAME = "smart-buy-list-v3\.[2-9]\.0"/.test(swContent),
   "PWA-01: sw.js CACHE_NAME incremented to smart-buy-list-v3.2.0 or higher"
 );
 assert(
-  (htmlContent.includes("v3.2.0") || htmlContent.includes("v3.3.0")) &&
+  /v3\.[2-9]\.0/.test(htmlContent) &&
     htmlContent.includes('id="pwaVersionBadge"'),
   "PWA-02: index.html displays synchronized version badge v3.2.0 or higher"
 );
