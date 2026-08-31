@@ -1,11 +1,8 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="vi" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Smart Buy-List & Unit Price Tracker</title>
     <meta
       name="description"
@@ -9288,6 +9285,9 @@
       function setLanguage(lang) {
         if (lang !== "en" && lang !== "vi") return;
         currentLanguage = lang;
+        if (document.documentElement) {
+          document.documentElement.lang = lang;
+        }
         if (memoryState && memoryState.settings) {
           memoryState.settings.language = lang;
         }
@@ -9905,6 +9905,9 @@
           if (memoryState && memoryState.settings) {
             if (memoryState.settings.language) {
               currentLanguage = memoryState.settings.language;
+            }
+            if (document.documentElement) {
+              document.documentElement.lang = currentLanguage;
             }
             if (memoryState.settings.currency) {
               currentCurrency = memoryState.settings.currency;

@@ -109,6 +109,7 @@ function loadBuyListI18nEngine() {
       querySelectorAll: () => [],
       addEventListener: () => {},
       documentElement: {
+        lang: "vi",
         classList: {
           contains: (c) => docElementClasses.has(c),
           add: (c) => docElementClasses.add(c),
@@ -205,6 +206,28 @@ try {
   assert(
     emptyViKeys.length === 0,
     `I18N-01c: All Vietnamese translation strings are non-empty`
+  );
+
+  // HTML lang attribute and Viewport Pinch-Zoom (Issue #254)
+  assert(
+    /<html\s+[^>]*lang="vi"[^>]*>/i.test(htmlContent),
+    "I18N-LANG-01: Default <html lang> is 'vi' on first paint in static HTML"
+  );
+  assert(
+    !/maximum-scale/i.test(htmlContent) && !/user-scalable/i.test(htmlContent),
+    "A11Y-ZOOM-01: Viewport meta tag does not restrict maximum-scale or user-scalable"
+  );
+
+  sandbox.setLanguage("en");
+  assert(
+    sandbox.document.documentElement.lang === "en",
+    "I18N-LANG-02: setLanguage('en') updates document.documentElement.lang to 'en'"
+  );
+
+  sandbox.setLanguage("vi");
+  assert(
+    sandbox.document.documentElement.lang === "vi",
+    "I18N-LANG-03: setLanguage('vi') updates document.documentElement.lang to 'vi'"
   );
 
   // 2. MULTI-CURRENCY & LOCALE FORMATTING TESTS
