@@ -17,6 +17,7 @@ const os = require("os");
 const path = require("path");
 const { execSync } = require("child_process");
 const { minify } = require("html-minifier-terser");
+const terser = require("terser");
 
 const ROOT_DIR = path.resolve(__dirname, "..");
 const IGNORED_DIRS = new Set([
@@ -371,12 +372,133 @@ function inlineLocalAssets(htmlContent, toolDir) {
 }
 
 /**
+ * Extract version from manifest if present in tool directory
+ */
+function extractToolVersion(toolDir) {
+  const manifestNames = [
+    "manifest.webmanifest",
+    "manifest.json",
+    "site.webmanifest",
+  ];
+  for (const name of manifestNames) {
+    const manifestPath = path.join(toolDir, name);
+    if (fs.existsSync(manifestPath)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+        if (data && data.version) {
+          return String(data.version).trim();
+        }
+      } catch (_) {}
+    }
+  }
+  return null;
+}
+
+/**
+ * Process and compact companion assets (service workers, web manifests, icons)
+ */
+async function buildCompanionAssets(
+  tool,
+  toolDistDir,
+  rootDistDir,
+  toolVersion = null
+) {
+  const processedFiles = [];
+  const version = toolVersion || extractToolVersion(tool.dir);
+
+  for (const assetName of COMPANION_ASSETS) {
+    const srcAsset = path.join(tool.dir, assetName);
+    if (!fs.existsSync(srcAsset)) continue;
+
+    const toolDistAsset = path.join(toolDistDir, assetName);
+    const rootDistAsset = path.join(rootDistDir, assetName);
+
+    if (assetName === "sw.js" || assetName === "service-worker.js") {
+      let swContent = fs.readFileSync(srcAsset, "utf8");
+
+      // Inject version into CACHE_NAME if version discovered
+      if (version) {
+        swContent = swContent.replace(
+          /const\s+CACHE_NAME\s*=\s*["'][^"']+["'];?/,
+          `const CACHE_NAME = "smart-buy-list-v${version}";`
+        );
+        // Synchronize source file if needed
+        try {
+          const currentSrc = fs.readFileSync(srcAsset, "utf8");
+          if (currentSrc !== swContent) {
+            fs.writeFileSync(srcAsset, swContent, "utf8");
+          }
+        } catch (_) {}
+      }
+
+      // Purge Tailwind CDN from ASSETS_TO_CACHE because Tailwind CSS is statically compiled and inlined
+      swContent = swContent
+        .replace(/,\s*["']https:\/\/cdn\.tailwindcss\.com["']/g, "")
+        .replace(/["']https:\/\/cdn\.tailwindcss\.com["'],?\s*/g, "");
+
+      // Minify using terser
+      try {
+        const minified = await terser.minify(swContent, {
+          compress: {
+            dead_code: true,
+            drop_debugger: true,
+          },
+          mangle: false,
+        });
+        if (minified && minified.code) {
+          swContent = minified.code;
+        }
+      } catch (err) {
+        process.stderr.write(
+          `⚠️  Terser minification failed for ${assetName} in ${tool.name}: ${err.message}\n`
+        );
+      }
+
+      fs.writeFileSync(toolDistAsset, swContent, "utf8");
+      fs.writeFileSync(rootDistAsset, swContent, "utf8");
+      processedFiles.push(toolDistAsset, rootDistAsset);
+    } else if (
+      assetName === "manifest.webmanifest" ||
+      assetName === "manifest.json" ||
+      assetName === "site.webmanifest"
+    ) {
+      try {
+        const rawJson = fs.readFileSync(srcAsset, "utf8");
+        const parsed = JSON.parse(rawJson);
+        const compactedJson = JSON.stringify(parsed);
+        fs.writeFileSync(toolDistAsset, compactedJson, "utf8");
+        fs.writeFileSync(rootDistAsset, compactedJson, "utf8");
+        processedFiles.push(toolDistAsset, rootDistAsset);
+      } catch (_) {
+        fs.copyFileSync(srcAsset, toolDistAsset);
+        fs.copyFileSync(srcAsset, rootDistAsset);
+        processedFiles.push(toolDistAsset, rootDistAsset);
+      }
+    } else if (assetName.endsWith(".svg")) {
+      const svgContent = fs.readFileSync(srcAsset, "utf8").trim();
+      fs.writeFileSync(toolDistAsset, svgContent, "utf8");
+      fs.writeFileSync(rootDistAsset, svgContent, "utf8");
+      processedFiles.push(toolDistAsset, rootDistAsset);
+    } else {
+      fs.copyFileSync(srcAsset, toolDistAsset);
+      fs.copyFileSync(srcAsset, rootDistAsset);
+      processedFiles.push(toolDistAsset, rootDistAsset);
+    }
+  }
+
+  return processedFiles;
+}
+
+/**
  * Build a single tool
  */
 async function buildTool(tool) {
   const startTime = Date.now();
   const rawHtml = fs.readFileSync(tool.entryFile, "utf8");
   const originalSize = Buffer.byteLength(rawHtml, "utf8");
+
+  // Extract version from manifest if present
+  const toolVersion = extractToolVersion(tool.dir);
 
   // Compile Tailwind CSS from the source HTML (extracts inline tailwind.config,
   // scans HTML for used utility classes, returns minified purged CSS string).
@@ -386,10 +508,18 @@ async function buildTool(tool) {
   const twInlinedHtml = inlineTailwindCSS(rawHtml, compiledCSS);
 
   // Inline local assets if any
-  const inlinedHtml = inlineLocalAssets(
+  let inlinedHtml = inlineLocalAssets(
     twInlinedHtml,
     path.dirname(tool.entryFile)
   );
+
+  // Statically stamp version badge if toolVersion is present
+  if (toolVersion) {
+    inlinedHtml = inlinedHtml.replace(
+      /(<span[^>]*id=["']pwaVersionBadge["'][^>]*>)([^<]*)(<\/span>)/i,
+      `$1v${toolVersion}$3`
+    );
+  }
 
   // Minify HTML + inline CSS + inline JS
   const minifiedHtml = await minify(inlinedHtml, MINIFY_OPTIONS);
@@ -414,17 +544,14 @@ async function buildTool(tool) {
 
   const outputFiles = [toolDistFile, rootDistFile];
 
-  // Also mirror companion assets (PWA manifests, icons, service workers) into dist folders
-  for (const assetName of COMPANION_ASSETS) {
-    const srcAsset = path.join(tool.dir, assetName);
-    if (fs.existsSync(srcAsset)) {
-      const toolDistAsset = path.join(toolDistDir, assetName);
-      const rootDistAsset = path.join(rootDistDir, assetName);
-      fs.copyFileSync(srcAsset, toolDistAsset);
-      fs.copyFileSync(srcAsset, rootDistAsset);
-      outputFiles.push(toolDistAsset, rootDistAsset);
-    }
-  }
+  // Process and compact companion assets into dist folders
+  const companionFiles = await buildCompanionAssets(
+    tool,
+    toolDistDir,
+    rootDistDir,
+    toolVersion
+  );
+  outputFiles.push(...companionFiles);
 
   const elapsed = Date.now() - startTime;
 
@@ -463,12 +590,14 @@ function syncToolToExternal(tool, destDir) {
   fs.copyFileSync(sourceIndex, targetIndex);
   const syncedFiles = [targetIndex];
 
-  // Sync companion assets if present in tool directory
+  // Sync companion assets from tool's dist directory (or source as fallback)
   for (const assetName of COMPANION_ASSETS) {
+    const distAsset = path.join(tool.dir, "dist", assetName);
     const srcAsset = path.join(tool.dir, assetName);
-    if (fs.existsSync(srcAsset)) {
+    const assetToCopy = fs.existsSync(distAsset) ? distAsset : srcAsset;
+    if (fs.existsSync(assetToCopy)) {
       const destAsset = path.join(targetDir, assetName);
-      fs.copyFileSync(srcAsset, destAsset);
+      fs.copyFileSync(assetToCopy, destAsset);
       syncedFiles.push(destAsset);
     }
   }
@@ -588,6 +717,8 @@ if (require.main === module) {
 module.exports = {
   discoverTools,
   buildTool,
+  buildCompanionAssets,
+  extractToolVersion,
   inlineLocalAssets,
   compileTailwindCSS,
   inlineTailwindCSS,
