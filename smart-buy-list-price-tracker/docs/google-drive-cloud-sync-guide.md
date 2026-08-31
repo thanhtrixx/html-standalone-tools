@@ -1,4 +1,4 @@
-# Google Drive Cloud Sync Guide — Smart Buy-List (v3.3.0)
+# Google Drive Cloud Sync Guide — Smart Buy-List (v3.9.0)
 
 This guide provides step-by-step instructions for configuring, connecting, and utilizing **Google Drive Cloud Sync** in Smart Buy-List.
 
@@ -79,20 +79,21 @@ Because Smart Buy-List has no centralized server, each user creates their own fr
 7. In the Google authentication popup, select your Google account and grant permission to connect with Google Drive AppData.
 8. Upon successful authorization:
    - A success toast will appear: _"Connected to Google Drive!"_.
-   - The status pill will display 🟢 **Synced**.
-   - The Top App Bar will show a live status indicator (🟢 **Synced**).
+   - The status pill in Option Hub will display 🟢 **Synced**.
 
 ---
 
 ## ⚡ Step 3: Day-to-Day Synchronization
 
-Once connected, synchronization runs automatically without manual intervention:
+Once connected, synchronization runs automatically following our **Calm Cloud Sync** protocol:
 
-| Trigger                  | Description                                                                                                                                                                                |
-| :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Data Mutations**       | Any change (adding items, toggling checkboxes, editing shelf prices, modifying stores, finalizing trips) automatically pushes to Google Drive in the background after a 3-second debounce. |
-| **Startup / App Launch** | Opening the app automatically checks Google Drive, fetches any remote changes made on other devices, and merges them into your active list.                                                |
-| **Tab Re-focus**         | Returning to the browser tab after more than 60 seconds of inactivity triggers a background refresh.                                                                                       |
+| Trigger                   | Description                                                                                                                                                                                                                     |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Data Mutations**        | Any change (adding items, toggling checkboxes, editing shelf prices, modifying stores, finalizing trips) automatically pushes to Google Drive in the background after a relaxed 15-second idle debounce (capped at 45 seconds). |
+| **Startup / App Launch**  | Opening the app automatically checks Google Drive, fetches any remote changes made on other devices, and merges them into your active list.                                                                                     |
+| **Tab Backgrounding**     | Switching away from the tab or locking your screen (`visibilitychange`) immediately flushes any pending debounced cloud sync.                                                                                                   |
+| **Tab Re-focus / Wakeup** | Returning to the browser tab after more than 120 seconds of inactivity triggers a background refresh.                                                                                                                           |
+| **Trip Completion**       | Finalizing a shopping trip immediately triggers an expedited cloud push.                                                                                                                                                        |
 
 ---
 

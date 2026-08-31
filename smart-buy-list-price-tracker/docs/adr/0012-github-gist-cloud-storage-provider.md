@@ -2,7 +2,10 @@
 
 ## Status
 
-Accepted (Extends [ADR-0001](./0001-indexeddb-storage-engine-and-google-drive-sync-seam.md) and [ADR-0011](./0011-google-drive-cloud-sync-storage-seam.md))
+Partially Superseded by [ADR-0014](./0014-calm-cloud-sync-adaptive-ledger-and-vietnamese-flag-polish.md), [ADR-0016](./0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md), and [ADR-0018](./0018-share-enhancement-qr-removal-and-buy-mode-polish.md) (Extends [ADR-0001](./0001-indexeddb-storage-engine-and-google-drive-sync-seam.md) and [ADR-0011](./0011-google-drive-cloud-sync-storage-seam.md))
+
+> [!NOTE]
+> **Active vs Superseded Decisions**: GitHub Gist REST API integration, secret gist auto-discovery, PAT authentication, and the multi-provider registry remain active. The top-bar Octocat live pill was consolidated into Option Hub in [ADR-0014](./0014-calm-cloud-sync-adaptive-ledger-and-vietnamese-flag-polish.md), conflict resolution was upgraded to 3-way differential merge with tombstones in [ADR-0016](./0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md), and detailed error message interpolation was implemented in [ADR-0018](./0018-share-enhancement-qr-removal-and-buy-mode-polish.md).
 
 ## Context
 
