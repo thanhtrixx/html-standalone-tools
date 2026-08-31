@@ -654,15 +654,19 @@ async function runTests() {
     const htmlContent = fs.readFileSync(htmlPath, "utf8");
 
     assert(
-      /CACHE_NAME = "smart-buy-list-v3\.(1[0-9]|[2-9]\d+)\.0"/.test(swContent),
+      /CACHE_NAME = "smart-buy-list-v(?:3\.(1[0-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+"/.test(
+        swContent
+      ),
       "VER-01: sw.js CACHE_NAME is updated"
     );
     assert(
-      /^3\.(1[0-9]|[2-9]\d+)\.0$/.test(manifestContent.version),
+      /^(?:3\.(1[0-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+$/.test(
+        manifestContent.version
+      ),
       "VER-02: manifest.webmanifest version is valid"
     );
     assert(
-      /v3\.(1[0-9]|[2-9]\d+)\.0/.test(htmlContent),
+      /v(?:3\.(1[0-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+/.test(htmlContent),
       "VER-03: index.html contains version badge"
     );
   }

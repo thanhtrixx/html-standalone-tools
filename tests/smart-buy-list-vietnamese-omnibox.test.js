@@ -491,11 +491,11 @@ console.log(
   const swContent = fs.readFileSync(swPath, "utf8");
 
   assert(
-    /smart-buy-list-v3\.\d+\.0/.test(swContent),
+    /smart-buy-list-v[3-9]\.\d+\.\d+/.test(swContent),
     "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.10.0' or higher"
   );
   assert(
-    /v3\.\d+\.0/.test(htmlContent),
+    /v[3-9]\.\d+\.\d+/.test(htmlContent),
     "PWA-02: index.html displays synchronized version badge"
   );
 

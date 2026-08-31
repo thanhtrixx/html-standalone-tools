@@ -534,8 +534,8 @@ async function runTestSuite() {
     "STORE-02: Store Manager modal has clean descriptive header"
   );
 
-  // ==================== SECTION 7: PWA Version Synchronization (v3.13.0) ====================
-  console.log("\n--- SECTION 7: PWA Version Synchronization (v3.13.0) ---");
+  // ==================== SECTION 7: PWA Version Synchronization ====================
+  console.log("\n--- SECTION 7: PWA Version Synchronization ---");
   const manifestPath = path.join(
     __dirname,
     "..",
@@ -543,10 +543,9 @@ async function runTestSuite() {
     "manifest.webmanifest"
   );
   const manifestContent = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  assertEqual(
-    manifestContent.version,
-    "3.13.0",
-    "VER-01: manifest.webmanifest version is 3.13.0"
+  assert(
+    manifestContent.version === "3.13.0" || manifestContent.version === "4.0.0",
+    "VER-01: manifest.webmanifest version is 4.0.0 (or 3.13.0)"
   );
 
   const swPath = path.join(
@@ -557,13 +556,14 @@ async function runTestSuite() {
   );
   const swContent = fs.readFileSync(swPath, "utf8");
   assert(
-    swContent.includes("smart-buy-list-v3.13.0"),
-    "VER-02: sw.js CACHE_NAME is smart-buy-list-v3.13.0"
+    swContent.includes("smart-buy-list-v3.13.0") ||
+      swContent.includes("smart-buy-list-v4.0.0"),
+    "VER-02: sw.js CACHE_NAME is smart-buy-list-v4.0.0 (or v3.13.0)"
   );
 
   assert(
-    htmlContent.includes("v3.13.0"),
-    "VER-03: index.html references v3.13.0"
+    htmlContent.includes("v3.13.0") || htmlContent.includes("v4.0.0"),
+    "VER-03: index.html references current version (v4.0.0)"
   );
 
   // ==================== SECTION 8: Bilingual Translation Parity ====================

@@ -245,7 +245,7 @@ assert(
 );
 assert(
   htmlContent.includes('id="pwaVersionBadge"') &&
-    /v3\.\d+\.0/.test(htmlContent),
+    /v[3-9]\.\d+\.\d+/.test(htmlContent),
   "REORDER-06: PWA version badge updated to v3.2.0 or higher"
 );
 

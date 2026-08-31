@@ -671,15 +671,17 @@ async function runTests() {
     );
 
     assert(
-      /^3\.(1[1-9]|[2-9]\d+)\.0$/.test(manifest.version),
+      /^(?:3\.(1[1-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+$/.test(manifest.version),
       `manifest.webmanifest version is 3.11.0 or higher (Got: ${manifest.version})`
     );
     assert(
-      /smart-buy-list-v3\.(1[1-9]|[2-9]\d+)\.0/.test(swContent),
+      /smart-buy-list-v(?:3\.(1[1-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+/.test(
+        swContent
+      ),
       "sw.js CACHE_NAME is smart-buy-list-v3.11.0 or higher"
     );
     assert(
-      />v3\.(1[1-9]|[2-9]\d+)\.0</.test(indexContent),
+      />v(?:3\.(1[1-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+</.test(indexContent),
       "index.html pwaVersionBadge displays v3.11.0 or higher"
     );
 

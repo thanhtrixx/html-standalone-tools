@@ -1,4 +1,4 @@
-# 🧪 Living Test Plan & Quality Assurance Strategy (v3.13.0)
+# 🧪 Living Test Plan & Quality Assurance Strategy (v4.0.0)
 
 > **Target File:** `smart-buy-list-price-tracker/index.html`  
 > **Test Location:** `tests/smart-buy-list-*.test.js`  
@@ -16,7 +16,7 @@ All automated tests strictly adhere to the zero-runtime build constraint and tes
 3. **Multi-Cloud Concurrency & Conflict Resolution**: 3-Way differential merge (`Merge3`) verification, deletion tombstone lifecycle (30-day TTL), in-flight mutation preservation, Google Drive AppData sync, and GitHub Gist REST sync with 403 rate limit diagnostics, reset countdowns, in-panel diagnostics banner, and Classic scope enforcement.
 4. **DOM & UI Interaction Ergonomics**: JSDOM-driven tests asserting shopping trip phase transitions, unified `#finishTripBar` visibility (`checkedItems.length > 0`), guarded completion modal, Smart Omnibox NLP parsing without layout breakage, in-aisle package comparisons, streamlined 3-row card rendering, Full Edit Item modal lifecycle, touch swipe gestures, and modal lifecycle invariants.
 5. **Bilingual Localization Parity (i18n)**: 100% dictionary key parity between English (`en`) and Vietnamese (`vi`), translation string completeness, dynamic language switching with country flags/full names, and currency masking (`formatCurrency`).
-6. **Progressive Web Application (PWA) & Asset Packaging**: Service worker lifecycle (`sw.js` v3.13.0), Network-First navigation with fallback, cache purge controls, companion asset compaction (Terser), and standalone release ZIP packaging.
+6. **Progressive Web Application (PWA) & Asset Packaging**: Service worker lifecycle (`sw.js` v4.0.0), Network-First navigation with fallback, cache purge controls, companion asset compaction (Terser), and standalone release ZIP packaging.
 
 ---
 
