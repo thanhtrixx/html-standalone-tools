@@ -60,9 +60,11 @@ async function main() {
   }
 
   const stagedHtmlFiles = [];
+  const stagedArchives = [];
 
   for (const tool of tools) {
-    const distHtmlPath = path.join(ROOT_DIR, "dist", tool.name, "index.html");
+    const distDir = path.join(ROOT_DIR, "dist", tool.name);
+    const distHtmlPath = path.join(distDir, "index.html");
 
     // Ensure build output exists
     if (!fs.existsSync(distHtmlPath)) {
@@ -76,10 +78,42 @@ async function main() {
     stagedHtmlFiles.push(targetHtmlFile);
 
     const size = (fs.statSync(targetHtmlFile).size / 1024).toFixed(1);
-    console.log(`✅ Staged: ${tool.name}.html (${size} KB)`);
+    console.log(`✅ Staged HTML: ${tool.name}.html (${size} KB)`);
+
+    // Check for companion assets (PWA tools)
+    const distFiles = fs.readdirSync(distDir);
+    const hasCompanionAssets = distFiles.some(
+      (f) => f !== "index.html" && !f.startsWith(".")
+    );
+
+    if (hasCompanionAssets) {
+      // Create dedicated standalone PWA zip bundle: <tool-name>-<version>.zip
+      const toolZipName = `${tool.name}-${version}.zip`;
+      const toolZipPath = path.join(outDir, toolZipName);
+
+      if (fs.existsSync(toolZipPath)) {
+        fs.unlinkSync(toolZipPath);
+      }
+
+      try {
+        execFileSync("zip", ["-r", toolZipPath, "."], {
+          cwd: distDir,
+          stdio: "pipe",
+        });
+        const toolZipSize = (fs.statSync(toolZipPath).size / 1024).toFixed(1);
+        console.log(
+          `✅ Staged PWA Bundle: ${toolZipName} (${toolZipSize} KB - ${distFiles.length} files)`
+        );
+        stagedArchives.push(toolZipPath);
+      } catch (err) {
+        console.warn(
+          `⚠️ Warning: Could not create tool ZIP archive for ${tool.name} (${err.message}).`
+        );
+      }
+    }
   }
 
-  // Create unified ZIP archive
+  // Create unified ZIP archive of all dist tools
   const zipFileName = `html-standalone-tools-${version}.zip`;
   const zipFilePath = path.join(outDir, zipFileName);
 
@@ -88,15 +122,20 @@ async function main() {
   }
 
   try {
-    execFileSync("zip", ["-j", zipFilePath, ...stagedHtmlFiles], {
-      cwd: outDir,
+    const rootDist = path.join(ROOT_DIR, "dist");
+    execFileSync("zip", ["-r", zipFilePath, "."], {
+      cwd: rootDist,
       stdio: "pipe",
     });
 
     const zipSize = (fs.statSync(zipFilePath).size / 1024).toFixed(1);
-    console.log(`✅ Staged ZIP Bundle: ${zipFileName} (${zipSize} KB)`);
+    console.log(
+      `✅ Staged Unified Master Bundle: ${zipFileName} (${zipSize} KB)`
+    );
   } catch (err) {
-    console.warn(`⚠️ Warning: Could not create ZIP archive (${err.message}).`);
+    console.warn(
+      `⚠️ Warning: Could not create master ZIP archive (${err.message}).`
+    );
   }
 
   console.log(
