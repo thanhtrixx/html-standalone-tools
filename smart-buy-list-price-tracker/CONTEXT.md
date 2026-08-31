@@ -1,4 +1,4 @@
-# Smart Buy-List & Unit Price Tracker (v3.13.0)
+# Smart Buy-List & Unit Price Tracker (v4.0.0)
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 
@@ -96,7 +96,7 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
   - **Row 2**: `[ 📥 Import File | 📋 Paste JSON ]` (Full database restore from file or clipboard with auto-detect hierarchy and fallback dialog).
     _Avoid_: Asymmetric backup buttons, camera scanner popup.
 - **Storage Provider Seam & Multi-Cloud Sync (`IStorageProvider`)**:
-  - `IndexedDBStorageProvider`: Default offline-first local persistence engine (`SmartBuyListDB`, v1) with localStorage/memory fallback.
+  - `IndexedDBStorageProvider`: Default offline-first local persistence engine (`SmartBuyListDB`, v2) with localStorage/memory fallback.
   - `GoogleDriveStorageProvider`: Cloud provider syncing with Google Drive hidden `appDataFolder` (`smart_buy_list_data.json`) via REST API v3 and Google Identity Services (GIS OAuth 2.0).
   - `GitHubGistStorageProvider`: Cloud provider syncing with private Secret GitHub Gists via GitHub REST API v3 and Personal Access Token (PAT) with auto-discovery, `raw_url` fallback, and detailed diagnostic error interpolation.
   - `Deterministic 3-Way Cloud Merge Engine (Merge3)`: Non-destructive multi-device conflict resolution uniting purchase ledger transactions, syncing active list items by `updatedAt` timestamps, merging store profiles, and preserving in-flight user mutations.
@@ -108,7 +108,7 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ### 6. PWA & Mobile Ergonomics
 
-- **Standalone PWA Shell & Single-Source Versioning**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 3.13.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v3.13.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, and standalone `.zip` packaging.
+- **Standalone PWA Shell & Single-Source Versioning**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.0.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.0.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, and standalone `.zip` packaging.
 - **Material You (MD3) Bottom Navigation**: Single-source-of-truth 4-destination bottom navigation bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`) with M3 surface containers, pill active indicators, and thumb-friendly touch targets ($\ge 48\text{px}$).
 - **In-Aisle Touch Swipe Gestures**: Swipe Right marks item Done/Checked with tactile haptics (`navigator.vibrate([15])`); Swipe Left opens In-Aisle Package Comparator pre-filled.
 - **Full-Width Smart Quick-Entry Omnibox & NLP Parser**: Single-line omnibox input (`#smartQuickInput`) with 100% full width and live preview pill (`#smartQuickPreview`). Parses natural language grocery shorthand (e.g. `Sữa tươi 35k/l`, `Thịt bò 120k 500g @winmart`) into structured items with active filter context inheritance, 1-tap add, Undo toast, and multi-line clipboard batch paste.

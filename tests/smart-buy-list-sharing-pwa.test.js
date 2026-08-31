@@ -406,11 +406,12 @@ async function runTests() {
 
     const swContent = fs.readFileSync(swPath, "utf8");
     assert(
-      /CACHE_NAME = "smart-buy-list-v3\.\d+\.0"/.test(swContent),
+      /CACHE_NAME = "smart-buy-list-v[3-9]\.\d+\.\d+"/.test(swContent),
       "PWA-14: sw.js bumps cache version to smart-buy-list-v3.2.0 or higher"
     );
     assert(
-      /v3\.\d+\.0/.test(rawHtml) && rawHtml.includes('id="pwaVersionBadge"'),
+      /v[3-9]\.\d+\.\d+/.test(rawHtml) &&
+        rawHtml.includes('id="pwaVersionBadge"'),
       "PWA-14b: index.html displays synchronized version badge v3.2.0 or higher"
     );
     assert(

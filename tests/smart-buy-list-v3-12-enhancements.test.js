@@ -530,15 +530,19 @@ async function runTestSuite() {
     const swContent = fs.readFileSync(swPath, "utf8");
 
     assert(
-      /^3\.(1[2-9]|[2-9]\d+)\.0$/.test(manifestContent.version),
+      /^(?:3\.(1[2-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+$/.test(
+        manifestContent.version
+      ),
       "VER-01: manifest.webmanifest version is at least 3.12.0"
     );
     assert(
-      swContent.includes("smart-buy-list-v3."),
-      "VER-02: sw.js CACHE_NAME is smart-buy-list-v3.x"
+      swContent.includes("smart-buy-list-v"),
+      "VER-02: sw.js CACHE_NAME is smart-buy-list-v*"
     );
     assert(
-      htmlContent.includes("v3.12.0") || htmlContent.includes("v3.13.0"),
+      htmlContent.includes("v3.12.0") ||
+        htmlContent.includes("v3.13.0") ||
+        htmlContent.includes("v4.0.0"),
       "VER-03: index.html references current PWA version"
     );
   }

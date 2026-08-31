@@ -723,12 +723,12 @@ async function runSuite() {
     );
     const swContent = fs.readFileSync(swPath, "utf8");
     assert(
-      /smart-buy-list-v3\.\d+\.0/.test(swContent),
+      /smart-buy-list-v[3-9]\.\d+\.\d+/.test(swContent),
       "PWA-01: sw.js CACHE_NAME is stamped as 'smart-buy-list-v3.10.0' or higher"
     );
 
     assert(
-      /v3\.\d+\.0/.test(htmlContent),
+      /v[3-9]\.\d+\.\d+/.test(htmlContent),
       "PWA-02: index.html displays synchronized version badge"
     );
 
@@ -740,7 +740,7 @@ async function runSuite() {
     );
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     assert(
-      /^3\.\d+\.0$/.test(manifest.version),
+      /^[3-9]\.\d+\.\d+$/.test(manifest.version),
       `PWA-03: manifest.webmanifest version is '3.10.0' or higher (Got: '${manifest.version}')`
     );
 
