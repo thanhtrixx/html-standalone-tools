@@ -4,6 +4,8 @@ const ASSETS_TO_CACHE = [
   "./index.html",
   "./manifest.webmanifest",
   "./icon.svg",
+  "./icon-180.png",
+  "./og-image.png",
   "https://cdn.tailwindcss.com",
 ];
 
@@ -75,25 +77,20 @@ self.addEventListener("fetch", (event) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(request)
-        .then((networkResponse) => {
-          if (
-            !networkResponse ||
-            networkResponse.status !== 200 ||
-            (networkResponse.type !== "basic" &&
-              networkResponse.type !== "cors")
-          ) {
-            return networkResponse;
-          }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseToCache);
-          });
+      return fetch(request).then((networkResponse) => {
+        if (
+          !networkResponse ||
+          networkResponse.status !== 200 ||
+          (networkResponse.type !== "basic" && networkResponse.type !== "cors")
+        ) {
           return networkResponse;
-        })
-        .catch(() => {
-          return caches.match("./index.html");
+        }
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseToCache);
         });
+        return networkResponse;
+      });
     })
   );
 });
