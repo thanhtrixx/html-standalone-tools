@@ -334,5 +334,16 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **LEDGER-01** | Adaptive Mobile Card Representation            | `#priceLedgerModal` renders `#ledgerMobileCards` on mobile screens ($< 640\text{px}$) with bold title, store badge, date, and unit price badge.   |
 | **LEDGER-02** | Mobile Touch Targets ($\ge 44\text{px}$)       | Mobile ledger cards provide $\ge 44\text{px}$ touch targets for Quick Add (`➕`) and Delete (`🗑️`) buttons.                                       |
 | **LEDGER-03** | Spacious Desktop Data Table Layout             | `#priceLedgerModal` renders `#ledgerTableContainer` on desktop screens ($\ge 640\text{px}$) with `text-sm` typography and `h-5 w-5` checkboxes.   |
-| **PWA-03**    | PWA Cache Invalidation & Version Bump          | `sw.js` cache name is `smart-buy-list-v3.5.0`, `manifest.webmanifest` version is `3.5.0`, and UI version badge displays `v3.5.0`.                 |
+| **PWA-03**    | PWA Cache Invalidation & Version Bump          | `sw.js` cache name is `smart-buy-list-v3.6.0`, `manifest.webmanifest` version is `3.6.0`, and UI version badge displays `v3.6.0`.                 |
 | **I18N-03**   | Bilingual Parity for v3.5.0 Polish Strings     | 100% of new cloud sync, guide link, origin copier, and adaptive ledger translation keys exist in both `TRANSLATIONS.en` and `TRANSLATIONS.vi`.    |
+
+---
+
+### 21. PWA Companion Asset Compaction, Single-Source Versioning & Release Packaging (v3.6.0)
+
+| Test ID    | Scenario                                     | Assertion                                                                                                                                           |
+| :--------- | :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PWA-04** | Single-Source Manifest Versioning (`3.6.0`)  | `manifest.webmanifest.version` is `"3.6.0"`, `dist/sw.js` CACHE_NAME is `smart-buy-list-v3.6.0`, and `dist/index.html` statically stamped `v3.6.0`. |
+| **PWA-05** | Companion Asset Terser Minification & Syntax | `dist/sw.js` is minified with `terser` (smaller than source, zero comments) and evaluates without error in a mock ServiceWorker context.            |
+| **PWA-06** | Production Tailwind CDN Purge & Integrity    | `dist/sw.js` purges `https://cdn.tailwindcss.com` from `ASSETS_TO_CACHE`, and 100% of cached local files physically exist in `dist/`.               |
+| **PWA-07** | Standalone Deployable PWA Release Packaging  | `scripts/pack-release.js` packages dedicated standalone PWA deployment archive (`smart-buy-list-price-tracker-<version>.zip`) with complete assets. |

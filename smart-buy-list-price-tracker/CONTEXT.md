@@ -159,8 +159,8 @@ _Avoid_: External QR scanner, barcode reader app, camera popup.
 
 ### 6. PWA & Mobile Ergonomics
 
-**Standalone PWA Shell & Version Invalidation Rule**:
-An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Every code release strictly increments `CACHE_NAME` in `sw.js` and the version badge in `index.html` (e.g. `v3.3.0`) to ensure `Check for Updates` reliably discovers new Service Worker revisions.
+**Standalone PWA Shell, Single-Source Versioning & Companion Compaction**:
+An installable Web Application utilizing Service Workers (`sw.js`) and Web App Manifest (`manifest.webmanifest`) providing instant Cache-First offline availability, home-screen installation on iOS and Android, and zero external runtime dependencies. Application version is single-sourced in `manifest.webmanifest` (`version: 3.6.0`), dynamically hydrated in development, and automatically injected into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v" + version`) and `dist/index.html` during compaction build. Build pipeline compiles companion assets (`sw.js` minified via Terser, `manifest.webmanifest` compacted JSON, Tailwind CDN purged from cache) and packages standalone deployable PWA ZIP bundles.
 _Avoid_: Web app wrapper, mobile site, hybrid app.
 
 **Material You (MD3) In-Aisle Navigation**:

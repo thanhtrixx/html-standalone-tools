@@ -101,6 +101,10 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R68** | **Header Sync Status Removal & Calm Adaptive Cloud Sync**        | Decommission `#topBarSyncStatus` from top app bar, extend idle debounce to 15s (capped at 45s), flush sync on tab backgrounding (`visibilitychange`), sync on trip finish, and pull on boot / tab wakeup.                                                         | P0       | ADR-0014           |
 | **R69** | **Google Drive Cloud Sync UI/UX Guidance & Origin Copier**       | Add direct link to setup guide, 1-click `copyCurrentOriginToClipboard()` helper for Authorized JavaScript Origins in Option Hub, and state-aware Sign In / Disconnect action buttons.                                                                             | P0       | ADR-0014           |
 | **R70** | **Adaptive Historical Purchase Ledger Mobile Cards & Table**     | Dual-representation layout for `#priceLedgerModal`: mobile cards (`#ledgerMobileCards`) with bold titles, store badges, prominent unit price badges, and $\ge 44\text{px}$ touch targets; desktop table (`#ledgerTableContainer`) with roomy typography.          | P0       | ADR-0014           |
+| **R71** | **Single-Source PWA Manifest Versioning (`3.6.0`)**              | Establish `manifest.webmanifest` as canonical source of truth, dynamically hydrate `#pwaVersionBadge` in dev, and statically stamp `dist/index.html` and `dist/sw.js` during build.                                                                               | P0       | ADR-0015           |
+| **R72** | **Type-Aware Companion Asset Compactor (Terser & JSON Compact)** | `scripts/build.js` minifies `sw.js` via Terser, compacts JSON in `manifest.webmanifest`, and cleans vector assets.                                                                                                                                                | P0       | ADR-0015           |
+| **R73** | **Tailwind CDN Cache Purge in Production Service Worker**        | Automatically purge external `https://cdn.tailwindcss.com` from `ASSETS_TO_CACHE` in `dist/sw.js` since Tailwind CSS is inlined statically.                                                                                                                       | P0       | ADR-0015           |
+| **R74** | **Standalone Deployable PWA Release Packaging (Zip Archives)**   | `scripts/pack-release.js` packages dedicated standalone PWA deployment archives (`release-assets/<tool>-<version>.zip`) with complete companion assets.                                                                                                           | P0       | ADR-0015           |
 
 ---
 
@@ -127,8 +131,9 @@ flowchart TD
     S17["Slice 17: GitHub Gist Cloud Storage Provider &amp; Multi-Provider Registry (#192)"]
     S18["Slice 18: Vietnamese-First Defaults, Smart Omnibox &amp; Currency Ergonomics (#193)"]
     S19["Slice 19: Calm Cloud Sync, Adaptive Historical Ledger &amp; Flag Polish (#196)"]
+    S20["Slice 20: CI/CD Build Pipeline Enhancement, PWA Companion Asset Compaction &amp; Single-Source Versioning (v3.6.0) (#203)"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18 --> S19
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18 --> S19 --> S20
 ```
 
 <details>
@@ -190,6 +195,9 @@ flowchart TD
       │
       ▼
 [Slice 19: Calm Cloud Sync, Adaptive Historical Ledger & Flag Polish (#196)]
+      │
+      ▼
+[Slice 20: CI/CD Build Pipeline, PWA Companion Asset Compaction & Single-Source Versioning (v3.6.0) (#203)]
 ```
 
 </details>
