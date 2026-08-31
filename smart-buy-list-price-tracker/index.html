@@ -1397,94 +1397,6 @@
       </div>
     </div>
 
-    <!-- 3.6. QR SCANNER MODAL WITH CAMERA VIEWFINDER & UPLOAD FALLBACK -->
-    <div
-      id="qrScannerModal"
-      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-    >
-      <div
-        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
-      >
-        <div class="flex items-center justify-between">
-          <h3
-            id="scanModalTitle"
-            class="text-base font-bold text-white flex items-center gap-2"
-          >
-            <span>📷</span>
-            <span id="scanModalTitleText">Scan QR Code</span>
-          </h3>
-          <button
-            onclick="closeQrScannerModal()"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
-          >
-            ✕
-          </button>
-        </div>
-
-        <p id="scanModalDesc" class="text-xs text-slate-400">
-          Point camera at a shared Buy-List QR code or upload a screenshot:
-        </p>
-
-        <!-- Live Camera Viewfinder -->
-        <div
-          class="relative w-full aspect-square max-h-64 bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center"
-        >
-          <video
-            id="qrVideoFeed"
-            playsinline
-            autoplay
-            muted
-            class="w-full h-full object-cover"
-          ></video>
-
-          <!-- Targeting Reticle Scan Box -->
-          <div
-            id="qrReticle"
-            class="absolute inset-8 border-2 border-emerald-400/80 rounded-2xl pointer-events-none shadow-[0_0_15px_rgba(52,211,153,0.3)] flex items-center justify-center"
-          >
-            <div
-              class="w-full h-0.5 bg-emerald-400/60 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Scanner Controls: Flip Camera & Upload QR Image -->
-        <div class="grid grid-cols-2 gap-2 pt-1">
-          <button
-            onclick="flipQrCamera()"
-            id="btnFlipCamera"
-            class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700"
-          >
-            <span>🔄</span>
-            <span id="btnFlipCameraText">Flip Camera</span>
-          </button>
-          <label
-            id="btnUploadQrImage"
-            class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700 cursor-pointer"
-          >
-            <span>🖼️</span>
-            <span id="btnUploadQrImageText">Upload QR Image</span>
-            <input
-              type="file"
-              id="qrImageFileInput"
-              accept="image/*"
-              onchange="handleQrImageUpload(event)"
-              class="hidden"
-            />
-          </label>
-        </div>
-
-        <div class="pt-1 flex justify-end">
-          <button
-            onclick="closeQrScannerModal()"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- 4. TRIP COMPLETE & SUMMARY MODAL -->
     <div
       id="tripCompleteModal"
@@ -2070,15 +1982,6 @@
             Data Management & Backup
           </div>
 
-          <button
-            onclick="openQrScannerModal()"
-            id="btnOpenQrScanner"
-            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-          >
-            <span>📷</span>
-            <span id="btnOpenQrScannerText">Scan QR Code</span>
-          </button>
-
           <div class="grid grid-cols-2 gap-2">
             <button
               onclick="exportJsonBackup()"
@@ -2086,7 +1989,7 @@
               class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
             >
               <span>💾</span>
-              <span id="btnExportBackupText">Export JSON</span>
+              <span id="btnExportBackupText">Export File</span>
             </button>
             <button
               onclick="copyBackupJson()"
@@ -4824,7 +4727,7 @@
           grouping_by_aisle: "By Aisle (Department)",
           grouping_by_store: "By Store",
           settings_data_heading: "Data Management & Backup",
-          btn_export_json_backup: "Export JSON",
+          btn_export_json_backup: "Export File",
           btn_import_json_backup: "Import File",
           btn_copy_list_json: "Copy Buy-List JSON",
           btn_copy_backup_json: "Copy JSON",
@@ -5108,8 +5011,8 @@
           grouping_by_aisle: "Theo Quầy (Ngành Hàng)",
           grouping_by_store: "Theo Cửa Hàng",
           settings_data_heading: "Quản Lý & Sao Lưu Dữ Liệu",
-          btn_export_json_backup: "Xuất JSON",
-          btn_import_json_backup: "Nhập Từ File",
+          btn_export_json_backup: "Xuất Tệp",
+          btn_import_json_backup: "Nhập Tệp",
           btn_copy_list_json: "Sao Chép JSON Danh Sách",
           btn_copy_backup_json: "Sao Chép JSON",
           btn_paste_json: "Dán JSON",
@@ -7960,227 +7863,6 @@
       }
 
       /* =========================================================================
-       8.5. IN-APP NATIVE QR SCANNER
-       ========================================================================= */
-      let currentCameraFacingMode = "environment";
-      let qrMediaStream = null;
-      let qrScanAnimationId = null;
-      let barcodeDetectorInstance = null;
-
-      function getBarcodeDetector() {
-        if (
-          !barcodeDetectorInstance &&
-          typeof BarcodeDetector !== "undefined"
-        ) {
-          try {
-            barcodeDetectorInstance = new BarcodeDetector({
-              formats: ["qr_code"],
-            });
-          } catch (e) {
-            barcodeDetectorInstance = null;
-          }
-        }
-        return barcodeDetectorInstance;
-      }
-
-      function openQrScannerModal() {
-        openModal("qrScannerModal");
-        startQrScannerStream();
-      }
-
-      function closeQrScannerModal() {
-        stopQrScannerStream();
-        closeModal("qrScannerModal");
-      }
-
-      function startQrScannerStream() {
-        stopQrScannerStream();
-        if (
-          navigator.mediaDevices &&
-          typeof navigator.mediaDevices.getUserMedia === "function"
-        ) {
-          navigator.mediaDevices
-            .getUserMedia({ video: { facingMode: currentCameraFacingMode } })
-            .then((stream) => {
-              qrMediaStream = stream;
-              const video = document.getElementById("qrVideoFeed");
-              if (video) {
-                video.srcObject = stream;
-                if (typeof video.play === "function") {
-                  video.play().catch(() => {});
-                }
-              }
-              startQrScanLoop();
-            })
-            .catch((err) => {
-              console.warn("Camera stream error", err);
-              showToast(
-                TRANSLATIONS[currentLanguage].toast_camera_permission_denied ||
-                  "Camera access denied. Please allow camera permissions or upload a QR image."
-              );
-            });
-        }
-      }
-
-      function stopQrScannerStream() {
-        if (qrScanAnimationId) {
-          if (typeof cancelAnimationFrame === "function") {
-            cancelAnimationFrame(qrScanAnimationId);
-          }
-          qrScanAnimationId = null;
-        }
-        if (qrMediaStream) {
-          try {
-            if (typeof qrMediaStream.getTracks === "function") {
-              qrMediaStream.getTracks().forEach((track) => {
-                if (typeof track.stop === "function") track.stop();
-              });
-            }
-          } catch (e) {}
-          qrMediaStream = null;
-        }
-        const video = document.getElementById("qrVideoFeed");
-        if (video) {
-          video.srcObject = null;
-        }
-      }
-
-      function flipQrCamera() {
-        currentCameraFacingMode =
-          currentCameraFacingMode === "environment" ? "user" : "environment";
-        startQrScannerStream();
-      }
-
-      function startQrScanLoop() {
-        const detector = getBarcodeDetector();
-        const video = document.getElementById("qrVideoFeed");
-        if (!detector || !video) return;
-
-        const scanFrame = () => {
-          if (!qrMediaStream) return;
-          detector
-            .detect(video)
-            .then((barcodes) => {
-              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-                handleScannedQrResult(barcodes[0].rawValue);
-              } else if (qrMediaStream) {
-                if (typeof requestAnimationFrame === "function") {
-                  qrScanAnimationId = requestAnimationFrame(scanFrame);
-                }
-              }
-            })
-            .catch(() => {
-              if (
-                qrMediaStream &&
-                typeof requestAnimationFrame === "function"
-              ) {
-                qrScanAnimationId = requestAnimationFrame(scanFrame);
-              }
-            });
-        };
-
-        if (typeof requestAnimationFrame === "function") {
-          qrScanAnimationId = requestAnimationFrame(scanFrame);
-        }
-      }
-
-      function handleScannedQrResult(rawValue) {
-        if (!rawValue) return;
-        closeQrScannerModal();
-        if (navigator.vibrate) {
-          try {
-            navigator.vibrate([25]);
-          } catch (e) {}
-        }
-
-        const isShareLink =
-          rawValue.includes("#share=") ||
-          (!rawValue.startsWith("{") &&
-            !rawValue.startsWith("[") &&
-            decodeSharePayload(rawValue) !== null);
-
-        let isBuyListJson = false;
-        try {
-          const parsed = JSON.parse(rawValue);
-          if (parsed && (parsed.items || parsed.i || parsed.activeList)) {
-            isBuyListJson = true;
-          }
-        } catch (e) {}
-
-        if (isShareLink || isBuyListJson) {
-          closeModal("settingsModal");
-          processImportData(rawValue);
-        } else {
-          const t = TRANSLATIONS[currentLanguage];
-          const msg = (
-            t.toast_scanned_external ||
-            "Scanned QR does not contain a shopping list: {content}"
-          ).replace("{content}", rawValue.slice(0, 40));
-          showToast(msg);
-        }
-      }
-
-      function handleQrImageUpload(event) {
-        const file =
-          event.target && event.target.files && event.target.files[0];
-        if (!file) return;
-        const detector = getBarcodeDetector();
-        if (!detector) {
-          showToast("QR Barcode detection not supported on this device.");
-          return;
-        }
-
-        if (typeof createImageBitmap === "function") {
-          createImageBitmap(file)
-            .then((bitmap) => detector.detect(bitmap))
-            .then((barcodes) => {
-              if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-                handleScannedQrResult(barcodes[0].rawValue);
-              } else {
-                showToast(
-                  TRANSLATIONS[currentLanguage].toast_no_qr_in_image ||
-                    "No valid QR code found in uploaded image."
-                );
-              }
-            })
-            .catch(() => {
-              showToast(
-                TRANSLATIONS[currentLanguage].toast_no_qr_in_image ||
-                  "No valid QR code found in uploaded image."
-              );
-            });
-        } else {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-              detector
-                .detect(img)
-                .then((barcodes) => {
-                  if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-                    handleScannedQrResult(barcodes[0].rawValue);
-                  } else {
-                    showToast(
-                      TRANSLATIONS[currentLanguage].toast_no_qr_in_image ||
-                        "No valid QR code found in uploaded image."
-                    );
-                  }
-                })
-                .catch(() => {
-                  showToast(
-                    TRANSLATIONS[currentLanguage].toast_no_qr_in_image ||
-                      "No valid QR code found in uploaded image."
-                  );
-                });
-            };
-            img.src = e.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-        event.target.value = "";
-      }
-
-      /* =========================================================================
        9. TRIP COMPLETION & LEDGER LOGGING
        ========================================================================= */
       function openTripCompleteModal() {
@@ -9016,12 +8698,6 @@
           pasteTextarea.placeholder =
             t.paste_modal_placeholder || "Paste JSON or #share= link here...";
 
-        // 3.6. QR Scanner Modal
-        el("scanModalTitleText", t.scan_modal_title || "Scan QR Code");
-        el("scanModalDesc", t.scan_modal_desc);
-        el("btnFlipCameraText", t.btn_flip_camera || "Flip Camera");
-        el("btnUploadQrImageText", t.btn_upload_qr_image || "Upload QR Image");
-
         // 4. Trip Complete Modal
         el("tripModalTitleText", t.trip_modal_title);
         el("tripModalPurchasedLabel", t.trip_modal_purchased_label);
@@ -9101,7 +8777,6 @@
         const langSelect = document.getElementById("settingsLanguageSelect");
         if (langSelect) langSelect.value = currentLanguage;
         el("settingsDataHeading", t.settings_data_heading);
-        el("btnOpenQrScannerText", t.btn_scan_qr || "Scan QR Code");
         el("btnExportBackupText", t.btn_export_json_backup);
         el("btnCopyBackupJsonText", t.btn_copy_backup_json || "Copy JSON");
         el("btnImportBackupText", t.btn_import_json_backup);
@@ -9694,13 +9369,7 @@
         window.openPasteJsonModal = openPasteJsonModal;
         window.submitPasteJson = submitPasteJson;
         window.processImportData = processImportData;
-        window.openQrScannerModal = openQrScannerModal;
-        window.closeQrScannerModal = closeQrScannerModal;
-        window.startQrScannerStream = startQrScannerStream;
-        window.stopQrScannerStream = stopQrScannerStream;
-        window.flipQrCamera = flipQrCamera;
-        window.handleScannedQrResult = handleScannedQrResult;
-        window.handleQrImageUpload = handleQrImageUpload;
+
         window.handleTouchStart = handleTouchStart;
         window.handleTouchMove = handleTouchMove;
         window.handleTouchEnd = handleTouchEnd;
