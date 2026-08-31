@@ -250,7 +250,8 @@ assert(
       htmlContent.includes("v3.4.0") ||
       htmlContent.includes("v3.5.0") ||
       htmlContent.includes("v3.6.0") ||
-      htmlContent.includes("v3.7.0")),
+      htmlContent.includes("v3.7.0") ||
+      htmlContent.includes("v3.8.0")),
   "REORDER-06: PWA version badge updated to v3.2.0 or higher"
 );
 

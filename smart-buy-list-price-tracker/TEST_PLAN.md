@@ -347,3 +347,32 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **PWA-05** | Companion Asset Terser Minification & Syntax | `dist/sw.js` is minified with `terser` (smaller than source, zero comments) and evaluates without error in a mock ServiceWorker context.            |
 | **PWA-06** | Production Tailwind CDN Purge & Integrity    | `dist/sw.js` purges `https://cdn.tailwindcss.com` from `ASSETS_TO_CACHE`, and 100% of cached local files physically exist in `dist/`.               |
 | **PWA-07** | Standalone Deployable PWA Release Packaging  | `scripts/pack-release.js` packages dedicated standalone PWA deployment archive (`smart-buy-list-price-tracker-<version>.zip`) with complete assets. |
+
+---
+
+### 22. Deterministic 3-Way Cloud Merge, Deletion Tombstones & Mutation Concurrency (v3.7.0)
+
+| Test ID      | Scenario                                   | Assertion                                                                                                                                     |
+| :----------- | :----------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TOMB-01**  | Tombstone Lifecycle & 30-Day TTL Pruning   | `pruneDeletedTombstones` purges tombstones older than 30 days while preserving recent deletion records.                                       |
+| **TOUCH-01** | Touch Mutation Invariants                  | All item mutators update `item.updatedAt` monotonically and clear resurrecting tombstones.                                                    |
+| **ZOMB-01**  | Zombie Item & Ledger Resurrection Guard    | `mergeCloudState` prevents deleted items, ledger records, and stores from reappearing when merging remote payloads.                           |
+| **3WAY-01**  | 3-Way Differential Merge Engine            | In-flight local mutations occurring during remote async network requests are preserved in the final merged state without overwrite data loss. |
+| **TRIP-01**  | Atomic Trip Completion & Deterministic IDs | `finalizeTripCompletion` generates unique deterministic IDs (`rec_<timestamp>_<idx>_<random>`) and sets item deletion tombstones.             |
+
+---
+
+### 23. Planning Trip Completion, Clean Empty State, Ledger Ergonomics & Comparator Unit Sync (v3.8.0)
+
+| Test ID       | Scenario                                      | Assertion                                                                                                                                |
+| :------------ | :-------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| **CLEAN-01**  | Sample Button Removal from Empty State Card   | `#btnLoadSampleEmpty` removed from `#emptyListCard`; `#btnResetSampleData` preserved in Option Hub Settings.                             |
+| **CLEAN-02**  | Buy Mode Empty Switch-to-Planning Action      | `#btnEmptySwitchToPlanning` appears in empty Buy Mode and switches trip phase to `PLANNING`; hidden in Planning Mode.                    |
+| **PLAN-01**   | Adaptive Planning Mode finishTripBar Presence | `#finishTripBar` dynamically shown in Planning Mode when `checkedCount > 0`; hidden when `checkedCount === 0`; always shown in Buy Mode. |
+| **PLAN-02**   | Context-Aware Trip Summary Prompt             | `#tripSummaryPrompt` displays `trip_planning_prompt` in Planning Mode and `trip_active` in Buy Mode.                                     |
+| **LEDGER-01** | Batch Bar Action Ordering & Labels            | `btnAddSelectedLedgerToBuyList` on left; `btnDeleteSelectedLedger` on right with text label span `#btnTextDeleteSelectedLedger`.         |
+| **LEDGER-02** | Mobile Card Delete Button Alignment & Text    | Mobile ledger cards render Add on left (`flex-1`) and Delete on right with icon & localized text label `btn_delete_ledger_item`.         |
+| **COMP-01**   | Bidirectional Unit Group Auto-Sync            | `syncComparatorUnitGroup` aligns Package B to Package A's dimension (and vice versa) across Weight (`kg`), Volume (`L`), Count (`ea`).   |
+| **COMP-02**   | Real-Time Instant Re-comparison               | All price, quantity, and unit inputs trigger `runComparatorCalc()` immediately without manual blur or dimension mismatch error.          |
+| **VER-01**    | PWA v3.8.0 Single-Source Versioning           | `manifest.webmanifest`, `sw.js` cache name, and `index.html` version badge synchronized to `3.8.0`.                                      |
+| **I18N-01**   | 100% Bilingual Parity for v3.8.0 Keys         | 100% dictionary symmetry between English and Vietnamese for all new empty state, planning prompt, and delete button strings.             |

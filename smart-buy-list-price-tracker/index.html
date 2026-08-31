@@ -827,11 +827,12 @@
             your shopping savings.
           </p>
           <button
-            id="btnLoadSampleEmpty"
-            onclick="loadSampleData()"
-            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-xl text-xs font-semibold border border-slate-700 transition-colors"
+            id="btnEmptySwitchToPlanning"
+            onclick="setTripPhase('PLANNING')"
+            class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-md transition-colors inline-flex items-center gap-1.5 mx-auto cursor-pointer"
           >
-            ✨ Load Sample Grocery List
+            <span>📝</span>
+            <span id="btnEmptySwitchToPlanningText">Switch to Planning</span>
           </button>
         </div>
 
@@ -1053,7 +1054,7 @@
                 >
                 <select
                   id="compUnitA"
-                  onchange="runComparatorCalc()"
+                  onchange="syncComparatorUnitGroup('A')"
                   class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
                 >
                   <optgroup label="Weight">
@@ -1130,7 +1131,7 @@
                 >
                 <select
                   id="compUnitB"
-                  onchange="runComparatorCalc()"
+                  onchange="syncComparatorUnitGroup('B')"
                   class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
                 >
                   <optgroup label="Weight">
@@ -1688,15 +1689,6 @@
           <div class="flex items-center gap-2">
             <button
               type="button"
-              id="btnDeleteSelectedLedger"
-              onclick="deleteSelectedLedgerItems()"
-              class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <span>🗑️</span>
-              <span id="btnTextDeleteSelectedLedger">Delete Selected</span>
-            </button>
-            <button
-              type="button"
               id="btnAddSelectedLedgerToBuyList"
               onclick="addSelectedLedgerItemsToBuyList()"
               class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
@@ -1705,6 +1697,15 @@
               <span id="btnTextAddSelectedLedger"
                 >Add Selected to Buy List</span
               >
+            </button>
+            <button
+              type="button"
+              id="btnDeleteSelectedLedger"
+              onclick="deleteSelectedLedgerItems()"
+              class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <span>🗑️</span>
+              <span id="btnTextDeleteSelectedLedger">Delete Selected</span>
             </button>
           </div>
         </div>
@@ -2462,7 +2463,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.7.0</span
+              >v3.8.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -4660,11 +4661,18 @@
           empty_title: "Your shopping list is empty",
           empty_desc:
             "Add items above or compare package deals in-aisle to start tracking your shopping savings.",
+          empty_planning_desc:
+            "Add items using the quick-entry box above to start tracking your grocery list and unit prices.",
+          empty_buy_mode_desc:
+            "No items to buy right now. Switch to Planning mode to add items to your grocery list.",
+          btn_empty_switch_to_planning: "Switch to Planning",
           btn_load_sample: "✨ Load Sample Grocery List",
           checked_section: "Checked Items",
           tap_toggle: "Tap to toggle",
           trip_active: "In-Store Shopping Active",
+          trip_planning_prompt: "Ready to Complete Trip",
           btn_finish_trip: "Complete Trip",
+          btn_delete_ledger_item: "Delete",
           nav_list: "List",
           nav_compare: "Compare",
           nav_ledger: "Price History",
@@ -4932,11 +4940,18 @@
           empty_title: "Danh sách mua sắm đang trống",
           empty_desc:
             "Thêm hàng ở trên hoặc dùng bộ so sánh quy cách đóng gói để mua sắm thông minh và tiết kiệm.",
+          empty_planning_desc:
+            "Thêm hàng bằng ô nhập nhanh phía trên để bắt đầu theo dõi danh sách và giá đơn vị.",
+          empty_buy_mode_desc:
+            "Hiện chưa có món hàng nào. Hãy chuyển sang Lập Kế Hoạch để thêm hàng vào danh sách.",
+          btn_empty_switch_to_planning: "Chuyển sang Lập Kế Hoạch",
           btn_load_sample: "✨ Tải Dữ Liệu Mẫu",
           checked_section: "Hàng Đã Mua / Đã Chọn",
           tap_toggle: "Chạm để ẩn/hiện",
           trip_active: "Đang Trong Chuyến Mua Sắm",
+          trip_planning_prompt: "Sẵn Sàng Hoàn Tất Chuyến Đi",
           btn_finish_trip: "Hoàn Tất Chuyến Đi",
+          btn_delete_ledger_item: "Xoá",
           nav_list: "Danh Sách",
           nav_compare: "So Sánh",
           nav_ledger: "Lịch Sử Giá",
@@ -5384,7 +5399,25 @@
             tabInStore.className =
               "px-3 py-1 rounded-lg transition-all text-slate-400 hover:text-slate-200";
           }
-          if (finishBar) finishBar.classList.add("hidden");
+          const hasChecked =
+            memoryState &&
+            memoryState.activeList &&
+            Array.isArray(memoryState.activeList.items) &&
+            memoryState.activeList.items.some((i) => i.checked);
+          if (finishBar) {
+            if (hasChecked) {
+              finishBar.classList.remove("hidden");
+            } else {
+              finishBar.classList.add("hidden");
+            }
+          }
+          const tripSummaryPrompt =
+            document.getElementById("tripSummaryPrompt");
+          if (tripSummaryPrompt) {
+            const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+            tripSummaryPrompt.textContent =
+              t.trip_planning_prompt || "Ready to Complete Trip";
+          }
           if (smartQuickSection) smartQuickSection.classList.remove("hidden");
 
           if (navPlanningPill) {
@@ -5411,6 +5444,13 @@
               "px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm";
           }
           if (finishBar) finishBar.classList.remove("hidden");
+          const tripSummaryPrompt =
+            document.getElementById("tripSummaryPrompt");
+          if (tripSummaryPrompt) {
+            const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+            tripSummaryPrompt.textContent =
+              t.trip_active || "In-Store Shopping Active";
+          }
           if (smartQuickSection) smartQuickSection.classList.add("hidden");
           if (addItemSection) addItemSection.classList.add("hidden");
 
@@ -5994,6 +6034,30 @@
           tripRunningTotal.textContent = `${totalSpentLabel} ${formatCurrency(checkedSpent)}`;
         }
 
+        const finishBar = document.getElementById("finishTripBar");
+        if (finishBar) {
+          if (currentPhase === "IN_STORE") {
+            finishBar.classList.remove("hidden");
+          } else if (currentPhase === "PLANNING") {
+            if (checkedItems.length > 0) {
+              finishBar.classList.remove("hidden");
+            } else {
+              finishBar.classList.add("hidden");
+            }
+          }
+        }
+        const tripSummaryPrompt = document.getElementById("tripSummaryPrompt");
+        if (tripSummaryPrompt) {
+          const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          if (currentPhase === "PLANNING") {
+            tripSummaryPrompt.textContent =
+              t.trip_planning_prompt || "Ready to Complete Trip";
+          } else {
+            tripSummaryPrompt.textContent =
+              t.trip_active || "In-Store Shopping Active";
+          }
+        }
+
         const listCountBadge = document.getElementById("listCountBadge");
         if (listCountBadge) listCountBadge.textContent = filtered.length;
 
@@ -6028,6 +6092,30 @@
 
         if (filtered.length === 0) {
           if (emptyCard) emptyCard.classList.remove("hidden");
+          const btnEmptySwitch = document.getElementById(
+            "btnEmptySwitchToPlanning"
+          );
+          const emptyDesc = document.getElementById("emptyListDesc");
+          const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          if (btnEmptySwitch) {
+            if (currentPhase === "IN_STORE") {
+              btnEmptySwitch.classList.remove("hidden");
+            } else {
+              btnEmptySwitch.classList.add("hidden");
+            }
+          }
+          if (emptyDesc) {
+            if (currentPhase === "IN_STORE") {
+              emptyDesc.textContent =
+                t.empty_buy_mode_desc ||
+                "No items to buy right now. Switch to Planning mode to add items to your grocery list.";
+            } else {
+              emptyDesc.textContent =
+                t.empty_planning_desc ||
+                t.empty_desc ||
+                "Add items using the quick-entry box above to start tracking your grocery list and unit prices.";
+            }
+          }
           container.innerHTML = "";
           if (checkedSection) checkedSection.classList.add("hidden");
           return;
@@ -7237,6 +7325,45 @@
           TRANSLATIONS[currentLanguage].toast_winner_applied ||
             "Applied winning deal to item!"
         );
+      }
+
+      /**
+       * Bidirectional unit group auto-sync for the comparator.
+       * When user changes unit group of one package (e.g. Weight → Volume),
+       * the other package's unit is updated to the default base unit of that
+       * same dimension, keeping both packages comparable.
+       * @param {'A'|'B'} source — which package triggered the change
+       */
+      function syncComparatorUnitGroup(source) {
+        const compUnitA = document.getElementById("compUnitA");
+        const compUnitB = document.getElementById("compUnitB");
+        if (!compUnitA || !compUnitB) return;
+
+        const valA = compUnitA.value;
+        const valB = compUnitB.value;
+
+        const dimA = normalizeQuantity(1, valA).dimension;
+        const dimB = normalizeQuantity(1, valB).dimension;
+
+        // Map dimension back to default base unit
+        const dimensionToBaseUnit = {
+          [DIMENSIONS.MASS]: "kg",
+          [DIMENSIONS.VOLUME]: "L",
+          [DIMENSIONS.COUNT]: "ea",
+        };
+
+        if (dimA !== dimB) {
+          if (source === "A") {
+            // Source A changed — sync B to A's dimension base unit
+            compUnitB.value = dimensionToBaseUnit[dimA] || "ea";
+          } else {
+            // Source B changed — sync A to B's dimension base unit
+            compUnitA.value = dimensionToBaseUnit[dimB] || "ea";
+          }
+        }
+
+        // Always re-compare after any unit change
+        runComparatorCalc();
       }
 
       function runComparatorCalc() {
@@ -8542,19 +8669,20 @@
               <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/60">
                 <button
                   type="button"
-                  onclick="deleteLedgerItem('${l.id}')"
-                  class="min-h-[44px] px-3 bg-red-950/40 hover:bg-red-900/60 active:scale-95 text-red-300 font-semibold rounded-xl text-xs border border-red-800/40 flex items-center justify-center gap-1 cursor-pointer transition-colors"
-                  title="${t.ledger_delete_item || "Delete record"}"
-                >
-                  <span>🗑️</span>
-                </button>
-                <button
-                  type="button"
                   onclick="addLedgerItemToBuyList('${l.id}')"
                   class="flex-1 min-h-[44px] px-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-colors"
                 >
                   <span>➕</span>
                   <span>${t.btn_add_selected_ledger || "Add to Buy List"}</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="deleteLedgerItem('${l.id}')"
+                  class="min-h-[44px] px-3 bg-red-950/40 hover:bg-red-900/60 active:scale-95 text-red-300 font-semibold rounded-xl text-xs border border-red-800/40 flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                  title="${t.ledger_delete_item || "Delete record"}"
+                >
+                  <span>🗑️</span>
+                  <span>${t.btn_delete_ledger_item || "Delete"}</span>
                 </button>
               </div>
             </div>
@@ -8748,7 +8876,14 @@
         el("kpiEstimatedLabel", t.kpi_estimated);
         el("tripProgressTitle", t.progress_pacing || "Shopping Progress");
         el("tripRemainingSpendLabel", t.remaining_spend || "Remaining");
-        el("tripSummaryPrompt", t.trip_active);
+        if (currentPhase === "PLANNING") {
+          el(
+            "tripSummaryPrompt",
+            t.trip_planning_prompt || "Ready to Complete Trip"
+          );
+        } else {
+          el("tripSummaryPrompt", t.trip_active);
+        }
         el("btnFinishTripText", t.btn_finish_trip);
         el("navLabelList", t.nav_list);
         el("navLabelCompare", t.nav_compare);
@@ -8765,8 +8900,19 @@
         el("btnGroupByAisle", t.by_aisle);
         el("btnGroupByStore", t.by_store);
         el("emptyListTitle", t.empty_title);
-        el("emptyListDesc", t.empty_desc);
-        el("btnLoadSampleEmpty", t.btn_load_sample);
+        if (currentPhase === "IN_STORE") {
+          el(
+            "emptyListDesc",
+            t.empty_buy_mode_desc ||
+              "No items to buy right now. Switch to Planning mode to add items."
+          );
+        } else {
+          el("emptyListDesc", t.empty_planning_desc || t.empty_desc);
+        }
+        el(
+          "btnEmptySwitchToPlanningText",
+          t.btn_empty_switch_to_planning || "Switch to Planning"
+        );
         el("checkedSectionTitle", t.checked_section);
         el("checkedToggleHint", t.tap_toggle);
 
