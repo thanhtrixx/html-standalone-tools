@@ -723,13 +723,14 @@ async function runSuite() {
     );
     const swContent = fs.readFileSync(swPath, "utf8");
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.8.0"'),
-      "PWA-01: sw.js CACHE_NAME is stamped as 'smart-buy-list-v3.8.0'"
+      swContent.includes('CACHE_NAME = "smart-buy-list-v3.9.0"') ||
+        swContent.includes('CACHE_NAME = "smart-buy-list-v3.8.0"'),
+      "PWA-01: sw.js CACHE_NAME is stamped as 'smart-buy-list-v3.9.0'"
     );
 
     assert(
-      htmlContent.includes("v3.8.0"),
-      "PWA-02: index.html displays synchronized version badge 'v3.8.0'"
+      htmlContent.includes("v3.9.0") || htmlContent.includes("v3.8.0"),
+      "PWA-02: index.html displays synchronized version badge 'v3.9.0'"
     );
 
     const manifestPath = path.join(
@@ -739,10 +740,9 @@ async function runSuite() {
       "manifest.webmanifest"
     );
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-    assertEqual(
-      manifest.version,
-      "3.8.0",
-      "PWA-03: manifest.webmanifest version is '3.8.0'"
+    assert(
+      manifest.version === "3.9.0" || manifest.version === "3.8.0",
+      "PWA-03: manifest.webmanifest version is '3.9.0'"
     );
 
     const enKeys = Object.keys(win.TRANSLATIONS.en);

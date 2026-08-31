@@ -585,8 +585,8 @@ EMPTY_KEY=
     "utf8"
   );
   assert(
-    manifest.version === "3.8.0",
-    `manifest.webmanifest defines single-source version 3.8.0 (Got: '${manifest.version}')`
+    manifest.version === "3.9.0",
+    `manifest.webmanifest defines single-source version 3.9.0 (Got: '${manifest.version}')`
   );
   assert(
     distSwContent.includes(

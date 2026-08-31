@@ -376,3 +376,20 @@ All automated tests adhere to the zero-runtime build constraint and test observa
 | **COMP-02**   | Real-Time Instant Re-comparison               | All price, quantity, and unit inputs trigger `runComparatorCalc()` immediately without manual blur or dimension mismatch error.          |
 | **VER-01**    | PWA v3.8.0 Single-Source Versioning           | `manifest.webmanifest`, `sw.js` cache name, and `index.html` version badge synchronized to `3.8.0`.                                      |
 | **I18N-01**   | 100% Bilingual Parity for v3.8.0 Keys         | 100% dictionary symmetry between English and Vietnamese for all new empty state, planning prompt, and delete button strings.             |
+
+---
+
+### 24. Enhanced Share Buy-List, Complete QR Purge, Symmetrical Settings & Buy Mode Polish (v3.9.0)
+
+| Test ID         | Scenario                                  | Assertion                                                                                                                                          |
+| :-------------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **BUY-01**      | In-Store Empty Buy-List Complete Trip Bar | `#finishTripBar` is hidden in Buy Mode (`IN_STORE`) when active shopping list is empty (`items.length === 0`), and shown when 1+ items exist.      |
+| **SYNC-01**     | GitHub Gist Cloud Sync Error Diagnostics  | `syncCloudNow()` interpolates `{msg}` in `toast_github_sync_error` with `(res.error \|\| "Unknown")` across English and Vietnamese.                |
+| **SETTINGS-01** | Complete QR Scanner Purge                 | `#qrScannerModal`, `#btnOpenQrScanner`, camera streaming, and barcode detection helpers are completely purged from HTML and JavaScript.            |
+| **SETTINGS-02** | Symmetrical 2x2 Data Interchange Grid     | Settings modal displays symmetrical `[ Export File \| Copy JSON ] / [ Import File \| Paste JSON ]` layout with full backup export/import fidelity. |
+| **SHARE-01**    | Human-Readable Checklist Export           | `generateBuyListTextChecklist` formats Markdown checklist with store tags, quantities, estimated prices, total, and web share link to clipboard.   |
+| **SHARE-02**    | Rich Web Share API Integration            | `invokeNativeShare` shares title, checklist summary, and compressed web URL via `navigator.share` with graceful fallback to copy link.             |
+| **SHARE-03**    | Standalone Buy-List JSON Export           | `exportBuyListJsonFile` triggers browser download of `smart-buy-list-YYYY-MM-DD.json` containing active shopping list data.                        |
+| **SHARE-04**    | Zero External QR Network Calls            | `#shareModal` has no QR image container (`#shareQrContainer`), hint text, or third-party image service calls (`api.qrserver.com`).                 |
+| **VER-02**      | PWA v3.9.0 Single-Source Versioning       | `manifest.webmanifest`, `sw.js` cache name (`smart-buy-list-v3.9.0`), and `index.html` version badge synchronized to `3.9.0`.                      |
+| **I18N-02**     | 100% Bilingual Parity for v3.9.0 Keys     | 100% dictionary symmetry between English and Vietnamese for all new share actions, backup labels, and toast strings.                               |
