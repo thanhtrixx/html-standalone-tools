@@ -164,6 +164,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-planning-completion-ledger-comparator.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List GitHub Gist 403 Resiliency, Ledger Price Scaling & UI Polish",
+    file: "tests/smart-buy-list-gist-resiliency-and-ui-polish.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {

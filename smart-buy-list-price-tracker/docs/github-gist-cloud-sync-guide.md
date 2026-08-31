@@ -1,4 +1,4 @@
-# GitHub Gist Cloud Sync Guide — Smart Buy-List (v3.9.0)
+# GitHub Gist Cloud Sync Guide — Smart Buy-List (v3.10.0)
 
 This guide provides step-by-step instructions for configuring, connecting, and utilizing **GitHub Gist Cloud Sync** in Smart Buy-List.
 
@@ -21,7 +21,10 @@ Smart Buy-List is an **offline-first, zero-backend, privacy-centric** Progressiv
 
 ## 🛠️ Step 1: Generate a GitHub Personal Access Token (PAT) (~1 minute)
 
-To allow the browser application to read and write your secret Gist without an intermediate server, generate a GitHub Personal Access Token with the `gist` permission.
+To allow the browser application to read and write your secret Gist without an intermediate server, generate a **Classic GitHub Personal Access Token** with the `gist` permission.
+
+> [!IMPORTANT]
+> **Token Type**: GitHub's Gist REST API only supports **Classic Personal Access Tokens** (prefixed with `ghp_`). Fine-grained Personal Access Tokens (prefixed with `github_pat_`) do not support Gist endpoints and will be rejected with HTTP 403.
 
 ### Method A: 1-Click Pre-Filled Link (Recommended)
 
@@ -41,13 +44,6 @@ To allow the browser application to read and write your secret Gist without an i
 3. Click **Generate new token** > **Generate new token (classic)**.
 4. Set Note to `Smart Buy-List Sync` and check the **`gist`** scope.
 5. Click **Generate token** and copy it.
-
-### Method C: Fine-Grained Personal Access Token
-
-1. Go to **Developer Settings** > **Personal access tokens** > **Fine-grained tokens**.
-2. Click **Generate new token**.
-3. Under **Account permissions**, locate **Gists** and set Access to **Read and write**.
-4. Click **Generate token** and copy it.
 
 ---
 
@@ -111,7 +107,15 @@ Inside Option Hub (⚙️ > Cloud Sync > GitHub Gist), you can perform manual op
 
 ### Q: What scopes does the token need?
 
-> **A:** The token only needs the **`gist`** scope (or Fine-grained **Gists: Read & Write**). It does **not** need access to your repositories, organizations, workflow, or user profile data.
+> **A:** The token needs a Classic Personal Access Token with the **`gist`** scope. It does **not** need access to your repositories, organizations, workflow, or user profile data. Note: Fine-grained tokens are not supported by GitHub's Gist REST API.
+
+### Q: Why do I see an `HTTP 403 Forbidden` error?
+
+> **A:** An HTTP 403 Forbidden error occurs if:
+>
+> 1. You generated a Fine-grained PAT (`github_pat_...`) instead of a Classic PAT (`ghp_...`). GitHub's Gist API only supports Classic PATs.
+> 2. Your Classic PAT was generated without checking the **`gist`** permission checkbox.
+> 3. To fix, click the pre-filled link: **[Generate GitHub Token with `gist` scope](https://github.com/settings/tokens/new?scopes=gist&description=Smart+Buy+List+PWA)**, generate a Classic token, and reconnect.
 
 ### Q: Why do I see a `401 Unauthorized` or `Bad credentials` error?
 

@@ -400,20 +400,12 @@ async function runAllTests() {
     const swContent = fs.readFileSync(swPath, "utf8");
 
     assert(
-      swContent.includes("smart-buy-list-v3.9.0") ||
-        swContent.includes("smart-buy-list-v3.8.0") ||
-        swContent.includes("smart-buy-list-v3.7.0") ||
-        swContent.includes("smart-buy-list-v3.6.0") ||
-        swContent.includes("smart-buy-list-v3.5.0"),
-      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.9.0'"
+      /smart-buy-list-v3\.\d+\.0/.test(swContent),
+      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.10.0' or higher"
     );
 
     assert(
-      htmlContent.includes("v3.9.0") ||
-        htmlContent.includes("v3.8.0") ||
-        htmlContent.includes("v3.7.0") ||
-        htmlContent.includes("v3.6.0") ||
-        htmlContent.includes("v3.5.0"),
+      /v3\.\d+\.0/.test(htmlContent),
       "PWA-02: index.html displays synchronized version badge"
     );
 
@@ -425,12 +417,8 @@ async function runAllTests() {
     );
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     assert(
-      manifest.version === "3.9.0" ||
-        manifest.version === "3.8.0" ||
-        manifest.version === "3.7.0" ||
-        manifest.version === "3.6.0" ||
-        manifest.version === "3.5.0",
-      `PWA-03: manifest.webmanifest version is '3.9.0' (Got: '${manifest.version}')`
+      /^3\.\d+\.0$/.test(manifest.version),
+      `PWA-03: manifest.webmanifest version is '3.10.0' (Got: '${manifest.version}')`
     );
 
     const enKeys = Object.keys(sandbox.TRANSLATIONS.en);

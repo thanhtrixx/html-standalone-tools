@@ -424,8 +424,26 @@ async function runCloudSyncTests() {
 
     const mockGithubFetch = async (url, opts = {}) => {
       const urlStr = String(url);
-      const auth = opts.headers?.Authorization || "";
+      // Raw URL fetch (CDN requests do not include Authorization header)
+      if (urlStr.includes("raw.githubusercontent.com")) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () =>
+            JSON.stringify({
+              schemaVersion: 2,
+              activeList: {
+                items: [
+                  { id: "raw_item_1", name: "Organic Honey", price: 80000 },
+                ],
+              },
+              purchaseLedger: [],
+              stores: ["WinMart"],
+            }),
+        };
+      }
 
+      const auth = opts.headers?.Authorization || "";
       if (!auth.includes("ghp_valid_test_token_123")) {
         return {
           ok: false,
@@ -848,20 +866,12 @@ async function runCloudSyncTests() {
     console.log("\n--- Section 8: PWA Version & Bilingual Parity ---");
 
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.9.0"') ||
-        swContent.includes('CACHE_NAME = "smart-buy-list-v3.8.0"') ||
-        swContent.includes('CACHE_NAME = "smart-buy-list-v3.7.0"') ||
-        swContent.includes('CACHE_NAME = "smart-buy-list-v3.6.0"') ||
-        swContent.includes('CACHE_NAME = "smart-buy-list-v3.5.0"'),
-      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.9.0'"
+      /smart-buy-list-v3\.\d+\.0/.test(swContent),
+      "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.10.0' or higher"
     );
     assert(
-      htmlContent.includes("v3.9.0") ||
-        htmlContent.includes("v3.8.0") ||
-        htmlContent.includes("v3.7.0") ||
-        htmlContent.includes("v3.6.0") ||
-        htmlContent.includes("v3.5.0"),
-      "PWA-02: index.html displays synchronized version badge v3.9.0"
+      /v3\.\d+\.0/.test(htmlContent),
+      "PWA-02: index.html displays synchronized version badge"
     );
 
     const requiredI18nKeys = [

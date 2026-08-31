@@ -349,7 +349,7 @@
             id="langToggleBtn"
             onclick="toggleLanguage()"
             class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-bold border border-slate-700 transition-colors"
-            title="Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)"
+            title="Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)"
           >
             🇻🇳
           </button>
@@ -803,6 +803,12 @@
             </button>
           </div>
         </div>
+
+        <!-- Horizontal Scrollable Store Filter Chips (1-Tap Fast Filter) -->
+        <div
+          id="storeFilterChips"
+          class="flex items-center gap-1.5 overflow-x-auto py-1 custom-scroll no-scrollbar -mx-1 px-1"
+        ></div>
 
         <!-- Horizontal Scrollable Department / Aisle Filter Chips -->
         <div
@@ -1592,9 +1598,7 @@
               class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
             >
               <span>🛒</span>
-              <span id="btnTextAddSelectedLedger"
-                >Add Selected to Buy List</span
-              >
+              <span id="btnTextAddSelectedLedger">Add to Buy List</span>
             </button>
             <button
               type="button"
@@ -1932,8 +1936,8 @@
                 onchange="setLanguage(this.value)"
                 class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:ring-1 focus:ring-emerald-500"
               >
-                <option value="en">English (EN)</option>
-                <option value="vi">Tiếng Việt (VI)</option>
+                <option value="vi">🇻🇳 Việt Nam (Tiếng Việt)</option>
+                <option value="en">🇺🇸 United States (English)</option>
               </select>
             </div>
 
@@ -2227,7 +2231,7 @@
                 <input
                   type="password"
                   id="githubTokenInput"
-                  placeholder="ghp_... or github_pat_..."
+                  placeholder="ghp_... (Classic PAT with 'gist' scope)"
                   class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
                 />
                 <button
@@ -2352,7 +2356,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.9.0</span
+              >v3.10.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -3530,20 +3534,36 @@
         }
 
         async validateToken(token) {
+          if (!token || typeof token !== "string") {
+            throw new Error("Missing GitHub Personal Access Token");
+          }
+          const trimmed = token.trim();
+          if (trimmed.startsWith("github_pat_")) {
+            throw new Error(
+              "Fine-grained tokens (github_pat_...) are not supported for Gists by GitHub. Please create a Classic PAT with 'gist' scope (ghp_...)."
+            );
+          }
           const res = await fetch("https://api.github.com/user", {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${trimmed}`,
               Accept: "application/vnd.github+json",
               "X-GitHub-Api-Version": "2022-11-28",
             },
           });
           if (!res.ok) {
-            throw new Error(`Invalid token: HTTP ${res.status}`);
+            const errData = await res.json().catch(() => null);
+            const msg = errData?.message || `HTTP ${res.status}`;
+            throw new Error(`GitHub auth failed: ${msg}`);
           }
           const scopes =
             res.headers && typeof res.headers.get === "function"
               ? res.headers.get("x-oauth-scopes") || ""
               : "";
+          if (scopes && !scopes.includes("gist")) {
+            throw new Error(
+              "GitHub token is missing the 'gist' scope. Please generate a Classic PAT with the 'gist' permission checkbox enabled."
+            );
+          }
           const user = await res.json();
           return { user, scopes };
         }
@@ -3612,8 +3632,10 @@
             }),
           });
           if (!createRes.ok) {
+            const errData = await createRes.json().catch(() => null);
+            const detail = errData?.message ? `: ${errData.message}` : "";
             throw new Error(
-              `Failed to create secret Gist: HTTP ${createRes.status}`
+              `Failed to create secret Gist: HTTP ${createRes.status}${detail}`
             );
           }
           const createdGist = await createRes.json();
@@ -3629,7 +3651,9 @@
             },
           });
           if (!res.ok) {
-            throw new Error(`Failed to read Gist: HTTP ${res.status}`);
+            const errData = await res.json().catch(() => null);
+            const detail = errData?.message ? `: ${errData.message}` : "";
+            throw new Error(`Failed to read Gist: HTTP ${res.status}${detail}`);
           }
           const gist = await res.json();
           const file = gist.files && gist.files[this.filename];
@@ -3639,11 +3663,8 @@
 
           let contentText = file.content;
           if ((file.truncated || !contentText) && file.raw_url) {
-            const rawRes = await fetch(file.raw_url, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
+            // Strip Authorization header when fetching raw CDN URL to prevent 403 / CORS rejection
+            const rawRes = await fetch(file.raw_url);
             if (rawRes.ok) {
               contentText = await rawRes.text();
             }
@@ -3684,7 +3705,11 @@
             }),
           });
           if (!res.ok) {
-            throw new Error(`Failed to update Gist: HTTP ${res.status}`);
+            const errData = await res.json().catch(() => null);
+            const detail = errData?.message ? `: ${errData.message}` : "";
+            throw new Error(
+              `Failed to update Gist: HTTP ${res.status}${detail}`
+            );
           }
           return res.json();
         }
@@ -4059,10 +4084,12 @@
           updateGithubGistUI();
         } catch (err) {
           console.error("GitHub connect error:", err);
-          showToast(
-            tr.toast_github_token_invalid ||
-              "Invalid GitHub token or missing gist scope"
-          );
+          const errMsg =
+            err && err.message
+              ? err.message
+              : tr.toast_github_token_invalid ||
+                "Invalid GitHub token or missing gist scope";
+          showToast(errMsg);
           updateSyncStatusUI("error");
         }
       }
@@ -4697,7 +4724,7 @@
           ledger_deselect_all: "Deselect All",
           ledger_selected_count: "{count} items selected",
           ledger_selected_total: "Est. Total: {total}",
-          btn_add_selected_ledger: "Add Selected to Buy List",
+          btn_add_selected_ledger: "Add to Buy List",
           toast_items_added_to_list: "Added {count} items to Buy List!",
           toast_item_added_to_list: "Added '{item}' to Buy List!",
           toast_item_qty_incremented:
@@ -4807,9 +4834,10 @@
           toast_batch_items_added: "Added {count} items to Buy List!",
           toast_action_undo: "Undo",
           toast_item_undone: "Removed '{item}' from Buy List",
-          lang_flag_toggle_vi: "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)",
+          lang_flag_toggle_vi:
+            "Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)",
           lang_flag_toggle_en:
-            "Language: English (Click to switch to Tiếng Việt)",
+            "Language: 🇺🇸 United States (English) — Click to switch to 🇻🇳 Việt Nam (Tiếng Việt)",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -4985,7 +5013,7 @@
           ledger_deselect_all: "Bỏ chọn tất cả",
           ledger_selected_count: "Đã chọn {count} mục",
           ledger_selected_total: "Ước tính: {total}",
-          btn_add_selected_ledger: "Thêm mục đã chọn vào danh sách",
+          btn_add_selected_ledger: "Thêm vào danh sách mua",
           toast_items_added_to_list: "Đã thêm {count} món vào danh sách mua!",
           toast_item_added_to_list: "Đã thêm '{item}' vào danh sách mua!",
           toast_item_qty_incremented:
@@ -5101,9 +5129,10 @@
           toast_batch_items_added: "Đã thêm {count} món vào danh sách mua!",
           toast_action_undo: "Hoàn Tác",
           toast_item_undone: "Đã hoàn tác '{item}' khỏi danh sách",
-          lang_flag_toggle_vi: "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)",
+          lang_flag_toggle_vi:
+            "Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)",
           lang_flag_toggle_en:
-            "Language: English (Click to switch to Tiếng Việt)",
+            "Language: 🇺🇸 United States (English) — Click to switch to 🇻🇳 Việt Nam (Tiếng Việt)",
         },
       };
 
@@ -5685,6 +5714,87 @@
         reader.readAsText(file);
       }
 
+      function renderStoreFilterChips() {
+        const container = document.getElementById("storeFilterChips");
+        if (!container) return;
+
+        const stores = memoryState.stores || DEFAULT_STORES;
+        const items = memoryState.activeList.items;
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+
+        const allChip = {
+          key: "ALL",
+          label: t.store_all || "All Stores",
+          icon: "🏬",
+          count: items.length,
+        };
+
+        const storeChips = stores.map((s) => ({
+          key: s,
+          label: s,
+          icon: "🏪",
+          count: items.filter((i) => i.store === s).length,
+        }));
+
+        let html = `
+          <button
+            type="button"
+            onclick="onStoreFilterChange('ALL')"
+            class="px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1 cursor-pointer ${
+              currentStoreFilter === "ALL"
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "bg-slate-800 text-slate-300 hover:bg-slate-700"
+            }"
+          >
+            <span>${allChip.icon}</span>
+            <span>${allChip.label}</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full ${
+              currentStoreFilter === "ALL"
+                ? "bg-emerald-700 text-emerald-100"
+                : "bg-slate-700 text-slate-300"
+            }">${allChip.count}</span>
+          </button>
+        `;
+
+        storeChips.forEach((chip) => {
+          const isActive = currentStoreFilter === chip.key;
+          const escapedKey = chip.key.replace(/'/g, "\\'");
+          html += `
+            <button
+              type="button"
+              onclick="onStoreFilterChange('${escapedKey}')"
+              class="px-2.5 py-1 rounded-full text-xs shrink-0 transition-all flex items-center gap-1 cursor-pointer ${
+                isActive
+                  ? "bg-emerald-600 text-white shadow-sm font-semibold"
+                  : "bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium"
+              }"
+            >
+              <span>${chip.icon}</span>
+              <span>${chip.label}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full ${
+                isActive
+                  ? "bg-emerald-700 text-emerald-100"
+                  : "bg-slate-700 text-slate-300"
+              }">${chip.count}</span>
+            </button>
+          `;
+        });
+
+        html += `
+          <button
+            type="button"
+            onclick="openStoreManagerModal()"
+            class="px-2.5 py-1 rounded-full text-xs font-medium shrink-0 transition-all flex items-center gap-1 bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-700 border border-dashed border-slate-700 cursor-pointer"
+            title="${t.manage_stores_title || "Manage Stores..."}"
+          >
+            <span>⚙️</span>
+            <span>${t.manage_stores_title || "Manage Stores..."}</span>
+          </button>
+        `;
+
+        container.innerHTML = html;
+      }
+
       function renderCategoryFilterChips() {
         const container = document.getElementById("categoryFilterChips");
         if (!container) return;
@@ -5822,6 +5932,7 @@
         renderCategoryOptions();
         renderUnitOptions();
         renderStoreFilterOptions();
+        renderStoreFilterChips();
         renderCategoryFilterChips();
         renderKpis();
         renderItemList();
@@ -8132,8 +8243,9 @@
         if (existing) {
           const incQty = parseFloat(entry.quantity) || 1;
           existing.quantity = (parseFloat(existing.quantity) || 0) + incQty;
-          if (entry.price) existing.price = parseFloat(entry.price);
-          if (entry.unit) existing.unit = entry.unit;
+          const incPrice = parseFloat(entry.price) || 0;
+          existing.price = (parseFloat(existing.price) || 0) + incPrice;
+          if (entry.unit && !existing.unit) existing.unit = entry.unit;
           if (entry.store && (!existing.store || existing.store === "—")) {
             existing.store = entry.store;
           }
@@ -8504,9 +8616,9 @@
           langBtn.title =
             currentLanguage === "vi"
               ? (t && t.lang_flag_toggle_vi) ||
-                "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)"
+                "Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)"
               : (t && t.lang_flag_toggle_en) ||
-                "Language: English (Click to switch to Tiếng Việt)";
+                "Language: 🇺🇸 United States (English) — Click to switch to 🇻🇳 Việt Nam (Tiếng Việt)";
         }
         const langSelect = document.getElementById("settingsLanguageSelect");
         if (langSelect) langSelect.value = currentLanguage;
@@ -8615,9 +8727,9 @@
           langBtn.title =
             currentLanguage === "vi"
               ? t.lang_flag_toggle_vi ||
-                "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)"
+                "Ngôn ngữ: 🇻🇳 Việt Nam (Tiếng Việt) — Bấm để đổi sang 🇺🇸 United States (English)"
               : t.lang_flag_toggle_en ||
-                "Language: English (Click to switch to Tiếng Việt)";
+                "Language: 🇺🇸 United States (English) — Click to switch to 🇻🇳 Việt Nam (Tiếng Việt)";
         }
         el("tripSummaryHeading", t.trip_summary_heading || "Shopping Trip");
         el("labelStoreFilter", t.store_filter || "Store:");
@@ -9557,6 +9669,7 @@
         window.handleSmartQuickPaste = handleSmartQuickPaste;
         window.toggleAdvancedAddForm = toggleAdvancedAddForm;
         window.undoLastAction = undoLastAction;
+        window.renderStoreFilterChips = renderStoreFilterChips;
         window.renderQuickPriceAdjustmentChips =
           renderQuickPriceAdjustmentChips;
         window.initApp = initApp;
