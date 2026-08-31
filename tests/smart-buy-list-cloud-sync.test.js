@@ -620,12 +620,13 @@ async function runCloudSyncTests() {
     console.log("\n--- Section 7: PWA Version & Bilingual Parity ---");
 
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.3.0"'),
-      "PWA-01: sw.js bumps CACHE_NAME to 'smart-buy-list-v3.3.0'"
+      swContent.includes('CACHE_NAME = "smart-buy-list-v3.3.0"') ||
+        swContent.includes('CACHE_NAME = "smart-buy-list-v3.4.0"'),
+      "PWA-01: sw.js bumps CACHE_NAME to 'smart-buy-list-v3.3.0' or higher"
     );
     assert(
-      htmlContent.includes("v3.3.0"),
-      "PWA-02: index.html displays synchronized version badge v3.3.0"
+      htmlContent.includes("v3.3.0") || htmlContent.includes("v3.4.0"),
+      "PWA-02: index.html displays synchronized version badge v3.3.0 or higher"
     );
 
     const requiredI18nKeys = [

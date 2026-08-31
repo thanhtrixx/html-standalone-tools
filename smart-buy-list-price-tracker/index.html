@@ -348,10 +348,10 @@
           <button
             id="langToggleBtn"
             onclick="toggleLanguage()"
-            class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold border border-slate-700 transition-colors"
-            title="Toggle Language"
+            class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm font-bold border border-slate-700 transition-colors"
+            title="Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)"
           >
-            VI
+            🇻🇳
           </button>
 
           <!-- Theme Toggle -->
@@ -367,7 +367,7 @@
           <!-- Share Button -->
           <button
             onclick="openShareModal()"
-            class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+            class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
             title="Share List"
           >
             <span>📤</span>
@@ -400,36 +400,6 @@
 
     <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
     <main class="max-w-3xl mx-auto px-4 py-4 space-y-4">
-      <!-- Sample Data Onboarding Banner -->
-      <div
-        id="sampleDataBanner"
-        class="hidden bg-emerald-950/60 border border-emerald-800/80 rounded-xl p-3.5 flex items-center justify-between gap-3 text-xs sm:text-sm"
-      >
-        <div class="flex items-center gap-2 text-emerald-200">
-          <span class="text-base">✨</span>
-          <span id="sampleDataText"
-            >Sample grocery items loaded! Explore unit prices & historical deal
-            ratings.</span
-          >
-        </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <button
-            id="btnKeepSample"
-            onclick="dismissSampleBanner()"
-            class="text-slate-400 hover:text-slate-200 underline"
-          >
-            Keep
-          </button>
-          <button
-            id="btnClearSample"
-            onclick="clearAllData(true)"
-            class="px-2.5 py-1 bg-red-900/60 hover:bg-red-800 text-red-200 rounded-md font-medium border border-red-700/50"
-          >
-            Clear
-          </button>
-        </div>
-      </div>
-
       <!-- ==================== TRIP LIFECYCLE CONTROLLER ==================== -->
       <section
         class="bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-sm space-y-3"
@@ -542,10 +512,98 @@
         </div>
       </section>
 
-      <!-- ==================== QUICK ITEM ADD FORM (PLANNING MODE) ==================== -->
+      <!-- ==================== SMART QUICK-ENTRY OMNIBOX (PLANNING MODE) ==================== -->
+      <section
+        id="smartQuickSection"
+        class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-2.5 shadow-sm"
+      >
+        <div class="flex items-center justify-between">
+          <h2
+            id="smartQuickHeading"
+            class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5"
+          >
+            <span>⚡</span>
+            <span id="smartQuickHeadingText">Nhập Nhanh Mặt Hàng</span>
+          </h2>
+          <button
+            type="button"
+            onclick="toggleAdvancedAddForm()"
+            class="text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
+            id="btnToggleAdvancedAdd"
+          >
+            <span>⚙️</span>
+            <span id="btnToggleAdvancedAddText">Tuỳ chọn chi tiết</span>
+            <span id="advancedToggleChevron">▾</span>
+          </button>
+        </div>
+
+        <!-- Smart Omnibox Input Form -->
+        <form
+          id="smartQuickForm"
+          onsubmit="
+            event.preventDefault();
+            handleSmartQuickInputSubmit();
+          "
+          class="space-y-2"
+        >
+          <div class="relative flex items-center gap-1.5">
+            <input
+              type="text"
+              id="smartQuickInput"
+              placeholder="Nhập nhanh vd: Sữa tươi 35k/l, Thịt bò 120k 500g, Trứng 30k 10 quả..."
+              autocomplete="off"
+              oninput="handleSmartQuickInputChange(this.value)"
+              onpaste="handleSmartQuickPaste(event)"
+              class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
+            />
+            <button
+              type="submit"
+              id="btnSmartQuickAdd"
+              class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center justify-center shrink-0 cursor-pointer"
+              title="Thêm vào danh sách (Enter)"
+            >
+              <span>➕</span>
+            </button>
+          </div>
+
+          <!-- Real-Time Interpretation Live Preview Pill -->
+          <div
+            id="smartQuickPreview"
+            class="hidden text-xs bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 flex items-center justify-between flex-wrap gap-2 transition-all"
+          >
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="smartPreviewName" class="font-bold text-white"></span>
+              <span
+                id="smartPreviewQtyUnit"
+                class="text-slate-400 font-medium"
+              ></span>
+              <span
+                id="smartPreviewPrice"
+                class="text-emerald-400 font-semibold"
+              ></span>
+              <span
+                id="smartPreviewStore"
+                class="text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md"
+              ></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span
+                id="smartPreviewCategory"
+                class="text-[11px] text-slate-400 font-medium"
+              ></span>
+              <span
+                id="smartPreviewUnitPrice"
+                class="text-[11px] text-emerald-400/90 font-semibold"
+              ></span>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- ==================== DETAILED ITEM ADD FORM (COLLAPSIBLE) ==================== -->
       <section
         id="addItemSection"
-        class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3"
+        class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3"
       >
         <div class="flex items-center justify-between">
           <h2
@@ -1739,48 +1797,51 @@
             >
               Quick Price Adjust:
             </div>
-            <div class="flex items-center gap-1.5 justify-center flex-wrap">
+            <div
+              id="quickPriceAdjustChipsContainer"
+              class="flex items-center gap-1.5 justify-center flex-wrap"
+            >
               <button
                 type="button"
-                onclick="stepQuickPrice(-1.0)"
-                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors active:scale-95"
+                onclick="stepQuickPrice(-50000)"
+                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
               >
-                -1.00
+                -50k
               </button>
               <button
                 type="button"
-                onclick="stepQuickPrice(-0.5)"
-                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors active:scale-95"
+                onclick="stepQuickPrice(-10000)"
+                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
               >
-                -0.50
+                -10k
               </button>
               <button
                 type="button"
-                onclick="stepQuickPrice(-0.25)"
-                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors active:scale-95"
+                onclick="stepQuickPrice(-5000)"
+                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
               >
-                -0.25
+                -5k
               </button>
               <button
                 type="button"
-                onclick="stepQuickPrice(+0.25)"
-                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg border border-slate-700 transition-colors active:scale-95"
+                onclick="stepQuickPrice(5000)"
+                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
               >
-                +0.25
+                +5k
               </button>
               <button
                 type="button"
-                onclick="stepQuickPrice(+0.5)"
-                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg border border-slate-700 transition-colors active:scale-95"
+                onclick="stepQuickPrice(10000)"
+                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
               >
-                +0.50
+                +10k
               </button>
               <button
                 type="button"
-                onclick="stepQuickPrice(+1.0)"
-                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg border border-slate-700 transition-colors active:scale-95"
+                onclick="stepQuickPrice(50000)"
+                class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
               >
-                +1.00
+                +50k
               </button>
             </div>
           </div>
@@ -2195,7 +2256,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.3.0</span
+              >v3.4.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -2312,6 +2373,11 @@
         box: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
         can: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
         bunch: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        loc: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        thung: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        khay: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        tui: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
+        hu: { dimension: DIMENSIONS.COUNT, baseUnit: "ea", multiplier: 1.0 },
       };
 
       const UNIT_GROUPS = [
@@ -2344,9 +2410,18 @@
           units: [
             { key: "ea", en: "ea (Piece / Unit)", vi: "ea (Cái / Quả / Trái)" },
             { key: "pk", en: "pk (Pack)", vi: "pk (Gói / Bịch)" },
-            { key: "box", en: "box (Box)", vi: "box (Hộp / Thùng)" },
+            { key: "box", en: "box (Box)", vi: "box (Hộp)" },
             { key: "can", en: "can (Can / Bottle)", vi: "can (Lon / Chai)" },
             { key: "bunch", en: "bunch (Bunch)", vi: "bunch (Bó / Nải)" },
+            { key: "loc", en: "loc (Pack of 4/6)", vi: "loc (Lốc 4/6)" },
+            {
+              key: "thung",
+              en: "thung (Carton / Case)",
+              vi: "thung (Thùng / Két)",
+            },
+            { key: "khay", en: "khay (Tray)", vi: "khay (Khay)" },
+            { key: "tui", en: "tui (Bag)", vi: "tui (Túi)" },
+            { key: "hu", en: "hu (Jar / Pot)", vi: "hu (Hũ / Lọ)" },
           ],
         },
       ];
@@ -2630,24 +2705,24 @@
       let dbInstance = null;
 
       const DEFAULT_STORES = [
-        "Costco",
-        "Trader Joe's",
-        "Target",
-        "Whole Foods",
         "WinMart",
-        "Bach Hoa Xanh",
-        "Local Market",
+        "Bách Hoá Xanh",
+        "Co.opmart",
+        "Big C / GO!",
+        "Lotte Mart",
+        "Chợ truyền thống",
+        "Cửa hàng tiện lợi",
       ];
 
       // In-memory fallback / active working state
       let memoryState = {
-        activeList: { id: "default", title: "Weekly Groceries", items: [] },
+        activeList: { id: "default", title: "Danh Sách Mua Sắm", items: [] },
         catalog: [],
         purchaseLedger: [],
         stores: [...DEFAULT_STORES],
         settings: {
-          language: "en",
-          currency: "USD",
+          language: "vi",
+          currency: "VND",
           theme: "dark",
           tripPhase: "PLANNING",
           grouping: "AISLE",
@@ -3730,6 +3805,18 @@
           toast_cloud_disconnected: "Disconnected from Google Drive.",
           toast_sample_loaded: "Sample grocery list loaded!",
           toast_data_cleared: "All data cleared",
+          smart_quick_heading: "Quick Add Item",
+          smart_quick_placeholder:
+            "Quick add e.g. Whole Milk 35k/l, Beef 120k 500g, Eggs 30k 10 ea...",
+          smart_quick_advanced_toggle: "Detailed Options",
+          smart_quick_add_btn: "Add Item",
+          toast_smart_item_added: "Added '{item}' ({qty} {unit} @ {price})!",
+          toast_batch_items_added: "Added {count} items to Buy List!",
+          toast_action_undo: "Undo",
+          toast_item_undone: "Removed '{item}' from Buy List",
+          lang_flag_toggle_vi: "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)",
+          lang_flag_toggle_en:
+            "Language: English (Click to switch to Tiếng Việt)",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -3971,6 +4058,18 @@
           toast_cloud_disconnected: "Đã ngắt kết nối với Google Drive.",
           toast_sample_loaded: "Đã tải danh sách hàng hoá mẫu!",
           toast_data_cleared: "Đã xoá toàn bộ dữ liệu",
+          smart_quick_heading: "Nhập Nhanh Mặt Hàng",
+          smart_quick_placeholder:
+            "Nhập nhanh vd: Sữa tươi 35k/l, Thịt bò 120k 500g, Trứng 30k 10 quả...",
+          smart_quick_advanced_toggle: "Tuỳ Chọn Chi Tiết",
+          smart_quick_add_btn: "Thêm Mặt Hàng",
+          toast_smart_item_added: "Đã thêm '{item}' ({qty} {unit} - {price})!",
+          toast_batch_items_added: "Đã thêm {count} món vào danh sách mua!",
+          toast_action_undo: "Hoàn Tác",
+          toast_item_undone: "Đã hoàn tác '{item}' khỏi danh sách",
+          lang_flag_toggle_vi: "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)",
+          lang_flag_toggle_en:
+            "Language: English (Click to switch to Tiếng Việt)",
         },
       };
 
@@ -3980,52 +4079,62 @@
       const SAMPLE_ITEMS = [
         {
           id: "1",
-          name: "Fresh Whole Milk",
+          name: "Sữa tươi tiệt trùng Vinamilk",
           category: "dairy_eggs",
-          store: "Costco",
-          quantity: 2,
-          unit: "l",
-          price: 3.5,
+          store: "WinMart",
+          quantity: 1,
+          unit: "L",
+          price: 36000,
           checked: false,
         },
         {
           id: "2",
-          name: "Organic Free-Range Eggs",
+          name: "Trứng gà tươi Ba Huân",
           category: "dairy_eggs",
-          store: "Trader Joe's",
-          quantity: 12,
+          store: "Bách Hoá Xanh",
+          quantity: 10,
           unit: "ea",
-          price: 4.2,
+          price: 32000,
           checked: false,
         },
         {
           id: "3",
-          name: "Jasmine Fragrant Rice",
+          name: "Gạo thơm ST25",
           category: "pantry",
-          store: "Costco",
+          store: "Co.opmart",
           quantity: 5,
           unit: "kg",
-          price: 9.99,
+          price: 185000,
           checked: false,
         },
         {
           id: "4",
-          name: "Extra Virgin Olive Oil",
+          name: "Dầu ăn thực vật Simply",
           category: "pantry",
-          store: "Trader Joe's",
+          store: "Big C / GO!",
           quantity: 1,
-          unit: "l",
-          price: 8.5,
+          unit: "L",
+          price: 58000,
           checked: false,
         },
         {
           id: "5",
-          name: "Arabica Coffee Beans",
-          category: "beverages",
-          store: "Local Market",
+          name: "Thịt heo ba chỉ tươi",
+          category: "meat_seafood",
+          store: "Chợ truyền thống",
           quantity: 500,
           unit: "g",
-          price: 6.8,
+          price: 75000,
+          checked: false,
+        },
+        {
+          id: "6",
+          name: "Rau muống xanh",
+          category: "produce",
+          store: "Chợ truyền thống",
+          quantity: 1,
+          unit: "bunch",
+          price: 12000,
           checked: false,
         },
       ];
@@ -4034,57 +4143,57 @@
         {
           id: 1,
           itemId: "1",
-          itemName: "Fresh Whole Milk",
-          store: "Costco",
+          itemName: "Sữa tươi tiệt trùng Vinamilk",
+          store: "WinMart",
           date: "2026-07-15",
-          quantity: 2,
-          unit: "l",
-          price: 3.4,
-          unitPrice: 1.7,
+          quantity: 1,
+          unit: "L",
+          price: 35000,
+          unitPrice: 35000,
         },
         {
           id: 2,
           itemId: "1",
-          itemName: "Fresh Whole Milk",
-          store: "Trader Joe's",
+          itemName: "Sữa tươi tiệt trùng Vinamilk",
+          store: "Bách Hoá Xanh",
           date: "2026-08-01",
           quantity: 1,
-          unit: "l",
-          price: 1.95,
-          unitPrice: 1.95,
+          unit: "L",
+          price: 36000,
+          unitPrice: 36000,
         },
         {
           id: 3,
           itemId: "3",
-          itemName: "Jasmine Fragrant Rice",
-          store: "Costco",
+          itemName: "Gạo thơm ST25",
+          store: "Co.opmart",
           date: "2026-06-20",
           quantity: 5,
           unit: "kg",
-          price: 9.5,
-          unitPrice: 1.9,
+          price: 180000,
+          unitPrice: 36000,
         },
         {
           id: 4,
           itemId: "4",
-          itemName: "Extra Virgin Olive Oil",
-          store: "Costco",
+          itemName: "Dầu ăn thực vật Simply",
+          store: "Big C / GO!",
           date: "2026-07-10",
-          quantity: 2,
-          unit: "l",
-          price: 16.0,
-          unitPrice: 8.0,
+          quantity: 1,
+          unit: "L",
+          price: 56000,
+          unitPrice: 56000,
         },
         {
           id: 5,
           itemId: "5",
-          itemName: "Arabica Coffee Beans",
-          store: "Local Market",
+          itemName: "Thịt heo ba chỉ tươi",
+          store: "Chợ truyền thống",
           date: "2026-08-10",
           quantity: 500,
           unit: "g",
-          price: 7.0,
-          unitPrice: 14.0,
+          price: 70000,
+          unitPrice: 140000,
         },
       ];
 
@@ -4125,8 +4234,8 @@
       let currentPhase = "PLANNING";
       let currentGrouping = "AISLE";
       let currentStoreFilter = "ALL";
-      let currentLanguage = "en";
-      let currentCurrency = "USD";
+      let currentLanguage = "vi";
+      let currentCurrency = "VND";
 
       function setTripPhase(phase) {
         currentPhase = phase;
@@ -4138,6 +4247,7 @@
         const tabInStore = document.getElementById("tabInStore");
         const finishBar = document.getElementById("finishTripBar");
         const addItemSection = document.getElementById("addItemSection");
+        const smartQuickSection = document.getElementById("smartQuickSection");
 
         const navPlanningPill = document.getElementById("navPlanningPill");
         const navBuyModePill = document.getElementById("navBuyModePill");
@@ -4154,7 +4264,7 @@
               "px-3 py-1 rounded-lg transition-all text-slate-400 hover:text-slate-200";
           }
           if (finishBar) finishBar.classList.add("hidden");
-          if (addItemSection) addItemSection.classList.remove("hidden");
+          if (smartQuickSection) smartQuickSection.classList.remove("hidden");
 
           if (navPlanningPill) {
             navPlanningPill.className =
@@ -4180,6 +4290,7 @@
               "px-3 py-1 rounded-lg transition-all bg-emerald-600 text-white shadow-sm";
           }
           if (finishBar) finishBar.classList.remove("hidden");
+          if (smartQuickSection) smartQuickSection.classList.add("hidden");
           if (addItemSection) addItemSection.classList.add("hidden");
 
           if (navPlanningPill) {
@@ -5297,6 +5408,579 @@
       }
 
       /* =========================================================================
+       6.5. SMART QUICK-ENTRY OMNIBOX & NLP PARSER ENGINE (ADR-0013)
+       ========================================================================= */
+      let lastAddedItemsStack = [];
+
+      function toggleAdvancedAddForm() {
+        const form = document.getElementById("addItemSection");
+        const chevron = document.getElementById("advancedToggleChevron");
+        if (form) {
+          const isHidden = form.classList.contains("hidden");
+          if (isHidden) {
+            form.classList.remove("hidden");
+            if (chevron) chevron.textContent = "▴";
+          } else {
+            form.classList.add("hidden");
+            if (chevron) chevron.textContent = "▾";
+          }
+        }
+      }
+
+      function normalizeUnitCode(raw) {
+        if (!raw) return null;
+        const s = raw.toLowerCase().trim();
+        if (
+          s === "kg" ||
+          s === "kí" ||
+          s === "ký" ||
+          s === "kilogram" ||
+          s === "kilogam"
+        )
+          return "kg";
+        if (s === "g" || s === "gr" || s === "gam" || s === "gram") return "g";
+        if (s === "lb" || s === "lbs" || s === "pound") return "lb";
+        if (s === "oz" || s === "ounce") return "oz";
+        if (
+          s === "l" ||
+          s === "lit" ||
+          s === "lít" ||
+          s === "litre" ||
+          s === "liter"
+        )
+          return "L";
+        if (
+          s === "ml" ||
+          s === "mililit" ||
+          s === "mililít" ||
+          s === "millilitre"
+        )
+          return "ml";
+        if (s === "gal" || s === "gallon") return "gal";
+        if (s === "fl oz" || s === "fl_oz" || s === "floz") return "fl oz";
+        if (s === "loc" || s === "lốc") return "loc";
+        if (s === "thung" || s === "thùng" || s === "ket" || s === "két")
+          return "thung";
+        if (s === "khay") return "khay";
+        if (s === "tui" || s === "túi" || s === "bich" || s === "bịch")
+          return "tui";
+        if (s === "hu" || s === "hũ" || s === "lo" || s === "lọ") return "hu";
+        if (
+          s === "bunch" ||
+          s === "bo" ||
+          s === "bó" ||
+          s === "nai" ||
+          s === "nải"
+        )
+          return "bunch";
+        if (
+          s === "can" ||
+          s === "lon" ||
+          s === "chai" ||
+          s === "btl" ||
+          s === "bottle"
+        )
+          return "can";
+        if (s === "box" || s === "hop" || s === "hộp") return "box";
+        if (s === "pk" || s === "pack" || s === "goi" || s === "gói")
+          return "pk";
+        if (
+          s === "ea" ||
+          s === "cai" ||
+          s === "cái" ||
+          s === "qua" ||
+          s === "quả" ||
+          s === "trai" ||
+          s === "trái" ||
+          s === "unit" ||
+          s === "trung" ||
+          s === "trứng"
+        )
+          return "ea";
+        return null;
+      }
+
+      function classifyGroceryCategory(name) {
+        if (!name) return "other";
+        const n = name.toLowerCase();
+
+        // Produce & Fruits
+        if (
+          /rau|củ|quả|trái|cà chua|dưa|khoai|cà rốt|táo|chuối|cam|xà lách|hành|tỏi|ớt|nấm|xoài|thanh long|bưởi|chanh|bắp|ngô|nho|dâu|súp lơ|bông cải|mướp|bầu|bí|gừng|sả/i.test(
+            n
+          ) ||
+          /produce|fruit|vegetable|apple|banana|orange|potato|tomato|onion|garlic/i.test(
+            n
+          )
+        ) {
+          return "produce";
+        }
+
+        // Dairy & Eggs
+        if (
+          /sữa|trứng|bơ|phô mai|phô-mai|sữa chua|yaourt|vinamilk|th true milk|ba huân|cheese|milk|egg|butter|yogurt/i.test(
+            n
+          )
+        ) {
+          return "dairy_eggs";
+        }
+
+        // Meat & Seafood
+        if (
+          /thịt|bò|heo|lợn|gà|vịt|cá|tôm|mực|cua|nghêu|sò|ốc|sườn|ba chỉ|nạc|bắp bò|ức gà|giò sống|chả|xúc xích|pork|beef|chicken|fish|seafood|shrimp|meat/i.test(
+            n
+          )
+        ) {
+          return "meat_seafood";
+        }
+
+        // Bakery & Bread
+        if (
+          /bánh mì|sandwich|bánh ngọt|toast|bread|croissant|hamburger|bánh bao|bông lan/i.test(
+            n
+          )
+        ) {
+          return "bakery";
+        }
+
+        // Pantry, Rice & Grains
+        if (
+          /gạo|dầu ăn|nước mắm|nước tương|xì dầu|tương ớt|gia vị|muối|đường|mì|hảo hảo|hạt nêm|tiêu|bột ngọt|ngũ cốc|st25|simply|nam ngư|chinsu|cholimex|maggi|ketchup|oil|rice|spice|flour|sugar|salt/i.test(
+            n
+          )
+        ) {
+          return "pantry";
+        }
+
+        // Beverages & Coffee
+        if (
+          /nước ngọt|bia|trà|cà phê|cafe|nước suối|pepsi|coca|coke|sting|heineken|tiger|lavie|aquafina|7up|mirinda|redbull|coffee|tea|beer|beverage|water|juice|wine/i.test(
+            n
+          )
+        ) {
+          return "beverages";
+        }
+
+        // Frozen
+        if (
+          /đông lạnh|kem|chả giò đông lạnh|cá viên|bò viên|frozen|ice cream|dumpling/i.test(
+            n
+          )
+        ) {
+          return "frozen";
+        }
+
+        // Household & Cleaning
+        if (
+          /nước rửa chén|bột giặt|nước giặt|nước xả|nước lau nhà|khăn giấy|giấy vệ sinh|túi rác|xà bông|xà phòng|sunlight|omo|comfort|downy|vim|detergent|cleaner|paper/i.test(
+            n
+          )
+        ) {
+          return "household";
+        }
+
+        // Personal Care
+        if (
+          /dầu gội|sữa tắm|kem đánh răng|bàn chải|dao cạo|lăn khử mùi|băng vệ sinh|ps|colgate|clear|dove|head & shoulders|shampoo|soap|toothpaste|toothbrush/i.test(
+            n
+          )
+        ) {
+          return "personal_care";
+        }
+
+        return "other";
+      }
+
+      function stripVnDiacritics(str) {
+        if (!str) return "";
+        return str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/đ/g, "d")
+          .replace(/Đ/g, "D")
+          .toLowerCase();
+      }
+
+      function parseSmartGroceryInput(rawText) {
+        if (!rawText || typeof rawText !== "string") {
+          return {
+            name: "",
+            price: 0,
+            quantity: 1,
+            unit: "ea",
+            store:
+              (memoryState && memoryState.stores && memoryState.stores[0]) ||
+              "WinMart",
+            category: "other",
+          };
+        }
+        let text = rawText.trim();
+        if (!text) {
+          return {
+            name: "",
+            price: 0,
+            quantity: 1,
+            unit: "ea",
+            store:
+              (memoryState && memoryState.stores && memoryState.stores[0]) ||
+              "WinMart",
+            category: "other",
+          };
+        }
+
+        let store = "";
+        let price = 0;
+        let quantity = 1;
+        let unit = "";
+        let category = "";
+
+        const knownStores = (memoryState && memoryState.stores) ||
+          DEFAULT_STORES || [
+            "WinMart",
+            "Bách Hoá Xanh",
+            "Co.opmart",
+            "Big C / GO!",
+            "Lotte Mart",
+            "Chợ truyền thống",
+            "Cửa hàng tiện lợi",
+          ];
+
+        // 1. Extract Store
+        const atMatch =
+          text.match(/@([\p{L}\d_\-\.\/\s]+)$/u) ||
+          text.match(/@([a-zA-Z0-9_\-\.\/]+)/);
+        if (atMatch) {
+          const rawTag = stripVnDiacritics(atMatch[1]).replace(
+            /[\s\/\-\.]/g,
+            ""
+          );
+          const matched = knownStores.find((s) => {
+            const cleanS = stripVnDiacritics(s).replace(/[\s\/\-\.]/g, "");
+            return cleanS.includes(rawTag) || rawTag.includes(cleanS);
+          });
+          if (matched) {
+            store = matched;
+          } else {
+            store = atMatch[1].trim();
+          }
+          text = text.replace(atMatch[0], "").trim();
+        } else {
+          for (const s of knownStores) {
+            const regex = new RegExp(
+              `(?:\\s|^)${s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&")}$`,
+              "i"
+            );
+            if (regex.test(text)) {
+              store = s;
+              text = text.replace(regex, "").trim();
+              break;
+            }
+          }
+        }
+
+        // 2. Extract Price with fraction (e.g. "35k/l", "35000/kg", "35k/1kg", "120k/500g", "30k/10 quả")
+        const fracRegex =
+          /(?:^|\s)(\d+(?:[\.,]\d+)?)\s*(k|nghìn|ngàn|tr|triệu|đ|vnd)?\s*\/\s*(\d+(?:[\.,]\d+)?)?\s*([a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]+)/i;
+        const fracMatch = text.match(fracRegex);
+        if (fracMatch) {
+          let rawNum = parseFloat(fracMatch[1].replace(/,/g, "."));
+          const mult = (fracMatch[2] || "").toLowerCase();
+          if (mult === "k" || mult === "nghìn" || mult === "ngàn") {
+            price = rawNum * 1000;
+          } else if (mult === "tr" || mult === "triệu") {
+            price = rawNum * 1000000;
+          } else if (
+            rawNum < 1000 &&
+            (currentCurrency === "VND" || (!mult && rawNum >= 10))
+          ) {
+            price = rawNum * 1000;
+          } else {
+            price = rawNum;
+          }
+
+          if (fracMatch[3]) {
+            quantity = parseFloat(fracMatch[3].replace(/,/g, ".")) || 1;
+          }
+          if (fracMatch[4]) {
+            unit = normalizeUnitCode(fracMatch[4]) || "ea";
+          }
+          text = text.replace(fracMatch[0], " ").trim();
+        }
+
+        // 3. Extract Quantity and Unit FIRST before standalone numbers
+        // Matches e.g. "1 lốc", "2 chai", "1 thùng", "500g", "10 quả", "1 bó", "2l", "1.5kg"
+        const qtyUnitRegex =
+          /(?:^|\s)(\d+(?:[\.,]\d+)?)\s*(kg|g|gr|gam|gram|lb|lbs|pound|oz|ounce|l|lit|lít|litre|liter|ml|mililit|mililít|millilitre|gal|gallon|fl\s*oz|loc|lốc|thung|thùng|ket|két|khay|tui|túi|bich|bịch|hu|hũ|lo|lọ|bunch|bo|bó|nai|nải|can|lon|chai|btl|bottle|box|hop|hộp|pk|pack|goi|gói|ea|cai|cái|qua|quả|trai|trái|unit|trung|trứng)(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
+        let qMatch = text.match(qtyUnitRegex);
+        if (qMatch) {
+          const rawQty = parseFloat(qMatch[1].replace(/,/g, "."));
+          const rawUnit = qMatch[2];
+          const recognizedUnit = normalizeUnitCode(rawUnit);
+          if (recognizedUnit) {
+            quantity = rawQty;
+            unit = recognizedUnit;
+            text = text.replace(qMatch[0], " ").trim();
+          }
+        }
+
+        // 4. Extract Price with explicit multiplier (e.g. "28k", "90k", "115k", "120k", "1.5tr", "35 ngàn")
+        if (!price) {
+          const explicitPriceRegex =
+            /(?:^|\s)(\d+(?:[\.,]\d+)?)\s*(k|nghìn|ngàn|tr|triệu|đ|vnd)(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
+          const epMatch = text.match(explicitPriceRegex);
+          if (epMatch) {
+            let numVal = parseFloat(epMatch[1].replace(/,/g, "."));
+            let mult = epMatch[2].toLowerCase();
+            if (mult === "k" || mult === "nghìn" || mult === "ngàn") {
+              price = numVal * 1000;
+            } else if (mult === "tr" || mult === "triệu") {
+              price = numVal * 1000000;
+            } else {
+              price = numVal;
+            }
+            text = text.replace(epMatch[0], " ").trim();
+          }
+        }
+
+        // 5. Extract Standard Large/Formatted Price (e.g. "30.000", "120.000", "35000")
+        if (!price) {
+          const numPriceRegex =
+            /(?:^|\s)(\d{1,3}(?:\.\d{3})+|\d{4,})(?:\s|$|(?=[^a-zA-Z\u00C0-\u024F\u1EA0-\u1EF9]))/i;
+          const npMatch = text.match(numPriceRegex);
+          if (npMatch) {
+            let strVal = npMatch[1];
+            if (
+              strVal.includes(".") &&
+              strVal
+                .split(".")
+                .every((part, idx) => idx === 0 || part.length === 3)
+            ) {
+              price = parseFloat(strVal.replace(/\./g, ""));
+            } else {
+              price = parseFloat(strVal.replace(/,/g, "."));
+            }
+            text = text.replace(npMatch[0], " ").trim();
+          }
+        }
+
+        // 6. Standalone unit without explicit number
+        if (!unit) {
+          const standaloneUnitRegex =
+            /(?:^|\s)(kg|g|l|ml|ea|pk|box|can|bunch|loc|thung|khay|tui|hu|lít|gam|kí|ký|quả|trái|hộp|gói|bó|nải|lốc|thùng|khay|túi|hũ|lọ|chai|lon)(?:\s|$)/i;
+          const sMatch = text.match(standaloneUnitRegex);
+          if (sMatch) {
+            const recognized = normalizeUnitCode(sMatch[1]);
+            if (recognized) {
+              unit = recognized;
+              text = text.replace(sMatch[0], " ").trim();
+            }
+          }
+        }
+
+        if (!unit) unit = "ea";
+
+        // Clean up item name: strip leading/trailing punctuation & multiple spaces
+        let itemName = text.replace(/\s+/g, " ").trim();
+        itemName = itemName.replace(/^[-–—:,/]+|[-–—:,/]+$/g, "").trim();
+
+        if (itemName.length > 0) {
+          itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1);
+        }
+
+        category = classifyGroceryCategory(itemName);
+
+        return {
+          name: itemName || rawText.trim(),
+          price: Math.max(0, price),
+          quantity: quantity > 0 ? quantity : 1,
+          unit: unit || "ea",
+          store: store || (knownStores && knownStores[0]) || "WinMart",
+          category: category || "other",
+        };
+      }
+
+      function undoLastAction() {
+        if (!lastAddedItemsStack || lastAddedItemsStack.length === 0) return;
+        const lastAction = lastAddedItemsStack.pop();
+        if (
+          lastAction &&
+          lastAction.type === "ADD_ITEMS" &&
+          Array.isArray(lastAction.items)
+        ) {
+          const idsToRemove = new Set(lastAction.items.map((i) => i.id));
+          memoryState.activeList.items = memoryState.activeList.items.filter(
+            (i) => !idsToRemove.has(i.id)
+          );
+          saveToLocalStorage();
+          renderApp();
+          const t = TRANSLATIONS[currentLanguage];
+          const raw = t.toast_item_undone || "Removed '{item}' from Buy List";
+          showToast(
+            raw.replace(
+              "{item}",
+              lastAction.items.map((i) => i.name).join(", ")
+            )
+          );
+        }
+      }
+
+      function processBatchQuickInput(text) {
+        if (!text || typeof text !== "string") return false;
+        const lines = text
+          .split(/[\r\n]+/)
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0);
+        if (lines.length === 0) return false;
+
+        const newItems = [];
+        lines.forEach((line) => {
+          const parsed = parseSmartGroceryInput(line);
+          if (parsed && parsed.name) {
+            const item = {
+              id:
+                Date.now().toString(36) +
+                Math.random().toString(36).substr(2, 5),
+              name: parsed.name,
+              category: parsed.category || "other",
+              store:
+                parsed.store ||
+                (memoryState && memoryState.stores && memoryState.stores[0]) ||
+                "WinMart",
+              quantity: parsed.quantity || 1,
+              unit: parsed.unit || "ea",
+              price: parsed.price || 0,
+              checked: false,
+              updatedAt: Date.now(),
+            };
+            newItems.push(item);
+            memoryState.activeList.items.push(item);
+          }
+        });
+
+        if (newItems.length > 0) {
+          lastAddedItemsStack.push({ type: "ADD_ITEMS", items: newItems });
+          saveToLocalStorage();
+          renderApp();
+          const t = TRANSLATIONS[currentLanguage];
+          if (newItems.length === 1) {
+            const item = newItems[0];
+            const msg = (t.toast_smart_item_added || "Added '{item}'!")
+              .replace("{item}", item.name)
+              .replace("{qty}", item.quantity)
+              .replace("{unit}", item.unit)
+              .replace("{price}", formatCurrency(item.price));
+            showToast(msg, t.toast_action_undo || "Undo", () =>
+              undoLastAction()
+            );
+          } else {
+            const msg = (
+              t.toast_batch_items_added || "Added {count} items!"
+            ).replace("{count}", newItems.length);
+            showToast(msg, t.toast_action_undo || "Undo", () =>
+              undoLastAction()
+            );
+          }
+          return true;
+        }
+        return false;
+      }
+
+      function handleSmartQuickInputSubmit() {
+        const input = document.getElementById("smartQuickInput");
+        if (!input) return;
+        const val = input.value.trim();
+        if (!val) return;
+
+        const success = processBatchQuickInput(val);
+        if (success) {
+          input.value = "";
+          handleSmartQuickInputChange("");
+          input.focus();
+        }
+      }
+
+      function handleSmartQuickInputChange(val) {
+        const preview = document.getElementById("smartQuickPreview");
+        if (!preview) return;
+        const text = (val || "").trim();
+        if (!text) {
+          preview.classList.add("hidden");
+          return;
+        }
+
+        const parsed = parseSmartGroceryInput(text);
+        const nameEl = document.getElementById("smartPreviewName");
+        const qtyUnitEl = document.getElementById("smartPreviewQtyUnit");
+        const priceEl = document.getElementById("smartPreviewPrice");
+        const storeEl = document.getElementById("smartPreviewStore");
+        const catEl = document.getElementById("smartPreviewCategory");
+        const unitPriceEl = document.getElementById("smartPreviewUnitPrice");
+
+        const catNames = {
+          produce:
+            currentLanguage === "vi" ? "🥦 Rau Củ & Trái Cây" : "🥦 Produce",
+          dairy_eggs:
+            currentLanguage === "vi" ? "🥛 Sữa & Trứng" : "🥛 Dairy & Eggs",
+          meat_seafood:
+            currentLanguage === "vi"
+              ? "🥩 Thịt & Hải Sản"
+              : "🥩 Meat & Seafood",
+          bakery: currentLanguage === "vi" ? "🍞 Bánh Mì" : "🍞 Bakery",
+          pantry: currentLanguage === "vi" ? "🍚 Gia Vị & Gạo" : "🍚 Pantry",
+          beverages: currentLanguage === "vi" ? "☕ Đồ Uống" : "☕ Beverages",
+          frozen: currentLanguage === "vi" ? "🧊 Đông Lạnh" : "🧊 Frozen",
+          household: currentLanguage === "vi" ? "🧹 Gia Dụng" : "🧹 Household",
+          personal_care:
+            currentLanguage === "vi" ? "🧴 Cá Nhân" : "🧴 Personal Care",
+          other: currentLanguage === "vi" ? "📦 Khác" : "📦 Other",
+        };
+
+        if (nameEl) nameEl.textContent = parsed.name || text;
+        if (qtyUnitEl)
+          qtyUnitEl.textContent = `• ${parsed.quantity} ${parsed.unit}`;
+        if (priceEl)
+          priceEl.textContent =
+            parsed.price > 0 ? `• ${formatCurrency(parsed.price)}` : "";
+        if (storeEl) storeEl.textContent = parsed.store || "";
+        if (catEl)
+          catEl.textContent = catNames[parsed.category] || catNames.other;
+
+        if (unitPriceEl) {
+          if (parsed.price > 0 && parsed.quantity > 0) {
+            const unitPrice = normalizeUnitPrice(
+              parsed.price,
+              parsed.quantity,
+              parsed.unit
+            );
+            const { baseUnit } = normalizeQuantity(
+              parsed.quantity,
+              parsed.unit
+            );
+            unitPriceEl.textContent = `(${formatCurrency(unitPrice)}/${baseUnit})`;
+          } else {
+            unitPriceEl.textContent = "";
+          }
+        }
+
+        preview.classList.remove("hidden");
+      }
+
+      function handleSmartQuickPaste(e) {
+        const pasteData = (e.clipboardData || window.clipboardData)?.getData(
+          "text"
+        );
+        if (pasteData && pasteData.includes("\n")) {
+          e.preventDefault();
+          processBatchQuickInput(pasteData);
+          const input = document.getElementById("smartQuickInput");
+          if (input) {
+            input.value = "";
+            handleSmartQuickInputChange("");
+          }
+        }
+      }
+
+      /* =========================================================================
        7. IN-AISLE PACKAGE COMPARATOR & QUICK PRICE ADJUSTMENT
        ========================================================================= */
       let activeComparingItemId = null;
@@ -5566,12 +6250,59 @@
         );
       }
 
+      function renderQuickPriceAdjustmentChips() {
+        const container = document.getElementById(
+          "quickPriceAdjustChipsContainer"
+        );
+        if (!container) return;
+
+        let steps = [];
+        if (currentCurrency === "VND") {
+          steps = [
+            { delta: -50000, label: "-50k", color: "text-slate-300" },
+            { delta: -10000, label: "-10k", color: "text-slate-300" },
+            { delta: -5000, label: "-5k", color: "text-slate-300" },
+            { delta: 5000, label: "+5k", color: "text-emerald-400" },
+            { delta: 10000, label: "+10k", color: "text-emerald-400" },
+            { delta: 50000, label: "+50k", color: "text-emerald-400" },
+          ];
+        } else {
+          steps = [
+            { delta: -1.0, label: "-1.00", color: "text-slate-300" },
+            { delta: -0.5, label: "-0.50", color: "text-slate-300" },
+            { delta: -0.25, label: "-0.25", color: "text-slate-300" },
+            { delta: 0.25, label: "+0.25", color: "text-emerald-400" },
+            { delta: 0.5, label: "+0.50", color: "text-emerald-400" },
+            { delta: 1.0, label: "+1.00", color: "text-emerald-400" },
+          ];
+        }
+
+        container.innerHTML = steps
+          .map(
+            (s) => `
+            <button
+              type="button"
+              onclick="stepQuickPrice(${s.delta})"
+              class="px-2.5 py-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 ${s.color} rounded-lg border border-slate-700 transition-colors active:scale-95 cursor-pointer"
+            >
+              ${s.label}
+            </button>
+          `
+          )
+          .join("");
+      }
+
       function stepQuickPrice(delta) {
         const input = document.getElementById("quickPriceInput");
         if (!input) return;
         let val = parseFloat(input.value) || 0;
-        val = Math.max(0, parseFloat((val + delta).toFixed(2)));
-        input.value = val.toFixed(2);
+        if (currentCurrency === "VND") {
+          val = Math.max(0, Math.round(val + delta));
+          input.value = val;
+        } else {
+          val = Math.max(0, parseFloat((val + delta).toFixed(2)));
+          input.value = val.toFixed(2);
+        }
       }
 
       function openQuickPriceEdit(itemId) {
@@ -5591,6 +6322,7 @@
         if (priceInput) priceInput.value = item.price;
         if (qtyInput) qtyInput.value = item.quantity;
 
+        renderQuickPriceAdjustmentChips();
         openModal("quickPriceModal");
         if (priceInput) priceInput.focus();
       }
@@ -6575,11 +7307,10 @@
               <button
                 type="button"
                 onclick="addLedgerItemToBuyList('${l.id}')"
-                class="inline-flex items-center gap-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold px-2 py-1 rounded-lg border border-emerald-500/40 text-xs transition-colors cursor-pointer"
+                class="inline-flex items-center justify-center bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold px-2.5 py-1 rounded-lg border border-emerald-500/40 text-xs transition-colors cursor-pointer"
                 title="${t.ledger_quick_add_title || "Add this item to Buy List"}"
               >
-                <span>+</span>
-                <span>${t.ledger_add_to_list || "Add"}</span>
+                <span>➕</span>
               </button>
               <button
                 type="button"
@@ -6651,9 +7382,17 @@
           memoryState.settings.language = lang;
         }
         saveToLocalStorage();
+        const t = TRANSLATIONS[currentLanguage];
         const langBtn = document.getElementById("langToggleBtn");
-        if (langBtn)
-          langBtn.textContent = currentLanguage === "en" ? "VI" : "EN";
+        if (langBtn) {
+          langBtn.textContent = currentLanguage === "vi" ? "🇻🇳" : "🇺🇸";
+          langBtn.title =
+            currentLanguage === "vi"
+              ? (t && t.lang_flag_toggle_vi) ||
+                "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)"
+              : (t && t.lang_flag_toggle_en) ||
+                "Language: English (Click to switch to Tiếng Việt)";
+        }
         const langSelect = document.getElementById("settingsLanguageSelect");
         if (langSelect) langSelect.value = currentLanguage;
         applyTranslations();
@@ -6674,6 +7413,7 @@
         saveToLocalStorage();
         const curSelect = document.getElementById("settingsCurrencySelect");
         if (curSelect) curSelect.value = currentCurrency;
+        renderQuickPriceAdjustmentChips();
         renderApp();
       }
 
@@ -6727,8 +7467,13 @@
         if (["INPUT", "SELECT", "TEXTAREA"].includes(tag)) return;
         if (e.key === "n" || e.key === "N") {
           e.preventDefault();
-          const input = document.getElementById("inputItemName");
-          if (input) input.focus();
+          const smartInput = document.getElementById("smartQuickInput");
+          if (smartInput) {
+            smartInput.focus();
+          } else {
+            const input = document.getElementById("inputItemName");
+            if (input) input.focus();
+          }
         } else if (e.key === "c" || e.key === "C") {
           e.preventDefault();
           openComparatorModal();
@@ -6749,7 +7494,16 @@
         el("headerTitle", t.app_title);
         el("headerSubtitle", t.app_subtitle);
         el("btnShareText", t.btn_share_header || "Share");
-        el("langToggleBtn", currentLanguage === "en" ? "VI" : "EN");
+        const langBtn = document.getElementById("langToggleBtn");
+        if (langBtn) {
+          langBtn.textContent = currentLanguage === "vi" ? "🇻🇳" : "🇺🇸";
+          langBtn.title =
+            currentLanguage === "vi"
+              ? t.lang_flag_toggle_vi ||
+                "Ngôn ngữ: Tiếng Việt (Bấm để đổi sang English)"
+              : t.lang_flag_toggle_en ||
+                "Language: English (Click to switch to Tiếng Việt)";
+        }
         el("tripSummaryHeading", t.trip_summary_heading || "Shopping Trip");
         el("labelStoreFilter", t.store_filter || "Store:");
         el("kpiItemsLabel", t.kpi_items);
@@ -6778,6 +7532,22 @@
         el("btnLoadSampleEmpty", t.btn_load_sample);
         el("checkedSectionTitle", t.checked_section);
         el("checkedToggleHint", t.tap_toggle);
+
+        // Smart Quick-Entry Omnibox
+        el("smartQuickHeadingText", t.smart_quick_heading || "Quick Add Item");
+        el(
+          "btnToggleAdvancedAddText",
+          t.smart_quick_advanced_toggle || "Detailed Options"
+        );
+        const smartInput = document.getElementById("smartQuickInput");
+        if (smartInput)
+          smartInput.placeholder =
+            t.smart_quick_placeholder ||
+            "Quick add e.g. Whole Milk 35k/l, Beef 120k 500g, Eggs 30k 10 ea...";
+        const smartAddBtn = document.getElementById("btnSmartQuickAdd");
+        if (smartAddBtn)
+          smartAddBtn.title =
+            (t.smart_quick_add_btn || "Add Item") + " (Enter)";
 
         // Add Item Form
         el("addItemHeading", t.add_item_title);
@@ -7530,6 +8300,17 @@
         window.triggerDebouncedCloudSync = triggerDebouncedCloudSync;
         window.updateSyncStatusUI = updateSyncStatusUI;
         window.createCloudPayload = createCloudPayload;
+        window.parseSmartGroceryInput = parseSmartGroceryInput;
+        window.normalizeUnitCode = normalizeUnitCode;
+        window.classifyGroceryCategory = classifyGroceryCategory;
+        window.processBatchQuickInput = processBatchQuickInput;
+        window.handleSmartQuickInputSubmit = handleSmartQuickInputSubmit;
+        window.handleSmartQuickInputChange = handleSmartQuickInputChange;
+        window.handleSmartQuickPaste = handleSmartQuickPaste;
+        window.toggleAdvancedAddForm = toggleAdvancedAddForm;
+        window.undoLastAction = undoLastAction;
+        window.renderQuickPriceAdjustmentChips =
+          renderQuickPriceAdjustmentChips;
         Object.defineProperty(window, "googleAuthState", {
           get: () => googleAuthState,
           set: (v) => {

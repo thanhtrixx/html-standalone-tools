@@ -27,7 +27,7 @@ The standardized physical dimension used to normalize prices for direct mathemat
 
 - **Mass / Weight**: Base unit is **Kilogram (`kg`)**; sub-units include Gram (`g`), Ounce (`oz`), Pound (`lb`).
 - **Volume / Liquid**: Base unit is **Litre (`l`)**; sub-units include Millilitre (`ml`), Fluid Ounce (`fl oz`), Gallon (`gal`).
-- **Count / Discrete**: Base unit is **Piece / Unit (`ea` / `unit`)**; sub-units include Pack (`pk`), Box (`box`), Bottle (`btl`), Can (`can`), Bundle / Bunch (`bunch`).
+- **Count / Discrete**: Base unit is **Piece / Unit (`ea` / `unit`)**; sub-units include Pack (`pk`), Box (`box`), Bottle / Can (`can`), Bundle / Bunch (`bunch`), Pack of 4/6 (`loc` / Lốc), Carton / Case (`thung` / Thùng), Tray (`khay`), Bag (`tui`), Jar (`hu` / Hũ).
   _Avoid_: Measurement type, size category, quantity metric.
 
 ---
@@ -137,11 +137,13 @@ The recipient client protocol that parses an incoming shared URL payload or JSON
 A centralized modal dialog accessible via the top app bar (`⚙️`) providing comprehensive user preferences (Default Currency, Language selection `EN`/`VI`, Default Grouping `By Aisle`/`By Store`), elevated store management access (`z-[60]` modal stacking), data backup/restore, IndexedDB storage sync status, and PWA version/update controls.
 _Avoid_: Prefs panel, control center, admin menu.
 
-**Storage Provider Seam & Google Drive Cloud Sync**:
+**Storage Provider Seam & Multi-Cloud Sync Architecture**:
 An abstracted TypeScript/JavaScript client-side storage architecture (`IStorageProvider`) decoupling domain data operations from physical storage implementations:
 
 - `IndexedDBStorageProvider`: Default offline-first local persistence engine with memory and `localStorage` fallback.
 - `GoogleDriveStorageProvider`: Composite cloud provider wrapping local storage and syncing with Google Drive's Application Data folder (`spaces=appDataFolder`) via REST API v3 and Google Identity Services (GIS `initTokenClient`) OAuth 2.0.
+- `GitHubGistStorageProvider`: Composite cloud provider wrapping local storage and synchronizing with private/secret GitHub Gists (`smart_buy_list_data.json`) via GitHub REST API v3 and Personal Access Token (PAT) authentication with automatic Gist discovery and `raw_url` truncation fallback.
+- `StorageManager Multi-Provider Registry`: Central manager orchestrating provider selection (`none`, `googledrive`, `github`) and dispatching mutation triggers.
 - `Deterministic Cloud Smart Merge`: Non-destructive multi-device conflict resolution uniting purchase ledger transactions, synchronizing active list items by `updatedAt` timestamps, merging store profiles, and pushing consolidated state back to both local storage and the cloud.
   _Avoid_: Database driver, storage hook, backend adapter, cloud server sync.
 
@@ -180,6 +182,10 @@ _Avoid_: Cart counter, checklist meter.
 Horizontal scrollable category chips (`All`, `Produce`, `Dairy`, `Meat`, `Bakery`, `Pantry`, `Frozen`, `Beverages`, `Household`, `Personal Care`, `Other`) enabling shoppers to instantly isolate items located in the specific store aisle they are standing in.
 _Avoid_: Tag filter, section tabs.
 
-**MD3 Bottom Sheet Modal & Fast Adjustment Chips**:
-Mobile-anchored bottom sheet dialogs with top drag indicators and 1-tap quick adjustment delta chips (`+0.25`, `+0.50`, `+1.00`, `-0.25`, `-0.50`, `-1.00`) for rapid shelf price edits without opening the soft keyboard.
+**MD3 Bottom Sheet Modal & Currency-Aware Adjustment Chips**:
+Mobile-anchored bottom sheet dialogs with top drag indicators and dynamic 1-tap quick adjustment delta chips that adapt to the active currency: `[-50k, -10k, -5k, +5k, +10k, +50k]` when in `VND`, or `[±0.25, ±0.50, ±1.00]` when in `USD`, for rapid shelf price edits without opening the soft keyboard.
 _Avoid_: Popup window, custom drawer.
+
+**Smart Quick-Entry Omnibox & NLP Parser Engine**:
+A frictionless single-line omnibox input at the top of Planning mode (`#smartQuickInput`) with real-time interpretation pill (`#smartQuickPreview`). Parses natural language grocery shorthand (e.g. `Sữa tươi 35k/l`, `Thịt ba chỉ 120k 500g WinMart`, `Trứng gà 30k 10 quả`) into structured items (Item Name, Quantity, Unit, Price, Store, Auto-classified Category) with 1-tap direct add (Enter/`➕`), instant Undo toast, and multi-line clipboard batch paste support.
+_Avoid_: Command line, raw query input, terminal bar.

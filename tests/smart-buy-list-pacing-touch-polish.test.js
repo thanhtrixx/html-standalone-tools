@@ -234,6 +234,8 @@ function createMockSandbox() {
 console.log("--- Section 1: In-Store Shopping Progress Pacing ---");
 {
   const { sandbox, elements } = createMockSandbox();
+  sandbox.setLanguage("en");
+  sandbox.setCurrency("USD");
   sandbox.memoryState.activeList.items = [
     {
       id: "1",
@@ -373,6 +375,7 @@ console.log(
 );
 {
   const { sandbox, elements } = createMockSandbox();
+  sandbox.setCurrency("USD");
 
   assert(
     typeof sandbox.stepQuickPrice === "function",

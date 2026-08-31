@@ -144,6 +144,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-cloud-sync.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List Vietnamese-First Defaults & Smart Omnibox",
+    file: "tests/smart-buy-list-vietnamese-omnibox.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {

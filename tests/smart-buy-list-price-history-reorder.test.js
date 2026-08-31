@@ -245,7 +245,9 @@ assert(
 );
 assert(
   htmlContent.includes('id="pwaVersionBadge"') &&
-    (htmlContent.includes("v3.2.0") || htmlContent.includes("v3.3.0")),
+    (htmlContent.includes("v3.2.0") ||
+      htmlContent.includes("v3.3.0") ||
+      htmlContent.includes("v3.4.0")),
   "REORDER-06: PWA version badge updated to v3.2.0 or higher"
 );
 
@@ -361,6 +363,8 @@ console.log(
 );
 {
   const { sandbox, elements } = createMockSandbox();
+  sandbox.window.setLanguage("en");
+  sandbox.window.setCurrency("USD");
   const memoryState = sandbox.window.memoryState;
   memoryState.purchaseLedger = [
     {
@@ -437,46 +441,58 @@ console.log(
 console.log("\n--- Section 5: Select All / Deselect All Toggle ---");
 {
   const { sandbox, elements } = createMockSandbox();
+  sandbox.window.setLanguage("en");
+  sandbox.window.setCurrency("USD");
   const memoryState = sandbox.window.memoryState;
   memoryState.purchaseLedger = [
     {
-      id: "l1",
-      itemName: "Rice",
-      store: "Costco",
+      id: "log-1",
+      itemName: "Item 1",
+      store: "Store A",
       date: "2026-08-01",
-      quantity: 5,
-      unit: "kg",
-      price: 12.0,
-      unitPrice: 2.4,
+      quantity: 1,
+      unit: "ea",
+      price: 5.0,
+      unitPrice: 5.0,
     },
     {
-      id: "l2",
-      itemName: "Eggs",
-      store: "Target",
+      id: "log-2",
+      itemName: "Item 2",
+      store: "Store B",
       date: "2026-08-02",
-      quantity: 12,
+      quantity: 1,
       unit: "ea",
-      price: 3.5,
-      unitPrice: 0.29,
+      price: 8.0,
+      unitPrice: 8.0,
     },
   ];
 
   sandbox.window.renderPriceLedgerTable("");
 
-  // Select all
+  // Invoke Select All
   sandbox.window.toggleSelectAllLedgerRows(true);
   assert(
     sandbox.window.selectedLedgerIds.size === 2,
     "REORDER-25: Select All adds all visible rows to selectedLedgerIds"
   );
   assert(
-    elements.ledgerSelectAllCheckbox.checked === true,
+    elements.ledgerSelectAllCheckbox &&
+      elements.ledgerSelectAllCheckbox.checked === true,
     "REORDER-26: Header select all checkbox is checked"
   );
   assert(
-    elements.btnLedgerSelectAllToggle.textContent
-      .toLowerCase()
-      .includes("deselect"),
+    (elements.btnLedgerSelectAllToggleText &&
+      (elements.btnLedgerSelectAllToggleText.textContent.includes("Deselect") ||
+        elements.btnLedgerSelectAllToggleText.textContent.includes(
+          "Bỏ chọn"
+        ))) ||
+      (elements.btnLedgerSelectAllToggle &&
+        (elements.btnLedgerSelectAllToggle.textContent
+          .toLowerCase()
+          .includes("deselect") ||
+          elements.btnLedgerSelectAllToggle.textContent
+            .toLowerCase()
+            .includes("bỏ chọn"))),
     "REORDER-27: Toggle button label switches to 'Deselect All'"
   );
 
