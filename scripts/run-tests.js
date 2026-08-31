@@ -159,6 +159,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-cloud-concurrency.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List Planning Completion, Ledger Ergonomics & Comparator Unit Sync",
+    file: "tests/smart-buy-list-planning-completion-ledger-comparator.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {

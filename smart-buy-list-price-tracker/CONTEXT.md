@@ -202,3 +202,33 @@ _Avoid_: Fixed table, cramped mobile view, unscrollable ledger.
 **Startup Language Flag Parity**:
 An internationalization presentation rule ensuring that the active language button (`#langToggleBtn`) reliably renders the national flag emoji (`🇻🇳` for Vietnamese, `🇺🇸` for English) on startup without being overridden by literal text labels.
 _Avoid_: Raw text switcher, locale code pill.
+
+**Adaptive Planning Mode Trip Completion**:
+A context-aware workflow enabling users to finalize trips and record verified purchases directly from Planning mode when one or more items are checked off (`checkedCount > 0`). The sticky action bar (`#finishTripBar`) dynamically reveals with the prompt `trip_planning_prompt` ("Sẵn sàng hoàn tất chuyến đi / Ready to Complete Trip") and reuses the deterministic `finalizeTripCompletion()` engine and modal without forcing phase transitions.
+_Avoid_: In-store only checkout, modal bypass, manual ledger copy.
+
+**Bidirectional Unit Group Comparator Auto-Sync**:
+A reactive synchronization algorithm within the Package Comparator modal (`syncComparatorUnitGroup`) that automatically aligns Package B's measurement dimension to Package A's dimension (and vice versa) whenever the selected unit changes (e.g. Weight `kg` ↔ Volume `L` ↔ Count `ea`), recalculating unit prices instantly and preventing dimension mismatch errors.
+_Avoid_: Asymmetric compare, manual unit realignment.
+
+---
+
+## 📚 Architectural Decision Records (ADRs)
+
+- [ADR-0001: IndexedDB Storage Engine & Google Drive Sync Seam](./docs/adr/0001-indexeddb-storage-engine-and-google-drive-sync-seam.md)
+- [ADR-0002: Measurement Normalization & Deal Scoring Intelligence](./docs/adr/0002-measurement-normalization-and-deal-scoring-intelligence.md)
+- [ADR-0003: URL Payload Compression & PWA Offline Architecture](./docs/adr/0003-url-payload-compression-and-pwa-offline-architecture.md)
+- [ADR-0004: Material You Navigation & Item Comparator](./docs/adr/0004-material-you-navigation-and-item-comparator.md)
+- [ADR-0005: Store Management, Grouping, Swipe Gestures & Option Hub](./docs/adr/0005-store-management-grouping-swipe-gestures-and-option-hub.md)
+- [ADR-0006: Differentiated Planning & Buy Mode Card UX](./docs/adr/0006-differentiated-planning-and-buy-mode-card-ux.md)
+- [ADR-0007: PWA Service Worker Lifecycle & Update Strategy](./docs/adr/0007-pwa-service-worker-lifecycle-and-update-strategy.md)
+- [ADR-0008: Price History Buy List Reorder](./docs/adr/0008-price-history-buy-list-reorder.md)
+- [ADR-0009: Clipboard JSON Interchange & Native QR Scanner](./docs/adr/0009-clipboard-json-interchange-and-native-qr-scanner.md)
+- [ADR-0010: Ledger Item Deletion, Comparator Unit & Form Prefill](./docs/adr/0010-ledger-item-deletion-comparator-unit-and-form-prefill.md)
+- [ADR-0011: Google Drive Cloud Sync Storage Seam](./docs/adr/0011-google-drive-cloud-sync-storage-seam.md)
+- [ADR-0012: GitHub Gist Cloud Storage Provider](./docs/adr/0012-github-gist-cloud-storage-provider.md)
+- [ADR-0013: Vietnamese-First Defaults, Smart Omnibox & Currency Ergonomics](./docs/adr/0013-vietnamese-first-defaults-smart-omnibox-and-currency-ergonomics.md)
+- [ADR-0014: Calm Cloud Sync, Adaptive Ledger & Vietnamese Flag Polish](./docs/adr/0014-calm-cloud-sync-adaptive-ledger-and-vietnamese-flag-polish.md)
+- [ADR-0015: PWA Companion Asset Compaction & Single-Source Versioning](./docs/adr/0015-pwa-companion-asset-compaction-and-single-source-versioning.md)
+- [ADR-0016: Deterministic 3-Way Cloud Merge, Deletion Tombstones & Mutation Concurrency](./docs/adr/0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md)
+- [ADR-0017: Planning Trip Completion, Clean Empty State, Ledger Ergonomics & Comparator Unit Sync](./docs/adr/0017-planning-trip-completion-ledger-ergonomics-and-comparator-unit-sync.md)

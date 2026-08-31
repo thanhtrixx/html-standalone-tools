@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Smart Buy-List 3-Way Cloud Concurrency, Deletion Tombstones & Mutation Invariants Test Suite (v3.7.0)
+ * Smart Buy-List 3-Way Cloud Concurrency, Deletion Tombstones & Mutation Invariants Test Suite (v3.8.0)
  *
  * Exercises:
  * 1. Tombstone Lifecycle & 30-Day TTL Pruning
@@ -723,13 +723,13 @@ async function runSuite() {
     );
     const swContent = fs.readFileSync(swPath, "utf8");
     assert(
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.7.0"'),
-      "PWA-01: sw.js CACHE_NAME is stamped as 'smart-buy-list-v3.7.0'"
+      swContent.includes('CACHE_NAME = "smart-buy-list-v3.8.0"'),
+      "PWA-01: sw.js CACHE_NAME is stamped as 'smart-buy-list-v3.8.0'"
     );
 
     assert(
-      htmlContent.includes("v3.7.0"),
-      "PWA-02: index.html displays synchronized version badge 'v3.7.0'"
+      htmlContent.includes("v3.8.0"),
+      "PWA-02: index.html displays synchronized version badge 'v3.8.0'"
     );
 
     const manifestPath = path.join(
@@ -741,8 +741,8 @@ async function runSuite() {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
     assertEqual(
       manifest.version,
-      "3.7.0",
-      "PWA-03: manifest.webmanifest version is '3.7.0'"
+      "3.8.0",
+      "PWA-03: manifest.webmanifest version is '3.8.0'"
     );
 
     const enKeys = Object.keys(win.TRANSLATIONS.en);

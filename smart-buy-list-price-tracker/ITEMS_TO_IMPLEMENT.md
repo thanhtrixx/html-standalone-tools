@@ -105,6 +105,12 @@ All requirements adhere strictly to the project domain model defined in [`CONTEX
 | **R72** | **Type-Aware Companion Asset Compactor (Terser & JSON Compact)** | `scripts/build.js` minifies `sw.js` via Terser, compacts JSON in `manifest.webmanifest`, and cleans vector assets.                                                                                                                                                | P0       | ADR-0015           |
 | **R73** | **Tailwind CDN Cache Purge in Production Service Worker**        | Automatically purge external `https://cdn.tailwindcss.com` from `ASSETS_TO_CACHE` in `dist/sw.js` since Tailwind CSS is inlined statically.                                                                                                                       | P0       | ADR-0015           |
 | **R74** | **Standalone Deployable PWA Release Packaging (Zip Archives)**   | `scripts/pack-release.js` packages dedicated standalone PWA deployment archives (`release-assets/<tool>-<version>.zip`) with complete companion assets.                                                                                                           | P0       | ADR-0015           |
+| **R75** | **Clean Empty State & Main List Sample Button Removal**          | Remove `#btnLoadSampleEmpty` from `#emptyListCard`; preserve `#btnResetSampleData` in Option Hub Settings; add `#btnEmptySwitchToPlanning` in Buy mode with dynamic descriptive text.                                                                             | P0       | ADR-0017           |
+| **R76** | **Adaptive Planning Mode Trip Completion Flow**                  | Dynamically reveal `#finishTripBar` in Planning Mode when `checkedCount > 0`; show `trip_planning_prompt`; trigger `#tripCompleteModal` and deterministic `finalizeTripCompletion()`.                                                                             | P0       | ADR-0017           |
+| **R77** | **Standardized Right-Aligned Ledger Deletion Ergonomics**        | Reorder `#ledgerBatchBar` (Add left, Delete right with text label); update `#ledgerMobileCards` layout (Add on left `flex-1`, Delete on right with icon & localized text).                                                                                        | P0       | ADR-0017           |
+| **R78** | **Bidirectional Unit Group Comparator Auto-Sync**                | Auto-synchronize measurement dimensions across packages in `syncComparatorUnitGroup(source)` (Weight ↔ Volume ↔ Count) and live calculate unit prices on every input/change event.                                                                                | P0       | ADR-0017           |
+| **R79** | **PWA Version Synchronization (v3.8.0) & Test Suite**            | Synchronize version `3.8.0` in `index.html`, `sw.js`, and `manifest.webmanifest`; author comprehensive test suite in `tests/smart-buy-list-planning-completion-ledger-comparator.test.js`.                                                                        | P0       | ADR-0017           |
+| **R80** | **Bilingual Localization Parity for v3.8.0 Keys**                | Maintain 100% dictionary symmetry for `empty_planning_desc`, `empty_buy_mode_desc`, `btn_empty_switch_to_planning`, `trip_planning_prompt`, and `btn_delete_ledger_item`.                                                                                         | P0       | ADR-0017, I18N.md  |
 
 ---
 
@@ -131,73 +137,36 @@ flowchart TD
     S17["Slice 17: GitHub Gist Cloud Storage Provider &amp; Multi-Provider Registry (#192)"]
     S18["Slice 18: Vietnamese-First Defaults, Smart Omnibox &amp; Currency Ergonomics (#193)"]
     S19["Slice 19: Calm Cloud Sync, Adaptive Historical Ledger &amp; Flag Polish (#196)"]
-    S20["Slice 20: CI/CD Build Pipeline Enhancement, PWA Companion Asset Compaction &amp; Single-Source Versioning (v3.6.0) (#203)"]
+    S20["Slice 20: CI/CD Build Pipeline, PWA Companion Asset Compaction &amp; Single-Source Versioning (v3.6.0) (#203)"]
+    S21["Slice 21: Clean Empty State &amp; Sample Data Removal (#222)"]
+    S22["Slice 22: Complete Trip in Planning Mode (#223)"]
+    S23["Slice 23: Ledger Delete Button Alignment &amp; Text Labels (#224)"]
+    S24["Slice 24: Comparator Unit Group Sync &amp; Real-Time Recalculation (#225)"]
+    S25["Slice 25: Automated Test Suite, ADR-0017 &amp; PWA v3.8.0 (#226)"]
 
-    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18 --> S19 --> S20
+    S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8 --> S9 --> S10 --> S11 --> S12 --> S13 --> S14 --> S15 --> S16 --> S17 --> S18 --> S19 --> S20 --> S21 --> S22 --> S23 --> S24 --> S25
 ```
 
 <details>
 <summary>ASCII Diagram (Fallback)</summary>
 
 ```text
-[Slice 1: Pure Domain Engine]
+[Slice 20: CI/CD Build Pipeline & Single-Source Versioning (#203)]
       │
       ▼
-[Slice 2: Storage & Persistence]
+[Slice 21: Clean Empty State & Sample Data Removal (#222)]
       │
       ▼
-[Slice 3: Core UI & In-Store Trip Lifecycle]
+[Slice 22: Complete Trip in Planning Mode (#223)]
       │
       ▼
-[Slice 4: In-Aisle Comparator & Price Intelligence]
+[Slice 23: Ledger Delete Button Alignment & Text Labels (#224)]
       │
       ▼
-[Slice 5: Sharing & PWA Integration]
+[Slice 24: Comparator Unit Group Sync & Real-Time Recalculation (#225)]
       │
       ▼
-[Slice 6: i18n Parity, Theming & Polish]
-      │
-      ▼
-[Slice 7: Material You & Item-Centric Comparator]
-      │
-      ▼
-[Slice 8: In-Store Progress Pacing & Aisle Touch Polish]
-      │
-      ▼
-[Slice 9: Store Management, Grouping, Swipe Gestures & Option Hub]
-      │
-      ▼
-[Slice 10: Differentiated Planning & Buy Mode Card Ergonomics]
-      │
-      ▼
-[Slice 11: Network-First Navigation, PWA Update Lifecycle & QA Cache Controls]
-      │
-      ▼
-[Slice 12: Price History Re-order & Batch Restocking Workflow]
-      │
-      ▼
-[Slice 13: Clipboard JSON Export & Multi-Format Import Engine (#184)]
-      │
-      ▼
-[Slice 14: Native BarcodeDetector QR Scanner in Option Hub (#185)]
-      │
-      ▼
-[Slice 15: Ledger Deletion, Comparator Unit Sync & Form Pre-fill (#188)]
-      │
-      ▼
-[Slice 16: Google Drive Cloud Sync Seam & GIS OAuth Integration (#190)]
-      │
-      ▼
-[Slice 17: GitHub Gist Cloud Storage Provider & Multi-Provider Registry (#192)]
-      │
-      ▼
-[Slice 18: Vietnamese-First Defaults, Smart Omnibox & Currency Ergonomics (#193)]
-      │
-      ▼
-[Slice 19: Calm Cloud Sync, Adaptive Historical Ledger & Flag Polish (#196)]
-      │
-      ▼
-[Slice 20: CI/CD Build Pipeline, PWA Companion Asset Compaction & Single-Source Versioning (v3.6.0) (#203)]
+[Slice 25: Automated Test Suite, ADR-0017 & PWA v3.8.0 (#226)]
 ```
 
 </details>
