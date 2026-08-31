@@ -1,4 +1,4 @@
-# Smart Buy-List & Unit Price Tracker (v3.9.0)
+# Smart Buy-List & Unit Price Tracker (v3.10.0)
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 
@@ -108,7 +108,7 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ### 6. PWA & Mobile Ergonomics
 
-- **Standalone PWA Shell & Single-Source Versioning**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 3.9.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v3.9.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, and standalone `.zip` packaging.
+- **Standalone PWA Shell & Single-Source Versioning**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 3.10.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v3.10.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, and standalone `.zip` packaging.
 - **Material You (MD3) Bottom Navigation**: Single-source-of-truth 4-destination bottom navigation bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`) with M3 surface containers, pill active indicators, and thumb-friendly touch targets ($\ge 48\text{px}$).
 - **In-Aisle Touch Swipe Gestures**: Swipe Right marks item Done/Checked with tactile haptics (`navigator.vibrate([15])`); Swipe Left opens In-Aisle Package Comparator pre-filled.
 - **Smart Quick-Entry Omnibox & NLP Parser**: Single-line omnibox input (`#smartQuickInput`) with live preview pill (`#smartQuickPreview`). Parses natural language grocery shorthand (e.g. `Sữa tươi 35k/l`, `Thịt bò 120k 500g @winmart`) into structured items with 1-tap add, Undo toast, and multi-line clipboard batch paste.
@@ -136,3 +136,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0016: Deterministic 3-Way Cloud Merge, Deletion Tombstones & Mutation Concurrency](./docs/adr/0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md)
 - [ADR-0017: Planning Trip Completion, Clean Empty State, Ledger Ergonomics & Comparator Unit Sync](./docs/adr/0017-planning-trip-completion-ledger-ergonomics-and-comparator-unit-sync.md)
 - [ADR-0018: Enhanced Share Buy-List, Complete QR Code Purge, Symmetrical Settings File Interchange & In-Store Trip Bar Polish](./docs/adr/0018-share-enhancement-qr-removal-and-buy-mode-polish.md)
+- [ADR-0019: GitHub Gist 403 Resiliency, Ledger Price Increment, Country Flag Branding & Dedicated Store Filter Chips](./docs/adr/0019-github-gist-403-resiliency-ledger-price-increment-and-store-filter-chips.md)

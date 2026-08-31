@@ -245,14 +245,7 @@ assert(
 );
 assert(
   htmlContent.includes('id="pwaVersionBadge"') &&
-    (htmlContent.includes("v3.2.0") ||
-      htmlContent.includes("v3.3.0") ||
-      htmlContent.includes("v3.4.0") ||
-      htmlContent.includes("v3.5.0") ||
-      htmlContent.includes("v3.6.0") ||
-      htmlContent.includes("v3.7.0") ||
-      htmlContent.includes("v3.8.0") ||
-      htmlContent.includes("v3.9.0")),
+    /v3\.\d+\.0/.test(htmlContent),
   "REORDER-06: PWA version badge updated to v3.2.0 or higher"
 );
 
@@ -357,8 +350,8 @@ console.log(
     "REORDER-15: Target quantity is incremented by historical amount (1 + 2 = 3)"
   );
   assert(
-    updated.price === 3.4,
-    "REORDER-16: Reference price refreshed to latest historical price ($3.40)"
+    Math.abs(updated.price - 6.6) < 0.001,
+    "REORDER-16: Estimated line price accumulated additively ($3.20 + $3.40 = $6.60)"
   );
 }
 

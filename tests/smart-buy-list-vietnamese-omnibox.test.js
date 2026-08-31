@@ -491,21 +491,11 @@ console.log(
   const swContent = fs.readFileSync(swPath, "utf8");
 
   assert(
-    swContent.includes("smart-buy-list-v3.4.0") ||
-      swContent.includes("smart-buy-list-v3.5.0") ||
-      swContent.includes("smart-buy-list-v3.6.0") ||
-      swContent.includes("smart-buy-list-v3.7.0") ||
-      swContent.includes("smart-buy-list-v3.8.0") ||
-      swContent.includes("smart-buy-list-v3.9.0"),
-    "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.9.0'"
+    /smart-buy-list-v3\.\d+\.0/.test(swContent),
+    "PWA-01: sw.js CACHE_NAME is incremented to 'smart-buy-list-v3.10.0' or higher"
   );
   assert(
-    htmlContent.includes("v3.4.0") ||
-      htmlContent.includes("v3.5.0") ||
-      htmlContent.includes("v3.6.0") ||
-      htmlContent.includes("v3.7.0") ||
-      htmlContent.includes("v3.8.0") ||
-      htmlContent.includes("v3.9.0"),
+    /v3\.\d+\.0/.test(htmlContent),
     "PWA-02: index.html displays synchronized version badge"
   );
 

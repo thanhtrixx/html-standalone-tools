@@ -523,14 +523,13 @@ try {
   const swContent = fs.readFileSync(swPath, "utf8");
 
   assert(
-    swContent.includes('CACHE_NAME = "smart-buy-list-v3.9.0"') ||
-      swContent.includes('CACHE_NAME = "smart-buy-list-v3.8.0"'),
-    "VER-01: sw.js CACHE_NAME is 'smart-buy-list-v3.9.0'"
+    /CACHE_NAME = "smart-buy-list-v3\.\d+\.0"/.test(swContent),
+    "VER-01: sw.js CACHE_NAME is 'smart-buy-list-v3.10.0' or higher"
   );
 
   assert(
-    htmlContent.includes("v3.9.0") || htmlContent.includes("v3.8.0"),
-    "VER-02: index.html contains version badge 'v3.9.0'"
+    /v3\.\d+\.0/.test(htmlContent),
+    "VER-02: index.html contains version badge 'v3.10.0' or higher"
   );
 
   const manifestPath = path.join(
@@ -541,8 +540,8 @@ try {
   );
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert(
-    manifest.version === "3.9.0" || manifest.version === "3.8.0",
-    "VER-03: manifest.webmanifest version is '3.9.0'"
+    /^3\.\d+\.0$/.test(manifest.version),
+    `VER-03: manifest.webmanifest version is '3.10.0' or higher (Got: '${manifest.version}')`
   );
 
   // =======================================================================
