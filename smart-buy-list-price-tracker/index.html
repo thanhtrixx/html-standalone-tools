@@ -2936,7 +2936,74 @@
           density: "comfortable",
           vibrate: true,
         },
+        _deleted: {
+          items: {},
+          ledger: {},
+          stores: {},
+        },
       };
+
+      const TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+      function pruneDeletedTombstones(
+        deletedDict = memoryState?._deleted,
+        nowMs = Date.now()
+      ) {
+        if (!deletedDict || typeof deletedDict !== "object") return;
+        ["items", "ledger", "stores"].forEach((key) => {
+          const map = deletedDict[key];
+          if (map && typeof map === "object") {
+            Object.keys(map).forEach((id) => {
+              const ts = new Date(map[id]).getTime() || 0;
+              if (nowMs - ts > TOMBSTONE_TTL_MS) {
+                delete map[id];
+              }
+            });
+          } else {
+            deletedDict[key] = {};
+          }
+        });
+      }
+
+      function touchItem(item) {
+        if (!item || typeof item !== "object") return item;
+        const nowIso = new Date().toISOString();
+        if (!item.createdAt) item.createdAt = nowIso;
+        item.updatedAt = nowIso;
+        if (
+          memoryState?._deleted?.items &&
+          item.id &&
+          memoryState._deleted.items[String(item.id)]
+        ) {
+          delete memoryState._deleted.items[String(item.id)];
+        }
+        return item;
+      }
+
+      function recordDeletedItem(id) {
+        if (!id) return;
+        if (!memoryState._deleted)
+          memoryState._deleted = { items: {}, ledger: {}, stores: {} };
+        if (!memoryState._deleted.items) memoryState._deleted.items = {};
+        memoryState._deleted.items[String(id)] = new Date().toISOString();
+      }
+
+      function recordDeletedLedger(id) {
+        if (id === undefined || id === null) return;
+        if (!memoryState._deleted)
+          memoryState._deleted = { items: {}, ledger: {}, stores: {} };
+        if (!memoryState._deleted.ledger) memoryState._deleted.ledger = {};
+        memoryState._deleted.ledger[String(id)] = new Date().toISOString();
+      }
+
+      function recordDeletedStore(storeName) {
+        if (!storeName) return;
+        if (!memoryState._deleted)
+          memoryState._deleted = { items: {}, ledger: {}, stores: {} };
+        if (!memoryState._deleted.stores) memoryState._deleted.stores = {};
+        memoryState._deleted.stores[String(storeName)] =
+          new Date().toISOString();
+      }
 
       // Base Storage Provider Interface (IStorageProvider)
       class StorageProvider {
@@ -3068,6 +3135,9 @@
         "https://www.googleapis.com/auth/drive.appdata";
 
       function createCloudPayload(state) {
+        if (state && state._deleted) {
+          pruneDeletedTombstones(state._deleted);
+        }
         return {
           schemaVersion: 2,
           app: "smart-buy-list-price-tracker",
@@ -3081,6 +3151,11 @@
           purchaseLedger: state.purchaseLedger || [],
           stores: state.stores || [...DEFAULT_STORES],
           settings: state.settings || {},
+          _deleted: state._deleted || {
+            items: {},
+            ledger: {},
+            stores: {},
+          },
         };
       }
 
@@ -4422,6 +4497,13 @@
             ) {
               memoryState.stores = [...DEFAULT_STORES];
             }
+            if (
+              !memoryState._deleted ||
+              typeof memoryState._deleted !== "object"
+            ) {
+              memoryState._deleted = { items: {}, ledger: {}, stores: {} };
+            }
+            pruneDeletedTombstones(memoryState._deleted);
           }
         } catch (e) {
           console.warn("Failed to parse localStorage state", e);
@@ -5293,6 +5375,9 @@
           );
           return false;
         }
+        if (memoryState._deleted?.stores && memoryState._deleted.stores[name]) {
+          delete memoryState._deleted.stores[name];
+        }
         memoryState.stores.push(name);
         saveToLocalStorage();
         renderStoreFilterOptions();
@@ -5312,6 +5397,11 @@
         const idx = memoryState.stores.indexOf(oldName);
         if (idx === -1) return false;
 
+        recordDeletedStore(oldName);
+        if (memoryState._deleted?.stores && memoryState._deleted.stores[name]) {
+          delete memoryState._deleted.stores[name];
+        }
+
         memoryState.stores[idx] = name;
 
         // Cascade rename to active list items
@@ -5322,6 +5412,7 @@
           memoryState.activeList.items.forEach((item) => {
             if (item.store === oldName) {
               item.store = name;
+              touchItem(item);
             }
           });
         }
@@ -5360,6 +5451,7 @@
           return false;
         }
 
+        recordDeletedStore(storeName);
         memoryState.stores = memoryState.stores.filter((s) => s !== storeName);
         const fallbackStore = memoryState.stores[0] || "Other";
 
@@ -5371,6 +5463,7 @@
           memoryState.activeList.items.forEach((item) => {
             if (item.store === storeName) {
               item.store = fallbackStore;
+              touchItem(item);
             }
           });
         }
@@ -6249,6 +6342,7 @@
         const item = memoryState.activeList.items.find((i) => i.id === id);
         if (item) {
           item.checked = !item.checked;
+          touchItem(item);
           if (
             typeof navigator !== "undefined" &&
             typeof navigator.vibrate === "function"
@@ -6261,6 +6355,8 @@
       }
 
       function deleteItem(id) {
+        if (!id) return;
+        recordDeletedItem(id);
         memoryState.activeList.items = memoryState.activeList.items.filter(
           (i) => i.id !== id
         );
@@ -6289,7 +6385,10 @@
           unit: unitInput.value,
           price: parseFloat(priceInput.value) || 0,
           checked: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         };
+        touchItem(newItem);
 
         memoryState.activeList.items.push(newItem);
         saveToLocalStorage();
@@ -7005,6 +7104,7 @@
           item.quantity = qA;
           item.unit = uA;
         }
+        touchItem(item);
 
         saveToLocalStorage();
         renderApp();
@@ -7261,6 +7361,7 @@
         if (item) {
           item.price = newPrice;
           if (newQty !== undefined && newQty > 0) item.quantity = newQty;
+          touchItem(item);
           saveToLocalStorage();
           renderApp();
           showToast(
@@ -7523,6 +7624,12 @@
                   memoryState.purchaseLedger = parsed.purchaseLedger;
                 if (Array.isArray(parsed.stores))
                   memoryState.stores = parsed.stores;
+                if (parsed._deleted && typeof parsed._deleted === "object") {
+                  memoryState._deleted = parsed._deleted;
+                } else if (!memoryState._deleted) {
+                  memoryState._deleted = { items: {}, ledger: {}, stores: {} };
+                }
+                pruneDeletedTombstones(memoryState._deleted);
                 if (parsed.settings)
                   memoryState.settings = Object.assign(
                     memoryState.settings,
@@ -8022,6 +8129,7 @@
           if (entry.store && (!existing.store || existing.store === "—")) {
             existing.store = entry.store;
           }
+          touchItem(existing);
           return { type: "incremented", item: existing, entry, incQty };
         }
 
@@ -8054,7 +8162,10 @@
           unit: entry.unit || "ea",
           price: parseFloat(entry.price) || 0,
           checked: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         };
+        touchItem(newItem);
         memoryState.activeList.items.push(newItem);
         return { type: "created", item: newItem, entry };
       }
@@ -8130,6 +8241,7 @@
 
       function deleteLedgerItem(id) {
         if (id === undefined || id === null) return;
+        recordDeletedLedger(id);
         const initialLen = memoryState.purchaseLedger.length;
         memoryState.purchaseLedger = memoryState.purchaseLedger.filter(
           (l) => String(l.id) !== String(id)
@@ -8153,6 +8265,7 @@
         if (selectedLedgerIds.size === 0) return;
 
         const count = selectedLedgerIds.size;
+        selectedLedgerIds.forEach((id) => recordDeletedLedger(id));
         memoryState.purchaseLedger = memoryState.purchaseLedger.filter(
           (l) => !selectedLedgerIds.has(String(l.id))
         );
@@ -9196,12 +9309,14 @@
           const existingNames = new Set(
             memoryState.activeList.items.map((i) => i.name.toLowerCase())
           );
-          const toAdd = window.pendingSharedList.items.filter(
-            (i) => !existingNames.has(i.name.toLowerCase())
-          );
+          const toAdd = window.pendingSharedList.items
+            .filter((i) => !existingNames.has(i.name.toLowerCase()))
+            .map((i) => touchItem({ ...i }));
           memoryState.activeList.items.push(...toAdd);
         } else {
-          memoryState.activeList.items = window.pendingSharedList.items;
+          memoryState.activeList.items = window.pendingSharedList.items.map(
+            (i) => touchItem({ ...i })
+          );
         }
         saveToLocalStorage();
         closeModal("importModal");
@@ -9215,6 +9330,12 @@
       // Global exports for test runner and Node vm sandbox
       if (typeof window !== "undefined") {
         window.DEFAULT_STORES = DEFAULT_STORES;
+        window.TOMBSTONE_TTL_MS = TOMBSTONE_TTL_MS;
+        window.touchItem = touchItem;
+        window.pruneDeletedTombstones = pruneDeletedTombstones;
+        window.recordDeletedItem = recordDeletedItem;
+        window.recordDeletedLedger = recordDeletedLedger;
+        window.recordDeletedStore = recordDeletedStore;
         window.normalizeUnitPrice = normalizeUnitPrice;
         window.normalizeQuantity = normalizeQuantity;
         window.comparePackages = comparePackages;
