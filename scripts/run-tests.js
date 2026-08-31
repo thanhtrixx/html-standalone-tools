@@ -194,6 +194,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-parser-hardening.test.js",
     category: "Core Math",
   },
+  {
+    name: "Smart Buy-List IndexedDB Storage & PAT Migration",
+    file: "tests/smart-buy-list-indexeddb-storage.test.js",
+    category: "Data Integrity",
+  },
 ];
 
 function escapeXml(str) {
