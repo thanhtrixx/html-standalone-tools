@@ -1,7 +1,7 @@
 {
   "name": "Smart Buy-List & Unit Price Tracker",
   "short_name": "BuyList",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "Mobile-first grocery buy-list with historical unit price intelligence",
   "start_url": "./index.html",
   "display": "standalone",

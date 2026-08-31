@@ -154,6 +154,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-calm-sync-ledger.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List 3-Way Cloud Concurrency & Deletion Tombstones",
+    file: "tests/smart-buy-list-cloud-concurrency.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {
