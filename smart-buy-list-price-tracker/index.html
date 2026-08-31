@@ -2462,7 +2462,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.5.0</span
+              >v3.6.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -9017,7 +9017,29 @@
 
       let waitingServiceWorker = null;
 
+      function hydratePwaVersion() {
+        if (
+          typeof fetch === "function" &&
+          window.location.protocol.startsWith("http")
+        ) {
+          fetch("./manifest.webmanifest")
+            .then((res) => (res.ok ? res.json() : null))
+            .then((manifest) => {
+              if (manifest && manifest.version) {
+                window.APP_VERSION = manifest.version;
+                const badge = document.getElementById("pwaVersionBadge");
+                if (badge) {
+                  badge.textContent = "v" + manifest.version;
+                }
+              }
+            })
+            .catch(() => {});
+        }
+      }
+
       function initServiceWorker() {
+        hydratePwaVersion();
+
         if (
           !("serviceWorker" in navigator) ||
           !window.location.protocol.startsWith("http")
