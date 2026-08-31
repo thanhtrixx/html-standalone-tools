@@ -140,4 +140,5 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0020: Quick Add Store Picker, Available-Only Store Filtering, Clean Filter Chips, GitHub Rate Limit Resiliency & Symmetrical Cloud Overrides](./docs/adr/0020-quick-add-store-picker-available-store-filter-and-github-ratelimit-resiliency.md)
 - [ADR-0021: Unified Trip Completion Bar Visibility, Settings Data Management Button Standardization, GitHub Rate Limit Diagnostics & Cloud Sync Semantics](./docs/adr/0021-unified-trip-completion-settings-sample-buttons-github-ratelimit-diagnostics-and-sync-semantics.md)
 - [ADR-0022: Full Item Edit, Streamlined Planning Card, Quick Add Simplification & Store Icon Consistency](./docs/adr/0022-full-item-edit-streamlined-planning-card-quick-add-simplification-and-store-icon-consistency.md)
+- [ADR-0023: Harden parseSmartGroceryInput Parser, Store Aliases & Validation Guards](./docs/adr/0023-harden-smart-grocery-input-parser-and-store-aliases.md)
 - [ADR-0024: innerHTML User Input Sanitization & Content-Security-Policy Meta Tag](./docs/adr/0024-sanitize-innerhtml-and-content-security-policy.md)
