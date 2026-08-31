@@ -1,4 +1,4 @@
-# Smart Buy-List & Unit Price Tracker (v3.12.0)
+# Smart Buy-List & Unit Price Tracker (v3.13.0)
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 
@@ -31,7 +31,7 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - **Normalized Unit Price ($P_{\text{unit}}$)**: Price per standardized base unit ($/kg, $/L, $/ea, ₫/kg, ₫/L, ₫/cái) computed as:
   $$P_{\text{unit}} = \frac{P}{\text{Normalized Base Quantity}}$$
   _Avoid_: Unit cost, per-gram price, rate, unit rate.
-- **Historical Purchase Ledger**: Chronological log of verified purchases recording `item_id`, `store_id`, `date`, `package_price`, `package_size`, `unit_price`, and `notes`. Supports row-level deletion (🗑️) and multi-select batch deletion with dynamic recalculation of All-Time Low (ATL) and Deal ratings.
+- **Historical Purchase Ledger**: Chronological log of verified purchases recording `item_id`, `store_id`, `date`, `package_price`, `package_size`, `unit_price`, and `notes`. Supports row-level deletion (`🗑️`) and multi-select batch deletion with dynamic recalculation of All-Time Low (ATL) and Deal ratings.
   _Avoid_: Price history table, expense log, purchase history database.
 - **All-Time Low (Best Price Ever)**: Minimum normalized unit price ($P_{\text{min}}$) recorded across all historical purchases and stores for a specific master item.
   _Avoid_: Record low, lowest price, baseline price.
@@ -51,11 +51,11 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ### 3. Stores, Aisles & Organization
 
-- **Store Profile & Store Manager**: Retail venue stored in persistent state (`memoryState.stores`). Managed via Store Manager modal supporting Add, Rename (with cascade to active list items and ledger records), and Delete.
+- **Store Profile & Store Manager**: Retail venue stored in persistent state (`memoryState.stores`). Managed via Store Manager modal (`⚙️ Manage Stores` / `Quản lý cửa hàng`) supporting Add, Rename (with cascade to active list items and ledger records), and Delete.
   _Avoid_: Merchant, shop, vendor, supermarket.
 - **Active List Grouping (`By Aisle` vs `By Store`)**:
   - **By Aisle (Department)**: Items partitioned by store aisle category following walking route order, with department badge and item counts.
-  - **By Store**: Items partitioned by retail venue with store icon, item count, and computed store subtotal.
+  - **By Store**: Items partitioned by retail venue with clean store typography (`${sName}`), item count, and computed store subtotal.
     _Avoid_: Tab sort, category flip, list splitter.
 - **Department / Aisle Category**: Navigational grouping representing store departments (Produce, Dairy & Eggs, Meat & Seafood, Bakery, Pantry & Grains, Frozen, Beverages, Household & Cleaning, Personal Care, Other).
   _Avoid_: Item tag, section, aisle name, product group.
@@ -65,12 +65,12 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 ### 4. Shopping Trip Lifecycle
 
 - **Shopping Trip**: Structured shopping session transitioning through three lifecycle stages:
-  1. **Planning Mode**: Adding items via Smart Omnibox (`#smartQuickInput`) or FAB, adjusting quantities, assigning stores/aisles, estimating trip spend with rich expanded cards (store & deal badges, $/unit, historical ATL, Compare `⚖️`, Edit `✏️`, Remove `🗑️`). Features adaptive Trip Completion bar when checked items exist (`checkedCount > 0`).
-  2. **In-Store Buy Mode**: Focused distraction-free checklist with ultra-minimalist cards (checkbox, item name, clickable price), live running totals, pacing progress, and touch swipe gestures. Automatically hides trip finish bar when buy-list is empty.
+  1. **Planning Mode**: Adding items via full-width Smart Omnibox (`#smartQuickInput`) or Collapsible Add Form, full editing via `#editItemModal` (Name, Category, Store, Qty, Unit, Price), adjusting quantities, assigning stores/aisles, estimating trip spend with streamlined 3-row cards (Row 1: Checkbox + Icon + Name; Row 2: Qty + Unit Price + Deal Badge [icon on mobile, full text on desktop] + ATL; Row 3: Compare `⚖️`, Edit `✏️`, Delete `🗑️` + Total Price). Features adaptive Trip Completion bar when checked items exist (`checkedCount > 0`).
+  2. **In-Store Buy Mode**: Focused distraction-free checklist with ultra-minimalist cards (checkbox, item name, clickable shelf price opening `#quickPriceModal` with fast delta chips), live running totals, pacing progress, and touch swipe gestures. Automatically hides trip finish bar when buy-list is empty.
   3. **Trip Summary & Completion Phase**: Prompts to log verified purchase prices into the historical ledger, calculate actual trip expenditure, and offer unpurchased item rollover or discard.
      _Avoid_: Shopping cart run, checkout session, shopping list run.
 - **Differentiated Item Card Ergonomics**:
-  - **Planning Mode Card**: Expanded multi-row container with rich domain metadata, unit price calculations, historical ATL baseline, and editing action toolbar.
+  - **Planning Mode Card**: Streamlined 3-row container with rich domain metadata, unit price calculations, responsive deal indicator badges, and unified red-tinted delete action.
   - **Buy Mode Card**: Ultra-minimalist single-row container with thumb-friendly checkbox, pure item name, and clickable shelf price for fast bottom-sheet edits.
     _Avoid_: Uniform card layout, static list item.
 - **Item Rollover**: Automatic transfer of unchecked/unpurchased items into a new draft list upon trip completion.
@@ -108,10 +108,10 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ### 6. PWA & Mobile Ergonomics
 
-- **Standalone PWA Shell & Single-Source Versioning**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 3.12.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v3.12.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, and standalone `.zip` packaging.
+- **Standalone PWA Shell & Single-Source Versioning**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 3.13.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v3.13.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, and standalone `.zip` packaging.
 - **Material You (MD3) Bottom Navigation**: Single-source-of-truth 4-destination bottom navigation bar (`Planning`, `Buy Mode`, `Price History`, `Comparator`) with M3 surface containers, pill active indicators, and thumb-friendly touch targets ($\ge 48\text{px}$).
 - **In-Aisle Touch Swipe Gestures**: Swipe Right marks item Done/Checked with tactile haptics (`navigator.vibrate([15])`); Swipe Left opens In-Aisle Package Comparator pre-filled.
-- **Smart Quick-Entry Omnibox & NLP Parser**: Single-line omnibox input (`#smartQuickInput`) with inline store selector pill (`#smartQuickStoreSelect`) and live preview pill (`#smartQuickPreview`). Parses natural language grocery shorthand (e.g. `Sữa tươi 35k/l`, `Thịt bò 120k 500g @winmart`) into structured items with active filter context inheritance, 1-tap add, Undo toast, and multi-line clipboard batch paste.
+- **Full-Width Smart Quick-Entry Omnibox & NLP Parser**: Single-line omnibox input (`#smartQuickInput`) with 100% full width and live preview pill (`#smartQuickPreview`). Parses natural language grocery shorthand (e.g. `Sữa tươi 35k/l`, `Thịt bò 120k 500g @winmart`) into structured items with active filter context inheritance, 1-tap add, Undo toast, and multi-line clipboard batch paste.
 - **Currency-Aware Quick Price Adjustment Chips**: Bottom sheet dialogs with dynamic 1-tap delta chips adapting to active currency (`[-50k, -10k, -5k, +5k, +10k, +50k]` for `VND`, `[±0.25, ±0.50, ±1.00]` for `USD`).
 
 ---
@@ -139,3 +139,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0019: GitHub Gist 403 Resiliency, Ledger Price Increment, Country Flag Branding & Dedicated Store Filter Chips](./docs/adr/0019-github-gist-403-resiliency-ledger-price-increment-and-store-filter-chips.md)
 - [ADR-0020: Quick Add Store Picker, Available-Only Store Filtering, Clean Filter Chips, GitHub Rate Limit Resiliency & Symmetrical Cloud Overrides](./docs/adr/0020-quick-add-store-picker-available-store-filter-and-github-ratelimit-resiliency.md)
 - [ADR-0021: Unified Trip Completion Bar Visibility, Settings Data Management Button Standardization, GitHub Rate Limit Diagnostics & Cloud Sync Semantics](./docs/adr/0021-unified-trip-completion-settings-sample-buttons-github-ratelimit-diagnostics-and-sync-semantics.md)
+- [ADR-0022: Full Item Edit, Streamlined Planning Card, Quick Add Simplification & Store Icon Consistency](./docs/adr/0022-full-item-edit-streamlined-planning-card-quick-add-simplification-and-store-icon-consistency.md)

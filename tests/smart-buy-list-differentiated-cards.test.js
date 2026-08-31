@@ -328,8 +328,8 @@ assert(
 );
 
 assert(
-  planCardHtml.includes(planItemMilk.store),
-  `DIFF-PLAN-04: Planning Mode card displays retail store badge ('${planItemMilk.store}')`
+  !planCardHtml.includes("🏪 " + planItemMilk.store),
+  `DIFF-PLAN-04: Planning Mode card streamlines header by removing redundant store name ('${planItemMilk.store}')`
 );
 
 assert(
@@ -374,7 +374,9 @@ assert(
 );
 
 assert(
-  planCardHtml.includes("openQuickPriceEdit") && planCardHtml.includes("✏️"),
+  (planCardHtml.includes("openFullItemEdit") ||
+    planCardHtml.includes("openQuickPriceEdit")) &&
+    planCardHtml.includes("✏️"),
   "DIFF-PLAN-10: Planning Mode card includes dedicated edit button (✏️)"
 );
 

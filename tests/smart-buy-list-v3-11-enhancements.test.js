@@ -267,6 +267,14 @@ async function runTests() {
         unit: "l",
         price: 35000,
       },
+      {
+        id: "i2",
+        name: "Cá",
+        store: "Co.opmart",
+        quantity: 1,
+        unit: "kg",
+        price: 50000,
+      },
     ];
     sandbox.onStoreFilterChange("ALL");
     sandbox.renderStoreFilterOptions();
@@ -279,18 +287,12 @@ async function runTests() {
       "When filter is ALL and no quick store selected, defaults to memoryState.stores[0]"
     );
 
-    // Case 2: Changing currentStoreFilter synchronizes #smartQuickStoreSelect
+    // Case 2: Changing currentStoreFilter synchronizes default store
     sandbox.onStoreFilterChange("Bách Hoá Xanh");
     assertEqual(
       sandbox.window.currentStoreFilter,
       "Bách Hoá Xanh",
       "currentStoreFilter updated to Bách Hoá Xanh"
-    );
-    const quickSelect = elements["smartQuickStoreSelect"];
-    assertEqual(
-      quickSelect.value,
-      "Bách Hoá Xanh",
-      "smartQuickStoreSelect auto-inherits active non-ALL store filter"
     );
 
     // Parsing item without @store uses the selected store
@@ -299,19 +301,19 @@ async function runTests() {
     assertEqual(
       parsed1.store,
       "Bách Hoá Xanh",
-      "Item without @store inherits smartQuickStoreSelect store"
+      "Item without @store inherits active store filter"
     );
 
-    // Case 3: Explicit inline store override via dropdown
-    quickSelect.value = "Co.opmart";
+    // Case 3: Explicit store filter change
+    sandbox.onStoreFilterChange("Co.opmart");
     const parsed2 = sandbox.parseSmartGroceryInput("Trứng gà 30k 10 quả");
     assertEqual(
       parsed2.store,
       "Co.opmart",
-      "Item inherits manually chosen store from smartQuickStoreSelect"
+      "Item inherits active store filter Co.opmart"
     );
 
-    // Case 4: Explicit @store tag in text overrides dropdown and updates dropdown value
+    // Case 4: Explicit @store tag in text overrides active filter
     const parsed3 = sandbox.parseSmartGroceryInput(
       "Gạo ST25 150k 5kg @WinMart"
     );
@@ -323,16 +325,11 @@ async function runTests() {
     assertEqual(
       parsed3.store,
       "WinMart",
-      "Explicit @WinMart tag correctly overrides dropdown"
-    );
-    assertEqual(
-      quickSelect.value,
-      "WinMart",
-      "Dropdown value synchronized with @WinMart NLP tag"
+      "Explicit @WinMart tag correctly overrides active store filter"
     );
 
-    // Case 5: Batch input uses quick store
-    quickSelect.value = "Co.opmart";
+    // Case 5: Batch input uses active filter store
+    sandbox.onStoreFilterChange("Co.opmart");
     const batchText = "Thịt bò 120k 500g\nBánh mì 15k";
     sandbox.processBatchQuickInput(batchText);
     const items = sandbox.memoryState.activeList.items;
