@@ -189,3 +189,15 @@ _Avoid_: Popup window, custom drawer.
 **Smart Quick-Entry Omnibox & NLP Parser Engine**:
 A frictionless single-line omnibox input at the top of Planning mode (`#smartQuickInput`) with real-time interpretation pill (`#smartQuickPreview`). Parses natural language grocery shorthand (e.g. `Sữa tươi 35k/l`, `Thịt ba chỉ 120k 500g WinMart`, `Trứng gà 30k 10 quả`) into structured items (Item Name, Quantity, Unit, Price, Store, Auto-classified Category) with 1-tap direct add (Enter/`➕`), instant Undo toast, and multi-line clipboard batch paste support.
 _Avoid_: Command line, raw query input, terminal bar.
+
+**Calm Adaptive Cloud Sync**:
+A serene, battery-friendly cloud synchronization architecture that decommissions intrusive header sync pills in favor of clean Option Hub indicators (`#cloudSyncStatusPill`). Employs a relaxed 15-second idle debounce capped at 45 seconds, flushes mutations on tab backgrounding (`visibilitychange`), triggers immediate sync on trip completion, and pulls remote updates on application boot and tab wakeup after 120 seconds of inactivity.
+_Avoid_: Polling loop, aggressive live sync, constant sync indicator.
+
+**Adaptive Historical Purchase Ledger (Mobile Cards & Desktop Table)**:
+A responsive dual-representation ledger in `#priceLedgerModal`. On mobile viewports ($< 640\text{px}$), renders touch-friendly cards (`#ledgerMobileCards`) with bold titles, store badges, prominent unit price badges, and $\ge 44\text{px}$ touch targets for Quick Add (`➕`) and Delete (`🗑️`). On desktop viewports ($\ge 640\text{px}$), renders a spacious, high-density data table (`#ledgerTableContainer`) with `text-sm` typography and `h-5 w-5` checkboxes.
+_Avoid_: Fixed table, cramped mobile view, unscrollable ledger.
+
+**Startup Language Flag Parity**:
+An internationalization presentation rule ensuring that the active language button (`#langToggleBtn`) reliably renders the national flag emoji (`🇻🇳` for Vietnamese, `🇺🇸` for English) on startup without being overridden by literal text labels.
+_Avoid_: Raw text switcher, locale code pill.

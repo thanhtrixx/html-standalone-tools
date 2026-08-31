@@ -259,8 +259,9 @@ async function runCloudSyncTests() {
       "SYNC-DOM-12: Option Hub contains View Gist on GitHub link (#githubViewGistLink)"
     );
     assert(
-      htmlContent.includes('id="topBarSyncStatus"'),
-      "SYNC-DOM-13: Top App Bar contains dynamic provider sync status indicator (#topBarSyncStatus)"
+      !htmlContent.includes('id="topBarSyncStatus"') &&
+        htmlContent.includes('id="cloudSyncStatusPill"'),
+      "SYNC-DOM-13: Option Hub contains calm sync status pill (#cloudSyncStatusPill) and top bar is decluttered"
     );
 
     // =========================================================================

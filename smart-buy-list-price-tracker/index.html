@@ -374,17 +374,6 @@
             <span id="btnShareText" class="hidden sm:inline">Share</span>
           </button>
 
-          <!-- Cloud Sync Live Status Indicator -->
-          <button
-            id="topBarSyncStatus"
-            onclick="openSettingsModal()"
-            class="hidden items-center gap-1 px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold border border-slate-700 transition-colors"
-            title="Google Drive Cloud Sync Status"
-          >
-            <span id="topBarSyncIcon">⚪</span>
-            <span id="topBarSyncText" class="hidden md:inline">Local</span>
-          </button>
-
           <!-- Settings Button (Option Hub) -->
           <button
             id="btnOpenSettings"
@@ -1599,22 +1588,22 @@
     <!-- 5. PRICE LEDGER & CATALOG HISTORY MODAL -->
     <div
       id="priceLedgerModal"
-      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
     >
       <div
-        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto custom-scroll p-5 space-y-4 shadow-2xl relative flex flex-col"
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[88vh] overflow-y-auto custom-scroll p-4 sm:p-6 space-y-4 shadow-2xl relative flex flex-col"
       >
         <div class="flex items-center justify-between">
           <h3
             id="ledgerModalTitle"
-            class="text-base font-bold text-white flex items-center gap-2"
+            class="text-base sm:text-lg font-bold text-white flex items-center gap-2"
           >
             <span>📈</span>
             <span id="ledgerModalTitleText">Historical Purchase Ledger</span>
           </h3>
           <button
             onclick="closeModal('priceLedgerModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1"
+            class="text-slate-400 hover:text-slate-200 text-xl p-1.5 transition-colors"
           >
             ✕
           </button>
@@ -1626,37 +1615,44 @@
             id="ledgerSearchInput"
             placeholder="Filter history by item or store..."
             oninput="renderPriceLedgerTable(this.value)"
-            class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500"
+            class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 font-medium"
           />
         </div>
 
-        <div id="ledgerTableContainer" class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
+        <!-- Mobile Card List View (< 640px) -->
+        <div id="ledgerMobileCards" class="block sm:hidden space-y-3"></div>
+
+        <!-- Desktop Table View (>= 640px) -->
+        <div
+          id="ledgerTableContainer"
+          class="hidden sm:block overflow-x-auto rounded-xl border border-slate-800"
+        >
+          <table class="w-full text-left text-sm text-slate-300">
             <thead
-              class="bg-slate-950 text-slate-400 uppercase text-[10px] tracking-wider sticky top-0 z-10"
+              class="bg-slate-950 text-slate-400 uppercase text-xs font-bold tracking-wider sticky top-0 z-10 border-b border-slate-800"
             >
               <tr>
-                <th id="thSelect" class="p-2.5 w-8 text-center">
+                <th id="thSelect" class="p-3 w-10 text-center">
                   <input
                     type="checkbox"
                     id="ledgerSelectAllCheckbox"
                     onchange="toggleSelectAllLedgerRows(this.checked)"
-                    class="h-4 w-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
+                    class="h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
                     title="Select All"
                   />
                 </th>
-                <th id="thDate" class="p-2.5">Date</th>
-                <th id="thItem" class="p-2.5">Item</th>
-                <th id="thStore" class="p-2.5">Store</th>
-                <th id="thSize" class="p-2.5">Size</th>
-                <th id="thPaid" class="p-2.5">Paid</th>
-                <th id="thUnitPrice" class="p-2.5">Unit Price</th>
-                <th id="thAction" class="p-2.5 text-right">Action</th>
+                <th id="thDate" class="p-3">Date</th>
+                <th id="thItem" class="p-3">Item</th>
+                <th id="thStore" class="p-3">Store</th>
+                <th id="thSize" class="p-3">Size</th>
+                <th id="thPaid" class="p-3">Paid</th>
+                <th id="thUnitPrice" class="p-3">Unit Price</th>
+                <th id="thAction" class="p-3 text-right">Action</th>
               </tr>
             </thead>
             <tbody
               id="ledgerTableBody"
-              class="divide-y divide-slate-800"
+              class="divide-y divide-slate-800 bg-slate-900/60"
             ></tbody>
           </table>
         </div>
@@ -2197,15 +2193,28 @@
             id="googleDriveSyncPanel"
             class="hidden space-y-2.5 pt-1 border-t border-slate-800/80"
           >
-            <!-- OAuth Client ID Input -->
+            <!-- OAuth Client ID Input & Guide Link Header -->
             <div class="space-y-1">
-              <label
-                id="cloudSyncClientIdLabel"
-                for="googleClientIdInput"
-                class="block text-[11px] font-semibold text-slate-300"
+              <div
+                class="flex items-center justify-between text-[11px] text-slate-400"
               >
-                Google OAuth 2.0 Client ID
-              </label>
+                <label
+                  id="cloudSyncClientIdLabel"
+                  for="googleClientIdInput"
+                  class="font-semibold text-slate-300"
+                >
+                  Google OAuth 2.0 Client ID
+                </label>
+                <a
+                  href="docs/google-drive-cloud-sync-guide.md"
+                  target="_blank"
+                  class="text-emerald-400 hover:text-emerald-300 underline inline-flex items-center gap-1 font-medium text-[11px]"
+                  id="gdriveGuideLink"
+                >
+                  <span>📖</span>
+                  <span id="gdriveGuideLinkText">Setup Guide (2 min) ↗</span>
+                </a>
+              </div>
               <div class="flex items-center gap-1.5">
                 <input
                   type="text"
@@ -2224,12 +2233,37 @@
               </div>
             </div>
 
+            <!-- Origin Copier Helper Box -->
+            <div
+              class="p-2.5 bg-slate-950/70 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1"
+            >
+              <div class="flex items-center justify-between">
+                <span id="gdriveOriginLabel" class="text-slate-300 font-medium"
+                  >Authorized JavaScript Origin:</span
+                >
+                <button
+                  type="button"
+                  onclick="copyCurrentOriginToClipboard()"
+                  class="text-emerald-400 hover:text-emerald-300 font-semibold cursor-pointer text-[10px] inline-flex items-center gap-1 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/50"
+                  id="btnCopyOriginText"
+                >
+                  📋 Copy
+                </button>
+              </div>
+              <div
+                id="gdriveCurrentOrigin"
+                class="font-mono text-slate-200 text-[10px] break-all select-all"
+              >
+                http://localhost
+              </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="grid grid-cols-2 gap-2 pt-0.5">
               <button
                 id="btnGoogleSignIn"
                 onclick="handleGoogleSignIn()"
-                class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl font-semibold transition-all shadow-sm"
+                class="col-span-2 flex items-center justify-center gap-1.5 py-2 px-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl font-semibold transition-all shadow-sm"
               >
                 <span>🔑</span>
                 <span id="btnGoogleSignInText">Sign in with Google</span>
@@ -2245,7 +2279,7 @@
               <button
                 id="btnGoogleSyncNow"
                 onclick="syncCloudNow()"
-                class="flex items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold border border-slate-700 transition-all"
+                class="hidden items-center justify-center gap-1.5 py-2 px-2.5 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-xl font-semibold border border-slate-700 transition-all"
               >
                 <span>🔄</span>
                 <span id="btnGoogleSyncNowText">Sync Now</span>
@@ -3790,6 +3824,7 @@
       }
 
       let syncDebounceTimer = null;
+      let syncFirstMutationTime = null;
 
       function triggerDebouncedCloudSync() {
         const providerType = storageManager.getActiveProviderType();
@@ -3798,10 +3833,64 @@
           return;
         if (providerType === "none") return;
 
+        const now = Date.now();
+        if (!syncFirstMutationTime) {
+          syncFirstMutationTime = now;
+        }
+
         if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
+
+        // Relaxed, calm idle debounce: 15s idle delay, capped at 45s from first mutation
+        const elapsed = now - syncFirstMutationTime;
+        const delayMs = elapsed > 30000 ? 5000 : 15000;
+
         syncDebounceTimer = setTimeout(() => {
+          syncDebounceTimer = null;
+          syncFirstMutationTime = null;
           storageManager.sync();
-        }, 3000);
+        }, delayMs);
+      }
+
+      function flushPendingCloudSync() {
+        if (syncDebounceTimer) {
+          clearTimeout(syncDebounceTimer);
+          syncDebounceTimer = null;
+          syncFirstMutationTime = null;
+          const providerType = storageManager.getActiveProviderType();
+          if (
+            (providerType === "github" && githubAuthState.token) ||
+            (providerType === "googledrive" && googleAuthState.accessToken)
+          ) {
+            storageManager.sync();
+          }
+        }
+      }
+
+      function copyCurrentOriginToClipboard() {
+        const origin =
+          (typeof window !== "undefined" &&
+            window.location &&
+            window.location.origin) ||
+          "http://localhost";
+        const tr = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+        if (
+          typeof navigator !== "undefined" &&
+          navigator.clipboard &&
+          navigator.clipboard.writeText
+        ) {
+          navigator.clipboard
+            .writeText(origin)
+            .then(() => {
+              showToast(
+                tr.toast_origin_copied || "Origin copied to clipboard!"
+              );
+            })
+            .catch(() => {
+              showToast(origin);
+            });
+        } else {
+          showToast(origin);
+        }
       }
 
       function handleCloudProviderChange(type) {
@@ -4191,9 +4280,6 @@
       function updateSyncStatusUI(status) {
         if (typeof document === "undefined") return;
         const pill = document.getElementById("cloudSyncStatusPill");
-        const topBar = document.getElementById("topBarSyncStatus");
-        const topBarIcon = document.getElementById("topBarSyncIcon");
-        const topBarText = document.getElementById("topBarSyncText");
         const lastTime = document.getElementById("cloudSyncLastTime");
 
         const gdrivePanel = document.getElementById("googleDriveSyncPanel");
@@ -4223,8 +4309,14 @@
           }
         }
 
+        const originEl = document.getElementById("gdriveCurrentOrigin");
+        if (originEl && typeof window !== "undefined" && window.location) {
+          originEl.textContent = window.location.origin || "http://localhost";
+        }
+
         const btnSignIn = document.getElementById("btnGoogleSignIn");
         const btnSignOut = document.getElementById("btnGoogleSignOut");
+        const btnGoogleSync = document.getElementById("btnGoogleSyncNow");
         const gdriveAdv = document.getElementById("cloudSyncAdvancedActions");
         const isGDriveConnected = !!googleAuthState.accessToken;
         if (btnSignIn && btnSignOut) {
@@ -4232,23 +4324,24 @@
             btnSignIn.classList.add("hidden");
             btnSignOut.classList.remove("hidden");
             btnSignOut.classList.add("flex");
+            if (btnGoogleSync) {
+              btnGoogleSync.classList.remove("hidden");
+              btnGoogleSync.classList.add("flex");
+            }
             if (gdriveAdv) gdriveAdv.classList.remove("hidden");
           } else {
             btnSignIn.classList.remove("hidden");
             btnSignOut.classList.add("hidden");
             btnSignOut.classList.remove("flex");
+            if (btnGoogleSync) {
+              btnGoogleSync.classList.add("hidden");
+              btnGoogleSync.classList.remove("flex");
+            }
             if (gdriveAdv) gdriveAdv.classList.add("hidden");
           }
         }
 
         updateGithubGistUI();
-
-        // Update Top Bar icon based on provider
-        if (topBarIcon) {
-          if (activeType === "github") topBarIcon.textContent = "🐙";
-          else if (activeType === "googledrive") topBarIcon.textContent = "📁";
-          else topBarIcon.textContent = "⚪";
-        }
 
         let isConnected = false;
         let syncTime = null;
@@ -4278,53 +4371,24 @@
             pill.className =
               "text-[11px] text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-800/50 font-medium";
           }
-          if (topBar) {
-            topBar.classList.remove("hidden");
-            topBar.classList.add("flex");
-          }
-          if (topBarText)
-            topBarText.textContent = tr.cloud_sync_syncing || "Syncing...";
         } else if (status === "synced" || (isConnected && status !== "error")) {
           if (pill) {
             pill.textContent = tr.cloud_sync_synced || "Synced";
             pill.className =
               "text-[11px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-medium";
           }
-          if (topBar) {
-            topBar.classList.remove("hidden");
-            topBar.classList.add("flex");
-          }
-          if (topBarText)
-            topBarText.textContent = tr.cloud_sync_synced || "Synced";
         } else if (status === "error") {
           if (pill) {
             pill.textContent = tr.cloud_sync_error || "Sync Error";
             pill.className =
               "text-[11px] text-red-400 bg-red-950/60 px-2 py-0.5 rounded-md border border-red-800/50 font-medium";
           }
-          if (topBar) {
-            topBar.classList.remove("hidden");
-            topBar.classList.add("flex");
-          }
-          if (topBarText)
-            topBarText.textContent = tr.cloud_sync_error || "Error";
         } else {
           if (pill) {
             pill.textContent = tr.cloud_sync_offline || "Local / Offline";
             pill.className =
               "text-[11px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800 font-medium";
           }
-          if (topBar) {
-            if (activeType === "none") {
-              topBar.classList.add("hidden");
-              topBar.classList.remove("flex");
-            } else {
-              topBar.classList.remove("hidden");
-              topBar.classList.add("flex");
-            }
-          }
-          if (topBarText)
-            topBarText.textContent = tr.cloud_sync_offline || "Local";
         }
       }
 
@@ -4578,7 +4642,14 @@
           settings_sync_title: "Storage & Cloud Sync",
           settings_sync_status: "IndexedDB Active (Offline-First)",
           badge_local_only: "Local Only",
-          cloud_sync_title: "Google Drive Cloud Sync",
+          cloud_sync_title: "Cloud Synchronization",
+          cloud_sync_subtitle:
+            "Sync across devices with Google Drive or GitHub Gist",
+          gdrive_guide_link: "Setup Guide (2 min) ↗",
+          gdrive_origin_label: "Authorized JavaScript Origin:",
+          btn_copy_origin: "📋 Copy",
+          toast_origin_copied: "Origin copied to clipboard!",
+          ledger_cards_empty_msg: "No historical purchase records found.",
           cloud_sync_synced: "Synced",
           cloud_sync_syncing: "Syncing...",
           cloud_sync_offline: "Local / Offline",
@@ -4852,7 +4923,15 @@
           settings_sync_title: "Lưu Trữ & Đồng Bộ Đám Mây",
           settings_sync_status: "IndexedDB Đang Hoạt Động (Offline-First)",
           badge_local_only: "Nội Bộ / Cục Bộ",
-          cloud_sync_title: "Đồng Bộ Đám Mây Google Drive",
+          cloud_sync_title: "Đồng Bộ Đám Mây",
+          cloud_sync_subtitle:
+            "Đồng bộ đa thiết bị qua Google Drive hoặc GitHub Gist",
+          gdrive_guide_link: "Hướng Dẫn Thiết Lập (2 phút) ↗",
+          gdrive_origin_label:
+            "Authorized JavaScript Origin (Nguồn được phép):",
+          btn_copy_origin: "📋 Sao chép",
+          toast_origin_copied: "Đã sao chép nguồn vào bộ nhớ tạm!",
+          ledger_cards_empty_msg: "Chưa có lịch sử mua sắm nào.",
           cloud_sync_synced: "Đã đồng bộ",
           cloud_sync_syncing: "Đang đồng bộ...",
           cloud_sync_offline: "Cục bộ / Ngoại tuyến",
@@ -7801,6 +7880,9 @@
         }
 
         saveToLocalStorage();
+        if (typeof flushPendingCloudSync === "function")
+          flushPendingCloudSync();
+        if (typeof storageManager !== "undefined") storageManager.sync();
         closeModal("tripCompleteModal");
         setTripPhase("PLANNING");
         renderApp();
@@ -8092,8 +8174,9 @@
 
       function renderPriceLedgerTable(query = "") {
         const tbody = document.getElementById("ledgerTableBody");
-        if (!tbody) return;
-        const t = TRANSLATIONS[currentLanguage];
+        const mobileContainer = document.getElementById("ledgerMobileCards");
+        if (!tbody && !mobileContainer) return;
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
 
         // Ensure every entry has an id
         memoryState.purchaseLedger.forEach((l, idx) => {
@@ -8113,54 +8196,128 @@
           .reverse();
 
         if (logs.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500">${t.ledger_empty_msg || "No historical purchase records found."}</td></tr>`;
+          const emptyMsg =
+            t.ledger_cards_empty_msg ||
+            t.ledger_empty_msg ||
+            "No historical purchase records found.";
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 text-sm font-medium italic">${emptyMsg}</td></tr>`;
+          }
+          if (mobileContainer) {
+            mobileContainer.innerHTML = `<div class="text-center py-8 px-4 text-slate-400 text-sm font-medium italic bg-slate-950/60 rounded-2xl border border-slate-800">${emptyMsg}</div>`;
+          }
           updateLedgerBatchBar([]);
           return;
         }
 
-        tbody.innerHTML = logs
-          .map((l) => {
-            const { baseUnit } = normalizeQuantity(l.quantity, l.unit);
-            const isSelected = selectedLedgerIds.has(String(l.id));
-            return `
-          <tr class="hover:bg-slate-800/40 transition-colors ${isSelected ? "bg-emerald-950/20" : ""}">
-            <td class="p-2.5 text-center">
-              <input
-                type="checkbox"
-                class="ledger-row-checkbox h-4 w-4 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
-                data-ledger-id="${l.id}"
-                onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
-                ${isSelected ? "checked" : ""}
-              />
-            </td>
-            <td class="p-2.5 font-mono text-[11px] text-slate-400">${l.date}</td>
-            <td class="p-2.5 font-semibold text-slate-200">${l.itemName}</td>
-            <td class="p-2.5 text-slate-400">${l.store || "—"}</td>
-            <td class="p-2.5 text-slate-400">${l.quantity} ${l.unit}</td>
-            <td class="p-2.5 font-semibold text-white">${formatCurrency(l.price)}</td>
-            <td class="p-2.5 font-bold text-emerald-400">${formatCurrency(l.unitPrice)} / ${baseUnit}</td>
-            <td class="p-2.5 text-right whitespace-nowrap space-x-1">
-              <button
-                type="button"
-                onclick="addLedgerItemToBuyList('${l.id}')"
-                class="inline-flex items-center justify-center bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-semibold px-2.5 py-1 rounded-lg border border-emerald-500/40 text-xs transition-colors cursor-pointer"
-                title="${t.ledger_quick_add_title || "Add this item to Buy List"}"
-              >
-                <span>➕</span>
-              </button>
-              <button
-                type="button"
-                onclick="deleteLedgerItem('${l.id}')"
-                class="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold px-2 py-1 rounded-lg border border-red-500/40 text-xs transition-colors cursor-pointer"
-                title="${t.ledger_delete_item || "Delete record"}"
-              >
-                <span>🗑️</span>
-              </button>
-            </td>
-          </tr>
-        `;
-          })
-          .join("");
+        // Render Desktop Table Rows (>= 640px)
+        if (tbody) {
+          tbody.innerHTML = logs
+            .map((l) => {
+              const { baseUnit } = normalizeQuantity(l.quantity, l.unit);
+              const isSelected = selectedLedgerIds.has(String(l.id));
+              return `
+            <tr class="hover:bg-slate-800/40 transition-colors ${isSelected ? "bg-emerald-950/20" : ""}">
+              <td class="p-3 text-center">
+                <input
+                  type="checkbox"
+                  class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
+                  data-ledger-id="${l.id}"
+                  onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
+                  ${isSelected ? "checked" : ""}
+                />
+              </td>
+              <td class="p-3 font-mono text-xs text-slate-400">${l.date}</td>
+              <td class="p-3 font-bold text-sm text-slate-100">${l.itemName}</td>
+              <td class="p-3 text-sm text-slate-300">${l.store || "—"}</td>
+              <td class="p-3 text-sm text-slate-300 font-medium">${l.quantity} ${l.unit}</td>
+              <td class="p-3 font-bold text-sm text-white">${formatCurrency(l.price)}</td>
+              <td class="p-3 font-bold text-sm text-emerald-400">${formatCurrency(l.unitPrice)} / ${baseUnit}</td>
+              <td class="p-3 text-right whitespace-nowrap space-x-1.5">
+                <button
+                  type="button"
+                  onclick="addLedgerItemToBuyList('${l.id}')"
+                  class="inline-flex items-center justify-center bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold px-3 py-1.5 rounded-lg border border-emerald-500/40 text-xs transition-colors cursor-pointer active:scale-95"
+                  title="${t.ledger_quick_add_title || "Add this item to Buy List"}"
+                >
+                  <span>➕</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="deleteLedgerItem('${l.id}')"
+                  class="inline-flex items-center justify-center bg-red-500/20 hover:bg-red-500/30 text-red-300 font-bold px-2.5 py-1.5 rounded-lg border border-red-500/40 text-xs transition-colors cursor-pointer active:scale-95"
+                  title="${t.ledger_delete_item || "Delete record"}"
+                >
+                  <span>🗑️</span>
+                </button>
+              </td>
+            </tr>
+          `;
+            })
+            .join("");
+        }
+
+        // Render Mobile Cards (< 640px)
+        if (mobileContainer) {
+          mobileContainer.innerHTML = logs
+            .map((l) => {
+              const { baseUnit } = normalizeQuantity(l.quantity, l.unit);
+              const isSelected = selectedLedgerIds.has(String(l.id));
+              return `
+            <div class="p-3.5 bg-slate-950/80 rounded-2xl border ${isSelected ? "border-emerald-500/60 bg-emerald-950/20" : "border-slate-800"} space-y-2.5 shadow-sm transition-all">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-start gap-2.5 flex-1 min-w-0">
+                  <input
+                    type="checkbox"
+                    class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer mt-0.5 shrink-0"
+                    data-ledger-id="${l.id}"
+                    onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
+                    ${isSelected ? "checked" : ""}
+                  />
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-bold text-slate-100 leading-snug break-words">${l.itemName}</div>
+                    <div class="flex items-center gap-2 mt-1 flex-wrap">
+                      <span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-800 text-slate-300 border border-slate-700/60">${l.store || "—"}</span>
+                      <span class="text-[11px] font-mono text-slate-400">${l.date}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+                <div class="text-xs text-slate-300">
+                  <span class="text-slate-500">${t.th_size || "Size"}:</span> <span class="font-semibold text-slate-200">${l.quantity} ${l.unit}</span>
+                  <span class="text-slate-600 mx-1">·</span>
+                  <span class="text-slate-500">${t.th_paid || "Paid"}:</span> <span class="font-bold text-slate-100">${formatCurrency(l.price)}</span>
+                </div>
+                <div class="text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-800/50">
+                  ${formatCurrency(l.unitPrice)} / ${baseUnit}
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/60">
+                <button
+                  type="button"
+                  onclick="deleteLedgerItem('${l.id}')"
+                  class="min-h-[44px] px-3 bg-red-950/40 hover:bg-red-900/60 active:scale-95 text-red-300 font-semibold rounded-xl text-xs border border-red-800/40 flex items-center justify-center gap-1 cursor-pointer transition-colors"
+                  title="${t.ledger_delete_item || "Delete record"}"
+                >
+                  <span>🗑️</span>
+                </button>
+                <button
+                  type="button"
+                  onclick="addLedgerItemToBuyList('${l.id}')"
+                  class="flex-1 min-h-[44px] px-3.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer transition-colors"
+                >
+                  <span>➕</span>
+                  <span>${t.btn_add_selected_ledger || "Add to Buy List"}</span>
+                </button>
+              </div>
+            </div>
+          `;
+            })
+            .join("");
+        }
 
         updateLedgerBatchBar(logs);
       }
@@ -8571,6 +8728,15 @@
           "cloudSyncClientIdLabel",
           t.cloud_sync_client_id_label || "Google OAuth 2.0 Client ID"
         );
+        el(
+          "gdriveGuideLinkText",
+          t.gdrive_guide_link || "Setup Guide (2 min) ↗"
+        );
+        el(
+          "gdriveOriginLabel",
+          t.gdrive_origin_label || "Authorized JavaScript Origin:"
+        );
+        el("btnCopyOriginText", t.btn_copy_origin || "📋 Copy");
         const clientIdInput = document.getElementById("googleClientIdInput");
         if (clientIdInput)
           clientIdInput.placeholder =
@@ -8752,7 +8918,7 @@
        11. INITIALIZATION & SERVICE WORKER
        ========================================================================= */
       function initApp() {
-        initDatabase().then(() => {
+        return initDatabase().then(() => {
           // Sync restored settings to runtime and UI controls
           if (memoryState && memoryState.settings) {
             if (memoryState.settings.language) {
@@ -8799,9 +8965,6 @@
           renderApp();
           runComparatorCalc();
 
-          const langBtn = document.getElementById("langToggleBtn");
-          if (langBtn)
-            langBtn.textContent = currentLanguage === "en" ? "VI" : "EN";
           const langSelect = document.getElementById("settingsLanguageSelect");
           if (langSelect) langSelect.value = currentLanguage;
           const curSelect = document.getElementById("settingsCurrencySelect");
@@ -8809,23 +8972,36 @@
           const groupSelect = document.getElementById("settingsGroupingSelect");
           if (groupSelect) groupSelect.value = currentGrouping;
 
-          // Show sample data banner if items exist and never dismissed
-          if (memoryState.activeList.items.length > 0) {
-            const banner = document.getElementById("sampleDataBanner");
-            if (banner) banner.classList.remove("hidden");
-          }
-
           // Load Google Identity Services and init auth if client ID is configured
           loadGisScript();
           initGoogleAuthClient();
 
-          // Pull cloud sync on tab focus after inactivity
+          // Pull cloud sync on startup if authenticated
+          if (
+            (storageManager.getActiveProviderType() === "googledrive" &&
+              googleAuthState.accessToken) ||
+            (storageManager.getActiveProviderType() === "github" &&
+              githubAuthState.token)
+          ) {
+            storageManager.sync();
+          }
+
+          // Calm Cloud Sync on Visibility Changes
           let lastVisibleTime = Date.now();
           document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
+            if (document.visibilityState === "hidden") {
+              flushPendingCloudSync();
+            } else if (document.visibilityState === "visible") {
               const elapsed = Date.now() - lastVisibleTime;
-              if (elapsed > 60000 && googleAuthState.accessToken) {
-                storageManager.getCloudProvider().sync();
+              if (elapsed > 120000) {
+                const activeType = storageManager.getActiveProviderType();
+                if (
+                  (activeType === "googledrive" &&
+                    googleAuthState.accessToken) ||
+                  (activeType === "github" && githubAuthState.token)
+                ) {
+                  storageManager.sync();
+                }
               }
               lastVisibleTime = Date.now();
             }
@@ -9204,6 +9380,9 @@
         window.undoLastAction = undoLastAction;
         window.renderQuickPriceAdjustmentChips =
           renderQuickPriceAdjustmentChips;
+        window.initApp = initApp;
+        window.copyCurrentOriginToClipboard = copyCurrentOriginToClipboard;
+        window.flushPendingCloudSync = flushPendingCloudSync;
         Object.defineProperty(window, "googleAuthState", {
           get: () => googleAuthState,
           set: (v) => {
