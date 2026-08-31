@@ -169,6 +169,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-gist-resiliency-and-ui-polish.test.js",
     category: "AI & State",
   },
+  {
+    name: "Smart Buy-List v3.11.0 Quick Add Store Picker, Available Filter & Rate Limit Resiliency",
+    file: "tests/smart-buy-list-v3-11-enhancements.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {

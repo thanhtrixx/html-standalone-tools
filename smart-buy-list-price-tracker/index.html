@@ -536,6 +536,12 @@
           class="space-y-2"
         >
           <div class="relative flex items-center gap-1.5">
+            <select
+              id="smartQuickStoreSelect"
+              onchange="onSmartQuickStoreSelectChange(this.value)"
+              class="bg-slate-900 text-slate-200 text-xs font-semibold border border-slate-700 rounded-xl px-2.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer max-w-[110px] sm:max-w-[140px] shrink-0 truncate transition-all"
+              title="Cửa hàng cho mục nhập nhanh"
+            ></select>
             <input
               type="text"
               id="smartQuickInput"
@@ -2183,21 +2189,23 @@
             <!-- Manual Overrides (Force Push / Pull) -->
             <div
               id="cloudSyncAdvancedActions"
-              class="hidden flex items-center justify-between pt-1 border-t border-slate-800/80"
+              class="hidden grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-800/80"
             >
               <button
                 id="btnForceUpload"
                 onclick="forceUploadCloud()"
-                class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold"
+                class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-emerald-950/40 text-emerald-400 hover:text-emerald-300 border border-emerald-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
-                Force Upload to Cloud
+                <span>⬆️</span>
+                <span id="btnForceUploadText">Force Upload to Cloud</span>
               </button>
               <button
                 id="btnForceDownload"
                 onclick="forceDownloadCloud()"
-                class="text-[11px] text-sky-400 hover:text-sky-300 font-semibold"
+                class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-sky-950/40 text-sky-400 hover:text-sky-300 border border-sky-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
-                Force Download from Cloud
+                <span>⬇️</span>
+                <span id="btnForceDownloadText">Force Download from Cloud</span>
               </button>
             </div>
           </div>
@@ -2322,21 +2330,25 @@
             <!-- GitHub Manual Overrides (Force Push / Pull) -->
             <div
               id="githubGistActions"
-              class="hidden flex items-center justify-between pt-1 border-t border-slate-800/80"
+              class="hidden grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-800/80"
             >
               <button
                 id="btnGithubForceUpload"
                 onclick="forceUploadCloud()"
-                class="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold"
+                class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-emerald-950/40 text-emerald-400 hover:text-emerald-300 border border-emerald-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
-                Force Upload to Cloud
+                <span>⬆️</span>
+                <span id="btnGithubForceUploadText">Force Upload to Cloud</span>
               </button>
               <button
                 id="btnGithubForceDownload"
                 onclick="forceDownloadCloud()"
-                class="text-[11px] text-sky-400 hover:text-sky-300 font-semibold"
+                class="flex items-center justify-center gap-1.5 py-1.5 px-2 bg-slate-900 hover:bg-sky-950/40 text-sky-400 hover:text-sky-300 border border-sky-800/60 rounded-xl text-xs font-semibold active:scale-95 transition-all cursor-pointer shadow-sm"
               >
-                Force Download from Cloud
+                <span>⬇️</span>
+                <span id="btnGithubForceDownloadText"
+                  >Force Download from Cloud</span
+                >
               </button>
             </div>
           </div>
@@ -2356,7 +2368,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v3.10.0</span
+              >v3.11.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -3496,14 +3508,72 @@
         }
       }
 
+      function parseGitHubRateLimitError(res, errData) {
+        if (!res) return null;
+        const is403or429 = res.status === 403 || res.status === 429;
+        const remaining =
+          res.headers && typeof res.headers.get === "function"
+            ? res.headers.get("x-ratelimit-remaining")
+            : null;
+        const resetHeader =
+          res.headers && typeof res.headers.get === "function"
+            ? res.headers.get("x-ratelimit-reset") ||
+              res.headers.get("retry-after")
+            : null;
+        const msgLower = (errData?.message || "").toLowerCase();
+        const isRateLimit =
+          (is403or429 && remaining === "0") ||
+          msgLower.includes("rate limit") ||
+          msgLower.includes("secondary rate limit") ||
+          msgLower.includes("api rate limit");
+
+        if (!isRateLimit) return null;
+
+        let timeStr = "";
+        let minutesLeft = 1;
+        if (resetHeader) {
+          const resetNum = parseInt(resetHeader, 10);
+          if (!isNaN(resetNum)) {
+            const resetDate =
+              resetNum > 1000000000
+                ? new Date(resetNum * 1000)
+                : new Date(Date.now() + resetNum * 1000);
+            timeStr = resetDate.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            minutesLeft = Math.max(
+              1,
+              Math.ceil((resetDate.getTime() - Date.now()) / 60000)
+            );
+          }
+        }
+        const lang =
+          typeof currentLanguage !== "undefined" ? currentLanguage : "vi";
+        const t = TRANSLATIONS[lang] || TRANSLATIONS.vi;
+        const template =
+          t.error_github_ratelimit ||
+          (lang === "vi"
+            ? "Đã đạt giới hạn yêu cầu GitHub API. Tự động mở lại lúc {time} (sau {mins} phút)."
+            : "GitHub API rate limit exceeded. Resets at {time} (in {mins}m).");
+        if (timeStr) {
+          return template
+            .replace("{time}", timeStr)
+            .replace("{mins}", minutesLeft);
+        }
+        return lang === "vi"
+          ? "Đã đạt giới hạn yêu cầu GitHub API. Vui lòng thử lại sau."
+          : "GitHub API rate limit reached. Please try again later.";
+      }
+
       // GitHub Gist Storage Provider
       class GitHubGistStorageProvider extends StorageProvider {
-        constructor(localProvider) {
+        constructor(localStorageProvider) {
           super();
-          this.local = localProvider;
+          this.local = localStorageProvider;
           this.filename = "smart_buy_list_data.json";
           this.description =
-            "Smart Buy-List & Unit Price Tracker Cloud Sync Data";
+            "Smart Buy-List & Unit Price Tracker Database Backup (Secret)";
           this.isSyncing = false;
           this.needsTrailingSync = false;
         }
@@ -3552,6 +3622,10 @@
           });
           if (!res.ok) {
             const errData = await res.json().catch(() => null);
+            const rateLimitMsg = parseGitHubRateLimitError(res, errData);
+            if (rateLimitMsg) {
+              throw new Error(rateLimitMsg);
+            }
             const msg = errData?.message || `HTTP ${res.status}`;
             throw new Error(`GitHub auth failed: ${msg}`);
           }
@@ -3633,6 +3707,10 @@
           });
           if (!createRes.ok) {
             const errData = await createRes.json().catch(() => null);
+            const rateLimitMsg = parseGitHubRateLimitError(createRes, errData);
+            if (rateLimitMsg) {
+              throw new Error(rateLimitMsg);
+            }
             const detail = errData?.message ? `: ${errData.message}` : "";
             throw new Error(
               `Failed to create secret Gist: HTTP ${createRes.status}${detail}`
@@ -3652,6 +3730,10 @@
           });
           if (!res.ok) {
             const errData = await res.json().catch(() => null);
+            const rateLimitMsg = parseGitHubRateLimitError(res, errData);
+            if (rateLimitMsg) {
+              throw new Error(rateLimitMsg);
+            }
             const detail = errData?.message ? `: ${errData.message}` : "";
             throw new Error(`Failed to read Gist: HTTP ${res.status}${detail}`);
           }
@@ -3706,6 +3788,10 @@
           });
           if (!res.ok) {
             const errData = await res.json().catch(() => null);
+            const rateLimitMsg = parseGitHubRateLimitError(res, errData);
+            if (rateLimitMsg) {
+              throw new Error(rateLimitMsg);
+            }
             const detail = errData?.message ? `: ${errData.message}` : "";
             throw new Error(
               `Failed to update Gist: HTTP ${res.status}${detail}`
@@ -4823,6 +4909,8 @@
           toast_github_token_invalid:
             "Invalid GitHub token or missing gist scope",
           toast_github_sync_error: "GitHub sync failed: {msg}",
+          error_github_ratelimit:
+            "GitHub API rate limit exceeded. Resets at {time} (in {mins}m).",
           toast_sample_loaded: "Sample grocery list loaded!",
           toast_data_cleared: "All data cleared",
           smart_quick_heading: "Quick Add Item",
@@ -4830,6 +4918,7 @@
             "Quick add e.g. Whole Milk 35k/l, Beef 120k 500g, Eggs 30k 10 ea...",
           smart_quick_advanced_toggle: "Detailed Options",
           smart_quick_add_btn: "Add Item",
+          smart_quick_store_title: "Target store for quick add",
           toast_smart_item_added: "Added '{item}' ({qty} {unit} @ {price})!",
           toast_batch_items_added: "Added {count} items to Buy List!",
           toast_action_undo: "Undo",
@@ -5118,6 +5207,8 @@
           toast_github_token_invalid:
             "Mã GitHub không hợp lệ hoặc thiếu quyền gist",
           toast_github_sync_error: "Lỗi đồng bộ GitHub: {msg}",
+          error_github_ratelimit:
+            "Đã đạt giới hạn yêu cầu GitHub API. Tự động mở lại lúc {time} (sau {mins} phút).",
           toast_sample_loaded: "Đã tải danh sách hàng hoá mẫu!",
           toast_data_cleared: "Đã xoá toàn bộ dữ liệu",
           smart_quick_heading: "Nhập Nhanh Mặt Hàng",
@@ -5125,6 +5216,7 @@
             "Nhập nhanh vd: Sữa tươi 35k/l, Thịt bò 120k 500g, Trứng 30k 10 quả...",
           smart_quick_advanced_toggle: "Tuỳ Chọn Chi Tiết",
           smart_quick_add_btn: "Thêm Mặt Hàng",
+          smart_quick_store_title: "Cửa hàng cho mục nhập nhanh",
           toast_smart_item_added: "Đã thêm '{item}' ({qty} {unit} - {price})!",
           toast_batch_items_added: "Đã thêm {count} món vào danh sách mua!",
           toast_action_undo: "Hoàn Tác",
@@ -5451,7 +5543,35 @@
           return;
         }
         currentStoreFilter = store;
+        const quickStoreSelect = document.getElementById(
+          "smartQuickStoreSelect"
+        );
+        if (quickStoreSelect && store !== "ALL") {
+          quickStoreSelect.value = store;
+        }
         renderApp();
+      }
+
+      function onSmartQuickStoreSelectChange(val) {
+        if (val === "MANAGE_STORES") {
+          openStoreManagerModal();
+          const quickStoreSelect = document.getElementById(
+            "smartQuickStoreSelect"
+          );
+          if (quickStoreSelect) {
+            const stores = memoryState.stores || DEFAULT_STORES;
+            quickStoreSelect.value =
+              currentStoreFilter !== "ALL" &&
+              stores.includes(currentStoreFilter)
+                ? currentStoreFilter
+                : stores[0] || "WinMart";
+          }
+        } else {
+          const input = document.getElementById("smartQuickInput");
+          if (input && input.value) {
+            handleSmartQuickInputChange(input.value);
+          }
+        }
       }
 
       function filterByCategory(category) {
@@ -5719,20 +5839,35 @@
         if (!container) return;
 
         const stores = memoryState.stores || DEFAULT_STORES;
-        const items = memoryState.activeList.items;
+        const items =
+          memoryState.activeList && Array.isArray(memoryState.activeList.items)
+            ? memoryState.activeList.items
+            : [];
         const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+
+        const availableStores = new Set(
+          items.map((i) => i.store).filter(Boolean)
+        );
+
+        if (
+          currentStoreFilter !== "ALL" &&
+          !availableStores.has(currentStoreFilter)
+        ) {
+          currentStoreFilter = "ALL";
+          const select = document.getElementById("storeFilterSelect");
+          if (select) select.value = "ALL";
+        }
 
         const allChip = {
           key: "ALL",
           label: t.store_all || "All Stores",
-          icon: "🏬",
           count: items.length,
         };
 
-        const storeChips = stores.map((s) => ({
+        const relevantStores = stores.filter((s) => availableStores.has(s));
+        const storeChips = relevantStores.map((s) => ({
           key: s,
           label: s,
-          icon: "🏪",
           count: items.filter((i) => i.store === s).length,
         }));
 
@@ -5746,7 +5881,6 @@
                 : "bg-slate-800 text-slate-300 hover:bg-slate-700"
             }"
           >
-            <span>${allChip.icon}</span>
             <span>${allChip.label}</span>
             <span class="text-[10px] px-1.5 py-0.5 rounded-full ${
               currentStoreFilter === "ALL"
@@ -5769,7 +5903,6 @@
                   : "bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium"
               }"
             >
-              <span>${chip.icon}</span>
               <span>${chip.label}</span>
               <span class="text-[10px] px-1.5 py-0.5 rounded-full ${
                 isActive
@@ -5941,21 +6074,40 @@
       function renderStoreFilterOptions() {
         const select = document.getElementById("storeFilterSelect");
         const addStoreSelect = document.getElementById("inputItemStore");
+        const smartQuickStoreSelect = document.getElementById(
+          "smartQuickStoreSelect"
+        );
         const stores = memoryState.stores || DEFAULT_STORES;
+        const items =
+          memoryState.activeList && Array.isArray(memoryState.activeList.items)
+            ? memoryState.activeList.items
+            : [];
+        const availableStores = new Set(
+          items.map((i) => i.store).filter(Boolean)
+        );
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
 
         if (select) {
           const currentVal = currentStoreFilter;
-          select.innerHTML = `<option value="ALL">${TRANSLATIONS[currentLanguage].store_all || "All Stores"}</option>`;
+          select.innerHTML = "";
+          const allOpt = document.createElement("option");
+          allOpt.value = "ALL";
+          allOpt.textContent = t.store_all || "All Stores";
+          if (currentVal === "ALL") allOpt.selected = true;
+          select.appendChild(allOpt);
+
           stores.forEach((store) => {
-            const opt = document.createElement("option");
-            opt.value = store;
-            opt.textContent = store;
-            if (store === currentVal) opt.selected = true;
-            select.appendChild(opt);
+            if (availableStores.has(store)) {
+              const opt = document.createElement("option");
+              opt.value = store;
+              opt.textContent = store;
+              if (store === currentVal) opt.selected = true;
+              select.appendChild(opt);
+            }
           });
           const manageOpt = document.createElement("option");
           manageOpt.value = "MANAGE_STORES";
-          manageOpt.textContent = `⚙️ ${TRANSLATIONS[currentLanguage].manage_stores_title || "Manage Stores..."}`;
+          manageOpt.textContent = `⚙️ ${t.manage_stores_title || "Manage Stores..."}`;
           select.appendChild(manageOpt);
         }
 
@@ -5971,8 +6123,32 @@
           });
           const manageOpt = document.createElement("option");
           manageOpt.value = "MANAGE_STORES";
-          manageOpt.textContent = `⚙️ ${TRANSLATIONS[currentLanguage].manage_stores_title || "Manage Stores..."}`;
+          manageOpt.textContent = `⚙️ ${t.manage_stores_title || "Manage Stores..."}`;
           addStoreSelect.appendChild(manageOpt);
+        }
+
+        if (smartQuickStoreSelect) {
+          const prevVal = smartQuickStoreSelect.value;
+          smartQuickStoreSelect.innerHTML = "";
+          stores.forEach((store) => {
+            const opt = document.createElement("option");
+            opt.value = store;
+            opt.textContent = store;
+            if (store === prevVal) opt.selected = true;
+            smartQuickStoreSelect.appendChild(opt);
+          });
+          const manageOpt = document.createElement("option");
+          manageOpt.value = "MANAGE_STORES";
+          manageOpt.textContent = `⚙️ ${t.manage_stores_title || "Manage Stores..."}`;
+          smartQuickStoreSelect.appendChild(manageOpt);
+
+          if (!prevVal || !stores.includes(prevVal)) {
+            smartQuickStoreSelect.value =
+              currentStoreFilter !== "ALL" &&
+              stores.includes(currentStoreFilter)
+                ? currentStoreFilter
+                : stores[0] || "WinMart";
+          }
         }
       }
 
@@ -6851,6 +7027,31 @@
           .toLowerCase();
       }
 
+      function getQuickAddDefaultStore() {
+        const quickStoreSelect = document.getElementById(
+          "smartQuickStoreSelect"
+        );
+        if (
+          quickStoreSelect &&
+          quickStoreSelect.value &&
+          quickStoreSelect.value !== "MANAGE_STORES"
+        ) {
+          return quickStoreSelect.value;
+        }
+        if (
+          typeof currentStoreFilter !== "undefined" &&
+          currentStoreFilter &&
+          currentStoreFilter !== "ALL" &&
+          currentStoreFilter !== "MANAGE_STORES"
+        ) {
+          return currentStoreFilter;
+        }
+        return (
+          (memoryState && memoryState.stores && memoryState.stores[0]) ||
+          "WinMart"
+        );
+      }
+
       function parseSmartGroceryInput(rawText) {
         if (!rawText || typeof rawText !== "string") {
           return {
@@ -6858,9 +7059,7 @@
             price: 0,
             quantity: 1,
             unit: "ea",
-            store:
-              (memoryState && memoryState.stores && memoryState.stores[0]) ||
-              "WinMart",
+            store: getQuickAddDefaultStore(),
             category: "other",
           };
         }
@@ -6871,9 +7070,7 @@
             price: 0,
             quantity: 1,
             unit: "ea",
-            store:
-              (memoryState && memoryState.stores && memoryState.stores[0]) ||
-              "WinMart",
+            store: getQuickAddDefaultStore(),
             category: "other",
           };
         }
@@ -6914,6 +7111,18 @@
             store = atMatch[1].trim();
           }
           text = text.replace(atMatch[0], "").trim();
+
+          const quickStoreSelect = document.getElementById(
+            "smartQuickStoreSelect"
+          );
+          if (
+            quickStoreSelect &&
+            store &&
+            quickStoreSelect.options &&
+            Array.from(quickStoreSelect.options).some((o) => o.value === store)
+          ) {
+            quickStoreSelect.value = store;
+          }
         } else {
           for (const s of knownStores) {
             const regex = new RegExp(
@@ -6923,9 +7132,23 @@
             if (regex.test(text)) {
               store = s;
               text = text.replace(regex, "").trim();
+              const quickStoreSelect = document.getElementById(
+                "smartQuickStoreSelect"
+              );
+              if (
+                quickStoreSelect &&
+                quickStoreSelect.options &&
+                Array.from(quickStoreSelect.options).some((o) => o.value === s)
+              ) {
+                quickStoreSelect.value = s;
+              }
               break;
             }
           }
+        }
+
+        if (!store) {
+          store = getQuickAddDefaultStore();
         }
 
         // 2. Extract Price with fraction (e.g. "35k/l", "35000/kg", "35k/1kg", "120k/500g", "30k/10 quả")
@@ -7044,7 +7267,7 @@
           price: Math.max(0, price),
           quantity: quantity > 0 ? quantity : 1,
           unit: unit || "ea",
-          store: store || (knownStores && knownStores[0]) || "WinMart",
+          store: store || getQuickAddDefaultStore(),
           category: category || "other",
         };
       }
@@ -7092,10 +7315,7 @@
                 Math.random().toString(36).substr(2, 5),
               name: parsed.name,
               category: parsed.category || "other",
-              store:
-                parsed.store ||
-                (memoryState && memoryState.stores && memoryState.stores[0]) ||
-                "WinMart",
+              store: parsed.store || getQuickAddDefaultStore(),
               quantity: parsed.quantity || 1,
               unit: parsed.unit || "ea",
               price: parsed.price || 0,
@@ -8784,6 +9004,12 @@
           "btnToggleAdvancedAddText",
           t.smart_quick_advanced_toggle || "Detailed Options"
         );
+        const smartQuickStore = document.getElementById(
+          "smartQuickStoreSelect"
+        );
+        if (smartQuickStore)
+          smartQuickStore.title =
+            t.smart_quick_store_title || "Target store for quick add";
         const smartInput = document.getElementById("smartQuickInput");
         if (smartInput)
           smartInput.placeholder =
@@ -8995,9 +9221,9 @@
         el("btnGoogleSignInText", t.btn_google_signin || "Sign in with Google");
         el("btnGoogleSignOutText", t.btn_google_signout || "Disconnect Drive");
         el("btnGoogleSyncNowText", t.btn_google_sync_now || "Sync Now");
-        el("btnForceUpload", t.btn_force_upload || "Force Upload to Cloud");
+        el("btnForceUploadText", t.btn_force_upload || "Force Upload to Cloud");
         el(
-          "btnForceDownload",
+          "btnForceDownloadText",
           t.btn_force_download || "Force Download from Cloud"
         );
 
@@ -9027,11 +9253,11 @@
         el("btnGithubDisconnectText", t.btn_github_disconnect || "Disconnect");
         el("btnGithubSyncNowText", t.btn_github_sync_now || "Sync Now");
         el(
-          "btnGithubForceUpload",
+          "btnGithubForceUploadText",
           t.btn_force_upload || "Force Upload to Cloud"
         );
         el(
-          "btnGithubForceDownload",
+          "btnGithubForceDownloadText",
           t.btn_force_download || "Force Download from Cloud"
         );
         el("githubViewGistLink", t.github_view_gist || "View Gist on GitHub ↗");
@@ -9672,6 +9898,9 @@
         window.renderStoreFilterChips = renderStoreFilterChips;
         window.renderQuickPriceAdjustmentChips =
           renderQuickPriceAdjustmentChips;
+        window.parseGitHubRateLimitError = parseGitHubRateLimitError;
+        window.onSmartQuickStoreSelectChange = onSmartQuickStoreSelectChange;
+        window.getQuickAddDefaultStore = getQuickAddDefaultStore;
         window.initApp = initApp;
         window.copyCurrentOriginToClipboard = copyCurrentOriginToClipboard;
         window.flushPendingCloudSync = flushPendingCloudSync;
