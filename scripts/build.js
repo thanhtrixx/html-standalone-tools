@@ -41,11 +41,13 @@ const COMPANION_ASSETS = [
   "sw.js",
   "service-worker.js",
   "icon.svg",
+  "icon-180.png",
   "icon-192.png",
   "icon-512.png",
   "favicon.ico",
   "favicon.png",
   "apple-touch-icon.png",
+  "og-image.png",
 ];
 
 const MINIFY_OPTIONS = {
