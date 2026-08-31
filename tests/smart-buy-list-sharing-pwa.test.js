@@ -537,6 +537,76 @@ async function runTests() {
         `SHARE-I18N: Vietnamese translation exists for '${k}'`
       );
     });
+
+    // 7. SOCIAL SHARE METADATA (OPEN GRAPH & TWITTER CARDS - ISSUE #256)
+    console.log(
+      "\n--- Section 7: Open Graph & Twitter Card Social Metadata ---"
+    );
+
+    assert(
+      /<meta\s+property="og:title"\s+content="[^"]+"/i.test(rawHtml),
+      "OG-01: <meta property='og:title'> present in <head>"
+    );
+    assert(
+      /<meta\s+property="og:description"\s+content="[^"]+"/i.test(rawHtml),
+      "OG-02: <meta property='og:description'> present in <head>"
+    );
+    assert(
+      /<meta\s+property="og:image"\s+content="https:\/\/trile\.dev\/tools\/smart-buy-list-price-tracker\/og-image\.png"/i.test(
+        rawHtml
+      ),
+      "OG-03: <meta property='og:image'> present with absolute URL"
+    );
+    assert(
+      /<meta\s+property="og:url"\s+content="https:\/\/trile\.dev\/tools\/smart-buy-list-price-tracker\/"/i.test(
+        rawHtml
+      ),
+      "OG-04: <meta property='og:url'> present with canonical tool URL"
+    );
+    assert(
+      /<meta\s+property="og:type"\s+content="website"/i.test(rawHtml),
+      "OG-05: <meta property='og:type' content='website'> present"
+    );
+    assert(
+      /<meta\s+name="twitter:card"\s+content="summary_large_image"/i.test(
+        rawHtml
+      ),
+      "TWITTER-01: <meta name='twitter:card' content='summary_large_image'> present"
+    );
+    assert(
+      /<meta\s+name="twitter:title"\s+content="[^"]+"/i.test(rawHtml),
+      "TWITTER-02: <meta name='twitter:title'> present in <head>"
+    );
+    assert(
+      /<meta\s+name="twitter:description"\s+content="[^"]+"/i.test(rawHtml),
+      "TWITTER-03: <meta name='twitter:description'> present in <head>"
+    );
+
+    const ogImagePath = path.join(
+      __dirname,
+      "..",
+      "smart-buy-list-price-tracker",
+      "og-image.png"
+    );
+    assert(
+      fs.existsSync(ogImagePath),
+      "OG-ASSET-01: og-image.png asset exists in tool directory"
+    );
+    const ogImageBuffer = fs.readFileSync(ogImagePath);
+    assert(
+      ogImageBuffer.length > 0 &&
+        ogImageBuffer[0] === 0x89 &&
+        ogImageBuffer[1] === 0x50 &&
+        ogImageBuffer[2] === 0x4e &&
+        ogImageBuffer[3] === 0x47,
+      "OG-ASSET-02: og-image.png is a valid PNG binary file"
+    );
+    const ogImgWidth = ogImageBuffer.readUInt32BE(16);
+    const ogImgHeight = ogImageBuffer.readUInt32BE(20);
+    assert(
+      ogImgWidth >= 1200 && ogImgHeight >= 630,
+      `OG-ASSET-03: og-image.png meets social resolution standard (>=1200x630, got ${ogImgWidth}x${ogImgHeight})`
+    );
   } catch (err) {
     console.error("❌ Test Execution Error:", err);
     failed++;
