@@ -426,7 +426,8 @@ async function runTests() {
     );
     assert(
       swContent.includes("navigate") &&
-        swContent.includes("text/html") &&
+        (swContent.includes("text/html") ||
+          swContent.includes("request.mode")) &&
         (swContent.includes("Promise.race") ||
           swContent.includes("setTimeout")),
       "PWA-17: sw.js implements Network-First strategy with timeout for navigation/HTML requests"

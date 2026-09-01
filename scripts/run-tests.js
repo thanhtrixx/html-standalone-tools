@@ -12,8 +12,9 @@
  */
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
-const { spawnSync } = require("child_process");
+const { spawn, spawnSync } = require("child_process");
 
 const ROOT_DIR = path.resolve(__dirname, "..");
 const REPORTS_DIR = path.join(ROOT_DIR, "test-reports");
@@ -204,6 +205,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-v4-1-navigation-and-gestures.test.js",
     category: "UI/UX",
   },
+  {
+    name: "Smart Buy-List v4.2.0 Review Remediation, Event Delegation & Math Robustness",
+    file: "tests/smart-buy-list-v4-2-review-remediation.test.js",
+    category: "Security & Hardening",
+  },
 ];
 
 function escapeXml(str) {
@@ -304,6 +310,71 @@ function runSuite(suite) {
     tests,
     rawOutput,
   };
+}
+
+function runSuiteAsync(suite) {
+  return new Promise((resolve) => {
+    const filePath = path.join(ROOT_DIR, suite.file);
+    const startTime = Date.now();
+
+    const child = spawn(process.execPath, [filePath], {
+      cwd: ROOT_DIR,
+      env: { ...process.env, CI: process.env.CI || "false" },
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString();
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    child.on("close", (code) => {
+      const durationMs = Date.now() - startTime;
+      const rawOutput = stdout + (stderr ? `\n--- STDERR ---\n${stderr}` : "");
+
+      let tests = parseTestOutput(rawOutput);
+      let passed = tests.filter((t) => t.status === "passed").length;
+      let failed = tests.filter((t) => t.status === "failed").length;
+
+      if (code !== 0 && failed === 0) {
+        failed = 1;
+        tests.push({
+          name: `${suite.name} execution failed`,
+          status: "failed",
+          error: stderr || `Process exited with code ${code}`,
+        });
+      }
+
+      const success = code === 0 && failed === 0;
+      const statusIcon = success ? "✅" : "❌";
+      console.log(
+        `  ${statusIcon} [${suite.category}] ${suite.name}: ${passed} Passed, ${failed} Failed (${(durationMs / 1000).toFixed(2)}s)`
+      );
+
+      if (!success && stderr.trim()) {
+        console.error(stderr.trim());
+      }
+
+      resolve({
+        name: suite.name,
+        file: suite.file,
+        category: suite.category,
+        durationMs,
+        exitCode: code,
+        success,
+        total: tests.length,
+        passed,
+        failed,
+        tests,
+        rawOutput,
+      });
+    });
+  });
 }
 
 function generateHtmlReport(reportData) {
@@ -689,18 +760,34 @@ function appendGithubStepSummary(reportData) {
 
 async function main() {
   const startTime = Date.now();
+  const concurrency = Math.max(2, Math.min(os.cpus ? os.cpus().length : 4, 8));
+
   console.log("==================================================");
   console.log("🚀 HTML Standalone Tools - Unified Test Runner");
-  console.log("==================================================");
+  console.log(
+    `⚡ Executing ${TEST_SUITES.length} test suites with concurrency = ${concurrency}`
+  );
+  console.log("==================================================\n");
 
-  const suitesResults = [];
+  const suitesResults = new Array(TEST_SUITES.length);
+  let currentIndex = 0;
+
+  async function worker() {
+    while (currentIndex < TEST_SUITES.length) {
+      const idx = currentIndex++;
+      const suite = TEST_SUITES[idx];
+      suitesResults[idx] = await runSuiteAsync(suite);
+    }
+  }
+
+  const workers = Array.from({ length: concurrency }, () => worker());
+  await Promise.all(workers);
+
   let totalAssertions = 0;
   let totalPassed = 0;
   let totalFailed = 0;
 
-  for (const suite of TEST_SUITES) {
-    const result = runSuite(suite);
-    suitesResults.push(result);
+  for (const result of suitesResults) {
     totalAssertions += result.total;
     totalPassed += result.passed;
     totalFailed += result.failed;

@@ -546,8 +546,9 @@ async function runTestSuite() {
   assert(
     manifestContent.version === "3.13.0" ||
       manifestContent.version === "4.0.0" ||
-      manifestContent.version === "4.1.0",
-    "VER-01: manifest.webmanifest version is 4.1.0 (or 4.0.0 / 3.13.0)"
+      manifestContent.version === "4.1.0" ||
+      manifestContent.version === "4.2.0",
+    "VER-01: manifest.webmanifest version is 4.2.0 (or 4.1.0 / 4.0.0 / 3.13.0)"
   );
 
   const swPath = path.join(
@@ -560,15 +561,17 @@ async function runTestSuite() {
   assert(
     swContent.includes("smart-buy-list-v3.13.0") ||
       swContent.includes("smart-buy-list-v4.0.0") ||
-      swContent.includes("smart-buy-list-v4.1.0"),
-    "VER-02: sw.js CACHE_NAME is smart-buy-list-v4.1.0 (or v4.0.0 / v3.13.0)"
+      swContent.includes("smart-buy-list-v4.1.0") ||
+      swContent.includes("smart-buy-list-v4.2.0"),
+    "VER-02: sw.js CACHE_NAME is smart-buy-list-v4.2.0 (or v4.1.0 / v4.0.0 / v3.13.0)"
   );
 
   assert(
     htmlContent.includes("v3.13.0") ||
       htmlContent.includes("v4.0.0") ||
-      htmlContent.includes("v4.1.0"),
-    "VER-03: index.html references current version (v4.1.0)"
+      htmlContent.includes("v4.1.0") ||
+      htmlContent.includes("v4.2.0"),
+    "VER-03: index.html references current version (v4.2.0 / v4.1.0)"
   );
 
   // ==================== SECTION 8: Bilingual Translation Parity ====================

@@ -21,8 +21,8 @@ Additionally, understanding whether a current shelf price represents an authenti
 2. **Multi-Store Deal Scoring & Indicator Badges**:
    - Compare the candidate unit price against the item's historical ledger:
      - 🟢 **Great Deal**: $P_{\text{unit}} \le P_{\text{min}}$ (All-Time Low) OR $P_{\text{unit}} \le 0.90 \times P_{\text{avg}}$.
-     - 🟡 **Fair Price**: $0.90 \times P_{\text{avg}} < P_{\text{unit}} \le 1.05 \times P_{\text{avg}}$.
-     - 🔴 **Price Spike**: $P_{\text{unit}} > 1.05 \times P_{\text{last}}$ OR $P_{\text{unit}} > 1.10 \times P_{\text{avg}}$.
+     - 🟡 **Fair Price**: $0.90 \times P_{\text{avg}} < P_{\text{unit}} \le 1.10 \times P_{\text{avg}}$ (within $\pm 10\%$ of historical average) and $P_{\text{unit}} \le 1.15 \times P_{\text{last}}$.
+     - 🔴 **Price Spike**: $P_{\text{unit}} > 1.10 \times P_{\text{avg}}$ OR $P_{\text{unit}} > 1.15 \times P_{\text{last}}$ (exceeds $+10\%$ of historical average or $+15\%$ above last paid price).
 3. **In-Aisle Side-by-Side Package Comparator**:
    - Provide a mobile-first dual package input modal (Price + Quantity + Unit for Package A & B) that computes live normalized unit prices, highlights the cheaper option with exact percentage savings, and allows 1-tap application to the active list item.
 

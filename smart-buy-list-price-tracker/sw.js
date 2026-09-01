@@ -1,4 +1,4 @@
-const CACHE_NAME = "smart-buy-list-v4.1.0";
+const CACHE_NAME = "smart-buy-list-v4.2.0";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -6,14 +6,18 @@ const ASSETS_TO_CACHE = [
   "./icon.svg",
   "./icon-180.png",
   "./og-image.png",
-  "https://cdn.tailwindcss.com",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch(() => {});
-    })
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => {
+        return cache.addAll(ASSETS_TO_CACHE);
+      })
+      .catch((err) => {
+        console.warn("[SW] Cache installation warning:", err);
+      })
   );
 });
 
@@ -40,11 +44,7 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
-  const isNavigation =
-    request.mode === "navigate" ||
-    (request.method === "GET" &&
-      request.headers.get("accept") &&
-      request.headers.get("accept").includes("text/html"));
+  const isNavigation = request.mode === "navigate";
 
   if (isNavigation) {
     // Network-First strategy with 2.5s timeout for HTML navigation
