@@ -1,6 +1,6 @@
 # Ways of Working (WoW) & GitHub Flow
 
-This document defines the standard engineering workflow and delivery lifecycle for both human engineers and autonomous coding agents working on this repository.
+This document defines the standard engineering workflow and delivery lifecycle for human engineers and autonomous coding agents working on this repository.
 
 ---
 
@@ -13,14 +13,16 @@ flowchart TD
         ADR --> Issues["GitHub Issues<br/>(Epic + Vertical Slices)"]
     end
 
-    subgraph P2["2. Branch &amp; TDD"]
-        Branch["Branch per Issue<br/>(feat/issue-&lt;n&gt;-...)"] --> TDD["Write Tests (TDD)"]
-        TDD --> Impl["Implementation"]
-        Impl --> Verify["Local Verify<br/>(npm run verify)"]
+    subgraph P2["2. Branch &amp; Two-Speed TDD"]
+        Branch["Branch per Issue<br/>(feat/issue-&lt;n&gt;-...)"] --> InnerLoop["Inner Loop: Fast Scoped TDD<br/>(npm run test:&lt;tool&gt;)"]
+        InnerLoop --> Impl["Implementation"]
+        Impl --> OuterGate["Outer Gate: Full Verify<br/>(npm run verify)"]
     end
 
-    subgraph P3["3. PR, CI Gate &amp; Merge"]
-        PR["Create PR<br/>(gh pr create --body &quot;Closes #&lt;n&gt;&quot;)"] --> CIGate["CI Quality Gate (pr-verify.yml)<br/>(npm run verify)"]
+    subgraph P3["3. PR, CI Gate &amp; Review"]
+        OuterGate --> SelfReview["Pre-PR Self-Review<br/>(Spec, Invariants, Gate)"]
+        SelfReview --> PR["Create PR<br/>(gh pr create --body 'Closes #&lt;n&gt;')"]
+        PR --> CIGate["CI Quality Gate (pr-verify.yml)<br/>(npm run verify)"]
         CIGate --> Review["Code &amp; Spec Review"]
         Review --> Merge["Squash &amp; Merge<br/>(gh pr merge --squash --delete-branch)"]
     end
@@ -32,11 +34,12 @@ flowchart TD
     end
 
     Issues --> Branch
-    Verify --> PR
 ```
 
 <details>
-<summary>ASCII Diagram (Backout Plan / Plain-Text Fallback)</summary>
+<summary>ASCII Diagram (Terminal / Plain-Text Fallback)</summary>
+
+> **Note:** Mermaid is the authoritative diagram format. This ASCII diagram is maintained as a synchronized plain-text mirror for terminal and offline reading.
 
 ```text
 [1. Spec & Decomposition]
@@ -45,18 +48,21 @@ flowchart TD
   Q&A / Grill ──► ADR / CONTEXT.md ──► GitHub Issues (Epic + Vertical Slices)
                                               │
                                               ▼
-[2. Branch & TDD]                      Branch per Issue (`<type>/issue-<n>-<slug>`)
+[2. Branch & Two-Speed TDD]            Branch per Issue (`<type>/issue-<n>-<slug>`)
        │                                      │
        ▼                                      ▼
-  Write Tests (TDD) ──► Implementation ──► Local Verify (`npm run verify`)
-                                              │
-                                              ▼
-[3. PR, CI Gate & Merge]               Create PR (`gh pr create --body "Closes #<n>"`)
-       │                                      │
-       ▼                                      ▼
-  CI Quality Gate (pr-verify.yml) ──► Code & Spec Review ──► Squash & Merge to main
-                                                                  │
-                                                                  ▼
+  Inner Loop (npm run test:<tool>) ──► Implementation ──► Outer Gate (`npm run verify`)
+                                                              │
+                                                              ▼
+[3. PR, CI Gate & Merge]               Pre-PR Self-Review ──► Create PR (`Closes #<n>`)
+       │                                                              │
+       ▼                                                              ▼
+  CI Quality Gate (pr-verify.yml) ◄── Code & Spec Review ◄── Automated CI Run
+       │
+       ▼
+  Squash & Merge to main (`gh pr merge --squash --delete-branch`)
+       │
+       ▼
 [4. Release & Closure]                 Automated CD Release (`release.yml`)
        │                                      │
        ▼                                      ▼
@@ -74,7 +80,7 @@ flowchart TD
    - Eliminate hidden assumptions before touching code.
 2. **Domain Modeling & Architectural Decisions**:
    - Update `<tool-name>/CONTEXT.md` with ubiquitous vocabulary and explicitly avoided synonyms (see [`docs/agents/domain.md`](./domain.md)).
-   - Record architectural trade-offs in `docs/adr/` or `<tool-name>/docs/adr/`.
+   - Record architectural trade-offs in root `docs/adr/` or `<tool-name>/docs/adr/`.
    - Maintain feature specifications in `<tool-name>/ITEMS_TO_IMPLEMENT.md` and test coverage in `<tool-name>/TEST_PLAN.md`.
 3. **Vertical Slice Decomposition**:
    - Break large initiatives into small, independent, testable tickets (vertical slices).
@@ -87,9 +93,9 @@ flowchart TD
 
 ---
 
-## Phase 2: Branching & Test-Driven Implementation
+## Phase 2: Branching & Two-Speed Test-Driven Implementation
 
-Every issue must follow **GitHub Flow** with an isolated branch and Pull Request:
+Every issue follows **GitHub Flow** with an isolated branch:
 
 1. **Claim the Issue**:
    ```bash
@@ -102,29 +108,46 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
    # git checkout -b feat/issue-2-emergency-buffer
    # git checkout -b fix/issue-3-scenario-b-workbench
    ```
-3. **Test-First Implementation (TDD)**:
-   - Add/update unit test cases in `tests/*.test.js` asserting observable behaviors and acceptance criteria.
-   - Implement the feature/fix cleanly adhering to repository constraints (zero-runtime build dependencies, isolated tool directory).
-4. **100% Local Automated Verification**:
-   - Execute the unified verification suite:
+3. **⚡ The Two-Speed Verification Loop**:
+   - **Inner Loop (Fast Scoped TDD)**: During active development, run targeted sub-second test suites for instant feedback:
+     ```bash
+     npm run test:tracker     # Smart Buy-List price tracking suites
+     npm run test:buy-rent    # Buy vs Rent comparison suites
+     npm run test:sim         # Savings Predictor simulation tests
+     npm run test:i18n        # Bilingual dictionary parity check
+     npm run test:build       # Standalone compilation & inlining tests
+     ```
+   - **Outer Loop (Pre-PR Quality Gate)**: When the slice is code-complete, execute the full unified verification suite:
      ```bash
      npm run verify
      ```
-   - Formatting checks (`prettier --check`), standalone compaction builds (`scripts/build.js`), and automated test suites (`scripts/run-tests.js`) must pass with zero failures.
+     Zero errors across formatting (`prettier --check`), standalone compaction builds (`scripts/build.js`), and all 2,100+ test assertions (`scripts/run-tests.js`).
+4. **External Distribution Sync ([ADR-0006](../adr/0006-configurable-external-distribution-sync.md))**:
+   - `npm run build` and `npm run verify` automatically detect `TOOLS_DEST_DIR` (configured in `.env.local` or via CLI) and sync compiled artifacts to external static repositories. If unconfigured (such as in CI), sync is cleanly bypassed without warning.
 
 ---
 
 ## Phase 3: Pull Request, CI Quality Gate & Review
 
-1. **Commit & Push**:
-   - Commit with conventional commit messages (`feat(...)`, `fix(...)`, `test(...)`, `docs(...)`).
-   ```bash
-   git add .
-   git commit -m "feat(tool): implement feature description (#<issue-number>)"
-   git push -u origin <branch-name>
-   ```
-2. **Create Pull Request Linked to Issue**:
-   - Open a PR that explicitly links to the originating issue using GitHub closing keywords:
+1. **Conventional Commits & Semantic Tag Triggers**:
+   - Commit using Conventional Commit messages (`feat(...)`, `fix(...)`, `test(...)`, `docs(...)`):
+     ```bash
+     git add .
+     git commit -m "feat(tool): implement feature description (#<issue-number>)"
+     git push -u origin <branch-name>
+     ```
+   - **Release Tag Rules:**
+     - Standard commit / PR title → triggers **patch bump** by default (`v0.63.1`).
+     - Adding `#minor` to the commit/PR title → triggers **minor bump** (`v0.64.0`).
+     - Adding `#major` to the commit/PR title → triggers **major bump** (`v1.0.0`).
+2. **Agent & Developer Pre-PR Self-Review Checklist**:
+   Before opening a PR, ensure all 4 invariants are satisfied:
+   - [ ] **Spec Conformance**: Every Acceptance Criteria checkbox in the issue is backed by an automated assertion.
+   - [ ] **Zero Runtime Dependencies**: Source and compiled single-file HTML have zero external unbundled npm runtime imports.
+   - [ ] **Data Migration Invariant**: Browser storage changes (IndexedDB / `localStorage`) include backwards-compatible silent auto-migration with dedicated test coverage (`tests/*storage*.test.js`).
+   - [ ] **Bilingual Parity**: 100% dictionary key parity between Vietnamese (`vi`) and English (`en`) strings (`npm run test:i18n`).
+3. **Open Pull Request Linked to Issue**:
+   - Open a PR using GitHub auto-closing keywords:
    ```bash
    gh pr create --title "feat(tool): <Description> (#<issue-number>)" --body "Closes #<issue-number>
 
@@ -136,18 +159,16 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
    - [x] <AC 2>
 
    ## Test Verification
-   - Verified with automated test suites (\`npm run verify\`)."
+   - Verified with 100% green pass on \`npm run verify\`."
    ```
-3. **Automated CI Quality Gate (`pr-verify.yml`)**:
-   - The PR automatically triggers the GitHub Actions CI pipeline:
-     - Executes unified quality gate (`npm run verify` covering Prettier code style validation, standalone compaction build, and automated test execution).
-     - Renders an interactive test summary directly in GitHub Step Summary (`$GITHUB_STEP_SUMMARY`).
-     - Uploads multi-format test report artifacts (`test-reports/` containing `index.html`, `results.json`, `junit.xml`) with `if: always()`.
-     - PR runs feature auto-cancellation (`cancel-in-progress: true`) on subsequent pushes to conserve runner time.
-   - **All checks must be 100% green before approval.**
-4. **Review & Merge Gate**:
-   - Conduct peer review or automated agent review (standards + spec conformance).
-   - **MANDATORY**: Merge the PR into `main` using **Squash and Merge** before closing the issue:
+4. **Automated CI Quality Gate (`pr-verify.yml`)**:
+   - Automatically executes `npm run verify` on GitHub Actions runners.
+   - Renders interactive test summaries in `$GITHUB_STEP_SUMMARY`.
+   - Uploads report artifacts (`test-reports/` with `index.html`, `results.json`, `junit.xml`) with `if: always()`.
+   - **100% green check required before approval.**
+5. **Review & Merge Gate**:
+   - Conduct peer or automated agent review (standards + spec conformance).
+   - **MANDATORY**: Merge the PR into `main` using **Squash and Merge**:
    ```bash
    gh pr merge <pr-number> --squash --delete-branch
    ```
@@ -157,44 +178,50 @@ Every issue must follow **GitHub Flow** with an isolated branch and Pull Request
 ## Phase 4: Automated Release, Verification & Closure
 
 1. **Automated CD Pipeline (`release.yml`)**:
-   - Merging to `main` automatically triggers the release workflow:
-     - Full build and test validation suite runs.
-     - Preserves test report files as workflow artifacts (`test-reports-release`).
-     - Determines Semantic Version tag (`v*.*.*`, default patch increment or `#minor`/`#major` conventional tags) and generates changelog.
-     - Release assets are packaged via `node scripts/pack-release.js` (named standalone `.html` files, per-tool PWA zips, and unified master `.zip` bundle).
-     - Annotated GitHub Release is published with generated changelog notes.
-2. **Verify Acceptance Criteria & Close Issue**:
-   - Double-check all Acceptance Criteria against the merged code and test suite.
-   - Update all issue checkboxes to completed (`[x]`).
-   - Close the issue with a verification summary comment:
+   - Merging to `main` triggers automated release packaging:
+     - Runs full build and test validation.
+     - Preserves report artifacts (`test-reports-release`).
+     - Computes next Semantic Version tag (`v*.*.*`) and generates markdown release changelogs.
+     - Packages standalone `.html` files, per-tool PWA bundles, and unified master `.zip` bundle via `node scripts/pack-release.js`.
+     - Publishes annotated GitHub Release with downloadable assets.
+2. **Verify Acceptance Criteria & Close Ticket**:
+   - Verify that all issue Acceptance Criteria checklist items are satisfied (`[x]`).
+   - Confirm issue closure with a verification summary comment:
    ```bash
-   gh issue close <issue-number> --comment "Implemented and verified via PR #<pr-number>. All acceptance criteria checked and 100% tests passing."
+   gh issue comment <issue-number> --body "Verified via PR #<pr-number>. All acceptance criteria checked and 100% test suites passing (\`npm run verify\`)."
    ```
 
 ---
 
 ## 💎 Standalone Tool Definition of Done (DoD)
 
-Every standalone tool added to or maintained in this repository must satisfy the following 8-point checklist before feature completion or release:
+Every standalone tool added to or maintained in this repository must satisfy the following 8-point checklist before completion:
 
-1. **Directory Isolation**: Dedicated self-contained directory containing human-readable source `index.html` and compacted deliverable `dist/index.html`.
-2. **Domain Glossary (`CONTEXT.md`)**: Comprehensive bilingual domain dictionary defining ubiquitous terms, explicit avoided synonyms, and calculation rules.
-3. **Context Map Registration**: Tool cataloged with description and relative links in root [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
-4. **Architecture Decision Records (`docs/adr/`)**: All non-trivial structural, mathematical, and UI/UX design trade-offs documented under `<tool-name>/docs/adr/`.
-5. **Specification & Test Plan**: Feature requirements matrix maintained in `ITEMS_TO_IMPLEMENT.md` and complete QA verification plan in `TEST_PLAN.md`.
-6. **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary key parity with locale-aware formatters and verbal quantity helpers.
-7. **Test Suite Integration**: Pure math unit tests, UI/DOM tests, and i18n tests authored in `tests/` and registered into the unified test runner (`scripts/run-tests.js`).
+1. **Directory Isolation**: Dedicated tool directory containing human-readable source `index.html` and compacted deliverable `dist/index.html`.
+2. **Domain Glossary (`CONTEXT.md`)**: Comprehensive bilingual dictionary defining ubiquitous terms, avoided synonyms, and calculation rules.
+3. **Context Map Registration**: Registered in root [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
+4. **Architectural Records (`docs/adr/`)**: Structural, mathematical, and UI/UX trade-offs documented under `<tool-name>/docs/adr/`.
+5. **Specification & Test Plan**: Requirements in `ITEMS_TO_IMPLEMENT.md` and QA verification plan in `TEST_PLAN.md`.
+6. **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary key parity with locale-aware formatters.
+7. **Test Suite Integration**: Pure math unit tests, UI/DOM tests, and i18n tests authored in `tests/` and registered into `scripts/run-tests.js`.
 8. **CI/CD Build & Release Ready**: Passes unified verification (`npm run verify`) and release packaging (`npm run pack:release`).
 
 ---
 
 ## 🛡️ Non-Negotiable Quality Guardrails
 
-- **No Issue Closed Without Merged PR**: Every issue must have a corresponding PR merged into `main` prior to issue closure.
-- **Squash and Merge Standard**: All PR merges to `main` must use `gh pr merge --squash --delete-branch` to ensure linear history and clean release changelogs.
+### How Quality Gates Are Enforced
+
+- **Authoritative Gate:** Remote GitHub Branch Protection on `main` requires the `Lint, Build & Test` status check to pass before merging, enforces Pull Request submission, and requires Squash & Merge.
+- **Local Developer Gate:** Zero-friction local commits without heavy pre-commit latency; developers and agents execute `npm run verify` prior to opening PRs.
+
+### Core Invariants
+
+- **PR-Per-Issue Standard**: Every issue must have a corresponding PR merged into `main` prior to ticket closure.
+- **Squash and Merge Standard**: All PR merges to `main` must use `gh pr merge --squash --delete-branch` to ensure linear history and clean release notes.
 - **CI Gate Must Be 100% Green**: No PR may be merged if the `pr-verify.yml` status check is failing or pending.
 - **Automated Release on Merge**: Releases and standalone download assets are published automatically on `main` via `release.yml`.
 - **Observable Behavior Over Implementation Details**: Tests must assert observable outputs (simulation logs, calculations, DOM state, URL payloads), not private variables.
-- **Zero-Regression Standard**: All existing tests must pass on every commit and PR.
-- **Documentation Integrity**: ADRs, `CONTEXT.md`, `ITEMS_TO_IMPLEMENT.md`, `TEST_PLAN.md`, and translation key parity (`TRANSLATIONS.en` vs `TRANSLATIONS.vi`) must be maintained in sync with code changes.
-- **Diagram Standard**: Use Mermaid as the default format for rendering diagrams in documentation. Maintain an ASCII diagram inside a collapsible backout block (`<details>`) as a fallback for plain-text viewing and rendering recovery.
+- **Zero-Regression & Silent Migration Standard**: All existing tests must remain green. Any browser storage changes must preserve backwards compatibility with existing stored user data via automated silent migration.
+- **Documentation Integrity**: ADRs, `CONTEXT.md`, `ITEMS_TO_IMPLEMENT.md`, `TEST_PLAN.md`, and translation dictionaries must remain synchronized with code changes.
+- **Diagram Standard**: Mermaid is the primary diagram format. Maintain a plain-text ASCII fallback inside `<details>` blocks as a synchronized mirror.
