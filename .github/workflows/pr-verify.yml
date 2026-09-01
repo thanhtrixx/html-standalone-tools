@@ -27,14 +27,8 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Code Formatting Check
-        run: npm run lint:check
-
-      - name: Build Compaction Check
-        run: npm run build
-
-      - name: Execute Automated Test Suite
-        run: npm test
+      - name: Verify Quality Gate (Lint, Build & Test)
+        run: npm run verify
 
       - name: Upload Test Report Artifacts
         if: always()

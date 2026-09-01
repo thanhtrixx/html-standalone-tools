@@ -12,14 +12,14 @@ We have established automated GitHub Actions workflows for continuous verificati
 
 1. **Pull Request Quality Gate (`pr-verify.yml`)**:
    - Automatically executes on all Pull Requests targeting `main`.
-   - Runs deterministic dependency installations (`npm ci`), code formatting checks (`npm run lint:check`), compaction build checks (`npm run build`), and the full automated test suite (`npm test`).
+   - Runs deterministic dependency installations (`npm ci`) and the unified verification suite (`npm run verify` covering Prettier code formatting checks, standalone compaction builds, and the full automated test suite).
    - Implements concurrency run-cancellation (`cancel-in-progress: true`) to terminate superseded in-flight runs when new commits are pushed.
 
 2. **Automated Build & Release on Merge (`release.yml`)**:
    - Automatically executes upon direct push or merged Pull Requests to `main`.
    - Validates build and test suites before publication.
-   - Automatically calculates the next Semantic Version tag (`v*.*.*`) and generates markdown release changelogs from Conventional Commit messages (`feat:`, `fix:`, `chore:`, etc.).
-   - Compiles and packages individual standalone HTML applications (`<tool-name>.html`) and a unified ZIP bundle (`html-standalone-tools-<version>.zip`) into release assets.
+   - Automatically calculates the next Semantic Version tag (`v*.*.*`, defaulting to patch increments with support for conventional commit tags `#minor`/`#major`) and generates markdown release changelogs.
+   - Compiles and packages individual standalone HTML applications (`<tool-name>.html`), per-tool PWA bundles, and a unified ZIP bundle (`html-standalone-tools-<version>.zip`) into release assets via `scripts/pack-release.js`.
    - Publishes an annotated GitHub Release with attached downloadable assets.
 
 3. **Deterministic Dependency Management**:

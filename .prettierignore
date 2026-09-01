@@ -2,3 +2,10 @@ node_modules
 dist
 **/dist
 package-lock.json
+test-reports
+release-assets
+coverage
+.tokensave
+.codex
+.gemini
+*.local.json
