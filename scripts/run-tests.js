@@ -199,6 +199,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-indexeddb-storage.test.js",
     category: "Data Integrity",
   },
+  {
+    name: "Smart Buy-List v4.1.0 Navigation, Gestures & UI/UX Polish",
+    file: "tests/smart-buy-list-v4-1-navigation-and-gestures.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {

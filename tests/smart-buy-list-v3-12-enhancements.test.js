@@ -542,7 +542,8 @@ async function runTestSuite() {
     assert(
       htmlContent.includes("v3.12.0") ||
         htmlContent.includes("v3.13.0") ||
-        htmlContent.includes("v4.0.0"),
+        htmlContent.includes("v4.0.0") ||
+        htmlContent.includes("v4.1.0"),
       "VER-03: index.html references current PWA version"
     );
   }

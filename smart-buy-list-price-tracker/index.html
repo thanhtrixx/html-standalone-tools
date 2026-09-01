@@ -436,12 +436,12 @@
             <span id="btnShareText" class="hidden sm:inline">Chia Sẻ</span>
           </button>
 
-          <!-- Settings Button (Option Hub) -->
+          <!-- Settings Button -->
           <button
             id="btnOpenSettings"
             onclick="openSettingsModal()"
             class="h-8 w-8 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-sm border border-slate-700 transition-colors inline-flex items-center justify-center"
-            title="Settings / Option Hub"
+            title="Settings"
             aria-label="Mở cài đặt"
           >
             <span aria-hidden="true">⚙️</span>
@@ -451,9 +451,10 @@
     </header>
 
     <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
-    <main class="max-w-3xl mx-auto px-4 py-4 space-y-4">
+    <main id="mainContainer" class="max-w-3xl mx-auto px-4 py-4 space-y-4">
       <!-- ==================== TRIP LIFECYCLE CONTROLLER ==================== -->
       <section
+        id="tripSummarySection"
         class="bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-sm space-y-3"
       >
         <div class="flex items-center justify-between gap-2">
@@ -564,274 +565,280 @@
         </div>
       </section>
 
-      <!-- ==================== SMART QUICK-ENTRY OMNIBOX (PLANNING MODE) ==================== -->
-      <section
-        id="smartQuickSection"
-        class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-2.5 shadow-sm"
-      >
-        <div class="flex items-center justify-between">
-          <h2
-            id="smartQuickHeading"
-            class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5"
-          >
-            <span>⚡</span>
-            <span id="smartQuickHeadingText">Nhập Nhanh Mặt Hàng</span>
-          </h2>
-          <button
-            type="button"
-            onclick="toggleAdvancedAddForm()"
-            class="text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
-            id="btnToggleAdvancedAdd"
-          >
-            <span>⚙️</span>
-            <span id="btnToggleAdvancedAddText">Tuỳ chọn chi tiết</span>
-            <span id="advancedToggleChevron">▾</span>
-          </button>
-        </div>
-
-        <!-- Smart Omnibox Input Form -->
-        <form
-          id="smartQuickForm"
-          onsubmit="
-            event.preventDefault();
-            handleSmartQuickInputSubmit();
-          "
-          class="space-y-2"
+      <!-- ==================== 1. PLANNING PAGE VIEW ==================== -->
+      <section id="viewPlanning" class="space-y-4">
+        <!-- ==================== SMART QUICK-ENTRY OMNIBOX (PLANNING MODE) ==================== -->
+        <section
+          id="smartQuickSection"
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-2.5 shadow-sm"
         >
-          <div class="relative flex items-center gap-1.5">
-            <input
-              type="text"
-              id="smartQuickInput"
-              placeholder="Nhập nhanh vd: Sữa tươi 35k/l, Thịt bò 120k 500g, Trứng 30k 10 quả..."
-              autocomplete="off"
-              oninput="handleSmartQuickInputChange(this.value)"
-              onpaste="handleSmartQuickPaste(event)"
-              class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
-            />
-            <button
-              type="submit"
-              id="btnSmartQuickAdd"
-              class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center justify-center shrink-0 cursor-pointer"
-              title="Thêm vào danh sách (Enter)"
+          <div class="flex items-center justify-between">
+            <h2
+              id="smartQuickHeading"
+              class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5"
             >
-              <span>➕</span>
+              <span>⚡</span>
+              <span id="smartQuickHeadingText">Nhập Nhanh Mặt Hàng</span>
+            </h2>
+            <button
+              type="button"
+              onclick="toggleAdvancedAddForm()"
+              class="text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
+              id="btnToggleAdvancedAdd"
+            >
+              <span>⚙️</span>
+              <span id="btnToggleAdvancedAddText">Tuỳ chọn chi tiết</span>
+              <span id="advancedToggleChevron">▾</span>
             </button>
           </div>
 
-          <!-- Real-Time Interpretation Live Preview Pill -->
-          <div
-            id="smartQuickPreview"
-            class="hidden text-xs bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 flex items-center justify-between flex-wrap gap-2 transition-all"
+          <!-- Smart Omnibox Input Form -->
+          <form
+            id="smartQuickForm"
+            onsubmit="
+              event.preventDefault();
+              handleSmartQuickInputSubmit();
+            "
+            class="space-y-2"
           >
-            <div class="flex items-center gap-2 flex-wrap">
-              <span id="smartPreviewName" class="font-bold text-white"></span>
-              <span
-                id="smartPreviewQtyUnit"
-                class="text-slate-400 font-medium"
-              ></span>
-              <span
-                id="smartPreviewPrice"
-                class="text-emerald-400 font-semibold"
-              ></span>
-              <span
-                id="smartPreviewStore"
-                class="text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md"
-              ></span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span
-                id="smartPreviewCategory"
-                class="text-[11px] text-slate-400 font-medium"
-              ></span>
-              <span
-                id="smartPreviewUnitPrice"
-                class="text-[11px] text-emerald-400/90 font-semibold"
-              ></span>
-            </div>
-          </div>
-        </form>
-      </section>
-
-      <!-- ==================== DETAILED ITEM ADD FORM (COLLAPSIBLE) ==================== -->
-      <section
-        id="addItemSection"
-        class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3"
-      >
-        <div class="flex items-center justify-between">
-          <h2
-            id="addItemHeading"
-            class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5"
-          >
-            <span>➕</span> Add Item to List
-          </h2>
-        </div>
-
-        <!-- Form Elements -->
-        <form
-          id="addItemForm"
-          onsubmit="handleAddItemSubmit(event)"
-          class="space-y-2.5"
-        >
-          <!-- Item Name & Fast Autocomplete Suggestions -->
-          <div class="relative">
-            <input
-              type="text"
-              id="inputItemName"
-              placeholder="e.g. Whole Milk, Jasmine Rice..."
-              required
-              autocomplete="off"
-              oninput="handleItemAutocomplete(this.value)"
-              class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-            <div
-              id="autocompleteDropdown"
-              class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 overflow-hidden divide-y divide-slate-800"
-            ></div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-6 gap-2">
-            <!-- Category / Aisle -->
-            <div class="sm:col-span-3">
-              <select
-                id="inputItemCategory"
-                class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="produce">🥦 Produce & Fruits</option>
-                <option value="dairy_eggs">🥛 Dairy & Eggs</option>
-                <option value="meat_seafood">🥩 Meat & Seafood</option>
-                <option value="bakery">🍞 Bakery & Bread</option>
-                <option value="pantry">🍚 Pantry & Grains</option>
-                <option value="frozen">🧊 Frozen</option>
-                <option value="beverages">☕ Beverages</option>
-                <option value="household">🧹 Household</option>
-                <option value="personal_care">🧴 Personal Care</option>
-                <option value="other">📦 Other</option>
-              </select>
-            </div>
-
-            <!-- Store -->
-            <div class="sm:col-span-3">
-              <select
-                id="inputItemStore"
-                onchange="onAddStoreSelectChange(this.value)"
-                class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
-              >
-                <option value="Costco">Costco</option>
-                <option value="Trader Joe's">Trader Joe's</option>
-                <option value="Target">Target</option>
-                <option value="Whole Foods">Whole Foods</option>
-                <option value="WinMart">WinMart</option>
-                <option value="Bach Hoa Xanh">Bach Hoa Xanh</option>
-                <option value="Local Market">Local Market</option>
-                <option value="MANAGE_STORES">⚙️ Manage Stores...</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Quantity, Unit, Estimated Package Price & Unit Calculation Preview -->
-          <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-center">
-            <!-- Quantity -->
-            <div class="sm:col-span-3">
-              <label
-                for="inputItemQty"
-                id="labelItemQty"
-                class="text-[11px] text-slate-400 font-medium block mb-1"
-                >Quantity / Size</label
-              >
+            <div class="relative flex items-center gap-1.5">
               <input
-                type="number"
-                id="inputItemQty"
-                step="any"
-                min="0.01"
-                value="1"
-                required
-                class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+                type="text"
+                id="smartQuickInput"
+                placeholder="Nhập nhanh vd: Sữa tươi 35k/l, Thịt bò 120k 500g, Trứng 30k 10 quả..."
+                autocomplete="off"
+                oninput="handleSmartQuickInputChange(this.value)"
+                onpaste="handleSmartQuickPaste(event)"
+                class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
               />
-            </div>
-
-            <!-- Unit Selector -->
-            <div class="sm:col-span-3">
-              <label
-                for="inputItemUnit"
-                id="labelItemUnit"
-                class="text-[11px] text-slate-400 font-medium block mb-1"
-                >Unit</label
-              >
-              <select
-                id="inputItemUnit"
-                class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
-              >
-                <optgroup label="Weight">
-                  <option value="kg">kg (Kilogram)</option>
-                  <option value="g">g (Gram)</option>
-                  <option value="lb">lb (Pound)</option>
-                  <option value="oz">oz (Ounce)</option>
-                </optgroup>
-                <optgroup label="Volume">
-                  <option value="L">L (Litre)</option>
-                  <option value="ml">ml (Millilitre)</option>
-                  <option value="gal">gal (Gallon)</option>
-                  <option value="fl oz">fl oz (Fl Ounce)</option>
-                </optgroup>
-                <optgroup label="Count / Units">
-                  <option value="ea">ea (Piece / Unit)</option>
-                  <option value="pk">pk (Pack)</option>
-                  <option value="box">box (Box)</option>
-                  <option value="can">can (Can / Bottle)</option>
-                  <option value="bunch">bunch (Bunch)</option>
-                </optgroup>
-              </select>
-            </div>
-
-            <!-- Price -->
-            <div class="sm:col-span-3">
-              <label
-                for="inputItemPrice"
-                id="labelItemPrice"
-                class="text-[11px] text-slate-400 font-medium block mb-1"
-                >Package Price</label
-              >
-              <input
-                type="number"
-                id="inputItemPrice"
-                step="any"
-                min="0"
-                placeholder="0.00"
-                oninput="updateLiveUnitPreview()"
-                class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
-              />
-            </div>
-
-            <!-- Submit Button -->
-            <div class="sm:col-span-3 self-end">
               <button
                 type="submit"
-                id="btnAddItemBtn"
-                class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                id="btnSmartQuickAdd"
+                class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center justify-center shrink-0 cursor-pointer"
+                title="Thêm vào danh sách (Enter)"
               >
                 <span>➕</span>
-                <span id="btnAddItemText">Add Item</span>
               </button>
             </div>
+
+            <!-- Real-Time Interpretation Live Preview Pill -->
+            <div
+              id="smartQuickPreview"
+              class="hidden text-xs bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 flex items-center justify-between flex-wrap gap-2 transition-all"
+            >
+              <div class="flex items-center gap-2 flex-wrap">
+                <span id="smartPreviewName" class="font-bold text-white"></span>
+                <span
+                  id="smartPreviewQtyUnit"
+                  class="text-slate-400 font-medium"
+                ></span>
+                <span
+                  id="smartPreviewPrice"
+                  class="text-emerald-400 font-semibold"
+                ></span>
+                <span
+                  id="smartPreviewStore"
+                  class="text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md"
+                ></span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span
+                  id="smartPreviewCategory"
+                  class="text-[11px] text-slate-400 font-medium"
+                ></span>
+                <span
+                  id="smartPreviewUnitPrice"
+                  class="text-[11px] text-emerald-400/90 font-semibold"
+                ></span>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- ==================== DETAILED ITEM ADD FORM (COLLAPSIBLE) ==================== -->
+        <section
+          id="addItemSection"
+          class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 space-y-3"
+        >
+          <div class="flex items-center justify-between">
+            <h2
+              id="addItemHeading"
+              class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5"
+            >
+              <span>➕</span> Add Item to List
+            </h2>
           </div>
 
-          <!-- Live Normalized Unit Price Preview Pill -->
-          <div
-            id="liveUnitPreviewPill"
-            class="hidden text-xs bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 flex items-center justify-between"
+          <!-- Form Elements -->
+          <form
+            id="addItemForm"
+            onsubmit="handleAddItemSubmit(event)"
+            class="space-y-2.5"
           >
-            <span id="liveUnitPreviewText">Unit Price: $0.00 / L</span>
-            <span
-              id="liveDealBadge"
-              class="px-2 py-0.5 rounded-md font-semibold text-[11px] bg-slate-800 text-slate-300"
-              >New Item</span
+            <!-- Item Name & Fast Autocomplete Suggestions -->
+            <div class="relative">
+              <input
+                type="text"
+                id="inputItemName"
+                placeholder="e.g. Whole Milk, Jasmine Rice..."
+                required
+                autocomplete="off"
+                oninput="handleItemAutocomplete(this.value)"
+                class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <div
+                id="autocompleteDropdown"
+                class="hidden absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-20 overflow-hidden divide-y divide-slate-800"
+              ></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-6 gap-2">
+              <!-- Category / Aisle -->
+              <div class="sm:col-span-3">
+                <select
+                  id="inputItemCategory"
+                  class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="produce">🥦 Produce & Fruits</option>
+                  <option value="dairy_eggs">🥛 Dairy & Eggs</option>
+                  <option value="meat_seafood">🥩 Meat & Seafood</option>
+                  <option value="bakery">🍞 Bakery & Bread</option>
+                  <option value="pantry">🍚 Pantry & Grains</option>
+                  <option value="frozen">🧊 Frozen</option>
+                  <option value="beverages">☕ Beverages</option>
+                  <option value="household">🧹 Household</option>
+                  <option value="personal_care">🧴 Personal Care</option>
+                  <option value="other">📦 Other</option>
+                </select>
+              </div>
+
+              <!-- Store -->
+              <div class="sm:col-span-3">
+                <select
+                  id="inputItemStore"
+                  onchange="onAddStoreSelectChange(this.value)"
+                  class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+                >
+                  <option value="Costco">Costco</option>
+                  <option value="Trader Joe's">Trader Joe's</option>
+                  <option value="Target">Target</option>
+                  <option value="Whole Foods">Whole Foods</option>
+                  <option value="WinMart">WinMart</option>
+                  <option value="Bach Hoa Xanh">Bach Hoa Xanh</option>
+                  <option value="Local Market">Local Market</option>
+                  <option value="MANAGE_STORES">⚙️ Manage Stores...</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quantity, Unit, Estimated Package Price & Unit Calculation Preview -->
+            <div class="grid grid-cols-2 sm:grid-cols-12 gap-2 items-center">
+              <!-- Quantity -->
+              <div class="sm:col-span-3">
+                <label
+                  for="inputItemQty"
+                  id="labelItemQty"
+                  class="text-[11px] text-slate-400 font-medium block mb-1"
+                  >Quantity / Size</label
+                >
+                <input
+                  type="number"
+                  id="inputItemQty"
+                  step="any"
+                  min="0.01"
+                  value="1"
+                  required
+                  class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <!-- Unit Selector -->
+              <div class="sm:col-span-3">
+                <label
+                  for="inputItemUnit"
+                  id="labelItemUnit"
+                  class="text-[11px] text-slate-400 font-medium block mb-1"
+                  >Unit</label
+                >
+                <select
+                  id="inputItemUnit"
+                  class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+                >
+                  <optgroup label="Weight">
+                    <option value="kg">kg (Kilogram)</option>
+                    <option value="g">g (Gram)</option>
+                    <option value="lb">lb (Pound)</option>
+                    <option value="oz">oz (Ounce)</option>
+                  </optgroup>
+                  <optgroup label="Volume">
+                    <option value="L">L (Litre)</option>
+                    <option value="ml">ml (Millilitre)</option>
+                    <option value="gal">gal (Gallon)</option>
+                    <option value="fl oz">fl oz (Fl Ounce)</option>
+                  </optgroup>
+                  <optgroup label="Count / Units">
+                    <option value="ea">ea (Piece / Unit)</option>
+                    <option value="pk">pk (Pack)</option>
+                    <option value="box">box (Box)</option>
+                    <option value="can">can (Can / Bottle)</option>
+                    <option value="bunch">bunch (Bunch)</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <!-- Price -->
+              <div class="sm:col-span-3">
+                <label
+                  for="inputItemPrice"
+                  id="labelItemPrice"
+                  class="text-[11px] text-slate-400 font-medium block mb-1"
+                  >Package Price</label
+                >
+                <input
+                  type="number"
+                  id="inputItemPrice"
+                  step="any"
+                  min="0"
+                  placeholder="0.00"
+                  oninput="updateLiveUnitPreview()"
+                  class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              <!-- Submit Button -->
+              <div class="sm:col-span-3 self-end">
+                <button
+                  type="submit"
+                  id="btnAddItemBtn"
+                  class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span>➕</span>
+                  <span id="btnAddItemText">Add Item</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Normalized Unit Price Preview Pill -->
+            <div
+              id="liveUnitPreviewPill"
+              class="hidden text-xs bg-slate-950/90 border border-slate-800 rounded-xl px-3 py-2 text-slate-300 flex items-center justify-between"
             >
-          </div>
-        </form>
+              <span id="liveUnitPreviewText">Unit Price: $0.00 / L</span>
+              <span
+                id="liveDealBadge"
+                class="px-2 py-0.5 rounded-md font-semibold text-[11px] bg-slate-800 text-slate-300"
+                >New Item</span
+              >
+            </div>
+          </form>
+        </section>
       </section>
 
+      <!-- ==================== 2. BUY PAGE VIEW ==================== -->
+      <section id="viewBuy" class="hidden space-y-4"></section>
+
       <!-- ==================== ACTIVE BUY-LIST CONTAINER ==================== -->
-      <section class="space-y-3">
+      <section id="shoppingListSection" class="space-y-3">
         <!-- Section Header with Grouping / Sorting Tabs -->
         <div class="flex items-center justify-between gap-2 px-1">
           <h2
@@ -931,36 +938,400 @@
           </button>
           <div id="checkedItemsList" class="space-y-2 opacity-75"></div>
         </div>
+
+        <!-- ==================== IN-STORE FINISH TRIP BAR ==================== -->
+        <div
+          id="finishTripBar"
+          class="hidden sticky bottom-16 z-20 max-w-3xl mx-auto px-1 py-2"
+        >
+          <div
+            class="bg-gradient-to-r from-emerald-900 to-slate-900 border border-emerald-600/50 rounded-2xl p-3.5 shadow-2xl flex items-center justify-between gap-3"
+          >
+            <div>
+              <div
+                class="text-xs text-emerald-300 font-semibold"
+                id="tripSummaryPrompt"
+              >
+                In-Store Shopping Active
+              </div>
+              <div class="text-sm font-bold text-white" id="tripRunningTotal">
+                Total Spent: $0.00
+              </div>
+            </div>
+            <button
+              onclick="openTripCompleteModal()"
+              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>🏁</span>
+              <span id="btnFinishTripText">Complete Trip</span>
+            </button>
+          </div>
+        </div>
       </section>
 
-      <!-- ==================== IN-STORE FINISH TRIP BAR ==================== -->
-      <div
-        id="finishTripBar"
-        class="hidden sticky bottom-16 z-20 max-w-3xl mx-auto px-1 py-2"
-      >
+      <!-- ==================== 3. PRICE HISTORY PAGE VIEW ==================== -->
+      <section id="viewPriceHistory" class="hidden space-y-4">
         <div
-          class="bg-gradient-to-r from-emerald-900 to-slate-900 border border-emerald-600/50 rounded-2xl p-3.5 shadow-2xl flex items-center justify-between gap-3"
+          id="priceLedgerModal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ledgerModalTitle"
+          class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full p-4 sm:p-6 space-y-4 shadow-sm relative flex flex-col"
         >
-          <div>
-            <div
-              class="text-xs text-emerald-300 font-semibold"
-              id="tripSummaryPrompt"
+          <div class="flex items-center justify-between">
+            <h3
+              id="ledgerModalTitle"
+              class="text-base sm:text-lg font-bold text-white flex items-center gap-2"
             >
-              In-Store Shopping Active
+              <span aria-hidden="true">📈</span>
+              <span id="ledgerModalTitleText">Historical Purchase Ledger</span>
+            </h3>
+          </div>
+
+          <div class="relative">
+            <input
+              type="text"
+              id="ledgerSearchInput"
+              placeholder="Filter history by item or store..."
+              oninput="renderPriceLedgerTable(this.value)"
+              class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 font-medium"
+            />
+          </div>
+
+          <!-- Mobile Card List View (< 640px) -->
+          <div id="ledgerMobileCards" class="block sm:hidden space-y-3"></div>
+
+          <!-- Desktop Table View (>= 640px) -->
+          <div
+            id="ledgerTableContainer"
+            class="hidden sm:block overflow-x-auto rounded-xl border border-slate-800"
+          >
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead
+                class="bg-slate-950 text-slate-400 uppercase text-xs font-bold tracking-wider sticky top-0 z-10 border-b border-slate-800"
+              >
+                <tr>
+                  <th id="thSelect" class="p-3 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      id="ledgerSelectAllCheckbox"
+                      onchange="toggleSelectAllLedgerRows(this.checked)"
+                      class="h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
+                      title="Select All"
+                    />
+                  </th>
+                  <th id="thDate" class="p-3">Date</th>
+                  <th id="thItem" class="p-3">Item</th>
+                  <th id="thStore" class="p-3">Store</th>
+                  <th id="thSize" class="p-3">Size</th>
+                  <th id="thPaid" class="p-3">Paid</th>
+                  <th id="thUnitPrice" class="p-3">Unit Price</th>
+                  <th id="thAction" class="p-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody
+                id="ledgerTableBody"
+                class="divide-y divide-slate-800 bg-slate-900/60"
+              ></tbody>
+            </table>
+          </div>
+
+          <!-- Sticky Batch Restocking Action Bar -->
+          <div
+            id="ledgerBatchBar"
+            class="hidden sticky bottom-0 bg-slate-950/95 backdrop-blur border border-emerald-500/40 rounded-xl p-3 shadow-xl flex flex-wrap items-center justify-between gap-2 z-20"
+          >
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="btnLedgerSelectAllToggle"
+                onclick="toggleSelectAllLedgerRows()"
+                class="text-xs text-slate-300 hover:text-white underline cursor-pointer"
+              >
+                Select All
+              </button>
+              <span class="text-slate-600">|</span>
+              <span
+                id="ledgerSelectedCountText"
+                class="text-xs font-semibold text-emerald-400"
+              >
+                0 items selected
+              </span>
+              <span
+                id="ledgerSelectedTotalText"
+                class="text-xs text-slate-400 hidden sm:inline"
+              >
+                (Est. Total: $0.00)
+              </span>
             </div>
-            <div class="text-sm font-bold text-white" id="tripRunningTotal">
-              Total Spent: $0.00
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="btnAddSelectedLedgerToBuyList"
+                onclick="addSelectedLedgerItemsToBuyList()"
+                class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+              >
+                <span aria-hidden="true">🛒</span>
+                <span id="btnTextAddSelectedLedger">Add to Buy List</span>
+              </button>
+              <button
+                type="button"
+                id="btnDeleteSelectedLedger"
+                onclick="deleteSelectedLedgerItems()"
+                class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <span aria-hidden="true">🗑️</span>
+                <span id="btnTextDeleteSelectedLedger">Delete Selected</span>
+              </button>
             </div>
           </div>
-          <button
-            onclick="openTripCompleteModal()"
-            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center gap-1.5"
-          >
-            <span>🏁</span>
-            <span id="btnFinishTripText">Complete Trip</span>
-          </button>
         </div>
-      </div>
+      </section>
+
+      <!-- ==================== 4. IN-AISLE PACKAGE COMPARATOR PAGE VIEW ==================== -->
+      <section id="viewComparator" class="hidden space-y-4">
+        <div
+          id="comparatorModal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="compModalTitle"
+          class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full p-4 sm:p-6 space-y-4 shadow-sm"
+        >
+          <div class="flex items-center justify-between">
+            <h3
+              id="compModalTitle"
+              class="text-base font-bold text-white flex items-center gap-2"
+            >
+              <span aria-hidden="true">⚖️</span>
+              <span id="compModalTitleText">In-Aisle Package Comparator</span>
+            </h3>
+          </div>
+          <p id="compModalDesc" class="text-xs text-slate-400">
+            Compare 2 package sizes in real-time to find the best deal ($/kg,
+            $/L, $/unit).
+          </p>
+
+          <!-- Contextual Pre-Filled Item Banner -->
+          <div
+            id="compComparingItemBanner"
+            class="hidden p-2.5 bg-emerald-950/70 border border-emerald-800/80 rounded-xl text-xs text-emerald-200 flex items-center justify-between"
+          >
+            <div>
+              <span class="font-bold text-white" id="compItemNameLabel"
+                >Comparing Item</span
+              >
+              <span
+                id="compItemCurrentUnitLabel"
+                class="text-slate-300 block text-[11px] mt-0.5"
+              ></span>
+            </div>
+            <span
+              id="compActiveBadge"
+              class="px-2 py-0.5 bg-emerald-900/90 text-emerald-300 rounded-md text-[10px] font-bold border border-emerald-700/60"
+            >
+              Package A (Active)
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Package A Card -->
+            <div
+              class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2"
+            >
+              <div
+                class="text-xs font-bold text-emerald-400"
+                id="labelPackageA"
+              >
+                Package A (e.g. Small / Brand 1)
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-400 block" id="labelPriceA"
+                  >Price</label
+                >
+                <input
+                  type="number"
+                  id="compPriceA"
+                  step="any"
+                  min="0.01"
+                  value="3.20"
+                  oninput="runComparatorCalc()"
+                  class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div>
+                  <label class="text-[11px] text-slate-400 block" id="labelQtyA"
+                    >Quantity</label
+                  >
+                  <input
+                    type="number"
+                    id="compQtyA"
+                    step="any"
+                    min="0.01"
+                    value="450"
+                    oninput="runComparatorCalc()"
+                    class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="text-[11px] text-slate-400 block"
+                    id="labelUnitA"
+                    >Unit</label
+                  >
+                  <select
+                    id="compUnitA"
+                    onchange="syncComparatorUnitGroup('A')"
+                    class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
+                  >
+                    <optgroup label="Weight">
+                      <option value="kg">kg (Kilogram)</option>
+                      <option value="g" selected>g (Gram)</option>
+                      <option value="lb">lb (Pound)</option>
+                      <option value="oz">oz (Ounce)</option>
+                    </optgroup>
+                    <optgroup label="Volume">
+                      <option value="L">L (Litre)</option>
+                      <option value="ml">ml (Millilitre)</option>
+                      <option value="gal">gal (Gallon)</option>
+                      <option value="fl oz">fl oz (Fl Ounce)</option>
+                    </optgroup>
+                    <optgroup label="Count / Units">
+                      <option value="ea">ea (Piece / Unit)</option>
+                      <option value="pk">pk (Pack)</option>
+                      <option value="box">box (Box)</option>
+                      <option value="can">can (Can / Bottle)</option>
+                      <option value="bunch">bunch (Bunch)</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+              <div class="pt-1 border-t border-slate-800 text-xs">
+                <span class="text-slate-400" id="labelNormPriceA"
+                  >Unit Price:</span
+                >
+                <span id="compNormA" class="font-bold text-white ml-1"
+                  >$7.11 / kg</span
+                >
+              </div>
+            </div>
+
+            <!-- Package B Card -->
+            <div
+              class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2"
+            >
+              <div class="text-xs font-bold text-sky-400" id="labelPackageB">
+                Package B (e.g. Bulk / Brand 2)
+              </div>
+              <div>
+                <label class="text-[11px] text-slate-400 block" id="labelPriceB"
+                  >Price</label
+                >
+                <input
+                  type="number"
+                  id="compPriceB"
+                  step="any"
+                  min="0.01"
+                  value="7.80"
+                  oninput="runComparatorCalc()"
+                  class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div>
+                  <label class="text-[11px] text-slate-400 block" id="labelQtyB"
+                    >Quantity</label
+                  >
+                  <input
+                    type="number"
+                    id="compQtyB"
+                    step="any"
+                    min="0.01"
+                    value="1.2"
+                    oninput="runComparatorCalc()"
+                    class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="text-[11px] text-slate-400 block"
+                    id="labelUnitB"
+                    >Unit</label
+                  >
+                  <select
+                    id="compUnitB"
+                    onchange="syncComparatorUnitGroup('B')"
+                    class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
+                  >
+                    <optgroup label="Weight">
+                      <option value="kg" selected>kg (Kilogram)</option>
+                      <option value="g">g (Gram)</option>
+                      <option value="lb">lb (Pound)</option>
+                      <option value="oz">oz (Ounce)</option>
+                    </optgroup>
+                    <optgroup label="Volume">
+                      <option value="L">L (Litre)</option>
+                      <option value="ml">ml (Millilitre)</option>
+                      <option value="gal">gal (Gallon)</option>
+                      <option value="fl oz">fl oz (Fl Ounce)</option>
+                    </optgroup>
+                    <optgroup label="Count / Units">
+                      <option value="ea">ea (Piece / Unit)</option>
+                      <option value="pk">pk (Pack)</option>
+                      <option value="box">box (Box)</option>
+                      <option value="can">can (Can / Bottle)</option>
+                      <option value="bunch">bunch (Bunch)</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+              <div class="pt-1 border-t border-slate-800 text-xs">
+                <span class="text-slate-400" id="labelNormPriceB"
+                  >Unit Price:</span
+                >
+                <span id="compNormB" class="font-bold text-white ml-1"
+                  >$6.50 / kg</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Winner Result Card -->
+          <div
+            id="compResultCard"
+            class="bg-emerald-950/70 border border-emerald-600/60 rounded-xl p-3.5 text-center space-y-1"
+          >
+            <div
+              id="compWinnerBadge"
+              class="text-sm font-bold text-emerald-300"
+            >
+              🏆 Package B is Cheaper!
+            </div>
+            <div id="compSavingsDetails" class="text-xs text-emerald-100">
+              Saves 8.6% ($0.61 / kg cheaper)
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-end gap-2 pt-2">
+            <button
+              onclick="applyWinnerToActiveItem()"
+              id="btnApplyWinnerToList"
+              class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
+            >
+              <span aria-hidden="true">✨</span>
+              <span id="btnApplyWinnerText">Apply Winner to List</span>
+            </button>
+            <button
+              onclick="applyComparatorWinner()"
+              id="btnApplyWinner"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
+            >
+              Apply Winner to Form
+            </button>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- ==================== BOTTOM IN-AISLE THUMB NAVIGATION (MD3) ==================== -->
@@ -974,8 +1345,8 @@
       >
         <button
           id="navPlanningBtn"
-          onclick="setTripPhase('PLANNING')"
-          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors"
+          onclick="setActiveTab('PLANNING')"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors cursor-pointer"
           role="tab"
           aria-selected="true"
           aria-label="Chuyển sang chế độ Lập kế hoạch"
@@ -991,8 +1362,8 @@
         </button>
         <button
           id="navBuyModeBtn"
-          onclick="setTripPhase('IN_STORE')"
-          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
+          onclick="setActiveTab('BUY')"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
           role="tab"
           aria-selected="false"
           aria-label="Chuyển sang chế độ Mua sắm"
@@ -1004,12 +1375,12 @@
           >
             🛒
           </div>
-          <span id="navLabelBuyMode">Buy Mode</span>
+          <span id="navLabelBuyMode">Buy</span>
         </button>
         <button
           id="navLedgerBtn"
-          onclick="openPriceLedgerModal()"
-          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
+          onclick="setActiveTab('PRICE_HISTORY')"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
           role="tab"
           aria-selected="false"
           aria-label="Mở sổ tay lịch sử giá"
@@ -1025,8 +1396,8 @@
         </button>
         <button
           id="navCompareBtn"
-          onclick="openComparatorModal()"
-          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors"
+          onclick="setActiveTab('COMPARATOR')"
+          class="flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer"
           role="tab"
           aria-selected="false"
           aria-label="Mở bộ so sánh giá"
@@ -1045,272 +1416,17 @@
 
     <!-- ==================== MODALS ==================== -->
 
-    <!-- 1. IN-AISLE PACKAGE COMPARATOR MODAL -->
-    <div
-      id="comparatorModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="compModalTitleText"
-      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
-    >
-      <div
-        class="bg-slate-900 border border-slate-700 rounded-t-3xl sm:rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto custom-scroll p-4 sm:p-6 space-y-4 shadow-2xl"
-      >
-        <!-- Mobile Sheet Drag Handle Indicator -->
-        <div
-          class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-1 sm:hidden"
-        ></div>
-
-        <div class="flex items-center justify-between">
-          <h3
-            id="compModalTitle"
-            class="text-base font-bold text-white flex items-center gap-2"
-          >
-            <span aria-hidden="true">⚖️</span>
-            <span id="compModalTitleText">In-Aisle Package Comparator</span>
-          </h3>
-          <button
-            onclick="closeModal('comparatorModal')"
-            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
-            aria-label="Close"
-            data-i18n-aria="modal_close_btn"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <p id="compModalDesc" class="text-xs text-slate-400">
-          Compare 2 package sizes in real-time to find the best deal ($/kg, $/L,
-          $/unit).
-        </p>
-
-        <!-- Contextual Pre-Filled Item Banner -->
-        <div
-          id="compComparingItemBanner"
-          class="hidden p-2.5 bg-emerald-950/70 border border-emerald-800/80 rounded-xl text-xs text-emerald-200 flex items-center justify-between"
-        >
-          <div>
-            <span class="font-bold text-white" id="compItemNameLabel"
-              >Comparing Item</span
-            >
-            <span
-              id="compItemCurrentUnitLabel"
-              class="text-slate-300 block text-[11px] mt-0.5"
-            ></span>
-          </div>
-          <span
-            id="compActiveBadge"
-            class="px-2 py-0.5 bg-emerald-900/90 text-emerald-300 rounded-md text-[10px] font-bold border border-emerald-700/60"
-          >
-            Package A (Active)
-          </span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Package A Card -->
-          <div
-            class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2"
-          >
-            <div class="text-xs font-bold text-emerald-400" id="labelPackageA">
-              Package A (e.g. Small / Brand 1)
-            </div>
-            <div>
-              <label class="text-[11px] text-slate-400 block" id="labelPriceA"
-                >Price</label
-              >
-              <input
-                type="number"
-                id="compPriceA"
-                step="any"
-                min="0.01"
-                value="3.20"
-                oninput="runComparatorCalc()"
-                class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
-              />
-            </div>
-            <div class="grid grid-cols-2 gap-1.5">
-              <div>
-                <label class="text-[11px] text-slate-400 block" id="labelQtyA"
-                  >Quantity</label
-                >
-                <input
-                  type="number"
-                  id="compQtyA"
-                  step="any"
-                  min="0.01"
-                  value="450"
-                  oninput="runComparatorCalc()"
-                  class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
-                />
-              </div>
-              <div>
-                <label class="text-[11px] text-slate-400 block" id="labelUnitA"
-                  >Unit</label
-                >
-                <select
-                  id="compUnitA"
-                  onchange="syncComparatorUnitGroup('A')"
-                  class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
-                >
-                  <optgroup label="Weight">
-                    <option value="kg">kg (Kilogram)</option>
-                    <option value="g" selected>g (Gram)</option>
-                    <option value="lb">lb (Pound)</option>
-                    <option value="oz">oz (Ounce)</option>
-                  </optgroup>
-                  <optgroup label="Volume">
-                    <option value="L">L (Litre)</option>
-                    <option value="ml">ml (Millilitre)</option>
-                    <option value="gal">gal (Gallon)</option>
-                    <option value="fl oz">fl oz (Fl Ounce)</option>
-                  </optgroup>
-                  <optgroup label="Count / Units">
-                    <option value="ea">ea (Piece / Unit)</option>
-                    <option value="pk">pk (Pack)</option>
-                    <option value="box">box (Box)</option>
-                    <option value="can">can (Can / Bottle)</option>
-                    <option value="bunch">bunch (Bunch)</option>
-                  </optgroup>
-                </select>
-              </div>
-            </div>
-            <div class="pt-1 border-t border-slate-800 text-xs">
-              <span class="text-slate-400" id="labelNormPriceA"
-                >Unit Price:</span
-              >
-              <span id="compNormA" class="font-bold text-white ml-1"
-                >$7.11 / kg</span
-              >
-            </div>
-          </div>
-
-          <!-- Package B Card -->
-          <div
-            class="bg-slate-950 border border-slate-800 rounded-xl p-3.5 space-y-2"
-          >
-            <div class="text-xs font-bold text-sky-400" id="labelPackageB">
-              Package B (e.g. Bulk / Brand 2)
-            </div>
-            <div>
-              <label class="text-[11px] text-slate-400 block" id="labelPriceB"
-                >Price</label
-              >
-              <input
-                type="number"
-                id="compPriceB"
-                step="any"
-                min="0.01"
-                value="7.80"
-                oninput="runComparatorCalc()"
-                class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
-              />
-            </div>
-            <div class="grid grid-cols-2 gap-1.5">
-              <div>
-                <label class="text-[11px] text-slate-400 block" id="labelQtyB"
-                  >Quantity</label
-                >
-                <input
-                  type="number"
-                  id="compQtyB"
-                  step="any"
-                  min="0.01"
-                  value="1.2"
-                  oninput="runComparatorCalc()"
-                  class="w-full bg-slate-900 text-slate-100 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm"
-                />
-              </div>
-              <div>
-                <label class="text-[11px] text-slate-400 block" id="labelUnitB"
-                  >Unit</label
-                >
-                <select
-                  id="compUnitB"
-                  onchange="syncComparatorUnitGroup('B')"
-                  class="w-full bg-slate-900 text-slate-200 border border-slate-700 rounded-lg px-1.5 py-1.5 text-sm"
-                >
-                  <optgroup label="Weight">
-                    <option value="kg" selected>kg (Kilogram)</option>
-                    <option value="g">g (Gram)</option>
-                    <option value="lb">lb (Pound)</option>
-                    <option value="oz">oz (Ounce)</option>
-                  </optgroup>
-                  <optgroup label="Volume">
-                    <option value="L">L (Litre)</option>
-                    <option value="ml">ml (Millilitre)</option>
-                    <option value="gal">gal (Gallon)</option>
-                    <option value="fl oz">fl oz (Fl Ounce)</option>
-                  </optgroup>
-                  <optgroup label="Count / Units">
-                    <option value="ea">ea (Piece / Unit)</option>
-                    <option value="pk">pk (Pack)</option>
-                    <option value="box">box (Box)</option>
-                    <option value="can">can (Can / Bottle)</option>
-                    <option value="bunch">bunch (Bunch)</option>
-                  </optgroup>
-                </select>
-              </div>
-            </div>
-            <div class="pt-1 border-t border-slate-800 text-xs">
-              <span class="text-slate-400" id="labelNormPriceB"
-                >Unit Price:</span
-              >
-              <span id="compNormB" class="font-bold text-white ml-1"
-                >$6.50 / kg</span
-              >
-            </div>
-          </div>
-        </div>
-
-        <!-- Live Winner Result Card -->
-        <div
-          id="compResultCard"
-          class="bg-emerald-950/70 border border-emerald-600/60 rounded-xl p-3.5 text-center space-y-1"
-        >
-          <div id="compWinnerBadge" class="text-sm font-bold text-emerald-300">
-            🏆 Package B is Cheaper!
-          </div>
-          <div id="compSavingsDetails" class="text-xs text-emerald-100">
-            Saves 8.6% ($0.61 / kg cheaper)
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-end gap-2 pt-2">
-          <button
-            id="btnCloseComparator"
-            onclick="closeModal('comparatorModal')"
-            class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
-          >
-            Close
-          </button>
-          <button
-            onclick="applyWinnerToActiveItem()"
-            id="btnApplyWinnerToList"
-            class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
-          >
-            <span aria-hidden="true">✨</span>
-            <span id="btnApplyWinnerText">Apply Winner to List</span>
-          </button>
-          <button
-            onclick="applyComparatorWinner()"
-            id="btnApplyWinner"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
-          >
-            Apply Winner to Form
-          </button>
-        </div>
-      </div>
-    </div>
-
     <!-- 2. SHARE LIST MODAL -->
     <div
       id="shareModal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="shareModalTitleText"
+      onclick="handleModalBackdropClick(event, 'shareModal')"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
       >
         <div class="flex items-center justify-between">
@@ -1384,9 +1500,11 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="importModalTitleText"
+      onclick="handleModalBackdropClick(event, 'importModal')"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
       >
         <div class="flex items-center justify-between">
@@ -1442,9 +1560,11 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="pasteModalTitleText"
+      onclick="handleModalBackdropClick(event, 'pasteJsonModal')"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
       >
         <div class="flex items-center justify-between">
@@ -1502,9 +1622,11 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="tripModalTitleText"
+      onclick="handleModalBackdropClick(event, 'tripCompleteModal')"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
       >
         <div class="flex items-center justify-between">
@@ -1602,144 +1724,17 @@
       </div>
     </div>
 
-    <!-- 5. PRICE LEDGER & CATALOG HISTORY MODAL -->
-    <div
-      id="priceLedgerModal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="ledgerModalTitleText"
-      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
-    >
-      <div
-        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-4xl w-full max-h-[88vh] overflow-y-auto custom-scroll p-4 sm:p-6 space-y-4 shadow-2xl relative flex flex-col"
-      >
-        <div class="flex items-center justify-between">
-          <h3
-            id="ledgerModalTitle"
-            class="text-base sm:text-lg font-bold text-white flex items-center gap-2"
-          >
-            <span aria-hidden="true">📈</span>
-            <span id="ledgerModalTitleText">Historical Purchase Ledger</span>
-          </h3>
-          <button
-            onclick="closeModal('priceLedgerModal')"
-            class="text-slate-400 hover:text-slate-200 text-xl p-1.5 transition-colors cursor-pointer"
-            aria-label="Close"
-            data-i18n-aria="modal_close_btn"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-
-        <div class="relative">
-          <input
-            type="text"
-            id="ledgerSearchInput"
-            placeholder="Filter history by item or store..."
-            oninput="renderPriceLedgerTable(this.value)"
-            class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 font-medium"
-          />
-        </div>
-
-        <!-- Mobile Card List View (< 640px) -->
-        <div id="ledgerMobileCards" class="block sm:hidden space-y-3"></div>
-
-        <!-- Desktop Table View (>= 640px) -->
-        <div
-          id="ledgerTableContainer"
-          class="hidden sm:block overflow-x-auto rounded-xl border border-slate-800"
-        >
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead
-              class="bg-slate-950 text-slate-400 uppercase text-xs font-bold tracking-wider sticky top-0 z-10 border-b border-slate-800"
-            >
-              <tr>
-                <th id="thSelect" class="p-3 w-10 text-center">
-                  <input
-                    type="checkbox"
-                    id="ledgerSelectAllCheckbox"
-                    onchange="toggleSelectAllLedgerRows(this.checked)"
-                    class="h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
-                    title="Select All"
-                  />
-                </th>
-                <th id="thDate" class="p-3">Date</th>
-                <th id="thItem" class="p-3">Item</th>
-                <th id="thStore" class="p-3">Store</th>
-                <th id="thSize" class="p-3">Size</th>
-                <th id="thPaid" class="p-3">Paid</th>
-                <th id="thUnitPrice" class="p-3">Unit Price</th>
-                <th id="thAction" class="p-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody
-              id="ledgerTableBody"
-              class="divide-y divide-slate-800 bg-slate-900/60"
-            ></tbody>
-          </table>
-        </div>
-
-        <!-- Sticky Batch Restocking Action Bar -->
-        <div
-          id="ledgerBatchBar"
-          class="hidden sticky bottom-0 bg-slate-950/95 backdrop-blur border border-emerald-500/40 rounded-xl p-3 shadow-xl flex flex-wrap items-center justify-between gap-2 z-20"
-        >
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              id="btnLedgerSelectAllToggle"
-              onclick="toggleSelectAllLedgerRows()"
-              class="text-xs text-slate-300 hover:text-white underline cursor-pointer"
-            >
-              Select All
-            </button>
-            <span class="text-slate-600">|</span>
-            <span
-              id="ledgerSelectedCountText"
-              class="text-xs font-semibold text-emerald-400"
-            >
-              0 items selected
-            </span>
-            <span
-              id="ledgerSelectedTotalText"
-              class="text-xs text-slate-400 hidden sm:inline"
-            >
-              (Est. Total: $0.00)
-            </span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              id="btnAddSelectedLedgerToBuyList"
-              onclick="addSelectedLedgerItemsToBuyList()"
-              class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
-            >
-              <span aria-hidden="true">🛒</span>
-              <span id="btnTextAddSelectedLedger">Add to Buy List</span>
-            </button>
-            <button
-              type="button"
-              id="btnDeleteSelectedLedger"
-              onclick="deleteSelectedLedgerItems()"
-              class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <span aria-hidden="true">🗑️</span>
-              <span id="btnTextDeleteSelectedLedger">Delete Selected</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 5.5. FULL ITEM EDIT MODAL (PLANNING MODE) -->
     <div
       id="editItemModal"
       role="dialog"
       aria-modal="true"
       aria-labelledby="editItemModalHeading"
+      onclick="handleModalBackdropClick(event, 'editItemModal')"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-700 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
       >
         <!-- Mobile Sheet Drag Handle Indicator -->
@@ -1911,9 +1906,11 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="quickPriceModalHeading"
+      onclick="handleModalBackdropClick(event, 'quickPriceModal')"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-700 rounded-t-3xl sm:rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl"
       >
         <!-- Mobile Sheet Drag Handle Indicator -->
@@ -2069,9 +2066,11 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="storeManagerModalTitle"
+      onclick="handleModalBackdropClick(event, 'storeManagerModal')"
       class="hidden fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll shadow-2xl"
       >
         <div class="flex items-center justify-between">
@@ -2141,9 +2140,11 @@
       role="dialog"
       aria-modal="true"
       aria-labelledby="settingsModalTitle"
+      onclick="handleModalBackdropClick(event, 'settingsModal')"
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
     >
       <div
+        onclick="event.stopPropagation()"
         class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scroll shadow-2xl"
       >
         <div class="flex items-center justify-between">
@@ -2691,7 +2692,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v4.0.0</span
+              >v4.1.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -5456,7 +5457,7 @@
           nav_ledger: "Price History",
           nav_share: "Share",
           nav_planning: "Planning",
-          nav_buy_mode: "Buy Mode",
+          nav_buy_mode: "Buy",
           btn_apply_winner: "Apply Winner to List",
           toast_winner_applied: "Applied winning deal to item!",
           quick_price_title: "Quick Price Update",
@@ -5727,9 +5728,9 @@
           edit_item_name_label: "Item Name",
           edit_item_cat_label: "Category / Department",
           edit_item_store_label: "Assigned Store",
-          edit_item_qty_label: "Quantity / Package Size",
+          edit_item_qty_label: "Qty",
           edit_item_unit_label: "Unit",
-          edit_item_price_label: "Package / Shelf Price",
+          edit_item_price_label: "Price",
           btn_save_edit_item: "Save Changes",
           toast_item_updated: "Item details updated!",
           delete_btn: "Delete",
@@ -5803,7 +5804,7 @@
           nav_ledger: "Lịch Sử Giá",
           nav_share: "Chia Sẻ",
           nav_planning: "Kế Hoạch",
-          nav_buy_mode: "Đi Chợ",
+          nav_buy_mode: "Mua Sắm",
           btn_apply_winner: "Cập Nhật Vào Danh Sách",
           toast_winner_applied: "Đã áp dụng mức giá tốt nhất vào món hàng!",
           quick_price_title: "Cập Nhật Giá Nhanh",
@@ -6085,9 +6086,9 @@
           edit_item_name_label: "Tên Mặt Hàng",
           edit_item_cat_label: "Danh Mục / Ngành Hàng",
           edit_item_store_label: "Cửa Hàng",
-          edit_item_qty_label: "Số Lượng / Quy Cách",
+          edit_item_qty_label: "Số Lượng",
           edit_item_unit_label: "Đơn Vị",
-          edit_item_price_label: "Giá Bao Bì / Kệ",
+          edit_item_price_label: "Giá Gói",
           btn_save_edit_item: "Lưu Thay Đổi",
           toast_item_updated: "Đã cập nhật chi tiết mặt hàng!",
           delete_btn: "Xoá",
@@ -6282,14 +6283,110 @@
       /* =========================================================================
        6. UI RENDERING & COMPONENT INTERACTIONS
        ========================================================================= */
+      const TAB_ORDER = ["PLANNING", "BUY", "PRICE_HISTORY", "COMPARATOR"];
+      let currentActiveTab = "PLANNING";
       let currentPhase = "PLANNING";
       let currentGrouping = "AISLE";
       let currentStoreFilter = "ALL";
       let currentLanguage = "vi";
       let currentCurrency = "VND";
 
-      function setTripPhase(phase) {
+      function setActiveTab(tab, options = {}) {
+        if (!TAB_ORDER.includes(tab)) return;
+        currentActiveTab = tab;
+        if (typeof window !== "undefined") {
+          window.currentActiveTab = tab;
+        }
+
+        const viewPlanning = document.getElementById("viewPlanning");
+        const viewBuy = document.getElementById("viewBuy");
+        const viewPriceHistory = document.getElementById("viewPriceHistory");
+        const viewComparator = document.getElementById("viewComparator");
+        const tripSummarySection =
+          document.getElementById("tripSummarySection");
+        const shoppingListSection = document.getElementById(
+          "shoppingListSection"
+        );
+
+        if (viewPlanning) viewPlanning.classList.add("hidden");
+        if (viewBuy) viewBuy.classList.add("hidden");
+        if (viewPriceHistory) viewPriceHistory.classList.add("hidden");
+        if (viewComparator) viewComparator.classList.add("hidden");
+        if (shoppingListSection) shoppingListSection.classList.add("hidden");
+
+        if (tab !== "COMPARATOR" && !options.preserveItem) {
+          activeComparingItemId = null;
+          const compBanner = document.getElementById("compComparingItemBanner");
+          const btnApplyWinner = document.getElementById(
+            "btnApplyWinnerToList"
+          );
+          if (compBanner) compBanner.classList.add("hidden");
+          if (btnApplyWinner) btnApplyWinner.classList.add("hidden");
+        }
+
+        if (tab === "PLANNING") {
+          if (tripSummarySection) tripSummarySection.classList.remove("hidden");
+          if (viewPlanning) viewPlanning.classList.remove("hidden");
+          if (shoppingListSection)
+            shoppingListSection.classList.remove("hidden");
+          setTripPhase("PLANNING", false);
+        } else if (tab === "BUY") {
+          if (tripSummarySection) tripSummarySection.classList.remove("hidden");
+          if (viewBuy) viewBuy.classList.remove("hidden");
+          if (shoppingListSection)
+            shoppingListSection.classList.remove("hidden");
+          setTripPhase("IN_STORE", false);
+        } else if (tab === "PRICE_HISTORY") {
+          if (tripSummarySection) tripSummarySection.classList.add("hidden");
+          if (viewPriceHistory) viewPriceHistory.classList.remove("hidden");
+          if (typeof renderPriceLedgerTable === "function") {
+            renderPriceLedgerTable();
+          }
+        } else if (tab === "COMPARATOR") {
+          if (tripSummarySection) tripSummarySection.classList.add("hidden");
+          if (viewComparator) viewComparator.classList.remove("hidden");
+          if (typeof runComparatorCalc === "function") {
+            runComparatorCalc();
+          }
+        }
+
+        updateBottomNavPills();
+      }
+
+      function updateBottomNavPills() {
+        const tabs = [
+          { name: "PLANNING", btn: "navPlanningBtn", pill: "navPlanningPill" },
+          { name: "BUY", btn: "navBuyModeBtn", pill: "navBuyModePill" },
+          { name: "PRICE_HISTORY", btn: "navLedgerBtn", pill: "navLedgerPill" },
+          { name: "COMPARATOR", btn: "navCompareBtn", pill: "navComparePill" },
+        ];
+
+        tabs.forEach(({ name, btn, pill }) => {
+          const btnEl = document.getElementById(btn);
+          const pillEl = document.getElementById(pill);
+          const isActive = currentActiveTab === name;
+
+          if (btnEl) {
+            if (typeof btnEl.setAttribute === "function") {
+              btnEl.setAttribute("aria-selected", isActive ? "true" : "false");
+            }
+            btnEl.className = isActive
+              ? "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors cursor-pointer"
+              : "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors cursor-pointer";
+          }
+          if (pillEl) {
+            pillEl.className = isActive
+              ? "w-14 h-7 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-base font-bold transition-all"
+              : "w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400";
+          }
+        });
+      }
+
+      function setTripPhase(phase, syncTab = true) {
         currentPhase = phase;
+        if (syncTab) {
+          currentActiveTab = phase === "PLANNING" ? "PLANNING" : "BUY";
+        }
         if (memoryState && memoryState.settings) {
           memoryState.settings.tripPhase = phase;
         }
@@ -6299,11 +6396,6 @@
         const finishBar = document.getElementById("finishTripBar");
         const addItemSection = document.getElementById("addItemSection");
         const smartQuickSection = document.getElementById("smartQuickSection");
-
-        const navPlanningPill = document.getElementById("navPlanningPill");
-        const navBuyModePill = document.getElementById("navBuyModePill");
-        const navPlanningBtn = document.getElementById("navPlanningBtn");
-        const navBuyModeBtn = document.getElementById("navBuyModeBtn");
 
         if (phase === "PLANNING") {
           if (tabPlanning) {
@@ -6334,21 +6426,6 @@
               t.trip_planning_prompt || "Ready to Complete Trip";
           }
           if (smartQuickSection) smartQuickSection.classList.remove("hidden");
-
-          if (navPlanningPill) {
-            navPlanningPill.className =
-              "w-14 h-7 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-base font-bold transition-all";
-          }
-          if (navBuyModePill) {
-            navBuyModePill.className =
-              "w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400";
-          }
-          if (navPlanningBtn)
-            navPlanningBtn.className =
-              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors";
-          if (navBuyModeBtn)
-            navBuyModeBtn.className =
-              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors";
         } else {
           if (tabPlanning) {
             tabPlanning.className =
@@ -6379,22 +6456,8 @@
           }
           if (smartQuickSection) smartQuickSection.classList.add("hidden");
           if (addItemSection) addItemSection.classList.add("hidden");
-
-          if (navPlanningPill) {
-            navPlanningPill.className =
-              "w-14 h-7 rounded-full flex items-center justify-center text-base font-bold transition-all text-slate-400";
-          }
-          if (navBuyModePill) {
-            navBuyModePill.className =
-              "w-14 h-7 rounded-full bg-emerald-600/30 text-emerald-400 flex items-center justify-center text-base font-bold transition-all";
-          }
-          if (navPlanningBtn)
-            navPlanningBtn.className =
-              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-slate-400 hover:text-emerald-400 transition-colors";
-          if (navBuyModeBtn)
-            navBuyModeBtn.className =
-              "flex flex-col items-center gap-0.5 text-xs font-semibold py-1 text-emerald-400 transition-colors";
         }
+        updateBottomNavPills();
         renderApp();
       }
 
@@ -7600,6 +7663,78 @@
         toggleItemCheck(itemId);
       }
 
+      /* =========================================================================
+       6e. PAGE HORIZONTAL SWIPE GESTURE CONTROLLER (4 TABS)
+       ========================================================================= */
+      let pageTouchState = {
+        startX: 0,
+        startY: 0,
+        currentX: 0,
+        currentY: 0,
+        active: false,
+      };
+
+      function handlePageTouchStart(e) {
+        if (!e.touches || e.touches.length === 0) return;
+        const target = e.target;
+        if (
+          target.closest("[role='dialog']") ||
+          target.closest("input, select, textarea, button") ||
+          target.closest("[id^='cardContainer-']") ||
+          target.closest("[id^='itemCard-']") ||
+          target.closest(".custom-scroll")
+        ) {
+          pageTouchState.active = false;
+          return;
+        }
+
+        pageTouchState.startX = e.touches[0].clientX;
+        pageTouchState.startY = e.touches[0].clientY;
+        pageTouchState.currentX = pageTouchState.startX;
+        pageTouchState.currentY = pageTouchState.startY;
+        pageTouchState.active = true;
+      }
+
+      function handlePageTouchMove(e) {
+        if (!pageTouchState.active || !e.touches || e.touches.length === 0)
+          return;
+        pageTouchState.currentX = e.touches[0].clientX;
+        pageTouchState.currentY = e.touches[0].clientY;
+      }
+
+      function handlePageTouchEnd(e) {
+        if (!pageTouchState.active) return;
+        const deltaX = pageTouchState.currentX - pageTouchState.startX;
+        const deltaY = pageTouchState.currentY - pageTouchState.startY;
+        pageTouchState.active = false;
+
+        const PAGE_SWIPE_THRESHOLD = 50;
+        if (
+          Math.abs(deltaX) >= PAGE_SWIPE_THRESHOLD &&
+          Math.abs(deltaX) > Math.abs(deltaY) * 1.5
+        ) {
+          if (deltaX > 0) {
+            handlePageSwipeAction("RIGHT");
+          } else {
+            handlePageSwipeAction("LEFT");
+          }
+        }
+      }
+
+      function handlePageSwipeAction(direction) {
+        const currentIndex = TAB_ORDER.indexOf(currentActiveTab);
+        if (currentIndex === -1) return;
+
+        if (direction === "RIGHT" && currentIndex > 0) {
+          setActiveTab(TAB_ORDER[currentIndex - 1]);
+        } else if (
+          direction === "LEFT" &&
+          currentIndex < TAB_ORDER.length - 1
+        ) {
+          setActiveTab(TAB_ORDER[currentIndex + 1]);
+        }
+      }
+
       function renderItemCard(item) {
         const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
         const isChecked = Boolean(item.checked);
@@ -7912,11 +8047,63 @@
       function toggleAdvancedAddForm() {
         const form = document.getElementById("addItemSection");
         const chevron = document.getElementById("advancedToggleChevron");
+        const quickInput = document.getElementById("smartQuickInput");
+
         if (form) {
           const isHidden = form.classList.contains("hidden");
           if (isHidden) {
+            if (
+              quickInput &&
+              quickInput.value &&
+              quickInput.value.trim().length > 0
+            ) {
+              const rawText = quickInput.value.trim();
+              const parsed = parseSmartGroceryInput(rawText);
+              if (parsed) {
+                const inputItemName = document.getElementById("inputItemName");
+                const inputItemPrice =
+                  document.getElementById("inputItemPrice");
+                const inputItemQty = document.getElementById("inputItemQty");
+                const inputItemUnit = document.getElementById("inputItemUnit");
+                const inputItemStore =
+                  document.getElementById("inputItemStore");
+                const inputItemCategory =
+                  document.getElementById("inputItemCategory");
+
+                if (inputItemName && parsed.name)
+                  inputItemName.value = parsed.name;
+                if (
+                  inputItemPrice &&
+                  parsed.price !== undefined &&
+                  parsed.price !== null
+                )
+                  inputItemPrice.value = parsed.price;
+                if (
+                  inputItemQty &&
+                  parsed.quantity !== undefined &&
+                  parsed.quantity !== null
+                )
+                  inputItemQty.value = parsed.quantity;
+                if (inputItemUnit && parsed.unit)
+                  inputItemUnit.value = parsed.unit;
+                if (inputItemStore && parsed.store)
+                  inputItemStore.value = parsed.store;
+                if (inputItemCategory && parsed.category)
+                  inputItemCategory.value = parsed.category;
+
+                quickInput.value = "";
+                const preview = document.getElementById("smartQuickPreview");
+                if (preview) preview.classList.add("hidden");
+              }
+            }
+
             form.classList.remove("hidden");
             if (chevron) chevron.textContent = "▴";
+            const nameEl = document.getElementById("inputItemName");
+            if (nameEl) nameEl.focus();
+            if (typeof updateLiveUnitPreview === "function") {
+              updateLiveUnitPreview();
+            }
           } else {
             form.classList.add("hidden");
             if (chevron) chevron.textContent = "▾";
@@ -8582,7 +8769,7 @@
         const btnApplyWinner = document.getElementById("btnApplyWinnerToList");
         if (banner) banner.classList.add("hidden");
         if (btnApplyWinner) btnApplyWinner.classList.add("hidden");
-        openModal("comparatorModal");
+        setActiveTab("COMPARATOR");
         runComparatorCalc();
       }
 
@@ -8643,7 +8830,7 @@
           if (banner) banner.classList.remove("hidden");
           if (btnApplyWinner) btnApplyWinner.classList.remove("hidden");
         }
-        openModal("comparatorModal");
+        setActiveTab("COMPARATOR", { preserveItem: true });
         runComparatorCalc();
       }
 
@@ -8656,7 +8843,7 @@
           (i) => i.id === activeComparingItemId
         );
         if (!item) {
-          closeModal("comparatorModal");
+          setActiveTab(currentPhase === "IN_STORE" ? "BUY" : "PLANNING");
           return;
         }
 
@@ -8685,7 +8872,7 @@
 
         saveToLocalStorage();
         renderApp();
-        closeModal("comparatorModal");
+        setActiveTab(currentPhase === "IN_STORE" ? "BUY" : "PLANNING");
         showToast(
           TRANSLATIONS[currentLanguage].toast_winner_applied ||
             "Applied winning deal to item!"
@@ -8864,9 +9051,8 @@
           }
         }
 
-        setTripPhase("PLANNING");
+        setActiveTab("PLANNING");
         updateLiveUnitPreview();
-        closeModal("comparatorModal");
 
         if (nameInput) {
           try {
@@ -9614,8 +9800,8 @@
         selectedLedgerIds.clear();
         const searchInput = document.getElementById("ledgerSearchInput");
         if (searchInput) searchInput.value = "";
+        setActiveTab("PRICE_HISTORY");
         renderPriceLedgerTable("");
-        openModal("priceLedgerModal");
       }
 
       function updateLedgerBatchBar(visibleLogs) {
@@ -10066,23 +10252,60 @@
       /* =========================================================================
        10. UTILITIES, THEMES, LOCALIZATION & MODAL CONTROLLER
        ========================================================================= */
+      let modalHistoryStack = [];
+
       function openModal(id) {
         const el = document.getElementById(id);
         if (el) {
           el.classList.remove("hidden");
+          if (!modalHistoryStack.includes(id)) {
+            modalHistoryStack.push(id);
+            try {
+              if (window.history && window.history.pushState) {
+                window.history.pushState({ modalId: id }, "");
+              }
+            } catch (e) {
+              // Ignore sandboxed history errors
+            }
+          }
           if (document.body && document.body.style) {
             document.body.style.overflow = "hidden";
           }
         }
       }
 
-      function closeModal(id) {
+      function closeModal(id, fromPopState = false) {
         const el = document.getElementById(id);
         if (el) {
           el.classList.add("hidden");
+        }
+        const index = modalHistoryStack.indexOf(id);
+        if (index > -1) {
+          modalHistoryStack.splice(index, 1);
+          if (!fromPopState) {
+            try {
+              if (
+                window.history &&
+                window.history.state &&
+                window.history.state.modalId === id
+              ) {
+                window.history.back();
+              }
+            } catch (e) {
+              // Ignore sandboxed history errors
+            }
+          }
+        }
+        if (modalHistoryStack.length === 0) {
           if (document.body && document.body.style) {
             document.body.style.overflow = "";
           }
+        }
+      }
+
+      function handleModalBackdropClick(event, id) {
+        if (event.target === event.currentTarget) {
+          closeModal(id);
         }
       }
 
@@ -10193,17 +10416,21 @@
 
       function handleGlobalKeyDown(e) {
         if (e.key === "Escape") {
-          [
-            "editItemModal",
-            "storeManagerModal",
-            "comparatorModal",
-            "shareModal",
-            "importModal",
-            "tripCompleteModal",
-            "priceLedgerModal",
-            "itemHistoryModal",
-            "settingsModal",
-          ].forEach((id) => closeModal(id));
+          if (modalHistoryStack.length > 0) {
+            const topModalId = modalHistoryStack[modalHistoryStack.length - 1];
+            closeModal(topModalId);
+          } else {
+            [
+              "editItemModal",
+              "quickPriceModal",
+              "storeManagerModal",
+              "shareModal",
+              "importModal",
+              "pasteJsonModal",
+              "tripCompleteModal",
+              "settingsModal",
+            ].forEach((id) => closeModal(id));
+          }
         }
         const tag = (e.target && e.target.tagName) || "";
         if (["INPUT", "SELECT", "TEXTAREA"].includes(tag)) return;
@@ -10267,7 +10494,7 @@
         el("navLabelLedger", t.nav_ledger);
         el("navLabelShare", t.nav_share);
         el("navLabelPlanning", t.nav_planning || t.tab_planning || "Planning");
-        el("navLabelBuyMode", t.nav_buy_mode || t.tab_in_store || "Buy Mode");
+        el("navLabelBuyMode", t.nav_buy_mode || t.tab_in_store || "Buy");
 
         // Banner & Empty State
         el("sampleDataText", t.sample_banner_text);
@@ -10436,15 +10663,9 @@
           t.edit_item_cat_label || "Category / Department"
         );
         el("editItemStoreLabel", t.edit_item_store_label || "Assigned Store");
-        el(
-          "editItemQtyLabel",
-          t.edit_item_qty_label || "Quantity / Package Size"
-        );
+        el("editItemQtyLabel", t.edit_item_qty_label || "Qty");
         el("editItemUnitLabel", t.edit_item_unit_label || "Unit");
-        el(
-          "editItemPriceLabel",
-          t.edit_item_price_label || "Package / Shelf Price"
-        );
+        el("editItemPriceLabel", t.edit_item_price_label || "Price");
         el("btnCancelEditItem", t.btn_cancel || "Cancel");
         el("btnSaveEditItem", t.btn_save_edit_item || "Save Changes");
 
@@ -10894,6 +11115,25 @@
           // Keyboard navigation shortcuts
           document.addEventListener("keydown", handleGlobalKeyDown);
 
+          // Popstate browser back button handling for modals
+          window.addEventListener("popstate", (event) => {
+            if (modalHistoryStack.length > 0) {
+              const topModal = modalHistoryStack[modalHistoryStack.length - 1];
+              closeModal(topModal, true);
+            }
+          });
+
+          // Page horizontal touch swipe listeners for 4-tab navigation
+          document.addEventListener("touchstart", handlePageTouchStart, {
+            passive: true,
+          });
+          document.addEventListener("touchmove", handlePageTouchMove, {
+            passive: true,
+          });
+          document.addEventListener("touchend", handlePageTouchEnd, {
+            passive: true,
+          });
+
           // Register Service Worker with update lifecycle
           initServiceWorker();
         });
@@ -11337,6 +11577,32 @@
           get: () => githubAuthState,
           set: (v) => {
             githubAuthState = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+
+        window.TAB_ORDER = TAB_ORDER;
+        window.setActiveTab = setActiveTab;
+        window.updateBottomNavPills = updateBottomNavPills;
+        window.handleModalBackdropClick = handleModalBackdropClick;
+        window.handlePageTouchStart = handlePageTouchStart;
+        window.handlePageTouchMove = handlePageTouchMove;
+        window.handlePageTouchEnd = handlePageTouchEnd;
+        window.handlePageSwipeAction = handlePageSwipeAction;
+
+        Object.defineProperty(window, "currentActiveTab", {
+          get: () => currentActiveTab,
+          set: (v) => {
+            currentActiveTab = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "modalHistoryStack", {
+          get: () => modalHistoryStack,
+          set: (v) => {
+            modalHistoryStack = v;
           },
           enumerable: true,
           configurable: true,
