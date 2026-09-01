@@ -10416,17 +10416,21 @@
 
       function handleGlobalKeyDown(e) {
         if (e.key === "Escape") {
-          [
-            "editItemModal",
-            "storeManagerModal",
-            "comparatorModal",
-            "shareModal",
-            "importModal",
-            "tripCompleteModal",
-            "priceLedgerModal",
-            "itemHistoryModal",
-            "settingsModal",
-          ].forEach((id) => closeModal(id));
+          if (modalHistoryStack.length > 0) {
+            const topModalId = modalHistoryStack[modalHistoryStack.length - 1];
+            closeModal(topModalId);
+          } else {
+            [
+              "editItemModal",
+              "quickPriceModal",
+              "storeManagerModal",
+              "shareModal",
+              "importModal",
+              "pasteJsonModal",
+              "tripCompleteModal",
+              "settingsModal",
+            ].forEach((id) => closeModal(id));
+          }
         }
         const tag = (e.target && e.target.tagName) || "";
         if (["INPUT", "SELECT", "TEXTAREA"].includes(tag)) return;
