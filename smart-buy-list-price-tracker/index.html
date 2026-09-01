@@ -2692,7 +2692,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v4.1.0</span
+              >v4.2.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -2937,6 +2937,33 @@
         return p / baseQuantity;
       }
 
+      function generateItemId(prefix = "item") {
+        const timestamp = Date.now();
+        let randomSuffix = "";
+        if (
+          typeof crypto !== "undefined" &&
+          typeof crypto.randomUUID === "function"
+        ) {
+          randomSuffix = crypto.randomUUID().slice(0, 8);
+        } else if (
+          typeof crypto !== "undefined" &&
+          typeof crypto.getRandomValues === "function"
+        ) {
+          const bytes = new Uint8Array(4);
+          crypto.getRandomValues(bytes);
+          randomSuffix = Array.from(bytes)
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        } else {
+          randomSuffix = Math.random().toString(36).slice(2, 10);
+        }
+        return `${prefix}_${timestamp}_${randomSuffix}`;
+      }
+
+      function isValidId(id) {
+        return typeof id === "string" && /^[a-zA-Z0-9_-]+$/.test(id);
+      }
+
       function evaluateDealScore(candidateUnitPrice, historicalLedger = []) {
         const price = parseFloat(candidateUnitPrice);
         if (
@@ -2955,6 +2982,16 @@
           };
         }
 
+        // Sort ledger chronologically (oldest to newest) to identify true chronological last valid purchase
+        const chronologicalLedger = [...historicalLedger].sort((a, b) => {
+          const timeA = new Date(a.date || a.timestamp || 0).getTime();
+          const timeB = new Date(b.date || b.timestamp || 0).getTime();
+          return timeA - timeB;
+        });
+        const chronologicalValid = chronologicalLedger
+          .map((l) => parseFloat(l.unitPrice))
+          .filter((p) => !isNaN(p) && p > 0);
+
         const validPrices = historicalLedger
           .map((l) => parseFloat(l.unitPrice))
           .filter((p) => !isNaN(p) && p > 0);
@@ -2969,10 +3006,16 @@
           };
         }
 
-        const minPrice = Math.min(...validPrices);
+        const minPrice = validPrices.reduce(
+          (m, p) => (p < m ? p : m),
+          Infinity
+        );
         const avgPrice =
           validPrices.reduce((sum, val) => sum + val, 0) / validPrices.length;
-        const lastPrice = validPrices[validPrices.length - 1];
+        const lastPrice =
+          chronologicalValid.length > 0
+            ? chronologicalValid[chronologicalValid.length - 1]
+            : validPrices[validPrices.length - 1];
 
         const isAllTimeLow = price <= minPrice + 0.0001;
         const diffPercent = ((price - avgPrice) / avgPrice) * 100;
@@ -3080,8 +3123,8 @@
           return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="overflow-visible"><line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#10b981" stroke-width="2" stroke-dasharray="3,3" /><circle cx="${width / 2}" cy="${y}" r="3" fill="#10b981" /></svg>`;
         }
 
-        const min = Math.min(...valid);
-        const max = Math.max(...valid);
+        const min = valid.reduce((m, p) => (p < m ? p : m), Infinity);
+        const max = valid.reduce((m, p) => (p > m ? p : m), -Infinity);
         const range = max - min === 0 ? 1 : max - min;
 
         const points = valid
@@ -3117,7 +3160,10 @@
         return Object.keys(storeMap).map((store) => {
           const records = storeMap[store];
           const prices = records.map((r) => r.unitPrice);
-          const lowestUnitPrice = Math.min(...prices);
+          const lowestUnitPrice = prices.reduce(
+            (m, p) => (p < m ? p : m),
+            Infinity
+          );
           const avgUnitPrice =
             prices.reduce((a, b) => a + b, 0) / prices.length;
           const lastRecord = records[records.length - 1];
@@ -7735,6 +7781,30 @@
         }
       }
 
+      function handleItemCardDelegatedClick(event) {
+        const actionBtn =
+          event.target && event.target.closest
+            ? event.target.closest("[data-action]")
+            : null;
+        if (!actionBtn) return;
+
+        const action = actionBtn.getAttribute("data-action");
+        const itemId = actionBtn.getAttribute("data-item-id");
+        if (!itemId) return;
+
+        if (action === "toggle-check") {
+          toggleItemCheck(itemId);
+        } else if (action === "edit-price") {
+          openQuickPriceEdit(itemId);
+        } else if (action === "edit-item") {
+          openFullItemEdit(itemId);
+        } else if (action === "compare") {
+          openItemComparator(itemId);
+        } else if (action === "delete-item") {
+          deleteItem(itemId);
+        }
+      }
+
       function renderItemCard(item) {
         const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
         const isChecked = Boolean(item.checked);
@@ -7745,21 +7815,22 @@
         const swipeRightIcon = isChecked ? "↺" : "✓";
         const swipeCompCue = t.swipe_compare_cue || "Compare";
 
+        const safeId = sanitizeHTML(item.id);
         const safeName = sanitizeHTML(item.name);
         const safeUnit = sanitizeHTML(item.unit);
 
         if (currentPhase === "IN_STORE") {
           return `
-          <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
+          <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${safeId}">
             <!-- Swipe Action Backgrounds -->
             <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
               <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
-              <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
+              <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${safeId}">
                 <span aria-hidden="true">${swipeRightIcon}</span>
                 <span>${swipeRightCue}</span>
               </div>
               <!-- Right Reveal (Indigo on Left Swipe) -->
-              <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
+              <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${safeId}">
                 <span aria-hidden="true">⚖️</span>
                 <span>${swipeCompCue}</span>
               </div>
@@ -7767,19 +7838,22 @@
 
             <!-- Foreground Swipeable Card (Buy Mode: Ultra-Minimalist) -->
             <div 
-              id="itemCard-${item.id}"
-              ontouchstart="handleTouchStart(event, '${item.id}')"
-              ontouchmove="handleTouchMove(event, '${item.id}')"
-              ontouchend="handleTouchEnd(event, '${item.id}')"
-              ontouchcancel="handleTouchCancel(event, '${item.id}')"
-              onclick="handleCardClick(event, '${item.id}')"
+              id="itemCard-${safeId}"
+              data-item-id="${safeId}"
+              ontouchstart="handleTouchStart(event, '${safeId}')"
+              ontouchmove="handleTouchMove(event, '${safeId}')"
+              ontouchend="handleTouchEnd(event, '${safeId}')"
+              ontouchcancel="handleTouchCancel(event, '${safeId}')"
+              onclick="handleCardClick(event, '${safeId}')"
               class="relative z-10 ${item.checked ? "bg-slate-950 border-slate-800/80" : "bg-slate-900 border-slate-800"} border rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out flex items-center justify-between gap-3 cursor-pointer"
             >
               <div class="flex items-center gap-3 flex-1 min-w-0">
                 <!-- Big Thumb-Friendly Checkbox -->
                 <button
                   type="button"
-                  onclick="event.stopPropagation(); toggleItemCheck('${item.id}')"
+                  data-action="toggle-check"
+                  data-item-id="${safeId}"
+                  onclick="event.stopPropagation(); toggleItemCheck('${safeId}')"
                   aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
                   class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}"
                 >
@@ -7796,7 +7870,9 @@
               <div class="shrink-0">
                 <button
                   type="button"
-                  onclick="event.stopPropagation(); openQuickPriceEdit('${item.id}')"
+                  data-action="edit-price"
+                  data-item-id="${safeId}"
+                  onclick="event.stopPropagation(); openQuickPriceEdit('${safeId}')"
                   aria-label="${(t.aria_edit_price || "Update item price") + ": " + safeName}"
                   class="font-bold text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors"
                   title="Update Price"
@@ -7844,16 +7920,16 @@
         const catInfo = CATEGORIES[item.category] || CATEGORIES.other;
 
         return `
-        <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${item.id}">
+        <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${safeId}">
           <!-- Swipe Action Backgrounds -->
           <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
             <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
-            <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${item.id}">
+            <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${safeId}">
               <span aria-hidden="true">${swipeRightIcon}</span>
               <span>${swipeRightCue}</span>
             </div>
             <!-- Right Reveal (Indigo on Left Swipe) -->
-            <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${item.id}">
+            <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${safeId}">
               <span aria-hidden="true">⚖️</span>
               <span>${swipeCompCue}</span>
             </div>
@@ -7861,18 +7937,21 @@
 
           <!-- Foreground Swipeable Card (Planning Mode: Streamlined 3-Row) -->
           <div 
-            id="itemCard-${item.id}"
-            ontouchstart="handleTouchStart(event, '${item.id}')"
-            ontouchmove="handleTouchMove(event, '${item.id}')"
-            ontouchend="handleTouchEnd(event, '${item.id}')"
-            ontouchcancel="handleTouchCancel(event, '${item.id}')"
+            id="itemCard-${safeId}"
+            data-item-id="${safeId}"
+            ontouchstart="handleTouchStart(event, '${safeId}')"
+            ontouchmove="handleTouchMove(event, '${safeId}')"
+            ontouchend="handleTouchEnd(event, '${safeId}')"
+            ontouchcancel="handleTouchCancel(event, '${safeId}')"
             class="relative z-10 ${item.checked ? "bg-slate-950 border-slate-800/80" : "bg-slate-900 border-slate-800"} border rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out space-y-3"
           >
             <!-- Row 1: Header (Checkbox + Category Icon + Item Name) -->
             <div class="flex items-center gap-3 min-w-0">
               <button
                 type="button"
-                onclick="toggleItemCheck('${item.id}')"
+                data-action="toggle-check"
+                data-item-id="${safeId}"
+                onclick="toggleItemCheck('${safeId}')"
                 aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer"
                 title="Toggle Check"
@@ -7890,7 +7969,9 @@
               <div class="flex items-center gap-2 flex-wrap min-w-0">
                 <button
                   type="button"
-                  onclick="openFullItemEdit('${item.id}')"
+                  data-action="edit-item"
+                  data-item-id="${safeId}"
+                  onclick="openFullItemEdit('${safeId}')"
                   aria-label="${(t.aria_edit_item || "Edit item details") + ": " + safeName}"
                   class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 transition-colors cursor-pointer"
                   title="Adjust details"
@@ -7910,7 +7991,9 @@
               <div class="flex items-center gap-1.5 sm:gap-2">
                 <button
                   type="button"
-                  onclick="openItemComparator('${item.id}')"
+                  data-action="compare"
+                  data-item-id="${safeId}"
+                  onclick="openItemComparator('${safeId}')"
                   aria-label="${(t.aria_nav_compare || "Compare") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-900/60 rounded-lg border border-slate-700/60 hover:border-indigo-500/50 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Compare Pack Sizes"
@@ -7920,7 +8003,9 @@
                 </button>
                 <button
                   type="button"
-                  onclick="openFullItemEdit('${item.id}')"
+                  data-action="edit-item"
+                  data-item-id="${safeId}"
+                  onclick="openFullItemEdit('${safeId}')"
                   aria-label="${(t.aria_edit_item || "Edit") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700/60 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Edit Item Details"
@@ -7930,7 +8015,9 @@
                 </button>
                 <button
                   type="button"
-                  onclick="deleteItem('${item.id}')"
+                  data-action="delete-item"
+                  data-item-id="${safeId}"
+                  onclick="deleteItem('${safeId}')"
                   aria-label="${(t.aria_delete_item || "Delete item") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/40 transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
                   title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].remove_btn || "Remove"}"
@@ -7942,7 +8029,9 @@
               <div class="text-right">
                 <button
                   type="button"
-                  onclick="openFullItemEdit('${item.id}')"
+                  data-action="edit-item"
+                  data-item-id="${safeId}"
+                  onclick="openFullItemEdit('${safeId}')"
                   aria-label="${(t.aria_edit_item || "Edit item") + ": " + safeName}"
                   class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 transition-colors block text-right cursor-pointer"
                   title="Update Price / Details"
@@ -7995,7 +8084,7 @@
         if (!name) return;
 
         const newItem = {
-          id: Date.now().toString(),
+          id: generateItemId("item"),
           name,
           category: catInput.value,
           store: storeInput.value,
@@ -8618,9 +8707,7 @@
           const parsed = parseSmartGroceryInput(line);
           if (parsed && parsed.name) {
             const item = {
-              id:
-                Date.now().toString(36) +
-                Math.random().toString(36).substr(2, 5),
+              id: generateItemId("item"),
               name: parsed.name,
               category: parsed.category || "other",
               store: parsed.store || getQuickAddDefaultStore(),
@@ -9342,8 +9429,8 @@
           const data = JSON.parse(str);
           return {
             title: data.t || "Shared List",
-            items: (data.i || []).map((arr, idx) => ({
-              id: `shared_${idx}_${Date.now()}`,
+            items: (data.i || []).map((arr) => ({
+              id: generateItemId("shared"),
               name: arr[0],
               category: arr[1],
               store: arr[2],
@@ -9654,8 +9741,11 @@
               let title = parsed.title || parsed.t || "Shared List";
               let items = [];
               if (Array.isArray(parsed.items)) {
-                items = parsed.items.map((it, idx) => ({
-                  id: it.id || `shared_${idx}_${Date.now()}`,
+                items = parsed.items.map((it) => ({
+                  id:
+                    it.id && isValidId(it.id)
+                      ? it.id
+                      : generateItemId("shared"),
                   name: it.name || "Item",
                   category: it.category || "other",
                   store: it.store || "Supermarket",
@@ -9665,8 +9755,8 @@
                   checked: !!it.checked,
                 }));
               } else if (Array.isArray(parsed.i)) {
-                items = parsed.i.map((arr, idx) => ({
-                  id: `shared_${idx}_${Date.now()}`,
+                items = parsed.i.map((arr) => ({
+                  id: generateItemId("shared"),
                   name: arr[0] || "Item",
                   category: arr[1] || "other",
                   store: arr[2] || "Supermarket",
@@ -9755,7 +9845,7 @@
             item.quantity,
             item.unit
           );
-          const recId = `rec_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 7)}`;
+          const recId = generateItemId("rec");
           memoryState.purchaseLedger.push({
             id: recId,
             itemId: item.id,
@@ -9953,7 +10043,7 @@
         }
 
         const newItem = {
-          id: "item-" + Date.now() + "-" + Math.floor(Math.random() * 10000),
+          id: generateItemId("item"),
           name: name,
           category: category,
           store: entry.store || memoryState.stores[0] || "Costco",
@@ -11112,6 +11202,9 @@
             }
           });
 
+          // Delegated item card click listener
+          document.addEventListener("click", handleItemCardDelegatedClick);
+
           // Keyboard navigation shortcuts
           document.addEventListener("keydown", handleGlobalKeyDown);
 
@@ -11381,6 +11474,9 @@
         window.setCurrency = setCurrency;
         window.formatCurrency = formatCurrency;
         window.sanitizeHTML = sanitizeHTML;
+        window.generateItemId = generateItemId;
+        window.isValidId = isValidId;
+        window.handleItemCardDelegatedClick = handleItemCardDelegatedClick;
         window.handleGlobalKeyDown = handleGlobalKeyDown;
         window.openComparatorModal = openComparatorModal;
         window.openItemComparator = openItemComparator;

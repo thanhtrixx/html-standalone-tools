@@ -35,6 +35,7 @@ const IGNORED_DIRS = new Set([
 ]);
 
 const COMPANION_ASSETS = [
+  "_headers",
   "manifest.webmanifest",
   "manifest.json",
   "site.webmanifest",

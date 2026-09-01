@@ -1,4 +1,4 @@
-# Smart Buy-List & Unit Price Tracker (v4.1.0)
+# Smart Buy-List & Unit Price Tracker (v4.2.0)
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 
@@ -35,12 +35,12 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
   _Avoid_: Price history table, expense log, purchase history database.
 - **All-Time Low (Best Price Ever)**: Minimum normalized unit price ($P_{\text{min}}$) recorded across all historical purchases and stores for a specific master item.
   _Avoid_: Record low, lowest price, baseline price.
-- **Last Purchased Price**: Normalized unit price paid on the most recent completed shopping trip for an item, including store and date.
+- **Last Purchased Price**: Normalized unit price paid on the chronologically most recent completed shopping trip for an item, derived by ordering ledger entries chronologically.
   _Avoid_: Recent price, previous cost, prior price.
 - **Deal Rating / Price Indicator**: Real-time visual assessment of current shelf price against historical records:
-  - 🟢 **Great Deal**: Current unit price is $\le$ All-Time Low or $\ge 10\%$ below historical average.
-  - 🟡 **Fair / Market Price**: Current unit price is within $\pm 5\%$ of historical average.
-  - 🔴 **Price Spike / Inflated**: Current unit price is $\ge 10\%$ higher than last paid price or historical average.
+  - 🟢 **Great Deal**: Current unit price is $\le$ All-Time Low ($P_{\text{min}}$) or $\le 0.90 \times P_{\text{avg}}$ ($\ge 10\%$ below historical average).
+  - 🟡 **Fair / Market Price**: Current unit price is within $\pm 10\%$ of historical average ($0.90 \times P_{\text{avg}} < P_{\text{unit}} \le 1.10 \times P_{\text{avg}}$) and $\le 1.15 \times P_{\text{last}}$.
+  - 🔴 **Price Spike / Inflated**: Current unit price is $> 1.10 \times P_{\text{avg}}$ (exceeds $+10\%$ of historical average) or $> 1.15 \times P_{\text{last}}$ (exceeds $+15\%$ above last paid price).
     _Avoid_: Bargain score, discount level, sale badge.
 - **In-Aisle Package Comparator**: Full page view comparing 2 package configurations side-by-side (e.g. _Brand A: 450g @ $3.20* vs *Brand B: 1.2kg @ $7.80_) with universal 13-unit dimension alignment, bidirectional unit group auto-sync, percentage savings calculation, and "Apply Winner to Form" context pre-filling. Can be accessed via the bottom `Comparator` tab or invoked directly from any active list item via swipe left gesture.
   _Avoid_: Price calculator, aisle widget, package comparison tool.
@@ -108,7 +108,9 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ### 6. PWA & Mobile Ergonomics
 
-- **Standalone PWA Shell & Single-Source Versioning**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.1.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.1.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, and standalone `.zip` packaging.
+- **Standalone PWA Shell & Single-Source Versioning (v4.2.0)**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.2.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.2.0"`) and `dist/index.html` during compaction build. Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, Cloudflare Pages clickjacking protection `_headers` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`), and standalone `.zip` packaging.
+- **Event Delegation & DOM Hardening**: All item card action buttons dispatch via root-level event delegation (`handleItemCardDelegatedClick`), using `data-action` and `data-item-id` with strict `/^[a-zA-Z0-9_-]+$/` format validation and cryptographic monotonic IDs (`item_${timestamp}_${randomUUID.slice(0,8)}`).
+- **Telemetry & Hosting Layer Privacy**: The client-side application operates completely tracker-free with zero runtime analytics scripts. Static delivery via Cloudflare Pages provides privacy-preserving aggregate HTTP telemetry without personal tracking.
 - **Material You (MD3) 4-Tab Page Navigation**: 4-destination bottom navigation bar (`Planning`, `Buy`, `Price History`, `Comparator`) managing 4 full page views within `<main>`.
 - **Horizontal Page Swipe Gestures & Gesture Hierarchy**: Horizontal swipe gestures navigate across the 4 tabs smoothly ($|\Delta X| \ge 50\text{px}$ and $|\Delta X| > 1.5 \times |\Delta Y|$). In-aisle item card swipe gestures (Swipe Right = Check/Done + Haptic Vibrate; Swipe Left = Open Comparator with active item pre-filled) are isolated and take precedence over page horizontal swipe actions.
 - **Modal Light Dismiss & History Popstate Ergonomics**: Modals close on backdrop tap, Escape key, or browser/Android back navigation via `window.history.pushState` integration.
@@ -146,3 +148,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0024: innerHTML User Input Sanitization & Content-Security-Policy Meta Tag](./docs/adr/0024-sanitize-innerhtml-and-content-security-policy.md)
 - [ADR-0025: IndexedDB Storage Engine & GitHub PAT Security Migration](./docs/adr/0025-indexeddb-storage-engine-and-pat-security-migration.md)
 - [ADR-0026: 4-Tab Page Navigation, Horizontal Swipe Gestures, Modal Ergonomics & Omnibox Pre-Fill](./docs/adr/0026-four-tab-page-navigation-gesture-hierarchy-modal-ergonomics-and-omnibox-prefill.md)
+- [ADR-0027: Review Remediation, Event Delegation, Math Robustness & PWA v4.2.0](./docs/adr/0027-review-remediation-modular-source-and-pwa-v4-2-0.md)
