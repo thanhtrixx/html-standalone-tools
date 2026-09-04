@@ -17,6 +17,9 @@ coverage
 .tokensave/
 .codex/
 .gemini/
+.impeccable/
+.agent/
+.agents/skills/
 
 ### IntelliJ IDEA ###
 .idea
