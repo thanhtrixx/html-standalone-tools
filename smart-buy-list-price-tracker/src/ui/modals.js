@@ -121,7 +121,9 @@ function handlePopState(event) {
     (lang === "vi"
       ? "Nhấn quay lại lần nữa để thoát"
       : "Press back again to exit");
-  if (typeof showToast === "function") {
+  if (typeof window !== "undefined" && typeof window.showToast === "function") {
+    window.showToast(exitMsg);
+  } else if (typeof showToast === "function") {
     showToast(exitMsg);
   }
 }

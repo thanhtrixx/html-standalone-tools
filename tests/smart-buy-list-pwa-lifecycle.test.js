@@ -894,6 +894,9 @@ async function runTests() {
     sandbox.showToast = (msg) => {
       capturedToast = msg;
     };
+    if (sandbox.window) {
+      sandbox.window.showToast = sandbox.showToast;
+    }
     sandbox.resetBackPressState();
     sandbox.window.__pwaExitAllowed = false;
 
