@@ -301,6 +301,7 @@ const TRANSLATIONS = {
     error_github_ratelimit:
       "GitHub API rate limit exceeded. Resets at {time} (in {mins}m).",
     toast_sample_loaded: "Sample grocery list loaded!",
+    toast_press_back_again_to_exit: "Press back again to exit",
     toast_data_cleared: "All data cleared",
     smart_quick_heading: "Quick Add Item",
     smart_quick_placeholder:
@@ -701,6 +702,7 @@ const TRANSLATIONS = {
     error_github_ratelimit:
       "Đã đạt giới hạn yêu cầu GitHub API. Tự động mở lại lúc {time} (sau {mins} phút).",
     toast_sample_loaded: "Đã tải danh sách hàng hoá mẫu!",
+    toast_press_back_again_to_exit: "Nhấn quay lại lần nữa để thoát",
     toast_data_cleared: "Đã xoá toàn bộ dữ liệu",
     smart_quick_heading: "Nhập Nhanh Mặt Hàng",
     smart_quick_placeholder:
