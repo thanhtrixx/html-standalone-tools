@@ -84,23 +84,29 @@ function restoreSnapshot(snapshotId) {
   saveFullStateSnapshot("PRE_RESTORE_UNDO");
 
   const restoredState = JSON.parse(JSON.stringify(target.state));
-  if (restoredState.activeList)
-    memoryState.activeList = restoredState.activeList;
-  if (Array.isArray(restoredState.purchaseLedger))
-    memoryState.purchaseLedger = restoredState.purchaseLedger;
-  if (Array.isArray(restoredState.stores))
-    memoryState.stores = restoredState.stores;
-  if (restoredState.storeAliases)
-    memoryState.storeAliases = restoredState.storeAliases;
-  if (restoredState.settings)
-    memoryState.settings = Object.assign(
-      memoryState.settings,
-      restoredState.settings
-    );
-  if (restoredState._deleted) memoryState._deleted = restoredState._deleted;
-
-  saveToLocalStorage();
-  renderApp();
+  if (typeof store !== "undefined" && store && store.dispatch) {
+    store.dispatch({
+      type: ACTION_TYPES.RESTORE_SNAPSHOT,
+      payload: restoredState,
+    });
+  } else {
+    if (restoredState.activeList)
+      memoryState.activeList = restoredState.activeList;
+    if (Array.isArray(restoredState.purchaseLedger))
+      memoryState.purchaseLedger = restoredState.purchaseLedger;
+    if (Array.isArray(restoredState.stores))
+      memoryState.stores = restoredState.stores;
+    if (restoredState.storeAliases)
+      memoryState.storeAliases = restoredState.storeAliases;
+    if (restoredState.settings)
+      memoryState.settings = Object.assign(
+        memoryState.settings,
+        restoredState.settings
+      );
+    if (restoredState._deleted) memoryState._deleted = restoredState._deleted;
+    saveToLocalStorage();
+    renderApp();
+  }
   const tr = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
   showToast(tr.toast_snapshot_restored || "Đã khôi phục snapshot thành công!");
   return true;

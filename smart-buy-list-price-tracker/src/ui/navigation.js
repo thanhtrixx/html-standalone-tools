@@ -113,10 +113,14 @@ function setTripPhase(phase, syncTab = true) {
   if (syncTab) {
     currentActiveTab = phase === "PLANNING" ? "PLANNING" : "BUY";
   }
-  if (memoryState && memoryState.settings) {
-    memoryState.settings.tripPhase = phase;
+  if (typeof store !== "undefined" && store && store.dispatch) {
+    store.dispatch({ type: ACTION_TYPES.SET_TRIP_PHASE, payload: phase });
+  } else {
+    if (memoryState && memoryState.settings) {
+      memoryState.settings.tripPhase = phase;
+    }
+    saveToLocalStorage();
   }
-  saveToLocalStorage();
   const tabPlanning = document.getElementById("tabPlanning");
   const tabInStore = document.getElementById("tabInStore");
   const finishBar = document.getElementById("finishTripBar");
@@ -187,10 +191,14 @@ function setTripPhase(phase, syncTab = true) {
 
 function setGrouping(grouping) {
   currentGrouping = grouping;
-  if (memoryState && memoryState.settings) {
-    memoryState.settings.grouping = grouping;
+  if (typeof store !== "undefined" && store && store.dispatch) {
+    store.dispatch({ type: ACTION_TYPES.SET_GROUPING, payload: grouping });
+  } else {
+    if (memoryState && memoryState.settings) {
+      memoryState.settings.grouping = grouping;
+    }
+    saveToLocalStorage();
   }
-  saveToLocalStorage();
   const btnAisle = document.getElementById("btnGroupByAisle");
   const btnStore = document.getElementById("btnGroupByStore");
   const settingsSelect = document.getElementById("settingsGroupingSelect");
@@ -216,17 +224,31 @@ function setGrouping(grouping) {
 
 let currentCategoryFilter = "ALL";
 
-function onStoreFilterChange(store) {
-  if (store === "MANAGE_STORES") {
+function setStoreFilter(storeName) {
+  if (typeof store !== "undefined" && store && store.setStoreFilter) {
+    return store.setStoreFilter(storeName);
+  }
+  currentStoreFilter = storeName;
+  saveToLocalStorage();
+  renderApp();
+}
+
+function onStoreFilterChange(storeName) {
+  if (storeName === "MANAGE_STORES") {
     openStoreManagerModal();
     const select = document.getElementById("storeFilterSelect");
     if (select) select.value = currentStoreFilter;
     return;
   }
-  currentStoreFilter = store;
+  currentStoreFilter = storeName;
+  if (typeof setStoreFilter === "function") {
+    setStoreFilter(storeName);
+  } else if (typeof store !== "undefined" && store && store.setStoreFilter) {
+    store.setStoreFilter(storeName);
+  }
   const quickStoreSelect = document.getElementById("smartQuickStoreSelect");
-  if (quickStoreSelect && store !== "ALL") {
-    quickStoreSelect.value = store;
+  if (quickStoreSelect && storeName !== "ALL") {
+    quickStoreSelect.value = storeName;
   }
   renderApp();
 }

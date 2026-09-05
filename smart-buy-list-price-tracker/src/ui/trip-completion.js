@@ -51,10 +51,11 @@ function finalizeTripCompletion() {
   // 1. Append verified prices to Historical Purchase Ledger
   const nowIso = new Date().toISOString();
   const now = nowIso.slice(0, 10);
-  checkedItems.forEach((item, idx) => {
+  const newLedgerEntries = [];
+  checkedItems.forEach((item) => {
     const unitPrice = normalizeUnitPrice(item.price, item.quantity, item.unit);
     const recId = generateItemId("rec");
-    memoryState.purchaseLedger.push({
+    newLedgerEntries.push({
       id: recId,
       itemId: item.id,
       itemName: item.name,
@@ -70,8 +71,9 @@ function finalizeTripCompletion() {
   });
 
   // 2. Handle active items & tombstones
+  let remainingItems = [];
   if (rollover === "ROLLOVER") {
-    memoryState.activeList.items = uncheckedItems.map((i) =>
+    remainingItems = uncheckedItems.map((i) =>
       touchItem({
         ...i,
         checked: false,
@@ -79,10 +81,20 @@ function finalizeTripCompletion() {
     );
   } else {
     uncheckedItems.forEach((i) => recordDeletedItem(i.id));
-    memoryState.activeList.items = [];
+    remainingItems = [];
   }
 
-  saveToLocalStorage();
+  if (typeof completeTrip === "function") {
+    completeTrip({
+      ledgerEntries: newLedgerEntries,
+      uncheckedItems: remainingItems,
+    });
+  } else {
+    memoryState.purchaseLedger.push(...newLedgerEntries);
+    memoryState.activeList.items = remainingItems;
+    saveToLocalStorage();
+  }
+
   if (typeof flushPendingCloudSync === "function") {
     flushPendingCloudSync();
   }
@@ -90,6 +102,18 @@ function finalizeTripCompletion() {
   setTripPhase("PLANNING");
   renderApp();
   showToast(TRANSLATIONS[currentLanguage].toast_trip_completed);
+}
+
+function completeTrip(payload) {
+  if (typeof store !== "undefined" && store && store.completeTrip) {
+    return store.completeTrip(payload);
+  }
+  const { ledgerEntries = [], uncheckedItems = [] } = payload || {};
+  if (!memoryState.purchaseLedger) memoryState.purchaseLedger = [];
+  memoryState.purchaseLedger.push(...ledgerEntries);
+  if (memoryState.activeList) memoryState.activeList.items = uncheckedItems;
+  saveToLocalStorage();
+  renderApp();
 }
 
 let selectedLedgerIds = new Set();
@@ -563,5 +587,5 @@ function renderPriceLedgerTable(query = "") {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { finishShoppingTrip };
+  module.exports = { finalizeTripCompletion };
 }

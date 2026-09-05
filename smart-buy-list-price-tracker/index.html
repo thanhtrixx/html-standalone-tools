@@ -6439,6 +6439,698 @@
         }
       }
 
+      /**
+       * Observable State Container & Action Dispatchers
+       * @module state/store
+       * @see ADR-0031: Modular Source Architecture, JSDoc Domain Contracts & Observable State Container
+       */
+
+      // Action Type Constants
+      const ACTION_TYPES = Object.freeze({
+        ITEM_ADD: "ITEM_ADD",
+        ITEM_UPDATE: "ITEM_UPDATE",
+        ITEM_DELETE: "ITEM_DELETE",
+        ITEM_TOGGLE_CHECK: "ITEM_TOGGLE_CHECK",
+        SET_TRIP_PHASE: "SET_TRIP_PHASE",
+        SET_GROUPING: "SET_GROUPING",
+        SET_STORE_FILTER: "SET_STORE_FILTER",
+        SET_LANGUAGE: "SET_LANGUAGE",
+        SET_CURRENCY: "SET_CURRENCY",
+        SET_THEME: "SET_THEME",
+        COMPLETE_TRIP: "COMPLETE_TRIP",
+        APPLY_MERGE: "APPLY_MERGE",
+        RESTORE_SNAPSHOT: "RESTORE_SNAPSHOT",
+        SET_CATALOG: "SET_CATALOG",
+        SET_LEDGER: "SET_LEDGER",
+        SET_STORES: "SET_STORES",
+        SET_STORE_ALIASES: "SET_STORE_ALIASES",
+        SET_SNAPSHOTS: "SET_SNAPSHOTS",
+        REPLACE_STATE: "REPLACE_STATE",
+      });
+
+      /**
+       * Root Reducer handling deterministic state transitions.
+       * @param {Object} state - Current application state
+       * @param {{ type: string, payload?: any }} action - Dispatched action
+       * @returns {Object} Next application state
+       */
+      function rootReducer(state, action) {
+        if (!action || !action.type) return state;
+
+        switch (action.type) {
+          case ACTION_TYPES.ITEM_ADD: {
+            const item = action.payload;
+            if (!item) return state;
+            const currentItems = Array.isArray(state?.activeList?.items)
+              ? [...state.activeList.items]
+              : [];
+            if (typeof unrecordDeletedItem === "function" && item.id) {
+              unrecordDeletedItem(item.id, state._deleted);
+            }
+            currentItems.push(item);
+            return {
+              ...state,
+              activeList: {
+                ...(state.activeList || {
+                  id: "default",
+                  title: "Danh Sách Mua Sắm",
+                }),
+                items: currentItems,
+              },
+            };
+          }
+
+          case ACTION_TYPES.ITEM_UPDATE: {
+            const { id, patch } = action.payload || {};
+            if (!id || !patch) return state;
+            const currentItems = Array.isArray(state?.activeList?.items)
+              ? state.activeList.items
+              : [];
+            const target = currentItems.find((it) => it.id === id);
+            if (target) {
+              Object.assign(target, patch);
+              target.updatedAt = new Date().toISOString();
+              if (typeof touchItem === "function") {
+                touchItem(target);
+              }
+            }
+            return {
+              ...state,
+              activeList: {
+                ...(state.activeList || {
+                  id: "default",
+                  title: "Danh Sách Mua Sắm",
+                }),
+                items: [...currentItems],
+              },
+            };
+          }
+
+          case ACTION_TYPES.ITEM_DELETE: {
+            const { id } = action.payload || {};
+            if (!id) return state;
+            if (typeof recordDeletedItem === "function") {
+              recordDeletedItem(id);
+            }
+            const currentItems = Array.isArray(state?.activeList?.items)
+              ? [...state.activeList.items]
+              : [];
+            const remainingItems = currentItems.filter((it) => it.id !== id);
+            return {
+              ...state,
+              activeList: {
+                ...(state.activeList || {
+                  id: "default",
+                  title: "Danh Sách Mua Sắm",
+                }),
+                items: remainingItems,
+              },
+            };
+          }
+
+          case ACTION_TYPES.ITEM_TOGGLE_CHECK: {
+            const { id } = action.payload || {};
+            if (!id) return state;
+            const currentItems = Array.isArray(state?.activeList?.items)
+              ? state.activeList.items
+              : [];
+            const target = currentItems.find((it) => it.id === id);
+            if (target) {
+              target.checked = !target.checked;
+              const nowIso = new Date().toISOString();
+              target.checkedAt = target.checked ? nowIso : null;
+              target.updatedAt = nowIso;
+              if (typeof touchItem === "function") {
+                touchItem(target);
+              }
+            }
+            return {
+              ...state,
+              activeList: {
+                ...(state.activeList || {
+                  id: "default",
+                  title: "Danh Sách Mua Sắm",
+                }),
+                items: [...currentItems],
+              },
+            };
+          }
+
+          case ACTION_TYPES.SET_TRIP_PHASE: {
+            const phase = action.payload;
+            return {
+              ...state,
+              settings: {
+                ...(state.settings || {}),
+                tripPhase: phase,
+              },
+            };
+          }
+
+          case ACTION_TYPES.SET_GROUPING: {
+            const grouping = action.payload;
+            return {
+              ...state,
+              settings: {
+                ...(state.settings || {}),
+                grouping,
+              },
+            };
+          }
+
+          case ACTION_TYPES.SET_STORE_FILTER: {
+            const storeFilter = action.payload;
+            return {
+              ...state,
+              settings: {
+                ...(state.settings || {}),
+                currentStoreFilter: storeFilter,
+              },
+            };
+          }
+
+          case ACTION_TYPES.SET_LANGUAGE: {
+            return {
+              ...state,
+              settings: {
+                ...(state.settings || {}),
+                language: action.payload,
+              },
+            };
+          }
+
+          case ACTION_TYPES.SET_CURRENCY: {
+            return {
+              ...state,
+              settings: {
+                ...(state.settings || {}),
+                currency: action.payload,
+              },
+            };
+          }
+
+          case ACTION_TYPES.SET_THEME: {
+            return {
+              ...state,
+              settings: {
+                ...(state.settings || {}),
+                theme: action.payload,
+              },
+            };
+          }
+
+          case ACTION_TYPES.COMPLETE_TRIP: {
+            const {
+              ledgerEntries = [],
+              uncheckedItems = [],
+              catalogUpdates = null,
+            } = action.payload || {};
+            const nextLedger = [
+              ...(state.purchaseLedger || []),
+              ...ledgerEntries,
+            ];
+            let nextCatalog = state.catalog ? [...state.catalog] : [];
+            if (Array.isArray(catalogUpdates)) {
+              nextCatalog = catalogUpdates;
+            }
+            return {
+              ...state,
+              purchaseLedger: nextLedger,
+              catalog: nextCatalog,
+              activeList: {
+                ...(state.activeList || {
+                  id: "default",
+                  title: "Danh Sách Mua Sắm",
+                }),
+                items: uncheckedItems,
+              },
+            };
+          }
+
+          case ACTION_TYPES.APPLY_MERGE: {
+            const merged = action.payload || {};
+            return {
+              ...state,
+              ...merged,
+              activeList: merged.activeList || state.activeList,
+              catalog: merged.catalog || state.catalog,
+              purchaseLedger: merged.purchaseLedger || state.purchaseLedger,
+              stores: merged.stores || state.stores,
+              storeAliases: merged.storeAliases || state.storeAliases,
+              settings: {
+                ...(state.settings || {}),
+                ...(merged.settings || {}),
+              },
+              _deleted: merged._deleted || state._deleted,
+            };
+          }
+
+          case ACTION_TYPES.RESTORE_SNAPSHOT: {
+            const restored = action.payload || {};
+            return {
+              ...state,
+              ...restored,
+              activeList: restored.activeList || state.activeList,
+              catalog: restored.catalog || state.catalog,
+              purchaseLedger: restored.purchaseLedger || state.purchaseLedger,
+              stores: restored.stores || state.stores,
+              storeAliases: restored.storeAliases || state.storeAliases,
+              settings: {
+                ...(state.settings || {}),
+                ...(restored.settings || {}),
+              },
+              _deleted: restored._deleted || state._deleted,
+            };
+          }
+
+          case ACTION_TYPES.SET_CATALOG: {
+            return {
+              ...state,
+              catalog: action.payload,
+            };
+          }
+
+          case ACTION_TYPES.SET_LEDGER: {
+            return {
+              ...state,
+              purchaseLedger: action.payload,
+            };
+          }
+
+          case ACTION_TYPES.SET_STORES: {
+            return {
+              ...state,
+              stores: action.payload,
+            };
+          }
+
+          case ACTION_TYPES.SET_STORE_ALIASES: {
+            return {
+              ...state,
+              storeAliases: action.payload,
+            };
+          }
+
+          case ACTION_TYPES.SET_SNAPSHOTS: {
+            return {
+              ...state,
+              snapshots: action.payload,
+            };
+          }
+
+          case ACTION_TYPES.REPLACE_STATE: {
+            return {
+              ...state,
+              ...action.payload,
+            };
+          }
+
+          default:
+            return state;
+        }
+      }
+
+      /**
+       * Synchronize internal store state into legacy memoryState for 100% backward compatibility.
+       * @param {Object} srcState
+       */
+      function syncToMemoryState(srcState) {
+        if (
+          typeof memoryState !== "undefined" &&
+          memoryState &&
+          typeof memoryState === "object"
+        ) {
+          Object.assign(memoryState, srcState);
+          if (srcState.activeList) memoryState.activeList = srcState.activeList;
+          if (srcState.purchaseLedger)
+            memoryState.purchaseLedger = srcState.purchaseLedger;
+          if (srcState.catalog) memoryState.catalog = srcState.catalog;
+          if (srcState.stores) memoryState.stores = srcState.stores;
+          if (srcState.storeAliases)
+            memoryState.storeAliases = srcState.storeAliases;
+          if (srcState.settings) memoryState.settings = srcState.settings;
+          if (srcState._deleted) memoryState._deleted = srcState._deleted;
+          if (srcState.snapshots) memoryState.snapshots = srcState.snapshots;
+        }
+      }
+
+      /**
+       * Observable State Container Factory
+       * @param {Function|Object} arg1 - Reducer function or initial state
+       * @param {Object|Array} [arg2] - Initial state or middlewares array
+       * @param {Array} [arg3] - Middlewares array
+       * @returns {Object} Store instance with getState, dispatch, subscribe, replaceState
+       */
+      function createStore(arg1, arg2, arg3) {
+        let reducer = rootReducer;
+        let state = null;
+        let middlewares = [];
+
+        if (typeof arg1 === "function") {
+          reducer = arg1;
+          state = arg2 || {};
+          middlewares = Array.isArray(arg3) ? arg3 : [];
+        } else {
+          state = arg1 || {};
+          middlewares = Array.isArray(arg2) ? arg2 : [];
+        }
+
+        const listeners = new Set();
+
+        function getState() {
+          // Reconcile if external sandbox/tests imperatively mutated memoryState directly
+          if (
+            typeof memoryState !== "undefined" &&
+            memoryState &&
+            typeof memoryState === "object" &&
+            state
+          ) {
+            if (
+              memoryState.activeList &&
+              memoryState.activeList !== state.activeList
+            ) {
+              state.activeList = memoryState.activeList;
+            }
+            if (
+              memoryState.purchaseLedger &&
+              memoryState.purchaseLedger !== state.purchaseLedger
+            ) {
+              state.purchaseLedger = memoryState.purchaseLedger;
+            }
+            if (memoryState.catalog && memoryState.catalog !== state.catalog) {
+              state.catalog = memoryState.catalog;
+            }
+            if (memoryState.stores && memoryState.stores !== state.stores) {
+              state.stores = memoryState.stores;
+            }
+            if (
+              memoryState.storeAliases &&
+              memoryState.storeAliases !== state.storeAliases
+            ) {
+              state.storeAliases = memoryState.storeAliases;
+            }
+            if (
+              memoryState.settings &&
+              memoryState.settings !== state.settings
+            ) {
+              state.settings = memoryState.settings;
+            }
+            if (
+              memoryState.snapshots &&
+              memoryState.snapshots !== state.snapshots
+            ) {
+              state.snapshots = memoryState.snapshots;
+            }
+            if (
+              memoryState._deleted &&
+              memoryState._deleted !== state._deleted
+            ) {
+              state._deleted = memoryState._deleted;
+            }
+          }
+          return state;
+        }
+
+        function subscribe(listener) {
+          if (typeof listener !== "function") return () => {};
+          listeners.add(listener);
+          return () => listeners.delete(listener);
+        }
+
+        let rawDispatch = (action) => {
+          state = reducer(getState(), action);
+          syncToMemoryState(state);
+          listeners.forEach((listener) => {
+            try {
+              listener(state, action);
+            } catch (err) {
+              console.error("Store listener error:", err);
+            }
+          });
+          return action;
+        };
+
+        let dispatch = rawDispatch;
+
+        if (Array.isArray(middlewares) && middlewares.length > 0) {
+          const middlewareAPI = {
+            getState: () => getState(),
+            dispatch: (act) => dispatch(act),
+          };
+          const chain = middlewares.map((fn) => fn(middlewareAPI));
+          dispatch = chain.reduceRight(
+            (composed, fn) => fn(composed),
+            rawDispatch
+          );
+        }
+
+        return {
+          getState,
+          dispatch: (act) => dispatch(act),
+          subscribe,
+          replaceState(nextState) {
+            return dispatch({
+              type: ACTION_TYPES.REPLACE_STATE,
+              payload: nextState,
+            });
+          },
+        };
+      }
+
+      /**
+       * Storage Persistence Middleware
+       * Persists state transitions to IndexedDB and LocalStorage automatically.
+       */
+      function createStoragePersistenceMiddleware() {
+        const PERSIST_ACTIONS = new Set([
+          ACTION_TYPES.ITEM_ADD,
+          ACTION_TYPES.ITEM_UPDATE,
+          ACTION_TYPES.ITEM_DELETE,
+          ACTION_TYPES.ITEM_TOGGLE_CHECK,
+          ACTION_TYPES.SET_TRIP_PHASE,
+          ACTION_TYPES.SET_GROUPING,
+          ACTION_TYPES.SET_STORE_FILTER,
+          ACTION_TYPES.SET_LANGUAGE,
+          ACTION_TYPES.SET_CURRENCY,
+          ACTION_TYPES.SET_THEME,
+          ACTION_TYPES.COMPLETE_TRIP,
+          ACTION_TYPES.APPLY_MERGE,
+          ACTION_TYPES.RESTORE_SNAPSHOT,
+          ACTION_TYPES.SET_CATALOG,
+          ACTION_TYPES.SET_LEDGER,
+          ACTION_TYPES.SET_STORES,
+          ACTION_TYPES.SET_STORE_ALIASES,
+          ACTION_TYPES.SET_SNAPSHOTS,
+          ACTION_TYPES.REPLACE_STATE,
+        ]);
+
+        return (storeAPI) => (next) => (action) => {
+          const result = next(action);
+          if (action && PERSIST_ACTIONS.has(action.type)) {
+            if (typeof saveToLocalStorage === "function") {
+              saveToLocalStorage();
+            } else if (typeof localStorage !== "undefined") {
+              try {
+                const state = storeAPI.getState();
+                localStorage.setItem(
+                  "smart_buy_list_state",
+                  JSON.stringify(state)
+                );
+              } catch (e) {}
+            }
+          }
+          return result;
+        };
+      }
+
+      // Global default singleton store initialized with memoryState
+      const store = createStore(
+        typeof memoryState !== "undefined" ? memoryState : {},
+        [createStoragePersistenceMiddleware()]
+      );
+
+      /**
+       * Action Dispatcher: Add new item to shopping list
+       * @param {Object} item
+       * @returns {Object} Added item
+       */
+      function dispatchAddItem(item) {
+        if (!item || typeof item !== "object") return null;
+        const normalized = {
+          id:
+            item.id ||
+            (typeof generateItemId === "function"
+              ? generateItemId("item")
+              : "item_" + Date.now()),
+          name: item.name || "",
+          category: item.category || "other",
+          store: item.store || "",
+          quantity: parseFloat(item.quantity) || 1,
+          unit: item.unit || "item",
+          price: parseFloat(item.price) || 0,
+          checked: !!item.checked,
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        if (typeof touchItem === "function") {
+          touchItem(normalized);
+        }
+        store.dispatch({ type: ACTION_TYPES.ITEM_ADD, payload: normalized });
+        return normalized;
+      }
+
+      /**
+       * Action Dispatcher: Update item by ID
+       * @param {string} id
+       * @param {Object} patch
+       * @returns {Object|null}
+       */
+      function dispatchUpdateItem(id, patch) {
+        if (!id || !patch) return null;
+        store.dispatch({
+          type: ACTION_TYPES.ITEM_UPDATE,
+          payload: { id, patch },
+        });
+        return (
+          store.getState().activeList?.items?.find((i) => i.id === id) || null
+        );
+      }
+
+      /**
+       * Action Dispatcher: Delete item by ID
+       * @param {string} id
+       * @returns {boolean}
+       */
+      function dispatchDeleteItem(id) {
+        if (!id) return false;
+        store.dispatch({ type: ACTION_TYPES.ITEM_DELETE, payload: { id } });
+        return true;
+      }
+
+      /**
+       * Action Dispatcher: Toggle item checked state
+       * @param {string} id
+       * @returns {Object|null}
+       */
+      function dispatchToggleItemCheck(id) {
+        if (!id) return null;
+        store.dispatch({
+          type: ACTION_TYPES.ITEM_TOGGLE_CHECK,
+          payload: { id },
+        });
+        if (
+          typeof navigator !== "undefined" &&
+          typeof navigator.vibrate === "function"
+        ) {
+          try {
+            navigator.vibrate([15]);
+          } catch (e) {}
+        }
+        return (
+          store.getState().activeList?.items?.find((i) => i.id === id) || null
+        );
+      }
+
+      /**
+       * Action Dispatcher: Set active trip phase (PLANNING | BUY)
+       * @param {string} phase
+       */
+      function dispatchSetTripPhase(phase) {
+        store.dispatch({ type: ACTION_TYPES.SET_TRIP_PHASE, payload: phase });
+      }
+
+      /**
+       * Action Dispatcher: Set list grouping (AISLE | STORE)
+       * @param {string} grouping
+       */
+      function dispatchSetGrouping(grouping) {
+        store.dispatch({ type: ACTION_TYPES.SET_GROUPING, payload: grouping });
+      }
+
+      /**
+       * Action Dispatcher: Set active store filter
+       * @param {string} storeName
+       */
+      function dispatchSetStoreFilter(storeName) {
+        store.dispatch({
+          type: ACTION_TYPES.SET_STORE_FILTER,
+          payload: storeName,
+        });
+      }
+
+      /**
+       * Action Dispatcher: Complete trip and record ledger entries
+       * @param {Object} payload
+       */
+      function dispatchCompleteTrip(payload) {
+        store.dispatch({ type: ACTION_TYPES.COMPLETE_TRIP, payload });
+      }
+
+      /**
+       * Action Dispatcher: Apply incoming 3-way or shared merge diff
+       * @param {Object} diff
+       */
+      function dispatchApplyMerge(diff) {
+        store.dispatch({ type: ACTION_TYPES.APPLY_MERGE, payload: diff });
+      }
+
+      /**
+       * Action Dispatcher: Restore state from snapshot
+       * @param {string} snapshotId
+       * @returns {boolean}
+       */
+      function dispatchRestoreSnapshot(snapshotId) {
+        const snapshots =
+          store.getState().snapshots ||
+          (typeof memoryState !== "undefined" ? memoryState.snapshots : []) ||
+          [];
+        const target =
+          snapshots.find((s) => s.id === snapshotId) || snapshots[0];
+        if (!target || !target.state) {
+          if (typeof showToast === "function") {
+            const tr =
+              (typeof TRANSLATIONS !== "undefined" &&
+                TRANSLATIONS[currentLanguage]) ||
+              {};
+            showToast(
+              tr.toast_no_snapshot || "Không có snapshot nào để hoàn tác."
+            );
+          }
+          return false;
+        }
+        if (typeof saveFullStateSnapshot === "function") {
+          saveFullStateSnapshot("PRE_RESTORE_UNDO");
+        }
+        const restoredState = JSON.parse(JSON.stringify(target.state));
+        store.dispatch({
+          type: ACTION_TYPES.RESTORE_SNAPSHOT,
+          payload: restoredState,
+        });
+        if (typeof updateSnapshotsUI === "function") updateSnapshotsUI();
+        if (typeof showToast === "function") {
+          const tr =
+            (typeof TRANSLATIONS !== "undefined" &&
+              TRANSLATIONS[currentLanguage]) ||
+            {};
+          showToast(
+            tr.toast_snapshot_restored || "Đã khôi phục dữ liệu từ snapshot."
+          );
+        }
+        return true;
+      }
+
+      // Bind action dispatchers as methods on store instance
+      store.addItem = dispatchAddItem;
+      store.updateItem = dispatchUpdateItem;
+      store.deleteItem = dispatchDeleteItem;
+      store.toggleItemCheck = dispatchToggleItemCheck;
+      store.setTripPhase = dispatchSetTripPhase;
+      store.setGrouping = dispatchSetGrouping;
+      store.setStoreFilter = dispatchSetStoreFilter;
+      store.completeTrip = dispatchCompleteTrip;
+      store.applyMerge = dispatchApplyMerge;
+      store.restoreSnapshot = dispatchRestoreSnapshot;
+
       /* =========================================================================
        4. BILINGUAL TRANSLATIONS MATRIX (100% en / vi parity)
        ========================================================================= */
@@ -7530,10 +8222,14 @@
         if (syncTab) {
           currentActiveTab = phase === "PLANNING" ? "PLANNING" : "BUY";
         }
-        if (memoryState && memoryState.settings) {
-          memoryState.settings.tripPhase = phase;
+        if (typeof store !== "undefined" && store && store.dispatch) {
+          store.dispatch({ type: ACTION_TYPES.SET_TRIP_PHASE, payload: phase });
+        } else {
+          if (memoryState && memoryState.settings) {
+            memoryState.settings.tripPhase = phase;
+          }
+          saveToLocalStorage();
         }
-        saveToLocalStorage();
         const tabPlanning = document.getElementById("tabPlanning");
         const tabInStore = document.getElementById("tabInStore");
         const finishBar = document.getElementById("finishTripBar");
@@ -7606,10 +8302,17 @@
 
       function setGrouping(grouping) {
         currentGrouping = grouping;
-        if (memoryState && memoryState.settings) {
-          memoryState.settings.grouping = grouping;
+        if (typeof store !== "undefined" && store && store.dispatch) {
+          store.dispatch({
+            type: ACTION_TYPES.SET_GROUPING,
+            payload: grouping,
+          });
+        } else {
+          if (memoryState && memoryState.settings) {
+            memoryState.settings.grouping = grouping;
+          }
+          saveToLocalStorage();
         }
-        saveToLocalStorage();
         const btnAisle = document.getElementById("btnGroupByAisle");
         const btnStore = document.getElementById("btnGroupByStore");
         const settingsSelect = document.getElementById(
@@ -7637,19 +8340,37 @@
 
       let currentCategoryFilter = "ALL";
 
-      function onStoreFilterChange(store) {
-        if (store === "MANAGE_STORES") {
+      function setStoreFilter(storeName) {
+        if (typeof store !== "undefined" && store && store.setStoreFilter) {
+          return store.setStoreFilter(storeName);
+        }
+        currentStoreFilter = storeName;
+        saveToLocalStorage();
+        renderApp();
+      }
+
+      function onStoreFilterChange(storeName) {
+        if (storeName === "MANAGE_STORES") {
           openStoreManagerModal();
           const select = document.getElementById("storeFilterSelect");
           if (select) select.value = currentStoreFilter;
           return;
         }
-        currentStoreFilter = store;
+        currentStoreFilter = storeName;
+        if (typeof setStoreFilter === "function") {
+          setStoreFilter(storeName);
+        } else if (
+          typeof store !== "undefined" &&
+          store &&
+          store.setStoreFilter
+        ) {
+          store.setStoreFilter(storeName);
+        }
         const quickStoreSelect = document.getElementById(
           "smartQuickStoreSelect"
         );
-        if (quickStoreSelect && store !== "ALL") {
-          quickStoreSelect.value = store;
+        if (quickStoreSelect && storeName !== "ALL") {
+          quickStoreSelect.value = storeName;
         }
         renderApp();
       }
@@ -8776,6 +9497,63 @@
         }
       }
 
+      function setupStoreSubscriptions() {
+        if (
+          typeof store !== "undefined" &&
+          store &&
+          typeof store.subscribe === "function"
+        ) {
+          store.subscribe((state, action) => {
+            if (!action || !action.type) {
+              renderApp();
+              return;
+            }
+
+            switch (action.type) {
+              case ACTION_TYPES.ITEM_TOGGLE_CHECK:
+                renderKpis();
+                renderItemList();
+                updateTripProgress();
+                break;
+
+              case ACTION_TYPES.ITEM_ADD:
+              case ACTION_TYPES.ITEM_DELETE:
+              case ACTION_TYPES.ITEM_UPDATE:
+                renderStoreFilterChips();
+                renderCategoryFilterChips();
+                renderKpis();
+                renderItemList();
+                break;
+
+              case ACTION_TYPES.SET_STORE_FILTER:
+                renderStoreFilterChips();
+                renderKpis();
+                renderItemList();
+                break;
+
+              case ACTION_TYPES.SET_GROUPING:
+              case ACTION_TYPES.SET_TRIP_PHASE:
+                renderItemList();
+                renderKpis();
+                break;
+
+              case ACTION_TYPES.SET_STORES:
+              case ACTION_TYPES.SET_STORE_ALIASES:
+                renderStoreFilterOptions();
+                renderStoreFilterChips();
+                break;
+
+              default:
+                renderApp();
+                break;
+            }
+          });
+        }
+      }
+
+      // Automatically bind store subscriber
+      setupStoreSubscriptions();
+
       /* =========================================================================
        6d. TOUCH SWIPE GESTURE CONTROLLER
        ========================================================================= */
@@ -9266,6 +10044,9 @@
       }
 
       function toggleItemCheck(id) {
+        if (typeof store !== "undefined" && store && store.toggleItemCheck) {
+          return store.toggleItemCheck(id);
+        }
         const item = memoryState.activeList.items.find((i) => i.id === id);
         if (item) {
           item.checked = !item.checked;
@@ -9283,12 +10064,27 @@
 
       function deleteItem(id) {
         if (!id) return;
+        if (typeof store !== "undefined" && store && store.deleteItem) {
+          return store.deleteItem(id);
+        }
         recordDeletedItem(id);
         memoryState.activeList.items = memoryState.activeList.items.filter(
           (i) => i.id !== id
         );
         saveToLocalStorage();
         renderApp();
+      }
+
+      function addItem(item) {
+        if (typeof store !== "undefined" && store && store.addItem) {
+          return store.addItem(item);
+        }
+        touchItem(item);
+        if (!memoryState.activeList.items) memoryState.activeList.items = [];
+        memoryState.activeList.items.push(item);
+        saveToLocalStorage();
+        renderApp();
+        return item;
       }
 
       function handleAddItemSubmit(e) {
@@ -9315,11 +10111,15 @@
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        touchItem(newItem);
 
-        memoryState.activeList.items.push(newItem);
-        saveToLocalStorage();
-        renderApp();
+        if (typeof addItem === "function") {
+          addItem(newItem);
+        } else {
+          touchItem(newItem);
+          memoryState.activeList.items.push(newItem);
+          saveToLocalStorage();
+          renderApp();
+        }
 
         nameInput.value = "";
         priceInput.value = "";
@@ -10517,6 +11317,24 @@
         }
       }
 
+      function updateItem(id, patch) {
+        if (typeof store !== "undefined" && store && store.updateItem) {
+          return store.updateItem(id, patch);
+        }
+        const item = (memoryState.activeList?.items || []).find(
+          (i) => i.id === id
+        );
+        if (item) {
+          Object.assign(item, patch);
+          item.updatedAt = Date.now();
+          touchItem(item);
+          saveToLocalStorage();
+          renderApp();
+          return item;
+        }
+        return null;
+      }
+
       function submitFullItemEdit() {
         const hiddenId = document.getElementById("editItemHiddenId");
         const nameInput = document.getElementById("editItemName");
@@ -10536,17 +11354,30 @@
         const name = (nameInput ? nameInput.value : "").trim();
         if (!name) return;
 
-        item.name = name;
-        if (catSelect) item.category = catSelect.value;
-        if (storeSelect) item.store = storeSelect.value;
-        if (qtyInput) item.quantity = parseFloat(qtyInput.value) || 1;
-        if (unitSelect) item.unit = unitSelect.value;
-        if (priceInput) item.price = parseFloat(priceInput.value) || 0;
-        item.updatedAt = Date.now();
+        const patch = {
+          name,
+          category: catSelect ? catSelect.value : item.category,
+          store: storeSelect ? storeSelect.value : item.store,
+          quantity: qtyInput ? parseFloat(qtyInput.value) || 1 : item.quantity,
+          unit: unitSelect ? unitSelect.value : item.unit,
+          price: priceInput ? parseFloat(priceInput.value) || 0 : item.price,
+        };
 
-        touchItem(item);
-        saveToLocalStorage();
-        renderApp();
+        if (typeof updateItem === "function") {
+          updateItem(itemId, patch);
+        } else {
+          item.name = name;
+          if (catSelect) item.category = catSelect.value;
+          if (storeSelect) item.store = storeSelect.value;
+          if (qtyInput) item.quantity = parseFloat(qtyInput.value) || 1;
+          if (unitSelect) item.unit = unitSelect.value;
+          if (priceInput) item.price = parseFloat(priceInput.value) || 0;
+          item.updatedAt = Date.now();
+          touchItem(item);
+          saveToLocalStorage();
+          renderApp();
+        }
+
         closeModal("editItemModal");
         showToast(
           TRANSLATIONS[currentLanguage].toast_item_updated ||
@@ -10591,18 +11422,27 @@
       }
 
       function quickUpdateItemPrice(itemId, newPrice, newQty) {
-        const item = memoryState.activeList.items.find((i) => i.id === itemId);
-        if (item) {
-          item.price = newPrice;
-          if (newQty !== undefined && newQty > 0) item.quantity = newQty;
-          touchItem(item);
-          saveToLocalStorage();
-          renderApp();
-          showToast(
-            TRANSLATIONS[currentLanguage].toast_price_updated ||
-              "Price updated!"
+        const patch = { price: newPrice };
+        if (newQty !== undefined && newQty > 0) patch.quantity = newQty;
+
+        if (typeof updateItem === "function") {
+          updateItem(itemId, patch);
+        } else {
+          const item = memoryState.activeList.items.find(
+            (i) => i.id === itemId
           );
+          if (item) {
+            item.price = newPrice;
+            if (newQty !== undefined && newQty > 0) item.quantity = newQty;
+            touchItem(item);
+            saveToLocalStorage();
+            renderApp();
+          }
         }
+
+        showToast(
+          TRANSLATIONS[currentLanguage].toast_price_updated || "Price updated!"
+        );
       }
 
       function focusAddItemInput() {
@@ -11508,24 +12348,30 @@
         saveFullStateSnapshot("PRE_RESTORE_UNDO");
 
         const restoredState = JSON.parse(JSON.stringify(target.state));
-        if (restoredState.activeList)
-          memoryState.activeList = restoredState.activeList;
-        if (Array.isArray(restoredState.purchaseLedger))
-          memoryState.purchaseLedger = restoredState.purchaseLedger;
-        if (Array.isArray(restoredState.stores))
-          memoryState.stores = restoredState.stores;
-        if (restoredState.storeAliases)
-          memoryState.storeAliases = restoredState.storeAliases;
-        if (restoredState.settings)
-          memoryState.settings = Object.assign(
-            memoryState.settings,
-            restoredState.settings
-          );
-        if (restoredState._deleted)
-          memoryState._deleted = restoredState._deleted;
-
-        saveToLocalStorage();
-        renderApp();
+        if (typeof store !== "undefined" && store && store.dispatch) {
+          store.dispatch({
+            type: ACTION_TYPES.RESTORE_SNAPSHOT,
+            payload: restoredState,
+          });
+        } else {
+          if (restoredState.activeList)
+            memoryState.activeList = restoredState.activeList;
+          if (Array.isArray(restoredState.purchaseLedger))
+            memoryState.purchaseLedger = restoredState.purchaseLedger;
+          if (Array.isArray(restoredState.stores))
+            memoryState.stores = restoredState.stores;
+          if (restoredState.storeAliases)
+            memoryState.storeAliases = restoredState.storeAliases;
+          if (restoredState.settings)
+            memoryState.settings = Object.assign(
+              memoryState.settings,
+              restoredState.settings
+            );
+          if (restoredState._deleted)
+            memoryState._deleted = restoredState._deleted;
+          saveToLocalStorage();
+          renderApp();
+        }
         const tr = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
         showToast(
           tr.toast_snapshot_restored || "Đã khôi phục snapshot thành công!"
@@ -11743,14 +12589,15 @@
         // 1. Append verified prices to Historical Purchase Ledger
         const nowIso = new Date().toISOString();
         const now = nowIso.slice(0, 10);
-        checkedItems.forEach((item, idx) => {
+        const newLedgerEntries = [];
+        checkedItems.forEach((item) => {
           const unitPrice = normalizeUnitPrice(
             item.price,
             item.quantity,
             item.unit
           );
           const recId = generateItemId("rec");
-          memoryState.purchaseLedger.push({
+          newLedgerEntries.push({
             id: recId,
             itemId: item.id,
             itemName: item.name,
@@ -11766,8 +12613,9 @@
         });
 
         // 2. Handle active items & tombstones
+        let remainingItems = [];
         if (rollover === "ROLLOVER") {
-          memoryState.activeList.items = uncheckedItems.map((i) =>
+          remainingItems = uncheckedItems.map((i) =>
             touchItem({
               ...i,
               checked: false,
@@ -11775,10 +12623,20 @@
           );
         } else {
           uncheckedItems.forEach((i) => recordDeletedItem(i.id));
-          memoryState.activeList.items = [];
+          remainingItems = [];
         }
 
-        saveToLocalStorage();
+        if (typeof completeTrip === "function") {
+          completeTrip({
+            ledgerEntries: newLedgerEntries,
+            uncheckedItems: remainingItems,
+          });
+        } else {
+          memoryState.purchaseLedger.push(...newLedgerEntries);
+          memoryState.activeList.items = remainingItems;
+          saveToLocalStorage();
+        }
+
         if (typeof flushPendingCloudSync === "function") {
           flushPendingCloudSync();
         }
@@ -11786,6 +12644,19 @@
         setTripPhase("PLANNING");
         renderApp();
         showToast(TRANSLATIONS[currentLanguage].toast_trip_completed);
+      }
+
+      function completeTrip(payload) {
+        if (typeof store !== "undefined" && store && store.completeTrip) {
+          return store.completeTrip(payload);
+        }
+        const { ledgerEntries = [], uncheckedItems = [] } = payload || {};
+        if (!memoryState.purchaseLedger) memoryState.purchaseLedger = [];
+        memoryState.purchaseLedger.push(...ledgerEntries);
+        if (memoryState.activeList)
+          memoryState.activeList.items = uncheckedItems;
+        saveToLocalStorage();
+        renderApp();
       }
 
       let selectedLedgerIds = new Set();

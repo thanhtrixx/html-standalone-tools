@@ -462,6 +462,9 @@ function renderItemCard(item) {
 }
 
 function toggleItemCheck(id) {
+  if (typeof store !== "undefined" && store && store.toggleItemCheck) {
+    return store.toggleItemCheck(id);
+  }
   const item = memoryState.activeList.items.find((i) => i.id === id);
   if (item) {
     item.checked = !item.checked;
@@ -479,12 +482,27 @@ function toggleItemCheck(id) {
 
 function deleteItem(id) {
   if (!id) return;
+  if (typeof store !== "undefined" && store && store.deleteItem) {
+    return store.deleteItem(id);
+  }
   recordDeletedItem(id);
   memoryState.activeList.items = memoryState.activeList.items.filter(
     (i) => i.id !== id
   );
   saveToLocalStorage();
   renderApp();
+}
+
+function addItem(item) {
+  if (typeof store !== "undefined" && store && store.addItem) {
+    return store.addItem(item);
+  }
+  touchItem(item);
+  if (!memoryState.activeList.items) memoryState.activeList.items = [];
+  memoryState.activeList.items.push(item);
+  saveToLocalStorage();
+  renderApp();
+  return item;
 }
 
 function handleAddItemSubmit(e) {
@@ -511,11 +529,15 @@ function handleAddItemSubmit(e) {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  touchItem(newItem);
 
-  memoryState.activeList.items.push(newItem);
-  saveToLocalStorage();
-  renderApp();
+  if (typeof addItem === "function") {
+    addItem(newItem);
+  } else {
+    touchItem(newItem);
+    memoryState.activeList.items.push(newItem);
+    saveToLocalStorage();
+    renderApp();
+  }
 
   nameInput.value = "";
   priceInput.value = "";
