@@ -70,6 +70,17 @@ function loadBuyListEngine(options = {}) {
       options.mockConfirm !== undefined ? options.mockConfirm : () => true,
     btoa: (str) => Buffer.from(str, "binary").toString("base64"),
     atob: (b64) => Buffer.from(b64, "base64").toString("binary"),
+    TextEncoder: typeof TextEncoder !== "undefined" ? TextEncoder : undefined,
+    TextDecoder: typeof TextDecoder !== "undefined" ? TextDecoder : undefined,
+    Uint8Array,
+    CompressionStream:
+      typeof CompressionStream !== "undefined" ? CompressionStream : undefined,
+    DecompressionStream:
+      typeof DecompressionStream !== "undefined"
+        ? DecompressionStream
+        : undefined,
+    Response: typeof Response !== "undefined" ? Response : undefined,
+    Blob: typeof Blob !== "undefined" ? Blob : undefined,
     encodeURIComponent,
     decodeURIComponent,
     escape,
@@ -310,7 +321,7 @@ async function runTests() {
     });
 
     const resBackup =
-      restoreEngine.sandbox.processImportData(fullBackupPayload);
+      await restoreEngine.sandbox.processImportData(fullBackupPayload);
     assert(
       resBackup === true,
       "CLIP-04b: Full backup payload returns true on successful parse"
@@ -344,7 +355,7 @@ async function runTests() {
     });
 
     const listEngine = loadBuyListEngine();
-    const resList = listEngine.sandbox.processImportData(listJsonPayload);
+    const resList = await listEngine.sandbox.processImportData(listJsonPayload);
     assert(resList === true, "CLIP-05a: Buy-list JSON returns true");
     assert(
       listEngine.sandbox.pendingSharedList !== null &&
@@ -357,7 +368,7 @@ async function runTests() {
     );
 
     // Test 4C: Shared URL link with #share= payload
-    const sampleSharePayload = listEngine.sandbox.encodeSharePayload({
+    const sampleSharePayload = await listEngine.sandbox.encodeSharePayload({
       title: "BBQ Supplies",
       items: [
         {
@@ -371,7 +382,7 @@ async function runTests() {
       ],
     });
     const shareUrl = `https://tools.example.com/smart-buy-list-price-tracker/#share=${sampleSharePayload}`;
-    const resUrl = listEngine.sandbox.processImportData(shareUrl);
+    const resUrl = await listEngine.sandbox.processImportData(shareUrl);
     assert(resUrl === true, "CLIP-06a: Share URL with #share= returns true");
     assert(
       listEngine.sandbox.pendingSharedList.title === "BBQ Supplies",
@@ -379,7 +390,7 @@ async function runTests() {
     );
 
     // Test 4D: Corrupted / Unrecognized String Resilience
-    const resInvalid = listEngine.sandbox.processImportData(
+    const resInvalid = await listEngine.sandbox.processImportData(
       "random unparseable garbage text @@##$$"
     );
     assert(
