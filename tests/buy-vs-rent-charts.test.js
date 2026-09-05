@@ -297,17 +297,19 @@ try {
 
   // Test 10: renderApp reactively invokes chart re-rendering
   let chartRenderCount = 0;
-  const originalRenderActiveTabChart = app.renderActiveTabChart;
-  app.renderActiveTabChart = function () {
+  app._mockRenderActiveTabChart = function () {
     chartRenderCount++;
-    return originalRenderActiveTabChart.apply(this, arguments);
   };
+  vm.runInContext(
+    "const _orig_renderActiveTabChart = renderActiveTabChart; renderActiveTabChart = function(...args) { if (window._mockRenderActiveTabChart) window._mockRenderActiveTabChart(); return _orig_renderActiveTabChart.apply(this, args); };",
+    app
+  );
   app.renderApp();
   assert(
     chartRenderCount > 0,
     "renderApp() reliably triggers renderActiveTabChart() on parameter update"
   );
-  app.renderActiveTabChart = originalRenderActiveTabChart;
+  vm.runInContext("renderActiveTabChart = _orig_renderActiveTabChart;", app);
 
   // Test 11: applySensitivityScenario updates rates and re-renders
   app.applySensitivityScenario(7.5, 9.0);
@@ -423,12 +425,14 @@ try {
   // Test 19: Actionable Toast Timeline Navigation
   let lastToastMsg = "";
   let lastToastAction = "";
-  const origShowToast = app.showToast;
-  app.showToast = function (msg, actionHtml) {
+  app._mockShowToast = function (msg, actionHtml) {
     lastToastMsg = msg;
     lastToastAction = actionHtml;
-    return origShowToast.apply(this, arguments);
   };
+  vm.runInContext(
+    "const _orig_showToast = showToast; showToast = function(msg, actionHtml, ...args) { window._mockShowToast(msg, actionHtml); return _orig_showToast.apply(this, [msg, actionHtml, ...args]); };",
+    app
+  );
   app.applySensitivityScenario(6.5, 8.0);
   assert(
     lastToastAction.includes("switchAnalyticsTab('timeline')") ||
@@ -440,7 +444,7 @@ try {
       lastToastAction.includes("View Timeline →"),
     "applySensitivityScenario toast renders localized timeline navigation button"
   );
-  app.showToast = origShowToast;
+  vm.runInContext("showToast = _orig_showToast;", app);
 
   // Test 20: Dedicated Application Vector Icon Validation
   const iconSvgPath = path.join(

@@ -456,14 +456,19 @@ console.log("--- Section 4: Mobile Touch Swipe Gestures ---");
 
     // Test Swipe Left (Open Comparator)
     let openedComparatorId = null;
-    sandbox.openItemComparator = (id) => {
+    sandbox._mockOpenItemComparator = (id) => {
       openedComparatorId = id;
     };
+    vm.runInContext(
+      "const _orig_openItemComparator = openItemComparator; openItemComparator = (id) => { if (window._mockOpenItemComparator) window._mockOpenItemComparator(id); return _orig_openItemComparator(id); };",
+      sandbox
+    );
     sandbox.handleItemSwipeAction("item-swipe", "LEFT");
     assert(
       openedComparatorId === "item-swipe",
       "SWIPE-04: Swiping left invokes openItemComparator for that item"
     );
+    vm.runInContext("openItemComparator = _orig_openItemComparator;", sandbox);
 
     // Test Card Opaque Styling for Checked vs Unchecked
     sandbox.memoryState.activeList.items[0].checked = true;

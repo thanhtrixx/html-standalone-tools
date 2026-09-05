@@ -234,14 +234,19 @@ async function runTests() {
     console.log("\n--- Section 3: Backup File Export Execution ---");
 
     let toastMsg = "";
-    sandbox.showToast = (msg) => {
+    sandbox._mockToast = (msg) => {
       toastMsg = msg;
     };
+    vm.runInContext(
+      "const _orig_showToast = showToast; showToast = (msg) => { if (window._mockToast) window._mockToast(msg); return _orig_showToast(msg); };",
+      sandbox
+    );
     sandbox.exportJsonBackup();
     assert(
       toastMsg.length > 0,
       `SETTINGS-03a: exportJsonBackup triggers confirmation toast (Got: '${toastMsg}')`
     );
+    vm.runInContext("showToast = _orig_showToast;", sandbox);
 
     // --- Section 4: Bilingual Translation Key Parity ---
     console.log("\n--- Section 4: Bilingual Translation Key Parity ---");

@@ -894,17 +894,19 @@ async function runUIUXTests() {
 
   // Test R18: Export Chart Image
   let exportedToastFired = false;
-  const origShowToast = app.showToast;
-  app.showToast = (msg, type) => {
+  app._mockShowToastR18 = (msg, type) => {
     if (type === "success") exportedToastFired = true;
-    origShowToast(msg, type);
   };
+  vm.runInContext(
+    "const _orig_showToast_r18 = showToast; showToast = (msg, type, ...args) => { if (window._mockShowToastR18) window._mockShowToastR18(msg, type); return _orig_showToast_r18(msg, type, ...args); };",
+    app
+  );
   app.exportChartAsImage();
   assert(
     exportedToastFired,
     "R18: exportChartAsImage triggered canvas export with dark background fill"
   );
-  app.showToast = origShowToast;
+  vm.runInContext("showToast = _orig_showToast_r18;", app);
 
   // Test R19: Print Summary Trigger
   let printTriggered = false;
@@ -1030,26 +1032,28 @@ async function runUIUXTests() {
 
   // 4. Strict CSV Date Validation (EndDate >= StartDate)
   let csvErrorToastFired = false;
-  const origShowToast2 = app.showToast;
-  app.showToast = (msg, type) => {
+  app._mockShowToastR22 = (msg, type) => {
     if (type === "error") csvErrorToastFired = true;
   };
+  vm.runInContext(
+    "const _orig_showToast_r22 = showToast; showToast = (msg, type, ...args) => { if (window._mockShowToastR22) window._mockShowToastR22(msg, type); return _orig_showToast_r22(msg, type, ...args); };",
+    app
+  );
   app.workingCSVData.push({
     "Account Name": "Invalid Date Row",
     Principal: "10000000",
     "Start Date": "2026-12-01",
     "End Date": "2026-01-01", // End Date before Start Date
-    Interest: "5.0",
-    Type: "Term Saving",
-    Bank: "ACB",
+    Interest: "6.0",
+    Type: "Fixed Term",
+    Bank: "Vietcombank",
   });
   app.saveCSVEditorData();
-  app.showToast = origShowToast2;
   assert(
     csvErrorToastFired === true,
     "R22: saveCSVEditorData() strictly blocked save and fired error toast on EndDate < StartDate"
   );
-
+  vm.runInContext("showToast = _orig_showToast_r22;", app);
   // Test R23: Strategy Persona Presets & Undo Safeguard (Issue #6)
   // 1. Open Presets modal
   app.togglePresetsModal(true);

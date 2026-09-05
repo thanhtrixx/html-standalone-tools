@@ -98,55 +98,60 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 
 ## 🚀 Build, Lint & Test Commands
 
+This repository provides **100% Dual-Runtime Compatibility (Bun + Node.js)** ([ADR-0007](./docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md)). **Bun** is recommended for accelerated inner loops (~35% faster test runs, sub-second installs), but all commands work identically with **Node.js / npm**.
+
 ```bash
+# Run full verification quality gate (Lint + Build + Test)
+bun run verify            # or: npm run verify
+
 # Build all standalone tools to compacted dist/ outputs
-npm run build
+bun run build             # or: npm run build
 
 # Build a specific standalone tool
-npm run build:predictor
-npm run build:buy-rent
-npm run build:tracker
-# or: node scripts/build.js --tool <tool-name>
+bun run build:predictor   # or: npm run build:predictor
+bun run build:buy-rent    # or: npm run build:buy-rent
+bun run build:tracker     # or: npm run build:tracker
+# or: bun scripts/build.js --tool <tool-name>
 
-# Run all automated tests and generate interactive reports (HTML, JSON, JUnit)
-npm test
-# or: npm run test:report
+# Run all 17 automated test suites and generate interactive reports
+bun test                  # or: npm test
+# or: bun run test:report
 
-# Run specific isolated test suite
-npm run test:build
-npm run test:i18n
-npm run test:sim
-npm run test:helpers
-npm run test:ui
-npm run test:buy-rent
-npm run test:buy-rent:ui
-npm run test:buy-rent:charts
-npm run test:buy-rent:dossier
-npm run test:buy-rent:tooltips
-npm run test:tracker
-npm run test:tracker:storage
-npm run test:tracker:lifecycle
-npm run test:tracker:comparator
-npm run test:tracker:sharing
-npm run test:tracker:i18n
-npm run test:tracker:material
-npm run test:tracker:pacing
+# Run specific isolated test suites
+bun run test:build        # or: npm run test:build
+bun run test:i18n         # or: npm run test:i18n
+bun run test:sim          # or: npm run test:sim
+bun run test:helpers      # or: npm run test:helpers
+bun run test:ui           # or: npm run test:ui
+bun run test:buy-rent     # or: npm run test:buy-rent
+bun run test:buy-rent:ui  # or: npm run test:buy-rent:ui
+bun run test:buy-rent:charts
+bun run test:buy-rent:dossier
+bun run test:buy-rent:tooltips
+bun run test:tracker      # or: npm run test:tracker
+bun run test:tracker:math
+bun run test:tracker:storage
+bun run test:tracker:cloud
+bun run test:tracker:ui
+bun run test:tracker:pwa
+bun run test:tracker:i18n
+bun run test:tracker:security
 
 # Verify code formatting with Prettier (CI Gate)
-npm run lint:check
+bun run lint:check        # or: npm run lint:check
 
 # Format source files with Prettier
-npm run format
+bun run format            # or: npm run format
 
 # Package release assets (standalone HTMLs + unified zip)
-npm run pack:release
+bun run pack:release      # or: npm run pack:release
 
 # Build and automatically mirror deliverables to an external directory (e.g., static hosting)
 # Option 1: Configure in .env.local (recommended):
 #   TOOLS_DEST_DIR=/path/to/external/static/tools
-#   npm run build
+#   bun run build         # or: npm run build
 # Option 2: CLI argument:
-#   npm run build -- --dest-dir=/path/to/external/static/tools
+#   bun run build -- --dest-dir=/path/to/external/static/tools
 ```
 
 ---
@@ -200,7 +205,7 @@ To create and integrate a new tool into this repository, follow the 8-point **De
 5. **Document Architecture Decisions**: Add tool-specific decisions under `<tool-name>/docs/adr/`.
 6. **Include Test & Requirement Plans**: Provide `<tool-name>/ITEMS_TO_IMPLEMENT.md` and `<tool-name>/TEST_PLAN.md`.
 7. **Bilingual Parity**: Provide 100% Vietnamese (`vi`) and English (`en`) dictionary coverage.
-8. **Compile & Verify Deliverable**: Author unit/UI tests in `tests/`, add suite to `scripts/run-tests.js`, and run `npm run lint:check && npm run build && npm test`.
+8. **Compile & Verify Deliverable**: Author unit/UI tests in `tests/`, add suite to `scripts/run-tests.js`, and run `bun run verify` (or `npm run verify`).
 
 ---
 
@@ -229,8 +234,8 @@ Code formatting is maintained with **Prettier** across all source files, configu
 
 ```bash
 # Verify code formatting across repository (CI Gate)
-npm run lint:check
+bun run lint:check        # or: npm run lint:check
 
 # Automatically format all source and markdown files
-npm run format
+bun run format            # or: npm run format
 ```

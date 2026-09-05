@@ -24,10 +24,10 @@ jobs:
           bun-version: latest
 
       - name: Install Dependencies
-        run: bun install --frozen-lockfile || npm ci
+        run: bun install --frozen-lockfile
 
       - name: Verify Quality Gate (Lint, Build & Test)
-        run: bun run verify || npm run verify
+        run: bun run verify
 
       - name: Upload Test Report Artifacts
         if: always()

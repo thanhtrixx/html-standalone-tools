@@ -108,31 +108,34 @@ Every issue follows **GitHub Flow** with an isolated branch:
    # git checkout -b feat/issue-2-emergency-buffer
    # git checkout -b fix/issue-3-scenario-b-workbench
    ```
-3. **⚡ The Two-Speed Verification Loop**:
+3. **⚡ The Two-Speed Verification Loop ([ADR-0007](../adr/0007-migrate-runtime-and-package-manager-to-bun.md))**:
+   The repository features 100% **Dual-Runtime Compatibility (Bun + Node)**. Bun is recommended for high-speed local development and CI/CD, while Node/npm commands are supported identically side-by-side.
+
    - **Inner Loop (Fast Scoped TDD)**: During active development, run targeted sub-second test suites for instant feedback:
      ```bash
      # Tool-scoped execution (runs all domain suites for a specific tool)
-     npm run test:tracker     # All 7 Smart Buy-List domain suites
-     npm run test:buy-rent    # Buy vs Rent comparison suites
-     npm run test:sim         # Savings Predictor simulation tests
-     node scripts/run-tests.js --tool <name>  # Targeted tool filter
+     bun run test:tracker     # or: npm run test:tracker     (All 7 Smart Buy-List domain suites)
+     bun run test:buy-rent    # or: npm run test:buy-rent    (Buy vs Rent comparison suites)
+     bun run test:sim         # or: npm run test:sim         (Savings Predictor simulation tests)
+     bun scripts/run-tests.js --tool <name>  # or: node scripts/run-tests.js --tool <name>
 
      # Domain-scoped execution (Smart Buy-List inner loop)
-     npm run test:tracker:math      # Core math, normalization & deal scoring
-     npm run test:tracker:storage   # LocalStorage, IndexedDB & backup
-     npm run test:tracker:cloud     # Cloud sync & concurrency
-     npm run test:tracker:ui        # UI interactions & components
-     npm run test:tracker:pwa       # PWA lifecycle & safe-area
-     npm run test:tracker:i18n      # Bilingual key parity
-     npm run test:tracker:security  # Strict CSP & sanitization
+     bun run test:tracker:math      # or: npm run test:tracker:math
+     bun run test:tracker:storage   # or: npm run test:tracker:storage
+     bun run test:tracker:cloud     # or: npm run test:tracker:cloud
+     bun run test:tracker:ui        # or: npm run test:tracker:ui
+     bun run test:tracker:pwa       # or: npm run test:tracker:pwa
+     bun run test:tracker:i18n      # or: npm run test:tracker:i18n
+     bun run test:tracker:security  # or: npm run test:tracker:security
      ```
    - **Outer Loop (Pre-PR Quality Gate)**: When the slice is code-complete, execute the full unified verification suite:
      ```bash
-     npm run verify
+     bun run verify    # or: npm run verify
      ```
      Zero errors across formatting (`prettier --check`), standalone compaction builds (`scripts/build.js`), and all 2,200+ test assertions (`scripts/run-tests.js`).
+
 4. **External Distribution Sync ([ADR-0006](../adr/0006-configurable-external-distribution-sync.md))**:
-   - `npm run build` and `npm run verify` automatically detect `TOOLS_DEST_DIR` (configured in `.env.local` or via CLI) and sync compiled artifacts to external static repositories. If unconfigured (such as in CI), sync is cleanly bypassed without warning.
+   - `bun run build` (or `npm run build`) and `bun run verify` (or `npm run verify`) automatically detect `TOOLS_DEST_DIR` (configured in `.env.local` or via CLI) and sync compiled artifacts to external static repositories. If unconfigured (such as in CI), sync is cleanly bypassed without warning.
 
 ---
 
@@ -171,10 +174,10 @@ Every issue follows **GitHub Flow** with an isolated branch:
    - [x] <AC 2>
 
    ## Test Verification
-   - Verified with 100% green pass on \`npm run verify\`."
+   - Verified with 100% green pass on \`bun run verify\` (or \`npm run verify\`)."
    ```
 4. **Automated CI Quality Gate (`pr-verify.yml`)**:
-   - Automatically executes `npm run verify` on GitHub Actions runners.
+   - Automatically executes `bun run verify` on GitHub Actions runners.
    - Renders interactive test summaries in `$GITHUB_STEP_SUMMARY`.
    - Uploads report artifacts (`test-reports/` with `index.html`, `results.json`, `junit.xml`) with `if: always()`.
    - **100% green check required before approval.**
@@ -191,16 +194,16 @@ Every issue follows **GitHub Flow** with an isolated branch:
 
 1. **Automated CD Pipeline (`release.yml`)**:
    - Merging to `main` triggers automated release packaging:
-     - Runs full build and test validation.
+     - Runs full build and test validation via `bun run verify`.
      - Preserves report artifacts (`test-reports-release`).
      - Computes next Semantic Version tag (`v*.*.*`) and generates markdown release changelogs.
-     - Packages standalone `.html` files, per-tool PWA bundles, and unified master `.zip` bundle via `node scripts/pack-release.js`.
+     - Packages standalone `.html` files, per-tool PWA bundles, and unified master `.zip` bundle via `bun scripts/pack-release.js`.
      - Publishes annotated GitHub Release with downloadable assets.
 2. **Verify Acceptance Criteria & Close Ticket**:
    - Verify that all issue Acceptance Criteria checklist items are satisfied (`[x]`).
    - Confirm issue closure with a verification summary comment:
    ```bash
-   gh issue comment <issue-number> --body "Verified via PR #<pr-number>. All acceptance criteria checked and 100% test suites passing (\`npm run verify\`)."
+   gh issue comment <issue-number> --body "Verified via PR #<pr-number>. All acceptance criteria checked and 100% test suites passing (\`bun run verify\` / \`npm run verify\`)."
    ```
 
 ---
@@ -216,7 +219,7 @@ Every standalone tool added to or maintained in this repository must satisfy the
 5. **Specification & Test Plan**: Requirements in `ITEMS_TO_IMPLEMENT.md` and QA verification plan in `TEST_PLAN.md`.
 6. **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary key parity with locale-aware formatters.
 7. **Test Suite Integration**: Pure math unit tests, UI/DOM tests, and i18n tests authored in `tests/` and registered into `scripts/run-tests.js`.
-8. **CI/CD Build & Release Ready**: Passes unified verification (`npm run verify`) and release packaging (`npm run pack:release`).
+8. **CI/CD Build & Release Ready**: Passes unified verification (`bun run verify` / `npm run verify`) and release packaging (`bun run pack:release` / `npm run pack:release`).
 
 ---
 
