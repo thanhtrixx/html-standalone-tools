@@ -1139,6 +1139,7 @@
                   <th id="thSize" class="p-3">Size</th>
                   <th id="thPaid" class="p-3">Paid</th>
                   <th id="thUnitPrice" class="p-3">Unit Price</th>
+                  <th id="thDealRating" class="p-3 text-center">Deal Rating</th>
                   <th id="thAction" class="p-3 text-right">Action</th>
                 </tr>
               </thead>
@@ -3077,6 +3078,10 @@
         return typeof id === "string" && /^[a-zA-Z0-9_-]+$/.test(id);
       }
 
+      function normalizeItemKey(name) {
+        return typeof name === "string" ? name.trim().toLowerCase() : "";
+      }
+
       function evaluateDealScore(candidateUnitPrice, historicalLedger = []) {
         const price = parseFloat(candidateUnitPrice);
         if (
@@ -3256,8 +3261,9 @@
 
       function getItemStoreComparison(itemName) {
         if (!itemName) return [];
-        const history = memoryState.purchaseLedger.filter(
-          (l) => l.itemName.toLowerCase() === itemName.toLowerCase()
+        const itemKey = normalizeItemKey(itemName);
+        const history = (memoryState.purchaseLedger || []).filter(
+          (l) => normalizeItemKey(l.itemName) === itemKey
         );
         if (history.length === 0) return [];
 
@@ -5732,6 +5738,7 @@
           th_size: "Size",
           th_paid: "Paid",
           th_unit_price: "Unit Price",
+          th_deal_rating: "Deal Rating",
           th_action: "Action",
           ledger_empty_msg: "No historical purchase records found.",
           ledger_add_to_list: "Add",
@@ -6084,6 +6091,7 @@
           th_size: "Quy Cách",
           th_paid: "Giá Mua",
           th_unit_price: "Đơn Giá Chuẩn",
+          th_deal_rating: "Đánh Giá Giá",
           th_action: "Thao tác",
           ledger_empty_msg: "Chưa có dữ liệu lịch sử mua hàng.",
           ledger_add_to_list: "Thêm",
@@ -7939,6 +7947,54 @@
         const safeName = sanitizeHTML(item.name);
         const safeUnit = sanitizeHTML(item.unit);
 
+        const unitPrice = normalizeUnitPrice(
+          item.price,
+          item.quantity,
+          item.unit
+        );
+        const { baseUnit } = normalizeQuantity(item.quantity, item.unit);
+        const itemKey = normalizeItemKey(item.name);
+        const history = (memoryState.purchaseLedger || []).filter(
+          (l) =>
+            (itemKey && normalizeItemKey(l.itemName) === itemKey) ||
+            l.itemId === item.id
+        );
+        const deal = evaluateDealScore(unitPrice, history);
+
+        let dealBadgeHtml = "";
+        const cleanDealLabel = (raw) =>
+          (raw || "").replace(/^[🟢🟡🔴⚪]\s*/, "");
+
+        if (deal.score === "GREAT_DEAL") {
+          const rawLabel = t.badge_great_deal || "🟢 Great Deal";
+          dealBadgeHtml = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${rawLabel}">
+              <span aria-hidden="true">🟢</span>
+              <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
+            </span>`;
+        } else if (deal.score === "PRICE_SPIKE") {
+          const rawLabel = t.badge_price_spike || "🔴 Price Spike";
+          dealBadgeHtml = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${rawLabel}">
+              <span aria-hidden="true">🔴</span>
+              <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
+            </span>`;
+        } else if (deal.score === "FAIR_PRICE") {
+          const rawLabel = t.badge_fair_price || "🟡 Fair Price";
+          dealBadgeHtml = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${rawLabel}">
+              <span aria-hidden="true">🟡</span>
+              <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
+            </span>`;
+        } else if (deal.score === "NEW_ITEM" || !deal.score) {
+          const rawLabel = t.badge_new_item || "⚪ New Item";
+          dealBadgeHtml = `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 shrink-0" title="${rawLabel}">
+              <span aria-hidden="true">⚪</span>
+              <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
+            </span>`;
+        }
+
         if (currentPhase === "IN_STORE") {
           return `
           <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${safeId}">
@@ -7985,6 +8041,9 @@
                 </div>
               </div>
 
+              <!-- Deal Badge (Tablet & Desktop >= 640px) -->
+              ${dealBadgeHtml ? `<div class="hidden sm:flex items-center shrink-0">${dealBadgeHtml}</div>` : ""}
+
               <!-- Price (Clickable for quick shelf price update) -->
               <div class="shrink-0">
                 <button
@@ -8001,38 +8060,6 @@
             </div>
           </div>
         `;
-        }
-
-        const unitPrice = normalizeUnitPrice(
-          item.price,
-          item.quantity,
-          item.unit
-        );
-        const { baseUnit } = normalizeQuantity(item.quantity, item.unit);
-        const history = memoryState.purchaseLedger.filter(
-          (l) => l.itemName === item.name || l.itemId === item.id
-        );
-        const deal = evaluateDealScore(unitPrice, history);
-
-        let dealBadgeHtml = "";
-        if (deal.score === "GREAT_DEAL") {
-          dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${TRANSLATIONS[currentLanguage].badge_great_deal || "🟢 Great Deal"}">
-              <span class="sm:hidden" aria-hidden="true">🟢</span>
-              <span class="hidden sm:inline">${TRANSLATIONS[currentLanguage].badge_great_deal || "🟢 Great Deal"}</span>
-            </span>`;
-        } else if (deal.score === "PRICE_SPIKE") {
-          dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${TRANSLATIONS[currentLanguage].badge_price_spike || "🔴 Price Spike"}">
-              <span class="sm:hidden" aria-hidden="true">🔴</span>
-              <span class="hidden sm:inline">${TRANSLATIONS[currentLanguage].badge_price_spike || "🔴 Price Spike"}</span>
-            </span>`;
-        } else if (deal.score === "FAIR_PRICE") {
-          dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${TRANSLATIONS[currentLanguage].badge_fair_price || "🟡 Fair Price"}">
-              <span class="sm:hidden" aria-hidden="true">🟡</span>
-              <span class="hidden sm:inline">${TRANSLATIONS[currentLanguage].badge_fair_price || "🟡 Fair Price"}</span>
-            </span>`;
         }
 
         const catInfo = CATEGORIES[item.category] || CATEGORIES.other;
@@ -9384,12 +9411,9 @@
         }
 
         if (dealBadge) {
+          const itemKey = normalizeItemKey(name);
           const history = (memoryState.purchaseLedger || []).filter(
-            (l) =>
-              l.itemName === name ||
-              (name &&
-                l.itemName &&
-                l.itemName.toLowerCase() === name.toLowerCase())
+            (l) => itemKey && normalizeItemKey(l.itemName) === itemKey
           );
           const deal = evaluateDealScore(unitPrice, history);
           if (deal.score === "GREAT_DEAL") {
@@ -10315,7 +10339,7 @@
             t.ledger_empty_msg ||
             "No historical purchase records found.";
           if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400 text-sm font-medium italic">${emptyMsg}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400 text-sm font-medium italic">${emptyMsg}</td></tr>`;
           }
           if (mobileContainer) {
             mobileContainer.innerHTML = `<div class="text-center py-8 px-4 text-slate-400 text-sm font-medium italic bg-slate-950/60 rounded-2xl border border-slate-800">${emptyMsg}</div>`;
@@ -10334,6 +10358,32 @@
               const safeStore = sanitizeHTML(l.store || "—");
               const safeUnit = sanitizeHTML(l.unit);
               const safeDate = sanitizeHTML(l.date);
+
+              const itemKey = normalizeItemKey(l.itemName);
+              const itemLogs = (memoryState.purchaseLedger || []).filter(
+                (other) =>
+                  (itemKey && normalizeItemKey(other.itemName) === itemKey) ||
+                  (l.itemId && other.itemId === l.itemId)
+              );
+              const deal = evaluateDealScore(l.unitPrice, itemLogs);
+
+              let dealBadgeHtml = "";
+              const cleanDealLabel = (raw) =>
+                (raw || "").replace(/^[🟢🟡🔴⚪]\s*/, "");
+              if (deal.score === "GREAT_DEAL") {
+                const rawLabel = t.badge_great_deal || "🟢 Great Deal";
+                dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50" title="${rawLabel}"><span aria-hidden="true">🟢</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+              } else if (deal.score === "PRICE_SPIKE") {
+                const rawLabel = t.badge_price_spike || "🔴 Price Spike";
+                dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-950 text-red-300 border border-red-700/50" title="${rawLabel}"><span aria-hidden="true">🔴</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+              } else if (deal.score === "FAIR_PRICE") {
+                const rawLabel = t.badge_fair_price || "🟡 Fair Price";
+                dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-950 text-amber-300 border border-amber-700/50" title="${rawLabel}"><span aria-hidden="true">🟡</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+              } else {
+                const rawLabel = t.badge_new_item || "⚪ New Item";
+                dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700" title="${rawLabel}"><span aria-hidden="true">⚪</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+              }
+
               return `
             <tr class="hover:bg-slate-800/40 transition-colors ${isSelected ? "bg-emerald-950/20" : ""}">
               <td class="p-3 text-center">
@@ -10352,6 +10402,7 @@
               <td class="p-3 text-sm text-slate-300 font-medium">${l.quantity} ${safeUnit}</td>
               <td class="p-3 font-bold text-sm text-white">${formatCurrency(l.price)}</td>
               <td class="p-3 font-bold text-sm text-emerald-400">${formatCurrency(l.unitPrice)} / ${baseUnit}</td>
+              <td class="p-3 text-center whitespace-nowrap">${dealBadgeHtml}</td>
               <td class="p-3 text-right whitespace-nowrap space-x-1.5">
                 <button
                   type="button"
@@ -10846,6 +10897,7 @@
         el("thSize", t.th_size);
         el("thPaid", t.th_paid);
         el("thUnitPrice", t.th_unit_price);
+        el("thDealRating", t.th_deal_rating || "Deal Rating");
         el("thAction", t.th_action || "Action");
         el("btnLedgerSelectAllToggle", t.ledger_select_all || "Select All");
         el(
@@ -11708,6 +11760,7 @@
         window.copyCurrentOriginToClipboard = copyCurrentOriginToClipboard;
         window.flushPendingCloudSync = flushPendingCloudSync;
         window.showToast = showToast;
+        window.normalizeItemKey = normalizeItemKey;
 
         Object.defineProperty(window, "selectedLedgerIds", {
           get: () => selectedLedgerIds,
