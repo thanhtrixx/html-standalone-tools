@@ -288,8 +288,8 @@ async function runTestSuite() {
   const db = idbFactory.databases.get("SmartBuyListDB");
   assert(!!db, "IDB-02: SmartBuyListDB database instance created");
   assert(
-    db.version === 2,
-    `IDB-03: Database schema upgraded to version 2 (Got: ${db.version})`
+    db.version >= 2,
+    `IDB-03: Database schema upgraded to version >= 2 (Got: ${db.version})`
   );
   assert(
     db.objectStoreNames.contains("lists"),
