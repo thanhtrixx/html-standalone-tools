@@ -11,10 +11,17 @@
  * - Smart Omnibox NLP Parser Hardening, Multipliers & Store Aliases
  */
 
+const domain = require("../smart-buy-list-price-tracker/src/domain/index.js");
 const {
-  createTrackerSandbox,
-  createAssertions,
-} = require("./helpers/smart-buy-list-harness");
+  parseSmartGroceryInput,
+} = require("../smart-buy-list-price-tracker/src/ui/omnibox.js");
+const {
+  getStoreAliases,
+  setStoreAliases,
+  renameStore,
+} = require("../smart-buy-list-price-tracker/src/ui/store-manager.js");
+
+const { createAssertions } = require("./helpers/smart-buy-list-harness");
 
 const { assert, assertEqual, printSummary } = createAssertions(
   "Smart Buy-List Engine Math Test Suite"
@@ -38,7 +45,39 @@ function assertClose(actual, expected, tolerance = 0.001, message) {
 console.log("\n🧪 Running Smart Buy-List Engine Math Test Suite...\n");
 
 try {
-  const { sandbox: engine } = createTrackerSandbox();
+  const memoryState = {
+    purchaseLedger: [],
+    stores: [
+      "WinMart",
+      "Bách Hoá Xanh",
+      "Co.opmart",
+      "Big C / GO!",
+      "Lotte Mart",
+      "Chợ truyền thống",
+      "Cửa hàng tiện lợi",
+    ],
+    storeAliases: {
+      WinMart: ["wm", "vinmart"],
+      "Bách Hoá Xanh": ["bhx", "bachhoaxanh"],
+      "Co.opmart": ["coop", "coopmart"],
+      "Big C / GO!": ["bigc", "go"],
+      "Lotte Mart": ["lotte"],
+    },
+  };
+  globalThis.memoryState = memoryState;
+  globalThis.DEFAULT_STORES = memoryState.stores;
+  globalThis.DEFAULT_STORE_ALIASES = memoryState.storeAliases;
+  globalThis.saveToLocalStorage = () => {};
+  globalThis.renderStoreManagerList = () => {};
+
+  const engine = {
+    ...domain,
+    parseSmartGroceryInput,
+    getStoreAliases,
+    setStoreAliases,
+    renameStore,
+    memoryState,
+  };
 
   // 1. DIMENSIONS & UNIT CONVERSION TESTS
   console.log("--- Section 1: Measurement Unit Normalization Engine ---");

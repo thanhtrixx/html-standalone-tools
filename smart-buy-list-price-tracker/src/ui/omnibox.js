@@ -675,8 +675,13 @@ function handleSmartQuickPaste(e) {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     parseSmartGroceryInput,
+    resolveStoreFromTag,
     handleSmartQuickInputChange,
-    submitSmartQuickInput,
-    expandDetailedOptions,
+    handleSmartQuickInputSubmit,
+    toggleAdvancedAddForm,
+    processBatchQuickInput,
+    classifyGroceryCategory,
+    stripVnDiacritics,
+    normalizeUnitCode,
   };
 }

@@ -32,8 +32,8 @@ function setStoreAliases(storeName, aliases) {
       .filter(Boolean);
   }
   memoryState.storeAliases[storeName] = Array.from(new Set(arr));
-  saveToLocalStorage();
-  renderStoreManagerList();
+  if (typeof saveToLocalStorage === "function") saveToLocalStorage();
+  if (typeof renderStoreManagerList === "function") renderStoreManagerList();
   return true;
 }
 
@@ -89,13 +89,18 @@ function addStore(storeName, aliases) {
   } else {
     memoryState.storeAliases[name] = [];
   }
-  saveToLocalStorage();
-  renderStoreFilterOptions();
-  renderStoreManagerList();
-  showToast(
-    TRANSLATIONS[currentLanguage].toast_store_added ||
-      "Store added successfully"
-  );
+  if (typeof saveToLocalStorage === "function") saveToLocalStorage();
+  if (typeof renderStoreFilterOptions === "function")
+    renderStoreFilterOptions();
+  if (typeof renderStoreManagerList === "function") renderStoreManagerList();
+  if (typeof showToast === "function") {
+    showToast(
+      (typeof TRANSLATIONS !== "undefined" &&
+        TRANSLATIONS[currentLanguage] &&
+        TRANSLATIONS[currentLanguage].toast_store_added) ||
+        "Store added successfully"
+    );
+  }
   return true;
 }
 
@@ -104,37 +109,48 @@ function renameStore(oldName, newName) {
   const name = newName.trim();
   if (!name || name === oldName) return false;
   if (!memoryState.stores) memoryState.stores = [...DEFAULT_STORES];
-  const idx = memoryState.stores.indexOf(oldName);
-  if (idx === -1) return false;
 
-  recordDeletedStore(oldName);
+  // Disallow duplicate names
+  if (memoryState.stores.includes(name)) {
+    if (typeof showToast === "function") {
+      showToast(
+        (typeof TRANSLATIONS !== "undefined" &&
+          TRANSLATIONS[currentLanguage] &&
+          TRANSLATIONS[currentLanguage].toast_store_exists) ||
+          "Store name already exists"
+      );
+    }
+    return false;
+  }
+
+  if (typeof recordDeletedStore === "function") recordDeletedStore(oldName);
   if (memoryState._deleted?.stores && memoryState._deleted.stores[name]) {
     delete memoryState._deleted.stores[name];
   }
 
-  memoryState.stores[idx] = name;
+  // Update stores array
+  memoryState.stores = memoryState.stores.map((s) =>
+    s === oldName ? name : s
+  );
 
-  // Migrate aliases to new name
-  if (!memoryState.storeAliases) {
-    memoryState.storeAliases = { ...DEFAULT_STORE_ALIASES };
-  }
-  if (memoryState.storeAliases[oldName]) {
-    memoryState.storeAliases[name] = [...memoryState.storeAliases[oldName]];
+  // Update storeAliases key map
+  if (memoryState.storeAliases && memoryState.storeAliases[oldName]) {
+    memoryState.storeAliases[name] = memoryState.storeAliases[oldName];
     delete memoryState.storeAliases[oldName];
   }
 
-  // Cascade rename to active list items
+  // Update active items
   if (memoryState.activeList && Array.isArray(memoryState.activeList.items)) {
     memoryState.activeList.items.forEach((item) => {
       if (item.store === oldName) {
         item.store = name;
-        touchItem(item);
+        if (typeof touchItem === "function") touchItem(item);
       }
     });
   }
 
-  // Cascade rename to purchase ledger
-  if (Array.isArray(memoryState.purchaseLedger)) {
+  // Update purchase ledger
+  if (memoryState.purchaseLedger && Array.isArray(memoryState.purchaseLedger)) {
     memoryState.purchaseLedger.forEach((entry) => {
       if (entry.store === oldName) {
         entry.store = name;
@@ -142,17 +158,25 @@ function renameStore(oldName, newName) {
     });
   }
 
-  if (currentStoreFilter === oldName) {
+  // Update current filter if needed
+  if (
+    typeof currentStoreFilter !== "undefined" &&
+    currentStoreFilter === oldName
+  ) {
     currentStoreFilter = name;
   }
 
-  saveToLocalStorage();
-  renderApp();
-  renderStoreManagerList();
-  showToast(
-    TRANSLATIONS[currentLanguage].toast_store_renamed ||
-      "Store renamed successfully"
-  );
+  if (typeof saveToLocalStorage === "function") saveToLocalStorage();
+  if (typeof renderApp === "function") renderApp();
+  if (typeof renderStoreManagerList === "function") renderStoreManagerList();
+  if (typeof showToast === "function") {
+    showToast(
+      (typeof TRANSLATIONS !== "undefined" &&
+        TRANSLATIONS[currentLanguage] &&
+        TRANSLATIONS[currentLanguage].toast_store_renamed) ||
+        "Store renamed successfully"
+    );
+  }
   return true;
 }
 
@@ -198,6 +222,7 @@ function deleteStore(storeName) {
 }
 
 function renderStoreManagerList() {
+  if (typeof document === "undefined") return;
   const container = document.getElementById("storeManagerList");
   if (!container) return;
   const stores = memoryState.stores || DEFAULT_STORES;
@@ -272,10 +297,11 @@ function closeStoreManagerModal() {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     getStoreAliases,
+    setStoreAliases,
     openStoreManagerModal,
     closeStoreManagerModal,
     renderStoreManagerList,
-    addNewStore,
+    addStore,
     renameStore,
     deleteStore,
   };

@@ -1,6 +1,15 @@
 /* =========================================================================
        2. PURE MATH & NORMALIZATION FUNCTIONS
        ========================================================================= */
+if (typeof DIMENSIONS === "undefined" && typeof require !== "undefined") {
+  try {
+    const _units = require("./units.js");
+    if (typeof globalThis !== "undefined") {
+      Object.assign(globalThis, _units);
+    }
+  } catch (_) {}
+}
+
 function normalizeQuantity(quantity, unit) {
   const q = parseFloat(quantity);
   if (isNaN(q) || q <= 0) {
@@ -240,7 +249,17 @@ function renderSparklineSvg(prices, width = 120, height = 32) {
 function getItemStoreComparison(itemName) {
   if (!itemName) return [];
   const itemKey = normalizeItemKey(itemName);
-  const history = (memoryState.purchaseLedger || []).filter(
+  const ledger =
+    typeof memoryState !== "undefined" &&
+    memoryState &&
+    memoryState.purchaseLedger
+      ? memoryState.purchaseLedger
+      : typeof globalThis !== "undefined" &&
+          globalThis.memoryState &&
+          globalThis.memoryState.purchaseLedger
+        ? globalThis.memoryState.purchaseLedger
+        : [];
+  const history = ledger.filter(
     (l) => normalizeItemKey(l.itemName) === itemKey
   );
   if (history.length === 0) return [];
@@ -273,6 +292,17 @@ function getItemStoreComparison(itemName) {
 }
 
 if (typeof module !== "undefined" && module.exports) {
+  if (typeof globalThis !== "undefined") {
+    globalThis.normalizeQuantity = normalizeQuantity;
+    globalThis.normalizeUnitPrice = normalizeUnitPrice;
+    globalThis.generateItemId = generateItemId;
+    globalThis.isValidId = isValidId;
+    globalThis.normalizeItemKey = normalizeItemKey;
+    globalThis.evaluateDealScore = evaluateDealScore;
+    globalThis.comparePackages = comparePackages;
+    globalThis.renderSparklineSvg = renderSparklineSvg;
+    globalThis.getItemStoreComparison = getItemStoreComparison;
+  }
   module.exports = {
     normalizeQuantity,
     normalizeUnitPrice,
