@@ -78,22 +78,25 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ---
 
-### 5. Sharing, Backup & Data Portability
+#### 5. Sharing, Backup & Data Portability
 
-- **Share Buy-List Hub (`#shareModal`)**: Self-contained sharing modal offering 4 focused actions without third-party dependencies:
-  1. 📱 **Share via Apps** (`invokeNativeShare`): Web Share API sharing title, checklist summary, and web URL with copy fallback.
+- **Share Buy-List Hub (`#shareModal`) & CompressionStream Codec**: Self-contained sharing modal offering 4 focused actions without third-party dependencies:
+  1. 📱 **Share via Apps** (`invokeNativeShare`): Web Share API sharing title, checklist summary, and compressed web URL with copy fallback.
   2. 📋 **Copy Formatted Checklist** (`copyBuyListTextChecklist`): Copies human-readable Markdown/plain-text checklist with items, quantities, stores, prices, total spend, and web import URL.
-  3. 🔗 **Copy Shareable Link** (`copyShareUrl`): Copies compressed `#share=<payload>` URL to clipboard.
+  3. 🔗 **Copy Shareable Link** (`copyShareUrl`): Copies compressed `#share=<payload>` URL to clipboard utilizing browser-native `CompressionStream('deflate')` and URL-safe Base64 (with backward-compatible decompression of legacy uncompressed payloads).
   4. 📥 **Download Buy-List File (.json)** (`exportBuyListJsonFile`): Downloads standalone JSON file of active list.
      _Avoid_: QR visualizer, external image service, raw dump.
-- **Smart Merge Protocol (`#importModal`)**: Recipient client protocol that parses incoming shared URLs or JSON payloads with 3 non-destructive options:
-  1. _Import as New List_ (isolated new list).
-  2. _Merge into Active List_ (append unique items, deduplicate by name).
-  3. _Sync Price Catalog_ (adopt shared store prices).
-     _Avoid_: Overwrite import, blind merge, data replace.
-- **Symmetrical 2x2 Data Management (Settings Modal)**:
+- **Interactive Smart Merge Protocol (`#mergeReviewModal` / `#importModal`)**: Recipient client protocol that parses incoming shared URLs or JSON payloads:
+  - Interactive conflict review dialog displaying item diff badges: `[🆕 New]` (New item), `[🔄 New Price]` (Price update), `[⚖️ Qty Diff]` (Quantity diff), `[✅ Match]` (Exact match).
+  - Per-item resolution strategies:
+    1. _Quantity Strategy_: Keep Local ($Q_{\text{local}}$), Take Remote ($Q_{\text{remote}}$), or Sum Quantities ($Q_{\text{sum}} = Q_{\text{local}} + Q_{\text{remote}}$).
+    2. _Price Catalog Sync_: Adopt shared store prices and refresh master catalog price baselines.
+    3. _Save as Draft & New List_: Snapshot current list before creating isolated new list.
+       _Avoid_: Overwrite import, blind merge, data replace.
+- **Symmetrical 2x2 Data Management & Snapshot Safeguards (Settings Modal)**:
   - **Row 1**: `[ 💾 Export File | 📋 Copy JSON ]` (Full database backup file download & clipboard copy).
-  - **Row 2**: `[ 📥 Import File | 📋 Paste JSON ]` (Full database restore from file or clipboard with auto-detect hierarchy and fallback dialog).
+  - **Row 2**: `[ 📥 Import File | 📋 Paste JSON ]` (Full database restore with `#backupPreviewModal` side-by-side comparison, metadata inspection, and pre-restore snapshot).
+  - **Rolling Snapshots Engine**: Automated rolling snapshots store in IndexedDB (`snapshots`) preserving last 3 trip completions and pre-restore states with 1-tap restore.
     _Avoid_: Asymmetric backup buttons, Option Hub, camera scanner popup.
 - **Storage Provider Seam & Multi-Cloud Sync (`IStorageProvider`)**:
   - `IndexedDBStorageProvider`: Default offline-first local persistence engine (`SmartBuyListDB`, v2) with localStorage/memory fallback.
@@ -101,8 +104,8 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
   - `GitHubGistStorageProvider`: Cloud provider syncing with private Secret GitHub Gists via GitHub REST API v3 and Personal Access Token (PAT) with auto-discovery, `raw_url` fallback, and detailed diagnostic error interpolation.
   - `Deterministic 3-Way Cloud Merge Engine (Merge3)`: Non-destructive multi-device conflict resolution uniting purchase ledger transactions, syncing active list items by `updatedAt` timestamps, merging store profiles, and preserving in-flight user mutations.
   - `Deletion Tombstone Infrastructure & 30-Day TTL Pruning`: Explicit deletion tracking (`_deleted: { items, ledger, stores }`) with ISO-8601 timestamps, preventing zombie item/ledger/store resurrections, auto-pruned after 30 days (`TOMBSTONE_TTL_MS = 30 * 24 * 60 * 60 * 1000`).
-  - `Calm Adaptive Cloud Sync`: 15-second idle debounce (capped at 45s), tab backgrounding flush (`visibilitychange`), trip completion push, and tab wakeup pull after 120s inactivity. Status indicator pill located exclusively in Settings (`#cloudSyncStatusPill`).
-    _Avoid_: Polling loop, aggressive live sync, constant header sync pill.
+  - `Calm Adaptive Cloud Sync & Ambient Header Indicator`: 15-second idle debounce (capped at 45s), tab backgrounding flush (`visibilitychange`), trip completion push, and tab wakeup pull after 120s inactivity. Real-time glanceable status badge in sticky header (`#headerCloudSyncBadge`: 🟢 Synced, 🔵 Syncing, 🟡 Offline/Pending, 🔴 Error) alongside detailed Settings card (`#cloudSyncStatusPill`).
+    _Avoid_: Polling loop, aggressive live sync, constant sync spinners.
 
 ---
 
@@ -160,3 +163,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0027: Review Remediation, Event Delegation, Math Robustness & PWA v4.2.0](./docs/adr/0027-review-remediation-modular-source-and-pwa-v4-2-0.md)
 - [ADR-0028: Test Suite Domain Consolidation & Zero-Drift Harness](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md)
 - [ADR-0029: Pure Event Delegation, Two-Tier PWA Back Navigation & Responsive Tablet Deal Intelligence](./docs/adr/0029-event-delegation-pwa-back-navigation-and-tablet-deal-intelligence.md)
+- [ADR-0030: Share Payload Compression, Interactive Merge Protocol, Ambient Cloud Sync Indicator & Snapshot Safeguards](./docs/adr/0030-share-compression-interactive-merge-ambient-sync-and-snapshot-safeguards.md)
