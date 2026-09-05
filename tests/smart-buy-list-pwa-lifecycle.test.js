@@ -108,9 +108,7 @@ function assert(condition, message) {
 }
 
 async function runTests() {
-  console.log(
-    "\n🧪 Running Smart Buy-List URL Sharing & PWA Integration Test Suite...\n"
-  );
+  console.log("\n🧪 Running Smart Buy-List PWA & Lifecycle Test Suite...\n");
 
   try {
     const { sandbox } = loadBuyListSharingEngine();
@@ -406,7 +404,7 @@ async function runTests() {
 
     const swContent = fs.readFileSync(swPath, "utf8");
     assert(
-      /CACHE_NAME = "smart-buy-list-v[3-9]\.\d+\.\d+"/.test(swContent),
+      swContent.includes("smart-buy-list-v" + manifestContent.version),
       "PWA-14: sw.js bumps cache version to smart-buy-list-v3.2.0 or higher"
     );
     assert(

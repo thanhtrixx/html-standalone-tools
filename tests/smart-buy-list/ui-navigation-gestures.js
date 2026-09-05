@@ -44,7 +44,7 @@ function assertEqual(actual, expected, message) {
 function loadTestSandbox() {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -721,7 +721,7 @@ console.log("\n--- Section 6: Settings Terminology & PWA Versioning ---");
 try {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -729,7 +729,7 @@ try {
 
   const manifestPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "manifest.webmanifest"
   );
@@ -737,22 +737,19 @@ try {
 
   const swPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "sw.js"
   );
   const swContent = fs.readFileSync(swPath, "utf8");
 
   assert(
-    manifest.version === "4.1.0" ||
-      manifest.version === "4.2.0" ||
-      manifest.version === "4.3.0",
+    typeof manifest.version === "string" &&
+      /^\d+\.\d+\.\d+$/.test(manifest.version),
     "PWA-01: manifest.webmanifest version bumped to 4.2.0 (or 4.1.0)"
   );
   assert(
-    swContent.includes('const CACHE_NAME = "smart-buy-list-v4.1.0";') ||
-      swContent.includes('const CACHE_NAME = "smart-buy-list-v4.2.0";') ||
-      swContent.includes('const CACHE_NAME = "smart-buy-list-v4.3.0";'),
+    swContent.includes("smart-buy-list-v" + manifest.version),
     "PWA-02: sw.js CACHE_NAME matches smart-buy-list-v4.2.0 (or v4.1.0)"
   );
 

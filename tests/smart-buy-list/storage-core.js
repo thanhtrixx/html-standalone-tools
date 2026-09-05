@@ -8,7 +8,7 @@ function loadBuyListStorageEngine(
 ) {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );

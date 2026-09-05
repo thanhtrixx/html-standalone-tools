@@ -23,7 +23,7 @@ console.log(
 
 const indexPath = path.join(
   __dirname,
-  "../smart-buy-list-price-tracker/index.html"
+  "../../smart-buy-list-price-tracker/index.html"
 );
 const htmlContent = fs.readFileSync(indexPath, "utf-8");
 

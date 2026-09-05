@@ -44,7 +44,7 @@ function assertEqual(actual, expected, message) {
 function loadTestSandbox() {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -517,7 +517,7 @@ try {
 
   const swPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "sw.js"
   );
@@ -535,7 +535,7 @@ try {
 
   const manifestPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "manifest.webmanifest"
   );

@@ -29,7 +29,7 @@ function assert(condition, message) {
 function loadBuyListEngine(options = {}) {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -393,7 +393,7 @@ async function runAllTests() {
     const { sandbox, htmlContent } = loadBuyListEngine();
     const swPath = path.join(
       __dirname,
-      "..",
+      "../..",
       "smart-buy-list-price-tracker",
       "sw.js"
     );
@@ -411,7 +411,7 @@ async function runAllTests() {
 
     const manifestPath = path.join(
       __dirname,
-      "..",
+      "../..",
       "smart-buy-list-price-tracker",
       "manifest.webmanifest"
     );

@@ -686,6 +686,42 @@ try {
     missingInViKeys.length === 0,
     `I18N-PARITY-01: All ${allEnKeys.length} keys in TRANSLATIONS.en exist in TRANSLATIONS.vi (Missing: ${missingInViKeys.join(", ") || "none"})`
   );
+
+  // 7. Vietnam-First Baseline Defaults & Language Flags
+  console.log("\n--- Section 7: Vietnam-First Baseline Defaults & Flags ---");
+  const { sandbox: freshBox } = loadBuyListI18nEngine();
+  const defaultState = freshBox.memoryState;
+  assert(
+    defaultState.settings.language === "vi",
+    "VN-DEF-01a: settings.language defaults to vi"
+  );
+  assert(
+    defaultState.settings.currency === "VND",
+    "VN-DEF-01b: settings.currency defaults to VND"
+  );
+  assert(
+    Array.isArray(defaultState.activeList.items) &&
+      defaultState.activeList.items.length === 0,
+    "VN-DEF-01c: activeList.items initializes clean and empty"
+  );
+  assert(
+    Array.isArray(defaultState.purchaseLedger) &&
+      defaultState.purchaseLedger.length === 0,
+    "VN-DEF-01d: purchaseLedger initializes clean and empty"
+  );
+
+  const defaultStores = sandbox.DEFAULT_STORES || defaultState.stores;
+  assert(
+    defaultStores.includes("WinMart") &&
+      defaultStores.includes("Bách Hoá Xanh") &&
+      defaultStores.includes("Co.opmart"),
+    "VN-DEF-02: DEFAULT_STORES includes Vietnamese supermarket chains"
+  );
+  assert(
+    !htmlContent.includes('id="sampleDataBanner"'),
+    "VN-DEF-03: #sampleDataBanner is decommissioned from HTML"
+  );
+
   assert(
     missingInEnKeys.length === 0,
     `I18N-PARITY-02: All ${allViKeys.length} keys in TRANSLATIONS.vi exist in TRANSLATIONS.en (Missing: ${missingInEnKeys.join(", ") || "none"})`

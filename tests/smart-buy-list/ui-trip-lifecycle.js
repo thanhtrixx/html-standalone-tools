@@ -5,7 +5,7 @@ const vm = require("vm");
 function loadBuyListLifecycleDOM() {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );

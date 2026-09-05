@@ -5,7 +5,7 @@ const vm = require("vm");
 function loadBuyListEngine(options = {}) {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -484,7 +484,7 @@ console.log(
   const { sandbox, htmlContent } = loadBuyListEngine();
   const swPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "sw.js"
   );

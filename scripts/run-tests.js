@@ -71,149 +71,39 @@ const TEST_SUITES = [
     category: "UI/UX",
   },
   {
-    name: "Smart Buy-List Unit Price & Deal Intelligence Engine",
-    file: "tests/smart-buy-list-price-tracker.test.js",
+    name: "Smart Buy-List Math Engine & Comparator Intelligence",
+    file: "tests/smart-buy-list-engine-math.test.js",
     category: "Core Math",
   },
   {
-    name: "Smart Buy-List Storage Engine & Migrations",
-    file: "tests/smart-buy-list-storage.test.js",
-    category: "AI & State",
+    name: "Smart Buy-List Storage & Persistence",
+    file: "tests/smart-buy-list-storage-persistence.test.js",
+    category: "Data Integrity",
   },
   {
-    name: "Smart Buy-List Trip Lifecycle & In-Store Mode",
-    file: "tests/smart-buy-list-lifecycle.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List Package Comparator & Price Sparklines",
-    file: "tests/smart-buy-list-comparator-sparklines.test.js",
-    category: "Core Math",
-  },
-  {
-    name: "Smart Buy-List URL State Sharing & PWA",
-    file: "tests/smart-buy-list-sharing-pwa.test.js",
-    category: "AI & State",
-  },
-  {
-    name: "Smart Buy-List i18n Parity, Multi-Currency & Theming",
-    file: "tests/smart-buy-list-i18n-theming.test.js",
-    category: "i18n",
-  },
-  {
-    name: "Smart Buy-List Material You & In-Aisle Comparator",
-    file: "tests/smart-buy-list-material-you.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List In-Store Progress Pacing & Touch Polish",
-    file: "tests/smart-buy-list-pacing-touch-polish.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List Store Management, Grouping & Settings",
-    file: "tests/smart-buy-list-stores-grouping-gestures.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List Differentiated Card UX & In-Store Ergonomics",
-    file: "tests/smart-buy-list-differentiated-cards.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List Price History Re-order & Batch Restocking",
-    file: "tests/smart-buy-list-price-history-reorder.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List Clipboard JSON Interchange",
-    file: "tests/smart-buy-list-clipboard-interchange.test.js",
-    category: "AI & State",
-  },
-  {
-    name: "Smart Buy-List Settings Backup File & Clipboard Interchange",
-    file: "tests/smart-buy-list-settings-backup-interchange.test.js",
-    category: "AI & State",
-  },
-  {
-    name: "Smart Buy-List Ledger Deletion & Comparator Prefill",
-    file: "tests/smart-buy-list-ledger-delete-comparator-prefill.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List Google Drive Cloud Sync Seam",
+    name: "Smart Buy-List Cloud Sync & Multi-Device Concurrency",
     file: "tests/smart-buy-list-cloud-sync.test.js",
     category: "AI & State",
   },
   {
-    name: "Smart Buy-List Vietnamese-First Defaults & Smart Omnibox",
-    file: "tests/smart-buy-list-vietnamese-omnibox.test.js",
+    name: "Smart Buy-List UI Interactions, Gestures & Components",
+    file: "tests/smart-buy-list-ui-components.test.js",
     category: "UI/UX",
   },
   {
-    name: "Smart Buy-List Calm Cloud Sync & Adaptive Historical Ledger",
-    file: "tests/smart-buy-list-calm-sync-ledger.test.js",
-    category: "UI/UX",
+    name: "Smart Buy-List PWA Lifecycle, Cache & Safe-Area",
+    file: "tests/smart-buy-list-pwa-lifecycle.test.js",
+    category: "PWA",
   },
   {
-    name: "Smart Buy-List 3-Way Cloud Concurrency & Deletion Tombstones",
-    file: "tests/smart-buy-list-cloud-concurrency.test.js",
-    category: "AI & State",
+    name: "Smart Buy-List i18n Parity, Currency & Accessibility",
+    file: "tests/smart-buy-list-i18n.test.js",
+    category: "i18n",
   },
   {
-    name: "Smart Buy-List Planning Completion, Ledger Ergonomics & Comparator Unit Sync",
-    file: "tests/smart-buy-list-planning-completion-ledger-comparator.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List GitHub Gist 403 Resiliency, Ledger Price Scaling & UI Polish",
-    file: "tests/smart-buy-list-gist-resiliency-and-ui-polish.test.js",
-    category: "AI & State",
-  },
-  {
-    name: "Smart Buy-List v3.11.0 Quick Add Store Picker, Available Filter & Rate Limit Resiliency",
-    file: "tests/smart-buy-list-v3-11-enhancements.test.js",
-    category: "AI & State",
-  },
-  {
-    name: "Smart Buy-List v3.12.0 Unified Trip Complete, Sample Buttons & Rate Limit Diagnostics",
-    file: "tests/smart-buy-list-v3-12-enhancements.test.js",
-    category: "AI & State",
-  },
-  {
-    name: "Smart Buy-List v3.13.0 Full Item Edit, Streamlined Planning Card & Quick Add Simplification",
-    file: "tests/smart-buy-list-v3-13-enhancements.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List innerHTML Sanitization & Content Security Policy",
-    file: "tests/smart-buy-list-security-csp.test.js",
+    name: "Smart Buy-List Security, CSP & Content Sanitization",
+    file: "tests/smart-buy-list-security.test.js",
     category: "Security",
-  },
-  {
-    name: "Smart Buy-List Parser Hardening & Store Aliases",
-    file: "tests/smart-buy-list-parser-hardening.test.js",
-    category: "Core Math",
-  },
-  {
-    name: "Smart Buy-List IndexedDB Storage & PAT Migration",
-    file: "tests/smart-buy-list-indexeddb-storage.test.js",
-    category: "Data Integrity",
-  },
-  {
-    name: "Smart Buy-List v4.1.0 Navigation, Gestures & UI/UX Polish",
-    file: "tests/smart-buy-list-v4-1-navigation-and-gestures.test.js",
-    category: "UI/UX",
-  },
-  {
-    name: "Smart Buy-List v4.2.0 Review Remediation, Event Delegation & Math Robustness",
-    file: "tests/smart-buy-list-v4-2-review-remediation.test.js",
-    category: "Security & Hardening",
-  },
-  {
-    name: "Smart Buy-List iOS PWA / Safe-Area & v4.3.0 Sync",
-    file: "tests/smart-buy-list-ios-pwa-safe-area.test.js",
-    category: "UI/UX",
   },
 ];
 
@@ -764,23 +654,78 @@ function appendGithubStepSummary(reportData) {
 }
 
 async function main() {
+  const args = process.argv.slice(2);
+  let toolFilter = null;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--tool" && args[i + 1]) {
+      toolFilter = args[i + 1].toLowerCase();
+      i++;
+    } else if (args[i].startsWith("--tool=")) {
+      toolFilter = args[i].split("=")[1].toLowerCase();
+    }
+  }
+
+  const suitesToRun = TEST_SUITES.filter((suite) => {
+    if (!toolFilter) return true;
+    const f = suite.file.toLowerCase();
+    const n = suite.name.toLowerCase();
+    if (
+      toolFilter === "tracker" ||
+      toolFilter === "smart-buy-list" ||
+      toolFilter === "smart-buy-list-price-tracker"
+    ) {
+      return f.includes("smart-buy-list");
+    }
+    if (
+      toolFilter === "buy-rent" ||
+      toolFilter === "buy-vs-rent" ||
+      toolFilter === "buy-vs-rent-home-comparison"
+    ) {
+      return f.includes("buy-vs-rent");
+    }
+    if (
+      toolFilter === "predictor" ||
+      toolFilter === "savings" ||
+      toolFilter === "personal-finance-savings-predictor"
+    ) {
+      return (
+        f.includes("simulation.test.js") ||
+        f.includes("i18n.test.js") ||
+        f.includes("helpers.test.js") ||
+        f.includes("ui-ux.test.js")
+      );
+    }
+    return f.includes(toolFilter) || n.includes(toolFilter);
+  });
+
+  if (suitesToRun.length === 0) {
+    console.error(`❌ No test suites matched tool filter: '${toolFilter}'`);
+    process.exit(1);
+  }
+
   const startTime = Date.now();
-  const concurrency = Math.max(2, Math.min(os.cpus ? os.cpus().length : 4, 8));
+  const concurrency = Math.max(
+    1,
+    Math.min(os.cpus ? os.cpus().length : 4, Math.min(suitesToRun.length, 8))
+  );
 
   console.log("==================================================");
   console.log("🚀 HTML Standalone Tools - Unified Test Runner");
+  if (toolFilter) {
+    console.log(`🎯 Tool Filter: ${toolFilter}`);
+  }
   console.log(
-    `⚡ Executing ${TEST_SUITES.length} test suites with concurrency = ${concurrency}`
+    `⚡ Executing ${suitesToRun.length} test suites with concurrency = ${concurrency}`
   );
   console.log("==================================================\n");
 
-  const suitesResults = new Array(TEST_SUITES.length);
+  const suitesResults = new Array(suitesToRun.length);
   let currentIndex = 0;
 
   async function worker() {
-    while (currentIndex < TEST_SUITES.length) {
+    while (currentIndex < suitesToRun.length) {
       const idx = currentIndex++;
-      const suite = TEST_SUITES[idx];
+      const suite = suitesToRun[idx];
       suitesResults[idx] = await runSuiteAsync(suite);
     }
   }

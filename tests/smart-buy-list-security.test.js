@@ -1,142 +1,36 @@
+#!/usr/bin/env node
+
+/**
+ * Smart Buy-List Security, CSP, Sanitization & Clickjacking Defense Suite
+ *
+ * Domain: Security & Hardening
+ * Covers:
+ * - Content Security Policy (CSP) headers & inline handler restrictions
+ * - Dynamic Template XSS Defenses & Entity Sanitization (sanitizeHTML)
+ * - Cloudflare Pages _headers Clickjacking Protections (X-Frame-Options, X-Content-Type-Options)
+ */
+
 const fs = require("fs");
 const path = require("path");
-const vm = require("vm");
+const {
+  TRACKER_DIR,
+  getHtmlContent,
+  createTrackerSandbox,
+  createAssertions,
+} = require("./helpers/smart-buy-list-harness");
 
-function loadSecurityEngine() {
-  const htmlPath = path.join(
-    __dirname,
-    "..",
-    "smart-buy-list-price-tracker",
-    "index.html"
-  );
-  const htmlContent = fs.readFileSync(htmlPath, "utf8");
-  const scriptMatches = [
-    ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
-  ];
-  const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
-
-  const storageMock = {};
-  const docElementClasses = new Set(["dark"]);
-  let activeFocus = null;
-
-  const sandbox = {
-    console,
-    Math,
-    Date,
-    JSON,
-    parseInt,
-    parseFloat,
-    isNaN,
-    isFinite,
-    Array,
-    Object,
-    String,
-    Number,
-    Boolean,
-    Set,
-    Map,
-    Promise,
-    Intl,
-    btoa: (str) => Buffer.from(str, "binary").toString("base64"),
-    atob: (b64) => Buffer.from(b64, "base64").toString("binary"),
-    encodeURIComponent,
-    decodeURIComponent,
-    escape,
-    unescape,
-    setTimeout: (fn) => fn(),
-    clearTimeout: () => {},
-    tailwind: {},
-    addEventListener: () => {},
-    scrollTo: () => {},
-    location: { origin: "http://localhost", pathname: "/", hash: "" },
-    navigator: {
-      clipboard: { writeText: () => Promise.resolve() },
-      share: () => Promise.resolve(),
-    },
-    document: {
-      getElementById: (id) => ({
-        id,
-        classList: {
-          add: () => {},
-          remove: () => {},
-          contains: () => false,
-          toggle: () => {},
-        },
-        textContent: "",
-        innerHTML: "",
-        style: {},
-        value: "",
-        appendChild: () => {},
-        setAttribute: () => {},
-        getAttribute: () => null,
-        focus: () => {
-          activeFocus = id;
-        },
-      }),
-      createElement: () => ({
-        className: "",
-        textContent: "",
-        classList: { add: () => {}, remove: () => {}, contains: () => false },
-        remove: () => {},
-        setAttribute: () => {},
-        getAttribute: () => null,
-      }),
-      querySelector: () => null,
-      querySelectorAll: () => [],
-      addEventListener: () => {},
-      documentElement: {
-        lang: "vi",
-        classList: {
-          contains: (c) => docElementClasses.has(c),
-          add: (c) => docElementClasses.add(c),
-          remove: (c) => docElementClasses.delete(c),
-        },
-      },
-      body: { style: {} },
-    },
-    localStorage: {
-      getItem: (key) => storageMock[key] || null,
-      setItem: (key, val) => {
-        storageMock[key] = String(val);
-      },
-      removeItem: (key) => {
-        delete storageMock[key];
-      },
-      clear: () => {
-        Object.keys(storageMock).forEach((k) => delete storageMock[k]);
-      },
-    },
-    indexedDB: null,
-  };
-  sandbox.window = sandbox;
-
-  vm.createContext(sandbox);
-  vm.runInContext(combinedScripts, sandbox);
-  return { sandbox, htmlContent };
-}
-
-let passed = 0;
-let failed = 0;
-
-function assert(condition, message) {
-  if (condition) {
-    console.log(`  ✅ PASS: ${message}`);
-    passed++;
-  } else {
-    console.error(`  ❌ FAIL: ${message}`);
-    failed++;
-  }
-}
-
-console.log(
-  "\n🧪 Running Smart Buy-List Security & Content-Security-Policy Test Suite...\n"
+const { assert, printSummary } = createAssertions(
+  "Smart Buy-List Security & Hardening Test Suite"
 );
 
-try {
-  const { sandbox, htmlContent } = loadSecurityEngine();
+console.log("\n🧪 Running Smart Buy-List Security & Hardening Test Suite...\n");
 
-  // SECTION 1: sanitizeHTML Unit Behavior
-  console.log("--- Section 1: sanitizeHTML Utility Seam ---");
+try {
+  const { sandbox } = createTrackerSandbox();
+  const rawHtml = getHtmlContent();
+
+  // SECTION 1: Utility Sanitization Function Unit Tests
+  console.log("--- Section 1: sanitizeHTML Utility Unit Tests ---");
 
   assert(
     typeof sandbox.sanitizeHTML === "function",
@@ -300,7 +194,7 @@ try {
   // SECTION 3: Content-Security-Policy Meta Tag Verification
   console.log("\n--- Section 3: Content-Security-Policy (CSP) Directives ---");
 
-  const cspMetaMatch = htmlContent.match(
+  const cspMetaMatch = rawHtml.match(
     /<meta[^>]*http-equiv=["']Content-Security-Policy["'][^>]*content="([^"]+)"/i
   );
 
@@ -342,19 +236,30 @@ try {
       "SEC-CSP-07: CSP connect-src whitelists Google APIs (https://www.googleapis.com)"
     );
   }
+
+  // SECTION 4: Cloudflare Pages _headers Clickjacking Defense
+  console.log(
+    "\n--- Section 4: Cloudflare Pages _headers & Clickjacking Defense ---"
+  );
+
+  const headersPath = path.join(TRACKER_DIR, "_headers");
+  assert(
+    fs.existsSync(headersPath),
+    "HEADERS-01: _headers file exists in smart-buy-list-price-tracker/"
+  );
+
+  const headersContent = fs.readFileSync(headersPath, "utf8");
+  assert(
+    headersContent.includes("X-Frame-Options: DENY"),
+    "HEADERS-02: _headers configures 'X-Frame-Options: DENY' for clickjacking defense (B2)"
+  );
+  assert(
+    headersContent.includes("X-Content-Type-Options: nosniff"),
+    "HEADERS-03: _headers configures 'X-Content-Type-Options: nosniff'"
+  );
 } catch (err) {
-  console.error("❌ Test Execution Error:", err);
-  failed++;
-}
-
-console.log("\n==================================================");
-console.log(
-  `📊 Security & CSP Test Summary: ${passed} Passed, ${failed} Failed`
-);
-console.log("==================================================\n");
-
-if (failed > 0) {
+  console.error("❌ Exception during security test execution:", err);
   process.exit(1);
-} else {
-  process.exit(0);
 }
+
+printSummary();
