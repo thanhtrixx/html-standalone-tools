@@ -48,3 +48,7 @@ If the concept you need isn't in the glossary yet, that's a signal: either you'r
 If your output contradicts an existing ADR, surface it explicitly rather than silently overriding:
 
 > _Contradicts ADR-0007 (event-sourced orders), but worth reopening because…_
+
+## Reconciling /grilling with /domain-modeling
+
+When the relentless interview (`/grilling`, via `/grill-me`) runs alongside the docs discipline (`/domain-modeling`, via `/grill-with-docs`), their two write postures — _"defer until confirmed"_ vs _"write inline"_ — are reconciled by the **two-speed rule**: write reversible `CONTEXT.md` glossary terms inline, but defer hard-to-reverse `docs/adr/` entries to the user's "shared understanding" confirmation. The composition of `grill-me` / `grill-with-docs` / `grilling` / `domain-modeling` is documented in [`grill-docs-reconciliation.md`](./grill-docs-reconciliation.md) (decision record: [`ADR-0007`](../adr/0007-grilling-domain-modeling-two-speed-reconciliation.md)).
