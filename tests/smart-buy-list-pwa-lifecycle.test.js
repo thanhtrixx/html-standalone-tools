@@ -35,6 +35,17 @@ function loadBuyListSharingEngine() {
     Promise,
     btoa: (str) => Buffer.from(str, "binary").toString("base64"),
     atob: (b64) => Buffer.from(b64, "base64").toString("binary"),
+    TextEncoder: typeof TextEncoder !== "undefined" ? TextEncoder : undefined,
+    TextDecoder: typeof TextDecoder !== "undefined" ? TextDecoder : undefined,
+    Uint8Array,
+    CompressionStream:
+      typeof CompressionStream !== "undefined" ? CompressionStream : undefined,
+    DecompressionStream:
+      typeof DecompressionStream !== "undefined"
+        ? DecompressionStream
+        : undefined,
+    Response: typeof Response !== "undefined" ? Response : undefined,
+    Blob: typeof Blob !== "undefined" ? Blob : undefined,
     encodeURIComponent,
     decodeURIComponent,
     escape,
@@ -176,13 +187,17 @@ async function runTests() {
       ],
     };
 
-    const encoded = sandbox.encodeSharePayload(sampleList);
+    const encoded = await sandbox.encodeSharePayload(sampleList);
     assert(
       typeof encoded === "string" && encoded.length > 0,
-      "SHARE-01a: Active list successfully serialized to base64 payload"
+      "SHARE-01a: Active list successfully serialized to payload"
+    );
+    assert(
+      encoded.startsWith("cz:"),
+      "SHARE-01-cz: encodeSharePayload produces compressed string prefixed with cz:"
     );
 
-    const decoded = sandbox.decodeSharePayload(encoded);
+    const decoded = await sandbox.decodeSharePayload(encoded);
     assert(
       decoded !== null && decoded.title === "Weekend Barbecue Haul",
       "SHARE-01b: Decoded payload preserves list title"
@@ -197,6 +212,52 @@ async function runTests() {
         decoded.items[0].unit === "kg" &&
         decoded.items[0].price === 28.5,
       "SHARE-01d: Decoded item attributes strictly match original data"
+    );
+
+    // Test legacy uncompressed Base64 payload decoding
+    const legacyCompact = {
+      t: "Legacy Test List",
+      i: [["Legacy Item", "produce", "Local Market", 3, "kg", 15.0]],
+    };
+    const legacyB64 = Buffer.from(
+      JSON.stringify(legacyCompact),
+      "utf8"
+    ).toString("base64");
+    const legacyDecoded = await sandbox.decodeSharePayload(legacyB64);
+    assert(
+      legacyDecoded !== null &&
+        legacyDecoded.title === "Legacy Test List" &&
+        legacyDecoded.items[0].name === "Legacy Item",
+      "SHARE-01-legacy: decodeSharePayload transparently decodes legacy uncompressed Base64 payloads"
+    );
+
+    // Test 15-item compression ratio and URL length < 800 chars
+    const largeList = {
+      title: "Weekly Family Shopping Haul",
+      items: [],
+    };
+    for (let i = 1; i <= 15; i++) {
+      largeList.items.push({
+        name: `Mặt hàng thực phẩm gia đình số ${i}`,
+        category: "produce",
+        store: "Bách Hoá Xanh",
+        quantity: 2,
+        unit: "kg",
+        price: 35000 + i * 1000,
+        checked: false,
+      });
+    }
+    const largeEncoded = await sandbox.encodeSharePayload(largeList);
+    const uncompressedRawLen = JSON.stringify(largeList).length;
+    const compressionRatio = 1 - largeEncoded.length / uncompressedRawLen;
+    assert(
+      largeEncoded.startsWith("cz:") && compressionRatio >= 0.5,
+      `SHARE-01-ratio: Compression achieved ${(compressionRatio * 100).toFixed(1)}% reduction for 15 items`
+    );
+    const fullShareUrl = `https://tools.example.com/smart-buy-list-price-tracker/#share=${largeEncoded}`;
+    assert(
+      fullShareUrl.length < 800,
+      `SHARE-01-url-len: 15-item share URL (${fullShareUrl.length} chars) is well under 800 chars limit`
     );
 
     // 1.5. HUMAN-READABLE CHECKLIST TEXT GENERATION & STANDALONE FILE EXPORT
@@ -217,7 +278,8 @@ async function runTests() {
       "SHARE-01g: exportBuyListJsonFile is exported globally"
     );
 
-    const checklistText = sandbox.generateBuyListTextChecklist(sampleList);
+    const checklistText =
+      await sandbox.generateBuyListTextChecklist(sampleList);
     assert(
       checklistText.includes("Weekend Barbecue Haul") &&
         checklistText.includes("- [ ] Ribeye Steak (2 kg [Costco])") &&
@@ -228,6 +290,7 @@ async function runTests() {
       "SHARE-01h: generateBuyListTextChecklist formats title, items, store tags, and share link correctly"
     );
 
+    // Test toast notification triggers on copy actions
     let shareToast = "";
     sandbox._mockShowToast = (msg) => {
       shareToast = msg;
@@ -236,6 +299,7 @@ async function runTests() {
       "const _orig_showToast = showToast; showToast = (msg) => { if (window._mockShowToast) window._mockShowToast(msg); return _orig_showToast(msg); };",
       sandbox
     );
+
     sandbox.memoryState.activeList = sampleList;
     await sandbox.copyBuyListTextChecklist();
     assert(
@@ -254,7 +318,7 @@ async function runTests() {
     // 2. CORRUPTED & MALFORMED PAYLOAD RESILIENCE
     console.log("\n--- Section 2: Error Resilience on Malformed Hash ---");
 
-    const corruptResult = sandbox.decodeSharePayload(
+    const corruptResult = await sandbox.decodeSharePayload(
       "invalid!!!not-base64-@@@"
     );
     assert(
@@ -698,15 +762,15 @@ async function runTests() {
 
     // 8.5 Share URL size guard
     const longItems = [];
-    for (let i = 0; i < 40; i++) {
+    for (let i = 0; i < 150; i++) {
       longItems.push({
-        id: `item_${i}`,
-        name: `Very Long Grocery Item Name Number ${i} With Extra Details`,
-        category: "produce",
-        store: "Supermarket Extra Long Store Name",
-        quantity: 10,
+        id: `item_${i}_${Math.random().toString(36).slice(2)}`,
+        name: `Grocery Item Name ${i} Unique Token ${Math.random().toString(36).slice(2)} With Descriptive Ingredients and Notes`,
+        category: `cat_${i % 10}_${Math.random().toString(36).slice(2)}`,
+        store: `Store Location ${i % 5} Branch ${Math.random().toString(36).slice(2)}`,
+        quantity: 10 + i,
         unit: "kg",
-        price: 150000,
+        price: 150000 + i * 1000,
         checked: false,
       });
     }
@@ -714,18 +778,20 @@ async function runTests() {
       title: "Extremely Long Grocery Shopping List",
       items: longItems,
     };
-    let lastToast = null;
+    const toasts = [];
     sandbox._mockShowToast = (msg) => {
-      lastToast = msg;
+      toasts.push(msg);
     };
     vm.runInContext(
       "const _orig_showToast2 = showToast; showToast = (msg) => { if (window._mockShowToast) window._mockShowToast(msg); return _orig_showToast2(msg); };",
       sandbox
     );
-    sandbox.copyShareUrl();
+    await sandbox.copyShareUrl();
     assert(
-      typeof lastToast === "string" &&
-        (lastToast.includes("2,048") || lastToast.includes("2.048")),
+      toasts.some(
+        (t) =>
+          typeof t === "string" && (t.includes("2,048") || t.includes("2.048"))
+      ),
       "HYGIENE-06: copyShareUrl displays warning toast when URL exceeds 2048 chars"
     );
     vm.runInContext("showToast = _orig_showToast2;", sandbox);

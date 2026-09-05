@@ -402,6 +402,17 @@ function createTrackerSandbox(options = {}) {
     },
     btoa: (str) => Buffer.from(str, "binary").toString("base64"),
     atob: (b64) => Buffer.from(b64, "base64").toString("binary"),
+    TextEncoder: typeof TextEncoder !== "undefined" ? TextEncoder : undefined,
+    TextDecoder: typeof TextDecoder !== "undefined" ? TextDecoder : undefined,
+    Uint8Array,
+    CompressionStream:
+      typeof CompressionStream !== "undefined" ? CompressionStream : undefined,
+    DecompressionStream:
+      typeof DecompressionStream !== "undefined"
+        ? DecompressionStream
+        : undefined,
+    Response: typeof Response !== "undefined" ? Response : undefined,
+    Blob: typeof Blob !== "undefined" ? Blob : undefined,
     encodeURIComponent,
     decodeURIComponent,
     escape,
