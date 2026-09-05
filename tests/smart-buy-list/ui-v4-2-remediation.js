@@ -415,6 +415,50 @@ try {
   );
   vm.runInContext("toggleItemCheck = _orig_toggleItemCheck;", sandbox);
 
+  // ADR-0029: Pure Event Delegation Invariants
+  assert(
+    !planningCardHtml.includes("onclick="),
+    "CARD-11: Planning card buttons have zero inline onclick attributes"
+  );
+  assert(
+    !buyCardHtml.match(/<button[^>]*onclick=/i),
+    "CARD-12: Buy mode card buttons have zero inline onclick attributes"
+  );
+
+  let cardClickDelegatedToggleCount = 0;
+  sandbox._mockCardToggle = () => {
+    cardClickDelegatedToggleCount++;
+  };
+  vm.runInContext(
+    "const _orig_toggleCard = toggleItemCheck; toggleItemCheck = () => { if (window._mockCardToggle) window._mockCardToggle(); return _orig_toggleCard(); };",
+    sandbox
+  );
+
+  // When clicking inside a [data-action] button, handleCardClick must ignore to let delegation handle it
+  const eventInsideDataAction = {
+    target: {
+      closest: (selector) => (selector === "[data-action]" ? {} : null),
+    },
+  };
+  sandbox.handleCardClick(eventInsideDataAction, testItem.id);
+  assert(
+    cardClickDelegatedToggleCount === 0,
+    "CARD-13: handleCardClick ignores clicks originating from [data-action] elements"
+  );
+
+  // When clicking on card background (outside any [data-action]), handleCardClick triggers toggle
+  const eventOutsideDataAction = {
+    target: {
+      closest: (selector) => null,
+    },
+  };
+  sandbox.handleCardClick(eventOutsideDataAction, testItem.id);
+  assert(
+    cardClickDelegatedToggleCount === 1,
+    "CARD-14: handleCardClick triggers toggle when clicking card background outside [data-action]"
+  );
+  vm.runInContext("toggleItemCheck = _orig_toggleCard;", sandbox);
+
   // =========================================================================
   // Section 4: Service Worker & Cloudflare Pages _headers (B2, I2, I3)
   // =========================================================================

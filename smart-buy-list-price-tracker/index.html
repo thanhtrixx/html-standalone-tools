@@ -7819,6 +7819,13 @@
 
       function handleCardClick(e, itemId) {
         if (touchState.isSwiping) return;
+        if (
+          e &&
+          e.target &&
+          e.target.closest &&
+          e.target.closest("[data-action]")
+        )
+          return;
         toggleItemCheck(itemId);
       }
 
@@ -7966,7 +7973,6 @@
                   type="button"
                   data-action="toggle-check"
                   data-item-id="${safeId}"
-                  onclick="event.stopPropagation(); toggleItemCheck('${safeId}')"
                   aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
                   class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}"
                 >
@@ -7985,7 +7991,6 @@
                   type="button"
                   data-action="edit-price"
                   data-item-id="${safeId}"
-                  onclick="event.stopPropagation(); openQuickPriceEdit('${safeId}')"
                   aria-label="${(t.aria_edit_price || "Update item price") + ": " + safeName}"
                   class="font-bold text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors"
                   title="Update Price"
@@ -8064,7 +8069,6 @@
                 type="button"
                 data-action="toggle-check"
                 data-item-id="${safeId}"
-                onclick="toggleItemCheck('${safeId}')"
                 aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
                 class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer"
                 title="Toggle Check"
@@ -8084,7 +8088,6 @@
                   type="button"
                   data-action="edit-item"
                   data-item-id="${safeId}"
-                  onclick="openFullItemEdit('${safeId}')"
                   aria-label="${(t.aria_edit_item || "Edit item details") + ": " + safeName}"
                   class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 transition-colors cursor-pointer"
                   title="Adjust details"
@@ -8106,7 +8109,6 @@
                   type="button"
                   data-action="compare"
                   data-item-id="${safeId}"
-                  onclick="openItemComparator('${safeId}')"
                   aria-label="${(t.aria_nav_compare || "Compare") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-900/60 rounded-lg border border-slate-700/60 hover:border-indigo-500/50 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Compare Pack Sizes"
@@ -8118,7 +8120,6 @@
                   type="button"
                   data-action="edit-item"
                   data-item-id="${safeId}"
-                  onclick="openFullItemEdit('${safeId}')"
                   aria-label="${(t.aria_edit_item || "Edit") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700/60 transition-colors flex items-center gap-1 cursor-pointer"
                   title="Edit Item Details"
@@ -8130,7 +8131,6 @@
                   type="button"
                   data-action="delete-item"
                   data-item-id="${safeId}"
-                  onclick="deleteItem('${safeId}')"
                   aria-label="${(t.aria_delete_item || "Delete item") + ": " + safeName}"
                   class="px-2.5 py-1 text-xs font-semibold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/40 transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
                   title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].remove_btn || "Remove"}"
@@ -8144,7 +8144,6 @@
                   type="button"
                   data-action="edit-item"
                   data-item-id="${safeId}"
-                  onclick="openFullItemEdit('${safeId}')"
                   aria-label="${(t.aria_edit_item || "Edit item") + ": " + safeName}"
                   class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 transition-colors block text-right cursor-pointer"
                   title="Update Price / Details"
