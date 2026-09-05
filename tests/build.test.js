@@ -432,6 +432,25 @@ EMPTY_KEY=
       envResolved === "/from/process/env",
       "resolveDestDir prioritizes process.env over local file env"
     );
+
+    // Case 14c: Fallback to .env.local when process.env is absent
+    delete process.env.TOOLS_DEST_DIR;
+    const fileResolved = resolveDestDir([], tempCascadeDir);
+    assert(
+      fileResolved === "/from/env/local",
+      "resolveDestDir falls back to .env.local when CLI and process.env are absent"
+    );
+
+    // Case 14d: Null when unconfigured
+    const emptyDir = path.join(__dirname, "temp_empty_dir");
+    fs.mkdirSync(emptyDir, { recursive: true });
+    const nullResolved = resolveDestDir([], emptyDir);
+    assert(
+      nullResolved === null,
+      "resolveDestDir returns null when no destination is configured"
+    );
+    fs.rmSync(emptyDir, { recursive: true, force: true });
+    fs.rmSync(tempCascadeDir, { recursive: true, force: true });
   } finally {
     if (originalEnv !== undefined) {
       process.env.TOOLS_DEST_DIR = originalEnv;
@@ -439,24 +458,6 @@ EMPTY_KEY=
       delete process.env.TOOLS_DEST_DIR;
     }
   }
-
-  // Case 14c: Fallback to .env.local
-  const fileResolved = resolveDestDir([], tempCascadeDir);
-  assert(
-    fileResolved === "/from/env/local",
-    "resolveDestDir falls back to .env.local when CLI and process.env are absent"
-  );
-
-  // Case 14d: Null when unconfigured
-  const emptyDir = path.join(__dirname, "temp_empty_dir");
-  fs.mkdirSync(emptyDir, { recursive: true });
-  const nullResolved = resolveDestDir([], emptyDir);
-  assert(
-    nullResolved === null,
-    "resolveDestDir returns null when no destination is configured"
-  );
-  fs.rmSync(emptyDir, { recursive: true, force: true });
-  fs.rmSync(tempCascadeDir, { recursive: true, force: true });
 
   // Test 15: syncToolToExternal directory mirroring & companion asset sync
   const tempSyncDest = path.join(__dirname, "temp_external_sync");

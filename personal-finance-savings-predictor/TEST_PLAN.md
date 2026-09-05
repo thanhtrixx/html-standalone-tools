@@ -2,16 +2,16 @@
 
 > **Target:** `personal-finance-savings-predictor/index.html` & `dist/personal-finance-savings-predictor/index.html`  
 > **Goal:** Deterministically validate all 40 feature requirements (R1–R40) across financial simulation mathematics, utility helpers, UI/UX DOM components, bilingual i18n parity, and compacted build packaging.  
-> **Method:** Automated Node.js test runner (`npm test`) + Comprehensive manual QA checklist.
+> **Method:** Automated Bun / Node.js test runner (`bun test` / `npm test`) + Comprehensive manual QA checklist.
 
 ```bash
-# Automated Test Suites (502 assertions passing across 5 suites)
-npm test              # Run all 5 suites with unified multi-format reporting (502 assertions)
-npm run test:sim      # Pure simulation engine unit tests & mathematical edge cases (77 assertions)
-npm run test:helpers  # Currency masking, formatters, LZ-String & CSV editor tests (141 assertions)
-npm run test:ui       # UI/UX component & DOM integration tests for R1-R40 (186 assertions)
-npm run test:i18n     # Bilingual translation dictionary parity & verbal localization (60 assertions)
-npm run test:build    # Compacted build pipeline & release packaging verification (38 assertions)
+# Automated Test Suites (Dual-Runtime: Bun or Node.js)
+bun test              # or: npm test (Run all suites with multi-format reporting)
+bun run test:sim      # or: npm run test:sim (Pure simulation engine unit tests)
+bun run test:helpers  # or: npm run test:helpers (Currency masking, formatters, LZ-String & CSV editor)
+bun run test:ui       # or: npm run test:ui (UI/UX component & DOM integration tests)
+bun run test:i18n     # or: npm run test:i18n (Bilingual translation dictionary parity)
+bun run test:build    # or: npm run test:build (Compacted build pipeline & release verification)
 ```
 
 ---
@@ -210,13 +210,13 @@ flowchart TD
 
 ## 📊 Expected Quality Gates & Acceptance Criteria
 
-| Category                  | Requirement                                              | Quality Threshold                            |
-| :------------------------ | :------------------------------------------------------- | :------------------------------------------- |
-| **Automated Test Suites** | All 5 test suites pass cleanly (`npm test`)              | **502 / 502 (100% PASS)**                    |
-| **Lint & Formatting**     | Code formatting and syntax checks (`npm run lint:check`) | **0 errors / 0 warnings**                    |
-| **Build Compaction**      | Minification and asset inlining (`npm run build`)        | **> 30% reduction (< 220 KB deliverable)**   |
-| **Browser Performance**   | 5-year simulation run execution time                     | **< 100 milliseconds**                       |
-| **Console Cleanliness**   | Runtime error log scan                                   | **0 unhandled exceptions or error warnings** |
+| Category                  | Requirement                                                                     | Quality Threshold                            |
+| :------------------------ | :------------------------------------------------------------------------------ | :------------------------------------------- |
+| **Automated Test Suites** | All 5 test suites pass cleanly (`bun test` / `npm test`)                        | **502 / 502 (100% PASS)**                    |
+| **Lint & Formatting**     | Code formatting and syntax checks (`bun run lint:check` / `npm run lint:check`) | **0 errors / 0 warnings**                    |
+| **Build Compaction**      | Minification and asset inlining (`bun run build` / `npm run build`)             | **> 30% reduction (< 220 KB deliverable)**   |
+| **Browser Performance**   | 5-year simulation run execution time                                            | **< 100 milliseconds**                       |
+| **Console Cleanliness**   | Runtime error log scan                                                          | **0 unhandled exceptions or error warnings** |
 
 ---
 

@@ -29,12 +29,10 @@ jobs:
           bun-version: latest
 
       - name: Install Dependencies
-        run: bun install --frozen-lockfile || npm ci
+        run: bun install --frozen-lockfile
 
       - name: Verify Build & Automated Tests
-        run: |
-          bun run build || npm run build
-          bun run test || npm test
+        run: bun run verify
 
       - name: Upload Test Report Artifacts
         if: always()
@@ -54,7 +52,7 @@ jobs:
           release_branches: main
 
       - name: Package Release Assets
-        run: node scripts/pack-release.js --version=${{ steps.tag_version.outputs.new_tag }}
+        run: bun scripts/pack-release.js --version=${{ steps.tag_version.outputs.new_tag }}
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2

@@ -2,16 +2,16 @@
 
 > **Target:** `buy-vs-rent-home-comparison/index.html` & `buy-vs-rent-home-comparison/dist/index.html` (or `dist/buy-vs-rent-home-comparison/index.html`)  
 > **Goal:** Deterministically validate all 35 feature requirements (R1–R35) across financial simulation mathematics, amortization schedules, opportunity cost delta reinvestment, bilingual i18n parity, analytics charts, URL sharing, AI decision dossiers, and compacted build packaging.  
-> **Method:** Automated Node.js test runner (`npm test`) + Comprehensive manual QA checklist.
+> **Method:** Automated Bun / Node.js test runner (`bun test` / `npm test`) + Comprehensive manual QA checklist.
 
 ```bash
-# Automated Test Suites for Buy vs. Rent Home Comparison
-npm test                      # Run all repository test suites with unified multi-format reporting
-npm run test:buy-rent         # Pure simulation engine unit tests & mathematical amortization tests
-npm run test:buy-rent:ui      # UI shell, translation dictionary parity & currency masking tests
-npm run test:buy-rent:charts  # Chart.js analytics, 2D sensitivity matrix & visualization tests
-npm run test:buy-rent:dossier # LZ-String URL hash sharing, AI decision dossier & privacy mask tests
-npm run test:buy-rent:tooltips# Floating tooltips, methodology hub & dynamic formula trace tests
+# Automated Test Suites for Buy vs. Rent Home Comparison (Dual-Runtime)
+bun test                      # or: npm test (Run all suites with unified reporting)
+bun run test:buy-rent         # or: npm run test:buy-rent (Pure simulation engine unit tests)
+bun run test:buy-rent:ui      # or: npm run test:buy-rent:ui (UI shell, i18n parity & currency masking)
+bun run test:buy-rent:charts  # or: npm run test:buy-rent:charts (Chart.js analytics & 2D sensitivity matrix)
+bun run test:buy-rent:dossier # or: npm run test:buy-rent:dossier (LZ-String sharing & AI decision dossier)
+bun run test:buy-rent:tooltips# or: npm run test:buy-rent:tooltips (Floating tooltips & formula hub)
 ```
 
 ---
@@ -89,4 +89,4 @@ Before opening a PR or merging to `main`, verify the following interactive behav
 - [ ] **Dynamic Verbal Helpers**: Type `4500000000` into Home Price; verify that `4.5 Tỷ VND` (or `4.5 Billion VND` in English) updates instantaneously without cursor jumping.
 - [ ] **AI Decision Dossier Bilingual Export**: Generate an AI Dossier in English and Vietnamese; switch between all 4 prompt blueprints (Verdict, Stress-Test, FIRE, Asset Allocation) and verify 100% bilingual parity across parameters, outcomes, and advisory consultation blueprints. Activate Privacy Anonymization Mask and verify all absolute numbers convert to localized home price multiples and percentages.
 - [ ] **Methodology Hub & KaTeX Proofs**: Open the Methodology Hub; check that dynamic formula traces substitute active input values into mathematical equations in real time.
-- [ ] **Single-File Compaction**: Run `npm run build:buy-rent` and open `buy-vs-rent-home-comparison/dist/index.html` via `file://` to ensure 100% offline standalone execution.
+- [ ] **Single-File Compaction**: Run `bun run build:buy-rent` (or `npm run build:buy-rent`) and open `buy-vs-rent-home-comparison/dist/index.html` via `file://` to ensure 100% offline standalone execution.

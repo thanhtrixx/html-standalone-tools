@@ -3,28 +3,28 @@
 > **Target File:** `smart-buy-list-price-tracker/index.html`  
 > **Test Architecture:** 7 Permanent Domain Suites (`tests/smart-buy-list-*.test.js`)  
 > **Shared Harness:** `tests/helpers/smart-buy-list-harness.js`  
-> **Test Runner:** `scripts/run-tests.js` (`npm test`, `npm run test:tracker`)  
-> **Architecture Decision Record:** [`docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md`](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md)  
+> **Test Runner:** `scripts/run-tests.js` (`bun test` / `npm test`, `bun run test:tracker` / `npm run test:tracker`)  
+> **Architecture Decision Record:** [`docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md`](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md) & [`docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md`](../docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md)  
 > **Historical Incremental Test Log Archive:** [`docs/deprecated/TEST_PLAN_HISTORY.md`](./docs/deprecated/TEST_PLAN_HISTORY.md)
 
 ---
 
 ## 🎯 Test Architecture & Domain Organization
 
-Per **ADR-0028**, the `smart-buy-list-price-tracker` test suite is organized into **7 domain capabilities**. All tests strictly adhere to the zero-runtime build constraint (pure Node.js built-ins) and test observable behaviors with zero version-name coupling.
+Per **ADR-0028** and **ADR-0007**, the `smart-buy-list-price-tracker` test suite is organized into **7 domain capabilities** with full **Dual-Runtime Compatibility (Bun + Node.js)**.
 
 ### Developer Inner Loop
 
-| Target Scope                 | Command                         | Description                                                                                                     |
-| :--------------------------- | :------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
-| **All Tracker Suites**       | `npm run test:tracker`          | Executes all 7 domain suites concurrently via `scripts/run-tests.js --tool smart-buy-list-price-tracker` (~12s) |
-| **Core Math & Scoring**      | `npm run test:tracker:math`     | Unit price normalization, deal scoring, comparator intelligence, sparklines                                     |
-| **Storage & State**          | `npm run test:tracker:storage`  | LocalStorage, IndexedDB migrations, backup/restore, clipboard interchange                                       |
-| **Cloud Sync & Concurrency** | `npm run test:tracker:cloud`    | Drive & Gist sync, 3-way merge, 30-day tombstones, 403 rate limit handling                                      |
-| **UI Interactions**          | `npm run test:tracker:ui`       | 4-tab SPA navigation, swipe gestures, cards, modals, Smart Omnibox                                              |
-| **PWA Lifecycle & Cache**    | `npm run test:tracker:pwa`      | Manifest validation, dynamic SemVer parity, service worker caching, iOS safe-area                               |
-| **i18n & Accessibility**     | `npm run test:tracker:i18n`     | 100% bilingual key parity, VND/currency formatting, ARIA audit                                                  |
-| **Security & CSP**           | `npm run test:tracker:security` | Strict CSP compliance, HTML entity sanitization, `_headers` framing protection                                  |
+| Target Scope                 | Command (Bun)                   | Command (Node.js)               | Description                                                                                                     |
+| :--------------------------- | :------------------------------ | :------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
+| **All Tracker Suites**       | `bun run test:tracker`          | `npm run test:tracker`          | Executes all 7 domain suites concurrently via `scripts/run-tests.js --tool smart-buy-list-price-tracker` (~12s) |
+| **Core Math & Scoring**      | `bun run test:tracker:math`     | `npm run test:tracker:math`     | Unit price normalization, deal scoring, comparator intelligence, sparklines                                     |
+| **Storage & State**          | `bun run test:tracker:storage`  | `npm run test:tracker:storage`  | LocalStorage, IndexedDB migrations, backup/restore, clipboard interchange                                       |
+| **Cloud Sync & Concurrency** | `bun run test:tracker:cloud`    | `npm run test:tracker:cloud`    | Drive & Gist sync, 3-way merge, 30-day tombstones, 403 rate limit handling                                      |
+| **UI Interactions**          | `bun run test:tracker:ui`       | `npm run test:tracker:ui`       | 4-tab SPA navigation, swipe gestures, cards, modals, Smart Omnibox                                              |
+| **PWA Lifecycle & Cache**    | `bun run test:tracker:pwa`      | `npm run test:tracker:pwa`      | Manifest validation, dynamic SemVer parity, service worker caching, iOS safe-area                               |
+| **i18n & Accessibility**     | `bun run test:tracker:i18n`     | `npm run test:tracker:i18n`     | 100% bilingual key parity, VND/currency formatting, ARIA audit                                                  |
+| **Security & CSP**           | `bun run test:tracker:security` | `npm run test:tracker:security` | Strict CSP compliance, HTML entity sanitization, `_headers` framing protection                                  |
 
 ---
 
@@ -48,21 +48,23 @@ Every Pull Request and commit must pass all validation gates locally and in CI (
 
 1. **Prettier Code Formatting**:
    ```bash
-   npm run lint:check
+   bun run lint:check   # or: npm run lint:check
    ```
 2. **Compacted Deliverable Build**:
    ```bash
-   npm run build
+   bun run build        # or: npm run build
    ```
 3. **Targeted Inner-Loop Verification**:
    ```bash
-   npm run test:tracker
+   bun run test:tracker # or: npm run test:tracker
    ```
 4. **Unified Automated Test Suite Execution**:
    ```bash
-   npm test
+   bun test             # or: npm test
+   # Or full verification gate:
+   bun run verify       # or: npm run verify
    ```
-   _Requirement_: 100% of all 2,222+ automated assertions across all repository test suites must pass with zero failures.
+   _Requirement_: 100% of all 2,222+ automated assertions across all repository test suites must pass with zero failures in both Bun and Node.
 
 ---
 

@@ -204,9 +204,13 @@ async function runTests() {
     );
 
     let shareToast = "";
-    sandbox.showToast = (msg) => {
+    sandbox._mockShowToast = (msg) => {
       shareToast = msg;
     };
+    vm.runInContext(
+      "const _orig_showToast = showToast; showToast = (msg) => { if (window._mockShowToast) window._mockShowToast(msg); return _orig_showToast(msg); };",
+      sandbox
+    );
     sandbox.memoryState.activeList = sampleList;
     await sandbox.copyBuyListTextChecklist();
     assert(
@@ -220,6 +224,7 @@ async function runTests() {
       shareToast.length > 0,
       `SHARE-01j: exportBuyListJsonFile triggers toast notification (Got: '${shareToast}')`
     );
+    vm.runInContext("showToast = _orig_showToast;", sandbox);
 
     // 2. CORRUPTED & MALFORMED PAYLOAD RESILIENCE
     console.log("\n--- Section 2: Error Resilience on Malformed Hash ---");
@@ -685,15 +690,20 @@ async function runTests() {
       items: longItems,
     };
     let lastToast = null;
-    sandbox.showToast = (msg) => {
+    sandbox._mockShowToast = (msg) => {
       lastToast = msg;
     };
+    vm.runInContext(
+      "const _orig_showToast2 = showToast; showToast = (msg) => { if (window._mockShowToast) window._mockShowToast(msg); return _orig_showToast2(msg); };",
+      sandbox
+    );
     sandbox.copyShareUrl();
     assert(
       typeof lastToast === "string" &&
         (lastToast.includes("2,048") || lastToast.includes("2.048")),
       "HYGIENE-06: copyShareUrl displays warning toast when URL exceeds 2048 chars"
     );
+    vm.runInContext("showToast = _orig_showToast2;", sandbox);
 
     // 8.6 Single source window exports
     const exportBlockMatch = rawHtml.match(

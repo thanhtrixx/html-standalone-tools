@@ -181,54 +181,42 @@ function loadTestSandbox(mockFetch = null) {
       head: { appendChild: function () {} },
       body: { appendChild: function () {} },
     },
-    window: {
-      localStorage: mockLocalStorage,
-      location: { origin: "https://localhost:8080" },
-      navigator: {
-        vibrate: () => {},
-        clipboard: { writeText: async () => {}, readText: async () => "" },
-      },
-    },
     localStorage: mockLocalStorage,
     navigator: {
       vibrate: () => {},
       clipboard: { writeText: async () => {}, readText: async () => "" },
     },
     location: { origin: "https://localhost:8080" },
-    showToast: (msg) => {
-      toastsShown.push(msg);
-    },
-    openModal: (id) => {
-      modalsOpened.push(id);
-    },
-    closeModal: (id) => {
-      modalsClosed.push(id);
-    },
   };
 
-  sandbox.window.document = sandbox.document;
-  sandbox.window.showToast = sandbox.showToast;
-  sandbox.window.openModal = sandbox.openModal;
-  sandbox.window.closeModal = sandbox.closeModal;
+  sandbox.window = sandbox;
+  sandbox._testToastsShown = toastsShown;
+  sandbox._testModalsOpened = modalsOpened;
+  sandbox._testModalsClosed = modalsClosed;
 
   const context = vm.createContext(sandbox);
   vm.runInContext(combinedScripts, context);
 
-  if (context.window) {
-    Object.assign(context, context.window);
-  }
-
-  // Intercept showToast to capture toasts into toastsShown array
-  const origShowToast = context.showToast;
-  context.showToast = (msg, duration) => {
-    toastsShown.push(msg);
-    if (typeof origShowToast === "function") {
-      origShowToast(msg, duration);
-    }
-  };
-  if (context.window) {
-    context.window.showToast = context.showToast;
-  }
+  vm.runInContext(
+    `
+    const _orig_showToast_harness = typeof showToast === 'function' ? showToast : null;
+    showToast = function(msg, duration) {
+      if (window._testToastsShown) window._testToastsShown.push(msg);
+      if (_orig_showToast_harness) return _orig_showToast_harness(msg, duration);
+    };
+    const _orig_openModal_harness = typeof openModal === 'function' ? openModal : null;
+    openModal = function(id) {
+      if (window._testModalsOpened) window._testModalsOpened.push(id);
+      if (_orig_openModal_harness) return _orig_openModal_harness(id);
+    };
+    const _orig_closeModal_harness = typeof closeModal === 'function' ? closeModal : null;
+    closeModal = function(id) {
+      if (window._testModalsClosed) window._testModalsClosed.push(id);
+      if (_orig_closeModal_harness) return _orig_closeModal_harness(id);
+    };
+  `,
+    context
+  );
 
   return { context, elements, toastsShown, modalsOpened, modalsClosed };
 }

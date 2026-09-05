@@ -385,9 +385,13 @@ try {
 
   // Test delegated click dispatcher
   let delegatedActionFired = false;
-  sandbox.toggleItemCheck = (id) => {
+  sandbox._mockToggleItemCheck = (id) => {
     if (id === "item_test_safe_1") delegatedActionFired = true;
   };
+  vm.runInContext(
+    "const _orig_toggleItemCheck = toggleItemCheck; toggleItemCheck = (id) => { if (window._mockToggleItemCheck) window._mockToggleItemCheck(id); return _orig_toggleItemCheck(id); };",
+    sandbox
+  );
   const fakeEvent = {
     target: {
       closest: (selector) => {
@@ -409,6 +413,7 @@ try {
     delegatedActionFired,
     "CARD-10: handleItemCardDelegatedClick routes data-action='toggle-check' to toggleItemCheck()"
   );
+  vm.runInContext("toggleItemCheck = _orig_toggleItemCheck;", sandbox);
 
   // =========================================================================
   // Section 4: Service Worker & Cloudflare Pages _headers (B2, I2, I3)

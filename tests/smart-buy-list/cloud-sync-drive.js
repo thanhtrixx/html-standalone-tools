@@ -828,9 +828,13 @@ async function runCloudSyncTests() {
     );
 
     let lastToast = "";
-    ghEngine.sandbox.showToast = (msg) => {
+    ghEngine.sandbox._mockShowToast = (msg) => {
       lastToast = msg;
     };
+    vm.runInContext(
+      "const _orig_showToast = showToast; showToast = (msg) => { if (window._mockShowToast) window._mockShowToast(msg); return _orig_showToast(msg); };",
+      ghEngine.sandbox
+    );
     ghEngine.sandbox.storageManager.getActiveProviderType = () => "github";
     ghEngine.sandbox.githubAuthState.token = "ghp_valid_mock_token";
     ghEngine.sandbox.storageManager.sync = async () => ({
@@ -859,6 +863,7 @@ async function runCloudSyncTests() {
       !lastToast.includes("{msg}"),
       "ERR-04: Vietnamese toast does not contain literal '{msg}' token"
     );
+    vm.runInContext("showToast = _orig_showToast;", ghEngine.sandbox);
 
     // =========================================================================
     // SECTION 8: PWA Version Bump & Bilingual Translation Parity
