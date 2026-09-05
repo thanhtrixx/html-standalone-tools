@@ -744,12 +744,15 @@ try {
   const swContent = fs.readFileSync(swPath, "utf8");
 
   assert(
-    manifest.version === "4.1.0" || manifest.version === "4.2.0",
+    manifest.version === "4.1.0" ||
+      manifest.version === "4.2.0" ||
+      manifest.version === "4.3.0",
     "PWA-01: manifest.webmanifest version bumped to 4.2.0 (or 4.1.0)"
   );
   assert(
     swContent.includes('const CACHE_NAME = "smart-buy-list-v4.1.0";') ||
-      swContent.includes('const CACHE_NAME = "smart-buy-list-v4.2.0";'),
+      swContent.includes('const CACHE_NAME = "smart-buy-list-v4.2.0";') ||
+      swContent.includes('const CACHE_NAME = "smart-buy-list-v4.3.0";'),
     "PWA-02: sw.js CACHE_NAME matches smart-buy-list-v4.2.0 (or v4.1.0)"
   );
 

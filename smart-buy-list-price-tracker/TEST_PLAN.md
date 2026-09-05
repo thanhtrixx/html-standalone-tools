@@ -1,4 +1,4 @@
-# 🧪 Living Test Plan & Quality Assurance Strategy (v4.2.0)
+# 🧪 Living Test Plan & Quality Assurance Strategy (v4.3.0)
 
 > **Target File:** `smart-buy-list-price-tracker/index.html`  
 > **Test Location:** `tests/smart-buy-list-*.test.js`  
@@ -16,7 +16,7 @@ All automated tests strictly adhere to the zero-runtime build constraint and tes
 3. **Multi-Cloud Concurrency & Conflict Resolution**: 3-Way differential merge (`Merge3`) verification, deletion tombstone lifecycle (30-day TTL), in-flight mutation preservation, Google Drive AppData sync, and GitHub Gist REST sync with 403 rate limit diagnostics, reset countdowns, in-panel diagnostics banner, and Classic scope enforcement.
 4. **DOM & UI Interaction Ergonomics**: JSDOM-driven tests asserting 4-tab SPA navigation (`Planning`, `Buy`, `Price History`, `Comparator`), page horizontal swipe gestures, item card gesture hierarchy, modal light dismiss/history popstate navigation, Smart Omnibox NLP parsing with pre-fill to Detailed Options, 1-line 3-column item editing, and unified `#finishTripBar` visibility.
 5. **Bilingual Localization Parity (i18n)**: 100% dictionary key parity between English (`en`) and Vietnamese (`vi`), translation string completeness, dynamic language switching with country flags/full names, and currency masking (`formatCurrency`).
-6. **Progressive Web Application (PWA) & Asset Packaging**: Service worker lifecycle (`sw.js` v4.2.0), Network-First navigation with fallback, cache purge controls, companion asset compaction (Terser), and standalone release ZIP packaging.
+6. **Progressive Web Application (PWA) & Asset Packaging**: Service worker lifecycle (`sw.js` v4.3.0), Network-First navigation with fallback, cache purge controls, companion asset compaction (Terser), iOS safe-area insets (`viewport-fit=cover` + `env(safe-area-inset-*)`), and standalone release ZIP packaging.
 
 ---
 
@@ -48,6 +48,7 @@ All automated tests strictly adhere to the zero-runtime build constraint and tes
 | **`tests/smart-buy-list-i18n-theming.test.js`**                          | 100% Vietnamese and English dictionary key symmetry, currency formatting (`formatCurrency`), verbal amount helpers, and theme tokens.          | `I18N-01..03`, `I18N-PARITY-EN→VI`, `I18N-PARITY-VI→EN`                                 |
 | **`tests/smart-buy-list-v4-1-navigation-and-gestures.test.js`**          | 4-tab page navigation, page swipe gestures, item card gesture hierarchy, modal popstate back navigation, Omnibox pre-fill, 3-column layout.    | `NAV-01..16`, `GESTURE-01..12`, `MODAL-01..05`, `OMNIBOX-01..06`, `EDIT-01..06`         |
 | **`tests/smart-buy-list-v4-2-review-remediation.test.js`**               | Review remediation: event delegation, XSS immunity, `_headers` clickjacking, chronological `lastPrice`, math reduction, and PWA v4.2.0 sync.   | `ID-01..09`, `MATH-01..06`, `CARD-01..10`, `HEADERS-01..03`, `SW-01..03`, `PWA-01..02`  |
+| **`tests/smart-buy-list-ios-pwa-safe-area.test.js`**                     | iOS PWA: `viewport-fit=cover` + `env()` safe-area for header/nav/toasts, single manifest, `4.3.0` sync, `sw.js` cache integrity.               | `IOS-01..14`                                                                            |
 
 ---
 

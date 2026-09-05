@@ -2,7 +2,10 @@
 <html lang="vi" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://accounts.google.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob: https://trile.dev https://*.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://www.googleapis.com https://accounts.google.com https://cloudflareinsights.com https://static.cloudflareinsights.com; font-src 'self' data:; manifest-src 'self';"
@@ -451,6 +454,21 @@
           transition-duration: 0.001ms !important;
           scroll-behavior: auto !important;
         }
+      }
+      /* ==================== iOS SAFE-AREA INSETS ====================
+         Notch / Dynamic Island / home indicator.
+         env() resolves to 0 on non-Apple platforms, so this is a no-op there. */
+      header {
+        padding-top: calc(env(safe-area-inset-top) + 0.75rem) !important;
+      }
+      nav#bottomNavBar {
+        padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem) !important;
+      }
+      #toastContainer {
+        top: calc(env(safe-area-inset-top) + 1rem) !important;
+      }
+      #pwaUpdateToast {
+        bottom: calc(env(safe-area-inset-bottom) + 5rem) !important;
       }
     </style>
   </head>
@@ -2787,7 +2805,7 @@
             <span
               id="pwaVersionBadge"
               class="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono"
-              >v4.2.0</span
+              >v4.3.0</span
             >
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1">

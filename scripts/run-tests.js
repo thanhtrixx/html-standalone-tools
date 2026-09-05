@@ -210,6 +210,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-v4-2-review-remediation.test.js",
     category: "Security & Hardening",
   },
+  {
+    name: "Smart Buy-List iOS PWA / Safe-Area & v4.3.0 Sync",
+    file: "tests/smart-buy-list-ios-pwa-safe-area.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {
