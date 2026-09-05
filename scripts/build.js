@@ -561,15 +561,14 @@ async function buildTool(tool) {
     const sIdx = rawHtml.indexOf(scriptStartMarker);
     const eIdx = rawHtml.lastIndexOf(scriptEndMarker);
     if (sIdx !== -1 && eIdx !== -1) {
-      const updatedHtml =
+      rawHtml =
         rawHtml.slice(0, sIdx + scriptStartMarker.length) +
         "\n" +
         bundledScript.trim() +
         "\n    " +
         rawHtml.slice(eIdx);
-      if (updatedHtml !== rawHtml) {
-        fs.writeFileSync(tool.entryFile, updatedHtml, "utf8");
-        rawHtml = updatedHtml;
+      if (process.argv.includes("--sync-source")) {
+        fs.writeFileSync(tool.entryFile, rawHtml, "utf8");
       }
     }
   }
