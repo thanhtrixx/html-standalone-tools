@@ -1,4 +1,4 @@
-# Smart Buy-List & Unit Price Tracker (v4.3.0)
+# Smart Buy-List & Unit Price Tracker (v4.5.0)
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 
@@ -111,7 +111,7 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ### 6. PWA & Mobile Ergonomics
 
-- **Standalone PWA Shell & Single-Source Versioning (v4.3.0)**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.3.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.3.0"`) and `dist/index.html` during compaction build. Full iOS PWA support adds `viewport-fit=cover` and `env(safe-area-inset-*)` safe-area padding for the sticky header, MD3 bottom nav, and toasts (notch / Dynamic Island / home indicator). Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, Cloudflare Pages clickjacking protection `_headers` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`), and standalone `.zip` packaging.
+- **Standalone PWA Shell & Single-Source Versioning (v4.5.0)**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.5.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.5.0"`) and `dist/index.html` during compaction build. Full iOS PWA support adds `viewport-fit=cover` and `env(safe-area-inset-*)` safe-area padding for the sticky header, MD3 bottom nav, and toasts (notch / Dynamic Island / home indicator). Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, Cloudflare Pages clickjacking protection `_headers` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`), and standalone `.zip` packaging.
 - **Pure Event Delegation & Zero-Inline Handlers**: All item card action buttons dispatch strictly via root-level event delegation (`handleItemCardDelegatedClick`) on `document`, using `data-action` and `data-item-id` with strict `/^[a-zA-Z0-9_-]+$/` format validation and cryptographic monotonic IDs (`item_${timestamp}_${randomUUID.slice(0,8)}`). Redundant inline `onclick` handlers are completely eliminated to prevent double-invocation regressions.
 - **Two-Tier Native PWA Back Navigation Hierarchy**: Back navigation (`popstate`) orchestrates a strict two-tier dismissal hierarchy:
   1. _Tier 1 (Modals)_: If `modalHistoryStack` contains active dialogs, dismiss topmost modal.

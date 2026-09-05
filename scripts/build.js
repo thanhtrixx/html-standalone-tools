@@ -493,12 +493,87 @@ async function buildCompanionAssets(
   return processedFiles;
 }
 
+const TRACKER_BUNDLE_MODULES = [
+  "src/domain/units.js",
+  "src/domain/math.js",
+  "src/storage/indexeddb.js",
+  "src/sync/tombstones.js",
+  "src/storage/providers.js",
+  "src/sync/cloud-seam.js",
+  "src/sync/merge3.js",
+  "src/sync/cloud-actions.js",
+  "src/i18n/translations.js",
+  "src/ui/sample-data.js",
+  "src/ui/navigation.js",
+  "src/ui/store-manager.js",
+  "src/ui/render.js",
+  "src/ui/gestures.js",
+  "src/ui/omnibox.js",
+  "src/ui/comparator.js",
+  "src/sharing/sharing.js",
+  "src/sharing/codec.js",
+  "src/sharing/merge-review.js",
+  "src/storage/snapshots.js",
+  "src/sharing/merge-actions.js",
+  "src/ui/trip-completion.js",
+  "src/ui/modals.js",
+  "src/ui/app.js",
+];
+
+/**
+ * Zero-dependency modular inliner for smart-buy-list-price-tracker (ADR-0031)
+ * Concatenates discrete modular source files from src/ into a unified script payload.
+ */
+function bundleTrackerModules(trackerDir) {
+  let combined = "";
+  for (const relPath of TRACKER_BUNDLE_MODULES) {
+    const fullPath = path.join(trackerDir, relPath);
+    if (!fs.existsSync(fullPath)) {
+      throw new Error(`Tracker module missing: ${relPath}`);
+    }
+    let content = fs.readFileSync(fullPath, "utf8");
+    // Strip trailing module.exports block so inlined script in HTML remains pure browser code
+    content = content.replace(
+      /\nif\s*\(typeof module\s*!==\s*["']undefined["'][\s\S]*?\n\}\s*$/g,
+      ""
+    );
+    combined += "\n" + content.trim() + "\n";
+  }
+  return combined;
+}
+
 /**
  * Build a single tool
  */
 async function buildTool(tool) {
   const startTime = Date.now();
-  const rawHtml = fs.readFileSync(tool.entryFile, "utf8");
+  let rawHtml = fs.readFileSync(tool.entryFile, "utf8");
+
+  // Zero-dependency modular inliner for smart-buy-list-price-tracker (ADR-0031)
+  if (
+    tool.name === "smart-buy-list-price-tracker" &&
+    fs.existsSync(path.join(tool.dir, "src"))
+  ) {
+    const bundledScript = bundleTrackerModules(tool.dir);
+    const scriptStartMarker =
+      "<!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->\n    <script>";
+    const scriptEndMarker = "</script>";
+    const sIdx = rawHtml.indexOf(scriptStartMarker);
+    const eIdx = rawHtml.lastIndexOf(scriptEndMarker);
+    if (sIdx !== -1 && eIdx !== -1) {
+      const updatedHtml =
+        rawHtml.slice(0, sIdx + scriptStartMarker.length) +
+        "\n" +
+        bundledScript.trim() +
+        "\n    " +
+        rawHtml.slice(eIdx);
+      if (updatedHtml !== rawHtml) {
+        fs.writeFileSync(tool.entryFile, updatedHtml, "utf8");
+        rawHtml = updatedHtml;
+      }
+    }
+  }
+
   const originalSize = Buffer.byteLength(rawHtml, "utf8");
 
   // Extract version from manifest if present

@@ -560,12 +560,10 @@ async function runTestSuite() {
   );
   const swContent = fs.readFileSync(swPath, "utf8");
   assert(
-    swContent.includes("smart-buy-list-v3.13.0") ||
-      swContent.includes("smart-buy-list-v4.0.0") ||
-      swContent.includes("smart-buy-list-v4.1.0") ||
-      swContent.includes("smart-buy-list-v4.2.0") ||
+    swContent.includes("smart-buy-list-v" + manifestContent.version) ||
+      swContent.includes("smart-buy-list-v4.5.0") ||
       swContent.includes("smart-buy-list-v4.3.0"),
-    "VER-02: sw.js CACHE_NAME is smart-buy-list-v4.2.0 (or v4.1.0 / v4.0.0 / v3.13.0)"
+    "VER-02: sw.js CACHE_NAME matches manifest version"
   );
 
   assert(

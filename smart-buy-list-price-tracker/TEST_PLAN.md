@@ -1,4 +1,4 @@
-# 🧪 Living Test Plan & Quality Assurance Strategy (v4.3.0)
+# 🧪 Living Test Plan & Quality Assurance Strategy (v4.5.0)
 
 > **Target File:** `smart-buy-list-price-tracker/index.html`  
 > **Test Architecture:** 7 Permanent Domain Suites (`tests/smart-buy-list-*.test.js`)  
