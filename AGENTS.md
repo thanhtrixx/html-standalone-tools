@@ -17,3 +17,7 @@ Standard engineering lifecycle and GitHub Flow (PR-per-issue required before clo
 ### Domain docs
 
 Multi-context (`CONTEXT-MAP.md` and per-tool `CONTEXT.md` / `docs/adr/`). See `docs/agents/domain.md`.
+
+### Phase 1 Kickoff & Grilling
+
+Orchestrate Phase 1 (grilling, domain docs, vertical slices, and GitHub issues) via `grill-wow`. See `.agents/skills/grill-wow/SKILL.md`.

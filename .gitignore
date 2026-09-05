@@ -19,7 +19,6 @@ coverage
 .gemini/
 .impeccable/
 .agent/
-.agents/skills/
 
 ### IntelliJ IDEA ###
 .idea
