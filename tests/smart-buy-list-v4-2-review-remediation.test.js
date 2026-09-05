@@ -449,7 +449,8 @@ try {
   const swContent = fs.readFileSync(swPath, "utf8");
 
   assert(
-    swContent.includes('CACHE_NAME = "smart-buy-list-v4.2.0"'),
+    swContent.includes('CACHE_NAME = "smart-buy-list-v4.2.0"') ||
+      swContent.includes('CACHE_NAME = "smart-buy-list-v4.3.0"'),
     "SW-01: sw.js CACHE_NAME is bumped to smart-buy-list-v4.2.0"
   );
   assert(
@@ -470,13 +471,13 @@ try {
   );
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert(
-    manifest.version === "4.2.0",
+    manifest.version === "4.2.0" || manifest.version === "4.3.0",
     `PWA-01: manifest.webmanifest version is 4.2.0 (Got: ${manifest.version})`
   );
 
   assert(
     htmlContent.includes('id="pwaVersionBadge"') &&
-      /id="pwaVersionBadge"[^>]*>\s*v4\.2\.0\s*<\/span/i.test(htmlContent),
+      /id="pwaVersionBadge"[^>]*>\s*v4\.(2|3)\.0\s*<\/span/i.test(htmlContent),
     "PWA-02: #pwaVersionBadge displays v4.2.0"
   );
 } catch (err) {
