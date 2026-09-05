@@ -75,13 +75,17 @@ function handlePopState(event) {
 
   // Tier 2: Tab navigation history
   const targetTab = event && event.state && event.state.tab;
-  if (targetTab && TAB_ORDER.includes(targetTab)) {
-    if (targetTab !== currentActiveTab) {
-      setActiveTab(targetTab, { fromPopState: true, preserveItem: true });
-      return;
-    }
-  } else if (currentActiveTab !== "PLANNING") {
-    // If history is at root / empty state and user is not on PLANNING, return to PLANNING
+  if (
+    targetTab &&
+    TAB_ORDER.includes(targetTab) &&
+    targetTab !== currentActiveTab
+  ) {
+    setActiveTab(targetTab, { fromPopState: true, preserveItem: true });
+    return;
+  }
+
+  // If user is on any tab other than PLANNING (e.g. BUY, PRICE_HISTORY, COMPARATOR), pressing back returns to PLANNING
+  if (currentActiveTab !== "PLANNING") {
     setActiveTab("PLANNING", { fromPopState: true });
     return;
   }
