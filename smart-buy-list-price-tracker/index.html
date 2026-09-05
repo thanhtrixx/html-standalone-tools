@@ -1567,6 +1567,40 @@
           shareable link, or JSON file.
         </p>
 
+        <!-- Store-Scoped Sharing Selection -->
+        <div
+          id="shareScopeContainer"
+          class="hidden bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs space-y-1.5"
+        >
+          <div class="text-slate-400 font-medium" id="lblShareScope">
+            Sharing Scope:
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              id="btnShareScopeAll"
+              onclick="setShareScope('ALL')"
+              class="py-1.5 px-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-500 cursor-pointer text-center"
+            >
+              🛒 <span id="shareScopeAllLabel">All Stores</span> (<span
+                id="shareScopeAllCount"
+                >0</span
+              >)
+            </button>
+            <button
+              type="button"
+              id="btnShareScopeFiltered"
+              onclick="setShareScope('FILTERED')"
+              class="py-1.5 px-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 cursor-pointer text-center"
+            >
+              🏪 <span id="shareScopeFilteredName">Store</span> (<span
+                id="shareScopeFilteredCount"
+                >0</span
+              >)
+            </button>
+          </div>
+        </div>
+
         <!-- Share Action Buttons -->
         <div class="space-y-2 pt-1">
           <button
@@ -1665,6 +1699,160 @@
             <span aria-hidden="true">🆕</span>
             <span id="btnImportReplaceText">Import as New List</span>
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3.1. INTERACTIVE SMART MERGE REVIEW MODAL -->
+    <div
+      id="mergeReviewModal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mergeReviewModalTitleText"
+      onclick="handleModalBackdropClick(event, 'mergeReviewModal')"
+      class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <div
+        onclick="event.stopPropagation()"
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-5 space-y-4 shadow-2xl my-8 max-h-[90vh] flex flex-col"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-800 pb-3"
+        >
+          <div>
+            <h3
+              id="mergeReviewModalTitle"
+              class="text-base font-bold text-white flex items-center gap-2"
+            >
+              <span aria-hidden="true">🔀</span>
+              <span id="mergeReviewModalTitleText">Smart Merge Review</span>
+            </h3>
+            <p
+              id="mergeReviewModalSubtitle"
+              class="text-xs text-slate-400 mt-0.5"
+            >
+              Review differences between incoming shared list and active list.
+            </p>
+          </div>
+          <button
+            onclick="closeModal('mergeReviewModal')"
+            class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <!-- Summary Stats Bar -->
+        <div
+          id="mergeStatsSummary"
+          class="grid grid-cols-4 gap-2 text-center text-[11px] font-semibold py-1"
+        >
+          <div
+            class="bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 rounded-lg p-1.5"
+          >
+            <span id="mergeStatNewCount">0</span>
+            <span id="lblStatNew">New</span>
+          </div>
+          <div
+            class="bg-blue-950/60 border border-blue-800/60 text-blue-300 rounded-lg p-1.5"
+          >
+            <span id="mergeStatPriceCount">0</span>
+            <span id="lblStatPrice">Price Diff</span>
+          </div>
+          <div
+            class="bg-amber-950/60 border border-amber-800/60 text-amber-300 rounded-lg p-1.5"
+          >
+            <span id="mergeStatQtyCount">0</span>
+            <span id="lblStatQty">Qty Diff</span>
+          </div>
+          <div
+            class="bg-slate-800/60 border border-slate-700/60 text-slate-300 rounded-lg p-1.5"
+          >
+            <span id="mergeStatMatchCount">0</span>
+            <span id="lblStatMatch">Match</span>
+          </div>
+        </div>
+
+        <!-- Global Strategy Options -->
+        <div
+          class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2 text-xs"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-slate-300 font-medium" id="lblGlobalQtyStrategy"
+              >Batch Quantity Strategy:</span
+            >
+            <select
+              id="mergeGlobalQtyStrategy"
+              onchange="onMergeGlobalQtyStrategyChange(this.value)"
+              class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 cursor-pointer"
+            >
+              <option value="SUM" id="optQtySum">
+                Sum (Q_local + Q_remote)
+              </option>
+              <option value="REMOTE" id="optQtyRemote">
+                Take Remote (Q_remote)
+              </option>
+              <option value="LOCAL" id="optQtyLocal">
+                Keep Local (Q_local)
+              </option>
+            </select>
+          </div>
+          <label
+            class="flex items-center gap-2 cursor-pointer pt-1 border-t border-slate-800/80"
+          >
+            <input
+              type="checkbox"
+              id="mergeUpdatePriceCatalog"
+              class="rounded border-slate-700 text-emerald-500 focus:ring-0 focus:ring-offset-0 bg-slate-800"
+              checked
+            />
+            <span class="text-slate-300" id="lblUpdatePriceCatalog"
+              >Update store price catalog with incoming prices</span
+            >
+          </label>
+        </div>
+
+        <!-- Diff Items Container (Scrollable) -->
+        <div
+          id="mergeDiffList"
+          class="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-[42vh] text-xs"
+        >
+          <!-- Dynamically generated diff items -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <button
+            id="btnApplyMerge"
+            onclick="applySmartMerge()"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md cursor-pointer transition-colors"
+          >
+            <span aria-hidden="true">🔀</span>
+            <span id="btnApplyMergeText">Apply Smart Merge</span>
+          </button>
+          <div class="flex gap-2">
+            <button
+              id="btnImportAsNewList"
+              onclick="importAsNewListWithSnapshot()"
+              class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700 cursor-pointer transition-colors"
+            >
+              <span aria-hidden="true">🆕</span>
+              <span id="btnImportNewListText"
+                >Replace as New List (Saves Backup)</span
+              >
+            </button>
+            <button
+              onclick="closeModal('mergeReviewModal')"
+              class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 cursor-pointer transition-colors"
+              id="btnCancelMerge"
+              aria-label="Close"
+              data-i18n-aria="modal_close_btn"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -3336,6 +3524,8 @@
           "circlek",
           "gs25",
         ],
+        "Trader Joe's": ["tjs", "trader joe", "trader joes", "trader joe's"],
+        Costco: ["costco", "costco wholesale"],
       };
 
       // In-memory fallback / active working state
@@ -5723,6 +5913,29 @@
           btn_import_merge: "Merge into My Active List",
           btn_import_replace: "Import as New List",
           toast_import_shared_success: "Shared list successfully imported!",
+          merge_modal_title: "Smart Merge Review",
+          merge_modal_subtitle:
+            "Review differences between incoming shared list and active list.",
+          merge_stat_new: "New",
+          merge_stat_price: "Price Diff",
+          merge_stat_qty: "Qty Diff",
+          merge_stat_match: "Match",
+          merge_global_qty_strategy: "Batch Quantity Strategy:",
+          merge_qty_sum: "Sum (Q_local + Q_remote)",
+          merge_qty_remote: "Take Remote (Q_remote)",
+          merge_qty_local: "Keep Local (Q_local)",
+          merge_update_price_catalog:
+            "Update store price catalog with incoming prices",
+          btn_apply_merge: "Apply Smart Merge",
+          btn_import_new_list_snapshot: "Replace as New List (Saves Backup)",
+          toast_smart_merge_success:
+            "Smart merge applied! Merged {count} items.",
+          toast_snapshot_created: "Previous list saved as backup snapshot.",
+          badge_new_item: "New",
+          badge_price_diff: "Price Update",
+          badge_qty_diff: "Qty Diff",
+          badge_matched: "Match",
+          lbl_share_scope: "Sharing Scope:",
           trip_modal_title: "Complete Shopping Trip",
           trip_modal_purchased_label: "Purchased Items:",
           trip_modal_total_spent_label: "Total Trip Spend:",
@@ -6075,6 +6288,31 @@
           btn_import_merge: "Gộp Vào Danh Sách Hiện Tại",
           btn_import_replace: "Nhập Thành Danh Sách Mới",
           toast_import_shared_success: "Đã nhập danh sách chia sẻ thành công!",
+          merge_modal_title: "Đánh Giá Gộp Thông Minh",
+          merge_modal_subtitle:
+            "So sánh khác biệt giữa danh sách chia sẻ và danh sách hiện tại.",
+          merge_stat_new: "Mới",
+          merge_stat_price: "Khác Giá",
+          merge_stat_qty: "Khác SL",
+          merge_stat_match: "Trùng Khớp",
+          merge_global_qty_strategy: "Chiến Lược Số Lượng Hàng Loạt:",
+          merge_qty_sum: "Cộng Dồn (SL Hiện Tại + SL Mới)",
+          merge_qty_remote: "Lấy Số Lượng Mới",
+          merge_qty_local: "Giữ Số Lượng Hiện Tại",
+          merge_update_price_catalog:
+            "Cập nhật danh mục giá cửa hàng từ giá được chia sẻ",
+          btn_apply_merge: "Áp Dụng Gộp Thông Minh",
+          btn_import_new_list_snapshot:
+            "Thay Bằng Danh Sách Mới (Đã Lưu Bản Sao)",
+          toast_smart_merge_success:
+            "Đã gộp thông minh thành công! Đã xử lý {count} mặt hàng.",
+          toast_snapshot_created:
+            "Đã lưu danh sách cũ vào bản sao lưu dự phòng.",
+          badge_new_item: "Mới",
+          badge_price_diff: "Giá Mới",
+          badge_qty_diff: "Khác SL",
+          badge_matched: "Trùng Khớp",
+          lbl_share_scope: "Phạm Vi Chia Sẻ:",
           trip_modal_title: "Hoàn Tất Chuyến Mua Sắm",
           trip_modal_purchased_label: "Mặt Hàng Đã Mua:",
           trip_modal_total_spent_label: "Tổng Chi Tiêu Chuyến Đi:",
@@ -9552,7 +9790,96 @@
       /* =========================================================================
        8. SHARING, TEXT CHECKLIST & MERGE PROTOCOL
        ========================================================================= */
+      let currentShareScope = "ALL";
+
+      function setShareScope(scope) {
+        currentShareScope = scope;
+        updateShareScopeUI();
+      }
+
+      function updateShareScopeUI() {
+        const container = document.getElementById("shareScopeContainer");
+        const btnAll = document.getElementById("btnShareScopeAll");
+        const btnFiltered = document.getElementById("btnShareScopeFiltered");
+        const countAll = document.getElementById("shareScopeAllCount");
+        const countFiltered = document.getElementById(
+          "shareScopeFilteredCount"
+        );
+        const filteredName = document.getElementById("shareScopeFilteredName");
+
+        const hasFilter =
+          typeof currentStoreFilter !== "undefined" &&
+          currentStoreFilter &&
+          currentStoreFilter !== "ALL";
+
+        if (container) {
+          if (hasFilter) {
+            container.classList.remove("hidden");
+            const allItems =
+              (memoryState &&
+                memoryState.activeList &&
+                memoryState.activeList.items) ||
+              [];
+            const filteredItems = allItems.filter(
+              (i) => i.store === currentStoreFilter
+            );
+            if (countAll) countAll.textContent = allItems.length;
+            if (countFiltered) countFiltered.textContent = filteredItems.length;
+            if (filteredName) filteredName.textContent = currentStoreFilter;
+
+            if (currentShareScope === "FILTERED") {
+              if (btnFiltered) {
+                btnFiltered.className =
+                  "py-1.5 px-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-500 cursor-pointer text-center";
+              }
+              if (btnAll) {
+                btnAll.className =
+                  "py-1.5 px-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 cursor-pointer text-center";
+              }
+            } else {
+              if (btnAll) {
+                btnAll.className =
+                  "py-1.5 px-2 rounded-lg text-xs font-semibold bg-emerald-600 text-white border border-emerald-500 cursor-pointer text-center";
+              }
+              if (btnFiltered) {
+                btnFiltered.className =
+                  "py-1.5 px-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700 cursor-pointer text-center";
+              }
+            }
+          } else {
+            container.classList.add("hidden");
+            currentShareScope = "ALL";
+          }
+        }
+      }
+
+      function getActiveShareList() {
+        if (
+          currentShareScope === "FILTERED" &&
+          typeof currentStoreFilter !== "undefined" &&
+          currentStoreFilter &&
+          currentStoreFilter !== "ALL"
+        ) {
+          const rawItems =
+            (memoryState &&
+              memoryState.activeList &&
+              memoryState.activeList.items) ||
+            [];
+          return {
+            title: `${(memoryState && memoryState.activeList && memoryState.activeList.title) || "Shopping List"} (${currentStoreFilter})`,
+            items: rawItems.filter((i) => i.store === currentStoreFilter),
+          };
+        }
+        return (
+          (memoryState && memoryState.activeList) || {
+            title: "Shopping List",
+            items: [],
+          }
+        );
+      }
+
       function openShareModal() {
+        updateShareScopeUI();
         openModal("shareModal");
       }
 
@@ -9724,7 +10051,8 @@
       }
 
       async function copyBuyListTextChecklist() {
-        const text = await generateBuyListTextChecklist(memoryState.activeList);
+        const activeShare = getActiveShareList();
+        const text = await generateBuyListTextChecklist(activeShare);
         if (navigator.clipboard && navigator.clipboard.writeText) {
           return navigator.clipboard.writeText(text).then(() => {
             showToast(
@@ -9736,7 +10064,8 @@
       }
 
       async function copyShareUrl() {
-        const payload = await encodeSharePayload(memoryState.activeList);
+        const activeShare = getActiveShareList();
+        const payload = await encodeSharePayload(activeShare);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
         if (url.length > 2048) {
           const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
@@ -9756,7 +10085,8 @@
       }
 
       async function invokeNativeShare() {
-        const payload = await encodeSharePayload(memoryState.activeList);
+        const activeShare = getActiveShareList();
+        const payload = await encodeSharePayload(activeShare);
         const url = `${window.location.origin}${window.location.pathname}#share=${payload}`;
         if (url.length > 2048) {
           const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
@@ -9765,11 +10095,11 @@
               "Warning: Share URL exceeds 2,048 characters. Consider exporting a JSON file instead."
           );
         }
-        const text = await generateBuyListTextChecklist(memoryState.activeList);
+        const text = await generateBuyListTextChecklist(activeShare);
         if (navigator.share) {
           navigator
             .share({
-              title: memoryState.activeList.title || "Smart Buy-List",
+              title: activeShare.title || "Smart Buy-List",
               text: text,
               url: url,
             })
@@ -9780,9 +10110,10 @@
       }
 
       function exportBuyListJsonFile() {
+        const activeShare = getActiveShareList();
         const payload = {
-          title: memoryState.activeList.title || "Shopping List",
-          items: memoryState.activeList.items || [],
+          title: activeShare.title || "Shopping List",
+          items: activeShare.items || [],
         };
         const dataStr =
           "data:text/json;charset=utf-8," +
@@ -9822,9 +10153,10 @@
       }
 
       function copyBuyListJson() {
+        const activeShare = getActiveShareList();
         const payload = {
-          title: memoryState.activeList.title || "Shopping List",
-          items: memoryState.activeList.items || [],
+          title: activeShare.title || "Shopping List",
+          items: activeShare.items || [],
         };
         const str = JSON.stringify(payload, null, 2);
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -9908,7 +10240,7 @@
             window.pendingSharedList = decoded;
             closeModal("pasteJsonModal");
             closeModal("settingsModal");
-            openModal("importModal");
+            openMergeReviewModal(decoded);
             applyTranslations();
             return true;
           }
@@ -9925,7 +10257,7 @@
             window.pendingSharedList = decoded;
             closeModal("pasteJsonModal");
             closeModal("settingsModal");
-            openModal("importModal");
+            openMergeReviewModal(decoded);
             applyTranslations();
             return true;
           }
@@ -10012,7 +10344,7 @@
               window.pendingSharedList = { title, items };
               closeModal("pasteJsonModal");
               closeModal("settingsModal");
-              openModal("importModal");
+              openMergeReviewModal(window.pendingSharedList);
               applyTranslations();
               return true;
             }
@@ -10026,6 +10358,431 @@
             "Invalid clipboard data. Expected JSON or share link."
         );
         return false;
+      }
+
+      function resolveStoreAlias(inputStore) {
+        if (!inputStore || typeof inputStore !== "string") return inputStore;
+        const knownStores =
+          (memoryState && memoryState.stores) || DEFAULT_STORES;
+        return resolveStoreFromTag(inputStore, knownStores) || inputStore;
+      }
+
+      function computeMergeDiff(incomingItems = [], activeItems = []) {
+        const activeMap = new Map();
+        for (const item of activeItems) {
+          const key = normalizeItemKey(item.name);
+          if (key && !activeMap.has(key)) {
+            activeMap.set(key, item);
+          }
+        }
+
+        const diffItems = [];
+        let newCount = 0;
+        let priceDiffCount = 0;
+        let qtyDiffCount = 0;
+        let matchCount = 0;
+
+        for (const incItem of incomingItems) {
+          const key = normalizeItemKey(incItem.name);
+          const normalizedStore = resolveStoreAlias(incItem.store);
+          const itemWithNormalizedStore = {
+            ...incItem,
+            store: normalizedStore,
+          };
+          const local = activeMap.get(key);
+
+          if (!local) {
+            diffItems.push({
+              status: "NEW",
+              incoming: itemWithNormalizedStore,
+              local: null,
+              selectedQtyStrategy: "REMOTE",
+              useRemotePrice: true,
+              includeInMerge: true,
+            });
+            newCount++;
+          } else {
+            const hasQtyDiff =
+              Number(local.quantity) !== Number(incItem.quantity);
+            const hasPriceDiff =
+              Math.abs(Number(local.price || 0) - Number(incItem.price || 0)) >
+              0.001;
+
+            let status = "MATCH";
+            if (hasPriceDiff && hasQtyDiff) {
+              status = "PRICE_AND_QTY_DIFF";
+              priceDiffCount++;
+              qtyDiffCount++;
+            } else if (hasPriceDiff) {
+              status = "PRICE_DIFF";
+              priceDiffCount++;
+            } else if (hasQtyDiff) {
+              status = "QTY_DIFF";
+              qtyDiffCount++;
+            } else {
+              status = "MATCH";
+              matchCount++;
+            }
+
+            diffItems.push({
+              status,
+              incoming: itemWithNormalizedStore,
+              local,
+              hasQtyDiff,
+              hasPriceDiff,
+              selectedQtyStrategy: hasQtyDiff ? "SUM" : "LOCAL",
+              useRemotePrice: hasPriceDiff,
+              includeInMerge: true,
+            });
+          }
+        }
+
+        return {
+          diffItems,
+          counts: {
+            newCount,
+            priceDiffCount,
+            qtyDiffCount,
+            matchCount,
+            total: incomingItems.length,
+          },
+        };
+      }
+
+      let currentMergeDiff = null;
+
+      function renderMergeReviewModal(sharedList) {
+        if (!sharedList || !Array.isArray(sharedList.items)) return;
+        window.pendingSharedList = sharedList;
+
+        const diffResult = computeMergeDiff(
+          sharedList.items,
+          (memoryState &&
+            memoryState.activeList &&
+            memoryState.activeList.items) ||
+            []
+        );
+        currentMergeDiff = diffResult;
+
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+
+        const statNew = document.getElementById("mergeStatNewCount");
+        const statPrice = document.getElementById("mergeStatPriceCount");
+        const statQty = document.getElementById("mergeStatQtyCount");
+        const statMatch = document.getElementById("mergeStatMatchCount");
+        if (statNew) statNew.textContent = diffResult.counts.newCount;
+        if (statPrice) statPrice.textContent = diffResult.counts.priceDiffCount;
+        if (statQty) statQty.textContent = diffResult.counts.qtyDiffCount;
+        if (statMatch) statMatch.textContent = diffResult.counts.matchCount;
+
+        const catalogCheckbox = document.getElementById(
+          "mergeUpdatePriceCatalog"
+        );
+        if (
+          catalogCheckbox &&
+          typeof catalogCheckbox.hasAttribute === "function"
+        ) {
+          if (!catalogCheckbox.hasAttribute("data-user-toggled")) {
+            catalogCheckbox.checked = true;
+          }
+        } else if (catalogCheckbox) {
+          catalogCheckbox.checked = true;
+        }
+
+        const container = document.getElementById("mergeDiffList");
+        if (!container) return;
+        container.innerHTML = "";
+
+        const currencySymbol =
+          memoryState.settings && memoryState.settings.currency === "USD"
+            ? "$"
+            : "₫";
+
+        diffResult.diffItems.forEach((diff, idx) => {
+          const inc = diff.incoming;
+          const loc = diff.local;
+          const card = document.createElement("div");
+          card.className =
+            "bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-xs";
+
+          let badgeHtml = "";
+          if (diff.status === "NEW") {
+            badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">[🆕 ${t.badge_new_item || "New"}]</span>`;
+          } else if (diff.status === "PRICE_AND_QTY_DIFF") {
+            badgeHtml = `
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">[🔄 ${t.badge_price_diff || "Price Update"}]</span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">[⚖️ ${t.badge_qty_diff || "Qty Diff"}]</span>
+            `;
+          } else if (diff.status === "PRICE_DIFF") {
+            badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">[🔄 ${t.badge_price_diff || "Price Update"}]</span>`;
+          } else if (diff.status === "QTY_DIFF") {
+            badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">[⚖️ ${t.badge_qty_diff || "Qty Diff"}]</span>`;
+          } else {
+            badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-700/40 text-slate-300 border border-slate-600/40">[✅ ${t.badge_matched || "Match"}]</span>`;
+          }
+
+          let controlsHtml = "";
+          if (diff.status === "NEW") {
+            controlsHtml = `
+              <div class="flex items-center justify-between text-slate-400">
+                <span>${inc.quantity} ${inc.unit || "ea"} @ ${inc.price > 0 ? inc.price.toLocaleString() + currencySymbol : "N/A"} (${inc.store || "General"})</span>
+                <label class="flex items-center gap-1.5 cursor-pointer text-slate-300 font-medium">
+                  <input type="checkbox" checked onchange="toggleMergeItemInclude(${idx}, this.checked)" class="rounded border-slate-700 text-emerald-500 bg-slate-800" />
+                  <span>${currentLanguage === "vi" ? "Thêm" : "Add"}</span>
+                </label>
+              </div>
+            `;
+          } else {
+            let qtySection = "";
+            if (diff.hasQtyDiff) {
+              qtySection = `
+                <div class="space-y-1 pt-1 border-t border-slate-800/80">
+                  <div class="flex items-center justify-between text-slate-400 text-[11px]">
+                    <span>${currentLanguage === "vi" ? "Số lượng" : "Quantity"}: Local <b>${loc.quantity}</b> vs Remote <b>${inc.quantity}</b></span>
+                    <select onchange="onItemQtyStrategyChange(${idx}, this.value)" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-0.5 text-slate-200 text-[11px] cursor-pointer">
+                      <option value="SUM" ${diff.selectedQtyStrategy === "SUM" ? "selected" : ""}>Sum (${Number(loc.quantity) + Number(inc.quantity)})</option>
+                      <option value="REMOTE" ${diff.selectedQtyStrategy === "REMOTE" ? "selected" : ""}>Take Remote (${inc.quantity})</option>
+                      <option value="LOCAL" ${diff.selectedQtyStrategy === "LOCAL" ? "selected" : ""}>Keep Local (${loc.quantity})</option>
+                    </select>
+                  </div>
+                </div>
+              `;
+            }
+
+            let priceSection = "";
+            if (diff.hasPriceDiff) {
+              const locP =
+                loc.price > 0
+                  ? loc.price.toLocaleString() + currencySymbol
+                  : "N/A";
+              const incP =
+                inc.price > 0
+                  ? inc.price.toLocaleString() + currencySymbol
+                  : "N/A";
+              priceSection = `
+                <div class="flex items-center justify-between text-slate-400 text-[11px] pt-1 border-t border-slate-800/80">
+                  <span>${currentLanguage === "vi" ? "Giá" : "Price"}: Local <b>${locP}</b> vs Remote <b>${incP}</b></span>
+                  <label class="flex items-center gap-1 cursor-pointer text-slate-300">
+                    <input type="checkbox" ${diff.useRemotePrice ? "checked" : ""} onchange="onItemPriceToggle(${idx}, this.checked)" class="rounded border-slate-700 text-emerald-500 bg-slate-800" />
+                    <span>${currentLanguage === "vi" ? "Dùng giá mới" : "Use new price"}</span>
+                  </label>
+                </div>
+              `;
+            }
+
+            controlsHtml = `${qtySection}${priceSection}`;
+          }
+
+          card.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-200">${inc.name}</span>
+              <div class="flex items-center gap-1">${badgeHtml}</div>
+            </div>
+            ${controlsHtml}
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      function onMergeGlobalQtyStrategyChange(strategy) {
+        if (!currentMergeDiff) return;
+        currentMergeDiff.diffItems.forEach((d) => {
+          if (d.hasQtyDiff) {
+            d.selectedQtyStrategy = strategy;
+          }
+        });
+        const container = document.getElementById("mergeDiffList");
+        if (container) {
+          const selects = container.querySelectorAll("select");
+          for (let i = 0; i < selects.length; i++) {
+            selects[i].value = strategy;
+          }
+        }
+      }
+
+      function onItemQtyStrategyChange(idx, strategy) {
+        if (currentMergeDiff && currentMergeDiff.diffItems[idx]) {
+          currentMergeDiff.diffItems[idx].selectedQtyStrategy = strategy;
+        }
+      }
+
+      function onItemPriceToggle(idx, useRemote) {
+        if (currentMergeDiff && currentMergeDiff.diffItems[idx]) {
+          currentMergeDiff.diffItems[idx].useRemotePrice = useRemote;
+        }
+      }
+
+      function toggleMergeItemInclude(idx, include) {
+        if (currentMergeDiff && currentMergeDiff.diffItems[idx]) {
+          currentMergeDiff.diffItems[idx].includeInMerge = include;
+        }
+      }
+
+      function saveActiveListSnapshot(reason = "PRE_IMPORT_BACKUP") {
+        const snapshot = {
+          id: "snap_" + Date.now(),
+          timestamp: new Date().toISOString(),
+          reason: reason,
+          activeList: JSON.parse(
+            JSON.stringify(
+              (memoryState && memoryState.activeList) || {
+                title: "Shopping List",
+                items: [],
+              }
+            )
+          ),
+        };
+        if (!Array.isArray(memoryState.snapshots)) {
+          memoryState.snapshots = [];
+        }
+        memoryState.snapshots.unshift(snapshot);
+        if (memoryState.snapshots.length > 10) {
+          memoryState.snapshots = memoryState.snapshots.slice(0, 10);
+        }
+        try {
+          if (typeof localStorage !== "undefined") {
+            localStorage.setItem(
+              "smart_buy_list_snapshots",
+              JSON.stringify(memoryState.snapshots)
+            );
+          }
+        } catch (e) {}
+        return snapshot;
+      }
+
+      function applySmartMerge() {
+        if (!window.pendingSharedList || !currentMergeDiff) return;
+
+        const updateCatalog = document.getElementById("mergeUpdatePriceCatalog")
+          ? document.getElementById("mergeUpdatePriceCatalog").checked
+          : true;
+
+        let processedCount = 0;
+
+        currentMergeDiff.diffItems.forEach((diff) => {
+          if (!diff.includeInMerge) return;
+
+          const inc = diff.incoming;
+          const loc = diff.local;
+
+          if (diff.status === "NEW") {
+            const newItem = touchItem({
+              ...inc,
+              store: resolveStoreAlias(inc.store),
+            });
+            if (!memoryState.activeList.items) {
+              memoryState.activeList.items = [];
+            }
+            memoryState.activeList.items.push(newItem);
+            processedCount++;
+
+            if (updateCatalog && inc.price > 0) {
+              const unitPrice = normalizeUnitPrice(
+                inc.price,
+                inc.quantity,
+                inc.unit
+              );
+              memoryState.purchaseLedger.push({
+                id: generateItemId("rec"),
+                itemId: newItem.id,
+                itemName: newItem.name,
+                store: newItem.store || "Supermarket",
+                date: new Date().toISOString().slice(0, 10),
+                timestamp: new Date().toISOString(),
+                quantity: newItem.quantity,
+                unit: newItem.unit,
+                price: newItem.price,
+                unitPrice,
+              });
+            }
+          } else if (loc) {
+            // Apply Qty strategy
+            if (diff.hasQtyDiff) {
+              if (diff.selectedQtyStrategy === "SUM") {
+                loc.quantity =
+                  Number(loc.quantity || 0) + Number(inc.quantity || 0);
+              } else if (diff.selectedQtyStrategy === "REMOTE") {
+                loc.quantity = Number(inc.quantity);
+              }
+            }
+
+            // Apply Price strategy
+            if (diff.hasPriceDiff && diff.useRemotePrice) {
+              loc.price = Number(inc.price);
+            }
+
+            touchItem(loc);
+            processedCount++;
+
+            if (updateCatalog && inc.price > 0 && diff.useRemotePrice) {
+              const unitPrice = normalizeUnitPrice(
+                inc.price,
+                loc.quantity || inc.quantity,
+                loc.unit || inc.unit
+              );
+              memoryState.purchaseLedger.push({
+                id: generateItemId("rec"),
+                itemId: loc.id,
+                itemName: loc.name,
+                store: loc.store || "Supermarket",
+                date: new Date().toISOString().slice(0, 10),
+                timestamp: new Date().toISOString(),
+                quantity: loc.quantity,
+                unit: loc.unit,
+                price: loc.price,
+                unitPrice,
+              });
+            }
+          }
+        });
+
+        saveToLocalStorage();
+        closeModal("mergeReviewModal");
+        closeModal("importModal");
+        renderApp();
+
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+        const msg = (
+          t.toast_smart_merge_success ||
+          "Smart merge applied! Merged {count} items."
+        ).replace("{count}", processedCount);
+        showToast(msg);
+      }
+
+      function importAsNewListWithSnapshot() {
+        if (!window.pendingSharedList) return;
+        saveActiveListSnapshot("PRE_REPLACE_IMPORT");
+
+        const normalizedItems = (window.pendingSharedList.items || []).map(
+          (i) =>
+            touchItem({
+              ...i,
+              store: resolveStoreAlias(i.store),
+            })
+        );
+
+        memoryState.activeList = {
+          title: window.pendingSharedList.title || "Shared Shopping List",
+          items: normalizedItems,
+        };
+
+        saveToLocalStorage();
+        closeModal("mergeReviewModal");
+        closeModal("importModal");
+        renderApp();
+
+        const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+        showToast(
+          t.toast_import_shared_success || "Shared list successfully imported!"
+        );
+      }
+
+      function openMergeReviewModal(sharedList) {
+        sharedList = sharedList || window.pendingSharedList;
+        if (!sharedList) return;
+        window.pendingSharedList = sharedList;
+        renderMergeReviewModal(sharedList);
+        openModal("mergeReviewModal");
       }
 
       /* =========================================================================
@@ -10997,6 +11754,26 @@
           pasteTextarea.placeholder =
             t.paste_modal_placeholder || "Paste JSON or #share= link here...";
 
+        // 3.6. Merge Review Modal & Store-Scoped Sharing
+        el("mergeReviewModalTitleText", t.merge_modal_title);
+        el("mergeReviewModalSubtitle", t.merge_modal_subtitle);
+        el("lblStatNew", t.merge_stat_new);
+        el("lblStatPrice", t.merge_stat_price);
+        el("lblStatQty", t.merge_stat_qty);
+        el("lblStatMatch", t.merge_stat_match);
+        el("lblGlobalQtyStrategy", t.merge_global_qty_strategy);
+        el("optQtySum", t.merge_qty_sum);
+        el("optQtyRemote", t.merge_qty_remote);
+        el("optQtyLocal", t.merge_qty_local);
+        el("lblUpdatePriceCatalog", t.merge_update_price_catalog);
+        el("btnApplyMergeText", t.btn_apply_merge);
+        el("btnImportNewListText", t.btn_import_new_list_snapshot);
+        el("lblShareScope", t.lbl_share_scope);
+        el(
+          "shareScopeAllLabel",
+          currentLanguage === "vi" ? "Tất Cả Cửa Hàng" : "All Stores"
+        );
+
         // 4. Trip Complete Modal
         el("tripModalTitleText", t.trip_modal_title);
         el("tripModalPurchasedLabel", t.trip_modal_purchased_label);
@@ -11441,7 +12218,7 @@
               window.pendingSharedList = sharedList;
               const countEl = document.getElementById("importItemCountBadge");
               if (countEl) countEl.textContent = sharedList.items.length;
-              openModal("importModal");
+              openMergeReviewModal(sharedList);
             }
           }
 
@@ -11715,19 +12492,34 @@
         if (!window.pendingSharedList) return;
         if (mode === "MERGE") {
           const existingNames = new Set(
-            memoryState.activeList.items.map((i) => i.name.toLowerCase())
+            (memoryState.activeList.items || []).map((i) =>
+              i.name.toLowerCase()
+            )
           );
-          const toAdd = window.pendingSharedList.items
+          const toAdd = (window.pendingSharedList.items || [])
             .filter((i) => !existingNames.has(i.name.toLowerCase()))
-            .map((i) => touchItem({ ...i }));
+            .map((i) =>
+              touchItem({
+                ...i,
+                store: resolveStoreAlias(i.store),
+              })
+            );
+          if (!memoryState.activeList.items) memoryState.activeList.items = [];
           memoryState.activeList.items.push(...toAdd);
         } else {
-          memoryState.activeList.items = window.pendingSharedList.items.map(
-            (i) => touchItem({ ...i })
+          saveActiveListSnapshot("PRE_REPLACE_IMPORT");
+          memoryState.activeList.items = (
+            window.pendingSharedList.items || []
+          ).map((i) =>
+            touchItem({
+              ...i,
+              store: resolveStoreAlias(i.store),
+            })
           );
         }
         saveToLocalStorage();
         closeModal("importModal");
+        closeModal("mergeReviewModal");
         renderApp();
         showToast(
           TRANSLATIONS[currentLanguage].toast_import_shared_success ||
@@ -11992,6 +12784,37 @@
         window.handlePageTouchMove = handlePageTouchMove;
         window.handlePageTouchEnd = handlePageTouchEnd;
         window.handlePageSwipeAction = handlePageSwipeAction;
+        window.openMergeReviewModal = openMergeReviewModal;
+        window.renderMergeReviewModal = renderMergeReviewModal;
+        window.computeMergeDiff = computeMergeDiff;
+        window.applySmartMerge = applySmartMerge;
+        window.importAsNewListWithSnapshot = importAsNewListWithSnapshot;
+        window.saveActiveListSnapshot = saveActiveListSnapshot;
+        window.setShareScope = setShareScope;
+        window.updateShareScopeUI = updateShareScopeUI;
+        window.getActiveShareList = getActiveShareList;
+        window.resolveStoreAlias = resolveStoreAlias;
+        window.onMergeGlobalQtyStrategyChange = onMergeGlobalQtyStrategyChange;
+        window.onItemQtyStrategyChange = onItemQtyStrategyChange;
+        window.onItemPriceToggle = onItemPriceToggle;
+        window.toggleMergeItemInclude = toggleMergeItemInclude;
+
+        Object.defineProperty(window, "currentShareScope", {
+          get: () => currentShareScope,
+          set: (v) => {
+            currentShareScope = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
+        Object.defineProperty(window, "currentMergeDiff", {
+          get: () => currentMergeDiff,
+          set: (v) => {
+            currentMergeDiff = v;
+          },
+          enumerable: true,
+          configurable: true,
+        });
 
         Object.defineProperty(window, "currentActiveTab", {
           get: () => currentActiveTab,
