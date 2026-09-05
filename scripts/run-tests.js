@@ -105,6 +105,11 @@ const TEST_SUITES = [
     file: "tests/smart-buy-list-security.test.js",
     category: "Security",
   },
+  {
+    name: "Portal Hub UI & Bilingual Parity",
+    file: "tests/portal.test.js",
+    category: "Portal",
+  },
 ];
 
 function escapeXml(str) {

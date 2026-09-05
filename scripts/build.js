@@ -32,6 +32,7 @@ const IGNORED_DIRS = new Set([
   "coverage",
   "test-reports",
   "release-assets",
+  "portal",
 ]);
 
 const COMPANION_ASSETS = [
@@ -612,6 +613,71 @@ function syncToolToExternal(tool, destDir) {
   };
 }
 
+/**
+ * Build the central portal hub launcher
+ */
+async function buildPortal(destDir = null) {
+  const portalDir = path.join(ROOT_DIR, "portal");
+  const portalSrc = path.join(portalDir, "index.html");
+  if (!fs.existsSync(portalSrc)) return null;
+
+  const startTime = Date.now();
+  const rawHtml = fs.readFileSync(portalSrc, "utf8");
+  const originalSize = Buffer.byteLength(rawHtml, "utf8");
+
+  // Compile Tailwind CSS from the portal source HTML
+  const compiledCSS = compileTailwindCSS(rawHtml, portalDir);
+
+  // Replace Tailwind CDN with compiled <style>
+  const twInlinedHtml = inlineTailwindCSS(rawHtml, compiledCSS);
+
+  // Inline any local assets if present
+  const inlinedHtml = inlineLocalAssets(twInlinedHtml, portalDir);
+
+  // Minify HTML + inline CSS + inline JS
+  const minifiedHtml = await minify(inlinedHtml, MINIFY_OPTIONS);
+  const minifiedSize = Buffer.byteLength(minifiedHtml, "utf8");
+  const savings =
+    originalSize > 0
+      ? ((1 - minifiedSize / originalSize) * 100).toFixed(1)
+      : "0.0";
+
+  // Write outputs:
+  // 1. In portal's dist folder: portal/dist/index.html
+  const portalDistDir = path.join(portalDir, "dist");
+  fs.mkdirSync(portalDistDir, { recursive: true });
+  const portalDistFile = path.join(portalDistDir, "index.html");
+  fs.writeFileSync(portalDistFile, minifiedHtml, "utf8");
+
+  // 2. In root dist folder: dist/index.html (served at GitHub Pages root)
+  const rootDistDir = path.join(ROOT_DIR, "dist");
+  fs.mkdirSync(rootDistDir, { recursive: true });
+  const rootDistFile = path.join(rootDistDir, "index.html");
+  fs.writeFileSync(rootDistFile, minifiedHtml, "utf8");
+
+  const outputFiles = [portalDistFile, rootDistFile];
+  const syncedFiles = [];
+
+  // Mirror to external distribution root if configured
+  if (destDir) {
+    fs.mkdirSync(destDir, { recursive: true });
+    const extIndex = path.join(destDir, "index.html");
+    fs.copyFileSync(rootDistFile, extIndex);
+    syncedFiles.push(extIndex);
+  }
+
+  const elapsed = Date.now() - startTime;
+  return {
+    name: "portal",
+    originalSize,
+    minifiedSize,
+    savings,
+    elapsed,
+    outputFiles,
+    syncedFiles,
+  };
+}
+
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   return `${(bytes / 1024).toFixed(1)} KB`;
@@ -641,21 +707,37 @@ async function main() {
     process.exit(1);
   }
 
-  const toolsToBuild = targetToolName
-    ? allTools.filter(
-        (t) => t.name.toLowerCase() === targetToolName.toLowerCase()
-      )
-    : allTools;
+  const isPortalTarget =
+    targetToolName && targetToolName.toLowerCase() === "portal";
+  const shouldBuildPortal = isPortalTarget || !targetToolName;
 
-  if (toolsToBuild.length === 0) {
-    console.error(
-      `❌ Tool "${targetToolName}" not found. Available tools: ${allTools.map((t) => t.name).join(", ")}`
-    );
-    process.exit(1);
+  let toolsToBuild = [];
+  if (!isPortalTarget) {
+    toolsToBuild = targetToolName
+      ? allTools.filter(
+          (t) => t.name.toLowerCase() === targetToolName.toLowerCase()
+        )
+      : allTools;
+
+    if (toolsToBuild.length === 0) {
+      console.error(
+        `❌ Tool "${targetToolName}" not found. Available tools: ${allTools.map((t) => t.name).join(", ")}, portal`
+      );
+      process.exit(1);
+    }
   }
 
+  const toolCountLabel =
+    toolsToBuild.length > 0
+      ? `${toolsToBuild.length} tool${toolsToBuild.length > 1 ? "s" : ""}`
+      : "";
+  const portalLabel = shouldBuildPortal ? "central portal hub" : "";
+  const summaryLabel = [toolCountLabel, portalLabel]
+    .filter(Boolean)
+    .join(" + ");
+
   console.log(
-    `\n📦 Building Compacted Standalone HTML Tools (${toolsToBuild.length} tool${toolsToBuild.length > 1 ? "s" : ""})...`
+    `\n📦 Building Compacted Standalone HTML Tools (${summaryLabel})...`
   );
   if (destDir) {
     console.log(`📁 External Distribution Target: ${destDir}\n`);
@@ -698,6 +780,38 @@ async function main() {
     }
   }
 
+  // Build Portal Hub if targeted or during full build
+  if (shouldBuildPortal) {
+    try {
+      const portalRes = await buildPortal(destDir);
+      if (portalRes) {
+        results.push(portalRes);
+        console.log(`✅ [${portalRes.name}] (Central Portal Hub)`);
+        console.log(`   Source:   ${formatBytes(portalRes.originalSize)}`);
+        console.log(
+          `   Compact:  ${formatBytes(portalRes.minifiedSize)} (${portalRes.savings}% reduction)`
+        );
+        console.log(
+          `   Outputs:  ${path.relative(ROOT_DIR, portalRes.outputFiles[0])}`
+        );
+        console.log(
+          `             ${path.relative(ROOT_DIR, portalRes.outputFiles[1])}`
+        );
+
+        if (destDir && portalRes.syncedFiles.length > 0) {
+          console.log(
+            `   Synced:   ${path.relative(ROOT_DIR, portalRes.syncedFiles[0])}`
+          );
+        }
+
+        console.log(`   Duration: ${portalRes.elapsed}ms\n`);
+      }
+    } catch (err) {
+      console.error(`❌ Failed to build central portal hub:`, err);
+      process.exit(1);
+    }
+  }
+
   if (destDir) {
     console.log(
       `✨ Build & external sync completed successfully! (${results.reduce((acc, r) => acc + r.elapsed, 0)}ms total)`
@@ -720,6 +834,7 @@ if (require.main === module) {
 module.exports = {
   discoverTools,
   buildTool,
+  buildPortal,
   buildCompanionAssets,
   extractToolVersion,
   inlineLocalAssets,
