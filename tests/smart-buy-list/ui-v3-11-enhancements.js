@@ -45,7 +45,7 @@ function assertEqual(actual, expected, message) {
 function loadTestSandbox(mockFetch = null) {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -584,7 +584,7 @@ async function runTests() {
   {
     const htmlPath = path.join(
       __dirname,
-      "..",
+      "../..",
       "smart-buy-list-price-tracker",
       "index.html"
     );
@@ -660,7 +660,11 @@ async function runTests() {
   // ---------------------------------------------------------------------------
   console.log("\n--- SECTION 6: PWA Version Synchronization (v3.11.0) ---");
   {
-    const rootDir = path.join(__dirname, "..", "smart-buy-list-price-tracker");
+    const rootDir = path.join(
+      __dirname,
+      "../..",
+      "smart-buy-list-price-tracker"
+    );
     const manifest = JSON.parse(
       fs.readFileSync(path.join(rootDir, "manifest.webmanifest"), "utf8")
     );

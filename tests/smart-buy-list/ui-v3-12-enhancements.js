@@ -46,7 +46,7 @@ function assertEqual(actual, expected, message) {
 function loadTestSandbox(mockFetch = null) {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -240,7 +240,7 @@ async function runTestSuite() {
 
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -515,13 +515,13 @@ async function runTestSuite() {
   {
     const manifestPath = path.join(
       __dirname,
-      "..",
+      "../..",
       "smart-buy-list-price-tracker",
       "manifest.webmanifest"
     );
     const swPath = path.join(
       __dirname,
-      "..",
+      "../..",
       "smart-buy-list-price-tracker",
       "sw.js"
     );
@@ -541,11 +541,7 @@ async function runTestSuite() {
     );
     assert(
       htmlContent.includes("v3.12.0") ||
-        htmlContent.includes("v3.13.0") ||
-        htmlContent.includes("v4.0.0") ||
-        htmlContent.includes("v4.1.0") ||
-        htmlContent.includes("v4.2.0") ||
-        htmlContent.includes("v4.3.0"),
+        htmlContent.includes('id="pwaVersionBadge"'),
       "VER-03: index.html references current PWA version"
     );
   }

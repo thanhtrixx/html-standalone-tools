@@ -64,7 +64,7 @@ function createMockStorage() {
 function setupTrackerSandbox() {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -717,7 +717,7 @@ async function runSuite() {
   {
     const swPath = path.join(
       __dirname,
-      "..",
+      "../..",
       "smart-buy-list-price-tracker",
       "sw.js"
     );
@@ -734,7 +734,7 @@ async function runSuite() {
 
     const manifestPath = path.join(
       __dirname,
-      "..",
+      "../..",
       "smart-buy-list-price-tracker",
       "manifest.webmanifest"
     );

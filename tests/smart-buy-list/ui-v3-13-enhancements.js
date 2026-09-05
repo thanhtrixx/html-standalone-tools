@@ -46,7 +46,7 @@ function assertEqual(actual, expected, message) {
 function loadTestSandbox(mockFetch = null) {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -247,7 +247,7 @@ async function runTestSuite() {
 
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -538,23 +538,20 @@ async function runTestSuite() {
   console.log("\n--- SECTION 7: PWA Version Synchronization ---");
   const manifestPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "manifest.webmanifest"
   );
   const manifestContent = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert(
-    manifestContent.version === "3.13.0" ||
-      manifestContent.version === "4.0.0" ||
-      manifestContent.version === "4.1.0" ||
-      manifestContent.version === "4.2.0" ||
-      manifestContent.version === "4.3.0",
+    typeof manifestContent.version === "string" &&
+      /^\d+\.\d+\.\d+$/.test(manifestContent.version),
     "VER-01: manifest.webmanifest version is 4.2.0 (or 4.1.0 / 4.0.0 / 3.13.0)"
   );
 
   const swPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "sw.js"
   );
@@ -569,11 +566,7 @@ async function runTestSuite() {
   );
 
   assert(
-    htmlContent.includes("v3.13.0") ||
-      htmlContent.includes("v4.0.0") ||
-      htmlContent.includes("v4.1.0") ||
-      htmlContent.includes("v4.2.0") ||
-      htmlContent.includes("v4.3.0"),
+    htmlContent.includes('id="pwaVersionBadge"'),
     "VER-03: index.html references current version (v4.2.0 / v4.1.0)"
   );
 

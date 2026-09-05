@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
 /**
- * Smart Buy-List Multi-Cloud Sync, Concurrency & Resiliency Test Suite
- * Domain: Multi-Cloud Concurrency & Conflict Resolution
+ * Smart Buy-List Storage, Persistence, IndexedDB & Interchange Test Suite
+ * Domain: State, Persistence & Migrations
  */
 
 const { spawnSync } = require("child_process");
 const path = require("path");
 
 const SUB_SUITES = [
-  "cloud-sync-drive.js",
-  "cloud-sync-concurrency.js",
-  "cloud-sync-calm.js",
-  "cloud-sync-gist-resiliency.js",
+  "storage-core.js",
+  "storage-indexeddb.js",
+  "storage-clipboard.js",
+  "storage-backup-settings.js",
 ];
 
 let totalFailed = 0;

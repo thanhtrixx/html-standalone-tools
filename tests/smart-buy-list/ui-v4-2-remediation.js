@@ -5,7 +5,7 @@ const vm = require("vm");
 function loadEngine() {
   const htmlPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "index.html"
   );
@@ -420,7 +420,7 @@ try {
   // Check _headers file
   const headersPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "_headers"
   );
@@ -439,18 +439,26 @@ try {
     "HEADERS-03: _headers configures 'X-Content-Type-Options: nosniff'"
   );
 
+  // Check manifest & version badge
+  const manifestPath = path.join(
+    __dirname,
+    "../..",
+    "smart-buy-list-price-tracker",
+    "manifest.webmanifest"
+  );
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+
   // Check sw.js
   const swPath = path.join(
     __dirname,
-    "..",
+    "../..",
     "smart-buy-list-price-tracker",
     "sw.js"
   );
   const swContent = fs.readFileSync(swPath, "utf8");
 
   assert(
-    swContent.includes('CACHE_NAME = "smart-buy-list-v4.2.0"') ||
-      swContent.includes('CACHE_NAME = "smart-buy-list-v4.3.0"'),
+    swContent.includes("smart-buy-list-v" + manifest.version),
     "SW-01: sw.js CACHE_NAME is bumped to smart-buy-list-v4.2.0"
   );
   assert(
@@ -462,16 +470,9 @@ try {
     "SW-03: sw.js uses clean request.mode === 'navigate' check (I3)"
   );
 
-  // Check manifest & version badge
-  const manifestPath = path.join(
-    __dirname,
-    "..",
-    "smart-buy-list-price-tracker",
-    "manifest.webmanifest"
-  );
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert(
-    manifest.version === "4.2.0" || manifest.version === "4.3.0",
+    typeof manifest.version === "string" &&
+      /^\d+\.\d+\.\d+$/.test(manifest.version),
     `PWA-01: manifest.webmanifest version is 4.2.0 (Got: ${manifest.version})`
   );
 

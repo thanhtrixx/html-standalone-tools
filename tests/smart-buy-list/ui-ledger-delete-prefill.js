@@ -23,11 +23,11 @@ console.log(
 
 const indexPath = path.join(
   __dirname,
-  "../smart-buy-list-price-tracker/index.html"
+  "../../smart-buy-list-price-tracker/index.html"
 );
 const htmlContent = fs.readFileSync(indexPath, "utf-8");
 
-const swPath = path.join(__dirname, "../smart-buy-list-price-tracker/sw.js");
+const swPath = path.join(__dirname, "../../smart-buy-list-price-tracker/sw.js");
 const swContent = fs.readFileSync(swPath, "utf-8");
 
 function createMockSandbox() {

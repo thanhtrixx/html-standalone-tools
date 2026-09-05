@@ -111,17 +111,26 @@ Every issue follows **GitHub Flow** with an isolated branch:
 3. **⚡ The Two-Speed Verification Loop**:
    - **Inner Loop (Fast Scoped TDD)**: During active development, run targeted sub-second test suites for instant feedback:
      ```bash
-     npm run test:tracker     # Smart Buy-List price tracking suites
+     # Tool-scoped execution (runs all domain suites for a specific tool)
+     npm run test:tracker     # All 7 Smart Buy-List domain suites
      npm run test:buy-rent    # Buy vs Rent comparison suites
      npm run test:sim         # Savings Predictor simulation tests
-     npm run test:i18n        # Bilingual dictionary parity check
-     npm run test:build       # Standalone compilation & inlining tests
+     node scripts/run-tests.js --tool <name>  # Targeted tool filter
+
+     # Domain-scoped execution (Smart Buy-List inner loop)
+     npm run test:tracker:math      # Core math, normalization & deal scoring
+     npm run test:tracker:storage   # LocalStorage, IndexedDB & backup
+     npm run test:tracker:cloud     # Cloud sync & concurrency
+     npm run test:tracker:ui        # UI interactions & components
+     npm run test:tracker:pwa       # PWA lifecycle & safe-area
+     npm run test:tracker:i18n      # Bilingual key parity
+     npm run test:tracker:security  # Strict CSP & sanitization
      ```
    - **Outer Loop (Pre-PR Quality Gate)**: When the slice is code-complete, execute the full unified verification suite:
      ```bash
      npm run verify
      ```
-     Zero errors across formatting (`prettier --check`), standalone compaction builds (`scripts/build.js`), and all 2,100+ test assertions (`scripts/run-tests.js`).
+     Zero errors across formatting (`prettier --check`), standalone compaction builds (`scripts/build.js`), and all 2,200+ test assertions (`scripts/run-tests.js`).
 4. **External Distribution Sync ([ADR-0006](../adr/0006-configurable-external-distribution-sync.md))**:
    - `npm run build` and `npm run verify` automatically detect `TOOLS_DEST_DIR` (configured in `.env.local` or via CLI) and sync compiled artifacts to external static repositories. If unconfigured (such as in CI), sync is cleanly bypassed without warning.
 
@@ -141,11 +150,14 @@ Every issue follows **GitHub Flow** with an isolated branch:
      - Adding `#minor` to the commit/PR title → triggers **minor bump** (`v0.64.0`).
      - Adding `#major` to the commit/PR title → triggers **major bump** (`v1.0.0`).
 2. **Agent & Developer Pre-PR Self-Review Checklist**:
-   Before opening a PR, ensure all 4 invariants are satisfied:
+   Before opening a PR, ensure all 5 invariants are satisfied:
    - [ ] **Spec Conformance**: Every Acceptance Criteria checkbox in the issue is backed by an automated assertion.
    - [ ] **Zero Runtime Dependencies**: Source and compiled single-file HTML have zero external unbundled npm runtime imports.
    - [ ] **Data Migration Invariant**: Browser storage changes (IndexedDB / `localStorage`) include backwards-compatible silent auto-migration with dedicated test coverage (`tests/*storage*.test.js`).
    - [ ] **Bilingual Parity**: 100% dictionary key parity between Vietnamese (`vi`) and English (`en`) strings (`npm run test:i18n`).
+   - [ ] **Dynamic SemVer & No Version-Named Test Files ([ADR-0028](../../smart-buy-list-price-tracker/docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md))**:
+     - Never create version-named test files (e.g. `tests/*-vX-Y.test.js`). Append tests to permanent domain suites.
+     - Never hardcode SemVer strings in functional tests. Assert version synchronization dynamically against `manifest.webmanifest`.
 3. **Open Pull Request Linked to Issue**:
    - Open a PR using GitHub auto-closing keywords:
    ```bash
