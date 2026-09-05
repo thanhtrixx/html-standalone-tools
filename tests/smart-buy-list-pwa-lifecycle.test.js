@@ -884,6 +884,30 @@ async function runTests() {
       "BACK-NAV-06a: handlePopState with null state returns to PLANNING if not already on PLANNING"
     );
 
+    // BACK-NAV-06b: Navigating to BUY and pressing Back returns to PLANNING
+    sandbox.setActiveTab("BUY");
+    sandbox.handlePopState({ state: { tab: "PLANNING" } });
+    assert(
+      sandbox.currentActiveTab === "PLANNING",
+      "BACK-NAV-06b: Navigating to BUY and pressing Back returns to PLANNING"
+    );
+
+    // BACK-NAV-06c: Navigating to PRICE_HISTORY and pressing Back returns to PLANNING
+    sandbox.setActiveTab("PRICE_HISTORY");
+    sandbox.handlePopState({ state: null });
+    assert(
+      sandbox.currentActiveTab === "PLANNING",
+      "BACK-NAV-06c: Navigating to PRICE_HISTORY and pressing Back returns to PLANNING"
+    );
+
+    // BACK-NAV-06d: Navigating to COMPARATOR and pressing Back returns to PLANNING
+    sandbox.setActiveTab("COMPARATOR");
+    sandbox.handlePopState({ state: null });
+    assert(
+      sandbox.currentActiveTab === "PLANNING",
+      "BACK-NAV-06d: Navigating to COMPARATOR and pressing Back returns to PLANNING"
+    );
+
     // ==========================================
     // Section 10: Two-Tier PWA Root Back Exit Guard ("Press back again to exit" - Issue #323)
     // ==========================================

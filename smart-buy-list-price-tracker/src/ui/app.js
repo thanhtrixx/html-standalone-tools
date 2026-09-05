@@ -2,6 +2,64 @@
        11. INITIALIZATION & SERVICE WORKER
        ========================================================================= */
 function initApp() {
+  // Synchronous event listeners & root history guard initialization
+  if (typeof window !== "undefined" && !window.__appInitialized) {
+    window.__appInitialized = true;
+
+    // Popstate browser back button handling for modals & tab navigation
+    if (typeof window.addEventListener === "function") {
+      window.addEventListener("popstate", handlePopState);
+    }
+
+    // Initial root back navigation guard state
+    try {
+      if (window.history && window.history.replaceState) {
+        if (!window.history.state) {
+          window.history.replaceState(
+            { tab: "PLANNING", rootGuard: "base" },
+            ""
+          );
+        }
+        if (window.history.pushState) {
+          window.history.pushState({ tab: "PLANNING", rootGuard: true }, "");
+        }
+      }
+    } catch (e) {
+      // Ignore sandboxed history errors
+    }
+
+    // Cloud Sync Online Reconnect & Auto-Retry
+    if (typeof window.addEventListener === "function") {
+      window.addEventListener("online", () => {
+        triggerAutoSyncWithRetry();
+      });
+      window.addEventListener("offline", () => {
+        updateSyncStatusUI("offline");
+      });
+    }
+
+    // Delegated and global listeners
+    if (
+      typeof document !== "undefined" &&
+      typeof document.addEventListener === "function"
+    ) {
+      document.addEventListener("click", handleCloudSyncPopoverOutsideClick);
+      document.addEventListener("click", handleItemCardDelegatedClick);
+      document.addEventListener("keydown", handleGlobalKeyDown);
+
+      // Page horizontal touch swipe listeners for 4-tab navigation
+      document.addEventListener("touchstart", handlePageTouchStart, {
+        passive: true,
+      });
+      document.addEventListener("touchmove", handlePageTouchMove, {
+        passive: true,
+      });
+      document.addEventListener("touchend", handlePageTouchEnd, {
+        passive: true,
+      });
+    }
+  }
+
   return initDatabase().then(async () => {
     // Sync restored settings to runtime and UI controls
     if (memoryState && memoryState.settings) {
@@ -52,23 +110,6 @@ function initApp() {
     renderApp();
     runComparatorCalc();
 
-    // Initialize root history state
-    try {
-      if (
-        typeof window !== "undefined" &&
-        window.history &&
-        window.history.replaceState &&
-        !window.history.state
-      ) {
-        window.history.replaceState(
-          { tab: currentActiveTab || "PLANNING" },
-          ""
-        );
-      }
-    } catch (e) {
-      // Ignore sandboxed history errors
-    }
-
     const langSelect = document.getElementById("settingsLanguageSelect");
     if (langSelect) langSelect.value = currentLanguage;
     const curSelect = document.getElementById("settingsCurrencySelect");
@@ -108,44 +149,6 @@ function initApp() {
         }
         lastVisibleTime = Date.now();
       }
-    });
-
-    // Cloud Sync Online Reconnect & Auto-Retry
-    window.addEventListener("online", () => {
-      triggerAutoSyncWithRetry();
-    });
-    window.addEventListener("offline", () => {
-      updateSyncStatusUI("offline");
-    });
-
-    // Click outside to dismiss cloud sync diagnostic popover
-    document.addEventListener("click", handleCloudSyncPopoverOutsideClick);
-
-    // Delegated item card click listener
-    document.addEventListener("click", handleItemCardDelegatedClick);
-
-    // Keyboard navigation shortcuts
-    document.addEventListener("keydown", handleGlobalKeyDown);
-
-    // Popstate browser back button handling for modals & tab navigation
-    window.addEventListener("popstate", handlePopState);
-
-    // Initial root back navigation guard state
-    if (window.history && window.history.pushState) {
-      try {
-        window.history.pushState({ tab: "PLANNING", rootGuard: true }, "");
-      } catch (e) {}
-    }
-
-    // Page horizontal touch swipe listeners for 4-tab navigation
-    document.addEventListener("touchstart", handlePageTouchStart, {
-      passive: true,
-    });
-    document.addEventListener("touchmove", handlePageTouchMove, {
-      passive: true,
-    });
-    document.addEventListener("touchend", handlePageTouchEnd, {
-      passive: true,
     });
 
     // Register Service Worker with update lifecycle
@@ -319,9 +322,15 @@ function purgeCacheAndReload() {
 
 if (
   typeof window !== "undefined" &&
+  typeof document !== "undefined" &&
+  typeof document.readyState === "string" &&
   typeof window.addEventListener === "function"
 ) {
-  window.addEventListener("DOMContentLoaded", initApp);
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", initApp);
+  } else {
+    initApp();
+  }
 }
 
 function confirmImport(mode) {
