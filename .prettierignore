@@ -8,4 +8,7 @@ coverage
 .tokensave
 .codex
 .gemini
+.impeccable
+.agent
+.agents/skills
 *.local.json
