@@ -24,6 +24,7 @@ const SUB_SUITES = [
   "ui-v4-2-remediation.js",
   "ui-v4-3-enhancements.js",
   "ui-vietnamese-omnibox.js",
+  "ui-smart-merge-review.js",
 ];
 
 let totalFailed = 0;
