@@ -2028,6 +2028,234 @@
       </div>
     </div>
 
+    <!-- ==================== BACKUP RESTORE PREVIEW MODAL (Issue #308) ==================== -->
+    <div
+      id="backupPreviewModal"
+      class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="backupPreviewModalTitle"
+      onclick="handleModalBackdropClick(event, 'backupPreviewModal')"
+    >
+      <div
+        class="bg-slate-900 border border-slate-700 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        onclick="event.stopPropagation()"
+      >
+        <!-- Modal Header -->
+        <div
+          class="px-5 py-4 border-b border-slate-800 flex items-center justify-between"
+        >
+          <div class="flex items-center gap-2">
+            <span class="text-xl" aria-hidden="true">🛡️</span>
+            <div>
+              <h3
+                id="backupPreviewModalTitle"
+                class="text-base font-bold text-slate-100"
+                data-i18n="backup_preview_title"
+              >
+                Xem Trước & Khôi Phục Bản Sao Lưu
+              </h3>
+              <p
+                id="backupPreviewSubtitle"
+                class="text-xs text-slate-400"
+                data-i18n="backup_preview_subtitle"
+              >
+                So sánh dữ liệu bản sao lưu với dữ liệu hiện tại trước khi ghi
+                đè
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onclick="closeModal('backupPreviewModal')"
+            class="text-slate-400 hover:text-slate-200 p-1 rounded-lg transition-colors focus:outline-none"
+            aria-label="Close"
+            data-i18n-aria="modal_close_btn"
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- Modal Body: Side-by-Side Comparison -->
+        <div class="p-5 space-y-4 overflow-y-auto custom-scroll">
+          <!-- Metadata Bar -->
+          <div
+            class="grid grid-cols-2 gap-2 text-xs bg-slate-950/60 p-3 rounded-xl border border-slate-800"
+          >
+            <div>
+              <span
+                class="text-slate-400 block text-[11px]"
+                data-i18n="lbl_backup_export_date"
+                >Thời gian sao lưu:</span
+              >
+              <span
+                id="backupPreviewExportDate"
+                class="font-semibold text-slate-200"
+                >--</span
+              >
+            </div>
+            <div>
+              <span
+                class="text-slate-400 block text-[11px]"
+                data-i18n="lbl_backup_version"
+                >Phiên bản:</span
+              >
+              <span
+                id="backupPreviewVersion"
+                class="font-mono text-emerald-400 font-semibold"
+                >--</span
+              >
+            </div>
+          </div>
+
+          <!-- Comparison Table -->
+          <div
+            class="rounded-xl border border-slate-800 overflow-hidden text-xs"
+          >
+            <table class="w-full text-left">
+              <thead class="bg-slate-800/80 text-slate-300 font-semibold">
+                <tr>
+                  <th class="py-2.5 px-3" data-i18n="th_data_category">
+                    Hạng mục
+                  </th>
+                  <th
+                    class="py-2.5 px-3 text-center text-slate-400"
+                    data-i18n="th_current_database"
+                  >
+                    Hiện tại
+                  </th>
+                  <th
+                    class="py-2.5 px-3 text-center text-emerald-400"
+                    data-i18n="th_incoming_backup"
+                  >
+                    Bản sao lưu
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-200">
+                <tr>
+                  <td class="py-2.5 px-3 flex items-center gap-1.5 font-medium">
+                    <span>🛒</span>
+                    <span data-i18n="lbl_compare_active_items"
+                      >Mục mua sắm</span
+                    >
+                  </td>
+                  <td
+                    id="backupCurrentItemCount"
+                    class="py-2.5 px-3 text-center font-mono"
+                  >
+                    0
+                  </td>
+                  <td
+                    id="backupIncomingItemCount"
+                    class="py-2.5 px-3 text-center font-mono font-bold text-emerald-400"
+                  >
+                    0
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 flex items-center gap-1.5 font-medium">
+                    <span>📜</span>
+                    <span data-i18n="lbl_compare_ledger_records"
+                      >Lịch sử giá đã mua</span
+                    >
+                  </td>
+                  <td
+                    id="backupCurrentLedgerCount"
+                    class="py-2.5 px-3 text-center font-mono"
+                  >
+                    0
+                  </td>
+                  <td
+                    id="backupIncomingLedgerCount"
+                    class="py-2.5 px-3 text-center font-mono font-bold text-emerald-400"
+                  >
+                    0
+                  </td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 flex items-center gap-1.5 font-medium">
+                    <span>🏪</span>
+                    <span data-i18n="lbl_compare_stores">Hồ sơ siêu thị</span>
+                  </td>
+                  <td
+                    id="backupCurrentStoreCount"
+                    class="py-2.5 px-3 text-center font-mono"
+                  >
+                    0
+                  </td>
+                  <td
+                    id="backupIncomingStoreCount"
+                    class="py-2.5 px-3 text-center font-mono font-bold text-emerald-400"
+                  >
+                    0
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Automated Safety Snapshot Option -->
+          <div
+            class="bg-amber-950/30 border border-amber-800/40 rounded-xl p-3 flex items-start gap-2.5 text-xs text-amber-200"
+          >
+            <input
+              type="checkbox"
+              id="backupAutoSnapshotCheckbox"
+              class="w-4 h-4 rounded border-slate-700 text-emerald-600 focus:ring-emerald-500 bg-slate-800 mt-0.5"
+              checked
+            />
+            <label
+              for="backupAutoSnapshotCheckbox"
+              class="cursor-pointer select-none leading-snug"
+            >
+              <strong
+                class="font-semibold block text-amber-100"
+                data-i18n="lbl_auto_snapshot_title"
+              >
+                Tự động tạo snapshot sao lưu an toàn
+              </strong>
+              <span
+                class="text-[11px] text-amber-300/80"
+                data-i18n="lbl_auto_snapshot_desc"
+              >
+                Lưu lại toàn bộ trạng thái hiện tại vào bộ nhớ IndexedDB trước
+                khi khôi phục để hoàn tác nếu cần.
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div
+          class="p-4 border-t border-slate-800 bg-slate-900/90 flex gap-2 justify-end"
+        >
+          <button
+            type="button"
+            onclick="closeModal('backupPreviewModal')"
+            aria-label="Cancel"
+            class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition-colors"
+            data-i18n="btn_cancel"
+          >
+            Huỷ
+          </button>
+          <button
+            type="button"
+            id="btnConfirmBackupRestore"
+            onclick="executeConfirmedBackupRestore()"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-colors shadow-sm flex items-center gap-1.5"
+          >
+            <span aria-hidden="true">🔄</span>
+            <span
+              id="btnConfirmBackupRestoreText"
+              data-i18n="btn_confirm_restore"
+              >Khôi Phục Dữ Liệu</span
+            >
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 4. TRIP COMPLETE & SUMMARY MODAL -->
     <div
       id="tripCompleteModal"
@@ -2748,6 +2976,33 @@
             >
               <span>🗑️</span>
               <span id="btnClearAllDataInSettingsText">Clear All Data</span>
+            </button>
+          </div>
+
+          <!-- Rolling Snapshots / 1-Tap Undo -->
+          <div class="pt-1 border-t border-slate-800/80">
+            <button
+              type="button"
+              id="btnRestoreLastSnapshot"
+              onclick="restoreLastSnapshot()"
+              class="w-full px-3 py-2 bg-indigo-950/40 hover:bg-indigo-900/50 text-indigo-200 border border-indigo-800/50 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors shadow-sm cursor-pointer"
+              title="Khôi phục trạng thái gần nhất trước thao tác cuối"
+            >
+              <div class="flex items-center gap-1.5">
+                <span>⏪</span>
+                <span
+                  id="btnRestoreLastSnapshotText"
+                  data-i18n="btn_restore_last_snapshot"
+                >
+                  Hoàn tác thao tác cuối (Khôi phục Snapshot)
+                </span>
+              </div>
+              <span
+                id="snapshotCountBadge"
+                class="text-[10px] bg-indigo-900/80 px-2 py-0.5 rounded-full font-mono"
+              >
+                0 snapshots
+              </span>
             </button>
           </div>
         </div>
@@ -3600,7 +3855,7 @@
        3. STORAGE PROVIDER SEAM & CLOUD SYNC ARCHITECTURE (ADR-0001, ADR-0011)
        ========================================================================= */
       const DB_NAME = "SmartBuyListDB";
-      const DB_VERSION = 2;
+      const DB_VERSION = 3;
       let dbInstance = null;
 
       const DEFAULT_STORES = [
@@ -3801,6 +4056,9 @@
                 if (!db.objectStoreNames.contains("settings")) {
                   db.createObjectStore("settings", { keyPath: "key" });
                 }
+                if (!db.objectStoreNames.contains("snapshots")) {
+                  db.createObjectStore("snapshots", { keyPath: "id" });
+                }
               };
 
               request.onsuccess = async (e) => {
@@ -3947,19 +4205,29 @@
             return;
           return new Promise((resolve, reject) => {
             try {
-              const tx = dbInstance.transaction(
-                ["lists", "catalog", "ledger", "settings"],
-                "readonly"
-              );
+              const storeNames = ["lists", "catalog", "ledger", "settings"];
+              if (
+                dbInstance.objectStoreNames &&
+                dbInstance.objectStoreNames.contains("snapshots")
+              ) {
+                storeNames.push("snapshots");
+              }
+              const tx = dbInstance.transaction(storeNames, "readonly");
               const listStore = tx.objectStore("lists");
               const catalogStore = tx.objectStore("catalog");
               const ledgerStore = tx.objectStore("ledger");
               const settingsStore = tx.objectStore("settings");
+              const snapStore =
+                dbInstance.objectStoreNames &&
+                dbInstance.objectStoreNames.contains("snapshots")
+                  ? tx.objectStore("snapshots")
+                  : null;
 
               const reqList = listStore.get("default");
               const reqCatalog = catalogStore.getAll();
               const reqLedger = ledgerStore.getAll();
               const reqSettings = settingsStore.getAll();
+              const reqSnapshots = snapStore ? snapStore.getAll() : null;
 
               tx.oncomplete = () => {
                 if (reqList.result) {
@@ -4003,6 +4271,17 @@
                       githubAuthState.gistId = entry.value;
                     }
                   });
+                }
+                if (
+                  reqSnapshots &&
+                  reqSnapshots.result &&
+                  Array.isArray(reqSnapshots.result)
+                ) {
+                  const sorted = reqSnapshots.result.sort((a, b) =>
+                    a.timestamp > b.timestamp ? -1 : 1
+                  );
+                  memoryState.snapshots = sorted.slice(0, 5);
+                  updateSnapshotsUI();
                 }
                 if (!memoryState.stores || memoryState.stores.length === 0) {
                   memoryState.stores = [...DEFAULT_STORES];
@@ -6087,6 +6366,15 @@
       }
 
       async function initDatabase() {
+        if (
+          typeof navigator !== "undefined" &&
+          navigator.storage &&
+          typeof navigator.storage.persist === "function"
+        ) {
+          try {
+            await navigator.storage.persist();
+          } catch (e) {}
+        }
         const localInit = await storageManager.init();
         await initGithubAuthState();
         return localInit;
@@ -6135,6 +6423,16 @@
               memoryState._deleted = { items: {}, ledger: {}, stores: {} };
             }
             pruneDeletedTombstones(memoryState._deleted);
+          }
+          const rawSnaps = localStorage.getItem("smart_buy_list_snapshots");
+          if (rawSnaps) {
+            try {
+              const parsedSnaps = JSON.parse(rawSnaps);
+              if (Array.isArray(parsedSnaps)) {
+                memoryState.snapshots = parsedSnaps.slice(0, 5);
+                updateSnapshotsUI();
+              }
+            } catch (e) {}
           }
         } catch (e) {
           console.warn("Failed to parse localStorage state", e);
@@ -6522,6 +6820,26 @@
           toast_store_aliases_updated: "Store aliases updated!",
           aria_edit_store_aliases: "Edit aliases",
           warn_price_too_high: "Warning: Price exceeds normal limit",
+          backup_preview_title: "Preview & Restore Backup",
+          backup_preview_subtitle:
+            "Compare incoming backup data against current database before restoring",
+          lbl_backup_export_date: "Backup Date:",
+          lbl_backup_version: "Version:",
+          th_data_category: "Data Category",
+          th_current_database: "Current",
+          th_incoming_backup: "Backup",
+          lbl_compare_active_items: "Active Buy-List Items",
+          lbl_compare_ledger_records: "Purchase Ledger History",
+          lbl_compare_stores: "Store Profiles",
+          lbl_auto_snapshot_title:
+            "Automatically create safety rollback snapshot",
+          lbl_auto_snapshot_desc:
+            "Saves current database state into IndexedDB snapshots before restoring.",
+          btn_confirm_restore: "Confirm & Restore Data",
+          btn_restore_last_snapshot: "Undo Last Action (Restore Snapshot)",
+          toast_snapshot_restored:
+            "Database restored from snapshot successfully!",
+          toast_no_snapshot: "No snapshot available to restore.",
         },
         vi: {
           app_title: "Danh Sách Mua Sắm",
@@ -6913,6 +7231,25 @@
           toast_store_aliases_updated: "Đã cập nhật tên viết tắt cho cửa hàng!",
           aria_edit_store_aliases: "Sửa tên viết tắt",
           warn_price_too_high: "Cảnh báo: Giá vượt quá giới hạn thông thường",
+          backup_preview_title: "Xem Trước & Khôi Phục Bản Sao Lưu",
+          backup_preview_subtitle:
+            "So sánh dữ liệu bản sao lưu với dữ liệu hiện tại trước khi ghi đè",
+          lbl_backup_export_date: "Thời gian sao lưu:",
+          lbl_backup_version: "Phiên bản:",
+          th_data_category: "Hạng mục",
+          th_current_database: "Hiện tại",
+          th_incoming_backup: "Bản sao lưu",
+          lbl_compare_active_items: "Mục mua sắm",
+          lbl_compare_ledger_records: "Lịch sử giá đã mua",
+          lbl_compare_stores: "Hồ sơ siêu thị",
+          lbl_auto_snapshot_title: "Tự động tạo snapshot sao lưu an toàn",
+          lbl_auto_snapshot_desc:
+            "Lưu lại toàn bộ trạng thái hiện tại vào bộ nhớ IndexedDB trước khi khôi phục để hoàn tác nếu cần.",
+          btn_confirm_restore: "Khôi Phục Dữ Liệu",
+          btn_restore_last_snapshot:
+            "Hoàn tác thao tác cuối (Khôi phục Snapshot)",
+          toast_snapshot_restored: "Đã khôi phục snapshot thành công!",
+          toast_no_snapshot: "Không có snapshot nào để hoàn tác.",
         },
       };
 
@@ -7663,6 +8000,118 @@
         );
       }
 
+      function openBackupPreviewModal(parsed) {
+        if (!parsed || typeof parsed !== "object") return;
+        window.pendingBackupRestore = parsed;
+
+        const dateEl = document.getElementById("backupPreviewExportDate");
+        const verEl = document.getElementById("backupPreviewVersion");
+        const curItems = document.getElementById("backupCurrentItemCount");
+        const incItems = document.getElementById("backupIncomingItemCount");
+        const curLedger = document.getElementById("backupCurrentLedgerCount");
+        const incLedger = document.getElementById("backupIncomingLedgerCount");
+        const curStores = document.getElementById("backupCurrentStoreCount");
+        const incStores = document.getElementById("backupIncomingStoreCount");
+
+        const exportDate =
+          parsed.exportDate ||
+          parsed.timestamp ||
+          (parsed.metadata && parsed.metadata.exportedAt) ||
+          null;
+        if (dateEl) {
+          if (exportDate) {
+            try {
+              dateEl.textContent = new Date(exportDate).toLocaleString();
+            } catch (e) {
+              dateEl.textContent = String(exportDate);
+            }
+          } else {
+            dateEl.textContent = "Không xác định / N/A";
+          }
+        }
+
+        if (verEl) {
+          verEl.textContent =
+            parsed.appVersion ||
+            parsed.version ||
+            (parsed.metadata && parsed.metadata.appVersion) ||
+            "v4.x";
+        }
+
+        if (curItems) {
+          curItems.textContent = (memoryState.activeList?.items || []).length;
+        }
+        if (incItems) {
+          incItems.textContent = (parsed.activeList?.items || []).length;
+        }
+
+        if (curLedger) {
+          curLedger.textContent = (memoryState.purchaseLedger || []).length;
+        }
+        if (incLedger) {
+          incLedger.textContent = (parsed.purchaseLedger || []).length;
+        }
+
+        if (curStores) {
+          curStores.textContent = (memoryState.stores || []).length;
+        }
+        if (incStores) {
+          incStores.textContent = (parsed.stores || []).length;
+        }
+
+        const autoCheck = document.getElementById("backupAutoSnapshotCheckbox");
+        if (autoCheck) {
+          autoCheck.checked = true;
+        }
+
+        openModal("backupPreviewModal");
+        applyTranslations();
+      }
+
+      function executeConfirmedBackupRestore() {
+        const parsed = window.pendingBackupRestore;
+        if (!parsed || typeof parsed !== "object") {
+          closeModal("backupPreviewModal");
+          return;
+        }
+
+        const autoSnapshot = document.getElementById(
+          "backupAutoSnapshotCheckbox"
+        );
+        const shouldSnapshot = autoSnapshot ? autoSnapshot.checked : true;
+
+        if (shouldSnapshot) {
+          saveFullStateSnapshot("PRE_BACKUP_RESTORE");
+        }
+
+        if (parsed.activeList) memoryState.activeList = parsed.activeList;
+        if (Array.isArray(parsed.purchaseLedger))
+          memoryState.purchaseLedger = parsed.purchaseLedger;
+        if (Array.isArray(parsed.stores)) memoryState.stores = parsed.stores;
+        if (parsed.storeAliases && typeof parsed.storeAliases === "object")
+          memoryState.storeAliases = parsed.storeAliases;
+        if (parsed._deleted && typeof parsed._deleted === "object") {
+          memoryState._deleted = parsed._deleted;
+        } else if (!memoryState._deleted) {
+          memoryState._deleted = { items: {}, ledger: {}, stores: {} };
+        }
+        pruneDeletedTombstones(memoryState._deleted);
+        if (parsed.settings)
+          memoryState.settings = Object.assign(
+            memoryState.settings,
+            parsed.settings
+          );
+
+        saveToLocalStorage();
+        renderApp();
+        const tr = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+        showToast(tr.toast_backup_imported || "Backup imported successfully!");
+        window.pendingBackupRestore = null;
+        closeModal("backupPreviewModal");
+        closeModal("pasteJsonModal");
+        closeModal("settingsModal");
+      }
+
       function handleBackupFileImport(event) {
         const file = event.target.files && event.target.files[0];
         if (!file) return;
@@ -7671,24 +8120,17 @@
           try {
             const parsed = JSON.parse(e.target.result);
             if (parsed && typeof parsed === "object") {
-              if (parsed.activeList) memoryState.activeList = parsed.activeList;
-              if (Array.isArray(parsed.purchaseLedger))
-                memoryState.purchaseLedger = parsed.purchaseLedger;
-              if (Array.isArray(parsed.stores))
-                memoryState.stores = parsed.stores;
-              if (parsed.settings)
-                memoryState.settings = Object.assign(
-                  memoryState.settings,
-                  parsed.settings
-                );
-              saveToLocalStorage();
-              renderApp();
-              showToast(
-                TRANSLATIONS[currentLanguage].toast_backup_imported ||
-                  "Backup imported successfully!"
-              );
-              closeModal("settingsModal");
+              if (
+                parsed.activeList ||
+                Array.isArray(parsed.purchaseLedger) ||
+                Array.isArray(parsed.stores)
+              ) {
+                openBackupPreviewModal(parsed);
+                if (event.target) event.target.value = "";
+                return;
+              }
             }
+            showToast("Invalid JSON backup format");
           } catch (err) {
             console.error("Failed to parse backup JSON", err);
             showToast("Invalid JSON backup file");
@@ -10658,42 +11100,9 @@
               Array.isArray(parsed.purchaseLedger) ||
               Array.isArray(parsed.stores)
             ) {
-              const t = TRANSLATIONS[currentLanguage];
-              const confirmed =
-                typeof confirm === "function"
-                  ? confirm(
-                      t.confirm_restore_backup ||
-                        "Restore full database backup? This will replace current active list, store history, and settings."
-                    )
-                  : true;
-              if (confirmed) {
-                if (parsed.activeList)
-                  memoryState.activeList = parsed.activeList;
-                if (Array.isArray(parsed.purchaseLedger))
-                  memoryState.purchaseLedger = parsed.purchaseLedger;
-                if (Array.isArray(parsed.stores))
-                  memoryState.stores = parsed.stores;
-                if (parsed._deleted && typeof parsed._deleted === "object") {
-                  memoryState._deleted = parsed._deleted;
-                } else if (!memoryState._deleted) {
-                  memoryState._deleted = { items: {}, ledger: {}, stores: {} };
-                }
-                pruneDeletedTombstones(memoryState._deleted);
-                if (parsed.settings)
-                  memoryState.settings = Object.assign(
-                    memoryState.settings,
-                    parsed.settings
-                  );
-                saveToLocalStorage();
-                renderApp();
-                showToast(
-                  t.toast_backup_imported || "Backup imported successfully!"
-                );
-                closeModal("pasteJsonModal");
-                closeModal("settingsModal");
-                return true;
-              }
-              return false;
+              closeModal("pasteJsonModal");
+              openBackupPreviewModal(parsed);
+              return true;
             }
 
             // 3B. Active Buy-List JSON ({ title, items } or { t, i })
@@ -11003,11 +11412,16 @@
         }
       }
 
-      function saveActiveListSnapshot(reason = "PRE_IMPORT_BACKUP") {
+      function saveFullStateSnapshot(reason = "MANUAL_SNAPSHOT") {
         const snapshot = {
-          id: "snap_" + Date.now(),
+          id:
+            "snap_" +
+            Date.now() +
+            "_" +
+            Math.random().toString(36).substring(2, 6),
           timestamp: new Date().toISOString(),
           reason: reason,
+          state: JSON.parse(JSON.stringify(memoryState)),
           activeList: JSON.parse(
             JSON.stringify(
               (memoryState && memoryState.activeList) || {
@@ -11016,14 +11430,51 @@
               }
             )
           ),
+          activeListCount: memoryState.activeList?.items?.length || 0,
+          ledgerCount: memoryState.purchaseLedger?.length || 0,
+          storesCount: memoryState.stores?.length || 0,
         };
+
         if (!Array.isArray(memoryState.snapshots)) {
           memoryState.snapshots = [];
         }
         memoryState.snapshots.unshift(snapshot);
-        if (memoryState.snapshots.length > 10) {
-          memoryState.snapshots = memoryState.snapshots.slice(0, 10);
+        // Cap snapshot storage to the 5 most recent snapshots to prevent storage bloat
+        if (memoryState.snapshots.length > 5) {
+          memoryState.snapshots = memoryState.snapshots.slice(0, 5);
         }
+
+        // Persist to IndexedDB 'snapshots' store if available
+        if (dbInstance && typeof dbInstance.transaction === "function") {
+          try {
+            if (
+              dbInstance.objectStoreNames &&
+              dbInstance.objectStoreNames.contains("snapshots")
+            ) {
+              const tx = dbInstance.transaction(["snapshots"], "readwrite");
+              const store = tx.objectStore("snapshots");
+              store.put(snapshot);
+
+              const getAllReq = store.getAll();
+              getAllReq.onsuccess = (e) => {
+                const all = e.target.result || [];
+                if (all.length > 5) {
+                  all.sort((a, b) => (a.timestamp > b.timestamp ? -1 : 1));
+                  const toDelete = all.slice(5);
+                  const delTx = dbInstance.transaction(
+                    ["snapshots"],
+                    "readwrite"
+                  );
+                  const delStore = delTx.objectStore("snapshots");
+                  toDelete.forEach((snap) => delStore.delete(snap.id));
+                }
+              };
+            }
+          } catch (e) {
+            console.warn("Failed to persist snapshot to IDB", e);
+          }
+        }
+
         try {
           if (typeof localStorage !== "undefined") {
             localStorage.setItem(
@@ -11032,7 +11483,74 @@
             );
           }
         } catch (e) {}
+
+        updateSnapshotsUI();
         return snapshot;
+      }
+
+      function saveActiveListSnapshot(reason = "PRE_IMPORT_BACKUP") {
+        return saveFullStateSnapshot(reason);
+      }
+
+      function restoreSnapshot(snapshotId) {
+        const snapshots = memoryState.snapshots || [];
+        const target =
+          snapshots.find((s) => s.id === snapshotId) || snapshots[0];
+        if (!target || !target.state) {
+          const tr = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          showToast(
+            tr.toast_no_snapshot || "Không có snapshot nào để hoàn tác."
+          );
+          return false;
+        }
+
+        // Save current state prior to restore as an emergency rollback
+        saveFullStateSnapshot("PRE_RESTORE_UNDO");
+
+        const restoredState = JSON.parse(JSON.stringify(target.state));
+        if (restoredState.activeList)
+          memoryState.activeList = restoredState.activeList;
+        if (Array.isArray(restoredState.purchaseLedger))
+          memoryState.purchaseLedger = restoredState.purchaseLedger;
+        if (Array.isArray(restoredState.stores))
+          memoryState.stores = restoredState.stores;
+        if (restoredState.storeAliases)
+          memoryState.storeAliases = restoredState.storeAliases;
+        if (restoredState.settings)
+          memoryState.settings = Object.assign(
+            memoryState.settings,
+            restoredState.settings
+          );
+        if (restoredState._deleted)
+          memoryState._deleted = restoredState._deleted;
+
+        saveToLocalStorage();
+        renderApp();
+        const tr = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+        showToast(
+          tr.toast_snapshot_restored || "Đã khôi phục snapshot thành công!"
+        );
+        return true;
+      }
+
+      function restoreLastSnapshot() {
+        const snapshots = memoryState.snapshots || [];
+        if (!snapshots.length) {
+          const tr = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+          showToast(
+            tr.toast_no_snapshot || "Không có snapshot nào để hoàn tác."
+          );
+          return false;
+        }
+        return restoreSnapshot(snapshots[0].id);
+      }
+
+      function updateSnapshotsUI() {
+        const countBadge = document.getElementById("snapshotCountBadge");
+        if (countBadge) {
+          const count = (memoryState.snapshots || []).length;
+          countBadge.textContent = `${count} snapshot${count === 1 ? "" : "s"}`;
+        }
       }
 
       function applySmartMerge() {
@@ -11208,6 +11726,7 @@
       }
 
       function finalizeTripCompletion() {
+        saveFullStateSnapshot("TRIP_COMPLETION");
         const items = memoryState.activeList.items;
         const checkedItems = items.filter((i) => i.checked);
         const uncheckedItems = items.filter((i) => !i.checked);
@@ -12267,6 +12786,13 @@
             t.btn_clear_all_data ||
             "Clear All Data"
         );
+        el("btnRestoreLastSnapshotText", t.btn_restore_last_snapshot);
+
+        // 8.0. Backup Restore Preview Modal (Issue #308)
+        el("backupPreviewModalTitle", t.backup_preview_title);
+        el("backupPreviewSubtitle", t.backup_preview_subtitle);
+        el("btnConfirmBackupRestoreText", t.btn_confirm_restore);
+
         el("settingsSyncTitle", t.settings_sync_title);
         el("settingsSyncStatus", t.settings_sync_status);
         el("settingsSyncBadge", t.badge_local_only);
@@ -13210,6 +13736,12 @@
         window.triggerHeaderManualSync = triggerHeaderManualSync;
         window.openCloudSettingsFromPopover = openCloudSettingsFromPopover;
         window.triggerAutoSyncWithRetry = triggerAutoSyncWithRetry;
+        window.openBackupPreviewModal = openBackupPreviewModal;
+        window.executeConfirmedBackupRestore = executeConfirmedBackupRestore;
+        window.saveFullStateSnapshot = saveFullStateSnapshot;
+        window.restoreSnapshot = restoreSnapshot;
+        window.restoreLastSnapshot = restoreLastSnapshot;
+        window.updateSnapshotsUI = updateSnapshotsUI;
 
         Object.defineProperty(window, "currentShareScope", {
           get: () => currentShareScope,

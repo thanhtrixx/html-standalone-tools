@@ -13,6 +13,7 @@ const SUB_SUITES = [
   "storage-indexeddb.js",
   "storage-clipboard.js",
   "storage-backup-settings.js",
+  "storage-snapshots-backup-preview.js",
 ];
 
 let totalFailed = 0;

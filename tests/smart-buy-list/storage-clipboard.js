@@ -326,10 +326,12 @@ async function runTests() {
       resBackup === true,
       "CLIP-04b: Full backup payload returns true on successful parse"
     );
+    const backupModal = restoreEngine.domElements["backupPreviewModal"];
     assert(
-      confirmCalled === true,
-      "CLIP-04c: Confirmation prompt was triggered before restoring full backup"
+      backupModal && !backupModal.classList.contains("hidden"),
+      "CLIP-04c: Backup restore preview modal (#backupPreviewModal) is displayed for user confirmation"
     );
+    restoreEngine.sandbox.executeConfirmedBackupRestore();
     assert(
       restoreEngine.sandbox.memoryState.activeList.title === "Restored List",
       "CLIP-04d: Full backup restored activeList state"
