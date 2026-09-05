@@ -1450,6 +1450,7 @@
 
     <!-- ==================== BOTTOM IN-AISLE THUMB NAVIGATION (MD3) ==================== -->
     <nav
+      id="bottomNavBar"
       class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900/95 dark:bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-2 py-1.5 no-print"
     >
       <div
@@ -6460,6 +6461,21 @@
 
       function setActiveTab(tab, options = {}) {
         if (!TAB_ORDER.includes(tab)) return;
+
+        if (!options.fromPopState && tab !== currentActiveTab) {
+          try {
+            if (
+              typeof window !== "undefined" &&
+              window.history &&
+              window.history.pushState
+            ) {
+              window.history.pushState({ tab }, "");
+            }
+          } catch (e) {
+            // Ignore sandboxed history errors
+          }
+        }
+
         currentActiveTab = tab;
         if (typeof window !== "undefined") {
           window.currentActiveTab = tab;
@@ -10562,6 +10578,27 @@
         }
       }
 
+      function handlePopState(event) {
+        // Tier 1: If any modal is open, close topmost modal and stay on current tab
+        if (modalHistoryStack.length > 0) {
+          const topModal = modalHistoryStack[modalHistoryStack.length - 1];
+          closeModal(topModal, true);
+          return;
+        }
+
+        // Tier 2: Tab navigation history
+        const targetTab = event && event.state && event.state.tab;
+        if (targetTab && TAB_ORDER.includes(targetTab)) {
+          if (targetTab !== currentActiveTab) {
+            setActiveTab(targetTab, { fromPopState: true, preserveItem: true });
+          }
+        } else if (currentActiveTab !== "PLANNING") {
+          // If history is at root / empty state and user is not on PLANNING, return to PLANNING
+          setActiveTab("PLANNING", { fromPopState: true });
+        }
+        // Tier 3: If on PLANNING with empty modalHistoryStack, let browser back / PWA exit occur naturally
+      }
+
       function scrollToTop() {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -11324,6 +11361,23 @@
           renderApp();
           runComparatorCalc();
 
+          // Initialize root history state
+          try {
+            if (
+              typeof window !== "undefined" &&
+              window.history &&
+              window.history.replaceState &&
+              !window.history.state
+            ) {
+              window.history.replaceState(
+                { tab: currentActiveTab || "PLANNING" },
+                ""
+              );
+            }
+          } catch (e) {
+            // Ignore sandboxed history errors
+          }
+
           const langSelect = document.getElementById("settingsLanguageSelect");
           if (langSelect) langSelect.value = currentLanguage;
           const curSelect = document.getElementById("settingsCurrencySelect");
@@ -11372,13 +11426,8 @@
           // Keyboard navigation shortcuts
           document.addEventListener("keydown", handleGlobalKeyDown);
 
-          // Popstate browser back button handling for modals
-          window.addEventListener("popstate", (event) => {
-            if (modalHistoryStack.length > 0) {
-              const topModal = modalHistoryStack[modalHistoryStack.length - 1];
-              closeModal(topModal, true);
-            }
-          });
+          // Popstate browser back button handling for modals & tab navigation
+          window.addEventListener("popstate", handlePopState);
 
           // Page horizontal touch swipe listeners for 4-tab navigation
           document.addEventListener("touchstart", handlePageTouchStart, {
@@ -11761,6 +11810,7 @@
         window.flushPendingCloudSync = flushPendingCloudSync;
         window.showToast = showToast;
         window.normalizeItemKey = normalizeItemKey;
+        window.handlePopState = handlePopState;
 
         Object.defineProperty(window, "selectedLedgerIds", {
           get: () => selectedLedgerIds,

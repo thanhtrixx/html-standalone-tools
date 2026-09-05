@@ -45,6 +45,31 @@ function loadBuyListSharingEngine() {
     addEventListener: () => {},
     scrollTo: () => {},
     location: { origin: "http://localhost", pathname: "/", hash: "" },
+    history: {
+      state: null,
+      stack: [],
+      pushState(state) {
+        this.state = state;
+        this.stack.push(state);
+      },
+      replaceState(state) {
+        this.state = state;
+        if (this.stack.length > 0) {
+          this.stack[this.stack.length - 1] = state;
+        } else {
+          this.stack.push(state);
+        }
+      },
+      back() {
+        if (this.stack.length > 1) {
+          this.stack.pop();
+          this.state = this.stack[this.stack.length - 1];
+        } else if (this.stack.length === 1) {
+          this.stack.pop();
+          this.state = null;
+        }
+      },
+    },
     navigator: {
       clipboard: { writeText: () => Promise.resolve() },
       share: () => Promise.resolve(),
@@ -724,6 +749,79 @@ async function runTests() {
     assert(
       duplicateExports.length === 0,
       `HYGIENE-07b: Zero duplicate window.* assignments in export block (Duplicates: ${duplicateExports.join(", ") || "none"})`
+    );
+
+    // ==========================================
+    // Section 9: Two-Tier Native PWA Back Navigation & Bottom Nav Hook (Issue #294)
+    // ==========================================
+    console.log(
+      "\n--- Section 9: Two-Tier Native PWA Back Navigation & Bottom Nav Hook ---"
+    );
+
+    // BACK-NAV-01: The bottom navigation <nav> element has id="bottomNavBar"
+    assert(
+      rawHtml.includes('<nav id="bottomNavBar"') ||
+        rawHtml.includes('<nav\n      id="bottomNavBar"'),
+      'BACK-NAV-01: The bottom navigation <nav> element has id="bottomNavBar"'
+    );
+
+    // BACK-NAV-02: Switching tabs pushes { tab } state into history without redundant duplicate pushes
+    sandbox.history.stack = [{ tab: "PLANNING" }];
+    sandbox.history.state = { tab: "PLANNING" };
+    sandbox.setActiveTab("BUY");
+    assert(
+      sandbox.history.state &&
+        sandbox.history.state.tab === "BUY" &&
+        sandbox.history.stack.length === 2,
+      'BACK-NAV-02a: setActiveTab("BUY") pushes { tab: "BUY" } to history stack'
+    );
+    // Calling same tab again should NOT push duplicate entry
+    sandbox.setActiveTab("BUY");
+    assert(
+      sandbox.history.stack.length === 2,
+      "BACK-NAV-02b: Calling setActiveTab on already active tab does not create redundant duplicate history push"
+    );
+
+    // BACK-NAV-03: Switching tabs further pushes new tab
+    sandbox.setActiveTab("PRICE_HISTORY");
+    assert(
+      sandbox.history.state &&
+        sandbox.history.state.tab === "PRICE_HISTORY" &&
+        sandbox.history.stack.length === 3,
+      'BACK-NAV-03: setActiveTab("PRICE_HISTORY") pushes { tab: "PRICE_HISTORY" } to history stack'
+    );
+
+    // BACK-NAV-04: Pressing back (popstate) activates previous tab
+    sandbox.handlePopState({ state: { tab: "BUY" } });
+    assert(
+      sandbox.currentActiveTab === "BUY",
+      'BACK-NAV-04: handlePopState with { tab: "BUY" } activates BUY tab'
+    );
+
+    // BACK-NAV-05: Pressing back with modal open closes topmost modal and retains active tab
+    sandbox.modalHistoryStack.push("editItemModal");
+    sandbox.handlePopState({ state: { tab: "PLANNING" } });
+    assert(
+      !sandbox.modalHistoryStack.includes("editItemModal"),
+      "BACK-NAV-05a: handlePopState with open modal closes the topmost modal"
+    );
+    assert(
+      sandbox.currentActiveTab === "BUY",
+      "BACK-NAV-05b: Closing modal via popstate does not alter the active tab"
+    );
+
+    // BACK-NAV-06: Pressing back on PLANNING root with no open modals does not trap user
+    sandbox.handlePopState({ state: null });
+    assert(
+      sandbox.currentActiveTab === "PLANNING",
+      "BACK-NAV-06a: handlePopState with null state returns to PLANNING if not already on PLANNING"
+    );
+    const stackLenBefore = sandbox.history.stack.length;
+    sandbox.handlePopState({ state: null });
+    assert(
+      sandbox.history.stack.length === stackLenBefore &&
+        sandbox.currentActiveTab === "PLANNING",
+      "BACK-NAV-06b: handlePopState when already on PLANNING root does not push history or trap user"
     );
   } catch (err) {
     console.error("❌ Test Execution Error:", err);
