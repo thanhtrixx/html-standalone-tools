@@ -145,6 +145,7 @@ async function runSimulationTests() {
   // Test 2: Demand interest on flexible pool only
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  today.setDate(1); // Align to 1st of month to match simStartDate in simulation engine
   const oneYearLater = new Date(today.getTime());
   oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
 

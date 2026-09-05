@@ -7751,7 +7751,7 @@
         const simTargetDate = parseDate(targetDateStr);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        let simStartDate = new Date(today.getTime());
+        let simStartDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
         // Parse savings accounts from portfolio
         const allSavings = [];
@@ -8056,7 +8056,7 @@
         };
         const totalEarnedInterest =
           totalInterestInitialCSV + totalInterestPool + totalInterest6M;
-        const years = getDaysDiff(today, simTargetDate) / 365;
+        const years = getDaysDiff(simStartDate, simTargetDate) / 365;
         const inflationAdjusted =
           inflationRate > 0
             ? finalSnapshot.totalWealth / Math.pow(1 + inflationRate, years)
