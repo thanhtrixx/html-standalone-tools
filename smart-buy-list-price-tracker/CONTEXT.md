@@ -111,17 +111,22 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ### 6. PWA & Mobile Ergonomics
 
-- **Standalone PWA Shell & Single-Source Versioning (v4.5.0)**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.5.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.5.0"`) and `dist/index.html` during compaction build. Full iOS PWA support adds `viewport-fit=cover` and `env(safe-area-inset-*)` safe-area padding for the sticky header, MD3 bottom nav, and toasts (notch / Dynamic Island / home indicator). Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, Cloudflare Pages clickjacking protection `_headers` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`), and standalone `.zip` packaging.
+- **Standalone PWA Shell & Single-Source Versioning (v4.5.1)**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.5.1`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.5.1"`) and `dist/index.html` during compaction build. Full iOS PWA support adds `viewport-fit=cover` and `env(safe-area-inset-*)` safe-area padding for the sticky header, MD3 bottom nav, and toasts (notch / Dynamic Island / home indicator). Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, Cloudflare Pages clickjacking protection `_headers` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`), and standalone `.zip` packaging.
 - **Pure Event Delegation & Zero-Inline Handlers**: All item card action buttons dispatch strictly via root-level event delegation (`handleItemCardDelegatedClick`) on `document`, using `data-action` and `data-item-id` with strict `/^[a-zA-Z0-9_-]+$/` format validation and cryptographic monotonic IDs (`item_${timestamp}_${randomUUID.slice(0,8)}`). Redundant inline `onclick` handlers are completely eliminated to prevent double-invocation regressions.
-- **Two-Tier Native PWA Back Navigation Hierarchy**: Back navigation (`popstate`) orchestrates a strict two-tier dismissal hierarchy:
-  1. _Tier 1 (Modals)_: If `modalHistoryStack` contains active dialogs, dismiss topmost modal.
+- **Two-Tier Native PWA Back Navigation with Exit Guard**: Back navigation (`popstate`) orchestrates a strict dismissal and exit hierarchy:
+  1. _Tier 1 (Modals)_: If `modalHistoryStack` contains active dialogs, dismiss topmost modal and stay on active tab.
   2. _Tier 2 (Tab History)_: Tab switches push `{ tab }` state to `window.history`. Back steps backward through viewed tabs, returning to `PLANNING`.
-  3. _Tier 3 (Root Exit)_: If at root `PLANNING` tab with zero active modals, standard browser exit behavior proceeds.
-- **Responsive Tablet & Desktop Deal Intelligence**:
+  3. _Tier 3 (Root Exit Guard - "Press back again to exit")_: If at root `PLANNING` tab with zero active modals, the initial back event intercepts navigation, displays a localized toast (_"Nhấn quay lại lần nữa để thoát"_ / _"Press back again to exit"_), and arms a 2000ms exit window timer. Pressing back a second time within 2000ms permits browser/PWA exit; otherwise the guard re-arms.
+- **Responsive Tablet & Mobile Deal Intelligence (`sm:` 640px Breakpoint)**:
   - Consistent case-insensitive item lookup (`normalizeItemKey(name)`) prevents casing mismatches between active items and ledger records.
   - Distinct `⚪ New Item` (`⚪ Hàng Mới`) badge displays for items without historical transactions.
-  - In Buy Mode, deal badges display on tablet and desktop (`sm:inline-flex`) for in-aisle decision intelligence without crowding mobile screens.
+  - On mobile phones (`< 640px`): Deal badges display emoji icons only (`🟢`, `🟡`, `🔴`, `⚪`) in Planning cards, Buy mode cards, Item Comparator, and Mobile Ledger cards to maximize precious horizontal space.
+  - On tablet and desktop (`>= 640px`, `sm:inline`): Deal badges expand to display both emoji and full localized label (e.g. `🟢 Great Deal` / `🟢 Giá Siêu Tốt`).
   - Desktop Price History Table (`#ledgerTableContainer`, $\ge 640\text{px}$) features a dedicated **Deal Rating** column (`Đánh Giá Giá`).
+- **Resilient Gist Cloud Sync & Status Polish**:
+  - `extractGistId(input)` seamlessly extracts 32-hex IDs from raw strings or full Gist URLs (`https://gist.github.com/...`).
+  - Anonymous public Gist download allows users to force-download and import shared Gist data without requiring personal access tokens.
+  - Expressive animated cloud iconography (`#headerCloudSyncBadge`, `#cloudSyncStatusPill`) visually differentiates in-flight syncing (animated spinning/pulsing cloud), completion checkmark, warning alert, and offline states.
 - **Telemetry & Hosting Layer Privacy**: The client-side application operates completely tracker-free with zero runtime analytics scripts. Static delivery via Cloudflare Pages provides privacy-preserving aggregate HTTP telemetry without personal tracking.
 - **Material You (MD3) 4-Tab Page Navigation**: 4-destination bottom navigation bar (`Planning`, `Buy`, `Price History`, `Comparator`) managing 4 full page views within `<main>`.
 - **Horizontal Page Swipe Gestures & Gesture Hierarchy**: Horizontal swipe gestures navigate across the 4 tabs smoothly ($|\Delta X| \ge 50\text{px}$ and $|\Delta X| > 1.5 \times |\Delta Y|$). In-aisle item card swipe gestures (Swipe Right = Check/Done + Haptic Vibrate; Swipe Left = Open Comparator with active item pre-filled) are isolated and take precedence over page horizontal swipe actions.
@@ -170,3 +175,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0029: Pure Event Delegation, Two-Tier PWA Back Navigation & Responsive Tablet Deal Intelligence](./docs/adr/0029-event-delegation-pwa-back-navigation-and-tablet-deal-intelligence.md)
 - [ADR-0030: Share Payload Compression, Interactive Merge Protocol, Ambient Cloud Sync Indicator & Snapshot Safeguards](./docs/adr/0030-share-compression-interactive-merge-ambient-sync-and-snapshot-safeguards.md)
 - [ADR-0031: Modular Source Architecture, JSDoc Domain Contracts & Observable State Container](./docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md)
+- [ADR-0032: Two-Tier PWA Back Exit Guard, Gist URL Resilience, Responsive Deal Badges, and Cloud Sync Status Polish](./docs/adr/0032-back-navigation-gist-resilience-responsive-badges-and-sync-visuals.md)
