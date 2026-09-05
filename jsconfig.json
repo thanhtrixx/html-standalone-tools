@@ -3,6 +3,6 @@
     "checkJs": true,
     "maxNodeModuleJsDepth": 1
   },
-  "include": ["smart-buy-list-price-tracker/src/**/*"],
+  "include": ["smart-buy-list-price-tracker/src/types/**/*"],
   "exclude": ["node_modules", "dist"]
 }

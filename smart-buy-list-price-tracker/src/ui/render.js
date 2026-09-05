@@ -793,6 +793,63 @@ function renderItemList() {
   }
 }
 
+function setupStoreSubscriptions() {
+  if (
+    typeof store !== "undefined" &&
+    store &&
+    typeof store.subscribe === "function"
+  ) {
+    store.subscribe((state, action) => {
+      if (!action || !action.type) {
+        renderApp();
+        return;
+      }
+
+      switch (action.type) {
+        case ACTION_TYPES.ITEM_TOGGLE_CHECK:
+          renderKpis();
+          renderItemList();
+          updateTripProgress();
+          break;
+
+        case ACTION_TYPES.ITEM_ADD:
+        case ACTION_TYPES.ITEM_DELETE:
+        case ACTION_TYPES.ITEM_UPDATE:
+          renderStoreFilterChips();
+          renderCategoryFilterChips();
+          renderKpis();
+          renderItemList();
+          break;
+
+        case ACTION_TYPES.SET_STORE_FILTER:
+          renderStoreFilterChips();
+          renderKpis();
+          renderItemList();
+          break;
+
+        case ACTION_TYPES.SET_GROUPING:
+        case ACTION_TYPES.SET_TRIP_PHASE:
+          renderItemList();
+          renderKpis();
+          break;
+
+        case ACTION_TYPES.SET_STORES:
+        case ACTION_TYPES.SET_STORE_ALIASES:
+          renderStoreFilterOptions();
+          renderStoreFilterChips();
+          break;
+
+        default:
+          renderApp();
+          break;
+      }
+    });
+  }
+}
+
+// Automatically bind store subscriber
+setupStoreSubscriptions();
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     renderApp,

@@ -502,6 +502,7 @@ const TRACKER_BUNDLE_MODULES = [
   "src/sync/cloud-seam.js",
   "src/sync/merge3.js",
   "src/sync/cloud-actions.js",
+  "src/state/store.js",
   "src/i18n/translations.js",
   "src/ui/sample-data.js",
   "src/ui/navigation.js",

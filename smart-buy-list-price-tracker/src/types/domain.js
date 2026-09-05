@@ -219,6 +219,37 @@
  * @property {Array<SnapshotRecord>} [snapshots] - Rolling database snapshots
  */
 
+/**
+ * Dispatched state action container.
+ * @typedef {Object} Action
+ * @property {string} type - Action type discriminator
+ * @property {any} [payload] - Optional action payload
+ */
+
+/**
+ * State subscriber callback.
+ * @typedef {(state: AppState, action: Action) => void} StoreListener
+ */
+
+/**
+ * Observable state store contract.
+ * @typedef {Object} Store
+ * @property {() => AppState} getState - Retrieve current state snapshot
+ * @property {(action: Action) => Action} dispatch - Dispatch action transition
+ * @property {(listener: StoreListener) => () => void} subscribe - Subscribe to state changes
+ * @property {(nextState: AppState) => Action} replaceState - Overwrite state snapshot
+ * @property {(item: ListItem) => ListItem} addItem - Add new item to shopping list
+ * @property {(id: string, patch: Object) => ListItem|null} updateItem - Update item by ID
+ * @property {(id: string) => boolean} deleteItem - Delete item by ID
+ * @property {(id: string) => ListItem|null} toggleItemCheck - Toggle item checked state
+ * @property {(phase: string) => void} setTripPhase - Set active trip phase
+ * @property {(grouping: string) => void} setGrouping - Set active grouping
+ * @property {(storeName: string) => void} setStoreFilter - Set store filter
+ * @property {(payload: Object) => void} completeTrip - Finalize shopping trip
+ * @property {(diff: Object) => void} applyMerge - Apply merge diff
+ * @property {(snapshotId: string) => boolean} restoreSnapshot - Restore snapshot by ID
+ */
+
 // Export constants for runtime usage across modules
 export const DIMENSIONS = Object.freeze({
   MASS: "MASS",

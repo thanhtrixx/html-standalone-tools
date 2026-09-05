@@ -437,6 +437,22 @@ function updateEditItemLivePreview() {
   }
 }
 
+function updateItem(id, patch) {
+  if (typeof store !== "undefined" && store && store.updateItem) {
+    return store.updateItem(id, patch);
+  }
+  const item = (memoryState.activeList?.items || []).find((i) => i.id === id);
+  if (item) {
+    Object.assign(item, patch);
+    item.updatedAt = Date.now();
+    touchItem(item);
+    saveToLocalStorage();
+    renderApp();
+    return item;
+  }
+  return null;
+}
+
 function submitFullItemEdit() {
   const hiddenId = document.getElementById("editItemHiddenId");
   const nameInput = document.getElementById("editItemName");
@@ -456,17 +472,30 @@ function submitFullItemEdit() {
   const name = (nameInput ? nameInput.value : "").trim();
   if (!name) return;
 
-  item.name = name;
-  if (catSelect) item.category = catSelect.value;
-  if (storeSelect) item.store = storeSelect.value;
-  if (qtyInput) item.quantity = parseFloat(qtyInput.value) || 1;
-  if (unitSelect) item.unit = unitSelect.value;
-  if (priceInput) item.price = parseFloat(priceInput.value) || 0;
-  item.updatedAt = Date.now();
+  const patch = {
+    name,
+    category: catSelect ? catSelect.value : item.category,
+    store: storeSelect ? storeSelect.value : item.store,
+    quantity: qtyInput ? parseFloat(qtyInput.value) || 1 : item.quantity,
+    unit: unitSelect ? unitSelect.value : item.unit,
+    price: priceInput ? parseFloat(priceInput.value) || 0 : item.price,
+  };
 
-  touchItem(item);
-  saveToLocalStorage();
-  renderApp();
+  if (typeof updateItem === "function") {
+    updateItem(itemId, patch);
+  } else {
+    item.name = name;
+    if (catSelect) item.category = catSelect.value;
+    if (storeSelect) item.store = storeSelect.value;
+    if (qtyInput) item.quantity = parseFloat(qtyInput.value) || 1;
+    if (unitSelect) item.unit = unitSelect.value;
+    if (priceInput) item.price = parseFloat(priceInput.value) || 0;
+    item.updatedAt = Date.now();
+    touchItem(item);
+    saveToLocalStorage();
+    renderApp();
+  }
+
   closeModal("editItemModal");
   showToast(
     TRANSLATIONS[currentLanguage].toast_item_updated || "Item details updated!"
@@ -508,17 +537,25 @@ function submitQuickPriceEdit() {
 }
 
 function quickUpdateItemPrice(itemId, newPrice, newQty) {
-  const item = memoryState.activeList.items.find((i) => i.id === itemId);
-  if (item) {
-    item.price = newPrice;
-    if (newQty !== undefined && newQty > 0) item.quantity = newQty;
-    touchItem(item);
-    saveToLocalStorage();
-    renderApp();
-    showToast(
-      TRANSLATIONS[currentLanguage].toast_price_updated || "Price updated!"
-    );
+  const patch = { price: newPrice };
+  if (newQty !== undefined && newQty > 0) patch.quantity = newQty;
+
+  if (typeof updateItem === "function") {
+    updateItem(itemId, patch);
+  } else {
+    const item = memoryState.activeList.items.find((i) => i.id === itemId);
+    if (item) {
+      item.price = newPrice;
+      if (newQty !== undefined && newQty > 0) item.quantity = newQty;
+      touchItem(item);
+      saveToLocalStorage();
+      renderApp();
+    }
   }
+
+  showToast(
+    TRANSLATIONS[currentLanguage].toast_price_updated || "Price updated!"
+  );
 }
 
 function focusAddItemInput() {
