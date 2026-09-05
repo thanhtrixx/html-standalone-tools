@@ -130,6 +130,11 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - **Compact 1-Line 3-Column Item Detail Edit**: Form layout featuring `Qty`, `Unit`, `Price` in a clean single row with concise labels.
 - **Currency-Aware Quick Price Adjustment Chips**: Bottom sheet dialogs with dynamic 1-tap delta chips adapting to active currency (`[-50k, -10k, -5k, +5k, +10k, +50k]` for `VND`, `[±0.25, ±0.50, ±1.00]` for `USD`).
 
+- **Modular Source Architecture & Build Pipeline (ADR-0031)**:
+  - Structured module authoring under `src/` (`domain/`, `types/`, `state/`, `storage/`, `sync/`, `sharing/`, `ui/`, `i18n/`) preserving standalone single-file distribution via build inlining.
+  - Strict JSDoc domain typing (`MasterItem`, `ListItem`, `LedgerEntry`, `SyncPayload`, `Snapshot`) with `checkJs` linting.
+  - Centralized observable state container (`createStore`) replacing ad-hoc global `memoryState` mutations.
+
 ---
 
 ## 📚 Architectural Decision Records (ADRs)
@@ -164,3 +169,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0028: Test Suite Domain Consolidation & Zero-Drift Harness](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md)
 - [ADR-0029: Pure Event Delegation, Two-Tier PWA Back Navigation & Responsive Tablet Deal Intelligence](./docs/adr/0029-event-delegation-pwa-back-navigation-and-tablet-deal-intelligence.md)
 - [ADR-0030: Share Payload Compression, Interactive Merge Protocol, Ambient Cloud Sync Indicator & Snapshot Safeguards](./docs/adr/0030-share-compression-interactive-merge-ambient-sync-and-snapshot-safeguards.md)
+- [ADR-0031: Modular Source Architecture, JSDoc Domain Contracts & Observable State Container](./docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md)
