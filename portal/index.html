@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML Standalone Tools — Central Portal Hub & Catalog</title>
+    <meta
+      name="description"
+      content="Catalog of 100% client-side, zero-dependency, offline-ready web applications."
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      if (typeof tailwind !== "undefined") {
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                brand: {
+                  50: "#ecfdf5",
+                  100: "#d1fae5",
+                  500: "#10b981",
+                  600: "#059669",
+                  700: "#047857",
+                },
+                slate: {
+                  850: "#151e2e",
+                  950: "#0b1120",
+                },
+              },
+            },
+          },
+        };
+      }
+    </script>
+    <style>
+      /* Base smoothing */
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950"
+  >
+    <!-- Header -->
+    <header
+      class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30"
+    >
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+      >
+        <div class="flex items-center space-x-3">
+          <div
+            class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20"
+          >
+            <svg
+              class="w-6 h-6 text-slate-950"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+              />
+            </svg>
+          </div>
+          <div>
+            <span
+              class="font-bold text-lg tracking-tight text-white block leading-tight"
+              data-i18n="suiteTitle"
+              >HTML Standalone Tools</span
+            >
+            <span
+              class="text-xs text-emerald-400 font-medium tracking-wide"
+              data-i18n="suiteTagline"
+              >Client-Side • Zero Dependencies</span
+            >
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <!-- Language Switcher -->
+          <div
+            class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700 text-xs font-semibold"
+          >
+            <button
+              id="langBtnEn"
+              onclick="setLanguage('en')"
+              class="px-2.5 py-1 rounded transition-all"
+              aria-label="Switch to English"
+            >
+              EN
+            </button>
+            <button
+              id="langBtnVi"
+              onclick="setLanguage('vi')"
+              class="px-2.5 py-1 rounded transition-all"
+              aria-label="Chuyển sang Tiếng Việt"
+            >
+              VI
+            </button>
+          </div>
+
+          <!-- GitHub Repo Link -->
+          <a
+            href="https://github.com/thanhtrixx/html-standalone-tools"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 transition"
+          >
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path
+                d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"
+              />
+            </svg>
+            <span class="hidden sm:inline">GitHub</span>
+          </a>
+
+          <!-- Releases Link -->
+          <a
+            href="https://github.com/thanhtrixx/html-standalone-tools/releases"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center space-x-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition"
+          >
+            <span data-i18n="navReleases">Releases</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section
+      class="py-12 md:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full text-center"
+    >
+      <div
+        class="inline-flex items-center space-x-2 bg-emerald-950/60 border border-emerald-800/60 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full mb-6"
+      >
+        <span
+          class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"
+        ></span>
+        <span data-i18n="heroBadge"
+          >100% Offline-First • Zero Cloud Dependency</span
+        >
+      </div>
+      <h1
+        class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight"
+        data-i18n="heroHeading"
+      >
+        Pure Client-Side Standalone Web Tools
+      </h1>
+      <p
+        class="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto"
+        data-i18n="heroSubtitle"
+      >
+        Fast, private, single-file HTML applications engineered with zero
+        runtime dependencies. Run directly in your browser or install as offline
+        PWAs.
+      </p>
+    </section>
+
+    <!-- Catalog Grid -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full flex-1">
+      <div
+        class="flex items-center justify-between mb-8 pb-4 border-b border-slate-800"
+      >
+        <div>
+          <h2
+            class="text-xl font-bold text-white tracking-tight"
+            data-i18n="catalogHeading"
+          >
+            Available Tools
+          </h2>
+          <p
+            class="text-xs sm:text-sm text-slate-400 mt-1"
+            data-i18n="catalogSubheading"
+          >
+            Select a tool to launch in browser or download the standalone HTML.
+          </p>
+        </div>
+        <span
+          class="text-xs font-medium text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-3 py-1 rounded-full"
+          data-i18n="totalToolsBadge"
+          >3 Standalone Applications</span
+        >
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card 1: Smart Buy-List -->
+        <article
+          class="bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 hover:shadow-xl hover:shadow-emerald-500/5 group"
+        >
+          <div>
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+              </div>
+              <span
+                class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60"
+                >PWA</span
+              >
+            </div>
+
+            <h3
+              class="text-lg font-bold text-white group-hover:text-emerald-400 transition-colors"
+              data-i18n="tool1Title"
+            >
+              Smart Buy-List & Unit Price Tracker
+            </h3>
+            <p
+              class="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed"
+              data-i18n="tool1Desc"
+            >
+              Mobile-first grocery buy-list with package unit-price
+              normalization ($/kg, $/L, $/ea), purchase ledger, and in-aisle
+              deal intelligence.
+            </p>
+
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgePwa"
+                >PWA</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeOffline"
+                >Offline-Ready</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeIntelligence"
+                >Deal Intelligence</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeIndexedDb"
+                >IndexedDB</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-3"
+          >
+            <a
+              href="./smart-buy-list-price-tracker/"
+              class="flex-1 text-center bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-xl transition shadow-sm"
+              data-i18n="launchButton"
+            >
+              Launch Tool
+            </a>
+            <a
+              href="https://github.com/thanhtrixx/html-standalone-tools/releases/latest/download/smart-buy-list-price-tracker.html"
+              title="Download standalone HTML"
+              class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              aria-label="Download standalone HTML"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 2: Buy vs Rent Comparison -->
+        <article
+          class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 hover:shadow-xl hover:shadow-cyan-500/5 group"
+        >
+          <div>
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
+              </div>
+              <span
+                class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/60"
+                >Finance</span
+              >
+            </div>
+
+            <h3
+              class="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors"
+              data-i18n="tool2Title"
+            >
+              Buy vs. Rent Home Comparison
+            </h3>
+            <p
+              class="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed"
+              data-i18n="tool2Desc"
+            >
+              Comprehensive housing decision engine comparing buying vs. renting
+              net worth projections, opportunity cost sweeps, and sensitivity
+              analysis.
+            </p>
+
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeFinancialModel"
+                >Financial Modeling</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeMortgage"
+                >Mortgage Amortization</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeOpportunityCost"
+                >Opportunity Cost</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeVisualAnalytics"
+                >Visual Analytics</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-3"
+          >
+            <a
+              href="./buy-vs-rent-home-comparison/"
+              class="flex-1 text-center bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-xl transition shadow-sm"
+              data-i18n="launchButton"
+            >
+              Launch Tool
+            </a>
+            <a
+              href="https://github.com/thanhtrixx/html-standalone-tools/releases/latest/download/buy-vs-rent-home-comparison.html"
+              title="Download standalone HTML"
+              class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              aria-label="Download standalone HTML"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </a>
+          </div>
+        </article>
+
+        <!-- Card 3: Personal Finance Savings Predictor -->
+        <article
+          class="bg-slate-900 border border-slate-800 hover:border-violet-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 hover:shadow-xl hover:shadow-violet-500/5 group"
+        >
+          <div>
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                  />
+                </svg>
+              </div>
+              <span
+                class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-violet-950 text-violet-400 border border-violet-800/60"
+                >Simulation</span
+              >
+            </div>
+
+            <h3
+              class="text-lg font-bold text-white group-hover:text-violet-400 transition-colors"
+              data-i18n="tool3Title"
+            >
+              Personal Finance Savings Predictor
+            </h3>
+            <p
+              class="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed"
+              data-i18n="tool3Desc"
+            >
+              Advanced compound savings simulation with salary escalation,
+              multi-tier fixed deposits, inflation forecasting, and capital
+              accumulation.
+            </p>
+
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeCompound"
+                >Compound Growth</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeMultiTier"
+                >Multi-Tier Deposit</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeInflation"
+                >Inflation Modeling</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeMonteCarlo"
+                >Monte Carlo</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-3"
+          >
+            <a
+              href="./personal-finance-savings-predictor/"
+              class="flex-1 text-center bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-xl transition shadow-sm"
+              data-i18n="launchButton"
+            >
+              Launch Tool
+            </a>
+            <a
+              href="https://github.com/thanhtrixx/html-standalone-tools/releases/latest/download/personal-finance-savings-predictor.html"
+              title="Download standalone HTML"
+              class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              aria-label="Download standalone HTML"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </a>
+          </div>
+        </article>
+      </div>
+
+      <!-- Feature Highlights -->
+      <section
+        class="mt-16 pt-12 border-t border-slate-800 grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
+        <div class="p-5 rounded-xl bg-slate-900/50 border border-slate-800/80">
+          <div
+            class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-3"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="feat1Title">
+            100% Private & Client-Side
+          </h4>
+          <p
+            class="text-xs text-slate-400 leading-relaxed"
+            data-i18n="feat1Desc"
+          >
+            All calculations, simulation projections, and purchase records
+            reside exclusively in your browser's storage. No telemetry, no
+            accounts, zero cloud leaks.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-slate-900/50 border border-slate-800/80">
+          <div
+            class="w-9 h-9 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center mb-3"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
+              />
+            </svg>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="feat2Title">
+            Offline PWA Ready
+          </h4>
+          <p
+            class="text-xs text-slate-400 leading-relaxed"
+            data-i18n="feat2Desc"
+          >
+            Equipped with service workers and web manifests. Install onto home
+            screens or desktop docks and use seamlessly without an internet
+            connection.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-slate-900/50 border border-slate-800/80">
+          <div
+            class="w-9 h-9 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center mb-3"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <h4 class="text-sm font-bold text-white mb-1" data-i18n="feat3Title">
+            Zero Runtime Dependencies
+          </h4>
+          <p
+            class="text-xs text-slate-400 leading-relaxed"
+            data-i18n="feat3Desc"
+          >
+            Packaged as single-file HTML deliverables with inlined or purged
+            assets. No npm runtime dependencies or server-side runtimes required
+            to serve.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer
+      class="border-t border-slate-800 bg-slate-900/40 py-8 text-center text-xs text-slate-500"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-3">
+        <div class="flex items-center justify-center space-x-6">
+          <a
+            href="https://github.com/thanhtrixx/html-standalone-tools"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-slate-300 transition"
+            >GitHub</a
+          >
+          <a
+            href="https://github.com/thanhtrixx/html-standalone-tools/releases"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-slate-300 transition"
+            data-i18n="footerReleases"
+            >Releases</a
+          >
+          <a
+            href="https://github.com/thanhtrixx/html-standalone-tools/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:text-slate-300 transition"
+            data-i18n="footerIssues"
+            >Issues</a
+          >
+        </div>
+        <p data-i18n="footerCopyright">
+          Open source under ISC license. Built for speed, privacy, and full
+          offline resilience.
+        </p>
+      </div>
+    </footer>
+
+    <!-- Bilingual Localization Script -->
+    <script>
+      const TRANSLATIONS = {
+        en: {
+          suiteTitle: "HTML Standalone Tools",
+          suiteTagline: "Client-Side • Zero Dependencies",
+          navReleases: "Releases",
+          heroBadge: "100% Offline-First • Zero Cloud Dependency",
+          heroHeading: "Pure Client-Side Standalone Web Tools",
+          heroSubtitle:
+            "Fast, private, single-file HTML applications engineered with zero runtime dependencies. Run directly in your browser or install as offline PWAs.",
+          catalogHeading: "Available Tools",
+          catalogSubheading:
+            "Select a tool to launch in browser or download the standalone HTML.",
+          totalToolsBadge: "3 Standalone Applications",
+          tool1Title: "Smart Buy-List & Unit Price Tracker",
+          tool1Desc:
+            "Mobile-first grocery buy-list with package unit-price normalization ($/kg, $/L, $/ea), purchase ledger, and in-aisle deal intelligence.",
+          tool2Title: "Buy vs. Rent Home Comparison",
+          tool2Desc:
+            "Comprehensive housing decision engine comparing buying vs. renting net worth projections, opportunity cost sweeps, and sensitivity analysis.",
+          tool3Title: "Personal Finance Savings Predictor",
+          tool3Desc:
+            "Advanced compound savings simulation with salary escalation, multi-tier fixed deposits, inflation forecasting, and capital accumulation.",
+          badgePwa: "PWA",
+          badgeOffline: "Offline-Ready",
+          badgeIntelligence: "Deal Intelligence",
+          badgeIndexedDb: "IndexedDB",
+          badgeFinancialModel: "Financial Modeling",
+          badgeMortgage: "Mortgage Amortization",
+          badgeOpportunityCost: "Opportunity Cost",
+          badgeVisualAnalytics: "Visual Analytics",
+          badgeCompound: "Compound Growth",
+          badgeMultiTier: "Multi-Tier Deposit",
+          badgeInflation: "Inflation Modeling",
+          badgeMonteCarlo: "Monte Carlo",
+          launchButton: "Launch Tool",
+          feat1Title: "100% Private & Client-Side",
+          feat1Desc:
+            "All calculations, simulation projections, and purchase records reside exclusively in your browser's storage. No telemetry, no accounts, zero cloud leaks.",
+          feat2Title: "Offline PWA Ready",
+          feat2Desc:
+            "Equipped with service workers and web manifests. Install onto home screens or desktop docks and use seamlessly without an internet connection.",
+          feat3Title: "Zero Runtime Dependencies",
+          feat3Desc:
+            "Packaged as single-file HTML deliverables with inlined or purged assets. No npm runtime dependencies or server-side runtimes required to serve.",
+          footerReleases: "Releases",
+          footerIssues: "Issues",
+          footerCopyright:
+            "Open source under ISC license. Built for speed, privacy, and full offline resilience.",
+        },
+        vi: {
+          suiteTitle: "HTML Standalone Tools",
+          suiteTagline: "Chạy Trên Trình Duyệt • Không Phụ Thuộc",
+          navReleases: "Bản phát hành",
+          heroBadge: "100% Ngoại Tuyến • Không Phụ Thuộc Đám Mây",
+          heroHeading: "Công Cụ Web Độc Lập Chạy Trên Trình Duyệt",
+          heroSubtitle:
+            "Ứng dụng HTML đơn tệp, tốc độ cao và bảo mật tuyệt đối, không cần máy chủ. Chạy trực tiếp trên trình duyệt hoặc cài đặt dưới dạng PWA ngoại tuyến.",
+          catalogHeading: "Danh Mục Công Cụ",
+          catalogSubheading:
+            "Chọn ứng dụng để mở trực tiếp trên trình duyệt hoặc tải về tệp HTML độc lập.",
+          totalToolsBadge: "3 Ứng Dụng Độc Lập",
+          tool1Title: "Sổ Mua Sắm & So Sánh Giá Đơn Vị",
+          tool1Desc:
+            "Sổ tay mua sắm thông minh trên di động, tự động chuẩn hóa đơn giá theo quy cách ($/kg, $/L, $/cái) và gợi ý ưu đãi tại quầy.",
+          tool2Title: "Mua Nhà vs Thuê Nhà",
+          tool2Desc:
+            "Công cụ phân tích tài chính toàn diện so sánh mua nhà vs thuê nhà, quét chi phí cơ hội đầu tư và ma trận độ nhạy lãi suất.",
+          tool3Title: "Dự Phóng Tiết Kiệm Cá Nhân",
+          tool3Desc:
+            "Mô phỏng tiết kiệm lãi kép chuyên sâu với tăng trưởng lương, gửi tiết kiệm bậc thang, dự phóng lạm phát và tích lũy tài sản.",
+          badgePwa: "PWA",
+          badgeOffline: "Ngoại tuyến",
+          badgeIntelligence: "Gợi ý ưu đãi",
+          badgeIndexedDb: "IndexedDB",
+          badgeFinancialModel: "Mô hình tài chính",
+          badgeMortgage: "Lịch trả góp vay",
+          badgeOpportunityCost: "Chi phí cơ hội",
+          badgeVisualAnalytics: "Trực quan hóa",
+          badgeCompound: "Lãi kép",
+          badgeMultiTier: "Tiết kiệm bậc thang",
+          badgeInflation: "Dự phóng lạm phát",
+          badgeMonteCarlo: "Monte Carlo",
+          launchButton: "Mở ứng dụng",
+          feat1Title: "100% Riêng Tư & Phía Trình Duyệt",
+          feat1Desc:
+            "Mọi tính toán, dự phóng mô phỏng và nhật ký mua sắm đều lưu giữ cục bộ trên trình duyệt. Không thu thập dữ liệu, không cần tài khoản.",
+          feat2Title: "Sẵn Sàng Ngoại Tuyến (PWA)",
+          feat2Desc:
+            "Tích hợp Service Worker và Web Manifest. Cài đặt lên màn hình chính điện thoại hoặc máy tính và sử dụng hoàn toàn khi mất mạng.",
+          feat3Title: "Không Phụ Thuộc Mã Nguồn Phụ",
+          feat3Desc:
+            "Được đóng gói thành tệp HTML độc lập duy nhất với CSS/JS tối ưu hóa. Không cần cài đặt thư viện ngoài hay môi trường máy chủ phức tạp.",
+          footerReleases: "Bản phát hành",
+          footerIssues: "Báo lỗi & Đóng góp",
+          footerCopyright:
+            "Mã nguồn mở theo giấy phép ISC. Thiết kế vì tốc độ, sự riêng tư và khả năng hoạt động ngoại tuyến bền bỉ.",
+        },
+      };
+
+      let currentLang = "en";
+
+      function setLanguage(lang) {
+        if (!TRANSLATIONS[lang]) return;
+        currentLang = lang;
+        document.documentElement.lang = lang;
+
+        const dict = TRANSLATIONS[lang];
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          if (dict[key]) {
+            el.textContent = dict[key];
+          }
+        });
+
+        // Update button active styling
+        const btnEn = document.getElementById("langBtnEn");
+        const btnVi = document.getElementById("langBtnVi");
+        if (btnEn && btnVi) {
+          if (lang === "en") {
+            btnEn.className =
+              "px-2.5 py-1 rounded transition-all bg-emerald-500 text-slate-950 font-bold shadow-sm";
+            btnVi.className =
+              "px-2.5 py-1 rounded transition-all text-slate-400 hover:text-white";
+          } else {
+            btnEn.className =
+              "px-2.5 py-1 rounded transition-all text-slate-400 hover:text-white";
+            btnVi.className =
+              "px-2.5 py-1 rounded transition-all bg-emerald-500 text-slate-950 font-bold shadow-sm";
+          }
+        }
+
+        try {
+          localStorage.setItem("portal_lang", lang);
+        } catch (_) {}
+      }
+
+      // Initialize language
+      document.addEventListener("DOMContentLoaded", () => {
+        let initialLang = "en";
+        try {
+          const saved = localStorage.getItem("portal_lang");
+          if (saved && TRANSLATIONS[saved]) {
+            initialLang = saved;
+          } else if (
+            navigator.language &&
+            navigator.language.toLowerCase().startsWith("vi")
+          ) {
+            initialLang = "vi";
+          }
+        } catch (_) {}
+        setLanguage(initialLang);
+      });
+    </script>
+  </body>
+</html>

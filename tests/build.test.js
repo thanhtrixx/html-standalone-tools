@@ -11,6 +11,7 @@ const {
   loadEnvFiles,
   resolveDestDir,
   syncToolToExternal,
+  buildPortal,
 } = require("../scripts/build");
 
 async function runTests() {
@@ -660,6 +661,22 @@ EMPTY_KEY=
 
   // Clean up test release dir
   fs.rmSync(testPwaReleaseDir, { recursive: true, force: true });
+
+  // Test 20: Portal Hub Compaction Build & Export
+  const portalRes = await buildPortal();
+  assert(portalRes !== null, "buildPortal successfully executed");
+  assert(
+    fs.existsSync(path.join(__dirname, "..", "dist", "index.html")),
+    "Portal hub output dist/index.html exists"
+  );
+  assert(
+    fs.existsSync(path.join(__dirname, "..", "portal", "dist", "index.html")),
+    "Portal hub output portal/dist/index.html exists"
+  );
+  assert(
+    portalRes.minifiedSize < 50 * 1024,
+    `Portal hub minified output is under 50 KB budget (${(portalRes.minifiedSize / 1024).toFixed(1)} KB)`
+  );
 
   console.log(`\n📊 Test Summary: ${passCount} Passed, ${failCount} Failed\n`);
   if (failCount > 0) {
