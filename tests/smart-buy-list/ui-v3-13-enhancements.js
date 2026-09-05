@@ -385,7 +385,8 @@ async function runTestSuite() {
   });
 
   assert(
-    planningCardHtml.includes("openFullItemEdit('test-card-1')"),
+    planningCardHtml.includes('data-action="edit-item"') ||
+      planningCardHtml.includes("openFullItemEdit('test-card-1')"),
     "DUAL-01: Planning card 'Edit' button calls openFullItemEdit()"
   );
 
@@ -402,7 +403,8 @@ async function runTestSuite() {
   });
 
   assert(
-    buyModeCardHtml.includes("openQuickPriceEdit('test-card-2')"),
+    buyModeCardHtml.includes('data-action="edit-price"') ||
+      buyModeCardHtml.includes("openQuickPriceEdit('test-card-2')"),
     "DUAL-02: In-Store Buy Mode price button calls openQuickPriceEdit()"
   );
 
@@ -454,7 +456,8 @@ async function runTestSuite() {
     "\n--- SECTION 4: Standardized Red-Tinted Delete Button & Vocabulary ---"
   );
   assert(
-    pCard.includes("deleteItem('plan-card-1')"),
+    pCard.includes('data-action="delete-item"') ||
+      pCard.includes("deleteItem('plan-card-1')"),
     "DEL-01: Planning Card action button invokes deleteItem()"
   );
   assert(

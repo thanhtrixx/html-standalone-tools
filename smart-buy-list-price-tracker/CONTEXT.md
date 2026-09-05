@@ -109,7 +109,16 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 ### 6. PWA & Mobile Ergonomics
 
 - **Standalone PWA Shell & Single-Source Versioning (v4.3.0)**: Installable Progressive Web App with Service Worker (`sw.js`) and Web App Manifest (`manifest.webmanifest`). Application version is single-sourced in `manifest.webmanifest` (`version: 4.3.0`), dynamically hydrated in dev (`#pwaVersionBadge`), and stamped into `dist/sw.js` (`CACHE_NAME = "smart-buy-list-v4.3.0"`) and `dist/index.html` during compaction build. Full iOS PWA support adds `viewport-fit=cover` and `env(safe-area-inset-*)` safe-area padding for the sticky header, MD3 bottom nav, and toasts (notch / Dynamic Island / home indicator). Companion assets include minified `sw.js` (Terser), compacted JSON manifest, purged Tailwind CDN cache, Cloudflare Pages clickjacking protection `_headers` (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`), and standalone `.zip` packaging.
-- **Event Delegation & DOM Hardening**: All item card action buttons dispatch via root-level event delegation (`handleItemCardDelegatedClick`), using `data-action` and `data-item-id` with strict `/^[a-zA-Z0-9_-]+$/` format validation and cryptographic monotonic IDs (`item_${timestamp}_${randomUUID.slice(0,8)}`).
+- **Pure Event Delegation & Zero-Inline Handlers**: All item card action buttons dispatch strictly via root-level event delegation (`handleItemCardDelegatedClick`) on `document`, using `data-action` and `data-item-id` with strict `/^[a-zA-Z0-9_-]+$/` format validation and cryptographic monotonic IDs (`item_${timestamp}_${randomUUID.slice(0,8)}`). Redundant inline `onclick` handlers are completely eliminated to prevent double-invocation regressions.
+- **Two-Tier Native PWA Back Navigation Hierarchy**: Back navigation (`popstate`) orchestrates a strict two-tier dismissal hierarchy:
+  1. _Tier 1 (Modals)_: If `modalHistoryStack` contains active dialogs, dismiss topmost modal.
+  2. _Tier 2 (Tab History)_: Tab switches push `{ tab }` state to `window.history`. Back steps backward through viewed tabs, returning to `PLANNING`.
+  3. _Tier 3 (Root Exit)_: If at root `PLANNING` tab with zero active modals, standard browser exit behavior proceeds.
+- **Responsive Tablet & Desktop Deal Intelligence**:
+  - Consistent case-insensitive item lookup (`normalizeItemKey(name)`) prevents casing mismatches between active items and ledger records.
+  - Distinct `⚪ New Item` (`⚪ Hàng Mới`) badge displays for items without historical transactions.
+  - In Buy Mode, deal badges display on tablet and desktop (`sm:inline-flex`) for in-aisle decision intelligence without crowding mobile screens.
+  - Desktop Price History Table (`#ledgerTableContainer`, $\ge 640\text{px}$) features a dedicated **Deal Rating** column (`Đánh Giá Giá`).
 - **Telemetry & Hosting Layer Privacy**: The client-side application operates completely tracker-free with zero runtime analytics scripts. Static delivery via Cloudflare Pages provides privacy-preserving aggregate HTTP telemetry without personal tracking.
 - **Material You (MD3) 4-Tab Page Navigation**: 4-destination bottom navigation bar (`Planning`, `Buy`, `Price History`, `Comparator`) managing 4 full page views within `<main>`.
 - **Horizontal Page Swipe Gestures & Gesture Hierarchy**: Horizontal swipe gestures navigate across the 4 tabs smoothly ($|\Delta X| \ge 50\text{px}$ and $|\Delta X| > 1.5 \times |\Delta Y|$). In-aisle item card swipe gestures (Swipe Right = Check/Done + Haptic Vibrate; Swipe Left = Open Comparator with active item pre-filled) are isolated and take precedence over page horizontal swipe actions.
@@ -149,3 +158,5 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0025: IndexedDB Storage Engine & GitHub PAT Security Migration](./docs/adr/0025-indexeddb-storage-engine-and-pat-security-migration.md)
 - [ADR-0026: 4-Tab Page Navigation, Horizontal Swipe Gestures, Modal Ergonomics & Omnibox Pre-Fill](./docs/adr/0026-four-tab-page-navigation-gesture-hierarchy-modal-ergonomics-and-omnibox-prefill.md)
 - [ADR-0027: Review Remediation, Event Delegation, Math Robustness & PWA v4.2.0](./docs/adr/0027-review-remediation-modular-source-and-pwa-v4-2-0.md)
+- [ADR-0028: Test Suite Domain Consolidation & Zero-Drift Harness](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md)
+- [ADR-0029: Pure Event Delegation, Two-Tier PWA Back Navigation & Responsive Tablet Deal Intelligence](./docs/adr/0029-event-delegation-pwa-back-navigation-and-tablet-deal-intelligence.md)

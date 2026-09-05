@@ -232,12 +232,14 @@ assert(
 );
 
 assert(
-  buyCardHtml.includes("toggleItemCheck"),
+  buyCardHtml.includes('data-action="toggle-check"') ||
+    buyCardHtml.includes("toggleItemCheck"),
   "DIFF-BUY-03: Buy Mode card includes big checkbox trigger"
 );
 
 assert(
-  buyCardHtml.includes("openQuickPriceEdit") &&
+  (buyCardHtml.includes('data-action="edit-price"') ||
+    buyCardHtml.includes("openQuickPriceEdit")) &&
     buyCardHtml.includes(sb1.formatCurrency(itemMilk.price)),
   `DIFF-BUY-04: Buy Mode card includes clickable shelf price (${sb1.formatCurrency(itemMilk.price)})`
 );
@@ -369,19 +371,24 @@ assert(
 );
 
 assert(
-  planCardHtml.includes("openItemComparator") && planCardHtml.includes("⚖️"),
+  (planCardHtml.includes('data-action="compare"') ||
+    planCardHtml.includes("openItemComparator")) &&
+    planCardHtml.includes("⚖️"),
   "DIFF-PLAN-09: Planning Mode card includes 1-tap comparator button (⚖️)"
 );
 
 assert(
-  (planCardHtml.includes("openFullItemEdit") ||
+  (planCardHtml.includes('data-action="edit-item"') ||
+    planCardHtml.includes("openFullItemEdit") ||
     planCardHtml.includes("openQuickPriceEdit")) &&
     planCardHtml.includes("✏️"),
   "DIFF-PLAN-10: Planning Mode card includes dedicated edit button (✏️)"
 );
 
 assert(
-  planCardHtml.includes("deleteItem") && planCardHtml.includes("🗑️"),
+  (planCardHtml.includes('data-action="delete-item"') ||
+    planCardHtml.includes("deleteItem")) &&
+    planCardHtml.includes("🗑️"),
   "DIFF-PLAN-11: Planning Mode card includes dedicated remove button (🗑️)"
 );
 
@@ -391,7 +398,8 @@ assert(
 );
 
 assert(
-  planCardHtml.includes("toggleItemCheck"),
+  planCardHtml.includes('data-action="toggle-check"') ||
+    planCardHtml.includes("toggleItemCheck"),
   "DIFF-PLAN-13: Planning Mode card retains functional checkbox for staging"
 );
 
