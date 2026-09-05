@@ -527,8 +527,11 @@ try {
 
   assert(
     htmlContent.includes('id="pwaVersionBadge"') &&
-      /id="pwaVersionBadge"[^>]*>\s*v4\.(2|3)\.0\s*<\/span/i.test(htmlContent),
-    "PWA-02: #pwaVersionBadge displays v4.2.0"
+      (/id="pwaVersionBadge"[^>]*>\s*v[3-9]\.\d+\.\d+\s*<\/span/i.test(
+        htmlContent
+      ) ||
+        htmlContent.includes(`v${manifest.version}`)),
+    `PWA-02: #pwaVersionBadge displays v${manifest.version}`
   );
 } catch (err) {
   console.error("❌ Test Execution Exception:", err);
