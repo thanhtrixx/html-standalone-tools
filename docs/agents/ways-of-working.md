@@ -28,7 +28,7 @@ flowchart TD
     end
 
     subgraph P4["4. Release &amp; Closure"]
-        Merge --> CDRelease["Automated CD Pipeline (release.yml)<br/>(Tag, Release, Standalone Assets)"]
+        Merge --> CDRelease["Automated CD Pipeline (release.yml)<br/>(Tag, Release, Standalone Assets, Pages)"]
         CDRelease --> VerifyAC["Verify ACs [x]"]
         VerifyAC --> Close["Close Issue<br/>(gh issue close)"]
     end
@@ -66,7 +66,7 @@ flowchart TD
 [4. Release & Closure]                 Automated CD Release (`release.yml`)
        │                                      │
        ▼                                      ▼
-  GitHub Release & Assets Uploaded ──► Verify ACs [x] ──► Close Issue (`gh issue close`)
+  GitHub Release, Assets & Pages ──► Verify ACs [x] ──► Close Issue (`gh issue close`)
 ```
 
 </details>
@@ -193,12 +193,15 @@ Every issue follows **GitHub Flow** with an isolated branch:
 ## Phase 4: Automated Release, Verification & Closure
 
 1. **Automated CD Pipeline (`release.yml`)**:
-   - Merging to `main` triggers automated release packaging:
+   - Merging to `main` triggers automated release packaging and web deployment:
      - Runs full build and test validation via `bun run verify`.
      - Preserves report artifacts (`test-reports-release`).
      - Computes next Semantic Version tag (`v*.*.*`) and generates markdown release changelogs.
      - Packages standalone `.html` files, per-tool PWA bundles, and unified master `.zip` bundle via `bun scripts/pack-release.js`.
      - Publishes annotated GitHub Release with downloadable assets.
+     - Uploads compacted `dist/` containing the central Portal Hub (`index.html`) and all tool applications to GitHub Pages (`actions/upload-pages-artifact@v3`).
+     - Deploys live web versions to GitHub Pages environment (`actions/deploy-pages@v4`).
+     - Live catalog endpoint: `https://thanhtrixx.github.io/html-standalone-tools/` (Repository Settings prerequisite: Settings -> Pages -> Build and deployment Source set to "GitHub Actions").
 2. **Verify Acceptance Criteria & Close Ticket**:
    - Verify that all issue Acceptance Criteria checklist items are satisfied (`[x]`).
    - Confirm issue closure with a verification summary comment:
