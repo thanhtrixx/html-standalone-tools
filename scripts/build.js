@@ -557,20 +557,17 @@ async function buildTool(tool) {
   ) {
     const bundledScript = bundleTrackerModules(tool.dir);
     const scriptStartMarker =
-      "<!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->\n    <script>";
-    const scriptEndMarker = "</script>";
+      "<!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->";
+    const lastScriptTag = "</script>";
     const sIdx = rawHtml.indexOf(scriptStartMarker);
-    const eIdx = rawHtml.lastIndexOf(scriptEndMarker);
+    const eIdx = rawHtml.lastIndexOf(lastScriptTag);
     if (sIdx !== -1 && eIdx !== -1) {
       rawHtml =
         rawHtml.slice(0, sIdx + scriptStartMarker.length) +
-        "\n" +
+        "\n    <script>\n" +
         bundledScript.trim() +
-        "\n    " +
-        rawHtml.slice(eIdx);
-      if (process.argv.includes("--sync-source")) {
-        fs.writeFileSync(tool.entryFile, rawHtml, "utf8");
-      }
+        "\n    </script>" +
+        rawHtml.slice(eIdx + lastScriptTag.length);
     }
   }
 

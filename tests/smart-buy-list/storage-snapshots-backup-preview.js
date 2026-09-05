@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { getTrackerHtml } = require("../helpers/smart-buy-list-harness");
 const vm = require("vm");
 
 // In-Memory IndexedDB Mock for Node.js Testing
@@ -149,7 +150,7 @@ function loadSandbox(options = {}) {
     "smart-buy-list-price-tracker",
     "index.html"
   );
-  const htmlContent = fs.readFileSync(htmlPath, "utf8");
+  const htmlContent = getTrackerHtml();
   const scriptMatches = [
     ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
   ];
@@ -321,7 +322,7 @@ async function runTests() {
     "smart-buy-list-price-tracker",
     "index.html"
   );
-  const rawHtml = fs.readFileSync(htmlPath, "utf8");
+  const rawHtml = getTrackerHtml();
 
   // --- Section 1: DOM & ARIA Verification ---
   console.log("--- Section 1: DOM & ARIA Verification ---");

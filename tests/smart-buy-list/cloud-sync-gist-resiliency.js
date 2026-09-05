@@ -15,6 +15,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { getTrackerHtml } = require("../helpers/smart-buy-list-harness");
 const vm = require("vm");
 
 let passedAssertions = 0;
@@ -49,7 +50,7 @@ function loadTestSandbox(mockFetch = null) {
     "smart-buy-list-price-tracker",
     "index.html"
   );
-  const htmlContent = fs.readFileSync(htmlPath, "utf8");
+  const htmlContent = getTrackerHtml();
   const scriptMatches = [
     ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
   ];
@@ -651,7 +652,7 @@ async function runTests() {
 
     const swContent = fs.readFileSync(swPath, "utf8");
     const manifestContent = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-    const htmlContent = fs.readFileSync(htmlPath, "utf8");
+    const htmlContent = getTrackerHtml();
 
     assert(
       /CACHE_NAME = "smart-buy-list-v(?:3\.(1[0-9]|[2-9]\d+)|[4-9]\.\d+)\.\d+"/.test(

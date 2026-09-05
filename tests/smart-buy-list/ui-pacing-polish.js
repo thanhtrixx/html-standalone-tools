@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { getTrackerHtml } = require("../helpers/smart-buy-list-harness");
 const vm = require("vm");
 
 let testCount = 0;
@@ -25,7 +26,7 @@ const indexPath = path.join(
   __dirname,
   "../../smart-buy-list-price-tracker/index.html"
 );
-const htmlContent = fs.readFileSync(indexPath, "utf-8");
+const htmlContent = getTrackerHtml();
 
 // Mock DOM & sandbox
 function createMockSandbox() {

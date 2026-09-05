@@ -15,6 +15,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { getTrackerHtml } = require("../helpers/smart-buy-list-harness");
 const vm = require("vm");
 
 let passedAssertions = 0;
@@ -68,7 +69,7 @@ function setupTrackerSandbox() {
     "smart-buy-list-price-tracker",
     "index.html"
   );
-  const htmlContent = fs.readFileSync(htmlPath, "utf8");
+  const htmlContent = getTrackerHtml();
 
   const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
   let allScripts = "";

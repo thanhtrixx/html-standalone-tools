@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
+const { getTrackerHtml } = require("./helpers/smart-buy-list-harness");
 
 function loadBuyListSharingEngine() {
   const htmlPath = path.join(
@@ -9,11 +10,11 @@ function loadBuyListSharingEngine() {
     "smart-buy-list-price-tracker",
     "index.html"
   );
-  const htmlContent = fs.readFileSync(htmlPath, "utf8");
+  const htmlContent = getTrackerHtml();
   const scriptMatches = [
     ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
   ];
-  const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
+  let combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
 
   const storageMock = {};
   const sandbox = {
@@ -424,7 +425,7 @@ async function runTests() {
       "smart-buy-list-price-tracker",
       "index.html"
     );
-    const rawHtml = fs.readFileSync(htmlPath, "utf8");
+    const rawHtml = getTrackerHtml();
     assert(
       rawHtml.includes('rel="icon"') && rawHtml.includes('href="./icon.svg"'),
       "PWA-03: index.html links to ./icon.svg as primary favicon"
