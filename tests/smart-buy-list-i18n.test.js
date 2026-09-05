@@ -9,11 +9,12 @@ function loadBuyListI18nEngine() {
     "smart-buy-list-price-tracker",
     "index.html"
   );
-  const htmlContent = fs.readFileSync(htmlPath, "utf8");
+  const { getTrackerHtml } = require("./helpers/smart-buy-list-harness");
+  const htmlContent = getTrackerHtml();
   const scriptMatches = [
     ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
   ];
-  const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
+  let combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
 
   const storageMock = {};
   const docElementClasses = new Set(["dark"]);

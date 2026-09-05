@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { getTrackerHtml } = require("../helpers/smart-buy-list-harness");
 const vm = require("vm");
 
 function loadBuyListSettingsEngine() {
@@ -9,7 +10,7 @@ function loadBuyListSettingsEngine() {
     "smart-buy-list-price-tracker",
     "index.html"
   );
-  const htmlContent = fs.readFileSync(htmlPath, "utf8");
+  const htmlContent = getTrackerHtml();
   const scriptMatches = [
     ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
   ];
@@ -165,7 +166,7 @@ async function runTests() {
       "smart-buy-list-price-tracker",
       "index.html"
     );
-    const rawHtml = fs.readFileSync(htmlPath, "utf8");
+    const rawHtml = getTrackerHtml();
 
     // --- Section 1: DOM Elements & Markup Verification ---
     console.log("--- Section 1: DOM Elements & Markup Verification ---");

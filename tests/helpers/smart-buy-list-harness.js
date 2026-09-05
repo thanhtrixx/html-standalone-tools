@@ -26,8 +26,57 @@ function getSwContent() {
   return fs.readFileSync(SW_PATH, "utf8");
 }
 
+const TRACKER_BUNDLE_MODULES = [
+  "src/domain/units.js",
+  "src/domain/math.js",
+  "src/storage/indexeddb.js",
+  "src/sync/tombstones.js",
+  "src/storage/providers.js",
+  "src/sync/cloud-seam.js",
+  "src/sync/merge3.js",
+  "src/sync/cloud-actions.js",
+  "src/state/store.js",
+  "src/i18n/translations.js",
+  "src/ui/sample-data.js",
+  "src/ui/navigation.js",
+  "src/ui/store-manager.js",
+  "src/ui/render.js",
+  "src/ui/gestures.js",
+  "src/ui/omnibox.js",
+  "src/ui/comparator.js",
+  "src/sharing/sharing.js",
+  "src/sharing/codec.js",
+  "src/sharing/merge-review.js",
+  "src/storage/snapshots.js",
+  "src/sharing/merge-actions.js",
+  "src/ui/trip-completion.js",
+  "src/ui/modals.js",
+  "src/ui/app.js",
+];
+
+function bundleTrackerFromSrc() {
+  let combined = "";
+  for (const relPath of TRACKER_BUNDLE_MODULES) {
+    const fullPath = path.join(TRACKER_DIR, relPath);
+    if (!fs.existsSync(fullPath)) continue;
+    let content = fs.readFileSync(fullPath, "utf8");
+    content = content.replace(
+      /\nif\s*\(typeof module\s*!==\s*["']undefined["'][\s\S]*?\n\}\s*$/g,
+      ""
+    );
+    combined += "\n" + content.trim() + "\n";
+  }
+  return combined;
+}
+
 function getTrackerScripts() {
   if (cachedScripts) return cachedScripts;
+
+  const srcDir = path.join(TRACKER_DIR, "src");
+  if (fs.existsSync(srcDir)) {
+    cachedScripts = bundleTrackerFromSrc();
+    return cachedScripts;
+  }
 
   const html = getHtmlContent();
   const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
@@ -46,6 +95,32 @@ function getTrackerScripts() {
 
   cachedScripts = combined;
   return cachedScripts;
+}
+
+let cachedInlinedHtml = null;
+
+function getTrackerHtml() {
+  if (cachedInlinedHtml) return cachedInlinedHtml;
+  const html = getHtmlContent();
+  if (html.includes('<script src="src/')) {
+    const scripts = getTrackerScripts();
+    const scriptStartMarker =
+      "<!-- ==================== JAVASCRIPT APPLICATION CORE ==================== -->";
+    const lastScriptTag = "</script>";
+    const sIdx = html.indexOf(scriptStartMarker);
+    const eIdx = html.lastIndexOf(lastScriptTag);
+    if (sIdx !== -1 && eIdx !== -1) {
+      cachedInlinedHtml =
+        html.slice(0, sIdx + scriptStartMarker.length) +
+        "\n    <script>\n" +
+        scripts.trim() +
+        "\n    </script>" +
+        html.slice(eIdx + lastScriptTag.length);
+      return cachedInlinedHtml;
+    }
+  }
+  cachedInlinedHtml = html;
+  return cachedInlinedHtml;
 }
 
 function createMockStorage(initialData = {}) {
@@ -591,6 +666,7 @@ module.exports = {
   MANIFEST_PATH,
   SW_PATH,
   getHtmlContent,
+  getTrackerHtml,
   getManifest,
   getSwContent,
   getTrackerScripts,
