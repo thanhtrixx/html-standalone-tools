@@ -5,7 +5,7 @@
  * Domain: State, Persistence & Migrations
  */
 
-const { spawnSync } = require("child_process");
+const { spawn } = require("child_process");
 const path = require("path");
 
 const SUB_SUITES = [
@@ -16,25 +16,53 @@ const SUB_SUITES = [
   "storage-snapshots-backup-preview.js",
 ];
 
-let totalFailed = 0;
-
-for (const sub of SUB_SUITES) {
+async function runSubSuite(sub) {
   const fullPath = path.resolve(__dirname, "smart-buy-list", sub);
-  const proc = spawnSync(process.execPath, [fullPath], {
-    cwd: path.resolve(__dirname, ".."),
-    encoding: "utf8",
+  return new Promise((resolve) => {
+    const proc = spawn(process.execPath, [fullPath], {
+      cwd: path.resolve(__dirname, ".."),
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    proc.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    proc.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+
+    proc.on("close", (status) => {
+      resolve({ sub, status, stdout, stderr });
+    });
   });
+}
 
-  if (proc.stdout) process.stdout.write(proc.stdout);
-  if (proc.stderr) process.stderr.write(proc.stderr);
+async function main() {
+  const results = await Promise.all(SUB_SUITES.map(runSubSuite));
 
-  if (proc.status !== 0) {
-    totalFailed++;
+  let totalFailed = 0;
+  for (const res of results) {
+    if (res.stdout) process.stdout.write(res.stdout);
+    if (res.stderr) process.stderr.write(res.stderr);
+    if (res.status !== 0) {
+      console.error(
+        `❌ SUB-SUITE FAILED: ${res.sub} with exit code ${res.status}`
+      );
+      totalFailed++;
+    }
+  }
+
+  if (totalFailed > 0) {
+    process.exit(1);
+  } else {
+    process.exit(0);
   }
 }
 
-if (totalFailed > 0) {
+main().catch((err) => {
+  console.error(err);
   process.exit(1);
-} else {
-  process.exit(0);
-}
+});

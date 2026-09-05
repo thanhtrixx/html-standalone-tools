@@ -135,5 +135,11 @@ const CATEGORIES = {
 };
 
 if (typeof module !== "undefined" && module.exports) {
+  if (typeof globalThis !== "undefined") {
+    globalThis.DIMENSIONS = DIMENSIONS;
+    globalThis.UNIT_CONVERSIONS = UNIT_CONVERSIONS;
+    globalThis.UNIT_GROUPS = UNIT_GROUPS;
+    globalThis.CATEGORIES = CATEGORIES;
+  }
   module.exports = { DIMENSIONS, UNIT_CONVERSIONS, UNIT_GROUPS, CATEGORIES };
 }

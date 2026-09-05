@@ -1,3 +1,12 @@
+if (typeof generateItemId === "undefined" && typeof require !== "undefined") {
+  try {
+    const _domain = require("../domain/index.js");
+    if (typeof globalThis !== "undefined" && !globalThis.generateItemId) {
+      globalThis.generateItemId = _domain.generateItemId;
+    }
+  } catch (_) {}
+}
+
 function uint8ArrayToUrlBase64(bytes) {
   let binary = "";
   const len = bytes.byteLength;
@@ -444,5 +453,8 @@ if (typeof module !== "undefined" && module.exports) {
     urlBase64ToUint8Array,
     encodeSharePayload,
     decodeSharePayload,
+    generateBuyListTextChecklist,
+    copyBuyListTextChecklist,
+    resolveStoreAlias,
   };
 }
