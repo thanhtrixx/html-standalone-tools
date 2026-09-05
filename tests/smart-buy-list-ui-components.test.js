@@ -22,6 +22,7 @@ const SUB_SUITES = [
   "ui-v3-12-enhancements.js",
   "ui-v3-13-enhancements.js",
   "ui-v4-2-remediation.js",
+  "ui-v4-3-enhancements.js",
   "ui-vietnamese-omnibox.js",
 ];
 

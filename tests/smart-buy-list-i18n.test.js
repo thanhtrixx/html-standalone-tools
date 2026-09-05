@@ -474,6 +474,7 @@ try {
     "th_size",
     "th_paid",
     "th_unit_price",
+    "th_deal_rating",
     "ledger_empty_msg",
     "quick_price_item_name",
     "quick_price_shelf",
