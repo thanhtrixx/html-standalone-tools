@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "maxNodeModuleJsDepth": 1
+  },
+  "include": ["smart-buy-list-price-tracker/src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

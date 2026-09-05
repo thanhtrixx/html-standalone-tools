@@ -4,14 +4,17 @@
 > **Test Architecture:** 7 Permanent Domain Suites (`tests/smart-buy-list-*.test.js`)  
 > **Shared Harness:** `tests/helpers/smart-buy-list-harness.js`  
 > **Test Runner:** `scripts/run-tests.js` (`bun test` / `npm test`, `bun run test:tracker` / `npm run test:tracker`)  
-> **Architecture Decision Record:** [`docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md`](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md) & [`docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md`](../docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md)  
+> **Architecture Decision Record:** [`docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md`](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md), [`docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md`](../docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md) & [`docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md`](./docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md)  
 > **Historical Incremental Test Log Archive:** [`docs/deprecated/TEST_PLAN_HISTORY.md`](./docs/deprecated/TEST_PLAN_HISTORY.md)
 
 ---
 
 ## 🎯 Test Architecture & Domain Organization
 
-Per **ADR-0028** and **ADR-0007**, the `smart-buy-list-price-tracker` test suite is organized into **7 domain capabilities** with full **Dual-Runtime Compatibility (Bun + Node.js)**.
+Per **ADR-0028**, **ADR-0007**, and **ADR-0031**, the `smart-buy-list-price-tracker` test suite operates under a **Dual-Level Strategy**:
+
+1. **Direct Domain Unit Tests**: Pure mathematical logic (`src/domain/`), normalization, compression codecs, and storage contracts are imported directly as ES/CommonJS modules, bypassing regex `<script>` parsing.
+2. **Scoped DOM Integration Tests**: UI interactions, gestures, modal stacks, and event delegation execute within the sandboxed DOM harness (`tests/helpers/smart-buy-list-harness.js`).
 
 ### Developer Inner Loop
 
