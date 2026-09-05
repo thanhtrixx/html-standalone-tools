@@ -13,6 +13,7 @@ const SUB_SUITES = [
   "cloud-sync-concurrency.js",
   "cloud-sync-calm.js",
   "cloud-sync-gist-resiliency.js",
+  "cloud-sync-ambient-header.js",
 ];
 
 let totalFailed = 0;
