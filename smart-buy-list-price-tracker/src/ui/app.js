@@ -130,6 +130,13 @@ function initApp() {
     // Popstate browser back button handling for modals & tab navigation
     window.addEventListener("popstate", handlePopState);
 
+    // Initial root back navigation guard state
+    if (window.history && window.history.pushState) {
+      try {
+        window.history.pushState({ tab: "PLANNING", rootGuard: true }, "");
+      } catch (e) {}
+    }
+
     // Page horizontal touch swipe listeners for 4-tab navigation
     document.addEventListener("touchstart", handlePageTouchStart, {
       passive: true,
@@ -518,6 +525,8 @@ if (typeof window !== "undefined") {
   window.showToast = showToast;
   window.normalizeItemKey = normalizeItemKey;
   window.handlePopState = handlePopState;
+  window.resetBackPressState = resetBackPressState;
+  window.BACK_EXIT_TIMEOUT_MS = BACK_EXIT_TIMEOUT_MS;
 
   Object.defineProperty(window, "selectedLedgerIds", {
     get: () => selectedLedgerIds,

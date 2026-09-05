@@ -876,18 +876,75 @@ async function runTests() {
       "BACK-NAV-05b: Closing modal via popstate does not alter the active tab"
     );
 
-    // BACK-NAV-06: Pressing back on PLANNING root with no open modals does not trap user
+    // BACK-NAV-06: Returning to PLANNING root on back navigation when not on PLANNING
     sandbox.handlePopState({ state: null });
     assert(
       sandbox.currentActiveTab === "PLANNING",
       "BACK-NAV-06a: handlePopState with null state returns to PLANNING if not already on PLANNING"
     );
-    const stackLenBefore = sandbox.history.stack.length;
+
+    // ==========================================
+    // Section 10: Two-Tier PWA Root Back Exit Guard ("Press back again to exit" - Issue #323)
+    // ==========================================
+    console.log(
+      "\n--- Section 10: Two-Tier Root Back Navigation & Exit Guard (ADR-0032) ---"
+    );
+
+    let capturedToast = null;
+    sandbox.showToast = (msg) => {
+      capturedToast = msg;
+    };
+    if (sandbox.window) {
+      sandbox.window.showToast = sandbox.showToast;
+    }
+    sandbox.resetBackPressState();
+    sandbox.window.__pwaExitAllowed = false;
+
+    // BACK-EXIT-01: First press on PLANNING root displays localized exit toast
+    const stackLenBeforeFirst = sandbox.history.stack.length;
     sandbox.handlePopState({ state: null });
     assert(
-      sandbox.history.stack.length === stackLenBefore &&
-        sandbox.currentActiveTab === "PLANNING",
-      "BACK-NAV-06b: handlePopState when already on PLANNING root does not push history or trap user"
+      capturedToast &&
+        (capturedToast.includes("lần nữa để thoát") ||
+          capturedToast.includes("again to exit")),
+      `BACK-EXIT-01: First back press on PLANNING root displays warning toast (Got: '${capturedToast}')`
+    );
+
+    // BACK-EXIT-02: First press on PLANNING root pushes guard history state
+    assert(
+      sandbox.history.stack.length === stackLenBeforeFirst + 1 &&
+        sandbox.history.state &&
+        sandbox.history.state.rootGuard === true,
+      "BACK-EXIT-02: First back press pushes { rootGuard: true } history state"
+    );
+
+    // BACK-EXIT-03: First press does NOT permit exit yet
+    assert(
+      !sandbox.window.__pwaExitAllowed,
+      "BACK-EXIT-03: First back press does not permit exit"
+    );
+
+    // BACK-EXIT-04: Second press within 2000ms allows exit
+    const stackLenBeforeSecond = sandbox.history.stack.length;
+    sandbox.handlePopState({ state: null });
+    assert(
+      sandbox.window.__pwaExitAllowed === true,
+      "BACK-EXIT-04: Second back press within 2000ms sets __pwaExitAllowed to true"
+    );
+    assert(
+      sandbox.history.stack.length === stackLenBeforeSecond,
+      "BACK-EXIT-05: Second back press does not push redundant history state"
+    );
+
+    // BACK-EXIT-06: Second press after 2000ms timeout re-arms guard
+    sandbox.resetBackPressState();
+    sandbox.window.__pwaExitAllowed = false;
+    capturedToast = null;
+    // Simulate first press after timeout
+    sandbox.handlePopState({ state: null });
+    assert(
+      capturedToast !== null && !sandbox.window.__pwaExitAllowed,
+      "BACK-EXIT-06: Back press after reset/timeout re-arms guard and displays toast again"
     );
   } catch (err) {
     console.error("❌ Test Execution Error:", err);

@@ -58,6 +58,13 @@ function handleModalBackdropClick(event, id) {
   }
 }
 
+let lastBackPressTime = 0;
+const BACK_EXIT_TIMEOUT_MS = 2000;
+
+function resetBackPressState() {
+  lastBackPressTime = 0;
+}
+
 function handlePopState(event) {
   // Tier 1: If any modal is open, close topmost modal and stay on current tab
   if (modalHistoryStack.length > 0) {
@@ -71,12 +78,54 @@ function handlePopState(event) {
   if (targetTab && TAB_ORDER.includes(targetTab)) {
     if (targetTab !== currentActiveTab) {
       setActiveTab(targetTab, { fromPopState: true, preserveItem: true });
+      return;
     }
   } else if (currentActiveTab !== "PLANNING") {
     // If history is at root / empty state and user is not on PLANNING, return to PLANNING
     setActiveTab("PLANNING", { fromPopState: true });
+    return;
   }
-  // Tier 3: If on PLANNING with empty modalHistoryStack, let browser back / PWA exit occur naturally
+
+  // Tier 3: Press back again to exit guard (on PLANNING tab with empty modalHistoryStack)
+  const now = Date.now();
+  if (now - lastBackPressTime < BACK_EXIT_TIMEOUT_MS) {
+    lastBackPressTime = 0;
+    if (typeof window !== "undefined") {
+      window.__pwaExitAllowed = true;
+    }
+    // Allow natural browser exit / navigation
+    return;
+  }
+
+  // First back press: arm window and display localized toast
+  lastBackPressTime = now;
+  try {
+    if (
+      typeof window !== "undefined" &&
+      window.history &&
+      window.history.pushState
+    ) {
+      window.history.pushState({ tab: "PLANNING", rootGuard: true }, "");
+    }
+  } catch (e) {}
+
+  const lang =
+    (typeof memoryState !== "undefined" && memoryState?.settings?.language) ||
+    (typeof currentLanguage !== "undefined" ? currentLanguage : "vi");
+  const t =
+    (typeof TRANSLATIONS !== "undefined" &&
+      (TRANSLATIONS[lang] || TRANSLATIONS.vi)) ||
+    {};
+  const exitMsg =
+    t.toast_press_back_again_to_exit ||
+    (lang === "vi"
+      ? "Nhấn quay lại lần nữa để thoát"
+      : "Press back again to exit");
+  if (typeof window !== "undefined" && typeof window.showToast === "function") {
+    window.showToast(exitMsg);
+  } else if (typeof showToast === "function") {
+    showToast(exitMsg);
+  }
 }
 
 function scrollToTop() {
@@ -788,5 +837,8 @@ if (typeof module !== "undefined" && module.exports) {
     closeModal,
     openEditItemModal,
     openQuickPriceModal,
+    handlePopState,
+    resetBackPressState,
+    BACK_EXIT_TIMEOUT_MS,
   };
 }

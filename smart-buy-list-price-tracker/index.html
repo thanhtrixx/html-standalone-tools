@@ -3573,6 +3573,15 @@
       /* =========================================================================
        2. PURE MATH & NORMALIZATION FUNCTIONS
        ========================================================================= */
+      if (typeof DIMENSIONS === "undefined" && typeof require !== "undefined") {
+        try {
+          const _units = require("./units.js");
+          if (typeof globalThis !== "undefined") {
+            Object.assign(globalThis, _units);
+          }
+        } catch (_) {}
+      }
+
       function normalizeQuantity(quantity, unit) {
         const q = parseFloat(quantity);
         if (isNaN(q) || q <= 0) {
@@ -3815,7 +3824,17 @@
       function getItemStoreComparison(itemName) {
         if (!itemName) return [];
         const itemKey = normalizeItemKey(itemName);
-        const history = (memoryState.purchaseLedger || []).filter(
+        const ledger =
+          typeof memoryState !== "undefined" &&
+          memoryState &&
+          memoryState.purchaseLedger
+            ? memoryState.purchaseLedger
+            : typeof globalThis !== "undefined" &&
+                globalThis.memoryState &&
+                globalThis.memoryState.purchaseLedger
+              ? globalThis.memoryState.purchaseLedger
+              : [];
+        const history = ledger.filter(
           (l) => normalizeItemKey(l.itemName) === itemKey
         );
         if (history.length === 0) return [];
@@ -7439,6 +7458,7 @@
           error_github_ratelimit:
             "GitHub API rate limit exceeded. Resets at {time} (in {mins}m).",
           toast_sample_loaded: "Sample grocery list loaded!",
+          toast_press_back_again_to_exit: "Press back again to exit",
           toast_data_cleared: "All data cleared",
           smart_quick_heading: "Quick Add Item",
           smart_quick_placeholder:
@@ -7850,6 +7870,7 @@
           error_github_ratelimit:
             "Đã đạt giới hạn yêu cầu GitHub API. Tự động mở lại lúc {time} (sau {mins} phút).",
           toast_sample_loaded: "Đã tải danh sách hàng hoá mẫu!",
+          toast_press_back_again_to_exit: "Nhấn quay lại lần nữa để thoát",
           toast_data_cleared: "Đã xoá toàn bộ dữ liệu",
           smart_quick_heading: "Nhập Nhanh Mặt Hàng",
           smart_quick_placeholder:
@@ -8437,8 +8458,9 @@
             .filter(Boolean);
         }
         memoryState.storeAliases[storeName] = Array.from(new Set(arr));
-        saveToLocalStorage();
-        renderStoreManagerList();
+        if (typeof saveToLocalStorage === "function") saveToLocalStorage();
+        if (typeof renderStoreManagerList === "function")
+          renderStoreManagerList();
         return true;
       }
 
@@ -8497,13 +8519,19 @@
         } else {
           memoryState.storeAliases[name] = [];
         }
-        saveToLocalStorage();
-        renderStoreFilterOptions();
-        renderStoreManagerList();
-        showToast(
-          TRANSLATIONS[currentLanguage].toast_store_added ||
-            "Store added successfully"
-        );
+        if (typeof saveToLocalStorage === "function") saveToLocalStorage();
+        if (typeof renderStoreFilterOptions === "function")
+          renderStoreFilterOptions();
+        if (typeof renderStoreManagerList === "function")
+          renderStoreManagerList();
+        if (typeof showToast === "function") {
+          showToast(
+            (typeof TRANSLATIONS !== "undefined" &&
+              TRANSLATIONS[currentLanguage] &&
+              TRANSLATIONS[currentLanguage].toast_store_added) ||
+              "Store added successfully"
+          );
+        }
         return true;
       }
 
@@ -8512,28 +8540,38 @@
         const name = newName.trim();
         if (!name || name === oldName) return false;
         if (!memoryState.stores) memoryState.stores = [...DEFAULT_STORES];
-        const idx = memoryState.stores.indexOf(oldName);
-        if (idx === -1) return false;
 
-        recordDeletedStore(oldName);
+        // Disallow duplicate names
+        if (memoryState.stores.includes(name)) {
+          if (typeof showToast === "function") {
+            showToast(
+              (typeof TRANSLATIONS !== "undefined" &&
+                TRANSLATIONS[currentLanguage] &&
+                TRANSLATIONS[currentLanguage].toast_store_exists) ||
+                "Store name already exists"
+            );
+          }
+          return false;
+        }
+
+        if (typeof recordDeletedStore === "function")
+          recordDeletedStore(oldName);
         if (memoryState._deleted?.stores && memoryState._deleted.stores[name]) {
           delete memoryState._deleted.stores[name];
         }
 
-        memoryState.stores[idx] = name;
+        // Update stores array
+        memoryState.stores = memoryState.stores.map((s) =>
+          s === oldName ? name : s
+        );
 
-        // Migrate aliases to new name
-        if (!memoryState.storeAliases) {
-          memoryState.storeAliases = { ...DEFAULT_STORE_ALIASES };
-        }
-        if (memoryState.storeAliases[oldName]) {
-          memoryState.storeAliases[name] = [
-            ...memoryState.storeAliases[oldName],
-          ];
+        // Update storeAliases key map
+        if (memoryState.storeAliases && memoryState.storeAliases[oldName]) {
+          memoryState.storeAliases[name] = memoryState.storeAliases[oldName];
           delete memoryState.storeAliases[oldName];
         }
 
-        // Cascade rename to active list items
+        // Update active items
         if (
           memoryState.activeList &&
           Array.isArray(memoryState.activeList.items)
@@ -8541,13 +8579,16 @@
           memoryState.activeList.items.forEach((item) => {
             if (item.store === oldName) {
               item.store = name;
-              touchItem(item);
+              if (typeof touchItem === "function") touchItem(item);
             }
           });
         }
 
-        // Cascade rename to purchase ledger
-        if (Array.isArray(memoryState.purchaseLedger)) {
+        // Update purchase ledger
+        if (
+          memoryState.purchaseLedger &&
+          Array.isArray(memoryState.purchaseLedger)
+        ) {
           memoryState.purchaseLedger.forEach((entry) => {
             if (entry.store === oldName) {
               entry.store = name;
@@ -8555,17 +8596,26 @@
           });
         }
 
-        if (currentStoreFilter === oldName) {
+        // Update current filter if needed
+        if (
+          typeof currentStoreFilter !== "undefined" &&
+          currentStoreFilter === oldName
+        ) {
           currentStoreFilter = name;
         }
 
-        saveToLocalStorage();
-        renderApp();
-        renderStoreManagerList();
-        showToast(
-          TRANSLATIONS[currentLanguage].toast_store_renamed ||
-            "Store renamed successfully"
-        );
+        if (typeof saveToLocalStorage === "function") saveToLocalStorage();
+        if (typeof renderApp === "function") renderApp();
+        if (typeof renderStoreManagerList === "function")
+          renderStoreManagerList();
+        if (typeof showToast === "function") {
+          showToast(
+            (typeof TRANSLATIONS !== "undefined" &&
+              TRANSLATIONS[currentLanguage] &&
+              TRANSLATIONS[currentLanguage].toast_store_renamed) ||
+              "Store renamed successfully"
+          );
+        }
         return true;
       }
 
@@ -8614,6 +8664,7 @@
       }
 
       function renderStoreManagerList() {
+        if (typeof document === "undefined") return;
         const container = document.getElementById("storeManagerList");
         if (!container) return;
         const stores = memoryState.stores || DEFAULT_STORES;
@@ -11550,6 +11601,18 @@
         openModal("shareModal");
       }
 
+      if (
+        typeof generateItemId === "undefined" &&
+        typeof require !== "undefined"
+      ) {
+        try {
+          const _domain = require("../domain/index.js");
+          if (typeof globalThis !== "undefined" && !globalThis.generateItemId) {
+            globalThis.generateItemId = _domain.generateItemId;
+          }
+        } catch (_) {}
+      }
+
       function uint8ArrayToUrlBase64(bytes) {
         let binary = "";
         const len = bytes.byteLength;
@@ -13201,6 +13264,13 @@
         }
       }
 
+      let lastBackPressTime = 0;
+      const BACK_EXIT_TIMEOUT_MS = 2000;
+
+      function resetBackPressState() {
+        lastBackPressTime = 0;
+      }
+
       function handlePopState(event) {
         // Tier 1: If any modal is open, close topmost modal and stay on current tab
         if (modalHistoryStack.length > 0) {
@@ -13214,12 +13284,58 @@
         if (targetTab && TAB_ORDER.includes(targetTab)) {
           if (targetTab !== currentActiveTab) {
             setActiveTab(targetTab, { fromPopState: true, preserveItem: true });
+            return;
           }
         } else if (currentActiveTab !== "PLANNING") {
           // If history is at root / empty state and user is not on PLANNING, return to PLANNING
           setActiveTab("PLANNING", { fromPopState: true });
+          return;
         }
-        // Tier 3: If on PLANNING with empty modalHistoryStack, let browser back / PWA exit occur naturally
+
+        // Tier 3: Press back again to exit guard (on PLANNING tab with empty modalHistoryStack)
+        const now = Date.now();
+        if (now - lastBackPressTime < BACK_EXIT_TIMEOUT_MS) {
+          lastBackPressTime = 0;
+          if (typeof window !== "undefined") {
+            window.__pwaExitAllowed = true;
+          }
+          // Allow natural browser exit / navigation
+          return;
+        }
+
+        // First back press: arm window and display localized toast
+        lastBackPressTime = now;
+        try {
+          if (
+            typeof window !== "undefined" &&
+            window.history &&
+            window.history.pushState
+          ) {
+            window.history.pushState({ tab: "PLANNING", rootGuard: true }, "");
+          }
+        } catch (e) {}
+
+        const lang =
+          (typeof memoryState !== "undefined" &&
+            memoryState?.settings?.language) ||
+          (typeof currentLanguage !== "undefined" ? currentLanguage : "vi");
+        const t =
+          (typeof TRANSLATIONS !== "undefined" &&
+            (TRANSLATIONS[lang] || TRANSLATIONS.vi)) ||
+          {};
+        const exitMsg =
+          t.toast_press_back_again_to_exit ||
+          (lang === "vi"
+            ? "Nhấn quay lại lần nữa để thoát"
+            : "Press back again to exit");
+        if (
+          typeof window !== "undefined" &&
+          typeof window.showToast === "function"
+        ) {
+          window.showToast(exitMsg);
+        } else if (typeof showToast === "function") {
+          showToast(exitMsg);
+        }
       }
 
       function scrollToTop() {
@@ -14099,6 +14215,16 @@
           // Popstate browser back button handling for modals & tab navigation
           window.addEventListener("popstate", handlePopState);
 
+          // Initial root back navigation guard state
+          if (window.history && window.history.pushState) {
+            try {
+              window.history.pushState(
+                { tab: "PLANNING", rootGuard: true },
+                ""
+              );
+            } catch (e) {}
+          }
+
           // Page horizontal touch swipe listeners for 4-tab navigation
           document.addEventListener("touchstart", handlePageTouchStart, {
             passive: true,
@@ -14496,6 +14622,8 @@
         window.showToast = showToast;
         window.normalizeItemKey = normalizeItemKey;
         window.handlePopState = handlePopState;
+        window.resetBackPressState = resetBackPressState;
+        window.BACK_EXIT_TIMEOUT_MS = BACK_EXIT_TIMEOUT_MS;
 
         Object.defineProperty(window, "selectedLedgerIds", {
           get: () => selectedLedgerIds,
