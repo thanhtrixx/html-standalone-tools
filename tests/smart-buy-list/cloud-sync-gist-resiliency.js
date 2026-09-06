@@ -71,6 +71,9 @@ function loadTestSandbox(mockFetch = null) {
         children: [],
         appendChild: function (child) {
           this.children.push(child);
+          if (id === "toastContainer" && child) {
+            toastsShown.push(child.textContent || "");
+          }
         },
         classList: {
           classes: new Set(),
@@ -170,7 +173,11 @@ function loadTestSandbox(mockFetch = null) {
             return this.classes.has(c);
           },
         },
-        appendChild: function () {},
+        appendChild: function (child) {
+          if (child && child.textContent) {
+            this.textContent = (this.textContent || "") + child.textContent;
+          }
+        },
         setAttribute: function () {},
         style: {},
       }),
@@ -221,17 +228,6 @@ function loadTestSandbox(mockFetch = null) {
 
   const context = vm.createContext(sandbox);
   vm.runInContext(combinedScripts, context);
-
-  vm.runInContext(
-    `
-    const _orig_showToast_harness = typeof showToast === 'function' ? showToast : null;
-    showToast = function(msg, duration) {
-      if (typeof _testRecordToast === 'function') _testRecordToast(msg);
-      if (_orig_showToast_harness) return _orig_showToast_harness(msg, duration);
-    };
-  `,
-    context
-  );
 
   // Expose window exports on context root
   if (context.window) {

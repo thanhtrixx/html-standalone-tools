@@ -456,16 +456,16 @@ function renderPriceLedgerTable(query = "") {
           (raw || "").replace(/^[🟢🟡🔴⚪]\s*/, "");
         if (deal.score === "GREAT_DEAL") {
           const rawLabel = t.badge_great_deal || "🟢 Great Deal";
-          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50" title="${rawLabel}"><span aria-hidden="true">🟢</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🟢</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
         } else if (deal.score === "PRICE_SPIKE") {
           const rawLabel = t.badge_price_spike || "🔴 Price Spike";
-          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-950 text-red-300 border border-red-700/50" title="${rawLabel}"><span aria-hidden="true">🔴</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-red-950 text-red-300 border border-red-700/50" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🔴</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
         } else if (deal.score === "FAIR_PRICE") {
           const rawLabel = t.badge_fair_price || "🟡 Fair Price";
-          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-950 text-amber-300 border border-amber-700/50" title="${rawLabel}"><span aria-hidden="true">🟡</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-amber-950 text-amber-300 border border-amber-700/50" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🟡</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
         } else {
           const rawLabel = t.badge_new_item || "⚪ New Item";
-          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700" title="${rawLabel}"><span aria-hidden="true">⚪</span><span class="ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+          dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">⚪</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
         }
 
         return `

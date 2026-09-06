@@ -245,28 +245,28 @@ function renderItemCard(item) {
   if (deal.score === "GREAT_DEAL") {
     const rawLabel = t.badge_great_deal || "🟢 Great Deal";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">🟢</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
   } else if (deal.score === "PRICE_SPIKE") {
     const rawLabel = t.badge_price_spike || "🔴 Price Spike";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">🔴</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
   } else if (deal.score === "FAIR_PRICE") {
     const rawLabel = t.badge_fair_price || "🟡 Fair Price";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">🟡</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
   } else if (deal.score === "NEW_ITEM" || !deal.score) {
     const rawLabel = t.badge_new_item || "⚪ New Item";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 shrink-0" title="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">⚪</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
@@ -318,8 +318,8 @@ function renderItemCard(item) {
                 </div>
               </div>
 
-              <!-- Deal Badge (Tablet & Desktop >= 640px) -->
-              ${dealBadgeHtml ? `<div class="hidden sm:flex items-center shrink-0">${dealBadgeHtml}</div>` : ""}
+              <!-- Deal Badge (Responsive: Icon on mobile, expands on tablet/desktop >= 640px) -->
+              ${dealBadgeHtml ? `<div class="flex sm:flex items-center shrink-0">${dealBadgeHtml}</div>` : ""}
 
               <!-- Price (Clickable for quick shelf price update) -->
               <div class="shrink-0">
