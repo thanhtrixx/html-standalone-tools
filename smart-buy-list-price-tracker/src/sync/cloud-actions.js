@@ -152,10 +152,21 @@ async function forceDownloadCloud() {
     (typeof currentLanguage !== "undefined" ? currentLanguage : "vi");
   const tr = TRANSLATIONS[lang] || TRANSLATIONS.vi;
 
-  if (activeType === "github" && !githubAuthState.token) {
+  const gistIdInput =
+    typeof document !== "undefined"
+      ? document.getElementById("githubGistIdInput")
+      : null;
+  const enteredGistId = extractGistId(
+    (gistIdInput && gistIdInput.value) || githubAuthState.gistId || ""
+  );
+  if (enteredGistId) {
+    githubAuthState.gistId = enteredGistId;
+  }
+
+  if (activeType === "github" && !githubAuthState.token && !enteredGistId) {
     showToast(
       tr.toast_github_missing_token ||
-        "Please connect with a valid GitHub token first."
+        "Please connect with a valid GitHub token or enter a Gist ID first."
     );
     return;
   }
