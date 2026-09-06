@@ -300,12 +300,16 @@ try {
   console.log("\n--- Section 4: Quick In-Store Price Adjustment ---");
 
   // Adjust Milk (item '1') from $3.50 to $3.29 in-store sticker price
-  sandbox.quickUpdateItemPrice("1", 3.29, 2);
+  const milkItem = sandbox.memoryState.activeList.items.find((i) =>
+    i.name.includes("Sữa")
+  );
+  const milkId = milkItem ? milkItem.id : "1";
+  sandbox.quickUpdateItemPrice(milkId, 3.29, 2);
   const updatedMilk = sandbox.memoryState.activeList.items.find(
-    (i) => i.id === "1"
+    (i) => i.id === milkId
   );
   assert(
-    updatedMilk.price === 3.29,
+    updatedMilk && updatedMilk.price === 3.29,
     "MD3-16: quickUpdateItemPrice updates shelf price to $3.29"
   );
 

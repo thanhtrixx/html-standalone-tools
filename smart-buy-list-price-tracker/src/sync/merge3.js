@@ -179,7 +179,8 @@ function mergeCloudState(local, remote) {
     const delTs = getTs(
       tombLedger[rec.id] || tombLedger[String(rec.id)] || tombLedger[k]
     );
-    if (delTs > 0) return;
+    const recTs = getTs(rec.updatedAt || rec.timestamp || rec.date);
+    if (delTs > 0 && (!recTs || delTs >= recTs)) return;
     ledgerMap.set(k, { ...rec });
   });
 
@@ -188,7 +189,8 @@ function mergeCloudState(local, remote) {
     const delTs = getTs(
       tombLedger[rec.id] || tombLedger[String(rec.id)] || tombLedger[k]
     );
-    if (delTs > 0) return;
+    const recTs = getTs(rec.updatedAt || rec.timestamp || rec.date);
+    if (delTs > 0 && (!recTs || delTs >= recTs)) return;
     if (!ledgerMap.has(k)) {
       ledgerMap.set(k, { ...rec });
     }
@@ -259,7 +261,10 @@ function reconcileMemoryState(newState) {
   saveToLocalStorage();
   if (typeof renderApp === "function") renderApp();
   if (typeof renderPriceLedgerTable === "function") {
-    const searchInput = document.getElementById("ledgerSearchInput");
+    const searchInput =
+      typeof document !== "undefined"
+        ? document.getElementById("ledgerSearchInput")
+        : null;
     renderPriceLedgerTable(searchInput ? searchInput.value : "");
   }
 }
