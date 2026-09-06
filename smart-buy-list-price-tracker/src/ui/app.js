@@ -504,6 +504,7 @@ if (typeof window !== "undefined") {
   window.toggleGithubTokenVisibility = toggleGithubTokenVisibility;
   window.handleCloudProviderChange = handleCloudProviderChange;
   window.updateGithubGistUI = updateGithubGistUI;
+  window.extractGistId = extractGistId;
   window.syncCloudNow = syncCloudNow;
   window.forceUploadCloud = forceUploadCloud;
   window.forceDownloadCloud = forceDownloadCloud;

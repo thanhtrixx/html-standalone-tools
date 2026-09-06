@@ -1,3 +1,20 @@
+/**
+ * Cleanly extracts a 32-hex character Gist ID from a raw string or full GitHub Gist URL (ADR-0032).
+ * Supports URLs:
+ * - https://gist.github.com/6b6ea1ec9fba7c2a610bbd38ff844193
+ * - https://gist.github.com/username/6b6ea1ec9fba7c2a610bbd38ff844193
+ * - Raw 32-character hex ID
+ *
+ * @param {string} input - Gist URL or raw ID
+ * @returns {string} Clean 32-character hexadecimal Gist ID or trimmed input
+ */
+function extractGistId(input) {
+  if (!input || typeof input !== "string") return "";
+  const trimmed = input.trim();
+  const match = trimmed.match(/([a-f0-9]{32})/i);
+  return match ? match[1].toLowerCase() : trimmed;
+}
+
 function createCloudPayload(state) {
   if (state && state._deleted) {
     pruneDeletedTombstones(state._deleted);
@@ -672,12 +689,16 @@ class GitHubGistStorageProvider extends StorageProvider {
   }
 
   async readRemoteGist(gistId, token) {
-    const res = await fetch(`https://api.github.com/gists/${gistId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
+    const cleanId = extractGistId(gistId);
+    const headers = {
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+    const res = await fetch(`https://api.github.com/gists/${cleanId}`, {
+      headers,
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => null);
@@ -748,12 +769,22 @@ class GitHubGistStorageProvider extends StorageProvider {
   }
 
   async sync(forcePush = false, forcePull = false) {
-    if (!githubAuthState.token) {
+    const gistIdInput =
+      typeof document !== "undefined"
+        ? document.getElementById("githubGistIdInput")?.value
+        : "";
+    const activeGistId = extractGistId(githubAuthState.gistId || gistIdInput);
+
+    if (!githubAuthState.token && (!forcePull || !activeGistId)) {
       return { success: false, error: "Not authenticated with GitHub" };
     }
     if (this.isSyncing) {
       this.needsTrailingSync = true;
       return { success: true, queued: true };
+    }
+
+    if (!githubAuthState.gistId && activeGistId) {
+      githubAuthState.gistId = activeGistId;
     }
 
     this.isSyncing = true;
@@ -766,6 +797,9 @@ class GitHubGistStorageProvider extends StorageProvider {
     try {
       const token = githubAuthState.token;
       if (!githubAuthState.gistId) {
+        if (!token) {
+          throw new Error("GitHub token or Gist ID required");
+        }
         const gistId = await this.discoverOrCreateGist(
           token,
           githubAuthState.gistId
@@ -778,7 +812,7 @@ class GitHubGistStorageProvider extends StorageProvider {
         }
       }
 
-      const gistId = githubAuthState.gistId;
+      const gistId = extractGistId(githubAuthState.gistId);
       if (!gistId) throw new Error("Could not locate or create Gist ID");
 
       const { gist, data: remoteData } = await this.readRemoteGist(
@@ -788,6 +822,9 @@ class GitHubGistStorageProvider extends StorageProvider {
       const localState = (await this.local.getState()) || memoryState;
 
       if (forcePush || (!remoteData && !forcePull)) {
+        if (!token) {
+          throw new Error("GitHub token required to upload to Gist");
+        }
         const payload = createCloudPayload(localState);
         await this.updateRemoteGist(gistId, payload, token);
       } else if (forcePull) {
@@ -808,9 +845,11 @@ class GitHubGistStorageProvider extends StorageProvider {
         if (remoteData) {
           const merged = merge3Way(snapshotBase, memoryState, remoteData);
           reconcileMemoryState(merged);
-          const payload = createCloudPayload(merged);
-          await this.updateRemoteGist(gistId, payload, token);
-        } else {
+          if (token) {
+            const payload = createCloudPayload(merged);
+            await this.updateRemoteGist(gistId, payload, token);
+          }
+        } else if (token) {
           const payload = createCloudPayload(localState);
           await this.updateRemoteGist(gistId, payload, token);
         }
@@ -927,7 +966,14 @@ class StorageManager {
   }
 
   async sync(forcePush = false, forcePull = false) {
-    if (this.activeProviderType === "github" && githubAuthState.token) {
+    if (
+      this.activeProviderType === "github" &&
+      (githubAuthState.token ||
+        (forcePull &&
+          (githubAuthState.gistId ||
+            (typeof document !== "undefined" &&
+              document.getElementById("githubGistIdInput")?.value))))
+    ) {
       return this.providers.github.sync(forcePush, forcePull);
     }
     if (
@@ -1338,6 +1384,15 @@ function initGoogleAuthClient() {
   }
 }
 
+if (typeof window !== "undefined") {
+  window.extractGistId = extractGistId;
+}
+
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { createCloudPayload, mergeCloudState, merge3Way };
+  module.exports = {
+    extractGistId,
+    createCloudPayload,
+    mergeCloudState,
+    merge3Way,
+  };
 }

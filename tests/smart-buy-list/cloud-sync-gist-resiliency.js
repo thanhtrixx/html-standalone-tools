@@ -217,8 +217,21 @@ function loadTestSandbox(mockFetch = null) {
   sandbox.window.navigator = sandbox.navigator;
   sandbox.window.tailwind = sandbox.tailwind;
 
+  sandbox._testRecordToast = (msg) => toastsShown.push(msg);
+
   const context = vm.createContext(sandbox);
   vm.runInContext(combinedScripts, context);
+
+  vm.runInContext(
+    `
+    const _orig_showToast_harness = typeof showToast === 'function' ? showToast : null;
+    showToast = function(msg, duration) {
+      if (typeof _testRecordToast === 'function') _testRecordToast(msg);
+      if (_orig_showToast_harness) return _orig_showToast_harness(msg, duration);
+    };
+  `,
+    context
+  );
 
   // Expose window exports on context root
   if (context.window) {
@@ -694,6 +707,135 @@ async function runTests() {
       missingInEn.length,
       0,
       `I18N-PARITY-VI→EN: 100% Vietnamese keys exist in English (Missing: ${missingInEn.join(", ") || "None"})`
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // SECTION 8: GitHub Gist URL Regex Extraction & Anonymous Download Fallback (ADR-0032)
+  // -------------------------------------------------------------------------
+  console.log(
+    "\n--- SECTION 8: Gist URL Regex Extraction & Anonymous Download (Issue #324) ---"
+  );
+  {
+    const { context, elements } = loadTestSandbox();
+
+    // GIST-URL-01: Full Gist URL without username
+    const url1 = "https://gist.github.com/6b6ea1ec9fba7c2a610bbd38ff844193";
+    assertEqual(
+      context.extractGistId(url1),
+      "6b6ea1ec9fba7c2a610bbd38ff844193",
+      "GIST-URL-01: extractGistId cleanly extracts 32-hex ID from direct Gist URL"
+    );
+
+    // GIST-URL-02: Full Gist URL with username
+    const url2 =
+      "https://gist.github.com/thanhtrixx/6b6ea1ec9fba7c2a610bbd38ff844193";
+    assertEqual(
+      context.extractGistId(url2),
+      "6b6ea1ec9fba7c2a610bbd38ff844193",
+      "GIST-URL-02: extractGistId cleanly extracts 32-hex ID from user-scoped Gist URL"
+    );
+
+    // GIST-URL-03: Raw 32-character hex ID
+    const rawId = "6b6ea1ec9fba7c2a610bbd38ff844193";
+    assertEqual(
+      context.extractGistId(rawId),
+      "6b6ea1ec9fba7c2a610bbd38ff844193",
+      "GIST-URL-03: extractGistId preserves valid raw 32-hex ID"
+    );
+
+    // GIST-URL-04: Gracefully handles empty or non-string inputs
+    assertEqual(
+      context.extractGistId(""),
+      "",
+      "GIST-URL-04a: extractGistId handles empty string safely"
+    );
+    assertEqual(
+      context.extractGistId(null),
+      "",
+      "GIST-URL-04b: extractGistId handles null safely"
+    );
+
+    // GIST-URL-05: readRemoteGist omits Authorization header when token is absent
+    let capturedHeaders = null;
+    let capturedFetchUrl = null;
+    const mockPublicFetch = async (url, options = {}) => {
+      capturedFetchUrl = url;
+      capturedHeaders = options.headers || {};
+      return {
+        ok: true,
+        json: async () => ({
+          id: "6b6ea1ec9fba7c2a610bbd38ff844193",
+          files: {
+            "smart_buy_list_data.json": {
+              content: JSON.stringify({
+                app: "smart-buy-list-price-tracker",
+                schemaVersion: 2,
+                updatedAt: new Date().toISOString(),
+                data: {
+                  activeList: { items: [] },
+                  purchaseLedger: [
+                    {
+                      id: "hist-1",
+                      itemName: "Milk",
+                      price: 3.5,
+                      quantity: 1,
+                      unit: "gal",
+                    },
+                  ],
+                },
+              }),
+            },
+          },
+        }),
+      };
+    };
+
+    const {
+      context: anonContext,
+      elements: anonElements,
+      toastsShown: anonToasts,
+    } = loadTestSandbox(mockPublicFetch);
+    const provider = anonContext.storageManager.providers.github;
+    const { data: remoteGistData } = await provider.readRemoteGist(
+      "https://gist.github.com/6b6ea1ec9fba7c2a610bbd38ff844193",
+      null
+    );
+
+    assert(
+      capturedFetchUrl &&
+        capturedFetchUrl.includes("/gists/6b6ea1ec9fba7c2a610bbd38ff844193"),
+      "GIST-URL-05a: readRemoteGist requests clean 32-hex endpoint without URL embedding"
+    );
+    assert(
+      !capturedHeaders.Authorization,
+      "GIST-URL-05b: readRemoteGist omits Authorization header when no token is provided"
+    );
+    assert(
+      remoteGistData &&
+        remoteGistData.data &&
+        Array.isArray(remoteGistData.data.purchaseLedger) &&
+        remoteGistData.data.purchaseLedger.length === 1,
+      "GIST-URL-05c: readRemoteGist successfully parses anonymous payload"
+    );
+
+    // GIST-URL-06: forceDownloadCloud allows anonymous public Gist downloads without token
+    anonContext.githubAuthState.token = null;
+    anonContext.githubAuthState.gistId = "6b6ea1ec9fba7c2a610bbd38ff844193";
+    anonContext.storageManager.setActiveCloudProvider("github");
+
+    await anonContext.forceDownloadCloud();
+
+    assert(
+      anonToasts.some(
+        (t) =>
+          !t.includes("token") &&
+          (t.includes("success") ||
+            t.includes("thành công") ||
+            t.includes("merged") ||
+            t.includes("Downloaded"))
+      ),
+      `GIST-URL-06: forceDownloadCloud successfully downloads public Gist anonymously without requiring token (Toasts: '${anonToasts.join(", ")}')`
     );
   }
 
