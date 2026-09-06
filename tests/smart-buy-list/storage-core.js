@@ -366,6 +366,103 @@ async function runStorageTests() {
         persisted.settings.theme.length > 0,
       "STORE-SETTINGS-05: toggleTheme updates and persists settings.theme to storage"
     );
+
+    // 6. DYNAMIC SAMPLE DATA IDS & TOMBSTONE CONFLICT IMMUNITY (Issue #325)
+    console.log(
+      "\n--- Section 6: Dynamic Sample Data IDs & Tombstone Immunity (Issue #325) ---"
+    );
+
+    const testSession = loadBuyListStorageEngine();
+    const sb = testSession.sandbox;
+
+    // Simulate pre-existing tombstones for static IDs '1'..'5' from prior deletions
+    sb.memoryState._deleted = {
+      items: {
+        1: new Date(Date.now() - 100000).toISOString(),
+        2: new Date(Date.now() - 100000).toISOString(),
+        3: new Date(Date.now() - 100000).toISOString(),
+      },
+      ledger: {
+        1: new Date(Date.now() - 100000).toISOString(),
+        2: new Date(Date.now() - 100000).toISOString(),
+        3: new Date(Date.now() - 100000).toISOString(),
+      },
+      stores: {},
+    };
+
+    // SAMPLE-ID-01: loadSampleData generates dynamic unique timestamped IDs
+    sb.loadSampleData();
+    const items = sb.memoryState.activeList.items;
+    const ledger = sb.memoryState.purchaseLedger;
+
+    assert(
+      items.length >= 5 &&
+        items.every((it) => /^sample_item_\d+_\d+$/.test(it.id)),
+      "SAMPLE-ID-01a: loadSampleData generates dynamic unique IDs matching /^sample_item_\\d+_\\d+$/ for items"
+    );
+    assert(
+      ledger.length >= 5 &&
+        ledger.every((entry) => /^sample_ledger_\d+_\d+$/.test(entry.id)),
+      "SAMPLE-ID-01b: loadSampleData generates dynamic unique IDs matching /^sample_ledger_\\d+_\\d+$/ for ledger entries"
+    );
+
+    // SAMPLE-ID-02: Loaded sample data is immune to pre-existing deletion tombstones
+    assert(
+      !sb.memoryState._deleted.items["1"] &&
+        !sb.memoryState._deleted.ledger["1"] &&
+        !items.some((it) => sb.memoryState._deleted.items[it.id]) &&
+        !ledger.some((e) => sb.memoryState._deleted.ledger[e.id]),
+      "SAMPLE-ID-02: loadSampleData prunes collision tombstones from memoryState._deleted ensuring immunity"
+    );
+
+    // SAMPLE-ID-03: Multiple loadSampleData calls generate unique independent IDs
+    const firstRunIds = items.map((it) => it.id);
+    // Slight pause or manual offset if needed, Date.now() should increment or be different
+    await new Promise((r) => setTimeout(r, 5));
+    sb.loadSampleData();
+    const secondRunIds = sb.memoryState.activeList.items.map((it) => it.id);
+    assert(
+      firstRunIds.every((id, idx) => id !== secondRunIds[idx]),
+      "SAMPLE-ID-03: Repeated invocations of loadSampleData generate distinct unique IDs"
+    );
+
+    // SAMPLE-ID-04: Merging with a remote state containing old static tombstones retains valid ledger history
+    const localSnap = JSON.parse(JSON.stringify(sb.memoryState));
+    const remoteGistState = {
+      schemaVersion: 2,
+      activeList: { items: [] },
+      purchaseLedger: [],
+      _deleted: {
+        items: {
+          1: "2026-01-01T00:00:00.000Z",
+          2: "2026-01-01T00:00:00.000Z",
+        },
+        ledger: {
+          1: "2026-01-01T00:00:00.000Z",
+          2: "2026-01-01T00:00:00.000Z",
+          id_1: "2026-01-01T00:00:00.000Z",
+        },
+        stores: {},
+      },
+      stores: ["WinMart", "Bách Hoá Xanh"],
+      settings: {},
+    };
+
+    const merged = sb.merge3Way(
+      {
+        activeList: { items: [] },
+        purchaseLedger: [],
+        stores: [],
+        _deleted: { items: {}, ledger: {}, stores: {} },
+      },
+      localSnap,
+      remoteGistState
+    );
+
+    assert(
+      merged.purchaseLedger.length >= 5,
+      `SAMPLE-ID-04: Deterministic 3-way merge preserves all sample ledger entries (${merged.purchaseLedger.length} retained) despite remote static tombstones`
+    );
   } catch (err) {
     console.error("❌ Test Execution Error:", err);
     failed++;

@@ -123,12 +123,67 @@ const SAMPLE_LEDGER = [
 ];
 
 function loadSampleData() {
-  memoryState.activeList.items = JSON.parse(JSON.stringify(SAMPLE_ITEMS));
-  memoryState.purchaseLedger = JSON.parse(JSON.stringify(SAMPLE_LEDGER));
+  const now = Date.now();
+  const isoNow = new Date(now).toISOString();
+
+  // Create mapping of static item ID/index to dynamic unique item ID
+  const itemIdMap = {};
+  const newItems = SAMPLE_ITEMS.map((item, idx) => {
+    const dynamicId = `sample_item_${now}_${idx}`;
+    itemIdMap[String(item.id || idx + 1)] = dynamicId;
+    return {
+      ...item,
+      id: dynamicId,
+      updatedAt: isoNow,
+    };
+  });
+
+  const newLedger = SAMPLE_LEDGER.map((entry, idx) => {
+    const dynamicLedgerId = `sample_ledger_${now}_${idx}`;
+    const mappedItemId =
+      itemIdMap[String(entry.itemId)] || `sample_item_${now}_0`;
+    return {
+      ...entry,
+      id: dynamicLedgerId,
+      itemId: mappedItemId,
+      updatedAt: isoNow,
+    };
+  });
+
+  // Ensure tombstone conflict immunity: prune from memoryState._deleted
+  if (!memoryState._deleted) {
+    memoryState._deleted = { items: {}, ledger: {}, stores: {} };
+  }
+  if (!memoryState._deleted.items) memoryState._deleted.items = {};
+  if (!memoryState._deleted.ledger) memoryState._deleted.ledger = {};
+
+  // Prune legacy static IDs (1..20) and newly generated dynamic IDs from tombstones
+  for (let i = 1; i <= 20; i++) {
+    delete memoryState._deleted.items[String(i)];
+    delete memoryState._deleted.ledger[String(i)];
+  }
+  newItems.forEach((it) => {
+    delete memoryState._deleted.items[String(it.id)];
+    delete memoryState._deleted.items[it.name.trim().toLowerCase()];
+  });
+  newLedger.forEach((entry) => {
+    delete memoryState._deleted.ledger[String(entry.id)];
+    delete memoryState._deleted.ledger[`id_${entry.id}`];
+  });
+
+  memoryState.activeList.items = newItems;
+  memoryState.purchaseLedger = newLedger;
   saveToLocalStorage();
   renderApp();
+  if (typeof renderPriceLedgerTable === "function") {
+    const searchInput =
+      typeof document !== "undefined"
+        ? document.getElementById("ledgerSearchInput")
+        : null;
+    renderPriceLedgerTable(searchInput ? searchInput.value : "");
+  }
   showToast(
-    TRANSLATIONS[currentLanguage].toast_sample_loaded ||
+    TRANSLATIONS[currentLanguage]?.toast_sample_loaded ||
       "Sample grocery list loaded!"
   );
   const banner = document.getElementById("sampleDataBanner");

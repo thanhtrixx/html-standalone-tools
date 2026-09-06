@@ -182,6 +182,13 @@ async function forceDownloadCloud() {
   );
   const res = await storageManager.sync(false, true);
   if (res && res.success) {
+    if (typeof renderPriceLedgerTable === "function") {
+      const searchInput =
+        typeof document !== "undefined"
+          ? document.getElementById("ledgerSearchInput")
+          : null;
+      renderPriceLedgerTable(searchInput ? searchInput.value : "");
+    }
     showToast(
       tr.toast_download_success || "Downloaded and merged successfully!"
     );
