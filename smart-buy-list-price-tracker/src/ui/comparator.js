@@ -181,9 +181,17 @@ function runComparatorCalc() {
     normTextB.textContent = `${formatCurrency(res.unitPriceB || 0)} / ${res.baseUnit || "unit"}`;
 
   if (res.error === "DIMENSION_MISMATCH") {
-    if (badge)
-      badge.textContent =
-        t.comp_dim_mismatch_title || "⚠️ Different Unit Dimensions";
+    const rawLabel =
+      t.comp_dim_mismatch_title || "⚠️ Different Unit Dimensions";
+    const cleanLabel = rawLabel.replace(/^⚠️\s*/, "");
+    if (badge) {
+      if (typeof badge.setAttribute === "function") {
+        badge.setAttribute("title", rawLabel);
+        badge.setAttribute("aria-label", rawLabel);
+      }
+      badge.title = rawLabel;
+      badge.innerHTML = `<span aria-hidden="true">⚠️</span><span class="hidden sm:inline ml-1">${cleanLabel}</span>`;
+    }
     if (details)
       details.textContent =
         t.comp_dim_mismatch_desc || "Cannot compare Weight vs Volume directly";
@@ -191,8 +199,16 @@ function runComparatorCalc() {
   }
 
   if (res.winner === "TIE") {
-    if (badge)
-      badge.textContent = t.comp_equal_deal_title || "🤝 Equal Value Deal";
+    const rawLabel = t.comp_equal_deal_title || "🤝 Equal Value Deal";
+    const cleanLabel = rawLabel.replace(/^🤝\s*/, "");
+    if (badge) {
+      if (typeof badge.setAttribute === "function") {
+        badge.setAttribute("title", rawLabel);
+        badge.setAttribute("aria-label", rawLabel);
+      }
+      badge.title = rawLabel;
+      badge.innerHTML = `<span aria-hidden="true">🤝</span><span class="hidden sm:inline ml-1">${cleanLabel}</span>`;
+    }
     if (details)
       details.textContent =
         t.comp_equal_deal_desc || "Both packages have identical unit prices";
@@ -205,8 +221,17 @@ function runComparatorCalc() {
         : currentLanguage === "vi"
           ? "Gói B"
           : "Package B";
-    if (badge)
-      badge.textContent = `🏆 ${(t.comp_winner_pkg_cheaper || "{package} is Cheaper!").replace("{package}", pkgName)}`;
+    const rawTpl = t.comp_winner_pkg_cheaper || "{package} is Cheaper!";
+    const fullText = `🏆 ${rawTpl.replace("{package}", pkgName).replace(/^🏆\s*/, "")}`;
+    const cleanLabel = fullText.replace(/^🏆\s*/, "");
+    if (badge) {
+      if (typeof badge.setAttribute === "function") {
+        badge.setAttribute("title", fullText);
+        badge.setAttribute("aria-label", fullText);
+      }
+      badge.title = fullText;
+      badge.innerHTML = `<span aria-hidden="true">🏆</span><span class="hidden sm:inline ml-1">${cleanLabel}</span>`;
+    }
     if (details) {
       if (activeComparingItemId) {
         if (res.winner === "B") {
@@ -417,23 +442,32 @@ function updateEditItemLivePreview() {
       (l) => itemKey && normalizeItemKey(l.itemName) === itemKey
     );
     const deal = evaluateDealScore(unitPrice, history);
+    const cleanDealLabel = (raw) => (raw || "").replace(/^[🟢🟡🔴⚪]\s*/, "");
+    let emoji = "⚪";
+    let rawLabel = t.badge_new_item || "⚪ New Item";
+    let bgClass = "bg-slate-800 text-slate-300 border border-slate-700";
+
     if (deal.score === "GREAT_DEAL") {
-      dealBadge.className =
-        "px-2 py-0.5 rounded-md font-bold text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50";
-      dealBadge.textContent = t.badge_great_deal || "🟢 Great Deal";
+      emoji = "🟢";
+      rawLabel = t.badge_great_deal || "🟢 Great Deal";
+      bgClass = "bg-emerald-950 text-emerald-300 border border-emerald-700/50";
     } else if (deal.score === "PRICE_SPIKE") {
-      dealBadge.className =
-        "px-2 py-0.5 rounded-md font-bold text-[10px] bg-red-950 text-red-300 border border-red-700/50";
-      dealBadge.textContent = t.badge_price_spike || "🔴 Price Spike";
+      emoji = "🔴";
+      rawLabel = t.badge_price_spike || "🔴 Price Spike";
+      bgClass = "bg-red-950 text-red-300 border border-red-700/50";
     } else if (deal.score === "FAIR_PRICE") {
-      dealBadge.className =
-        "px-2 py-0.5 rounded-md font-bold text-[10px] bg-amber-950 text-amber-300 border border-amber-700/50";
-      dealBadge.textContent = t.badge_fair_price || "🟡 Fair Price";
-    } else {
-      dealBadge.className =
-        "px-2 py-0.5 rounded-md font-bold text-[10px] bg-slate-800 text-slate-300 border border-slate-700";
-      dealBadge.textContent = t.badge_new_item || "⚪ New Item";
+      emoji = "🟡";
+      rawLabel = t.badge_fair_price || "🟡 Fair Price";
+      bgClass = "bg-amber-950 text-amber-300 border border-amber-700/50";
     }
+
+    dealBadge.className = `inline-flex items-center px-2 py-0.5 rounded-md font-bold text-[10px] ${bgClass}`;
+    if (typeof dealBadge.setAttribute === "function") {
+      dealBadge.setAttribute("title", rawLabel);
+      dealBadge.setAttribute("aria-label", rawLabel);
+    }
+    dealBadge.title = rawLabel;
+    dealBadge.innerHTML = `<span aria-hidden="true">${emoji}</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>`;
   }
 }
 

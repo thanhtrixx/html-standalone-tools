@@ -71,8 +71,16 @@ function createMockSandbox() {
             this.textContent += txt;
           }
         },
-        setAttribute: () => {},
-        removeAttribute: () => {},
+        attributes: {},
+        setAttribute: function (k, v) {
+          this.attributes[k] = String(v);
+        },
+        getAttribute: function (k) {
+          return this.attributes[k] !== undefined ? this.attributes[k] : null;
+        },
+        removeAttribute: function (k) {
+          delete this.attributes[k];
+        },
         remove: () => {},
       };
     }
@@ -469,6 +477,74 @@ assert(
   checkedCardHtml.includes("bg-slate-950") ||
     checkedCardHtml.includes("bg-slate-900"),
   "DIFF-QA-09: Checked item card uses solid opaque background surface"
+);
+
+// -------------------------------------------------------------------------
+// SECTION 5: Responsive Deal Badges on Mobile and Tablet (Issue #326)
+// -------------------------------------------------------------------------
+console.log(
+  "\n--- Section 5: Responsive Deal Badges on Mobile and Tablet (Issue #326) ---"
+);
+const sbBadges = createMockSandbox();
+sbBadges.loadSampleData();
+
+// RESP-BADGE-01: Planning Mode cards render compact emoji with hidden sm:inline text label
+sbBadges.setTripPhase("PLANNING");
+const planItem = sbBadges.memoryState.activeList.items[0];
+const planCard = sbBadges.renderItemCard(planItem);
+assert(
+  planCard.includes('aria-hidden="true">') &&
+    planCard.includes('class="hidden sm:inline ml-1"'),
+  "RESP-BADGE-01: Planning Mode item card renders emoji icon with 'hidden sm:inline' class for responsive label"
+);
+
+// RESP-BADGE-02: Buy Mode renders deal badge on mobile without 'hidden sm:flex' wrapper
+sbBadges.setTripPhase("IN_STORE");
+const buyCard = sbBadges.renderItemCard(planItem);
+assert(
+  (buyCard.includes("sm:flex items-center shrink-0") ||
+    buyCard.includes("flex items-center shrink-0")) &&
+    !buyCard.includes('<div class="hidden sm:flex items-center shrink-0">'),
+  "RESP-BADGE-02: Buy Mode card does not hide deal badge on mobile (removes 'hidden sm:flex')"
+);
+
+// RESP-BADGE-03: Buy Mode deal badge contains compact emoji and responsive sm:inline label
+assert(
+  buyCard.includes('aria-hidden="true">') &&
+    buyCard.includes('class="hidden sm:inline ml-1"'),
+  "RESP-BADGE-03: Buy Mode deal badge renders compact emoji on mobile and expands on tablet/desktop"
+);
+
+// RESP-BADGE-04: Comparator result badge renders responsive emoji and hidden sm:inline label
+sbBadges.document.getElementById("compPriceA").value = "50000";
+sbBadges.document.getElementById("compQtyA").value = "1";
+sbBadges.document.getElementById("compUnitA").value = "kg";
+sbBadges.document.getElementById("compPriceB").value = "40000";
+sbBadges.document.getElementById("compQtyB").value = "1";
+sbBadges.document.getElementById("compUnitB").value = "kg";
+sbBadges.runComparatorCalc();
+const compBadge = sbBadges.document.getElementById("compWinnerBadge");
+assert(
+  compBadge &&
+    compBadge.innerHTML.includes('aria-hidden="true">🏆</span>') &&
+    compBadge.innerHTML.includes('class="hidden sm:inline ml-1"'),
+  "RESP-BADGE-04: Comparator result badge displays emoji on mobile and sm:inline label on tablet/desktop"
+);
+
+// RESP-BADGE-05: Accessible aria-label and title attributes present on all deal badges
+assert(
+  compBadge.getAttribute("aria-label") && compBadge.getAttribute("title"),
+  "RESP-BADGE-05: Comparator result badge preserves accessible aria-label and title tooltip attributes"
+);
+
+// RESP-BADGE-06: Edit Item modal deal badge has responsive markup and aria-label
+sbBadges.updateEditItemLivePreview();
+const editBadge = sbBadges.document.getElementById("editItemDealBadge");
+assert(
+  editBadge &&
+    editBadge.getAttribute("aria-label") &&
+    editBadge.innerHTML.includes('class="hidden sm:inline ml-1"'),
+  "RESP-BADGE-06: Edit Item modal deal badge provides responsive markup and aria-label"
 );
 
 // -------------------------------------------------------------------------
