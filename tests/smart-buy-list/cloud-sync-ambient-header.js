@@ -243,6 +243,10 @@ console.log("--- Section 1: DOM Elements Verification ---");
       htmlContent.includes('aria-labelledby="cloudSyncPopoverHeading"'),
     "DOM-11: Diagnostic popover has proper dialog ARIA semantics"
   );
+  assert(
+    htmlContent.includes('id="headerCloudSyncIcon"'),
+    "DOM-12: #headerCloudSyncIcon SVG icon container exists in top header"
+  );
 }
 
 // --- Section 2: Visibility Lifecycle ---
@@ -356,6 +360,132 @@ console.log("\n--- Section 3: Dynamic State Transitions ---");
   assert(
     badge.title.includes("Rate limit"),
     `STATE-09: Badge title includes error diagnostic detail (Got: '${badge.title}')`
+  );
+
+  // --- Expressive Cloud Sync Visual Indicators (CAP-46) ---
+  const headerIcon = getMockEl("headerCloudSyncIcon");
+  const pill = getMockEl("cloudSyncStatusPill");
+
+  // Icon Helper Assertions
+  const syncingSvg = sandbox.getCloudSyncIcon("syncing");
+  assert(
+    typeof syncingSvg === "string" &&
+      syncingSvg.includes("<svg") &&
+      syncingSvg.includes("animate-pulse") &&
+      syncingSvg.includes("animate-spin"),
+    "SYNC-ICON-01: getCloudSyncIcon('syncing') returns animated pulsing/spinning cloud SVG"
+  );
+
+  const syncedSvg = sandbox.getCloudSyncIcon("synced");
+  assert(
+    typeof syncedSvg === "string" &&
+      syncedSvg.includes("<svg") &&
+      syncedSvg.includes("text-emerald-400"),
+    "SYNC-ICON-02: getCloudSyncIcon('synced') returns emerald checkmark cloud SVG"
+  );
+
+  const errorSvg = sandbox.getCloudSyncIcon("error");
+  assert(
+    typeof errorSvg === "string" &&
+      errorSvg.includes("<svg") &&
+      errorSvg.includes("text-red-400"),
+    "SYNC-ICON-03: getCloudSyncIcon('error') returns red alert cloud SVG"
+  );
+
+  const offlineSvg = sandbox.getCloudSyncIcon("offline");
+  assert(
+    typeof offlineSvg === "string" &&
+      offlineSvg.includes("<svg") &&
+      offlineSvg.includes("text-slate-400"),
+    "SYNC-ICON-04: getCloudSyncIcon('offline') returns slate slash cloud SVG"
+  );
+
+  const pendingSvg = sandbox.getCloudSyncIcon("pending");
+  assert(
+    typeof pendingSvg === "string" &&
+      pendingSvg.includes("<svg") &&
+      pendingSvg.includes("text-amber-400"),
+    "SYNC-ICON-05: getCloudSyncIcon('pending') returns amber pending cloud SVG"
+  );
+
+  // Status Pill & Header Icon Syncing
+  sandbox.updateSyncStatusUI("syncing");
+  assert(
+    pill.innerHTML.includes("animate-pulse") &&
+      pill.innerHTML.includes("animate-spin") &&
+      pill.className.includes("text-sky-400"),
+    "SYNC-PILL-01: Pill renders animated sky cloud icon when syncing"
+  );
+  assert(
+    headerIcon.innerHTML.includes("animate-pulse"),
+    "HEADER-ICON-01: Header icon renders animated syncing cloud icon"
+  );
+
+  sandbox.updateSyncStatusUI("synced");
+  assert(
+    pill.innerHTML.includes("text-emerald-400") &&
+      pill.className.includes("text-emerald-400"),
+    "SYNC-PILL-02: Pill renders emerald checkmark cloud icon when synced"
+  );
+  assert(
+    headerIcon.innerHTML.includes("text-emerald-400"),
+    "HEADER-ICON-02: Header icon renders emerald checkmark cloud icon"
+  );
+
+  sandbox.updateSyncStatusUI("error");
+  assert(
+    pill.innerHTML.includes("text-red-400") &&
+      pill.className.includes("text-red-400"),
+    "SYNC-PILL-03: Pill renders red alert cloud icon on error"
+  );
+  assert(
+    headerIcon.innerHTML.includes("text-red-400"),
+    "HEADER-ICON-03: Header icon renders red alert cloud icon"
+  );
+
+  sandbox.storageManager.setActiveCloudProvider("disabled");
+  sandbox.updateSyncStatusUI("offline");
+  assert(
+    pill.innerHTML.includes("text-slate-400") &&
+      pill.className.includes("text-slate-400"),
+    "SYNC-PILL-04: Pill renders slate slash cloud icon when offline"
+  );
+
+  // Single-Source PWA v4.5.1 Versioning
+  const manifestPath = path.join(
+    __dirname,
+    "../..",
+    "smart-buy-list-price-tracker",
+    "manifest.webmanifest"
+  );
+  const manifestJson = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  assert(
+    manifestJson.version === "4.5.1",
+    `PWA-VER-01: manifest.webmanifest version is 4.5.1 (Got: '${manifestJson.version}')`
+  );
+
+  const swPath = path.join(
+    __dirname,
+    "../..",
+    "smart-buy-list-price-tracker",
+    "sw.js"
+  );
+  const swContent = fs.readFileSync(swPath, "utf8");
+  assert(
+    swContent.includes("smart-buy-list-v4.5.1"),
+    "PWA-VER-02: sw.js CACHE_NAME matches smart-buy-list-v4.5.1"
+  );
+
+  const htmlPath = path.join(
+    __dirname,
+    "../..",
+    "smart-buy-list-price-tracker",
+    "index.html"
+  );
+  const indexHtml = fs.readFileSync(htmlPath, "utf8");
+  assert(
+    indexHtml.includes(">v4.5.1<"),
+    "PWA-VER-03: index.html #pwaVersionBadge displays v4.5.1"
   );
 }
 

@@ -199,6 +199,27 @@ async function forceDownloadCloud() {
   }
 }
 
+function getCloudSyncIcon(state, sizeClass = "w-3.5 h-3.5") {
+  if (state === "syncing") {
+    return `<span class="inline-flex items-center shrink-0 relative ${sizeClass}" aria-hidden="true"><svg class="${sizeClass} text-sky-400 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg><svg class="w-2.5 h-2.5 text-sky-300 animate-spin absolute -bottom-0.5 -right-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg></span>`;
+  }
+  if (state === "synced") {
+    return `<span class="inline-flex items-center shrink-0 relative ${sizeClass}" aria-hidden="true"><svg class="${sizeClass} text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><polyline points="9 13 11 15 15 10" stroke-width="2.5"/></svg></span>`;
+  }
+  if (state === "error") {
+    return `<span class="inline-flex items-center shrink-0 relative ${sizeClass}" aria-hidden="true"><svg class="${sizeClass} text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><line x1="12" y1="9" x2="12" y2="13" stroke-width="2.5"/><circle cx="12" cy="16" r="0.5" fill="currentColor"/></svg></span>`;
+  }
+  if (state === "offline") {
+    return `<span class="inline-flex items-center shrink-0 relative ${sizeClass}" aria-hidden="true"><svg class="${sizeClass} text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="2" x2="22" y2="22" stroke-width="2"/><path d="M17.5 19H9a7 7 0 0 1-6.71-9M12 5a7 7 0 0 1 5.5 2.66M19.79 14.5a4.5 4.5 0 0 0-2.29-4.5"/></svg></span>`;
+  }
+  // Pending
+  return `<span class="inline-flex items-center shrink-0 relative ${sizeClass}" aria-hidden="true"><svg class="${sizeClass} text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><polyline points="12 10 12 13 14 13" stroke-width="2"/></svg></span>`;
+}
+
+if (typeof window !== "undefined") {
+  window.getCloudSyncIcon = getCloudSyncIcon;
+}
+
 function updateSyncStatusUI(status) {
   if (typeof document === "undefined") return;
   const pill = document.getElementById("cloudSyncStatusPill");
@@ -292,18 +313,31 @@ function updateSyncStatusUI(status) {
     ).replace("{time}", timeStr);
   }
 
+  const effectiveState =
+    status === "syncing"
+      ? "syncing"
+      : status === "synced"
+        ? "synced"
+        : status === "error" || (isConnected && currentError)
+          ? "error"
+          : status || "offline";
+  const pillIcon = getCloudSyncIcon(effectiveState, "w-3.5 h-3.5");
+
   if (status === "syncing") {
     if (pill) {
-      pill.textContent = tr.cloud_sync_syncing || "Syncing...";
+      pill.innerHTML = `${pillIcon} <span>${tr.cloud_sync_syncing || "Syncing..."}</span>`;
       pill.className =
-        "text-[11px] text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-800/50 font-medium";
+        "inline-flex items-center gap-1.5 text-[11px] text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded-md border border-sky-800/50 font-medium";
     }
     if (errorBanner) errorBanner.classList.add("hidden");
-  } else if (status === "error" || (isConnected && currentError)) {
+  } else if (
+    status === "error" ||
+    (isConnected && currentError && status !== "synced" && status !== "pending")
+  ) {
     if (pill) {
-      pill.textContent = tr.cloud_sync_error || "Sync Error";
+      pill.innerHTML = `${pillIcon} <span>${tr.cloud_sync_error || "Sync Error"}</span>`;
       pill.className =
-        "text-[11px] text-red-400 bg-red-950/60 px-2 py-0.5 rounded-md border border-red-800/50 font-medium";
+        "inline-flex items-center gap-1.5 text-[11px] text-red-400 bg-red-950/60 px-2 py-0.5 rounded-md border border-red-800/50 font-medium";
     }
     if (errorBanner && errorBannerText) {
       errorBannerText.textContent =
@@ -312,29 +346,30 @@ function updateSyncStatusUI(status) {
     }
   } else if (status === "pending") {
     if (pill) {
-      pill.textContent = tr.cloud_sync_pending || "Sync pending...";
+      pill.innerHTML = `${pillIcon} <span>${tr.cloud_sync_pending || "Sync pending..."}</span>`;
       pill.className =
-        "text-[11px] text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-800/50 font-medium";
+        "inline-flex items-center gap-1.5 text-[11px] text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-800/50 font-medium";
     }
     if (errorBanner) errorBanner.classList.add("hidden");
   } else if (status === "synced" || (isConnected && status !== "error")) {
     if (pill) {
-      pill.textContent = tr.cloud_sync_synced || "Synced";
+      pill.innerHTML = `${pillIcon} <span>${tr.cloud_sync_synced || "Synced"}</span>`;
       pill.className =
-        "text-[11px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-medium";
+        "inline-flex items-center gap-1.5 text-[11px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-medium";
     }
     if (errorBanner) errorBanner.classList.add("hidden");
   } else {
     if (pill) {
-      pill.textContent = tr.cloud_sync_offline || "Local / Offline";
+      pill.innerHTML = `${pillIcon} <span>${tr.cloud_sync_offline || "Local / Offline"}</span>`;
       pill.className =
-        "text-[11px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800 font-medium";
+        "inline-flex items-center gap-1.5 text-[11px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800 font-medium";
     }
     if (errorBanner) errorBanner.classList.add("hidden");
   }
 
   // Synchronize Ambient Header Badge & Diagnostic Popover
   const headerBadge = document.getElementById("headerCloudSyncBadge");
+  const headerIcon = document.getElementById("headerCloudSyncIcon");
   const headerDot = document.getElementById("headerCloudSyncDot");
   const headerText = document.getElementById("headerCloudSyncText");
 
@@ -351,6 +386,10 @@ function updateSyncStatusUI(status) {
     } else {
       headerBadge.classList.remove("hidden");
       headerBadge.classList.add("inline-flex");
+
+      if (headerIcon) {
+        headerIcon.innerHTML = getCloudSyncIcon(effectiveState, "w-3.5 h-3.5");
+      }
 
       if (headerDot) {
         headerDot.className =
@@ -650,5 +689,6 @@ if (typeof module !== "undefined" && module.exports) {
     initDatabase,
     saveToLocalStorage,
     loadFromLocalStorage,
+    getCloudSyncIcon,
   };
 }

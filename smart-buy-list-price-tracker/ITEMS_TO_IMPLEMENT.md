@@ -1,4 +1,4 @@
-# 📋 Smart Buy-List & Unit Price Tracker — Living Requirements & Specifications (v4.5.0)
+# 📋 Smart Buy-List & Unit Price Tracker — Living Requirements & Specifications (v4.5.1)
 
 > **Target File:** `smart-buy-list-price-tracker/index.html` (Compacted: `smart-buy-list-price-tracker/dist/index.html` or `dist/smart-buy-list-price-tracker.html`)  
 > **Source Documents:** [`CONTEXT.md`](./CONTEXT.md), [`I18N.md`](./I18N.md), [`docs/adr/`](./docs/adr/)  
