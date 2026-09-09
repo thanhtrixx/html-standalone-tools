@@ -536,6 +536,20 @@ function submitFullItemEdit() {
   );
 }
 
+function handleDeleteFromEditModal() {
+  const hiddenId = document.getElementById("editItemHiddenId");
+  if (!hiddenId || !hiddenId.value) return;
+  const itemId = hiddenId.value;
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+  const confirmMsg = t.confirm_delete_item || "Delete this item?";
+  if (typeof confirm === "function" && !confirm(confirmMsg)) {
+    return;
+  }
+  closeModal("editItemModal");
+  deleteItem(itemId);
+  showToast(t.toast_item_deleted || "Item deleted");
+}
+
 function openQuickPriceEdit(itemId) {
   const item = memoryState.activeList.items.find((i) => i.id === itemId);
   if (!item) return;

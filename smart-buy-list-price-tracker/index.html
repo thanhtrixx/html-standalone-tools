@@ -2640,23 +2640,34 @@
             >
           </div>
 
-          <div class="flex items-center justify-end gap-2 pt-2">
+          <div class="flex items-center justify-between gap-2 pt-2">
             <button
               type="button"
-              onclick="closeModal('editItemModal')"
-              aria-label="Cancel"
-              class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
-              id="btnCancelEditItem"
+              id="btnDeleteEditItem"
+              onclick="handleDeleteFromEditModal()"
+              class="px-3.5 py-2 bg-red-950/40 hover:bg-red-900/60 text-red-400 hover:text-red-300 border border-red-800/40 rounded-xl text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5"
             >
-              Cancel
+              <span aria-hidden="true">🗑️</span>
+              <span id="btnDeleteEditItemText">Delete Item</span>
             </button>
-            <button
-              type="submit"
-              id="btnSaveEditItem"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-colors"
-            >
-              Save Changes
-            </button>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                onclick="closeModal('editItemModal')"
+                aria-label="Cancel"
+                class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+                id="btnCancelEditItem"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                id="btnSaveEditItem"
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
         </form>
       </div>

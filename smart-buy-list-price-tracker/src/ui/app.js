@@ -536,6 +536,9 @@ if (typeof window !== "undefined") {
   window.openFullItemEdit = openFullItemEdit;
   window.updateEditItemLivePreview = updateEditItemLivePreview;
   window.submitFullItemEdit = submitFullItemEdit;
+  window.handleDeleteFromEditModal = handleDeleteFromEditModal;
+  window.closeAllCardMenus = closeAllCardMenus;
+  window.handleCardAction = handleCardAction;
   window.onEditStoreSelectChange = onEditStoreSelectChange;
   window.copyCurrentOriginToClipboard = copyCurrentOriginToClipboard;
   window.flushPendingCloudSync = flushPendingCloudSync;

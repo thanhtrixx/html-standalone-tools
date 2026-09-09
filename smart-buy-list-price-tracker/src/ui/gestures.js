@@ -243,6 +243,15 @@ function handleItemCardDelegatedClick(event) {
   const action = actionBtn.getAttribute("data-action");
   const itemId = actionBtn.getAttribute("data-item-id");
   if (!itemId) return;
+  handleCardAction(action, itemId);
+}
+
+function handleCardAction(action, itemId) {
+  if (!action || !itemId) return;
+
+  if (action !== "toggle-card-menu") {
+    closeAllCardMenus();
+  }
 
   if (action === "toggle-check") {
     toggleItemCheck(itemId);
@@ -260,14 +269,29 @@ function handleItemCardDelegatedClick(event) {
     adjustItemQuantity(itemId, -1);
   } else if (action === "toggle-card-menu") {
     const menu = document.getElementById(`cardMenu-${itemId}`);
+    const container = document.getElementById(`cardContainer-${itemId}`);
     if (menu) {
-      const isHidden = menu.classList.contains("hidden");
-      document
-        .querySelectorAll("[id^='cardMenu-']")
-        .forEach((m) => m.classList.add("hidden"));
-      if (isHidden) menu.classList.remove("hidden");
+      const isCurrentlyHidden = menu.classList.contains("hidden");
+      closeAllCardMenus();
+      if (isCurrentlyHidden) {
+        menu.classList.remove("hidden");
+        if (container) {
+          container.classList.remove("overflow-hidden");
+          container.classList.add("overflow-visible", "z-30");
+        }
+      }
     }
   }
+}
+
+function closeAllCardMenus() {
+  document.querySelectorAll("[id^='cardMenu-']").forEach((m) => {
+    m.classList.add("hidden");
+  });
+  document.querySelectorAll("[id^='cardContainer-']").forEach((c) => {
+    c.classList.remove("overflow-visible", "z-30");
+    c.classList.add("overflow-hidden");
+  });
 }
 
 function renderItemCard(item) {
@@ -682,9 +706,7 @@ if (typeof document !== "undefined" && document.addEventListener) {
       return;
     if (e.target && e.target.closest && e.target.closest("[id^='cardMenu-']"))
       return;
-    document
-      .querySelectorAll("[id^='cardMenu-']")
-      .forEach((m) => m.classList.add("hidden"));
+    closeAllCardMenus();
   });
 }
 
