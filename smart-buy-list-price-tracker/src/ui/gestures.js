@@ -402,9 +402,9 @@ function renderItemCard(item) {
                   data-action="toggle-check"
                   data-item-id="${safeId}"
                   aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
-                  class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"}"
+                  class="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-transparent border-2 border-slate-600 hover:border-emerald-500"}"
                 >
-                  <span aria-hidden="true">✓</span>
+                  ${item.checked ? '<span aria-hidden="true">✓</span>' : ""}
                 </button>
 
                 <!-- Item Info (Name + Unit Price & ATL Delta) -->
@@ -474,10 +474,10 @@ function renderItemCard(item) {
                   data-action="toggle-check"
                   data-item-id="${safeId}"
                   aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
-                  class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-transparent border-2 border-slate-600 hover:border-emerald-500"} cursor-pointer"
                   title="Toggle Check"
                 >
-                  <span aria-hidden="true">✓</span>
+                  ${item.checked ? '<span aria-hidden="true">✓</span>' : ""}
                 </button>
                 <div class="flex items-center gap-1.5 min-w-0 flex-1">
                   <span class="text-base shrink-0" aria-hidden="true">${catInfo.icon}</span>

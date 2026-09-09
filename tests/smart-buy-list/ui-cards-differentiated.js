@@ -322,6 +322,33 @@ assert(
   "DIFF-BUY-10: Buy Mode card retains touch swipe containers"
 );
 
+// CHECKBOX-BUY: Checkbox hollow outline & conditional checkmark DOM (ADR-0034 / Issue #348)
+itemMilk.checked = false;
+const uncheckedBuyHtml = sb1.renderItemCard(itemMilk);
+assert(
+  uncheckedBuyHtml.includes("w-11 h-11 rounded-xl") &&
+    uncheckedBuyHtml.includes(
+      "bg-transparent border-2 border-slate-600 hover:border-emerald-500"
+    ),
+  "CHECKBOX-BUY-01: Unchecked Buy Mode checkbox renders w-11 h-11 rounded-xl hollow outline"
+);
+const buyBtnMatch = uncheckedBuyHtml.match(
+  /<button[^>]*data-action="toggle-check"[^>]*>([\s\S]*?)<\/button>/
+);
+assert(
+  buyBtnMatch && !buyBtnMatch[1].includes("✓"),
+  "CHECKBOX-BUY-02: Unchecked Buy Mode checkbox button contains zero checkmark text or glyphs"
+);
+
+itemMilk.checked = true;
+const checkedBuyHtml = sb1.renderItemCard(itemMilk);
+assert(
+  checkedBuyHtml.includes(
+    "bg-emerald-600 border-emerald-500 text-white shadow-sm"
+  ) && checkedBuyHtml.includes('<span aria-hidden="true">✓</span>'),
+  "CHECKBOX-BUY-03: Checked Buy Mode checkbox renders solid emerald background and bold checkmark"
+);
+
 // -------------------------------------------------------------------------
 // SECTION 2: Buy Mode Interactions & Swipes
 // -------------------------------------------------------------------------
@@ -446,6 +473,33 @@ assert(
   planCardHtml.includes('data-action="toggle-check"') ||
     planCardHtml.includes("toggleItemCheck"),
   "DIFF-PLAN-13: Planning Mode card retains functional checkbox for staging"
+);
+
+// CHECKBOX-PLAN: Planning checkbox hollow outline & conditional checkmark DOM (ADR-0034 / Issue #348)
+planItemMilk.checked = false;
+const uncheckedPlanHtml = sb2.renderItemCard(planItemMilk);
+assert(
+  uncheckedPlanHtml.includes("w-8 h-8 rounded-lg") &&
+    uncheckedPlanHtml.includes(
+      "bg-transparent border-2 border-slate-600 hover:border-emerald-500"
+    ),
+  "CHECKBOX-PLAN-01: Unchecked Planning Mode checkbox renders w-8 h-8 rounded-lg hollow outline"
+);
+const planBtnMatch = uncheckedPlanHtml.match(
+  /<button[^>]*data-action="toggle-check"[^>]*>([\s\S]*?)<\/button>/
+);
+assert(
+  planBtnMatch && !planBtnMatch[1].includes("✓"),
+  "CHECKBOX-PLAN-02: Unchecked Planning Mode checkbox button contains zero checkmark text or glyphs"
+);
+
+planItemMilk.checked = true;
+const checkedPlanHtml = sb2.renderItemCard(planItemMilk);
+assert(
+  checkedPlanHtml.includes(
+    "bg-emerald-600 border-emerald-500 text-white shadow-sm"
+  ) && checkedPlanHtml.includes('<span aria-hidden="true">✓</span>'),
+  "CHECKBOX-PLAN-03: Checked Planning Mode checkbox renders solid emerald background and bold checkmark"
 );
 
 // -------------------------------------------------------------------------
