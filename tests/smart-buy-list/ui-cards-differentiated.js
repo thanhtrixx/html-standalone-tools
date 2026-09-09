@@ -141,6 +141,14 @@ function createMockSandbox() {
     "settingsGroupingSelect",
     "settingsModal",
     "storeManagerModal",
+    "kpiCards",
+    "buyModePacingTicker",
+    "groupingSwitcherContainer",
+    "smartQuickSection",
+    "tickerCheckedVal",
+    "tickerSpentVal",
+    "tickerTotalVal",
+    "tickerCheckedText",
   ].forEach((id) => getOrCreateElement(id));
 
   let vibrateCalls = [];
@@ -562,6 +570,92 @@ assert(
     editBadge.getAttribute("aria-label") &&
     editBadge.innerHTML.includes('class="hidden sm:inline ml-1"'),
   "RESP-BADGE-06: Edit Item modal deal badge provides responsive markup and aria-label"
+);
+
+// -------------------------------------------------------------------------
+// SECTION 7: Context-Adaptive Viewport & Container Flattening (Issue #337)
+// -------------------------------------------------------------------------
+console.log(
+  "\n--- Section 7: Context-Adaptive Viewport & Pacing Ticker (Issue #337) ---"
+);
+const sbViewport = createMockSandbox();
+sbViewport.loadSampleData();
+
+// VIEWPORT-01: In Planning Mode, kpiCards, smartQuickSection, and groupingSwitcher are visible, buyModePacingTicker is hidden
+sbViewport.setTripPhase("PLANNING");
+assert(
+  !sbViewport.document.getElementById("kpiCards").classList.contains("hidden"),
+  "VIEWPORT-01a: Planning Mode displays KPI metric cards (#kpiCards)"
+);
+assert(
+  sbViewport.document
+    .getElementById("buyModePacingTicker")
+    .classList.contains("hidden"),
+  "VIEWPORT-01b: Planning Mode hides ambient pacing ticker (#buyModePacingTicker)"
+);
+assert(
+  !sbViewport.document
+    .getElementById("smartQuickSection")
+    .classList.contains("hidden"),
+  "VIEWPORT-01c: Planning Mode displays quick-entry omnibox (#smartQuickSection)"
+);
+assert(
+  !sbViewport.document
+    .getElementById("groupingSwitcherContainer")
+    .classList.contains("hidden"),
+  "VIEWPORT-01d: Planning Mode displays grouping switcher (#groupingSwitcherContainer)"
+);
+
+// VIEWPORT-02: In Buy Mode, kpiCards, smartQuickSection, and groupingSwitcher are hidden, buyModePacingTicker is visible
+sbViewport.setTripPhase("BUY");
+assert(
+  sbViewport.document.getElementById("kpiCards").classList.contains("hidden"),
+  "VIEWPORT-02a: Buy Mode hides multi-card KPI bar (#kpiCards)"
+);
+assert(
+  !sbViewport.document
+    .getElementById("buyModePacingTicker")
+    .classList.contains("hidden"),
+  "VIEWPORT-02b: Buy Mode displays single-line ambient pacing ticker (#buyModePacingTicker)"
+);
+assert(
+  sbViewport.document
+    .getElementById("smartQuickSection")
+    .classList.contains("hidden"),
+  "VIEWPORT-02c: Buy Mode hides quick-entry omnibox (#smartQuickSection)"
+);
+assert(
+  sbViewport.document
+    .getElementById("groupingSwitcherContainer")
+    .classList.contains("hidden"),
+  "VIEWPORT-02d: Buy Mode hides grouping switcher (#groupingSwitcherContainer)"
+);
+
+// VIEWPORT-03: Pacing ticker accurately formats checked count and spent spend
+sbViewport.renderKpis();
+const tickerCheckedVal = sbViewport.document.getElementById("tickerCheckedVal");
+const tickerSpentVal = sbViewport.document.getElementById("tickerSpentVal");
+assert(
+  tickerCheckedVal && tickerCheckedVal.textContent.includes("/"),
+  `VIEWPORT-03a: Pacing ticker displays checked vs total count (${tickerCheckedVal ? tickerCheckedVal.textContent : ""})`
+);
+assert(
+  tickerSpentVal && tickerSpentVal.textContent.length > 0,
+  `VIEWPORT-03b: Pacing ticker displays formatted checked spend (${tickerSpentVal ? tickerSpentVal.textContent : ""})`
+);
+
+// VIEWPORT-04: Full page views (Price Ledger, Comparator) are flattened regions without card borders
+assert(
+  !htmlContent.includes(
+    'id="priceLedgerModal"\n          role="dialog"\n          aria-modal="true"\n          aria-labelledby="ledgerModalTitle"\n          class="bg-slate-900 border border-slate-800 rounded-2xl'
+  ),
+  "VIEWPORT-04a: Price Ledger is flattened from a card dialog to a page region"
+);
+assert(
+  !htmlContent.includes(
+    'id="comparatorModal"\n          role="dialog"\n          aria-modal="true"\n          aria-labelledby="compModalTitle"\n          class="bg-slate-900 border border-slate-800 rounded-2xl'
+  ),
+  "VIEWPORT-04b: Comparator is flattened from a card dialog to a page region"
 );
 
 // -------------------------------------------------------------------------

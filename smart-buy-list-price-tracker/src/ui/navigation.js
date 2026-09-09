@@ -155,6 +155,15 @@ function setTripPhase(phase, syncTab = true) {
         t.trip_planning_prompt || "Ready to Complete Trip";
     }
     if (smartQuickSection) smartQuickSection.classList.remove("hidden");
+    const kpiCards = document.getElementById("kpiCards");
+    const buyModePacingTicker = document.getElementById("buyModePacingTicker");
+    const groupingSwitcherContainer = document.getElementById(
+      "groupingSwitcherContainer"
+    );
+    if (kpiCards) kpiCards.classList.remove("hidden");
+    if (buyModePacingTicker) buyModePacingTicker.classList.add("hidden");
+    if (groupingSwitcherContainer)
+      groupingSwitcherContainer.classList.remove("hidden");
   } else {
     if (tabPlanning) {
       tabPlanning.className =
@@ -184,6 +193,15 @@ function setTripPhase(phase, syncTab = true) {
     }
     if (smartQuickSection) smartQuickSection.classList.add("hidden");
     if (addItemSection) addItemSection.classList.add("hidden");
+    const kpiCards = document.getElementById("kpiCards");
+    const buyModePacingTicker = document.getElementById("buyModePacingTicker");
+    const groupingSwitcherContainer = document.getElementById(
+      "groupingSwitcherContainer"
+    );
+    if (kpiCards) kpiCards.classList.add("hidden");
+    if (buyModePacingTicker) buyModePacingTicker.classList.remove("hidden");
+    if (groupingSwitcherContainer)
+      groupingSwitcherContainer.classList.add("hidden");
   }
   updateBottomNavPills();
   renderApp();

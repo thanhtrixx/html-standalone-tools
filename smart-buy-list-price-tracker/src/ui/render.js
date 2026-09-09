@@ -580,8 +580,22 @@ function renderKpis() {
   if (kpiSpentVal) kpiSpentVal.textContent = formatCurrency(checkedSpent);
   if (kpiEstimatedVal)
     kpiEstimatedVal.textContent = formatCurrency(totalEstimated);
+
+  const tickerCheckedVal = document.getElementById("tickerCheckedVal");
+  const tickerSpentVal = document.getElementById("tickerSpentVal");
+  const tickerTotalVal = document.getElementById("tickerTotalVal");
+  const tickerCheckedText = document.getElementById("tickerCheckedText");
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+
+  if (tickerCheckedText)
+    tickerCheckedText.textContent = t.ticker_checked_label || "Checked:";
+  if (tickerCheckedVal)
+    tickerCheckedVal.textContent = `${checkedItems.length} / ${filtered.length}`;
+  if (tickerSpentVal) tickerSpentVal.textContent = formatCurrency(checkedSpent);
+  if (tickerTotalVal)
+    tickerTotalVal.textContent = formatCurrency(totalEstimated);
+
   if (tripRunningTotal) {
-    const t = TRANSLATIONS[currentLanguage];
     const totalSpentLabel = t.total_spent_label || "Total Spent:";
     tripRunningTotal.textContent = `${totalSpentLabel} ${formatCurrency(checkedSpent)}`;
   }
