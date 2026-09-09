@@ -659,6 +659,104 @@ assert(
 );
 
 // -------------------------------------------------------------------------
+// SECTION 8: Streamlined Two-Tier Planning Card with Swipe & Overflow (Issue #338)
+// -------------------------------------------------------------------------
+console.log(
+  "\n--- Section 8: Streamlined Two-Tier Planning Card (Issue #338) ---"
+);
+const sbPlan = createMockSandbox();
+sbPlan.loadSampleData();
+sbPlan.setTripPhase("PLANNING");
+
+const planItemTier = sbPlan.memoryState.activeList.items[0];
+const planCardTierHtml = sbPlan.renderItemCard(planItemTier);
+
+// PLAN-CARD-01: Two-tier structure with 3-dot overflow menu
+assert(
+  planCardTierHtml.includes('data-action="toggle-card-menu"') &&
+    planCardTierHtml.includes("⋯"),
+  "PLAN-CARD-01a: Planning card includes 3-dot overflow menu button (⋯)"
+);
+assert(
+  planCardTierHtml.includes(`id="cardMenu-${planItemTier.id}"`),
+  "PLAN-CARD-01b: Planning card includes hidden contextual actions menu"
+);
+
+// PLAN-CARD-02: Quantity stepper buttons (+ / -) in Tier 2
+assert(
+  planCardTierHtml.includes('data-action="increment-qty"') &&
+    planCardTierHtml.includes('data-action="decrement-qty"'),
+  "PLAN-CARD-02: Planning card renders quantity stepper buttons (+ / -)"
+);
+
+// PLAN-CARD-03: Tapping card body triggers handlePlanningCardClick
+assert(
+  typeof sbPlan.handlePlanningCardClick === "function",
+  "PLAN-CARD-03a: handlePlanningCardClick exists and is exposed"
+);
+let openedEditFromDelegation = null;
+sbPlan._mockOpenFullItemEdit = (id) => {
+  openedEditFromDelegation = id;
+};
+vm.runInContext(
+  "const _orig_edit_plan = openFullItemEdit; openFullItemEdit = (id) => { if (window._mockOpenFullItemEdit) window._mockOpenFullItemEdit(id); return _orig_edit_plan(id); };",
+  sbPlan
+);
+const fakeCardEl = {
+  getAttribute: (attr) => (attr === "data-item-id" ? planItemTier.id : null),
+};
+sbPlan.handleItemCardDelegatedClick({
+  target: {
+    closest: (selector) => {
+      if (selector === "[data-action]") return null;
+      if (selector === "[id^='itemCard-']") return fakeCardEl;
+      return null;
+    },
+  },
+});
+assert(
+  openedEditFromDelegation === planItemTier.id,
+  "PLAN-CARD-03b: Delegated click on card body triggers openFullItemEdit"
+);
+vm.runInContext("openFullItemEdit = _orig_edit_plan;", sbPlan);
+
+// PLAN-CARD-04: Standalone bottom row buttons removed; Compare and Remove moved into cardMenu
+assert(
+  !planCardTierHtml.includes(
+    'class="flex items-center justify-between pt-1 border-t border-slate-800/60">\n              <div class="flex items-center gap-1.5 sm:gap-2"'
+  ),
+  "PLAN-CARD-04: Standalone action toolbar row removed from default card view"
+);
+
+// PLAN-CARD-05: Swipe actions (Right -> Done/Undo, Left -> Compare) + 3-dot overflow menu fallback
+sbPlan.currentPhase = "PLANNING";
+planItemTier.checked = false;
+sbPlan.handleItemSwipeAction(planItemTier.id, "RIGHT");
+assert(
+  planItemTier.checked === true,
+  "PLAN-CARD-05a: Swipe right in Planning mode marks item checked (Done)"
+);
+let swipeCompareId = null;
+sbPlan._mockSwipeCompare = (id) => {
+  swipeCompareId = id;
+};
+vm.runInContext(
+  "const _orig_comp_plan = openItemComparator; openItemComparator = (id) => { if (window._mockSwipeCompare) window._mockSwipeCompare(id); return _orig_comp_plan(id); };",
+  sbPlan
+);
+sbPlan.handleItemSwipeAction(planItemTier.id, "LEFT");
+assert(
+  swipeCompareId === planItemTier.id,
+  "PLAN-CARD-05b: Swipe left in Planning mode triggers Comparator"
+);
+vm.runInContext("openItemComparator = _orig_comp_plan;", sbPlan);
+assert(
+  planCardTierHtml.includes('data-action="compare"') &&
+    planCardTierHtml.includes('data-action="delete-item"'),
+  "PLAN-CARD-05c: 3-dot overflow menu provides non-touch fallback for Compare and Delete"
+);
+
+// -------------------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------------------
 console.log(`\n==================================================`);
