@@ -4,7 +4,17 @@
 let modalHistoryStack = [];
 
 function openModal(id) {
-  const el = document.getElementById(id);
+  let el = document.getElementById(id);
+  if (!el && id === "tripVictoryModal")
+    el = document.getElementById("tripCompleteModal");
+  if (
+    el &&
+    el.id === "tripVictoryModal" &&
+    el.parentElement &&
+    el.parentElement.id === "tripCompleteModal"
+  ) {
+    el = el.parentElement;
+  }
   if (el) {
     el.classList.remove("hidden");
     if (!modalHistoryStack.includes(id)) {
@@ -24,7 +34,17 @@ function openModal(id) {
 }
 
 function closeModal(id, fromPopState = false) {
-  const el = document.getElementById(id);
+  let el = document.getElementById(id);
+  if (!el && id === "tripVictoryModal")
+    el = document.getElementById("tripCompleteModal");
+  if (
+    el &&
+    el.id === "tripVictoryModal" &&
+    el.parentElement &&
+    el.parentElement.id === "tripCompleteModal"
+  ) {
+    el = el.parentElement;
+  }
   if (el) {
     el.classList.add("hidden");
   }

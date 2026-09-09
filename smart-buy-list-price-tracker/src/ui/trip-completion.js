@@ -1,6 +1,142 @@
 /* =========================================================================
        9. TRIP COMPLETION & LEDGER LOGGING
        ========================================================================= */
+function calculateTripSavings(checkedItems = [], ledger = []) {
+  let totalSpent = 0;
+  let baselineTotal = 0;
+  let totalSavings = 0;
+  let bestDeal = null;
+  let itemsWithSavingsCount = 0;
+
+  checkedItems.forEach((item) => {
+    const itemPrice = parseFloat(item.price) || 0;
+    totalSpent += itemPrice;
+
+    const unitPrice = normalizeUnitPrice(item.price, item.quantity, item.unit);
+    const { baseQuantity, baseUnit } = normalizeQuantity(
+      item.quantity,
+      item.unit
+    );
+    const itemKey = normalizeItemKey(item.name);
+    const history = (ledger || []).filter(
+      (l) =>
+        (itemKey && normalizeItemKey(l.itemName) === itemKey) ||
+        l.itemId === item.id
+    );
+
+    if (history.length > 0 && unitPrice > 0 && baseQuantity > 0) {
+      const deal = evaluateDealScore(unitPrice, history);
+      if (deal.avgPrice && deal.avgPrice > 0) {
+        const itemBaselineTotal = deal.avgPrice * baseQuantity;
+        baselineTotal += itemBaselineTotal;
+        const itemSavings = itemBaselineTotal - itemPrice;
+        if (itemSavings > 0) {
+          totalSavings += itemSavings;
+          itemsWithSavingsCount++;
+          const itemSavingsPercent = Math.round(
+            (itemSavings / itemBaselineTotal) * 100
+          );
+          if (!bestDeal || itemSavingsPercent > bestDeal.savingsPercent) {
+            bestDeal = {
+              item,
+              savingsAmount: itemSavings,
+              savingsPercent: itemSavingsPercent,
+              unitPrice,
+              baseUnit,
+              avgPrice: deal.avgPrice,
+              isAllTimeLow: deal.isAllTimeLow,
+            };
+          }
+        }
+      } else {
+        baselineTotal += itemPrice;
+      }
+    } else {
+      baselineTotal += itemPrice;
+    }
+  });
+
+  const overallSavingsPercent =
+    baselineTotal > 0 && totalSavings > 0
+      ? Math.round((totalSavings / baselineTotal) * 100)
+      : 0;
+
+  return {
+    totalSpent,
+    baselineTotal,
+    totalSavings,
+    overallSavingsPercent,
+    bestDeal,
+    itemsWithSavingsCount,
+  };
+}
+
+function triggerTripCelebrationAnimation() {
+  const badge = document.getElementById("tripVictoryBadgeIcon");
+  if (badge) {
+    badge.classList.remove("scale-125", "rotate-12");
+    if (typeof badge.offsetWidth !== "undefined") {
+      void badge.offsetWidth;
+    }
+    badge.classList.add(
+      "scale-125",
+      "rotate-12",
+      "transition-transform",
+      "duration-500"
+    );
+  }
+}
+
+function toggleTripRolloverAction(explicitState) {
+  const radioYes = document.getElementById("radioRolloverYes");
+  const radioNo = document.getElementById("radioRolloverNo");
+  const track = document.getElementById("tripRolloverSwitchTrack");
+  const thumb = document.getElementById("tripRolloverSwitchThumb");
+  const statusText = document.getElementById("tripRolloverStatusText");
+  const statusSubtext = document.getElementById("tripRolloverStatusSubtext");
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+
+  const currentIsRollover = radioYes ? radioYes.checked : true;
+  const nextIsRollover =
+    explicitState !== undefined ? explicitState : !currentIsRollover;
+
+  if (radioYes) radioYes.checked = nextIsRollover;
+  if (radioNo) radioNo.checked = !nextIsRollover;
+
+  if (track && thumb) {
+    if (nextIsRollover) {
+      track.classList.remove("bg-slate-700");
+      track.classList.add("bg-emerald-600");
+      thumb.classList.remove("translate-x-0");
+      thumb.classList.add("translate-x-4");
+    } else {
+      track.classList.remove("bg-emerald-600");
+      track.classList.add("bg-slate-700");
+      thumb.classList.remove("translate-x-4");
+      thumb.classList.add("translate-x-0");
+    }
+  }
+
+  if (statusText) {
+    statusText.textContent = nextIsRollover
+      ? t.opt_rollover_text || "Rollover unchecked items to new draft list"
+      : t.opt_discard_text || "Discard unchecked items";
+  }
+  if (statusSubtext) {
+    statusSubtext.textContent = nextIsRollover
+      ? currentLanguage === "vi"
+        ? "Giữ lại mặt hàng chưa mua cho lần sau"
+        : "Keep unfinished items for next trip"
+      : currentLanguage === "vi"
+        ? "Xóa khỏi danh sách sau khi lưu"
+        : "Remove unchecked items from active list";
+  }
+}
+
+function openTripVictoryModal() {
+  openTripCompleteModal();
+}
+
 function openTripCompleteModal() {
   const items = memoryState.activeList.items || [];
   const checkedItems = items.filter((i) => i.checked);
@@ -15,20 +151,91 @@ function openTripCompleteModal() {
     return;
   }
 
-  const totalSpent = checkedItems.reduce(
-    (sum, i) => sum + (parseFloat(i.price) || 0),
-    0
+  const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+  const savingsData = calculateTripSavings(
+    checkedItems,
+    memoryState.purchaseLedger || []
   );
+
   const itemsWord = currentLanguage === "vi" ? "mặt hàng" : "items";
   const leftWord =
     currentLanguage === "vi" ? "mặt hàng chưa mua." : "items left unchecked.";
 
-  document.getElementById("tripModalPurchasedCount").textContent =
-    `${checkedItems.length} ${itemsWord}`;
-  document.getElementById("tripModalTotalSpentVal").textContent =
-    formatCurrency(totalSpent);
-  document.getElementById("unpurchasedCountText").textContent =
-    `${uncheckedItems.length} ${leftWord}`;
+  const purchasedCountEl = document.getElementById("tripModalPurchasedCount");
+  if (purchasedCountEl) {
+    purchasedCountEl.textContent = `${checkedItems.length} ${itemsWord}`;
+  }
+  const totalSpentEl = document.getElementById("tripModalTotalSpentVal");
+  if (totalSpentEl) {
+    totalSpentEl.textContent = formatCurrency(savingsData.totalSpent);
+  }
+  const unpurchasedCountEl = document.getElementById("unpurchasedCountText");
+  if (unpurchasedCountEl) {
+    unpurchasedCountEl.textContent = `${uncheckedItems.length} ${leftWord}`;
+  }
+
+  // Savings Hero Banner
+  const savingsHeroEl = document.getElementById("tripVictorySavingsHero");
+  const savingsAmountEl = document.getElementById("tripVictorySavingsAmount");
+  const savingsPercentEl = document.getElementById("tripVictorySavingsPercent");
+  const savingsSubtextEl = document.getElementById("tripVictorySavingsSubtext");
+
+  if (savingsHeroEl) {
+    if (savingsData.totalSavings > 0) {
+      if (savingsAmountEl) {
+        savingsAmountEl.textContent = `${t.trip_victory_savings_congrats || "You saved"} ${formatCurrency(savingsData.totalSavings)}`;
+      }
+      if (savingsPercentEl) {
+        savingsPercentEl.textContent = `(${savingsData.overallSavingsPercent}%)`;
+      }
+      if (savingsSubtextEl) {
+        savingsSubtextEl.textContent = `${t.trip_victory_vs_baseline || "vs historical average prices"} · ${savingsData.itemsWithSavingsCount} ${t.trip_victory_items_saved || "items with savings"}`;
+      }
+      savingsHeroEl.classList.remove("hidden");
+    } else {
+      if (savingsAmountEl) {
+        savingsAmountEl.textContent =
+          t.trip_victory_fair_prices ||
+          "All items purchased at fair market prices!";
+      }
+      if (savingsPercentEl) {
+        savingsPercentEl.textContent = "";
+      }
+      if (savingsSubtextEl) {
+        savingsSubtextEl.textContent = `${checkedItems.length} ${itemsWord} ${t.badge_fair_price || "Fair Price"}`;
+      }
+      savingsHeroEl.classList.remove("hidden");
+    }
+  }
+
+  // Best Deal Callout
+  const bestDealCardEl = document.getElementById("tripBestDealCard");
+  const bestDealNameEl = document.getElementById("tripBestDealName");
+  const bestDealBadgeEl = document.getElementById("tripBestDealBadge");
+  const bestDealSavingsEl = document.getElementById("tripBestDealSavings");
+
+  if (bestDealCardEl) {
+    if (savingsData.bestDeal) {
+      bestDealCardEl.classList.remove("hidden");
+      if (bestDealNameEl) {
+        bestDealNameEl.textContent = savingsData.bestDeal.item.name;
+      }
+      if (bestDealBadgeEl) {
+        bestDealBadgeEl.textContent = `-${savingsData.bestDeal.savingsPercent}%`;
+      }
+      if (bestDealSavingsEl) {
+        bestDealSavingsEl.textContent = `${formatCurrency(savingsData.bestDeal.unitPrice)}/${savingsData.bestDeal.baseUnit} (Avg: ${formatCurrency(savingsData.bestDeal.avgPrice)})`;
+      }
+    } else {
+      bestDealCardEl.classList.add("hidden");
+    }
+  }
+
+  // Reset/sync 1-tap rollover toggle
+  toggleTripRolloverAction(true);
+
+  // Trigger Celebration Animation
+  triggerTripCelebrationAnimation();
 
   openModal("tripCompleteModal");
 }
