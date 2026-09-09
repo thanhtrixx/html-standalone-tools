@@ -215,7 +215,7 @@ function renderStoreFilterChips() {
             }"
           >
             <span>${allChip.label}</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded-full ${
+            <span class="text-[11px] px-1.5 py-0.5 rounded-full ${
               currentStoreFilter === "ALL"
                 ? "bg-emerald-700 text-emerald-100"
                 : "bg-slate-700 text-slate-300"
@@ -239,7 +239,7 @@ function renderStoreFilterChips() {
               }"
             >
               <span>${safeLabel}</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-full ${
+              <span class="text-[11px] px-1.5 py-0.5 rounded-full ${
                 isActive
                   ? "bg-emerald-700 text-emerald-100"
                   : "bg-slate-700 text-slate-300"
@@ -322,7 +322,7 @@ function renderCategoryFilterChips() {
             >
               <span aria-hidden="true">${c.icon}</span>
               <span>${c.label}</span>
-              <span class="text-[10px] opacity-75">(${count})</span>
+              <span class="text-[11px] opacity-75">(${count})</span>
             </button>
           `;
     })

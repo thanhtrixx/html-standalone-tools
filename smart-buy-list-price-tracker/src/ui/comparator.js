@@ -461,7 +461,7 @@ function updateEditItemLivePreview() {
       bgClass = "bg-amber-950 text-amber-300 border border-amber-700/50";
     }
 
-    dealBadge.className = `inline-flex items-center px-2 py-0.5 rounded-md font-bold text-[10px] ${bgClass}`;
+    dealBadge.className = `inline-flex items-center px-2 py-0.5 rounded-md font-bold text-[11px] ${bgClass}`;
     if (typeof dealBadge.setAttribute === "function") {
       dealBadge.setAttribute("title", rawLabel);
       dealBadge.setAttribute("aria-label", rawLabel);

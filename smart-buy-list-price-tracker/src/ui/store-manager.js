@@ -244,7 +244,7 @@ function renderStoreManagerList() {
             </div>
             <div class="text-[11px] text-slate-400 flex items-center gap-1.5 flex-wrap">
               <span class="text-slate-500">${t.store_aliases_label || "Aliases"}:</span>
-              <span class="text-emerald-400 font-mono text-[10px]">${safeAliases || `<span class="text-slate-600 italic">${t.no_aliases || "none"}</span>`}</span>
+              <span class="text-emerald-400 font-mono text-[11px]">${safeAliases || `<span class="text-slate-600 italic">${t.no_aliases || "none"}</span>`}</span>
             </div>
           </div>
         `;

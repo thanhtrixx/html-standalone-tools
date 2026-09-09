@@ -127,18 +127,18 @@ function renderMergeReviewModal(sharedList) {
 
     let badgeHtml = "";
     if (diff.status === "NEW") {
-      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">[🆕 ${t.badge_new_item || "New"}]</span>`;
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">[🆕 ${t.badge_new_item || "New"}]</span>`;
     } else if (diff.status === "PRICE_AND_QTY_DIFF") {
       badgeHtml = `
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">[🔄 ${t.badge_price_diff || "Price Update"}]</span>
-              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">[⚖️ ${t.badge_qty_diff || "Qty Diff"}]</span>
+              <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">[🔄 ${t.badge_price_diff || "Price Update"}]</span>
+              <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">[⚖️ ${t.badge_qty_diff || "Qty Diff"}]</span>
             `;
     } else if (diff.status === "PRICE_DIFF") {
-      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">[🔄 ${t.badge_price_diff || "Price Update"}]</span>`;
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">[🔄 ${t.badge_price_diff || "Price Update"}]</span>`;
     } else if (diff.status === "QTY_DIFF") {
-      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">[⚖️ ${t.badge_qty_diff || "Qty Diff"}]</span>`;
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">[⚖️ ${t.badge_qty_diff || "Qty Diff"}]</span>`;
     } else {
-      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-700/40 text-slate-300 border border-slate-600/40">[✅ ${t.badge_matched || "Match"}]</span>`;
+      badgeHtml = `<span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-700/40 text-slate-300 border border-slate-600/40">[✅ ${t.badge_matched || "Match"}]</span>`;
     }
 
     let controlsHtml = "";
