@@ -767,7 +767,7 @@ function showToast(message, options = {}) {
     const actionBtn = document.createElement("button");
     actionBtn.type = "button";
     actionBtn.className =
-      "bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-bold px-2 py-1 rounded-lg text-[11px] transition-all cursor-pointer whitespace-nowrap shadow";
+      "bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-emerald-950 font-bold px-2 py-1 rounded-lg text-[11px] transition-all cursor-pointer whitespace-nowrap shadow";
     actionBtn.textContent = options.actionText;
     actionBtn.onclick = (e) => {
       if (e && typeof e.stopPropagation === "function") {
