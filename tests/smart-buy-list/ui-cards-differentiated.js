@@ -636,6 +636,42 @@ assert(
     editBadge.innerHTML.includes('class="hidden sm:inline ml-1"'),
   "RESP-BADGE-06: Edit Item modal deal badge provides responsive markup and aria-label"
 );
+assert(
+  editBadge &&
+    editBadge.innerHTML.includes('<span aria-hidden="true">') &&
+    editBadge.innerHTML.includes('<span class="hidden sm:inline ml-1">'),
+  "RESP-BADGE-07a: #editItemDealBadge isolates emoji icon from responsive text label"
+);
+assert(
+  htmlContent.includes('id="editItemDealBadge"') &&
+    htmlContent.includes(
+      'class="hidden sm:inline ml-1" id="editItemDealBadgeText"'
+    ),
+  "RESP-BADGE-07b: #editItemDealBadge static HTML template includes responsive breakpoint markup"
+);
+
+// RESP-TOUCH-01: Price History bulk action buttons satisfy 44px minimum touch targets (ADR-0034 / Issue #349)
+const addSelectedBtnMatch = htmlContent.match(
+  /<button[^>]*id="btnAddSelectedLedgerToBuyList"[^>]*class="([^"]*)"/
+);
+const deleteSelectedBtnMatch = htmlContent.match(
+  /<button[^>]*id="btnDeleteSelectedLedger"[^>]*class="([^"]*)"/
+);
+
+assert(
+  addSelectedBtnMatch &&
+    addSelectedBtnMatch[1].includes("min-h-[44px]") &&
+    addSelectedBtnMatch[1].includes("py-2.5") &&
+    addSelectedBtnMatch[1].includes("px-4"),
+  "RESP-TOUCH-01a: #btnAddSelectedLedgerToBuyList has min-h-[44px] py-2.5 px-4 touch targets"
+);
+assert(
+  deleteSelectedBtnMatch &&
+    deleteSelectedBtnMatch[1].includes("min-h-[44px]") &&
+    deleteSelectedBtnMatch[1].includes("py-2.5") &&
+    deleteSelectedBtnMatch[1].includes("px-4"),
+  "RESP-TOUCH-01b: #btnDeleteSelectedLedger has min-h-[44px] py-2.5 px-4 touch targets"
+);
 
 // -------------------------------------------------------------------------
 // SECTION 7: Context-Adaptive Viewport & Container Flattening (Issue #337)

@@ -519,6 +519,10 @@ function applyTranslations() {
   el("btnCancelEditItem", t.btn_cancel || "Cancel");
   el("btnSaveEditItem", t.btn_save_edit_item || "Save Changes");
   el("btnDeleteEditItemText", t.edit_modal_delete_btn || "Delete Item");
+  el(
+    "editItemDealBadgeText",
+    (t.badge_new_item || "⚪ New Item").replace(/^[🟢🟡🔴⚪]\s*/, "")
+  );
 
   // 6. Quick Price Modal
   el("quickPriceModalHeading", t.quick_price_title || "Quick Price Update");

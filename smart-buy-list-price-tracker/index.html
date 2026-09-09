@@ -1320,7 +1320,7 @@
                 type="button"
                 id="btnAddSelectedLedgerToBuyList"
                 onclick="addSelectedLedgerItemsToBuyList()"
-                class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-emerald-950 font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                class="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-emerald-950 font-bold text-xs px-4 py-2.5 min-h-[44px] rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
               >
                 <span aria-hidden="true">🛒</span>
                 <span id="btnTextAddSelectedLedger">Add to Buy List</span>
@@ -1329,7 +1329,7 @@
                 type="button"
                 id="btnDeleteSelectedLedger"
                 onclick="deleteSelectedLedgerItems()"
-                class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-3 py-2 rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
+                class="bg-red-500/20 hover:bg-red-500/30 text-red-300 font-semibold text-xs px-4 py-2.5 min-h-[44px] rounded-xl border border-red-500/40 flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <span aria-hidden="true">🗑️</span>
                 <span id="btnTextDeleteSelectedLedger">Delete Selected</span>
@@ -2635,9 +2635,15 @@
             >
             <span
               id="editItemDealBadge"
-              class="px-2 py-0.5 rounded-md font-bold text-[11px] bg-slate-800 text-slate-300"
-              >⚪ New Item</span
+              class="inline-flex items-center px-2 py-0.5 rounded-md font-bold text-[11px] bg-slate-800 text-slate-300 border border-slate-700"
+              title="⚪ New Item"
+              aria-label="⚪ New Item"
             >
+              <span aria-hidden="true">⚪</span>
+              <span class="hidden sm:inline ml-1" id="editItemDealBadgeText"
+                >New Item</span
+              >
+            </span>
           </div>
 
           <div class="flex items-center justify-between gap-2 pt-2">
