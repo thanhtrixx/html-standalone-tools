@@ -463,6 +463,8 @@ if (typeof window !== "undefined") {
   window.handleTouchMove = handleTouchMove;
   window.handleTouchEnd = handleTouchEnd;
   window.handleTouchCancel = handleTouchCancel;
+  window.handleCardClick = handleCardClick;
+  window.handlePlanningCardClick = handlePlanningCardClick;
   window.handleItemSwipeAction = handleItemSwipeAction;
   window.renderStoreFilterOptions = renderStoreFilterOptions;
   window.renderKpis = renderKpis;

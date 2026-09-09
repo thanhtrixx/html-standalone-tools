@@ -113,6 +113,12 @@ function handleItemSwipeAction(itemId, direction) {
     }
   } else if (direction === "LEFT") {
     openItemComparator(itemId);
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.vibrate === "function"
+    ) {
+      navigator.vibrate([15]);
+    }
   }
 }
 
@@ -121,6 +127,28 @@ function handleCardClick(e, itemId) {
   if (e && e.target && e.target.closest && e.target.closest("[data-action]"))
     return;
   toggleItemCheck(itemId);
+}
+
+function handlePlanningCardClick(e, itemId) {
+  if (touchState.isSwiping) return;
+  if (e && e.target && e.target.closest && e.target.closest("[data-action]"))
+    return;
+  openFullItemEdit(itemId);
+}
+
+function adjustItemQuantity(id, delta) {
+  const item = (memoryState.activeList.items || []).find((i) => i.id === id);
+  if (!item) return;
+  const currentQty = Number(item.quantity) || 1;
+  const newQty = Math.max(0.1, Math.round((currentQty + delta) * 100) / 100);
+  if (typeof store !== "undefined" && store && store.updateItem) {
+    store.updateItem(id, { quantity: newQty });
+  } else {
+    item.quantity = newQty;
+    touchItem(item);
+    saveToLocalStorage();
+    renderApp();
+  }
 }
 
 /* =========================================================================
@@ -196,7 +224,21 @@ function handleItemCardDelegatedClick(event) {
     event.target && event.target.closest
       ? event.target.closest("[data-action]")
       : null;
-  if (!actionBtn) return;
+  if (!actionBtn) {
+    if (currentPhase !== "IN_STORE") {
+      const cardEl =
+        event.target && event.target.closest
+          ? event.target.closest("[id^='itemCard-']")
+          : null;
+      if (cardEl && !touchState.isSwiping) {
+        const cardItemId = cardEl.getAttribute("data-item-id");
+        if (cardItemId) {
+          handlePlanningCardClick(event, cardItemId);
+        }
+      }
+    }
+    return;
+  }
 
   const action = actionBtn.getAttribute("data-action");
   const itemId = actionBtn.getAttribute("data-item-id");
@@ -212,6 +254,19 @@ function handleItemCardDelegatedClick(event) {
     openItemComparator(itemId);
   } else if (action === "delete-item") {
     deleteItem(itemId);
+  } else if (action === "increment-qty") {
+    adjustItemQuantity(itemId, 1);
+  } else if (action === "decrement-qty") {
+    adjustItemQuantity(itemId, -1);
+  } else if (action === "toggle-card-menu") {
+    const menu = document.getElementById(`cardMenu-${itemId}`);
+    if (menu) {
+      const isHidden = menu.classList.contains("hidden");
+      document
+        .querySelectorAll("[id^='cardMenu-']")
+        .forEach((m) => m.classList.add("hidden"));
+      if (isHidden) menu.classList.remove("hidden");
+    }
   }
 }
 
@@ -363,21 +418,21 @@ function renderItemCard(item) {
 
   return `
         <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${safeId}">
-          <!-- Swipe Action Backgrounds -->
+          <!-- Swipe Action Backgrounds (Swipe Right = Done/Undo, Swipe Left = Compare) -->
           <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
             <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
             <div class="h-full ${swipeRightBg} flex items-center gap-1.5 px-4 text-white font-bold text-xs" id="swipeRightReveal-${safeId}">
               <span aria-hidden="true">${swipeRightIcon}</span>
               <span>${swipeRightCue}</span>
             </div>
-            <!-- Right Reveal (Indigo on Left Swipe) -->
+            <!-- Right Reveal (Indigo on Left Swipe -> Compare) -->
             <div class="h-full bg-indigo-600 flex items-center gap-1.5 px-4 text-white font-bold text-xs ml-auto" id="swipeLeftReveal-${safeId}">
               <span aria-hidden="true">⚖️</span>
               <span>${swipeCompCue}</span>
             </div>
           </div>
 
-          <!-- Foreground Swipeable Card (Planning Mode: Streamlined 3-Row) -->
+          <!-- Foreground Swipeable Card (Planning Mode: Two-Tier Hierarchy) -->
           <div 
             id="itemCard-${safeId}"
             data-item-id="${safeId}"
@@ -385,95 +440,127 @@ function renderItemCard(item) {
             ontouchmove="handleTouchMove(event, '${safeId}')"
             ontouchend="handleTouchEnd(event, '${safeId}')"
             ontouchcancel="handleTouchCancel(event, '${safeId}')"
-            class="relative z-10 ${item.checked ? "bg-slate-950 border-slate-800/80" : "bg-slate-900 border-slate-800"} border rounded-2xl p-3.5 sm:p-4 transition-transform duration-200 ease-out space-y-3"
+            class="relative z-10 ${item.checked ? "bg-slate-950 border-slate-800/80" : "bg-slate-900 border-slate-800"} border rounded-2xl p-3 sm:p-3.5 transition-transform duration-200 ease-out space-y-2 cursor-pointer"
           >
-            <!-- Row 1: Header (Checkbox + Category Icon + Item Name) -->
-            <div class="flex items-center gap-3 min-w-0">
-              <button
-                type="button"
-                data-action="toggle-check"
-                data-item-id="${safeId}"
-                aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
-                class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer"
-                title="Toggle Check"
-              >
-                <span aria-hidden="true">✓</span>
-              </button>
-              <div class="flex items-center gap-2 min-w-0 flex-1">
-                <span class="text-base shrink-0" aria-hidden="true">${catInfo.icon}</span>
-                <span class="font-bold text-sm sm:text-base text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${safeName}</span>
+            <!-- Tier 1: Checkbox + Category Icon & Item Name + Price + Overflow Menu -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                <button
+                  type="button"
+                  data-action="toggle-check"
+                  data-item-id="${safeId}"
+                  aria-label="${(isChecked ? t.aria_uncheck_item || "Mark as unpurchased" : t.aria_check_item || "Mark as purchased") + ": " + safeName}"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold border transition-all shrink-0 ${item.checked ? "bg-emerald-600 border-emerald-500 text-white shadow-sm" : "bg-slate-800 border-slate-700 text-transparent hover:border-emerald-500"} cursor-pointer"
+                  title="Toggle Check"
+                >
+                  <span aria-hidden="true">✓</span>
+                </button>
+                <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                  <span class="text-base shrink-0" aria-hidden="true">${catInfo.icon}</span>
+                  <span class="font-bold text-sm sm:text-base text-slate-100 truncate ${item.checked ? "line-through text-slate-500" : ""}">${safeName}</span>
+                </div>
               </div>
-            </div>
 
-            <!-- Row 2: Metrics & Unit Pricing Intelligence -->
-            <div class="flex items-center justify-between gap-2 text-xs bg-slate-950/60 p-2 sm:p-2.5 rounded-xl border border-slate-800/80">
-              <div class="flex items-center gap-2 flex-wrap min-w-0">
+              <div class="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
-                  data-action="edit-item"
+                  data-action="edit-price"
                   data-item-id="${safeId}"
-                  aria-label="${(t.aria_edit_item || "Edit item details") + ": " + safeName}"
-                  class="font-semibold text-slate-200 hover:text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700 transition-colors cursor-pointer"
-                  title="Adjust details"
-                >
-                  <span aria-hidden="true">📦</span> ${item.quantity} ${safeUnit}
-                </button>
-                ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
-                ${dealBadgeHtml}
-              </div>
-              <div class="text-right text-[11px] text-slate-400 shrink-0">
-                ${history.length > 0 ? `<span title="All-Time Low recorded price">${TRANSLATIONS[currentLanguage].atl_price_label || "ATL:"} <strong class="text-emerald-400 font-semibold">${formatCurrency(deal.minPrice)}/${baseUnit}</strong></span>` : `<span class="text-slate-500 italic">${TRANSLATIONS[currentLanguage].new_item || "New Item"}</span>`}
-              </div>
-            </div>
-
-            <!-- Row 3: Action Toolbar & Total Estimated Spend -->
-            <div class="flex items-center justify-between pt-1 border-t border-slate-800/60">
-              <div class="flex items-center gap-1.5 sm:gap-2">
-                <button
-                  type="button"
-                  data-action="compare"
-                  data-item-id="${safeId}"
-                  aria-label="${(t.aria_nav_compare || "Compare") + ": " + safeName}"
-                  class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-indigo-900/60 rounded-lg border border-slate-700/60 hover:border-indigo-500/50 transition-colors flex items-center gap-1 cursor-pointer"
-                  title="Compare Pack Sizes"
-                >
-                  <span aria-hidden="true">⚖️</span>
-                  <span>${TRANSLATIONS[currentLanguage].nav_compare || "Compare"}</span>
-                </button>
-                <button
-                  type="button"
-                  data-action="edit-item"
-                  data-item-id="${safeId}"
-                  aria-label="${(t.aria_edit_item || "Edit") + ": " + safeName}"
-                  class="px-2.5 py-1 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700/60 transition-colors flex items-center gap-1 cursor-pointer"
-                  title="Edit Item Details"
-                >
-                  <span aria-hidden="true">✏️</span>
-                  <span>${TRANSLATIONS[currentLanguage].edit_btn || "Edit"}</span>
-                </button>
-                <button
-                  type="button"
-                  data-action="delete-item"
-                  data-item-id="${safeId}"
-                  aria-label="${(t.aria_delete_item || "Delete item") + ": " + safeName}"
-                  class="px-2.5 py-1 text-xs font-semibold text-red-300 hover:text-red-200 bg-red-500/20 hover:bg-red-500/30 rounded-lg border border-red-500/40 transition-colors flex items-center gap-1 cursor-pointer active:scale-95"
-                  title="${TRANSLATIONS[currentLanguage].delete_item_title || TRANSLATIONS[currentLanguage].remove_btn || "Remove"}"
-                >
-                  <span aria-hidden="true">🗑️</span>
-                  <span>${TRANSLATIONS[currentLanguage].remove_btn || "Remove"}</span>
-                </button>
-              </div>
-              <div class="text-right">
-                <button
-                  type="button"
-                  data-action="edit-item"
-                  data-item-id="${safeId}"
-                  aria-label="${(t.aria_edit_item || "Edit item") + ": " + safeName}"
-                  class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 transition-colors block text-right cursor-pointer"
-                  title="Update Price / Details"
+                  aria-label="${(t.aria_edit_price || "Update item price") + ": " + safeName}"
+                  class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-700/60 transition-colors cursor-pointer"
+                  title="Update Price"
                 >
                   ${formatCurrency(item.price)}
                 </button>
+
+                <!-- Non-touch desktop 3-dot overflow menu -->
+                <div class="relative">
+                  <button
+                    type="button"
+                    data-action="toggle-card-menu"
+                    data-item-id="${safeId}"
+                    aria-label="${(t.aria_card_more || "More options") + ": " + safeName}"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 text-sm font-bold transition-colors cursor-pointer"
+                    title="More options"
+                  >
+                    ⋯
+                  </button>
+                  <div
+                    id="cardMenu-${safeId}"
+                    class="hidden absolute right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-30 py-1 min-w-[130px] text-xs divide-y divide-slate-800"
+                  >
+                    <button
+                      type="button"
+                      data-action="compare"
+                      data-item-id="${safeId}"
+                      class="w-full text-left px-3 py-2 text-slate-200 hover:bg-slate-800 flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <span aria-hidden="true">⚖️</span>
+                      <span>${TRANSLATIONS[currentLanguage].nav_compare || "Compare"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-action="edit-item"
+                      data-item-id="${safeId}"
+                      class="w-full text-left px-3 py-2 text-slate-200 hover:bg-slate-800 flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <span aria-hidden="true">✏️</span>
+                      <span>${TRANSLATIONS[currentLanguage].edit_btn || "Edit"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      data-action="delete-item"
+                      data-item-id="${safeId}"
+                      class="w-full text-left px-3 py-2 text-red-400 hover:bg-red-950/40 flex items-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <span aria-hidden="true">🗑️</span>
+                      <span>${TRANSLATIONS[currentLanguage].remove_btn || "Remove"}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tier 2: Quantity Stepper + Normalized Unit Price + Deal Rating Badge + ATL -->
+            <div class="flex items-center justify-between gap-2 text-xs pt-1 border-t border-slate-800/60">
+              <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                <!-- Quantity Stepper -->
+                <div class="inline-flex items-center bg-slate-800/80 rounded-lg border border-slate-700/60 p-0.5 shrink-0">
+                  <button
+                    type="button"
+                    data-action="decrement-qty"
+                    data-item-id="${safeId}"
+                    class="w-6 h-6 rounded bg-slate-900/60 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors"
+                    aria-label="Decrease quantity"
+                  >−</button>
+                  <button
+                    type="button"
+                    data-action="edit-item"
+                    data-item-id="${safeId}"
+                    class="px-2 text-xs font-semibold text-slate-200 hover:text-emerald-400 cursor-pointer"
+                    title="Edit Details"
+                  >
+                    ${item.quantity} ${safeUnit}
+                  </button>
+                  <button
+                    type="button"
+                    data-action="increment-qty"
+                    data-item-id="${safeId}"
+                    class="w-6 h-6 rounded bg-slate-900/60 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors"
+                    aria-label="Increase quantity"
+                  >+</button>
+                </div>
+
+                <!-- Normalized Unit Price -->
+                ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40 text-[11px] shrink-0">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
+
+                <!-- Deal Badge -->
+                ${dealBadgeHtml}
+              </div>
+
+              <!-- Historical ATL Reference -->
+              <div class="text-right text-[11px] text-slate-400 shrink-0">
+                ${history.length > 0 ? `<span title="All-Time Low recorded price">${TRANSLATIONS[currentLanguage].atl_price_label || "ATL:"} <strong class="text-emerald-400 font-semibold">${formatCurrency(deal.minPrice)}/${baseUnit}</strong></span>` : `<span class="text-slate-500 italic">${TRANSLATIONS[currentLanguage].new_item || "New Item"}</span>`}
               </div>
             </div>
           </div>
@@ -583,6 +670,22 @@ function updateLiveUnitPreview() {
   } else {
     if (previewPill) previewPill.classList.add("hidden");
   }
+}
+
+if (typeof document !== "undefined" && document.addEventListener) {
+  document.addEventListener("click", (e) => {
+    if (
+      e.target &&
+      e.target.closest &&
+      e.target.closest("[data-action='toggle-card-menu']")
+    )
+      return;
+    if (e.target && e.target.closest && e.target.closest("[id^='cardMenu-']"))
+      return;
+    document
+      .querySelectorAll("[id^='cardMenu-']")
+      .forEach((m) => m.classList.add("hidden"));
+  });
 }
 
 if (typeof module !== "undefined" && module.exports) {
