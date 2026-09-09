@@ -189,8 +189,19 @@ function createMockSandbox() {
     navigator: mockNavigator,
     document: {
       getElementById: (id) => getOrCreateElement(id),
-      querySelector: (sel) => getOrCreateElement(sel.replace("#", "")),
-      querySelectorAll: () => [],
+      querySelectorAll: (sel) => {
+        if (sel && sel.includes("cardMenu-")) {
+          return Object.values(elements).filter(
+            (el) => el.id && el.id.startsWith("cardMenu-")
+          );
+        }
+        if (sel && sel.includes("cardContainer-")) {
+          return Object.values(elements).filter(
+            (el) => el.id && el.id.startsWith("cardContainer-")
+          );
+        }
+        return [];
+      },
       createElement: (tag) => {
         const el = getOrCreateElement(`dyn_${Date.now()}_${Math.random()}`);
         el.tagName = tag.toUpperCase();
@@ -754,6 +765,61 @@ assert(
   planCardTierHtml.includes('data-action="compare"') &&
     planCardTierHtml.includes('data-action="delete-item"'),
   "PLAN-CARD-05c: 3-dot overflow menu provides non-touch fallback for Compare and Delete"
+);
+
+// PLAN-CARD-06: Unclipped overflow menu toggling and deletion ergonomics (ADR-0034 / Issue #347)
+const testMenuEl = sbPlan.document.getElementById(
+  `cardMenu-${planItemTier.id}`
+);
+const testContainerEl = sbPlan.document.getElementById(
+  `cardContainer-${planItemTier.id}`
+);
+testMenuEl.classList.add("hidden");
+testContainerEl.classList.add("overflow-hidden");
+
+// Trigger toggle-card-menu action
+sbPlan.handleCardAction("toggle-card-menu", planItemTier.id);
+assert(
+  !testMenuEl.classList.contains("hidden"),
+  "PLAN-CARD-06a: toggle-card-menu reveals cardMenu dropdown"
+);
+assert(
+  testContainerEl.classList.contains("overflow-visible") &&
+    testContainerEl.classList.contains("z-30") &&
+    !testContainerEl.classList.contains("overflow-hidden"),
+  "PLAN-CARD-06b: Opening cardMenu applies overflow-visible and z-30 elevation to cardContainer"
+);
+
+// Dismiss via closeAllCardMenus
+sbPlan.closeAllCardMenus();
+assert(
+  testMenuEl.classList.contains("hidden"),
+  "PLAN-CARD-06c: closeAllCardMenus hides cardMenu dropdown"
+);
+assert(
+  testContainerEl.classList.contains("overflow-hidden") &&
+    !testContainerEl.classList.contains("overflow-visible") &&
+    !testContainerEl.classList.contains("z-30"),
+  "PLAN-CARD-06d: closeAllCardMenus restores overflow-hidden and removes elevation"
+);
+
+// Test delete-item from card action deletes item and restores container overflow
+sbPlan.handleCardAction("toggle-card-menu", planItemTier.id);
+assert(
+  testContainerEl.classList.contains("overflow-visible"),
+  "PLAN-CARD-06e: Container is overflow-visible before deletion"
+);
+const initialItemCount = sbPlan.memoryState.activeList.items.length;
+sbPlan.handleCardAction("delete-item", planItemTier.id);
+assert(
+  sbPlan.memoryState.activeList.items.length === initialItemCount - 1 &&
+    !sbPlan.memoryState.activeList.items.some((i) => i.id === planItemTier.id),
+  "PLAN-CARD-06f: delete-item action in card menu deletes item from active list"
+);
+assert(
+  testContainerEl.classList.contains("overflow-hidden") &&
+    !testContainerEl.classList.contains("overflow-visible"),
+  "PLAN-CARD-06g: Executing action restores container overflow-hidden"
 );
 
 // -------------------------------------------------------------------------

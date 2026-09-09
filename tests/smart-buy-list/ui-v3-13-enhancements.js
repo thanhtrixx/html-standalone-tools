@@ -370,6 +370,32 @@ async function runTestSuite() {
     assertEqual(updated.store, "Bach Hoa Xanh", "EDIT-19: Item store updated");
     assertEqual(updated.quantity, 3, "EDIT-20: Item quantity updated");
     assertEqual(updated.price, 105000, "EDIT-21: Item price updated");
+
+    // EDIT-22: Destructive Delete button in modal footer (ADR-0034 / Issue #347)
+    assert(
+      htmlContent.includes('id="btnDeleteEditItem"'),
+      "EDIT-22: #btnDeleteEditItem exists in modal footer markup"
+    );
+    assert(
+      htmlContent.includes("handleDeleteFromEditModal"),
+      "EDIT-23: handleDeleteFromEditModal function is declared in scripts"
+    );
+    assert(
+      typeof sb.handleDeleteFromEditModal === "function",
+      "EDIT-24: handleDeleteFromEditModal is exposed on window"
+    );
+
+    // Test deleting from modal
+    sb.openFullItemEdit("item-edit-1");
+    sb.confirm = () => true;
+    sb.handleDeleteFromEditModal();
+    const deleted = sb.memoryState.activeList.items.find(
+      (i) => i.id === "item-edit-1"
+    );
+    assert(
+      !deleted,
+      "EDIT-25: handleDeleteFromEditModal removes item from active list"
+    );
   }
 
   // ==================== SECTION 2: Dual Modal Architecture ====================
