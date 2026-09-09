@@ -1,4 +1,4 @@
-# Smart Buy-List & Unit Price Tracker (v4.5.1)
+# Smart Buy-List & Unit Price Tracker (v4.6.0)
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 
