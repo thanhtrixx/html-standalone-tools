@@ -391,6 +391,11 @@ if (typeof window !== "undefined") {
   window.setTripPhase = setTripPhase;
   window.toggleItemCheck = toggleItemCheck;
   window.deleteItem = deleteItem;
+  window.openTripCompleteModal = openTripCompleteModal;
+  window.openTripVictoryModal = openTripVictoryModal;
+  window.calculateTripSavings = calculateTripSavings;
+  window.triggerTripCelebrationAnimation = triggerTripCelebrationAnimation;
+  window.toggleTripRolloverAction = toggleTripRolloverAction;
   window.finalizeTripCompletion = finalizeTripCompletion;
   window.loadSampleData = loadSampleData;
   window.clearAllData = clearAllData;

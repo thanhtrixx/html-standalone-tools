@@ -757,6 +757,197 @@ assert(
 );
 
 // -------------------------------------------------------------------------
+// SECTION 9: Interactive Trip Victory Receipt Modal (Issue #339)
+// -------------------------------------------------------------------------
+console.log(
+  "\n--- Section 9: Interactive Trip Victory Receipt Modal (Issue #339) ---"
+);
+const sbVic = createMockSandbox();
+sbVic.loadSampleData();
+
+// Mock ledger with known baseline prices
+const testLedger = [
+  {
+    id: "rec_milk_1",
+    itemName: "Fresh Whole Milk",
+    unitPrice: 40000,
+    price: 40000,
+    quantity: 1,
+    unit: "L",
+  },
+  {
+    id: "rec_milk_2",
+    itemName: "Fresh Whole Milk",
+    unitPrice: 40000,
+    price: 40000,
+    quantity: 1,
+    unit: "L",
+  },
+];
+
+const checkedItem = {
+  id: "item_vic_milk",
+  name: "Fresh Whole Milk",
+  price: 30000,
+  quantity: 1,
+  unit: "L",
+  checked: true,
+};
+const uncheckedItem = {
+  id: "item_vic_eggs",
+  name: "Eggs",
+  price: 35000,
+  quantity: 1,
+  unit: "pack",
+  checked: false,
+};
+
+const savings = sbVic.calculateTripSavings([checkedItem], testLedger);
+
+// VICTORY-01: Monetary savings vs baseline
+assert(
+  savings.totalSpent === 30000 &&
+    savings.baselineTotal === 40000 &&
+    savings.totalSavings === 10000 &&
+    savings.overallSavingsPercent === 25,
+  "VICTORY-01: calculateTripSavings accurately computes monetary savings against historical price baselines"
+);
+
+// VICTORY-02: Best Deal highlight
+assert(
+  savings.bestDeal &&
+    savings.bestDeal.item.id === "item_vic_milk" &&
+    savings.bestDeal.savingsPercent === 25 &&
+    savings.bestDeal.savingsAmount === 10000,
+  "VICTORY-02: calculateTripSavings identifies the single Best Deal of the Trip with percentage savings"
+);
+
+// VICTORY-03: 1-Tap Rollover Toggle
+const radioYes = { checked: true };
+const radioNo = { checked: false };
+const track = {
+  classList: {
+    classes: new Set(["bg-emerald-600"]),
+    add(c) {
+      this.classes.add(c);
+    },
+    remove(c) {
+      this.classes.delete(c);
+    },
+    contains(c) {
+      return this.classes.has(c);
+    },
+  },
+};
+const thumb = {
+  classList: {
+    classes: new Set(["translate-x-4"]),
+    add(c) {
+      this.classes.add(c);
+    },
+    remove(c) {
+      this.classes.delete(c);
+    },
+    contains(c) {
+      return this.classes.has(c);
+    },
+  },
+};
+const statusText = { textContent: "" };
+const statusSubtext = { textContent: "" };
+
+sbVic.document.getElementById = (id) => {
+  if (id === "radioRolloverYes") return radioYes;
+  if (id === "radioRolloverNo") return radioNo;
+  if (id === "tripRolloverSwitchTrack") return track;
+  if (id === "tripRolloverSwitchThumb") return thumb;
+  if (id === "tripRolloverStatusText") return statusText;
+  if (id === "tripRolloverStatusSubtext") return statusSubtext;
+  return null;
+};
+
+// Toggle to false (DISCARD)
+sbVic.toggleTripRolloverAction(false);
+assert(
+  radioYes.checked === false &&
+    radioNo.checked === true &&
+    track.classList.contains("bg-slate-700") &&
+    thumb.classList.contains("translate-x-0"),
+  "VICTORY-03a: toggleTripRolloverAction(false) switches state to DISCARD with visual track animation"
+);
+
+// Toggle back to true (ROLLOVER)
+sbVic.toggleTripRolloverAction(true);
+assert(
+  radioYes.checked === true &&
+    radioNo.checked === false &&
+    track.classList.contains("bg-emerald-600") &&
+    thumb.classList.contains("translate-x-4"),
+  "VICTORY-03b: toggleTripRolloverAction(true) switches state to ROLLOVER"
+);
+
+// VICTORY-04: Trip completion modal setup & celebration trigger
+sbVic.memoryState.activeList.items = [checkedItem, uncheckedItem];
+sbVic.memoryState.purchaseLedger = testLedger;
+
+let victoryModalOpened = false;
+sbVic._mockVictoryOpenModal = (id) => {
+  if (id === "tripCompleteModal" || id === "tripVictoryModal") {
+    victoryModalOpened = true;
+  }
+};
+vm.runInContext(
+  "const _orig_openModal_vic = openModal; openModal = (id) => { if (window._mockVictoryOpenModal) window._mockVictoryOpenModal(id); return _orig_openModal_vic(id); };",
+  sbVic
+);
+
+const domEls = {};
+sbVic.document.getElementById = (id) => {
+  if (id === "radioRolloverYes") return radioYes;
+  if (id === "radioRolloverNo") return radioNo;
+  if (id === "tripRolloverSwitchTrack") return track;
+  if (id === "tripRolloverSwitchThumb") return thumb;
+  if (id === "tripRolloverStatusText") return statusText;
+  if (id === "tripRolloverStatusSubtext") return statusSubtext;
+  if (!domEls[id]) {
+    domEls[id] = {
+      textContent: "",
+      classList: {
+        classes: new Set(),
+        add(c) {
+          this.classes.add(c);
+        },
+        remove(c) {
+          this.classes.delete(c);
+        },
+        contains(c) {
+          return this.classes.has(c);
+        },
+      },
+    };
+  }
+  return domEls[id];
+};
+
+sbVic.openTripVictoryModal();
+assert(
+  victoryModalOpened === true,
+  "VICTORY-04a: openTripVictoryModal opens the trip completion modal"
+);
+vm.runInContext("openModal = _orig_openModal_vic;", sbVic);
+assert(
+  domEls["tripVictorySavingsHero"] &&
+    !domEls["tripVictorySavingsHero"].classList.contains("hidden"),
+  "VICTORY-04b: Trip victory savings hero banner is displayed"
+);
+assert(
+  domEls["tripBestDealCard"] &&
+    !domEls["tripBestDealCard"].classList.contains("hidden") &&
+    domEls["tripBestDealName"].textContent === "Fresh Whole Milk",
+  "VICTORY-04c: Best Deal card highlights winning deal item"
+);
+
+// -------------------------------------------------------------------------
 // Summary
 // -------------------------------------------------------------------------
 console.log(`\n==================================================`);

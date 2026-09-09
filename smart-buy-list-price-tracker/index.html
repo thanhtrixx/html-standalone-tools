@@ -2269,7 +2269,7 @@
       </div>
     </div>
 
-    <!-- 4. TRIP COMPLETE & SUMMARY MODAL -->
+    <!-- 4. TRIP VICTORY RECEIPT & SUMMARY MODAL -->
     <div
       id="tripCompleteModal"
       role="dialog"
@@ -2279,17 +2279,37 @@
       class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
+        id="tripVictoryModal"
         onclick="event.stopPropagation()"
-        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"
+        class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl overflow-hidden"
       >
+        <!-- Header -->
         <div class="flex items-center justify-between">
-          <h3
-            id="tripModalTitle"
-            class="text-base font-bold text-white flex items-center gap-2"
-          >
-            <span aria-hidden="true">🏁</span>
-            <span id="tripModalTitleText">Complete Shopping Trip</span>
-          </h3>
+          <div class="flex items-center gap-2.5">
+            <span
+              id="tripVictoryBadgeIcon"
+              class="text-2xl inline-block"
+              aria-hidden="true"
+              >🎉</span
+            >
+            <div>
+              <h3
+                id="tripModalTitle"
+                class="text-base font-bold text-white leading-tight"
+              >
+                <span id="tripModalTitleText" data-i18n="trip_victory_title"
+                  >Trip Victory Receipt</span
+                >
+              </h3>
+              <p
+                class="text-[11px] text-slate-400"
+                id="tripModalSubtitle"
+                data-i18n="trip_victory_subtitle"
+              >
+                Trip savings receipt & summary
+              </p>
+            </div>
+          </div>
           <button
             onclick="closeModal('tripCompleteModal')"
             class="text-slate-400 hover:text-slate-200 text-lg p-1 cursor-pointer"
@@ -2300,65 +2320,155 @@
           </button>
         </div>
 
-        <!-- Trip Stats Summary -->
-        <div class="bg-slate-950/60 rounded-xl p-3.5 space-y-2 text-xs">
-          <div class="flex justify-between text-slate-300">
-            <span id="tripModalPurchasedLabel">Purchased Items:</span>
+        <!-- Savings Hero Callout -->
+        <div
+          id="tripVictorySavingsHero"
+          class="bg-emerald-950/60 border border-emerald-800/60 rounded-xl p-3.5 text-center space-y-1"
+        >
+          <div class="flex items-center justify-center gap-1.5 flex-wrap">
             <span
-              id="tripModalPurchasedCount"
-              class="font-bold text-emerald-400"
-              >4 items</span
+              id="tripVictorySavingsAmount"
+              class="text-base sm:text-lg font-extrabold text-emerald-300"
             >
+              You saved $0.00
+            </span>
+            <span
+              id="tripVictorySavingsPercent"
+              class="text-sm font-bold text-emerald-400"
+            ></span>
           </div>
-          <div class="flex justify-between text-slate-300">
-            <span id="tripModalTotalSpentLabel">Total Trip Spend:</span>
+          <p
+            id="tripVictorySavingsSubtext"
+            class="text-[11px] text-emerald-400/80"
+          >
+            vs historical average prices
+          </p>
+        </div>
+
+        <!-- Best Deal Callout Card -->
+        <div
+          id="tripBestDealCard"
+          class="hidden bg-slate-950/70 border border-indigo-900/50 rounded-xl p-3 space-y-1.5"
+        >
+          <div class="flex items-center justify-between">
             <span
-              id="tripModalTotalSpentVal"
-              class="font-bold text-white text-sm"
-              >$24.50</span
+              class="text-xs font-bold text-indigo-300 flex items-center gap-1.5"
             >
+              <span aria-hidden="true">🏆</span>
+              <span data-i18n="trip_victory_best_deal"
+                >Best Deal of the Trip</span
+              >
+            </span>
+            <span
+              id="tripBestDealBadge"
+              class="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-indigo-900/60 text-indigo-300 border border-indigo-700/50"
+            >
+              -0%
+            </span>
           </div>
           <div
-            id="unpurchasedNotice"
-            class="text-amber-400 pt-1 border-t border-slate-800"
+            class="flex items-center justify-between text-xs pt-1 border-t border-slate-800/80"
           >
-            <span id="unpurchasedCountText">2 items left unchecked.</span>
+            <span
+              id="tripBestDealName"
+              class="font-semibold text-slate-200 truncate"
+            ></span>
+            <span
+              id="tripBestDealSavings"
+              class="text-slate-400 text-[11px] shrink-0"
+            ></span>
           </div>
         </div>
 
-        <!-- Rollover Choice -->
+        <!-- Trip Stats Summary -->
+        <div
+          class="bg-slate-950/60 rounded-xl p-3.5 space-y-2 text-xs divide-y divide-slate-800/60"
+        >
+          <div class="flex justify-between text-slate-300 pb-1.5">
+            <span
+              id="tripModalPurchasedLabel"
+              data-i18n="trip_modal_purchased_label"
+              >Purchased Items:</span
+            >
+            <span
+              id="tripModalPurchasedCount"
+              class="font-bold text-emerald-400"
+              >0 items</span
+            >
+          </div>
+          <div class="flex justify-between text-slate-300 py-1.5">
+            <span
+              id="tripModalTotalSpentLabel"
+              data-i18n="trip_modal_total_spent_label"
+              >Total Trip Spend:</span
+            >
+            <span
+              id="tripModalTotalSpentVal"
+              class="font-bold text-white text-sm"
+              >$0.00</span
+            >
+          </div>
+          <div id="unpurchasedNotice" class="text-amber-400 pt-1.5">
+            <span id="unpurchasedCountText">0 items left unchecked.</span>
+          </div>
+        </div>
+
+        <!-- Rollover Choice: 1-Tap Switch / Toggle Card -->
         <div class="space-y-2">
           <label
             class="text-xs text-slate-400 font-medium block"
             id="labelRolloverChoice"
+            data-i18n="label_rollover_choice"
             >What should happen to unchecked items?</label
           >
-          <div class="space-y-1.5">
-            <label
-              class="flex items-center gap-2 bg-slate-950/60 p-2.5 rounded-xl cursor-pointer text-xs"
+          <div
+            id="tripRolloverToggleCard"
+            onclick="toggleTripRolloverAction()"
+            class="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 cursor-pointer transition-colors"
+          >
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <span class="text-base" aria-hidden="true">🔄</span>
+              <div class="min-w-0 flex-1">
+                <span
+                  id="tripRolloverStatusText"
+                  class="text-xs font-semibold text-slate-200 block"
+                >
+                  Rollover unchecked items to new draft list
+                </span>
+                <span
+                  id="tripRolloverStatusSubtext"
+                  class="text-[11px] text-slate-400 block"
+                >
+                  Keep unfinished items for next trip
+                </span>
+              </div>
+            </div>
+            <!-- Switch Track & Thumb -->
+            <div
+              id="tripRolloverSwitchTrack"
+              class="w-10 h-6 bg-emerald-600 rounded-full p-0.5 transition-colors duration-200 ease-in-out shrink-0"
             >
-              <input
-                type="radio"
-                name="rolloverAction"
-                value="ROLLOVER"
-                checked
-                class="text-emerald-600 focus:ring-emerald-500"
-              />
-              <span id="optRolloverText"
-                >Rollover unchecked items to new draft list</span
-              >
-            </label>
-            <label
-              class="flex items-center gap-2 bg-slate-950/60 p-2.5 rounded-xl cursor-pointer text-xs"
-            >
-              <input
-                type="radio"
-                name="rolloverAction"
-                value="DISCARD"
-                class="text-emerald-600 focus:ring-emerald-500"
-              />
-              <span id="optDiscardText">Discard unchecked items</span>
-            </label>
+              <div
+                id="tripRolloverSwitchThumb"
+                class="w-5 h-5 bg-white rounded-full shadow-md transform translate-x-4 transition-transform duration-200 ease-in-out"
+              ></div>
+            </div>
+            <!-- Hidden inputs for backward compatibility -->
+            <input
+              type="radio"
+              name="rolloverAction"
+              id="radioRolloverYes"
+              value="ROLLOVER"
+              checked
+              class="sr-only"
+            />
+            <input
+              type="radio"
+              name="rolloverAction"
+              id="radioRolloverNo"
+              value="DISCARD"
+              class="sr-only"
+            />
           </div>
         </div>
 
@@ -2367,7 +2477,8 @@
           <button
             onclick="finalizeTripCompletion()"
             id="btnFinalizeTrip"
-            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
+            class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer transition-transform active:scale-95"
+            data-i18n="btn_finalize_trip"
           >
             Record Prices & Finalize Trip
           </button>
