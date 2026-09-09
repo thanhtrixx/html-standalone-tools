@@ -65,13 +65,13 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 ### 4. Shopping Trip Lifecycle
 
 - **Shopping Trip**: Structured shopping session transitioning through three lifecycle stages:
-  1. **Planning Mode**: Adding items via full-width Smart Omnibox (`#smartQuickInput`) or Collapsible Add Form (with automatic parsing and pre-fill when expanding `Detailed Options`), full editing via `#editItemModal` (Name, Category, Store, Qty, Unit, Price on 1 responsive row), adjusting quantities, assigning stores/aisles, estimating trip spend with streamlined 3-row cards. Features adaptive Trip Completion bar when checked items exist (`checkedCount > 0`).
-  2. **In-Store Buy Mode**: Focused distraction-free checklist with ultra-minimalist cards (checkbox, item name, clickable shelf price opening `#quickPriceModal` with fast delta chips), live running totals, pacing progress, and touch swipe gestures. Automatically hides trip finish bar when buy-list is empty.
-  3. **Trip Summary & Completion Phase**: Prompts to log verified purchase prices into the historical ledger, calculate actual trip expenditure, and offer unpurchased item rollover or discard.
-     _Avoid_: Shopping cart run, checkout session, shopping list run.
+  1. **Planning Mode**: Adding items via full-width Smart Omnibox (`#smartQuickInput`) or Collapsible Add Form (with automatic parsing and pre-fill when expanding `Detailed Options`), full editing via `#editItemModal` (Name, Category, Store, Qty, Unit, Price on 1 responsive row), adjusting quantities, assigning stores/aisles, estimating trip spend with streamlined two-tier cards and swipe-first actions. Features adaptive Trip Completion bar when checked items exist (`checkedCount > 0`).
+  2. **In-Store Buy Mode**: Focused distraction-free checklist with heads-up in-aisle intelligence (displaying bold normalized unit price and All-Time Low delta alongside shelf price), single-line ambient pacing ticker, hidden planning chrome, and touch swipe gestures.
+  3. **Trip Victory Receipt Phase (`#tripVictoryModal`)**: Celebratory modal calculating total money saved against baseline prices, highlighting the single Best Deal of the trip, logging verified purchases into the historical ledger, and offering 1-tap unpurchased item rollover.
+     _Avoid_: Shopping cart run, checkout session, shopping list run, rollover popup.
 - **Differentiated Item Card Ergonomics**:
-  - **Planning Mode Card**: Streamlined 3-row container with rich domain metadata, unit price calculations, responsive deal indicator badges, and unified red-tinted delete action.
-  - **Buy Mode Card**: Ultra-minimalist single-row container with thumb-friendly checkbox, pure item name, and clickable shelf price for fast bottom-sheet edits.
+  - **Planning Mode Card (Two-Tier)**: Clean two-row container: Row 1 (Checkbox + Item Icon & Name + Total Price), Row 2 (Quantity Stepper + Normalized Unit Price + Deal Rating Badge), with secondary actions delegated to swipe gestures or 3-dot menu.
+  - **Buy Mode Card (In-Aisle Intelligence)**: Focused container with thumb-friendly checkbox, item name, clickable shelf price, bold normalized unit price, and ATL percentage delta.
     _Avoid_: Uniform card layout, static list item.
 - **Item Rollover**: Automatic transfer of unchecked/unpurchased items into a new draft list upon trip completion.
   _Avoid_: Carryover, push to next, leftover migrate.
@@ -176,3 +176,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0030: Share Payload Compression, Interactive Merge Protocol, Ambient Cloud Sync Indicator & Snapshot Safeguards](./docs/adr/0030-share-compression-interactive-merge-ambient-sync-and-snapshot-safeguards.md)
 - [ADR-0031: Modular Source Architecture, JSDoc Domain Contracts & Observable State Container](./docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md)
 - [ADR-0032: Two-Tier PWA Back Exit Guard, Gist URL Resilience, Responsive Deal Badges, and Cloud Sync Status Polish](./docs/adr/0032-back-navigation-gist-resilience-responsive-badges-and-sync-visuals.md)
+- [ADR-0033: Critique Remediation: Buy Mode Deal Intelligence, Viewport Decluttering, Two-Tier Planning Cards, and Trip Victory Receipt](./docs/adr/0033-critique-remediation-buy-mode-intelligence-viewport-declutter-and-victory-receipt.md)

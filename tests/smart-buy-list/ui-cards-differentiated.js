@@ -272,13 +272,28 @@ assert(
 );
 
 assert(
-  !buyCardHtml.includes("/l") && !buyCardHtml.includes("/kg"),
-  "DIFF-BUY-08: Buy Mode card hides normalized unit price"
+  buyCardHtml.includes("/l") ||
+    buyCardHtml.includes("/kg") ||
+    buyCardHtml.includes("/L") ||
+    buyCardHtml.includes("buy-mode-unit-price"),
+  "DIFF-BUY-08 / BUY-UNIT-01: Buy Mode card displays normalized unit price (ADR-0033)"
+);
+
+assert(
+  buyCardHtml.includes('data-testid="buy-mode-unit-price"'),
+  "BUY-UNIT-02: Buy Mode card contains testid hook for unit price"
+);
+
+assert(
+  buyCardHtml.includes('data-testid="buy-mode-atl-delta"') ||
+    buyCardHtml.includes("ATL") ||
+    buyCardHtml.includes("% vs ATL"),
+  "BUY-UNIT-03: Buy Mode card displays ATL delta indicator when historical ledger records exist"
 );
 
 assert(
   !buyCardHtml.includes(itemMilk.store),
-  `DIFF-BUY-09: Buy Mode card hides store name badge ('${itemMilk.store}')`
+  `DIFF-BUY-09 / BUY-UNIT-04: Buy Mode card hides redundant store name badge ('${itemMilk.store}')`
 );
 
 assert(
@@ -346,7 +361,9 @@ assert(
 assert(
   /fair price|great deal|price spike|giá hợp lý|giá rất tốt|giá tăng cao|món mới/i.test(
     planCardHtml
-  ) || planCardHtml.includes("rounded-md text-[10px] font-bold"),
+  ) ||
+    planCardHtml.includes("rounded-md text-[10px] font-bold") ||
+    planCardHtml.includes("rounded-md text-[11px] font-bold"),
   "DIFF-PLAN-05: Planning Mode card displays deal score badge"
 );
 

@@ -22,6 +22,18 @@ colors:
   deal-great: "#047857"
   deal-fair: "#f59e0b"
   deal-spike: "#dc2626"
+  light-surface: "#f1f5f9"
+  light-border: "#e2e8f0"
+  light-border-subtle: "#cbd5e1"
+  light-text-muted: "#64748b"
+  light-deal-great-text: "#065f46"
+  light-deal-great-border: "#a7f3d0"
+  light-deal-fair-bg: "#fffbeb"
+  light-deal-fair-text: "#92400e"
+  light-deal-fair-border: "#fde68a"
+  light-deal-spike-bg: "#fef2f2"
+  light-deal-spike-text: "#991b1b"
+  light-deal-spike-border: "#fecaca"
 typography:
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
@@ -39,6 +51,12 @@ typography:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     fontSize: "12px"
     fontWeight: 600
+    lineHeight: 1.2
+    letterSpacing: "normal"
+  caption:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    fontSize: "11px"
+    fontWeight: 500
     lineHeight: 1.2
     letterSpacing: "normal"
 rounded:

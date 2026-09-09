@@ -245,31 +245,47 @@ function renderItemCard(item) {
   if (deal.score === "GREAT_DEAL") {
     const rawLabel = t.badge_great_deal || "🟢 Great Deal";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">🟢</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
   } else if (deal.score === "PRICE_SPIKE") {
     const rawLabel = t.badge_price_spike || "🔴 Price Spike";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">🔴</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
   } else if (deal.score === "FAIR_PRICE") {
     const rawLabel = t.badge_fair_price || "🟡 Fair Price";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">🟡</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
   } else if (deal.score === "NEW_ITEM" || !deal.score) {
     const rawLabel = t.badge_new_item || "⚪ New Item";
     dealBadgeHtml = `
-            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-slate-300 border border-slate-700 shrink-0" title="${rawLabel}" aria-label="${rawLabel}">
               <span aria-hidden="true">⚪</span>
               <span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span>
             </span>`;
+  }
+
+  let atlDeltaHtml = "";
+  if (history.length > 0 && deal.minPrice > 0 && unitPrice > 0) {
+    if (deal.isAllTimeLow) {
+      const atlLabel = t.best_deal_atl || "ATL";
+      atlDeltaHtml = `<span class="text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-1.5 py-0.5 rounded font-semibold text-[11px]" title="${t.all_time_low_title || "All-Time Low price"}">${atlLabel}</span>`;
+    } else {
+      const diffVsAtl = ((unitPrice - deal.minPrice) / deal.minPrice) * 100;
+      const diffSign = diffVsAtl > 0 ? "+" : "";
+      const isSpike = diffVsAtl > 15;
+      const colorClass = isSpike
+        ? "text-red-400 bg-red-950/60 border-red-800/40"
+        : "text-slate-400 bg-slate-800/60 border-slate-700/40";
+      atlDeltaHtml = `<span class="${colorClass} border px-1.5 py-0.5 rounded font-medium text-[11px]">${diffSign}${Math.round(diffVsAtl)}% vs ATL</span>`;
+    }
   }
 
   if (currentPhase === "IN_STORE") {
@@ -289,7 +305,7 @@ function renderItemCard(item) {
               </div>
             </div>
 
-            <!-- Foreground Swipeable Card (Buy Mode: Ultra-Minimalist) -->
+            <!-- Foreground Swipeable Card (Buy Mode: Focused In-Aisle Deal Intelligence) -->
             <div 
               id="itemCard-${safeId}"
               data-item-id="${safeId}"
@@ -312,9 +328,13 @@ function renderItemCard(item) {
                   <span aria-hidden="true">✓</span>
                 </button>
 
-                <!-- Item Info (Clean Name Only) -->
+                <!-- Item Info (Name + Unit Price & ATL Delta) -->
                 <div class="flex-1 min-w-0">
                   <span class="font-bold text-base text-slate-100 truncate block ${item.checked ? "line-through text-slate-500" : ""}">${safeName}</span>
+                  <div class="flex items-center gap-1.5 flex-wrap mt-0.5 text-[11px] ${item.checked ? "opacity-60" : ""}">
+                    ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold" data-testid="buy-mode-unit-price">${formatCurrency(unitPrice)}/${baseUnit}</span>` : ""}
+                    ${atlDeltaHtml ? `<span data-testid="buy-mode-atl-delta">${atlDeltaHtml}</span>` : ""}
+                  </div>
                 </div>
               </div>
 
