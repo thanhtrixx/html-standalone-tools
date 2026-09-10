@@ -2,7 +2,7 @@
 
 - **Status**: Accepted
 - **Date**: 2026-09-10
-- **Context**: Smart Buy-List & Unit Price Tracker (PWA v4.6.1)
+- **Context**: Smart Buy-List & Unit Price Tracker (PWA v4.6.2)
 
 ---
 
