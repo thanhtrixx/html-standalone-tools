@@ -42,6 +42,9 @@
     "test:e2e:mobile": "playwright test --project=android --project=iphone",
     "test:e2e:desktop": "playwright test --project=desktop",
     "test:e2e:tracker": "playwright test tests/e2e/smart-buy-list-devices.spec.js",
+    "test:e2e:predictor": "playwright test tests/e2e/savings-predictor-devices.spec.js",
+    "test:e2e:buy-rent": "playwright test tests/e2e/buy-vs-rent-devices.spec.js",
+    "test:e2e:portal": "playwright test tests/e2e/portal-devices.spec.js",
     "format": "prettier --write .",
     "lint:check": "prettier --check .",
     "pack:release": "./scripts/run.sh scripts/pack-release.js"

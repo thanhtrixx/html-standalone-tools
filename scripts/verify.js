@@ -15,12 +15,25 @@ const ROOT_DIR = path.resolve(__dirname, "..");
 const runtime = process.execPath;
 const isBun = typeof process.versions.bun !== "undefined";
 
+process.on("unhandledRejection", (reason) => {
+  console.error(
+    "\n❌ Unhandled Rejection in Quality Gate Verification:",
+    reason
+  );
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("\n❌ Uncaught Exception in Quality Gate Verification:", err);
+  process.exit(1);
+});
+
 console.log(
   `\n🔍 Quality Gate Verification [Runtime: ${isBun ? "Bun " + process.versions.bun : "Node " + process.version}]`
 );
 
 // 1. Lint / Format Check (Prettier)
-console.log("\n[1/3] Running Formatting Check (Prettier)...");
+console.log("\n[1/4] Running Formatting Check (Prettier)...");
 const prettierBin = path.join(
   ROOT_DIR,
   "node_modules",
@@ -48,7 +61,7 @@ if (lintProc.status !== 0) {
 }
 
 // 2. Build Pipeline
-console.log("\n[2/3] Running Compaction Build Pipeline...");
+console.log("\n[2/4] Running Compaction Build Pipeline...");
 const buildProc = spawnSync(
   runtime,
   [path.join(ROOT_DIR, "scripts", "build.js")],

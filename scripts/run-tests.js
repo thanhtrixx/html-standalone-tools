@@ -16,6 +16,16 @@ const os = require("os");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
 
+process.on("unhandledRejection", (reason) => {
+  console.error("\n❌ Unhandled Rejection in Test Runner:", reason);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("\n❌ Uncaught Exception in Test Runner:", err);
+  process.exit(1);
+});
+
 const ROOT_DIR = path.resolve(__dirname, "..");
 const REPORTS_DIR = path.join(ROOT_DIR, "test-reports");
 
