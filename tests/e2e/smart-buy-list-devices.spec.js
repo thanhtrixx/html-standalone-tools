@@ -154,6 +154,7 @@ test.describe("Smart Buy-List Multi-Device UI/UX Suite", () => {
     await expect(btnSettings).toBeVisible();
     await btnSettings.click();
 
+    await expect(page.locator("#settingsModal")).toBeVisible();
     const loadSampleBtn = page.locator("#btnResetSampleData");
     await expect(loadSampleBtn).toBeVisible();
     await loadSampleBtn.click();
