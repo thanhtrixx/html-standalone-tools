@@ -1372,9 +1372,9 @@
         <!-- Empty State Card -->
         <div
           id="emptyListCard"
-          class="hidden bg-slate-900 border border-slate-800 border-dashed rounded-2xl p-8 text-center space-y-3"
+          class="hidden bg-slate-900 border border-slate-800 border-dashed rounded-2xl p-6 sm:p-8 text-center space-y-3"
         >
-          <div class="text-4xl">🛒</div>
+          <div id="emptyListIcon" class="text-4xl">🛒</div>
           <h3 id="emptyListTitle" class="text-base font-bold text-slate-200">
             Your shopping list is empty
           </h3>
@@ -1392,6 +1392,78 @@
           >
             <span>📝</span>
             <span id="btnEmptySwitchToPlanningText">Switch to Planning</span>
+          </button>
+
+          <!-- Interactive Starter Haul Section (Planning Mode Empty State) -->
+          <div id="starterHaulSection" class="pt-2 space-y-2.5">
+            <button
+              id="btnStarterHaul"
+              type="button"
+              onclick="loadStarterHaul('ALL')"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 inline-flex items-center gap-1.5 mx-auto cursor-pointer"
+            >
+              <span>✨</span>
+              <span id="btnStarterHaulText"
+                >Weekly Essentials Starter Haul</span
+              >
+            </button>
+            <div
+              class="text-[11px] text-slate-400 font-medium"
+              id="starterChipsLabel"
+            >
+              Or add by department:
+            </div>
+            <div
+              id="starterDepartmentChips"
+              class="flex items-center justify-center gap-1.5 flex-wrap max-w-md mx-auto"
+            >
+              <button
+                type="button"
+                onclick="loadStarterHaul('produce')"
+                class="px-2.5 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-full border border-slate-700/60 transition-colors active:scale-95 cursor-pointer"
+              >
+                🥦 Produce
+              </button>
+              <button
+                type="button"
+                onclick="loadStarterHaul('dairy')"
+                class="px-2.5 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-full border border-slate-700/60 transition-colors active:scale-95 cursor-pointer"
+              >
+                🥛 Dairy
+              </button>
+              <button
+                type="button"
+                onclick="loadStarterHaul('meat')"
+                class="px-2.5 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-full border border-slate-700/60 transition-colors active:scale-95 cursor-pointer"
+              >
+                🥩 Meat
+              </button>
+              <button
+                type="button"
+                onclick="loadStarterHaul('bakery')"
+                class="px-2.5 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-full border border-slate-700/60 transition-colors active:scale-95 cursor-pointer"
+              >
+                🍞 Bakery
+              </button>
+              <button
+                type="button"
+                onclick="loadStarterHaul('pantry')"
+                class="px-2.5 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 text-slate-200 rounded-full border border-slate-700/60 transition-colors active:scale-95 cursor-pointer"
+              >
+                🍚 Pantry
+              </button>
+            </div>
+          </div>
+
+          <!-- Zero-Result Filter Recovery Button -->
+          <button
+            id="btnClearActiveFilters"
+            type="button"
+            onclick="clearActiveFilters()"
+            class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 rounded-xl text-xs font-semibold shadow-md transition-all active:scale-95 inline-flex items-center gap-1.5 mx-auto cursor-pointer"
+          >
+            <span>🔄</span>
+            <span id="btnClearActiveFiltersText">Clear Active Filters</span>
           </button>
         </div>
 

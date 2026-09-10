@@ -28,6 +28,7 @@ const SUB_SUITES = [
   "ui-v4-6-glanceability.js",
   "ui-v4-6-spring-motion.js",
   "ui-v4-6-quick-price-popover.js",
+  "ui-v4-6-starter-hauls.js",
 ];
 
 async function runSubSuite(sub) {

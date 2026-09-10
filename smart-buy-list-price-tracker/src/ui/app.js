@@ -398,6 +398,8 @@ if (typeof window !== "undefined") {
   window.toggleTripRolloverAction = toggleTripRolloverAction;
   window.finalizeTripCompletion = finalizeTripCompletion;
   window.loadSampleData = loadSampleData;
+  window.loadStarterHaul = loadStarterHaul;
+  window.clearActiveFilters = clearActiveFilters;
   window.clearAllData = clearAllData;
   window.handleItemAutocomplete = handleItemAutocomplete;
   window.renderCategoryOptions = renderCategoryOptions;

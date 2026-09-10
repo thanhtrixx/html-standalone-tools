@@ -827,7 +827,19 @@ function handleItemAutocomplete(val) {
   const unique = Array.from(new Set(matches)).slice(0, 5);
 
   if (unique.length === 0) {
-    dropdown.classList.add("hidden");
+    const rawVal = (val || "").trim();
+    const safeQ = sanitizeHTML(rawVal);
+    const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
+    const template =
+      t.autocomplete_new_item_prompt || 'Press Enter to add new item "{query}"';
+    const promptText = template.replace("{query}", safeQ);
+    dropdown.innerHTML = `
+      <div class="px-3 py-2 text-xs text-slate-400 italic flex items-center gap-1.5 bg-slate-950/40">
+        <span aria-hidden="true">↵</span>
+        <span>${promptText}</span>
+      </div>
+    `;
+    dropdown.classList.remove("hidden");
     return;
   }
 
