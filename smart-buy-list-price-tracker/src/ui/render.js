@@ -816,6 +816,9 @@ function setupStoreSubscriptions() {
     store.subscribe((state, action) => {
       if (!action || !action.type) {
         renderApp();
+        if (typeof renderPriceLedgerTable === "function") {
+          renderPriceLedgerTable();
+        }
         return;
       }
 
@@ -833,6 +836,23 @@ function setupStoreSubscriptions() {
           renderCategoryFilterChips();
           renderKpis();
           renderItemList();
+          break;
+
+        case ACTION_TYPES.COMPLETE_TRIP:
+          renderApp();
+          if (typeof renderPriceLedgerTable === "function") {
+            renderPriceLedgerTable();
+          }
+          break;
+
+        case ACTION_TYPES.SET_LEDGER:
+        case ACTION_TYPES.APPLY_MERGE:
+        case ACTION_TYPES.RESTORE_SNAPSHOT:
+        case ACTION_TYPES.REPLACE_STATE:
+          renderApp();
+          if (typeof renderPriceLedgerTable === "function") {
+            renderPriceLedgerTable();
+          }
           break;
 
         case ACTION_TYPES.SET_STORE_FILTER:
@@ -855,6 +875,9 @@ function setupStoreSubscriptions() {
 
         default:
           renderApp();
+          if (typeof renderPriceLedgerTable === "function") {
+            renderPriceLedgerTable();
+          }
           break;
       }
     });

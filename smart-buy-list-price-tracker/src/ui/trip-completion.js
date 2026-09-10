@@ -571,18 +571,25 @@ function addSelectedLedgerItemsToBuyList() {
 function deleteLedgerItem(id) {
   if (id === undefined || id === null) return;
   recordDeletedLedger(id);
-  const initialLen = memoryState.purchaseLedger.length;
-  memoryState.purchaseLedger = memoryState.purchaseLedger.filter(
-    (l) => String(l.id) !== String(id)
-  );
-  if (memoryState.purchaseLedger.length === initialLen) return;
+  const currentLedger =
+    (typeof store !== "undefined" && store.getState
+      ? store.getState().purchaseLedger
+      : memoryState.purchaseLedger) || [];
+  const initialLen = currentLedger.length;
+  const nextLedger = currentLedger.filter((l) => String(l.id) !== String(id));
+  if (nextLedger.length === initialLen) return;
 
   selectedLedgerIds.delete(String(id));
-  saveToLocalStorage();
-  renderApp();
-  renderPriceLedgerTable(
-    document.getElementById("ledgerSearchInput")?.value || ""
-  );
+  if (typeof store !== "undefined" && store.dispatch) {
+    store.dispatch({ type: ACTION_TYPES.SET_LEDGER, payload: nextLedger });
+  } else {
+    memoryState.purchaseLedger = nextLedger;
+    saveToLocalStorage();
+    renderApp();
+    renderPriceLedgerTable(
+      document.getElementById("ledgerSearchInput")?.value || ""
+    );
+  }
 
   const t = TRANSLATIONS[currentLanguage];
   showToast(
@@ -595,16 +602,25 @@ function deleteSelectedLedgerItems() {
 
   const count = selectedLedgerIds.size;
   selectedLedgerIds.forEach((id) => recordDeletedLedger(id));
-  memoryState.purchaseLedger = memoryState.purchaseLedger.filter(
+  const currentLedger =
+    (typeof store !== "undefined" && store.getState
+      ? store.getState().purchaseLedger
+      : memoryState.purchaseLedger) || [];
+  const nextLedger = currentLedger.filter(
     (l) => !selectedLedgerIds.has(String(l.id))
   );
 
   selectedLedgerIds.clear();
-  saveToLocalStorage();
-  renderApp();
-  renderPriceLedgerTable(
-    document.getElementById("ledgerSearchInput")?.value || ""
-  );
+  if (typeof store !== "undefined" && store.dispatch) {
+    store.dispatch({ type: ACTION_TYPES.SET_LEDGER, payload: nextLedger });
+  } else {
+    memoryState.purchaseLedger = nextLedger;
+    saveToLocalStorage();
+    renderApp();
+    renderPriceLedgerTable(
+      document.getElementById("ledgerSearchInput")?.value || ""
+    );
+  }
 
   const t = TRANSLATIONS[currentLanguage];
   const raw =
