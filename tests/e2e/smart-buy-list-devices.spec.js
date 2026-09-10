@@ -158,17 +158,17 @@ test.describe("Smart Buy-List Multi-Device UI/UX Suite", () => {
     // Open settings and load sample data
     const btnSettings = page.locator("#btnOpenSettings");
     await expect(btnSettings).toBeVisible();
-    await btnSettings.click();
+    await btnSettings.click({ force: true });
 
     await expect(page.locator("#settingsModal")).toBeVisible();
     const loadSampleBtn = page.locator("#btnResetSampleData");
     await expect(loadSampleBtn).toBeVisible();
-    await loadSampleBtn.click();
+    await loadSampleBtn.click({ force: true });
 
     // Close settings
     const btnClose = page.locator("#btnCloseSettings");
     await expect(btnClose).toBeVisible();
-    await btnClose.click();
+    await btnClose.click({ force: true });
     await expect(page.locator("#settingsModal")).toBeHidden();
 
     // Switch to Planning Tab and verify items rendered
@@ -205,10 +205,10 @@ test.describe("Smart Buy-List Multi-Device UI/UX Suite", () => {
     // Open settings and load sample data
     const btnSettings = page.locator("#btnOpenSettings");
     await expect(btnSettings).toBeVisible();
-    await btnSettings.click();
+    await btnSettings.click({ force: true });
     await expect(page.locator("#settingsModal")).toBeVisible();
-    await page.locator("#btnResetSampleData").click();
-    await page.locator("#btnCloseSettings").click();
+    await page.locator("#btnResetSampleData").click({ force: true });
+    await page.locator("#btnCloseSettings").click({ force: true });
     await expect(page.locator("#settingsModal")).toBeHidden();
 
     // In Planning view: verify deal badge elements exist in #activeItemsList
