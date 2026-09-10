@@ -322,7 +322,7 @@ assert(
   "DIFF-BUY-10: Buy Mode card retains touch swipe containers"
 );
 
-// CHECKBOX-BUY: Checkbox hollow outline & conditional checkmark DOM (ADR-0034 / Issue #348)
+// CHECKBOX-BUY: Checkbox hollow outline & conditional checkmark DOM (ADR-0034 / Issue #348 / ADR-0036)
 itemMilk.checked = false;
 const uncheckedBuyHtml = sb1.renderItemCard(itemMilk);
 assert(
@@ -338,6 +338,11 @@ const buyBtnMatch = uncheckedBuyHtml.match(
 assert(
   buyBtnMatch && !buyBtnMatch[1].includes("✓"),
   "CHECKBOX-BUY-02: Unchecked Buy Mode checkbox button contains zero checkmark text or glyphs"
+);
+assert(
+  uncheckedBuyHtml.includes('data-action="toggle-check"') &&
+    uncheckedBuyHtml.includes("aria-label="),
+  "CHECKBOX-BUY-02b: Buy Mode checkbox has semantic data-action and accessible aria-label"
 );
 
 itemMilk.checked = true;
@@ -475,7 +480,7 @@ assert(
   "DIFF-PLAN-13: Planning Mode card retains functional checkbox for staging"
 );
 
-// CHECKBOX-PLAN: Planning checkbox hollow outline & conditional checkmark DOM (ADR-0034 / Issue #348)
+// CHECKBOX-PLAN: Planning checkbox hollow outline & conditional checkmark DOM (ADR-0034 / Issue #348 / ADR-0036)
 planItemMilk.checked = false;
 const uncheckedPlanHtml = sb2.renderItemCard(planItemMilk);
 assert(
@@ -491,6 +496,11 @@ const planBtnMatch = uncheckedPlanHtml.match(
 assert(
   planBtnMatch && !planBtnMatch[1].includes("✓"),
   "CHECKBOX-PLAN-02: Unchecked Planning Mode checkbox button contains zero checkmark text or glyphs"
+);
+assert(
+  uncheckedPlanHtml.includes('data-action="toggle-check"') &&
+    uncheckedPlanHtml.includes("aria-label="),
+  "CHECKBOX-PLAN-02b: Planning Mode checkbox has semantic data-action and accessible aria-label"
 );
 
 planItemMilk.checked = true;
