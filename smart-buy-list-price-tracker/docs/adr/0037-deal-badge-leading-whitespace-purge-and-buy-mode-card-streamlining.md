@@ -36,7 +36,7 @@ Following user feedback and visual inspection on desktop/table views and in-aisl
     ```
   - Use single-line tag composition with `gap-1` or explicit inline layout:
     ```javascript
-    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold ..."><span aria-hidden="true">${emoji}</span><span class="hidden sm:inline">${cleanDealLabel(rawLabel)}</span></span>`
+    `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold ..."><span aria-hidden="true">${emoji}</span><span class="hidden sm:inline">${cleanDealLabel(rawLabel)}</span></span>`;
     ```
   - Ensure rendered text content on tablet/desktop views ($\ge 640\text{px}$) is cleanly formatted as `🟢 Great Deal` / `🟢 Giá Siêu Tốt` with zero double spaces or leading whitespace artifacts.
 

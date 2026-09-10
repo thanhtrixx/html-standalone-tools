@@ -660,6 +660,31 @@ assert(
   "RESP-BADGE-07b: #editItemDealBadge static HTML template includes responsive breakpoint markup"
 );
 
+// RESP-BADGE-08: Price History table deal badge has zero newline or double-space artifacts (ADR-0037 / Issue #376)
+sbBadges.renderPriceLedgerTable();
+const tableBody = sbBadges.document.getElementById("ledgerTableBody");
+const tableHtml = tableBody ? tableBody.innerHTML : "";
+assert(
+  tableHtml.includes('<span aria-hidden="true">') &&
+    !tableHtml.includes("  Great Deal") &&
+    !tableHtml.includes("  Price Spike") &&
+    !tableHtml.includes("  Fair Price") &&
+    !tableHtml.includes("  New Item"),
+  "RESP-BADGE-08: Price History table deal badge has zero newline or double-space artifacts"
+);
+
+// RESP-BADGE-09: Item card deal badge has single-line tag composition with zero whitespace artifacts (ADR-0037 / Issue #376)
+const planBadgeMatch = planCard.match(
+  /<span class="inline-flex items-center px-2[^"]*"[^>]*>([\s\S]*?)<\/span>/
+);
+const planBadgeInner = planBadgeMatch ? planBadgeMatch[1] : "";
+assert(
+  !planBadgeInner.includes("\n") &&
+    !planBadgeInner.includes("  Great Deal") &&
+    !planBadgeInner.includes("  Price Spike"),
+  "RESP-BADGE-09: Item card deal badge has single-line tag composition without template newline artifacts"
+);
+
 // RESP-TOUCH-01: Price History bulk action buttons satisfy 44px minimum touch targets (ADR-0034 / Issue #349)
 const addSelectedBtnMatch = htmlContent.match(
   /<button[^>]*id="btnAddSelectedLedgerToBuyList"[^>]*class="([^"]*)"/
