@@ -7,6 +7,8 @@ dist
 release-assets
 test-reports
 coverage
+playwright-report
+test-results
 
 # Local environment & secrets
 .env
