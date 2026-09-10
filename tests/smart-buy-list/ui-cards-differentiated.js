@@ -291,23 +291,21 @@ assert(
 );
 
 assert(
-  buyCardHtml.includes("/l") ||
-    buyCardHtml.includes("/kg") ||
-    buyCardHtml.includes("/L") ||
-    buyCardHtml.includes("buy-mode-unit-price"),
-  "DIFF-BUY-08 / BUY-UNIT-01: Buy Mode card displays normalized unit price (ADR-0033)"
+  !buyCardHtml.includes('data-testid="buy-mode-unit-price"'),
+  "DIFF-BUY-08 / BUY-STREAMLINE-01: Buy Mode card omits secondary unit price sub-row (ADR-0037 / Issue #377)"
 );
 
 assert(
-  buyCardHtml.includes('data-testid="buy-mode-unit-price"'),
-  "BUY-UNIT-02: Buy Mode card contains testid hook for unit price"
+  !buyCardHtml.includes('data-testid="buy-mode-atl-delta"'),
+  "BUY-STREAMLINE-02: Buy Mode card omits secondary ATL delta indicator (ADR-0037 / Issue #377)"
 );
 
 assert(
-  buyCardHtml.includes('data-testid="buy-mode-atl-delta"') ||
-    buyCardHtml.includes("ATL") ||
-    buyCardHtml.includes("% vs ATL"),
-  "BUY-UNIT-03: Buy Mode card displays ATL delta indicator when historical ledger records exist"
+  buyCardHtml.includes('data-action="toggle-check"') &&
+    buyCardHtml.includes(itemMilk.name) &&
+    buyCardHtml.includes('data-action="edit-price"') &&
+    buyCardHtml.includes("inline-flex items-center px-2"),
+  "BUY-STREAMLINE-03: Buy Mode card strictly renders 4 core components (Checkbox, Name, Deal Badge, Price Button)"
 );
 
 assert(
