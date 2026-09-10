@@ -4,19 +4,20 @@
 > **Test Architecture:** 7 Permanent Domain Suites (`tests/smart-buy-list-*.test.js`)  
 > **Shared Harness:** `tests/helpers/smart-buy-list-harness.js`  
 > **Test Runner:** `scripts/run-tests.js` (`bun test` / `npm test`, `bun run test:tracker` / `npm run test:tracker`)  
-> **Architecture Decision Record:** [`docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md`](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md), [`docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md`](../docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md) & [`docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md`](./docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md)  
+> **Architecture Decision Record:** [`docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md`](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md), [`docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md`](../docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md), [`docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md`](./docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md) & [`docs/adr/0009-playwright-lightpanda-hybrid-multi-device-testing.md`](../docs/adr/0009-playwright-lightpanda-hybrid-multi-device-testing.md)  
 > **Historical Incremental Test Log Archive:** [`docs/deprecated/TEST_PLAN_HISTORY.md`](./docs/deprecated/TEST_PLAN_HISTORY.md)
 
 ---
 
 ## 🎯 Test Architecture & Domain Organization
 
-Per **ADR-0028**, **ADR-0007**, and **ADR-0031**, the `smart-buy-list-price-tracker` test suite operates under a **Dual-Level Strategy**:
+Per **ADR-0028**, **ADR-0007**, **ADR-0031**, and **ADR-0009**, the `smart-buy-list-price-tracker` test suite operates under a **Three-Tier Hybrid Strategy**:
 
-1. **Direct Domain Unit Tests**: Pure mathematical logic (`src/domain/`), normalization, compression codecs, and storage contracts are imported directly as ES/CommonJS modules, bypassing regex `<script>` parsing.
-2. **Scoped DOM Integration Tests**: UI interactions, gestures, modal stacks, and event delegation execute within the sandboxed DOM harness (`tests/helpers/smart-buy-list-harness.js`).
+1. **Direct Domain Unit Tests (Fast Inner Loop)**: Pure mathematical logic (`src/domain/`), normalization, compression codecs, and storage contracts imported directly as ES/CommonJS modules.
+2. **Scoped DOM Integration Tests**: UI interactions, gestures, modal stacks, and event delegation executed within the sandboxed DOM harness (`tests/helpers/smart-buy-list-harness.js`).
+3. **Multi-Device E2E & Visual Regression Tests (Playwright Outer Gate)**: Real browser engine rendering across 4 standard profiles (`Pixel 7`, `iPhone 14 Pro`, `iPad Pro 11`, `Desktop Chrome`) validating zero horizontal overflow, touch target accessibility (≥44px), bilingual card integrity, and visual snapshots.
 
-### Developer Inner Loop
+### Developer Inner Loop & E2E Gate
 
 | Target Scope                 | Command (Bun)                   | Command (Node.js)               | Description                                                                                                     |
 | :--------------------------- | :------------------------------ | :------------------------------ | :-------------------------------------------------------------------------------------------------------------- |
@@ -28,6 +29,8 @@ Per **ADR-0028**, **ADR-0007**, and **ADR-0031**, the `smart-buy-list-price-trac
 | **PWA Lifecycle & Cache**    | `bun run test:tracker:pwa`      | `npm run test:tracker:pwa`      | Manifest validation, dynamic SemVer parity, service worker caching, iOS safe-area                               |
 | **i18n & Accessibility**     | `bun run test:tracker:i18n`     | `npm run test:tracker:i18n`     | 100% bilingual key parity, VND/currency formatting, ARIA audit                                                  |
 | **Security & CSP**           | `bun run test:tracker:security` | `npm run test:tracker:security` | Strict CSP compliance, HTML entity sanitization, `_headers` framing protection                                  |
+| **E2E 4-Device Suite**       | `bun run test:e2e:tracker`      | `npm run test:e2e:tracker`      | 4-device Playwright test (Pixel 7, iPhone 14 Pro, iPad Pro 11, Desktop Chrome)                                  |
+| **E2E Mobile Only**          | `bun run test:e2e:mobile`       | `npm run test:e2e:mobile`       | Scoped mobile-only E2E checks (Pixel 7 + iPhone 14 Pro)                                                         |
 
 ---
 
