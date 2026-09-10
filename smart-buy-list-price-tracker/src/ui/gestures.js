@@ -392,13 +392,9 @@ function renderItemCard(item) {
                   ${item.checked ? '<span aria-hidden="true">✓</span>' : ""}
                 </button>
 
-                <!-- Item Info (Name + Unit Price & ATL Delta) -->
+                <!-- Item Info (Name) -->
                 <div class="flex-1 min-w-0">
                   <span class="font-bold text-base text-slate-100 truncate block ${item.checked ? "line-through text-slate-500" : ""}">${safeName}</span>
-                  <div class="flex items-center gap-1.5 flex-wrap mt-0.5 text-[11px] ${item.checked ? "opacity-60" : ""}">
-                    ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold" data-testid="buy-mode-unit-price">${formatCurrency(unitPrice)}/${baseUnit}</span>` : ""}
-                    ${atlDeltaHtml ? `<span data-testid="buy-mode-atl-delta">${atlDeltaHtml}</span>` : ""}
-                  </div>
                 </div>
               </div>
 

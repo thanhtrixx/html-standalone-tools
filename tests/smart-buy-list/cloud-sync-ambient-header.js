@@ -460,8 +460,8 @@ console.log("\n--- Section 3: Dynamic State Transitions ---");
   );
   const manifestJson = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert(
-    manifestJson.version === "4.6.0",
-    `PWA-VER-01: manifest.webmanifest version is 4.6.0 (Got: '${manifestJson.version}')`
+    manifestJson.version === "4.6.1",
+    `PWA-VER-01: manifest.webmanifest version is 4.6.1 (Got: '${manifestJson.version}')`
   );
 
   const swPath = path.join(
@@ -472,8 +472,9 @@ console.log("\n--- Section 3: Dynamic State Transitions ---");
   );
   const swContent = fs.readFileSync(swPath, "utf8");
   assert(
-    swContent.includes("smart-buy-list-v4.6.0"),
-    "PWA-VER-02: sw.js CACHE_NAME matches smart-buy-list-v4.6.0"
+    swContent.includes(`smart-buy-list-v${manifestJson.version}`),
+    "PWA-VER-02: sw.js CACHE_NAME matches smart-buy-list-v" +
+      manifestJson.version
   );
 
   const htmlPath = path.join(
@@ -484,8 +485,8 @@ console.log("\n--- Section 3: Dynamic State Transitions ---");
   );
   const indexHtml = fs.readFileSync(htmlPath, "utf8");
   assert(
-    indexHtml.includes(">v4.6.0<"),
-    "PWA-VER-03: index.html #pwaVersionBadge displays v4.6.0"
+    indexHtml.includes(`>v${manifestJson.version}<`),
+    "PWA-VER-03: index.html #pwaVersionBadge displays v" + manifestJson.version
   );
 }
 

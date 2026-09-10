@@ -1,4 +1,4 @@
-const CACHE_NAME = "smart-buy-list-v4.6.0";
+const CACHE_NAME = "smart-buy-list-v4.6.1";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
