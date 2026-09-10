@@ -655,7 +655,7 @@
   </head>
 
   <body
-    class="h-full flex flex-col font-sans antialiased bg-slate-900 text-slate-100 theme-transition"
+    class="h-full flex flex-col font-sans antialiased bg-slate-900 text-slate-100 theme-transition overflow-x-hidden max-w-[100vw]"
   >
     <div
       id="toastContainer"
@@ -930,7 +930,7 @@
         <select
           id="langSelector"
           onchange="changeLanguage(this.value)"
-          class="bg-slate-800 border border-slate-700 text-xs sm:text-sm rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none transition cursor-pointer"
+          class="bg-slate-800 border border-slate-700 text-xs sm:text-sm rounded-lg px-2.5 py-1.5 h-[36px] min-h-[36px] text-slate-200 focus:outline-none transition cursor-pointer"
           aria-label="Select Language"
         >
           <option value="en">🇬🇧 EN</option>
@@ -939,7 +939,7 @@
         <select
           id="currencySelector"
           onchange="setCurrency(this.value)"
-          class="bg-slate-800 border border-slate-700 text-xs sm:text-sm rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none transition cursor-pointer"
+          class="hidden sm:inline-block bg-slate-800 border border-slate-700 text-xs sm:text-sm rounded-lg px-2.5 py-1.5 h-[36px] min-h-[36px] text-slate-200 focus:outline-none transition cursor-pointer"
           aria-label="Select Currency"
         >
           <option value="VND">🇻🇳 VND (₫)</option>
@@ -949,7 +949,7 @@
         </select>
         <button
           onclick="triggerCSVUpload()"
-          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
+          class="hidden lg:flex px-3 py-1.5 min-h-[36px] text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_import"
           title="Import CSV"
         >
@@ -958,7 +958,7 @@
         </button>
         <button
           onclick="shareSimulation()"
-          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
+          class="hidden lg:flex px-3 py-1.5 min-h-[36px] text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_share"
           title="Share via URL"
         >
@@ -967,7 +967,7 @@
         </button>
         <button
           onclick="toggleCSVModal(true)"
-          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
+          class="hidden lg:flex px-3 py-1.5 min-h-[36px] text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_manage"
           title="Manage Data"
         >
@@ -979,7 +979,7 @@
         <button
           onclick="togglePresetsModal(true)"
           id="btnPresetsHeader"
-          class="px-3 py-1.5 text-xs sm:text-sm bg-gradient-to-r from-indigo-600/80 to-purple-600/80 hover:from-indigo-500 hover:to-purple-500 text-white font-medium border border-indigo-500/30 rounded-lg flex items-center shadow-md shadow-indigo-500/20 transition"
+          class="hidden lg:flex px-3 py-1.5 min-h-[36px] text-xs sm:text-sm bg-gradient-to-r from-indigo-600/80 to-purple-600/80 hover:from-indigo-500 hover:to-purple-500 text-white font-medium border border-indigo-500/30 rounded-lg items-center shadow-md shadow-indigo-500/20 transition"
           data-i18n-title="tooltip_presets"
           title="Strategy Presets"
         >
@@ -989,7 +989,7 @@
         <button
           onclick="openAIDossierModal()"
           id="btnAIDossier"
-          class="px-3 py-1.5 text-xs sm:text-sm bg-gradient-to-r from-emerald-600/80 to-teal-600/80 hover:from-emerald-500 hover:to-teal-500 text-white font-medium border border-emerald-500/30 rounded-lg flex items-center shadow-md shadow-emerald-500/20 transition"
+          class="hidden lg:flex px-3 py-1.5 min-h-[36px] text-xs sm:text-sm bg-gradient-to-r from-emerald-600/80 to-teal-600/80 hover:from-emerald-500 hover:to-teal-500 text-white font-medium border border-emerald-500/30 rounded-lg items-center shadow-md shadow-emerald-500/20 transition"
           data-i18n-title="tooltip_ai_dossier"
           title="AI Health Dossier"
         >
@@ -999,7 +999,7 @@
         <button
           onclick="toggleTheme()"
           id="themeBtn"
-          class="px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center transition"
+          class="hidden sm:flex px-3 py-1.5 min-h-[36px] text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_theme"
           title="Toggle Theme"
         >
@@ -1008,7 +1008,7 @@
         </button>
         <button
           onclick="showOnboarding()"
-          class="hidden md:flex px-3 py-1.5 text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
+          class="hidden lg:flex px-3 py-1.5 min-h-[36px] text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg items-center transition"
           data-i18n-title="tooltip_help"
           title="Help"
         >
@@ -1017,7 +1017,7 @@
         <button
           onclick="toggleMobileActionSheet(true)"
           id="btnMobileActions"
-          class="md:hidden px-2.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center relative transition"
+          class="lg:hidden px-3 py-1.5 min-h-[36px] min-w-[36px] text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg flex items-center justify-center relative transition"
           data-i18n-title="tooltip_more_actions"
           aria-label="More actions"
           title="More actions"
