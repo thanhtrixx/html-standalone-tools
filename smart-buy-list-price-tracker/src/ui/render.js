@@ -731,11 +731,12 @@ function renderItemList() {
       );
       storeHtml += `
               <div class="space-y-2">
-                <div class="flex items-center justify-between pt-2 pb-1 px-1">
-                  <div class="font-bold text-xs uppercase tracking-wider text-slate-300">
+                <div class="sticky top-14 z-10 -mx-1 px-2 py-1.5 backdrop-blur-md bg-slate-900/90 border-b border-slate-800/60 rounded-xl flex items-center justify-between shadow-sm">
+                  <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-300">
+                    <span aria-hidden="true">🏬</span>
                     <span>${sanitizeHTML(sName)}</span>
                   </div>
-                  <span class="text-[11px] font-semibold text-emerald-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
+                  <span class="text-[11px] font-semibold tabular-nums text-emerald-400 bg-slate-800/90 px-2.5 py-0.5 rounded-full border border-slate-700/60">
                     ${storeItems.length} ${itemsLabel} • ${formatCurrency(storeSubtotal)}
                   </span>
                 </div>
@@ -767,21 +768,26 @@ function renderItemList() {
       catMap.get(cat).push(item);
     });
 
+    const itemsLabel = currentLanguage === "vi" ? "mặt hàng" : "items";
     let aisleHtml = "";
     catOrder.forEach((catKey) => {
       if (catMap.has(catKey)) {
         const catItems = catMap.get(catKey);
         const catInfo = CATEGORIES[catKey] || CATEGORIES.other;
         const catLabel = currentLanguage === "vi" ? catInfo.vi : catInfo.en;
+        const catSubtotal = catItems.reduce(
+          (sum, it) => sum + (parseFloat(it.price) || 0),
+          0
+        );
         aisleHtml += `
                 <div class="space-y-2">
-                  <div class="flex items-center justify-between pt-2 pb-1 px-1">
+                  <div class="sticky top-14 z-10 -mx-1 px-2 py-1.5 backdrop-blur-md bg-slate-900/90 border-b border-slate-800/60 rounded-xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-300">
-                      <span>${catInfo.icon}</span>
+                      <span aria-hidden="true">${catInfo.icon}</span>
                       <span>${catLabel}</span>
                     </div>
-                    <span class="text-[11px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
-                      ${catItems.length}
+                    <span class="text-[11px] font-semibold tabular-nums text-emerald-400 bg-slate-800/90 px-2.5 py-0.5 rounded-full border border-slate-700/60">
+                      ${catItems.length} ${itemsLabel} • ${formatCurrency(catSubtotal)}
                     </span>
                   </div>
                   <div class="space-y-2">
@@ -797,15 +803,19 @@ function renderItemList() {
     catMap.forEach((catItems, catKey) => {
       const catInfo = CATEGORIES[catKey] || CATEGORIES.other;
       const catLabel = currentLanguage === "vi" ? catInfo.vi : catInfo.en;
+      const catSubtotal = catItems.reduce(
+        (sum, it) => sum + (parseFloat(it.price) || 0),
+        0
+      );
       aisleHtml += `
               <div class="space-y-2">
-                <div class="flex items-center justify-between pt-2 pb-1 px-1">
+                <div class="sticky top-14 z-10 -mx-1 px-2 py-1.5 backdrop-blur-md bg-slate-900/90 border-b border-slate-800/60 rounded-xl flex items-center justify-between shadow-sm">
                   <div class="flex items-center gap-1.5 font-bold text-xs uppercase tracking-wider text-slate-300">
-                    <span>${catInfo.icon}</span>
+                    <span aria-hidden="true">${catInfo.icon}</span>
                     <span>${catLabel}</span>
                   </div>
-                  <span class="text-[11px] font-semibold text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full border border-slate-700/60">
-                    ${catItems.length}
+                  <span class="text-[11px] font-semibold tabular-nums text-emerald-400 bg-slate-800/90 px-2.5 py-0.5 rounded-full border border-slate-700/60">
+                    ${catItems.length} ${itemsLabel} • ${formatCurrency(catSubtotal)}
                   </span>
                 </div>
                 <div class="space-y-2">
