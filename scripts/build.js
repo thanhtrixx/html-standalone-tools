@@ -115,11 +115,15 @@ function compileTailwindCSS(htmlContent, toolDir) {
     const configObj = extractTailwindConfigObject(htmlContent) || "{}";
 
     // Build a temporary tailwind.config.js using the extracted config, pointing
-    // content scanning at the source HTML file.
-    const srcHtmlPath = path.join(toolDir, "index.html").replace(/\\/g, "/");
+    // content scanning at the source HTML file and all source JS/HTML assets.
+    const contentGlobs = [
+      path.join(toolDir, "index.html").replace(/\\/g, "/"),
+      path.join(toolDir, "src", "**", "*.{js,html}").replace(/\\/g, "/"),
+      path.join(toolDir, "*.js").replace(/\\/g, "/"),
+    ];
     const configJs = `module.exports = ${configObj.replace(
       /^(\s*\{)/,
-      `$1\n  content: [${JSON.stringify(srcHtmlPath)}],`
+      `$1\n  content: ${JSON.stringify(contentGlobs)},`
     )};`;
 
     const configPath = path.join(tmpDir, "tailwind.config.js");

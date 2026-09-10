@@ -312,15 +312,27 @@ function finalizeTripCompletion() {
 }
 
 function completeTrip(payload) {
-  if (typeof store !== "undefined" && store && store.completeTrip) {
-    return store.completeTrip(payload);
-  }
   const { ledgerEntries = [], uncheckedItems = [] } = payload || {};
-  if (!memoryState.purchaseLedger) memoryState.purchaseLedger = [];
-  memoryState.purchaseLedger.push(...ledgerEntries);
-  if (memoryState.activeList) memoryState.activeList.items = uncheckedItems;
+  if (typeof store !== "undefined" && store && store.completeTrip) {
+    store.completeTrip(payload);
+    const storeState = store.getState();
+    if (storeState) {
+      if (storeState.purchaseLedger)
+        memoryState.purchaseLedger = storeState.purchaseLedger;
+      if (storeState.activeList && storeState.activeList.items)
+        memoryState.activeList.items = storeState.activeList.items;
+    }
+  } else {
+    if (!memoryState.purchaseLedger) memoryState.purchaseLedger = [];
+    memoryState.purchaseLedger.push(...ledgerEntries);
+    if (memoryState.activeList) memoryState.activeList.items = uncheckedItems;
+  }
+
   saveToLocalStorage();
   renderApp();
+  if (typeof renderPriceLedgerTable === "function") {
+    renderPriceLedgerTable();
+  }
 }
 
 let selectedLedgerIds = new Set();
@@ -680,7 +692,7 @@ function renderPriceLedgerTable(query = "") {
               <td class="p-3 text-center">
                 <input
                   type="checkbox"
-                  class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
+                  class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 accent-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
                   data-ledger-id="${l.id}"
                   aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + safeName}"
                   onchange="toggleLedgerRowSelect('${l.id}', this.checked)"
@@ -736,7 +748,7 @@ function renderPriceLedgerTable(query = "") {
                 <div class="flex items-start gap-2.5 flex-1 min-w-0">
                   <input
                     type="checkbox"
-                    class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer mt-0.5 shrink-0"
+                    class="ledger-row-checkbox h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 accent-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer mt-0.5 shrink-0"
                     data-ledger-id="${l.id}"
                     aria-label="${(t.aria_select_ledger_row || "Select purchase record") + ": " + safeName}"
                     onchange="toggleLedgerRowSelect('${l.id}', this.checked)"

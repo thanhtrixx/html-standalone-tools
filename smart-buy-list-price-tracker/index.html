@@ -356,11 +356,6 @@
           0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
       }
 
-      /* Utility hidden override to guarantee display:none when toggled */
-      .hidden {
-        display: none !important;
-      }
-
       /* ==================== BROWSER SURFACES & INTERACTION POLISH ==================== */
       /* The parts the page doesn't draw — selection, caret, the page scrollbar,
         and keyboard focus — carry the emerald accent so the untouched chrome
@@ -1209,6 +1204,7 @@
               </div>
             </div>
             <button
+              id="btnOpenFinishTripModal"
               onclick="openTripCompleteModal()"
               class="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold rounded-xl text-xs sm:text-sm shadow-md transition-transform active:scale-95 flex items-center gap-1.5 cursor-pointer"
             >
@@ -1266,7 +1262,7 @@
                       type="checkbox"
                       id="ledgerSelectAllCheckbox"
                       onchange="toggleSelectAllLedgerRows(this.checked)"
-                      class="h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
+                      class="h-5 w-5 rounded border-slate-700 bg-slate-900 text-emerald-500 accent-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-900 cursor-pointer"
                       title="Select All"
                     />
                   </th>
