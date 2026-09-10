@@ -35,6 +35,7 @@
     "test:tracker:pwa": "./scripts/run.sh tests/smart-buy-list-pwa-lifecycle.test.js",
     "test:tracker:i18n": "./scripts/run.sh tests/smart-buy-list-i18n.test.js",
     "test:tracker:security": "./scripts/run.sh tests/smart-buy-list-security.test.js",
+    "test:tracker:smoke": "./scripts/run.sh tests/smart-buy-list-lightpanda-smoke.test.js",
     "test:helpers": "./scripts/run.sh tests/helpers.test.js",
     "test:ui": "./scripts/run.sh tests/ui-ux.test.js",
     "test:e2e": "playwright test",

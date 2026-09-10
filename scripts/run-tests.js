@@ -106,6 +106,11 @@ const TEST_SUITES = [
     category: "Security",
   },
   {
+    name: "Smart Buy-List Fast Smoke & DOM Semantics",
+    file: "tests/smart-buy-list-lightpanda-smoke.test.js",
+    category: "Smoke",
+  },
+  {
     name: "Portal Hub UI & Bilingual Parity",
     file: "tests/portal.test.js",
     category: "Portal",
