@@ -13,6 +13,7 @@ async function setupPage(page) {
   await page.goto(APP_PATH, { waitUntil: "domcontentloaded" });
   await page.waitForSelector("#headerTitle");
   await page.waitForSelector("#btnOpenSettings");
+  await page.waitForTimeout(100);
   return { errors };
 }
 

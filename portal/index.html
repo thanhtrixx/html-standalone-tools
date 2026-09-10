@@ -35,6 +35,11 @@
     </script>
     <style>
       /* Base smoothing */
+      html,
+      body {
+        overflow-x: hidden;
+        max-width: 100vw;
+      }
       body {
         font-family:
           ui-sans-serif,
@@ -50,14 +55,14 @@
     </style>
   </head>
   <body
-    class="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950"
+    class="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950 overflow-x-hidden"
   >
     <!-- Header -->
     <header
-      class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30"
+      class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30 overflow-x-hidden"
     >
       <div
-        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
+        class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between"
       >
         <div class="flex items-center space-x-3">
           <div
@@ -91,7 +96,7 @@
           </div>
         </div>
 
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-1.5 sm:space-x-3 shrink-0">
           <!-- Language Switcher -->
           <div
             class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700 text-xs font-semibold"

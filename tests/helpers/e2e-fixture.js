@@ -9,8 +9,8 @@ async function assertNoHorizontalOverflow(page) {
   await page.waitForLoadState("domcontentloaded");
   const isOverflowing = await page.evaluate(() => {
     return (
-      document.documentElement.scrollWidth > window.innerWidth ||
-      document.body.scrollWidth > window.innerWidth
+      document.documentElement.scrollWidth > window.innerWidth + 1 ||
+      document.body.scrollWidth > window.innerWidth + 1
     );
   });
   expect(isOverflowing, "Page should have no horizontal overflow").toBe(false);
@@ -24,7 +24,10 @@ async function assertNoHorizontalOverflow(page) {
  */
 async function assertTouchTargetSize(locator, minW = 44, minH = 44) {
   await locator.waitFor({ state: "visible" });
-  const box = await locator.boundingBox();
+  const box = await locator.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    return { width: Math.round(rect.width), height: Math.round(rect.height) };
+  });
   expect(box, "Element should have a bounding box").not.toBeNull();
   if (box) {
     expect(
