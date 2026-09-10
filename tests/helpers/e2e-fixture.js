@@ -23,6 +23,7 @@ async function assertNoHorizontalOverflow(page) {
  * @param {number} [minH=44]
  */
 async function assertTouchTargetSize(locator, minW = 44, minH = 44) {
+  await locator.waitFor({ state: "visible" });
   const box = await locator.boundingBox();
   expect(box, "Element should have a bounding box").not.toBeNull();
   if (box) {

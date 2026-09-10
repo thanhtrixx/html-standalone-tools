@@ -328,9 +328,9 @@ const uncheckedBuyHtml = sb1.renderItemCard(itemMilk);
 assert(
   uncheckedBuyHtml.includes("w-11 h-11 rounded-xl") &&
     uncheckedBuyHtml.includes(
-      "bg-transparent border-2 border-slate-600 hover:border-emerald-500"
+      "bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500"
     ),
-  "CHECKBOX-BUY-01: Unchecked Buy Mode checkbox renders w-11 h-11 rounded-xl hollow outline"
+  "CHECKBOX-BUY-01: Unchecked Buy Mode checkbox renders w-11 h-11 rounded-xl high-contrast outline"
 );
 const buyBtnMatch = uncheckedBuyHtml.match(
   /<button[^>]*data-action="toggle-check"[^>]*>([\s\S]*?)<\/button>/
@@ -481,9 +481,9 @@ const uncheckedPlanHtml = sb2.renderItemCard(planItemMilk);
 assert(
   uncheckedPlanHtml.includes("w-8 h-8 rounded-lg") &&
     uncheckedPlanHtml.includes(
-      "bg-transparent border-2 border-slate-600 hover:border-emerald-500"
+      "bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500"
     ),
-  "CHECKBOX-PLAN-01: Unchecked Planning Mode checkbox renders w-8 h-8 rounded-lg hollow outline"
+  "CHECKBOX-PLAN-01: Unchecked Planning Mode checkbox renders w-8 h-8 rounded-lg high-contrast outline"
 );
 const planBtnMatch = uncheckedPlanHtml.match(
   /<button[^>]*data-action="toggle-check"[^>]*>([\s\S]*?)<\/button>/

@@ -53,6 +53,6 @@ module.exports = defineConfig({
   webServer: {
     command: "node scripts/serve-dist.js",
     port: 4173,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
 });
