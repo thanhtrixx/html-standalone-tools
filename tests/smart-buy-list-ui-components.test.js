@@ -27,6 +27,7 @@ const SUB_SUITES = [
   "ui-smart-merge-review.js",
   "ui-v4-6-glanceability.js",
   "ui-v4-6-spring-motion.js",
+  "ui-v4-6-quick-price-popover.js",
 ];
 
 async function runSubSuite(sub) {
