@@ -354,7 +354,7 @@ function renderItemCard(item) {
 
   if (currentPhase === "IN_STORE") {
     return `
-          <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${safeId}">
+          <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none item-card-transition" id="cardContainer-${safeId}">
             <!-- Swipe Action Backgrounds -->
             <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
               <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->
@@ -422,7 +422,7 @@ function renderItemCard(item) {
   const catInfo = CATEGORIES[item.category] || CATEGORIES.other;
 
   return `
-        <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none" id="cardContainer-${safeId}">
+        <div class="relative overflow-hidden rounded-2xl group shadow-sm select-none item-card-transition" id="cardContainer-${safeId}">
           <!-- Swipe Action Backgrounds (Swipe Right = Done/Undo, Swipe Left = Compare) -->
           <div class="absolute inset-0 flex items-center justify-between pointer-events-none rounded-2xl">
             <!-- Left Reveal (Green/Done on Unchecked, Amber/Undo on Checked) -->

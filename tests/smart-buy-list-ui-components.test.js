@@ -26,6 +26,7 @@ const SUB_SUITES = [
   "ui-vietnamese-omnibox.js",
   "ui-smart-merge-review.js",
   "ui-v4-6-glanceability.js",
+  "ui-v4-6-spring-motion.js",
 ];
 
 async function runSubSuite(sub) {
