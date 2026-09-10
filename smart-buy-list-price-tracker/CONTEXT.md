@@ -144,6 +144,13 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ---
 
+- **In-Aisle Quick Price Popover (`#quickPricePopover`)**: Lightweight, 1-tap in-aisle price editor anchored directly to Buy Mode cards, allowing rapid price corrections with numeric input and 1-tap "Save & Update Ledger" without full modal disruption.
+- **Interactive Starter Hauls & Zero-Result Recovery**: Contextual empty states with 1-tap "Weekly Essentials Starter Haul" button, category quick-add chips, and clear recovery actions when active filters yield 0 matches.
+- **Sticky Section Grouping & Subtotal Rollup**: Department and store group headers stick beneath the top app bar (`sticky top-14`) with department icons, item counts, and live running subtotal rollups.
+- **Spring Micro-Interactions & Reduced Motion**: Tactile spring physics (`cubic-bezier(0.34, 1.56, 0.64, 1)`) for checkbox states, smooth list transition into completed trays, and fluid progress bar updates, strictly dampened to `0.01ms` when `prefers-reduced-motion: reduce` is active.
+
+---
+
 ## 📚 Architectural Decision Records (ADRs)
 
 - [ADR-0001: IndexedDB Storage Engine & Google Drive Sync Seam](./docs/adr/0001-indexeddb-storage-engine-and-google-drive-sync-seam.md)
@@ -183,3 +190,4 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 - [ADR-0035: Responsive Deal Badge Expansion, Tailwind Content Scanner, Trip Completion Price History State Synchronization & Checkbox Contrast](./docs/adr/0035-responsive-deal-badge-expansion-trip-completion-sync-and-checkbox-contrast.md)
 - [ADR-0036: Test Architecture Upgrade — Artifact-First Testing, Single Source of Truth State Container, and Semantic Invariants](./docs/adr/0036-test-architecture-artifact-first-single-state-and-semantic-invariants.md)
 - [ADR-0037: Deal Badge Whitespace Purge, Buy Mode Card Streamlining & PWA v4.6.1](./docs/adr/0037-deal-badge-leading-whitespace-purge-and-buy-mode-card-streamlining.md)
+- [ADR-0038: Comprehensive Impeccable UI/UX Enhancements, In-Aisle Ergonomics & Motion Architecture](./docs/adr/0038-comprehensive-impeccable-ui-ux-enhancements.md)

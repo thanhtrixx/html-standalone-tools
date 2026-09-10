@@ -56,7 +56,7 @@ During testing of `smart-buy-list-price-tracker`, several user-facing bugs escap
 
 ## Decision Outcome
 
-1. **Artifact-First Testing**: `npm run verify` runs compaction build first, then serves `dist/` and runs Playwright across 4 device profiles (`android`, `iphone`, `ipad`, `desktop`).
+1. **Artifact-First Testing**: `bun run verify` or `npm run verify` runs compaction build first, then serves `dist/` and runs Playwright across 4 device profiles (`android`, `iphone`, `ipad`, `desktop`).
 2. **State Container Consolidation**: Unify application state in `store.js`. UI views subscribe directly to store changes.
 3. **Semantic Test Invariants**: Test assertions check real DOM semantics (`role`, `aria-*`, `querySelector`, bounding box $\ge 44\text{px}$, contrast $\ge 4.5:1$).
 
@@ -73,4 +73,4 @@ During testing of `smart-buy-list-price-tracker`, several user-facing bugs escap
 
 ### Negative / Trade-offs
 
-- Running the full verification gate takes ~10-15s (acceptable for PR checks, mitigated by fast inner-loop `npm run test:tracker`).
+- Running the full verification gate takes ~10-15s (acceptable for PR checks, mitigated by fast inner-loop `bun run test:tracker` or `npm run test:tracker`).
