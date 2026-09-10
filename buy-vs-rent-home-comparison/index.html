@@ -156,10 +156,20 @@
         cursor: help;
         transition: color 0.15s ease;
       }
+      .latex-math,
+      .katex-display {
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+      }
+      .katex-display > .katex {
+        max-width: 100% !important;
+        text-align: center;
+      }
     </style>
   </head>
   <body
-    class="min-h-screen transition-colors duration-200 antialiased flex flex-col justify-between"
+    class="min-h-screen transition-colors duration-200 antialiased flex flex-col justify-between overflow-x-hidden max-w-[100vw]"
   >
     <!-- Floating Tooltip Container -->
     <div id="appTooltip" class="hidden opacity-0 transform scale-95"></div>
@@ -300,7 +310,7 @@
           <button
             id="aiDossierBtn"
             onclick="openAIDossierModal()"
-            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1.5 shadow-sm"
+            class="px-3 py-1.5 min-h-[36px] text-xs font-semibold rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1.5 shadow-sm"
           >
             <i class="fa-solid fa-brain text-emerald-400"></i>
             <span data-i18n="btn_ai_dossier">Hồ sơ AI</span>
@@ -310,7 +320,7 @@
           <button
             id="onboardingTourBtn"
             onclick="startOnboardingTour()"
-            class="p-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            class="p-2 min-h-[36px] min-w-[36px] text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center"
             title="Hướng dẫn sử dụng"
           >
             <i class="fa-solid fa-circle-question text-sky-400"></i>
@@ -320,7 +330,7 @@
           <button
             id="langToggleBtn"
             onclick="toggleLanguage()"
-            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            class="px-3 py-1.5 min-h-[36px] min-w-[36px] text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center"
           >
             <i class="fa-solid fa-globe mr-1"></i>
             <span id="langLabel">EN</span>
@@ -330,7 +340,7 @@
           <button
             id="themeToggleBtn"
             onclick="toggleTheme()"
-            class="p-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            class="p-2 min-h-[36px] min-w-[36px] text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center"
             title="Toggle theme"
           >
             <i id="themeIcon" class="fa-solid fa-sun text-amber-400"></i>
@@ -340,7 +350,7 @@
           <button
             id="resetDefaultsBtn"
             onclick="resetToDefaults()"
-            class="p-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+            class="p-2 min-h-[36px] min-w-[36px] text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center justify-center"
             title="Khôi phục mặc định"
           >
             <i class="fa-solid fa-rotate-left"></i>
@@ -350,7 +360,7 @@
           <button
             id="shareUrlBtn"
             onclick="shareSimulationUrl()"
-            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow transition flex items-center gap-1.5"
+            class="px-3 py-1.5 min-h-[36px] text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow transition flex items-center gap-1.5"
           >
             <i class="fa-solid fa-share-nodes"></i>
             <span data-i18n="btn_share">Chia sẻ</span>
@@ -521,9 +531,9 @@
       </section>
 
       <!-- Main Workspace (Balanced Dual-Column Workbench: Buy on Left, Rent & Macro on Right) -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 min-w-0">
         <!-- LEFT COLUMN: Parameter Configuration - Mua Nhà & Vay Ngân Hàng (Buy Path) -->
-        <div id="card_buyColumn" class="space-y-5">
+        <div id="card_buyColumn" class="space-y-5 min-w-0">
           <!-- Home Purchase & Financing Card -->
           <div
             class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm space-y-4"
@@ -984,7 +994,7 @@
         </div>
 
         <!-- RIGHT COLUMN: Parameter Configuration - Thuê Nhà & Kinh Tế Vĩ Mô (Rent Path & Macro) -->
-        <div id="card_rentColumn" class="space-y-5">
+        <div id="card_rentColumn" class="space-y-5 min-w-0">
           <!-- 3. Renting & Investment Opportunity Card -->
           <div
             class="p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm space-y-4"
@@ -2101,19 +2111,19 @@
       <!-- Full-Width Analytics & Visualization Hub (12 Columns) -->
       <section
         id="analyticsHubSection"
-        class="mt-6 p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm flex flex-col min-h-[480px] lg:min-h-[500px]"
+        class="mt-6 p-5 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-sm flex flex-col min-h-[480px] lg:min-h-[500px] max-w-full overflow-hidden"
       >
         <!-- Tab Navigation Bar -->
         <div
           class="flex items-center justify-between border-b border-slate-700 pb-3 mb-4 flex-wrap gap-2"
         >
           <div
-            class="flex items-center gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800"
+            class="flex items-center gap-1.5 p-1 bg-slate-900 rounded-xl border border-slate-800 overflow-x-auto max-w-full custom-scrollbar"
           >
             <button
               id="tabBtn_timeline"
               onclick="switchAnalyticsTab('timeline')"
-              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow"
+              class="px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow flex items-center shrink-0"
             >
               <i class="fa-solid fa-chart-area mr-1"></i>
               <span data-i18n="tab_timeline">Tài Sản Ròng</span>
@@ -2121,7 +2131,7 @@
             <button
               id="tabBtn_sunk"
               onclick="switchAnalyticsTab('sunk')"
-              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
+              class="px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200 flex items-center shrink-0"
             >
               <i class="fa-solid fa-fire text-amber-400 mr-1"></i>
               <span data-i18n="tab_sunk">Chi Phí Mất Đi</span>
@@ -2129,7 +2139,7 @@
             <button
               id="tabBtn_cashflow"
               onclick="switchAnalyticsTab('cashflow')"
-              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
+              class="px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200 flex items-center shrink-0"
             >
               <i class="fa-solid fa-money-bill-wave mr-1"></i>
               <span data-i18n="tab_cashflow">Dòng Tiền Ra</span>
@@ -2137,7 +2147,7 @@
             <button
               id="tabBtn_sensitivity"
               onclick="switchAnalyticsTab('sensitivity')"
-              class="px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200"
+              class="px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200 flex items-center shrink-0"
             >
               <i class="fa-solid fa-table-cells mr-1"></i>
               <span data-i18n="tab_sensitivity">Ma Trận Độ Nhạy</span>
@@ -2200,12 +2210,12 @@
 
         <!-- Canvas Container -->
         <div
-          class="relative flex-1 w-full min-h-[400px] sm:min-h-[440px] flex items-center justify-center"
+          class="relative flex-1 w-full min-h-[400px] sm:min-h-[440px] flex flex-col items-stretch justify-start min-w-0 max-w-full overflow-hidden"
         >
           <canvas id="mainChartCanvas" class="w-full h-full"></canvas>
           <div
             id="sensitivityContainer"
-            class="hidden w-full h-full overflow-x-auto custom-scrollbar"
+            class="hidden w-full max-w-full h-full overflow-x-auto custom-scrollbar flex-1 min-w-0"
           ></div>
         </div>
 
@@ -4305,7 +4315,7 @@
             : [5.0, 6.5, 8.0, 9.5, 11.0, 12.5];
 
         let html = `
-          <div class="p-2 space-y-3">
+          <div class="p-2 space-y-3 w-full max-w-full min-w-0 overflow-hidden">
             <div class="flex items-center justify-between flex-wrap gap-2 text-xs text-slate-400">
               <div>
                 <span class="font-bold text-white">${isVi ? "Ma Trận Hòa Vốn & Người Thắng Cuộc (Nhấp ô để thử kịch bản):" : "Break-Even Crossover Matrix (Click any cell to apply):"}</span>
@@ -4327,7 +4337,7 @@
                 </button>
               </div>
             </div>
-            <div class="overflow-x-auto rounded-xl border border-slate-700 max-h-[380px] custom-scrollbar relative shadow-inner">
+            <div class="overflow-x-auto rounded-xl border border-slate-700 max-h-[380px] custom-scrollbar relative shadow-inner w-full max-w-full">
               <table class="w-full text-xs text-left border-collapse select-none">
                 <thead class="sticky top-0 bg-slate-900 z-20 shadow-sm">
                   <tr class="border-b border-slate-700 text-slate-400">
@@ -4407,10 +4417,10 @@
           if (btn) {
             if (t === tabKey) {
               btn.className =
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow";
+                "px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold transition bg-indigo-600 text-white shadow flex items-center";
             } else {
               btn.className =
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200";
+                "px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold transition text-slate-400 hover:text-slate-200 flex items-center";
             }
           }
         });
