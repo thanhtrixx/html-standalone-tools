@@ -460,8 +460,8 @@ console.log("\n--- Section 3: Dynamic State Transitions ---");
   );
   const manifestJson = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert(
-    manifestJson.version === "4.6.1",
-    `PWA-VER-01: manifest.webmanifest version is 4.6.1 (Got: '${manifestJson.version}')`
+    manifestJson.version === "4.6.2",
+    `PWA-VER-01: manifest.webmanifest version is 4.6.2 (Got: '${manifestJson.version}')`
   );
 
   const swPath = path.join(
