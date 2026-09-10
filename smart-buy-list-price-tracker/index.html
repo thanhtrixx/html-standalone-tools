@@ -8,7 +8,7 @@
     />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://accounts.google.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob: https://trile.dev https://*.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://www.googleapis.com https://accounts.google.com https://cloudflareinsights.com https://static.cloudflareinsights.com; font-src 'self' data:; manifest-src 'self';"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://accounts.google.com https://static.cloudflareinsights.com http://localhost:8400; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob: https://trile.dev https://*.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://www.googleapis.com https://accounts.google.com https://cloudflareinsights.com https://static.cloudflareinsights.com http://localhost:8400; font-src 'self' data:; manifest-src 'self';"
     />
     <title>Smart Buy-List & Unit Price Tracker</title>
     <meta
@@ -135,8 +135,26 @@
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
           Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+      }
+      h1 {
+        font-size: 18px;
+        line-height: 1.25;
+      }
+      h2 {
+        font-size: 18px;
+        line-height: 1.3;
+      }
+      h3 {
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      h4 {
+        font-size: 12px;
+        line-height: 1.4;
       }
       .custom-scroll::-webkit-scrollbar {
         height: 6px;
@@ -146,16 +164,6 @@
         background: var(--border-color);
         border-radius: 9999px;
       }
-      @media print {
-        .no-print {
-          display: none !important;
-        }
-        body {
-          background: white !important;
-          color: black !important;
-        }
-      }
-
       /* ==================== LIGHT THEME OVERRIDES (Issue #167) ==================== */
       html.light body {
         background-color: var(--bg-page) !important;
@@ -438,32 +446,216 @@
         font-variant-numeric: tabular-nums;
       }
 
-      /* Respect motion sensitivity: collapse tap/press micro-motion and any
-          entrance transitions to their end state without removing function. */
+      /* Respect motion sensitivity: dampens large movements while preserving
+          state feedback and transition completion. */
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
         *::after {
-          animation-duration: 0.001ms !important;
+          animation-duration: 0.01ms !important;
           animation-iteration-count: 1 !important;
-          transition-duration: 0.001ms !important;
+          transition-duration: 0.01ms !important;
           scroll-behavior: auto !important;
         }
       }
-      /* ==================== iOS SAFE-AREA INSETS ====================
-         Notch / Dynamic Island / home indicator.
-         env() resolves to 0 on non-Apple platforms, so this is a no-op there. */
+      /* ==================== ADAPTIVE VIEWPORTS, TOUCH, ORIENTATION & PRINT ==================== */
+      /* 1. Safe-area insets: Portrait, Landscape & Notches */
       header {
-        padding-top: calc(env(safe-area-inset-top) + 0.75rem) !important;
+        padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem) !important;
+        padding-left: max(1rem, env(safe-area-inset-left, 0px)) !important;
+        padding-right: max(1rem, env(safe-area-inset-right, 0px)) !important;
       }
       nav#bottomNavBar {
-        padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem) !important;
+        padding-bottom: calc(
+          env(safe-area-inset-bottom, 0px) + 0.5rem
+        ) !important;
+        padding-left: max(0.5rem, env(safe-area-inset-left, 0px)) !important;
+        padding-right: max(0.5rem, env(safe-area-inset-right, 0px)) !important;
+      }
+      #mainContainer {
+        padding-left: max(1rem, env(safe-area-inset-left, 0px));
+        padding-right: max(1rem, env(safe-area-inset-right, 0px));
       }
       #toastContainer {
-        top: calc(env(safe-area-inset-top) + 1rem) !important;
+        top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
+        left: max(1rem, env(safe-area-inset-left, 0px)) !important;
+        right: max(1rem, env(safe-area-inset-right, 0px)) !important;
       }
       #pwaUpdateToast {
-        bottom: calc(env(safe-area-inset-bottom) + 5rem) !important;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem) !important;
+      }
+      #finishTripBar {
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem) !important;
+      }
+
+      /* 2. Touch vs Pointer Adaptation */
+      @media (pointer: coarse) {
+        button,
+        [role="button"],
+        [role="tab"],
+        select {
+          min-height: 36px;
+        }
+        #storeFilterChips button,
+        #categoryFilterChips button {
+          min-height: 36px;
+        }
+        button:active,
+        [role="button"]:active {
+          transform: scale(0.98);
+        }
+      }
+
+      @media (pointer: fine) {
+        button,
+        [role="button"],
+        [role="tab"],
+        select,
+        input {
+          transition-property:
+            color, background-color, border-color, box-shadow, transform;
+          transition-duration: 150ms;
+        }
+      }
+
+      /* 3. Ultra-compact narrow screens (<= 360px - e.g. iPhone SE 1st gen, Fold outer display) */
+      @media (max-width: 360px) {
+        #kpiCards {
+          padding: 0.375rem !important;
+          gap: 0.25rem !important;
+        }
+        #smartQuickInput {
+          padding: 0.5rem 0.5rem !important;
+        }
+      }
+
+      /* 4. Short Viewports / Mobile Landscape (Height <= 500px) */
+      @media (max-height: 500px) and (orientation: landscape) {
+        header {
+          padding-top: calc(env(safe-area-inset-top, 0px) + 0.35rem) !important;
+          padding-bottom: 0.35rem !important;
+        }
+        nav#bottomNavBar {
+          padding-top: 0.25rem !important;
+          padding-bottom: calc(
+            env(safe-area-inset-bottom, 0px) + 0.25rem
+          ) !important;
+        }
+        #mainContainer {
+          padding-top: 0.5rem !important;
+          padding-bottom: 5rem !important;
+        }
+        [role="dialog"] > div {
+          max-height: 85vh !important;
+          overflow-y: auto !important;
+        }
+      }
+
+      /* 5. Comprehensive Print Adaptation */
+      @media print {
+        *,
+        *::before,
+        *::after {
+          box-shadow: none !important;
+          text-shadow: none !important;
+        }
+        body {
+          background: #ffffff !important;
+          color: #000000 !important;
+          font-size: 12pt !important;
+          line-height: 1.4 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        .no-print,
+        header,
+        nav#bottomNavBar,
+        #smartQuickSection,
+        #addItemSection,
+        #groupingSwitcherContainer,
+        #finishTripBar,
+        #toastContainer,
+        #pwaUpdateToast,
+        #storeFilterChips,
+        #categoryFilterChips,
+        #cloudSyncDiagnosticPopover,
+        [role="dialog"],
+        button:not(.print-keep) {
+          display: none !important;
+        }
+        #mainContainer {
+          max-width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        #tripSummarySection {
+          background: #ffffff !important;
+          border: 1px solid #94a3b8 !important;
+          color: #000000 !important;
+          break-inside: avoid;
+          margin-bottom: 1rem !important;
+        }
+        #tripSummarySection span,
+        #tripSummarySection div {
+          color: #000000 !important;
+        }
+        #kpiCards {
+          background: #f8fafc !important;
+          border: 1px solid #cbd5e1 !important;
+        }
+        #kpiCards div {
+          color: #000000 !important;
+        }
+        div[id^="cardContainer-"] {
+          background: #ffffff !important;
+          border: 1px solid #cbd5e1 !important;
+          color: #000000 !important;
+          break-inside: avoid;
+          page-break-inside: avoid;
+          margin-bottom: 0.5rem !important;
+          padding: 0.5rem 0.75rem !important;
+        }
+        div[id^="cardContainer-"] * {
+          color: #000000 !important;
+        }
+        div[id^="cardContainer-"] .text-emerald-400,
+        div[id^="cardContainer-"] .text-emerald-300,
+        div[id^="cardContainer-"] .text-emerald-600 {
+          color: #065f46 !important;
+          font-weight: 700 !important;
+        }
+        div[id^="cardContainer-"] button,
+        div[id^="cardContainer-"] [data-action="menu"] {
+          display: none !important;
+        }
+        #priceLedgerModal {
+          max-width: 100% !important;
+        }
+        #ledgerTableContainer {
+          display: block !important;
+          overflow: visible !important;
+        }
+        #ledgerTableContainer table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+        }
+        #ledgerTableContainer th,
+        #ledgerTableContainer td {
+          border: 1px solid #cbd5e1 !important;
+          padding: 6px 8px !important;
+          color: #000000 !important;
+        }
+        #ledgerTableContainer thead {
+          background: #f1f5f9 !important;
+        }
+        #ledgerTableContainer th#thAction,
+        #ledgerTableContainer td:last-child,
+        #ledgerTableContainer th#thSelect,
+        #ledgerTableContainer td:first-child,
+        #ledgerSearchInput,
+        #ledgerBatchBar {
+          display: none !important;
+        }
       }
     </style>
   </head>
@@ -472,7 +664,7 @@
       <div
         class="p-4 sm:p-6 max-w-xl mx-auto my-6 bg-amber-950/80 border border-amber-600 rounded-2xl text-amber-200 text-center space-y-2"
       >
-        <h2 class="text-base sm:text-lg font-bold text-white">
+        <h2 class="text-lg sm:text-xl font-bold text-white">
           JavaScript Required / Yêu cầu JavaScript
         </h2>
         <p class="text-xs sm:text-sm text-amber-300">
@@ -493,22 +685,25 @@
       class="sticky top-0 z-30 bg-slate-900/90 dark:bg-slate-900/90 border-b border-slate-800 backdrop-blur-md px-4 py-3 no-print"
     >
       <div class="max-w-3xl mx-auto flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">🛒</span>
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl" aria-hidden="true">🛒</span>
           <div>
             <h1
               id="headerTitle"
-              class="font-bold text-base sm:text-lg leading-tight tracking-tight text-white"
+              class="font-bold text-xl sm:text-2xl leading-tight tracking-tight text-white"
             >
               Smart Buy-List
             </h1>
-            <p id="headerSubtitle" class="text-xs text-emerald-400 font-medium">
-              Unit Price & Deal Tracker
+            <p
+              id="headerSubtitle"
+              class="text-xs sm:text-sm text-emerald-400 font-semibold tracking-tight"
+            >
+              Unit Price &amp; Deal Tracker
             </p>
           </div>
         </div>
 
-        <!-- Quick Action Controls -->
+        <!-- Quick Action Controls (Ergonomic Touch Targets) -->
         <div class="flex items-center gap-1 sm:gap-2">
           <!-- Language Switcher -->
           <button
@@ -577,7 +772,7 @@
             <!-- Diagnostic Popover -->
             <div
               id="cloudSyncDiagnosticPopover"
-              class="hidden absolute right-0 top-10 w-72 bg-slate-900 border border-slate-700 rounded-xl p-3 shadow-2xl z-50 text-xs text-slate-300 space-y-2.5 backdrop-blur-md"
+              class="hidden absolute right-0 top-11 w-72 bg-slate-900 border border-slate-700 rounded-2xl p-3.5 shadow-2xl z-50 text-xs text-slate-300 space-y-2.5 backdrop-blur-md"
               role="dialog"
               aria-labelledby="cloudSyncPopoverHeading"
             >
@@ -637,7 +832,7 @@
                   id="btnHeaderSyncNow"
                   type="button"
                   onclick="triggerHeaderManualSync()"
-                  class="flex-1 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold text-xs transition-colors flex items-center justify-center gap-1 shadow-sm"
+                  class="flex-1 py-2 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold text-xs transition-colors flex items-center justify-center gap-1 shadow-sm cursor-pointer"
                 >
                   <span aria-hidden="true">🔄</span>
                   <span id="btnHeaderSyncNowText" data-i18n="btn_sync_now"
@@ -648,7 +843,7 @@
                   id="btnHeaderCloudSettings"
                   type="button"
                   onclick="openCloudSettingsFromPopover()"
-                  class="py-1.5 px-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold border border-slate-700 transition-colors flex items-center justify-center"
+                  class="py-2 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold border border-slate-700 transition-colors flex items-center justify-center cursor-pointer"
                   title="Cài đặt Cloud"
                   aria-label="Cài đặt Cloud"
                 >
@@ -681,10 +876,10 @@
       >
         <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2">
-            <span class="text-base">🛒</span>
+            <span class="text-base" aria-hidden="true">🛒</span>
             <span
               id="tripSummaryHeading"
-              class="text-xs font-bold uppercase tracking-wider text-slate-300"
+              class="text-sm font-bold uppercase tracking-wider text-slate-200"
             >
               Shopping Trip
             </span>
@@ -700,6 +895,7 @@
             >
             <select
               id="storeFilterSelect"
+              aria-label="Lọc theo siêu thị / Filter by store"
               onchange="onStoreFilterChange(this.value)"
               class="bg-slate-800 text-xs font-medium text-slate-200 border border-slate-700 rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-emerald-500"
             >
@@ -819,9 +1015,9 @@
           <div class="flex items-center justify-between">
             <h2
               id="smartQuickHeading"
-              class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5"
+              class="text-base sm:text-lg font-bold tracking-tight text-emerald-400 flex items-center gap-1.5"
             >
-              <span>⚡</span>
+              <span aria-hidden="true">⚡</span>
               <span id="smartQuickHeadingText">Nhập Nhanh Mặt Hàng</span>
             </h2>
             <button
@@ -830,7 +1026,7 @@
               class="text-xs text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-1 cursor-pointer"
               id="btnToggleAdvancedAdd"
             >
-              <span>⚙️</span>
+              <span aria-hidden="true">⚙️</span>
               <span id="btnToggleAdvancedAddText">Tuỳ chọn chi tiết</span>
               <span id="advancedToggleChevron">▾</span>
             </button>
@@ -849,11 +1045,12 @@
               <input
                 type="text"
                 id="smartQuickInput"
+                aria-label="Nhập nhanh mặt hàng (vd: Sữa tươi 35k/l, Thịt bò 120k 500g)"
                 placeholder="Nhập nhanh vd: Sữa tươi 35k/l, Thịt bò 120k 500g, Trứng 30k 10 quả..."
                 autocomplete="off"
                 oninput="handleSmartQuickInputChange(this.value)"
                 onpaste="handleSmartQuickPaste(event)"
-                class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
+                class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-400 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-medium"
               />
               <button
                 type="submit"
@@ -907,9 +1104,9 @@
           <div class="flex items-center justify-between">
             <h2
               id="addItemHeading"
-              class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5"
+              class="text-base sm:text-lg font-bold tracking-tight text-slate-200 flex items-center gap-1.5"
             >
-              <span>➕</span> Add Item to List
+              <span aria-hidden="true">➕</span> Add Item to List
             </h2>
           </div>
 
@@ -924,11 +1121,12 @@
               <input
                 type="text"
                 id="inputItemName"
+                aria-label="Item Name / Tên mặt hàng"
                 placeholder="e.g. Whole Milk, Jasmine Rice..."
                 required
                 autocomplete="off"
                 oninput="handleItemAutocomplete(this.value)"
-                class="w-full bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                class="w-full bg-slate-950 text-slate-100 placeholder-slate-400 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
               <div
                 id="autocompleteDropdown"
@@ -941,6 +1139,7 @@
               <div class="sm:col-span-3">
                 <select
                   id="inputItemCategory"
+                  aria-label="Category / Phân loại mặt hàng"
                   class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="produce">🥦 Produce & Fruits</option>
@@ -960,6 +1159,7 @@
               <div class="sm:col-span-3">
                 <select
                   id="inputItemStore"
+                  aria-label="Store / Siêu thị"
                   onchange="onAddStoreSelectChange(this.value)"
                   class="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-xl px-2.5 py-2 text-sm focus:ring-2 focus:ring-emerald-500"
                 >
@@ -1087,12 +1287,13 @@
         <div class="flex items-center justify-between gap-2 px-1">
           <h2
             id="listSectionTitle"
-            class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5"
+            class="text-base sm:text-lg font-bold text-slate-200 flex items-center gap-1.5 tracking-tight"
           >
-            <span>📋</span> <span id="listTitleText">Shopping List</span>
+            <span aria-hidden="true">📋</span>
+            <span id="listTitleText">Shopping List</span>
             <span
               id="listCountBadge"
-              class="ml-1 text-xs px-2 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-slate-700"
+              class="ml-1 text-xs px-2 py-0.5 rounded-full bg-slate-800 text-emerald-400 border border-slate-700 font-bold"
               >0</span
             >
           </h2>
@@ -1227,7 +1428,7 @@
           <div class="flex items-center justify-between">
             <h3
               id="ledgerModalTitle"
-              class="text-base sm:text-lg font-bold text-white flex items-center gap-2"
+              class="text-base sm:text-lg font-bold text-white flex items-center gap-2 tracking-tight"
             >
               <span aria-hidden="true">📈</span>
               <span id="ledgerModalTitleText">Historical Purchase Ledger</span>
@@ -1238,9 +1439,10 @@
             <input
               type="text"
               id="ledgerSearchInput"
+              aria-label="Filter history by item or store / Tìm kiếm lịch sử"
               placeholder="Filter history by item or store..."
               oninput="renderPriceLedgerTable(this.value)"
-              class="w-full bg-slate-950 text-slate-100 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 font-medium"
+              class="w-full bg-slate-950 text-slate-100 placeholder-slate-400 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 font-medium"
             />
           </div>
 
@@ -1347,7 +1549,7 @@
           <div class="flex items-center justify-between">
             <h3
               id="compModalTitle"
-              class="text-base font-bold text-white flex items-center gap-2"
+              class="text-base sm:text-lg font-bold text-white flex items-center gap-2 tracking-tight"
             >
               <span aria-hidden="true">⚖️</span>
               <span id="compModalTitleText">In-Aisle Package Comparator</span>
@@ -2014,6 +2216,7 @@
 
         <textarea
           id="pasteJsonTextarea"
+          aria-label="Paste JSON backup, buy-list JSON, or shared link"
           rows="5"
           placeholder="Paste JSON or #share= link here..."
           class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 font-mono focus:ring-1 focus:ring-emerald-500 focus:outline-none custom-scroll"
@@ -2873,9 +3076,10 @@
           <input
             type="text"
             id="inputNewStoreName"
+            aria-label="New store name / Tên siêu thị mới"
             placeholder="New store name (e.g. Sprouts, ALDI)..."
             required
-            class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-500 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+            class="flex-1 bg-slate-950 text-slate-100 placeholder-slate-400 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
           />
           <button
             type="submit"

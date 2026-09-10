@@ -324,16 +324,16 @@ function renderItemCard(item) {
 
   if (deal.score === "GREAT_DEAL") {
     const rawLabel = t.badge_great_deal || "🟢 Great Deal";
-    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🟢</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🟢</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
   } else if (deal.score === "PRICE_SPIKE") {
     const rawLabel = t.badge_price_spike || "🔴 Price Spike";
-    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-red-950 text-red-300 border border-red-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🔴</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-red-950 text-red-300 border border-red-500/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🔴</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
   } else if (deal.score === "FAIR_PRICE") {
     const rawLabel = t.badge_fair_price || "🟡 Fair Price";
-    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🟡</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-950 text-amber-300 border border-amber-500/50 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🟡</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
   } else if (deal.score === "NEW_ITEM" || !deal.score) {
     const rawLabel = t.badge_new_item || "⚪ New Item";
-    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-slate-300 border border-slate-700 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">⚪</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
+    dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-slate-300 border border-slate-600 shrink-0" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">⚪</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;
   }
 
   let atlDeltaHtml = "";
@@ -408,7 +408,7 @@ function renderItemCard(item) {
                   data-action="edit-price"
                   data-item-id="${safeId}"
                   aria-label="${(t.aria_edit_price || "Update item price") + ": " + safeName}"
-                  class="font-bold text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors"
+                  class="font-bold tabular-nums text-base sm:text-lg text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors cursor-pointer"
                   title="Update Price"
                 >
                   ${formatCurrency(item.price)}
@@ -472,7 +472,7 @@ function renderItemCard(item) {
                   data-action="edit-price"
                   data-item-id="${safeId}"
                   aria-label="${(t.aria_edit_price || "Update item price") + ": " + safeName}"
-                  class="font-bold text-sm sm:text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-2.5 py-1 rounded-xl border border-slate-700/60 transition-colors cursor-pointer"
+                  class="font-bold tabular-nums text-sm sm:text-base text-slate-100 hover:text-emerald-400 bg-slate-800/70 hover:bg-slate-800 px-3 py-1.5 min-h-[36px] rounded-xl border border-slate-700/60 transition-colors cursor-pointer"
                   title="Update Price"
                 >
                   ${formatCurrency(item.price)}
@@ -485,7 +485,7 @@ function renderItemCard(item) {
                     data-action="toggle-card-menu"
                     data-item-id="${safeId}"
                     aria-label="${(t.aria_card_more || "More options") + ": " + safeName}"
-                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 text-sm font-bold transition-colors cursor-pointer"
+                    class="w-8 h-8 min-h-[32px] min-w-[32px] rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 text-sm font-bold transition-colors cursor-pointer"
                     title="More options"
                   >
                     ⋯
@@ -535,14 +535,14 @@ function renderItemCard(item) {
                     type="button"
                     data-action="decrement-qty"
                     data-item-id="${safeId}"
-                    class="w-6 h-6 rounded bg-slate-900/60 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors"
+                    class="w-7 h-7 sm:w-8 sm:h-8 min-h-[28px] min-w-[28px] rounded-md bg-slate-900/80 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors active:scale-95"
                     aria-label="Decrease quantity"
                   >−</button>
                   <button
                     type="button"
                     data-action="edit-item"
                     data-item-id="${safeId}"
-                    class="px-2 text-xs font-semibold text-slate-200 hover:text-emerald-400 cursor-pointer"
+                    class="px-2.5 text-xs font-semibold text-slate-200 hover:text-emerald-400 cursor-pointer"
                     title="Edit Details"
                   >
                     ${item.quantity} ${safeUnit}
@@ -551,13 +551,13 @@ function renderItemCard(item) {
                     type="button"
                     data-action="increment-qty"
                     data-item-id="${safeId}"
-                    class="w-6 h-6 rounded bg-slate-900/60 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors"
+                    class="w-7 h-7 sm:w-8 sm:h-8 min-h-[28px] min-w-[28px] rounded-md bg-slate-900/80 hover:bg-slate-700 text-slate-200 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors active:scale-95"
                     aria-label="Increase quantity"
                   >+</button>
                 </div>
 
                 <!-- Normalized Unit Price -->
-                ${unitPrice > 0 ? `<span class="text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40 text-[11px] shrink-0">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
+                ${unitPrice > 0 ? `<span class="tabular-nums text-emerald-400 font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-800/40 text-[11px] shrink-0">${formatCurrency(unitPrice)} / ${baseUnit}</span>` : ""}
 
                 <!-- Deal Badge -->
                 ${dealBadgeHtml}
@@ -565,7 +565,7 @@ function renderItemCard(item) {
 
               <!-- Historical ATL Reference -->
               <div class="text-right text-[11px] text-slate-400 shrink-0">
-                ${history.length > 0 ? `<span title="All-Time Low recorded price">${TRANSLATIONS[currentLanguage].atl_price_label || "ATL:"} <strong class="text-emerald-400 font-semibold">${formatCurrency(deal.minPrice)}/${baseUnit}</strong></span>` : `<span class="text-slate-500 italic">${TRANSLATIONS[currentLanguage].new_item || "New Item"}</span>`}
+                ${history.length > 0 ? `<span title="All-Time Low recorded price">${TRANSLATIONS[currentLanguage].atl_price_label || "ATL:"} <strong class="tabular-nums text-emerald-400 font-semibold">${formatCurrency(deal.minPrice)}/${baseUnit}</strong></span>` : `<span class="text-slate-500 italic">${TRANSLATIONS[currentLanguage].new_item || "New Item"}</span>`}
               </div>
             </div>
           </div>

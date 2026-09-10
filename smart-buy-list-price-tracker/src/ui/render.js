@@ -208,7 +208,7 @@ function renderStoreFilterChips() {
             type="button"
             onclick="onStoreFilterChange('ALL')"
             aria-label="${allChip.label} (${allChip.count})"
-            class="px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1 cursor-pointer ${
+            class="min-h-[32px] px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
               currentStoreFilter === "ALL"
                 ? "bg-emerald-600 text-white shadow-sm"
                 : "bg-slate-800 text-slate-300 hover:bg-slate-700"
@@ -232,7 +232,7 @@ function renderStoreFilterChips() {
               type="button"
               onclick="onStoreFilterChange('${escapedKey}')"
               aria-label="${safeLabel} (${chip.count})"
-              class="px-2.5 py-1 rounded-full text-xs shrink-0 transition-all flex items-center gap-1 cursor-pointer ${
+              class="min-h-[32px] px-3 py-1.5 rounded-full text-xs shrink-0 transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 ${
                 isActive
                   ? "bg-emerald-600 text-white shadow-sm font-semibold"
                   : "bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium"
@@ -252,7 +252,7 @@ function renderStoreFilterChips() {
           <button
             type="button"
             onclick="openStoreManagerModal()"
-            class="px-2.5 py-1 rounded-full text-xs font-medium shrink-0 transition-all flex items-center gap-1 bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-700 border border-dashed border-slate-700 cursor-pointer"
+            class="min-h-[32px] px-3 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all flex items-center gap-1.5 bg-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-700 border border-dashed border-slate-700 cursor-pointer active:scale-95"
             title="${t.manage_stores_title || "Manage Stores..."}"
             aria-label="${t.manage_stores_title || "Manage Stores..."}"
           >
@@ -314,7 +314,7 @@ function renderCategoryFilterChips() {
               type="button"
               onclick="filterByCategory('${c.key}')"
               aria-label="${c.label} (${count})"
-              class="px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1 border ${
+              class="min-h-[32px] px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all flex items-center gap-1.5 border active:scale-95 cursor-pointer ${
                 isActive
                   ? "bg-emerald-600 border-emerald-500 text-white shadow-sm"
                   : "bg-slate-800/80 border-slate-700/60 text-slate-300 hover:bg-slate-700 hover:text-white"
