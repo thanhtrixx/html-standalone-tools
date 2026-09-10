@@ -654,28 +654,52 @@ function renderItemList() {
 
   if (filtered.length === 0) {
     if (emptyCard) emptyCard.classList.remove("hidden");
-    const btnEmptySwitch = document.getElementById("btnEmptySwitchToPlanning");
+    const emptyIcon = document.getElementById("emptyListIcon");
+    const emptyTitle = document.getElementById("emptyListTitle");
     const emptyDesc = document.getElementById("emptyListDesc");
+    const btnEmptySwitch = document.getElementById("btnEmptySwitchToPlanning");
+    const starterHaulSection = document.getElementById("starterHaulSection");
+    const btnClearFilters = document.getElementById("btnClearActiveFilters");
     const t = TRANSLATIONS[currentLanguage] || TRANSLATIONS.vi;
-    if (btnEmptySwitch) {
+
+    const isFilterZeroResult = items.length > 0;
+
+    if (isFilterZeroResult) {
+      if (emptyIcon) emptyIcon.textContent = "🔍";
+      if (emptyTitle)
+        emptyTitle.textContent =
+          t.empty_filter_title || "No items match current filters";
+      if (emptyDesc)
+        emptyDesc.textContent =
+          t.empty_filter_desc ||
+          "You have items in your list, but none match the active filters.";
+      if (btnEmptySwitch) btnEmptySwitch.classList.add("hidden");
+      if (starterHaulSection) starterHaulSection.classList.add("hidden");
+      if (btnClearFilters) btnClearFilters.classList.remove("hidden");
+    } else {
+      if (emptyIcon) emptyIcon.textContent = "🛒";
+      if (emptyTitle)
+        emptyTitle.textContent = t.empty_title || "Your shopping list is empty";
+      if (btnClearFilters) btnClearFilters.classList.add("hidden");
+
       if (currentPhase === "IN_STORE") {
-        btnEmptySwitch.classList.remove("hidden");
+        if (emptyDesc)
+          emptyDesc.textContent =
+            t.empty_buy_mode_desc ||
+            "No items to buy right now. Switch to Planning mode to add items to your grocery list.";
+        if (btnEmptySwitch) btnEmptySwitch.classList.remove("hidden");
+        if (starterHaulSection) starterHaulSection.classList.add("hidden");
       } else {
-        btnEmptySwitch.classList.add("hidden");
+        if (emptyDesc)
+          emptyDesc.textContent =
+            t.empty_planning_desc ||
+            t.empty_desc ||
+            "Add items using the quick-entry box above to start tracking your grocery list and unit prices.";
+        if (btnEmptySwitch) btnEmptySwitch.classList.add("hidden");
+        if (starterHaulSection) starterHaulSection.classList.remove("hidden");
       }
     }
-    if (emptyDesc) {
-      if (currentPhase === "IN_STORE") {
-        emptyDesc.textContent =
-          t.empty_buy_mode_desc ||
-          "No items to buy right now. Switch to Planning mode to add items to your grocery list.";
-      } else {
-        emptyDesc.textContent =
-          t.empty_planning_desc ||
-          t.empty_desc ||
-          "Add items using the quick-entry box above to start tracking your grocery list and unit prices.";
-      }
-    }
+
     container.innerHTML = "";
     if (checkedSection) checkedSection.classList.add("hidden");
     return;

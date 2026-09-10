@@ -207,11 +207,144 @@ function clearAllData(silent = false) {
     );
 }
 
+const WEEKLY_ESSENTIALS = [
+  {
+    name: "Fresh Whole Milk",
+    name_vi: "Sữa tươi tiệt trùng",
+    category: "dairy_eggs",
+    unit: "L",
+    price: 35000,
+    price_usd: 3.89,
+    store: "Supermarket",
+  },
+  {
+    name: "Free-range Large Eggs",
+    name_vi: "Trứng gà tươi",
+    category: "dairy_eggs",
+    unit: "ea",
+    quantity: 10,
+    price: 32000,
+    price_usd: 3.49,
+    store: "Supermarket",
+  },
+  {
+    name: "Jasmine Rice ST25",
+    name_vi: "Gạo thơm ST25",
+    category: "pantry",
+    unit: "kg",
+    quantity: 5,
+    price: 185000,
+    price_usd: 8.99,
+    store: "Supermarket",
+  },
+  {
+    name: "Artisan Sourdough Bread",
+    name_vi: "Bánh mì lát tươi",
+    category: "bakery",
+    unit: "loaf",
+    quantity: 1,
+    price: 25000,
+    price_usd: 3.29,
+    store: "Bakery",
+  },
+  {
+    name: "Crisp Honeycrisp Apples",
+    name_vi: "Táo Envy tươi",
+    category: "produce",
+    unit: "kg",
+    quantity: 1,
+    price: 65000,
+    price_usd: 4.99,
+    store: "Produce Mart",
+  },
+];
+
+function loadStarterHaul(categoryKey) {
+  const isVi = currentLanguage === "vi";
+  const isVnd = currentCurrency === "VND";
+  const now = Date.now();
+  const isoNow = new Date(now).toISOString();
+
+  let candidates = WEEKLY_ESSENTIALS;
+  if (categoryKey && categoryKey !== "ALL") {
+    candidates = WEEKLY_ESSENTIALS.filter(
+      (e) =>
+        e.category === categoryKey ||
+        (categoryKey === "dairy" && e.category === "dairy_eggs") ||
+        (categoryKey === "meat" && e.category === "meat_seafood")
+    );
+    if (candidates.length === 0) {
+      candidates = [
+        {
+          name: `${categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)} Essential`,
+          name_vi: `Hàng ${categoryKey} thiết yếu`,
+          category: categoryKey,
+          unit: "ea",
+          quantity: 1,
+          price: isVnd ? 50000 : 4.99,
+          price_usd: 4.99,
+          store: "Supermarket",
+        },
+      ];
+    }
+  }
+
+  const newItems = candidates.map((item, idx) => {
+    const dynamicId =
+      typeof generateItemId === "function"
+        ? generateItemId("starter")
+        : `starter_item_${now}_${idx}`;
+    const name = isVi ? item.name_vi || item.name : item.name;
+    const price = isVnd ? item.price : item.price_usd || item.price;
+    return {
+      id: dynamicId,
+      name,
+      category: item.category,
+      store: item.store || "Supermarket",
+      quantity: item.quantity || 1,
+      unit: item.unit || "ea",
+      price,
+      checked: false,
+      updatedAt: isoNow,
+    };
+  });
+
+  if (!memoryState.activeList) memoryState.activeList = { items: [] };
+  if (!memoryState.activeList.items) memoryState.activeList.items = [];
+
+  memoryState.activeList.items.push(...newItems);
+  if (typeof store !== "undefined" && store && store.dispatch) {
+    store.dispatch({
+      type: ACTION_TYPES.ITEM_ADD,
+      payload: newItems,
+    });
+  }
+  saveToLocalStorage();
+  renderApp();
+  showToast(
+    TRANSLATIONS[currentLanguage]?.toast_starter_loaded ||
+      "Weekly essentials starter haul added!"
+  );
+}
+
+function clearActiveFilters() {
+  currentStoreFilter = "ALL";
+  currentCategoryFilter = "ALL";
+  if (typeof renderStoreFilterChips === "function") renderStoreFilterChips();
+  if (typeof renderCategoryFilterChips === "function")
+    renderCategoryFilterChips();
+  renderItemList();
+  updateTripProgress();
+}
+
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     SAMPLE_ITEMS,
     SAMPLE_LEDGER,
+    WEEKLY_ESSENTIALS,
     loadSampleData,
+    loadStarterHaul,
+    clearActiveFilters,
     dismissSampleBanner,
     clearAllData,
   };
