@@ -4,33 +4,34 @@ This document defines the standard engineering workflow and delivery lifecycle f
 
 ---
 
-## 🔁 The Four-Phase Delivery Lifecycle
+## 🔁 The Four-Phase Delivery Lifecycle & Subagent Quality Protocol
 
 ```mermaid
 flowchart TD
     subgraph P1["1. Spec &amp; Decomposition"]
-        QA["Q&amp;A / Grill"] --> ADR["ADR / CONTEXT.md"]
+        QA["Q&amp;A / Grill (grill-wow)"] --> SpecAudit["Spec &amp; AC Auditor Subagent<br/>(Verifies AC testability &amp; domain terms)"]
+        SpecAudit --> ADR["ADR / CONTEXT.md"]
         ADR --> Issues["GitHub Issues<br/>(Epic + Vertical Slices)"]
     end
 
     subgraph P2["2. Branch &amp; Two-Speed TDD"]
-        Branch["Branch per Issue<br/>(feat/issue-&lt;n&gt;-...)"] --> InnerLoop["Inner Loop: Fast Scoped TDD<br/>(npm run test:&lt;tool&gt;)"]
+        Branch["Branch per Issue<br/>(feat/issue-&lt;n&gt;-...)"] --> BlindTests["Adversarial Test Hunter Subagent<br/>(Blind test generation at public seams)"]
+        BlindTests --> InnerLoop["Inner Loop: Fast Scoped TDD<br/>(npm run test:&lt;tool&gt;)"]
         InnerLoop --> Impl["Implementation"]
         Impl --> OuterGate["Outer Gate: Full Verify<br/>(npm run verify)"]
     end
 
     subgraph P3["3. PR, CI Gate &amp; Review"]
-        OuterGate --> SelfReview["Pre-PR Self-Review<br/>(Spec, Invariants, Gate)"]
-        SelfReview --> PR["Create PR<br/>(gh pr create --body 'Closes #&lt;n&gt;')"]
+        OuterGate --> ReviewAgents["Dual-Axis Parallel Review Subagents<br/>(Standards &amp; 5 Invariants + Spec Conformance)"]
+        ReviewAgents --> PR["Create PR with AC-to-Test Matrix<br/>(gh pr create --body 'Closes #&lt;n&gt;')"]
         PR --> CIGate["CI Quality Gate (pr-verify.yml)<br/>(npm run verify)"]
-        CIGate --> Review["Code &amp; Spec Review"]
-        Review --> Merge["Squash &amp; Merge<br/>(gh pr merge --squash --delete-branch)"]
+        CIGate --> Merge["Squash &amp; Merge<br/>(gh pr merge --squash --delete-branch)"]
     end
 
     subgraph P4["4. Release &amp; Closure"]
         Merge --> CDRelease["Automated CD Pipeline (release.yml)<br/>(Tag, Release, Standalone Assets, Pages)"]
-        CDRelease --> VerifyAC["Verify ACs [x]"]
-        VerifyAC --> Close["Close Issue<br/>(gh issue close)"]
+        CDRelease --> ACVerifier["AC Verification Subagent<br/>(Audits live deliverable &amp; test assertions)"]
+        ACVerifier --> Close["Close Issue with Sign-off<br/>(gh issue close)"]
     end
 
     Issues --> Branch
@@ -45,28 +46,28 @@ flowchart TD
 [1. Spec & Decomposition]
        │
        ▼
-  Q&A / Grill ──► ADR / CONTEXT.md ──► GitHub Issues (Epic + Vertical Slices)
-                                              │
-                                              ▼
-[2. Branch & Two-Speed TDD]            Branch per Issue (`<type>/issue-<n>-<slug>`)
-       │                                      │
-       ▼                                      ▼
-  Inner Loop (npm run test:<tool>) ──► Implementation ──► Outer Gate (`npm run verify`)
-                                                              │
-                                                              ▼
-[3. PR, CI Gate & Merge]               Pre-PR Self-Review ──► Create PR (`Closes #<n>`)
-       │                                                              │
-       ▼                                                              ▼
-  CI Quality Gate (pr-verify.yml) ◄── Code & Spec Review ◄── Automated CI Run
+  Q&A / Grill (grill-wow) ──► Spec & AC Auditor Subagent ──► ADR / CONTEXT.md ──► GitHub Issues (Epic + Slices)
+                                                                                         │
+                                                                                         ▼
+[2. Branch & Two-Speed TDD]                                                    Branch (`<type>/issue-<n>-<slug>`)
+       │                                                                                 │
+       ▼                                                                                 ▼
+  Adversarial Test Hunter Subagent (Blind Seam Tests) ──► Inner Loop (test:<tool>) ──► Outer Gate (`npm run verify`)
+                                                                                               │
+                                                                                               ▼
+[3. PR, CI Gate & Merge]                                                       Dual-Axis Review Subagents (5 Invariants + Spec)
+       │                                                                                 │
+       ▼                                                                                 ▼
+  CI Quality Gate (pr-verify.yml) ◄── Create PR with Traceability Matrix ◄── Pre-PR Invariant Verification
        │
        ▼
   Squash & Merge to main (`gh pr merge --squash --delete-branch`)
        │
        ▼
-[4. Release & Closure]                 Automated CD Release (`release.yml`)
-       │                                      │
-       ▼                                      ▼
-  GitHub Release, Assets & Pages ──► Verify ACs [x] ──► Close Issue (`gh issue close`)
+[4. Release & Closure]                                                         Automated CD Release (`release.yml`)
+       │                                                                                 │
+       ▼                                                                                 ▼
+  GitHub Release, Assets & Pages ──► AC Verification Subagent Sign-off ──► Close Issue (`gh issue close`)
 ```
 
 </details>
@@ -82,13 +83,15 @@ flowchart TD
    - Update `<tool-name>/CONTEXT.md` with ubiquitous vocabulary and explicitly avoided synonyms (see [`docs/agents/domain.md`](./domain.md)).
    - Record architectural trade-offs in root `docs/adr/` or `<tool-name>/docs/adr/`.
    - Maintain feature specifications in `<tool-name>/ITEMS_TO_IMPLEMENT.md` and test coverage in `<tool-name>/TEST_PLAN.md`.
-3. **Vertical Slice Decomposition**:
+3. **Spec & Acceptance Criteria (AC) Audit**:
+   - Prior to publishing issues, a **Spec & AC Auditor Subagent** evaluates the ticket decomposition to ensure every Acceptance Criteria item is testable, decoupled, and strictly bound to defined domain language.
+4. **Vertical Slice Decomposition**:
    - Break large initiatives into small, independent, testable tickets (vertical slices).
    - Each ticket must have:
      - Clear problem statement and technical scope.
      - Checkable Acceptance Criteria checklist (`- [ ]`).
      - Explicit dependency graph (native GitHub dependencies or `Blocked by: #<n>` fallback per [`docs/agents/issue-tracker.md`](./issue-tracker.md)).
-4. **Publish to GitHub Issue Tracker**:
+5. **Publish to GitHub Issue Tracker**:
    - Create parent tracking epic and child issues using `gh issue create`.
 
 ---
@@ -108,7 +111,12 @@ Every issue follows **GitHub Flow** with an isolated branch:
    # git checkout -b feat/issue-2-emergency-buffer
    # git checkout -b fix/issue-3-scenario-b-workbench
    ```
-3. **⚡ The Two-Speed Verification Loop ([ADR-0007](../adr/0007-migrate-runtime-and-package-manager-to-bun.md))**:
+3. **Adversarial Blind Test Generation ([ADR-0010](../adr/0010-subagent-quality-guardrails-and-two-speed-tdd.md))**:
+   - Before or alongside implementation, spawn the **Adversarial Test Hunter Subagent** (`.agents/skills/adversarial-tdd/SKILL.md`).
+   - The subagent generates expected-behavior tests derived _only_ from the issue ACs and domain glossary, operating strictly at **pre-agreed public seams**:
+     1. Pure state/calculation engines (`tests/<tool>.*.test.js`).
+     2. Accessible semantic DOM elements (standard tags, ARIA roles, semantic data attributes, or bilingual dictionary text).
+4. **⚡ The Two-Speed Verification Loop ([ADR-0007](../adr/0007-migrate-runtime-and-package-manager-to-bun.md))**:
    The repository features 100% **Dual-Runtime Compatibility (Bun + Node)**. Bun is recommended for high-speed local development and CI/CD, while Node/npm commands are supported identically side-by-side.
 
    - **Inner Loop (Fast Scoped TDD)**: During active development, run targeted sub-second test suites for instant feedback:
@@ -134,7 +142,7 @@ Every issue follows **GitHub Flow** with an isolated branch:
      ```
      Zero errors across formatting (`prettier --check`), standalone compaction builds (`scripts/build.js`), and all 2,200+ test assertions (`scripts/run-tests.js`).
 
-4. **External Distribution Sync ([ADR-0006](../adr/0006-configurable-external-distribution-sync.md))**:
+5. **External Distribution Sync ([ADR-0006](../adr/0006-configurable-external-distribution-sync.md))**:
    - `bun run build` (or `npm run build`) and `bun run verify` (or `npm run verify`) automatically detect `TOOLS_DEST_DIR` (configured in `.env.local` or via CLI) and sync compiled artifacts to external static repositories. If unconfigured (such as in CI), sync is cleanly bypassed without warning.
 
 ---
@@ -152,29 +160,34 @@ Every issue follows **GitHub Flow** with an isolated branch:
      - Standard commit / PR title → triggers **patch bump** by default (`v0.63.1`).
      - Adding `#minor` to the commit/PR title → triggers **minor bump** (`v0.64.0`).
      - Adding `#major` to the commit/PR title → triggers **major bump** (`v1.0.0`).
-2. **Agent & Developer Pre-PR Self-Review Checklist**:
-   Before opening a PR, ensure all 5 invariants are satisfied:
-   - [ ] **Spec Conformance**: Every Acceptance Criteria checkbox in the issue is backed by an automated assertion.
-   - [ ] **Zero Runtime Dependencies**: Source and compiled single-file HTML have zero external unbundled npm runtime imports.
-   - [ ] **Data Migration Invariant**: Browser storage changes (IndexedDB / `localStorage`) include backwards-compatible silent auto-migration with dedicated test coverage (`tests/*storage*.test.js`).
-   - [ ] **Bilingual Parity**: 100% dictionary key parity between Vietnamese (`vi`) and English (`en`) strings (`npm run test:i18n`).
-   - [ ] **Dynamic SemVer & No Version-Named Test Files ([ADR-0028](../../smart-buy-list-price-tracker/docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md))**:
-     - Never create version-named test files (e.g. `tests/*-vX-Y.test.js`). Append tests to permanent domain suites.
-     - Never hardcode SemVer strings in functional tests. Assert version synchronization dynamically against `manifest.webmanifest`.
-3. **Open Pull Request Linked to Issue**:
-   - Open a PR using GitHub auto-closing keywords:
+2. **Dual-Axis Subagent Review & 5 Core Invariants**:
+   Before opening a PR, run the dual-axis review (`.agents/skills/code-review/SKILL.md`) to verify both axes in parallel:
+   - **Standards & Invariants Axis**:
+     - [ ] **Zero Runtime Dependencies**: Source and compiled single-file HTML have zero external unbundled npm runtime imports.
+     - [ ] **Silent Data Migration**: Browser storage changes (IndexedDB / `localStorage`) include backwards-compatible silent auto-migration with dedicated test coverage (`tests/*storage*.test.js`).
+     - [ ] **Bilingual Parity**: 100% dictionary key parity between Vietnamese (`vi`) and English (`en`) strings (`npm run test:<tool>:i18n`).
+     - [ ] **Dynamic SemVer**: Version synchronized dynamically against `manifest.webmanifest` (no version-named test files).
+     - [ ] **Zero Regression**: 100% green pass across all repository test suites (`bun run verify`).
+   - **Spec Conformance Axis**:
+     - [ ] Every requirement from the issue is faithfully implemented without scope creep.
+3. **Open Pull Request with AC-to-Test Traceability Matrix**:
+   - Open a PR using GitHub auto-closing keywords and the standardized traceability checklist:
    ```bash
    gh pr create --title "feat(tool): <Description> (#<issue-number>)" --body "Closes #<issue-number>
 
    ## Summary of Changes
    - <Key changes implemented>
 
-   ## Acceptance Criteria Verified
-   - [x] <AC 1>
-   - [x] <AC 2>
+   ## Acceptance Criteria & Test Traceability Matrix
+   - [x] **AC-1 (<Description>)**: Verified by \`tests/<tool>.<domain>.test.js: '<Test Name>'\`
+   - [x] **AC-2 (<Description>)**: Verified by \`tests/<tool>.<domain>.test.js: '<Test Name>'\`
 
-   ## Test Verification
-   - Verified with 100% green pass on \`bun run verify\` (or \`npm run verify\`)."
+   ## Invariant Verification
+   - [x] Zero runtime dependencies verified
+   - [x] Silent data migration verified
+   - [x] Bilingual parity verified (\`bun run test:i18n\`)
+   - [x] Dynamic SemVer verified
+   - [x] 100% test suites passing (\`bun run verify\`)"
    ```
 4. **Automated CI Quality Gate (`pr-verify.yml`)**:
    - Automatically executes `bun run verify` on GitHub Actions runners.
@@ -182,7 +195,6 @@ Every issue follows **GitHub Flow** with an isolated branch:
    - Uploads report artifacts (`test-reports/` with `index.html`, `results.json`, `junit.xml`) with `if: always()`.
    - **100% green check required before approval.**
 5. **Review & Merge Gate**:
-   - Conduct peer or automated agent review (standards + spec conformance).
    - **MANDATORY**: Merge the PR into `main` using **Squash and Merge**:
    ```bash
    gh pr merge <pr-number> --squash --delete-branch
@@ -201,19 +213,20 @@ Every issue follows **GitHub Flow** with an isolated branch:
      - Publishes annotated GitHub Release with downloadable assets.
      - Uploads compacted `dist/` containing the central Portal Hub (`index.html`) and all tool applications to GitHub Pages (`actions/upload-pages-artifact@v3`).
      - Deploys live web versions to GitHub Pages environment (`actions/deploy-pages@v4`).
-     - Live catalog endpoint: `https://thanhtrixx.github.io/html-standalone-tools/` (Repository Settings prerequisite: Settings -> Pages -> Build and deployment Source set to "GitHub Actions").
-2. **Verify Acceptance Criteria & Close Ticket**:
-   - Verify that all issue Acceptance Criteria checklist items are satisfied (`[x]`).
-   - Confirm issue closure with a verification summary comment:
+     - Live catalog endpoint: `https://thanhtrixx.github.io/html-standalone-tools/`.
+2. **AC Verification Subagent Sign-off & Ticket Closure**:
+   - The **AC Verification Subagent** (`.agents/skills/verify-ac/SKILL.md`) audits the live build and test logs to confirm all issue Acceptance Criteria checklist items are satisfied (`[x]`).
+   - Confirm issue closure with a formal sign-off comment:
    ```bash
    gh issue comment <issue-number> --body "Verified via PR #<pr-number>. All acceptance criteria checked and 100% test suites passing (\`bun run verify\` / \`npm run verify\`)."
+   gh issue close <issue-number>
    ```
 
 ---
 
 ## 💎 Standalone Tool Definition of Done (DoD)
 
-Every standalone tool added to or maintained in this repository must satisfy the following 8-point checklist before completion:
+Every standalone tool added to or maintained in this repository must satisfy the following 9-point checklist before completion:
 
 1. **Directory Isolation**: Dedicated tool directory containing human-readable source `index.html` and compacted deliverable `dist/index.html`.
 2. **Domain Glossary (`CONTEXT.md`)**: Comprehensive bilingual dictionary defining ubiquitous terms, avoided synonyms, and calculation rules.
@@ -222,7 +235,8 @@ Every standalone tool added to or maintained in this repository must satisfy the
 5. **Specification & Test Plan**: Requirements in `ITEMS_TO_IMPLEMENT.md` and QA verification plan in `TEST_PLAN.md`.
 6. **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary key parity with locale-aware formatters.
 7. **Test Suite Integration**: Pure math unit tests, UI/DOM tests, and i18n tests authored in `tests/` and registered into `scripts/run-tests.js`.
-8. **CI/CD Build & Release Ready**: Passes unified verification (`bun run verify` / `npm run verify`) and release packaging (`bun run pack:release` / `npm run pack:release`).
+8. **Subagent Quality Audit**: Blind adversarial tests verified at public seams, and PR includes verified AC-to-Test Traceability Matrix.
+9. **CI/CD Build & Release Ready**: Passes unified verification (`bun run verify` / `npm run verify`) and release packaging (`bun run pack:release` / `npm run pack:release`).
 
 ---
 
