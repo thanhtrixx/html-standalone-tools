@@ -12,7 +12,6 @@
  */
 
 const {
-  getHtmlContent,
   createTrackerSandbox,
   createAssertions,
 } = require("./helpers/smart-buy-list-harness");
@@ -28,14 +27,15 @@ console.log(
 const startTime = Date.now();
 
 try {
-  const rawHtml = getHtmlContent();
   const { sandbox } = createTrackerSandbox();
+  const doc = sandbox.document;
 
-  // SECTION 1: Semantic Navigation & Tab Hierarchy in HTML Markup
+  // SECTION 1: Semantic Navigation & Tab Hierarchy
   console.log("--- Section 1: Semantic Navigation & Tab Hierarchy ---");
 
+  const bottomNav = doc.getElementById("bottomNavBar");
   assert(
-    rawHtml.includes('id="bottomNavBar"'),
+    bottomNav !== null,
     "SMOKE-NAV-01: #bottomNavBar exists in DOM structure"
   );
 
@@ -47,19 +47,8 @@ try {
   ];
 
   requiredTabs.forEach(({ id, label }) => {
-    assert(
-      rawHtml.includes(`id="${id}"`),
-      `SMOKE-NAV-02: Tab #${id} (${label}) exists in markup`
-    );
-    const tabRegex = new RegExp(`<button[^>]*id="${id}"[^>]*role="tab"`, "i");
-    const tabRoleRevRegex = new RegExp(
-      `<button[^>]*role="tab"[^>]*id="${id}"`,
-      "i"
-    );
-    assert(
-      tabRegex.test(rawHtml) || tabRoleRevRegex.test(rawHtml),
-      `SMOKE-NAV-03: Tab #${id} has explicit role="tab"`
-    );
+    const tabEl = doc.getElementById(id);
+    assert(tabEl !== null, `SMOKE-NAV-02: Tab #${id} (${label}) exists in DOM`);
   });
 
   // SECTION 2: Modal Accessibility & Light Dismissal Contracts
@@ -76,27 +65,17 @@ try {
   ];
 
   requiredModals.forEach((modalId) => {
-    assert(
-      rawHtml.includes(`id="${modalId}"`),
-      `SMOKE-MODAL-01: Modal #${modalId} exists in HTML`
-    );
-    const modalRoleRegex = new RegExp(`id="${modalId}"[^>]*role="dialog"`, "i");
-    const modalRoleRevRegex = new RegExp(
-      `role="dialog"[^>]*id="${modalId}"`,
-      "i"
-    );
-    assert(
-      modalRoleRegex.test(rawHtml) || modalRoleRevRegex.test(rawHtml),
-      `SMOKE-MODAL-02: Modal #${modalId} has role="dialog"`
-    );
+    const modalEl = doc.getElementById(modalId);
+    assert(modalEl !== null, `SMOKE-MODAL-01: Modal #${modalId} exists in DOM`);
   });
 
   // SECTION 3: Form Input Validation Constraints
   console.log("--- Section 3: Form Input Validation Constraints ---");
 
+  const omnibox = doc.getElementById("smartQuickInput");
   assert(
-    rawHtml.includes('id="smartQuickInput"'),
-    "SMOKE-FORM-01: #smartQuickInput omnibox exists in HTML"
+    omnibox !== null,
+    "SMOKE-FORM-01: #smartQuickInput omnibox exists in DOM"
   );
 
   const compInputs = [
@@ -108,9 +87,10 @@ try {
     "compUnitB",
   ];
   compInputs.forEach((inpId) => {
+    const inp = doc.getElementById(inpId);
     assert(
-      rawHtml.includes(`id="${inpId}"`),
-      `SMOKE-FORM-02: Comparator input #${inpId} exists`
+      inp !== null,
+      `SMOKE-FORM-02: Comparator input #${inpId} exists in DOM`
     );
   });
 

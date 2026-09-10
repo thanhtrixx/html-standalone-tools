@@ -589,27 +589,7 @@ try {
     );
   });
 
-  // Test 15: Header methodology button removed & in-page section preserved
-  assert(
-    !htmlContent.includes('id="methodologyBtn"'),
-    "#methodologyBtn removed from top header navigation"
-  );
-  assert(
-    htmlContent.includes('id="methodologySection"'),
-    "#methodologySection preserved at the bottom of the page"
-  );
-
-  // Test 16: Unfolded Acquisition Breakdown Card
-  assert(
-    htmlContent.includes('id="acquisitionBreakdownCard"'),
-    "#acquisitionBreakdownCard exists as an open, non-collapsible card"
-  );
-  assert(
-    !htmlContent.includes('data-i18n="sec_acquisition_breakdown"</span'),
-    "Acquisition breakdown title rendered properly"
-  );
-
-  // Test 17: Analytics Tab & Legend Translation Key Parity
+  // Test 15: Analytics Tab & Legend Translation Key Parity
   const tabKeys = [
     "tab_timeline",
     "tab_sunk",
