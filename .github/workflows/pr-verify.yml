@@ -26,7 +26,10 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Verify Quality Gate (Lint, Build & Test)
+      - name: Install Playwright Browsers
+        run: bunx playwright install --with-deps chromium webkit
+
+      - name: Verify Quality Gate (Lint, Build, Unit Tests & Multi-Device E2E)
         run: bun run verify
 
       - name: Upload Test Report Artifacts
