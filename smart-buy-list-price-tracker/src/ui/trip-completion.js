@@ -688,7 +688,9 @@ function renderPriceLedgerTable(query = "") {
 
         let dealBadgeHtml = "";
         const cleanDealLabel = (raw) =>
-          (raw || "").replace(/^[🟢🟡🔴⚪]\s*/, "");
+          (raw || "")
+            .replace(/^[\p{Extended_Pictographic}\uFE0F\s]+/u, "")
+            .trim();
         if (deal.score === "GREAT_DEAL") {
           const rawLabel = t.badge_great_deal || "🟢 Great Deal";
           dealBadgeHtml = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-700/50" title="${rawLabel}" aria-label="${rawLabel}"><span aria-hidden="true">🟢</span><span class="hidden sm:inline ml-1">${cleanDealLabel(rawLabel)}</span></span>`;

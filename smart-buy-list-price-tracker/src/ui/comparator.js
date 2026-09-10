@@ -442,7 +442,8 @@ function updateEditItemLivePreview() {
       (l) => itemKey && normalizeItemKey(l.itemName) === itemKey
     );
     const deal = evaluateDealScore(unitPrice, history);
-    const cleanDealLabel = (raw) => (raw || "").replace(/^[🟢🟡🔴⚪]\s*/, "");
+    const cleanDealLabel = (raw) =>
+      (raw || "").replace(/^[\p{Extended_Pictographic}\uFE0F\s]+/u, "").trim();
     let emoji = "⚪";
     let rawLabel = t.badge_new_item || "⚪ New Item";
     let bgClass = "bg-slate-800 text-slate-300 border border-slate-700";

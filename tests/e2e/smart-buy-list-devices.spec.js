@@ -222,10 +222,12 @@ test.describe("Smart Buy-List Multi-Device UI/UX Suite", () => {
     // Get the first deal badge's text label span (.sm:inline)
     const firstBadgeText = dealBadges.first().locator("span.sm\\:inline");
     if (isDesktopOrTablet) {
-      // Tablet/Desktop (>= 640px): text label MUST be visible and non-empty
+      // Tablet/Desktop (>= 640px): text label MUST be visible, trimmed and non-empty
       await expect(firstBadgeText).toBeVisible();
       const textContent = await firstBadgeText.textContent();
       expect(textContent && textContent.trim().length).toBeGreaterThan(0);
+      expect(textContent).not.toMatch(/^\s+/);
+      expect(textContent).not.toMatch(/\s{2,}/);
     } else {
       // Mobile (< 640px): text label MUST be hidden (icon-only mode)
       await expect(firstBadgeText).toBeHidden();

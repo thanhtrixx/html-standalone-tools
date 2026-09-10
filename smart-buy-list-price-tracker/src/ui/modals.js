@@ -521,7 +521,9 @@ function applyTranslations() {
   el("btnDeleteEditItemText", t.edit_modal_delete_btn || "Delete Item");
   el(
     "editItemDealBadgeText",
-    (t.badge_new_item || "⚪ New Item").replace(/^[🟢🟡🔴⚪]\s*/, "")
+    (t.badge_new_item || "⚪ New Item")
+      .replace(/^[\p{Extended_Pictographic}\uFE0F\s]+/u, "")
+      .trim()
   );
 
   // 6. Quick Price Modal
