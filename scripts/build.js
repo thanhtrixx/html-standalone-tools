@@ -31,6 +31,8 @@ const IGNORED_DIRS = new Set([
   "tests",
   "coverage",
   "test-reports",
+  "playwright-report",
+  "test-results",
   "release-assets",
   "portal",
 ]);

@@ -6,6 +6,7 @@ const { expect } = require("@playwright/test");
  * @param {import('@playwright/test').Page} page
  */
 async function assertNoHorizontalOverflow(page) {
+  await page.waitForLoadState("domcontentloaded");
   const isOverflowing = await page.evaluate(() => {
     return (
       document.documentElement.scrollWidth > window.innerWidth ||
