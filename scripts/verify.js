@@ -63,8 +63,8 @@ if (buildProc.status !== 0) {
   process.exit(buildProc.status || 1);
 }
 
-// 3. Test Runner
-console.log("\n[3/3] Running Automated Test Suites...");
+// 3. Test Runner (Unit & Domain Suites)
+console.log("\n[3/4] Running Automated Domain Test Suites...");
 const testProc = spawnSync(
   runtime,
   [path.join(ROOT_DIR, "scripts", "run-tests.js")],
@@ -75,8 +75,38 @@ const testProc = spawnSync(
 );
 
 if (testProc.status !== 0) {
-  console.error("\n❌ Automated tests failed.");
+  console.error("\n❌ Automated domain tests failed.");
   process.exit(testProc.status || 1);
+}
+
+// 4. Playwright Multi-Device E2E & Visual Regression Suite
+console.log("\n[4/4] Running Playwright Multi-Device E2E Tests...");
+const playwrightBin = path.join(
+  ROOT_DIR,
+  "node_modules",
+  "@playwright",
+  "test",
+  "cli.js"
+);
+let e2eProc;
+if (fs.existsSync(playwrightBin)) {
+  e2eProc = spawnSync(runtime, [playwrightBin, "test"], {
+    cwd: ROOT_DIR,
+    stdio: "inherit",
+    env: { ...process.env, CI: process.env.CI || "1" },
+  });
+} else {
+  const runner = isBun ? "bunx" : "npx";
+  e2eProc = spawnSync(runner, ["playwright", "test"], {
+    cwd: ROOT_DIR,
+    stdio: "inherit",
+    env: { ...process.env, CI: process.env.CI || "1" },
+  });
+}
+
+if (e2eProc.status !== 0) {
+  console.error("\n❌ Playwright E2E tests failed.");
+  process.exit(e2eProc.status || 1);
 }
 
 console.log("\n✨ Quality Gate Passed! All checks 100% green.");
