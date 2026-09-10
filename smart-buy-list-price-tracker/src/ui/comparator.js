@@ -589,16 +589,49 @@ function quickUpdateItemPrice(itemId, newPrice, newQty) {
   const patch = { price: newPrice };
   if (newQty !== undefined && newQty > 0) patch.quantity = newQty;
 
+  const item = (memoryState.activeList?.items || []).find(
+    (i) => i.id === itemId
+  );
+
   if (typeof updateItem === "function") {
     updateItem(itemId, patch);
-  } else {
-    const item = memoryState.activeList.items.find((i) => i.id === itemId);
-    if (item) {
-      item.price = newPrice;
-      if (newQty !== undefined && newQty > 0) item.quantity = newQty;
-      touchItem(item);
+  } else if (item) {
+    item.price = newPrice;
+    if (newQty !== undefined && newQty > 0) item.quantity = newQty;
+    touchItem(item);
+    saveToLocalStorage();
+    renderApp();
+  }
+
+  // Record verified shelf price into historical purchase ledger
+  if (item && newPrice > 0) {
+    const qty = newQty !== undefined && newQty > 0 ? newQty : item.quantity;
+    const { baseUnit } = normalizeQuantity(qty, item.unit);
+    const unitPrice = normalizeUnitPrice(newPrice, qty, item.unit);
+    const ledgerEntry = {
+      id: generateItemId("ledger"),
+      itemId: item.id,
+      itemName: item.name,
+      price: newPrice,
+      quantity: qty,
+      unit: item.unit,
+      unitPrice,
+      baseUnit,
+      store: item.store || "General",
+      date: new Date().toISOString(),
+      timestamp: Date.now(),
+      notes: "Quick shelf price update",
+    };
+    if (!memoryState.purchaseLedger) memoryState.purchaseLedger = [];
+    memoryState.purchaseLedger.unshift(ledgerEntry);
+    if (typeof store !== "undefined" && store && store.dispatch) {
+      store.dispatch({
+        type: ACTION_TYPES.SET_LEDGER,
+        payload: memoryState.purchaseLedger,
+      });
+    }
+    if (typeof saveToLocalStorage === "function") {
       saveToLocalStorage();
-      renderApp();
     }
   }
 
