@@ -446,6 +446,43 @@
         font-variant-numeric: tabular-nums;
       }
 
+      /* Spring micro-interactions: tactile feedback and delight */
+      [data-action="toggle-check"] {
+        transition:
+          transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+          background-color 0.2s ease,
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+      [data-action="toggle-check"]:active {
+        transform: scale(0.92);
+      }
+      [data-action="toggle-check"] span {
+        display: inline-block;
+        animation: spring-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes spring-pop {
+        0% {
+          transform: scale(0.3);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      #tripProgressBar {
+        transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .item-card-transition {
+        transition:
+          opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+          transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+
       /* Respect motion sensitivity: dampens large movements while preserving
           state feedback and transition completion. */
       @media (prefers-reduced-motion: reduce) {
