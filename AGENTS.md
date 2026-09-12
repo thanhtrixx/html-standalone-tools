@@ -12,7 +12,7 @@ Canonical 5-role defaults. See `docs/agents/triage-labels.md`.
 
 ### Ways of working & GitHub Flow
 
-Standard engineering lifecycle, GitHub Flow, Subagent Quality Protocol (PR-per-issue required before closing, ADR-0010), and Optimal Token Strategy (ADR-0012). See `docs/agents/ways-of-working.md`, `docs/adr/0010-subagent-quality-guardrails-and-two-speed-tdd.md`, and `docs/adr/0012-optimal-token-strategy-and-subagent-economics.md`.
+Token-first three-tier change classification (Tier 0 Zero-Ceremony / Tier 1 Scoped Lightweight / Tier 2 Full Ceremony), phase-aware quality gating, and Subagent Quality Protocol (ADR-0010, ADR-0012, ADR-0014). See `docs/agents/ways-of-working.md` and `docs/adr/0014-token-first-wow-rebuild-and-tiered-change-classification.md`.
 
 ### Token Economics & Subagent Strategy
 
