@@ -327,10 +327,20 @@ function createHabitTrackerSandbox(options = {}) {
   const elements = {};
   const globalListeners = {};
 
+  const defaultHiddenElements = new Set([
+    "habit-edit-modal-overlay",
+    "detail-sheet-overlay",
+    "backup-restore-overlay",
+    "celebration-confetti-container",
+  ]);
+
   function getOrCreateElement(id) {
     if (!elements[id]) {
       const el = new MockDOMElement(id);
       el.ownerDocument = doc;
+      if (defaultHiddenElements.has(id)) {
+        el.classList.add("hidden");
+      }
       elements[id] = el;
     }
     return elements[id];

@@ -272,90 +272,90 @@
     const html = `
       <div class="settings-view max-w-lg mx-auto pb-24 px-1">
         <div class="mb-6">
-          <h2 class="text-2xl font-black text-white">${i18n.t("settings_tab", {}, lang)}</h2>
-          <p class="text-xs text-slate-400">${i18n.t("settings_title", {}, lang)}</p>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white">${i18n.t("settings_tab", {}, lang)}</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("settings_title", {}, lang)}</p>
         </div>
 
         <!-- Language & Appearance Card -->
-        <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-5 shadow-xl">
-          <h3 class="text-sm font-bold text-white mb-3">🌐 ${i18n.t("language_select", {}, lang)} & ${i18n.t("theme_select", {}, lang)}</h3>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">🌐 ${i18n.t("language_select", {}, lang)} & ${i18n.t("theme_select", {}, lang)}</h3>
           
-          <div class="flex items-center justify-between py-2 border-b border-slate-800/60">
-            <span class="text-xs text-slate-300">${i18n.t("language_select", {}, lang)}</span>
+          <div class="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-800/60">
+            <span class="text-xs text-slate-700 dark:text-slate-300">${i18n.t("language_select", {}, lang)}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="window.HabitApp.switchLanguage('vi')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${lang === "vi" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">Tiếng Việt</button>
-              <button onclick="window.HabitApp.switchLanguage('en')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${lang === "en" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">English</button>
+              <button onclick="window.HabitApp.switchLanguage('vi')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${lang === "vi" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">Tiếng Việt</button>
+              <button onclick="window.HabitApp.switchLanguage('en')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${lang === "en" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">English</button>
             </div>
           </div>
 
           <div class="flex items-center justify-between pt-3">
-            <span class="text-xs text-slate-300">${i18n.t("theme_select", {}, lang)}</span>
+            <span class="text-xs text-slate-700 dark:text-slate-300">${i18n.t("theme_select", {}, lang)}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme !== "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">🌙 ${i18n.t("theme_dark", {}, lang)}</button>
-              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">☀️ ${i18n.t("theme_light", {}, lang)}</button>
+              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme !== "light" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">🌙 ${i18n.t("theme_dark", {}, lang)}</button>
+              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">☀️ ${i18n.t("theme_light", {}, lang)}</button>
             </div>
           </div>
         </div>
 
         <!-- Streak Freeze & Vacation Safeguards Card -->
-        <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-5 shadow-xl">
-          <h3 class="text-sm font-bold text-white mb-3">🛡️ ${i18n.t("freeze_token", {}, lang)} & ${i18n.t("vacation_pause_mode", {}, lang)}</h3>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">🛡️ ${i18n.t("freeze_token", {}, lang)} & ${i18n.t("vacation_pause_mode", {}, lang)}</h3>
           
-          <div class="flex items-center justify-between py-2 border-b border-slate-800/60">
+          <div class="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-800/60">
             <div>
-              <span class="text-xs text-slate-300 block font-semibold">${i18n.t("freeze_tokens_left", { count: settings.freezeTokens ?? 2 }, lang)}</span>
-              <span class="text-[11px] text-slate-500">${i18n.t("freeze_tokens_desc", {}, lang)}</span>
+              <span class="text-xs text-slate-800 dark:text-slate-300 block font-semibold">${i18n.t("freeze_tokens_left", { count: settings.freezeTokens ?? 2 }, lang)}</span>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400">${i18n.t("freeze_tokens_desc", {}, lang)}</span>
             </div>
-            <button onclick="window.HabitApp.addFreezeTokens(1)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold rounded-xl active:scale-95 transition-all">
+            <button onclick="window.HabitApp.addFreezeTokens(1)" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-amber-600 dark:text-amber-400 text-xs font-bold rounded-xl active:scale-95 transition-all">
               +1 🛡️
             </button>
           </div>
 
           <div class="flex items-center justify-between pt-3">
             <div>
-              <span class="text-xs text-slate-300 block font-semibold">${i18n.t("vacation_pause_mode", {}, lang)}</span>
-              <span class="text-[11px] text-slate-500">${i18n.t("vacation_mode_desc", {}, lang)}</span>
+              <span class="text-xs text-slate-800 dark:text-slate-300 block font-semibold">${i18n.t("vacation_pause_mode", {}, lang)}</span>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400">${i18n.t("vacation_mode_desc", {}, lang)}</span>
             </div>
-            <button onclick="window.HabitApp.toggleVacationMode()" class="px-3 py-1.5 ${settings.vacationRanges && settings.vacationRanges.length > 0 ? "bg-amber-600/80 text-white" : "bg-slate-800 text-slate-300"} text-xs font-bold rounded-xl active:scale-95 transition-all">
+            <button onclick="window.HabitApp.toggleVacationMode()" class="px-3 py-1.5 ${settings.vacationRanges && settings.vacationRanges.length > 0 ? "bg-amber-600/80 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"} text-xs font-bold rounded-xl active:scale-95 transition-all">
               ${settings.vacationRanges && settings.vacationRanges.length > 0 ? i18n.t("vacation_active_btn", {}, lang) : i18n.t("vacation_inactive_btn", {}, lang)}
             </button>
           </div>
         </div>
 
         <!-- Data Backup & Cloud Sync Card -->
-        <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-5 shadow-xl">
-          <h3 class="text-sm font-bold text-white mb-3">☁️ ${i18n.t("cloud_backup_title", {}, lang)} & ${i18n.t("export_import_title", {}, lang)}</h3>
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">☁️ ${i18n.t("cloud_backup_title", {}, lang)} & ${i18n.t("export_import_title", {}, lang)}</h3>
 
           <div class="grid grid-cols-2 gap-2 mb-4">
-            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-cyan-400 border border-slate-700/50 transition-all">
+            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all">
               <span>📥</span>
               <span>${i18n.t("export_json_btn", {}, lang)}</span>
             </button>
-            <label class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-emerald-400 border border-slate-700/50 cursor-pointer transition-all">
+            <label class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all">
               <span>📤</span>
               <span>${i18n.t("import_json_btn", {}, lang)}</span>
               <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
             </label>
           </div>
 
-          <div class="space-y-2 pt-2 border-t border-slate-800/60">
-            <button onclick="window.HabitApp.promptDriveBackup()" class="w-full flex items-center justify-between p-3 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/40 text-left transition-all">
+          <div class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800/60">
+            <button onclick="window.HabitApp.promptDriveBackup()" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/40 text-left transition-all">
               <div class="flex items-center gap-2.5">
                 <span class="text-lg">📁</span>
                 <div>
-                  <h4 class="text-xs font-bold text-white">Google Drive Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-400">${isDriveConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">Google Drive Cloud Backup</h4>
+                  <span class="text-[10px] text-slate-500 dark:text-slate-400">${isDriveConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
             </button>
 
-            <button onclick="window.HabitApp.promptGistBackup()" class="w-full flex items-center justify-between p-3 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/40 text-left transition-all">
+            <button onclick="window.HabitApp.promptGistBackup()" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/40 text-left transition-all">
               <div class="flex items-center gap-2.5">
                 <span class="text-lg">🐙</span>
                 <div>
-                  <h4 class="text-xs font-bold text-white">GitHub Gist Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-400">${isGistConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">GitHub Gist Cloud Backup</h4>
+                  <span class="text-[10px] text-slate-500 dark:text-slate-400">${isGistConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
@@ -364,18 +364,18 @@
         </div>
 
         <!-- PWA Status & Updates Card -->
-        <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-5 shadow-xl">
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold text-white">📲 ${i18n.t("pwa_version", {}, lang)}</h3>
-            <span class="text-[11px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-800/50 font-mono">v1.0.0</span>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">📲 ${i18n.t("pwa_version", {}, lang)}</h3>
+            <span class="text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800/50 font-mono">v1.0.0</span>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
-            <button onclick="window.HabitApp.checkForUpdates()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 rounded-2xl text-xs font-bold transition-all">
+            <button onclick="window.HabitApp.checkForUpdates()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 rounded-2xl text-xs font-bold transition-all">
               <span>🔄</span>
               <span>${i18n.t("check_updates_btn", {}, lang)}</span>
             </button>
-            <button onclick="window.HabitApp.purgeCacheAndReload()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800/80 hover:bg-red-950/60 hover:text-red-300 hover:border-red-800/60 border border-transparent active:scale-95 text-slate-300 rounded-2xl text-xs font-bold transition-all">
+            <button onclick="window.HabitApp.purgeCacheAndReload()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-red-100 dark:hover:bg-red-950/60 hover:text-red-700 dark:hover:text-red-300 hover:border-red-300 dark:hover:border-red-800/60 border border-transparent active:scale-95 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold transition-all">
               <span>🧹</span>
               <span>${i18n.t("purge_cache_btn", {}, lang)}</span>
             </button>
@@ -1000,7 +1000,11 @@
       }
     },
     closeDetailSheet,
+    handleOpenDetailSheet,
+    openDetailSheet: handleOpenDetailSheet,
     handleOpenEditModal,
+    openEditModal: handleOpenEditModal,
+    openAddHabitModal: () => handleOpenEditModal(null),
     closeHabitModal,
     saveHabitFromModal,
     handleArchiveHabit: async (id) => {

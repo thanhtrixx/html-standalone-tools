@@ -57,7 +57,7 @@
 
         const activeClasses = isSelected
           ? "date-pill-active bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400"
-          : "bg-slate-800/60 dark:bg-slate-800/60 text-slate-300 hover:bg-slate-700/60 border border-slate-700/40";
+          : "bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/40";
 
         const dotIndicator = isAllDone
           ? `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1"></span>`
@@ -123,7 +123,7 @@
           data-action="toggle-habit"
           data-habit-id="${habit.id}"
           aria-label="${i18n.t("completed", {}, lang)}"
-          class="w-11 h-11 rounded-full border-2 border-slate-600/60 dark:border-slate-600/60 flex items-center justify-center text-white font-bold text-lg transition-transform active:scale-90"
+          class="w-11 h-11 rounded-full border-2 border-slate-300 dark:border-slate-600/60 flex items-center justify-center text-white font-bold text-lg transition-transform active:scale-90"
           ${checkBg}
         >
           ${checkIcon}
@@ -143,13 +143,13 @@
             data-habit-id="${habit.id}"
             data-step="${step}"
             aria-label="Decrease"
-            class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center justify-center font-bold text-base active:scale-95 border border-slate-700/50"
+            class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center font-bold text-base active:scale-95 border border-slate-200 dark:border-slate-700/50"
           >
             -
           </button>
           <div class="text-right min-w-[70px]">
-            <span class="text-sm font-bold ${isCompleted ? "text-emerald-400" : "text-white"}">${currentVal} / ${targetVal}</span>
-            <span class="text-[11px] text-slate-400 block">${unit}</span>
+            <span class="text-sm font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${currentVal} / ${targetVal}</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${unit}</span>
           </div>
           <button
             type="button"
@@ -171,8 +171,8 @@
       controlHtml = `
         <div class="flex items-center gap-2">
           <div class="text-right">
-            <span class="text-sm font-mono font-bold ${isCompleted ? "text-emerald-400" : "text-white"}">${durationFormatted}</span>
-            <span class="text-[11px] text-slate-400 block">${targetDuration}</span>
+            <span class="text-sm font-mono font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${targetDuration}</span>
           </div>
           <button
             type="button"
@@ -190,18 +190,18 @@
 
     const completedCardStyle = isCompleted
       ? "opacity-85 border-emerald-500/30 dark:border-emerald-500/20"
-      : "border-slate-800/80 dark:border-slate-800/80";
+      : "border-slate-200 dark:border-slate-800/80";
 
     const noteIndicator =
       logEntry && logEntry.notes
-        ? `<span class="inline-flex items-center text-[10px] text-slate-400 mt-1"><span class="mr-1">📝</span>${logEntry.notes.slice(0, 24)}${logEntry.notes.length > 24 ? "..." : ""}</span>`
+        ? `<span class="inline-flex items-center text-[10px] text-slate-500 dark:text-slate-400 mt-1"><span class="mr-1">📝</span>${logEntry.notes.slice(0, 24)}${logEntry.notes.length > 24 ? "..." : ""}</span>`
         : "";
 
     return `
       <div
         id="habit-card-${habit.id}"
         data-habit-card="${habit.id}"
-        class="habit-card relative overflow-hidden bg-slate-900/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-4 mb-3 border ${completedCardStyle} transition-all duration-300 shadow-md touch-pan-y"
+        class="habit-card relative overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-4 mb-3 border ${completedCardStyle} transition-all duration-300 shadow-md touch-pan-y"
       >
         <!-- Swipe reveal zone (Green check) -->
         <div class="swipe-reveal-complete absolute inset-y-0 left-0 w-24 bg-emerald-500 text-white flex items-center justify-center font-bold text-lg opacity-0 -translate-x-full transition-all pointer-events-none">
@@ -213,8 +213,8 @@
             <div class="w-1.5 h-10 rounded-full" style="background-color: ${colorHex};"></div>
             <div class="text-2xl">${habit.icon || "🎯"}</div>
             <div>
-              <h4 class="font-semibold text-white text-base ${isCompleted ? "line-through text-slate-400" : ""}">${habit.name}</h4>
-              <div class="flex items-center gap-2 text-xs text-slate-400">
+              <h4 class="font-semibold text-slate-900 dark:text-white text-base ${isCompleted ? "line-through text-slate-400 dark:text-slate-500" : ""}">${habit.name}</h4>
+              <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <span>${habit.routine ? i18n.t(`routine_${habit.routine}`, {}, lang) : ""}</span>
               </div>
               ${noteIndicator}
@@ -287,12 +287,12 @@
           <div class="flex items-center gap-2">
             <span class="text-xl">${icons[routineKey] || "🎯"}</span>
             <div>
-              <h3 class="font-bold text-white text-base leading-tight">${routineTitle}</h3>
-              <span class="text-xs text-slate-400">${routineTime}</span>
+              <h3 class="font-bold text-slate-900 dark:text-white text-base leading-tight">${routineTitle}</h3>
+              <span class="text-xs text-slate-500 dark:text-slate-400">${routineTime}</span>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/50">
+            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700/50">
               ${routineProg.completed}/${routineProg.total} ${i18n.t("done", {}, lang)}
             </span>
           </div>
@@ -343,8 +343,8 @@
       ? `
         <div class="text-center py-16 px-4">
           <div class="text-5xl mb-3">🌱</div>
-          <h3 class="text-lg font-bold text-white mb-1">${i18n.t("no_habits_scheduled_today", {}, lang)}</h3>
-          <p class="text-sm text-slate-400 mb-6">${i18n.t("app_tagline", {}, lang)}</p>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">${i18n.t("no_habits_scheduled_today", {}, lang)}</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">${i18n.t("app_tagline", {}, lang)}</p>
           <button
             type="button"
             data-action="open-add-habit"
@@ -366,16 +366,16 @@
     const html = `
       <div class="today-dashboard max-w-lg mx-auto pb-24">
         <!-- Top Status Header -->
-        <header class="ambient-header bg-slate-900/60 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-5 mb-4 border border-slate-800/80 shadow-lg">
+        <header class="ambient-header bg-white/80 dark:bg-slate-900/60 backdrop-blur-md rounded-3xl p-5 mb-4 border border-slate-200 dark:border-slate-800/80 shadow-lg">
           <div class="flex items-center justify-between">
             <div>
-              <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">${i18n.formatDate(selectedDate, lang, "full")}</span>
-              <h2 class="text-2xl font-black text-white tracking-tight mt-0.5">${i18n.t("today_tab", {}, lang)}</h2>
+              <span class="text-xs font-semibold text-emerald-500 dark:text-emerald-400 uppercase tracking-wider">${i18n.formatDate(selectedDate, lang, "full")}</span>
+              <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">${i18n.t("today_tab", {}, lang)}</h2>
               <div class="flex items-center gap-3 mt-2">
-                <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-800/50">
+                <span class="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800/50">
                   🔥 ${i18n.t("streak_days_count", { count: streakSummary.currentStreak }, lang)}
                 </span>
-                <span class="inline-flex items-center gap-1 text-xs font-bold text-cyan-400 bg-cyan-950/40 px-2 py-0.5 rounded-full border border-cyan-800/50">
+                <span class="inline-flex items-center gap-1 text-xs font-bold text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-950/40 px-2 py-0.5 rounded-full border border-cyan-200 dark:border-cyan-800/50">
                   ❄️ ${settings.freezeTokens || 2}
                 </span>
               </div>
@@ -383,12 +383,12 @@
 
             <div class="relative flex items-center justify-center">
               ${progressRingHtml}
-              <span class="absolute text-sm font-extrabold text-white">${dailyProgress.percentage}%</span>
+              <span class="absolute text-sm font-extrabold text-slate-900 dark:text-white">${dailyProgress.percentage}%</span>
             </div>
           </div>
 
           <!-- Date Ribbon -->
-          <div class="mt-4 pt-3 border-t border-slate-800/60">
+          <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/60">
             ${ribbonHtml}
           </div>
         </header>
