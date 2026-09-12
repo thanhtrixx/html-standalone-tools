@@ -308,7 +308,7 @@
           <h3 class="text-sm font-bold text-white mb-3">☁️ ${i18n.t("cloud_backup_title", {}, lang)} & ${i18n.t("export_import_title", {}, lang)}</h3>
 
           <div class="grid grid-cols-2 gap-2 mb-4">
-            <button onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-cyan-400 border border-slate-700/50 transition-all">
+            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-cyan-400 border border-slate-700/50 transition-all">
               <span>📥</span>
               <span>${i18n.t("export_json_btn", {}, lang)}</span>
             </button>
@@ -511,7 +511,13 @@
       } else if (action === "restore-habit") {
         await HabitApp.handleRestoreHabit(habitId);
       } else if (action === "delete-habit") {
-        await HabitApp.handleDeleteHabit(habitId);
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        await app.handleDeleteHabit(habitId);
+      } else if (action === "export-json") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        await app.exportDataJSON();
       }
     });
   }
@@ -774,7 +780,11 @@
     toast.innerHTML = `<span>${type === "success" ? "✅" : type === "error" ? "⚠️" : "ℹ️"}</span> <span>${message}</span>`;
 
     container.appendChild(toast);
-    requestAnimationFrame(() => {
+    const raf =
+      typeof requestAnimationFrame !== "undefined"
+        ? requestAnimationFrame
+        : (fn) => setTimeout(fn, 16);
+    raf(() => {
       toast.classList.remove("translate-y-2", "opacity-0");
     });
 
@@ -818,6 +828,10 @@
   // Public API exposed to global
   const HabitApp = {
     init: initApp,
+    get store() {
+      return store;
+    },
+    showToast,
     switchTab(tab) {
       activeTab = tab;
       renderApp();
@@ -848,8 +862,11 @@
       }
     },
     exportDataJSON() {
+      if (!store) return;
       exportImport.downloadExportJSON(store.state);
-      showToast("Đã tải xuống bản sao lưu JSON!", "success");
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify("Đã tải xuống bản sao lưu JSON!", "success");
     },
     async importDataJSON(event) {
       const file = event.target.files && event.target.files[0];
