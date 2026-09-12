@@ -32,7 +32,7 @@
    */
   function renderYearlyHeatmapGrid(cells = [], lang = "vi") {
     const levelColors = [
-      "bg-slate-800/70 border-slate-700/30",
+      "bg-slate-100 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700/30",
       "bg-emerald-950 border-emerald-800 text-emerald-300",
       "bg-emerald-700 border-emerald-600 text-white",
       "bg-emerald-500 border-emerald-400 text-white",
@@ -59,13 +59,13 @@
       .join("");
 
     return `
-      <div class="heatmap-container bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
+      <div class="heatmap-container bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-bold text-white">${i18n.t("yearly_heatmap_title", {}, lang)}</h3>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">${i18n.t("yearly_heatmap_title", {}, lang)}</h3>
           <!-- Legend -->
-          <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
+          <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
             <span>${i18n.t("heatmap_less", {}, lang)}</span>
-            <span class="w-2.5 h-2.5 rounded-xs bg-slate-800 border border-slate-700/50"></span>
+            <span class="w-2.5 h-2.5 rounded-xs bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700/50"></span>
             <span class="w-2.5 h-2.5 rounded-xs bg-emerald-950 border border-emerald-800"></span>
             <span class="w-2.5 h-2.5 rounded-xs bg-emerald-700 border border-emerald-600"></span>
             <span class="w-2.5 h-2.5 rounded-xs bg-emerald-500 border border-emerald-400"></span>
@@ -80,7 +80,7 @@
           </div>
         </div>
 
-        <div id="heatmap-cell-popover" class="hidden mt-3 p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 text-xs text-slate-200"></div>
+        <div id="heatmap-cell-popover" class="hidden mt-3 p-3 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700/60 text-xs text-slate-800 dark:text-slate-200"></div>
       </div>
     `;
   }
@@ -105,19 +105,19 @@
         const name = dayNames[stat.dayOfWeek] || dayNames[idx];
         return `
           <div class="flex-1 flex flex-col items-center gap-2">
-            <span class="text-[11px] font-bold text-slate-300">${rate}%</span>
-            <div class="w-full bg-slate-800 rounded-full h-24 flex items-end p-0.5">
+            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">${rate}%</span>
+            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-24 flex items-end p-0.5">
               <div class="w-full bg-emerald-500 rounded-full transition-all duration-500" style="height: ${rate}%;"></div>
             </div>
-            <span class="text-xs font-semibold text-slate-400">${name}</span>
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">${name}</span>
           </div>
         `;
       })
       .join("");
 
     return `
-      <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
-        <h3 class="text-base font-bold text-white mb-4">${i18n.t("weekday_adherence_title", {}, lang)}</h3>
+      <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">${i18n.t("weekday_adherence_title", {}, lang)}</h3>
         <div class="flex items-end justify-between gap-2 h-36 pt-2">
           ${barsHtml}
         </div>
@@ -148,18 +148,18 @@
         );
 
         return `
-          <div class="bg-slate-800/60 border border-slate-700/40 rounded-2xl p-4 flex items-center justify-between">
+          <div class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <span class="text-2xl">${icon}</span>
               <div>
-                <h4 class="font-bold text-white text-sm">${rTitle}</h4>
-                <span class="text-xs text-slate-400">${stat.completed}/${stat.scheduled} ${i18n.t("completed", {}, lang)}</span>
+                <h4 class="font-bold text-slate-900 dark:text-white text-sm">${rTitle}</h4>
+                <span class="text-xs text-slate-500 dark:text-slate-400">${stat.completed}/${stat.scheduled} ${i18n.t("completed", {}, lang)}</span>
               </div>
             </div>
 
             <div class="relative flex items-center justify-center">
               ${ringHtml}
-              <span class="absolute text-[11px] font-bold text-white">${stat.rate}%</span>
+              <span class="absolute text-[11px] font-bold text-slate-900 dark:text-white">${stat.rate}%</span>
             </div>
           </div>
         `;
@@ -167,8 +167,8 @@
       .join("");
 
     return `
-      <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
-        <h3 class="text-base font-bold text-white mb-4">${i18n.t("routine_adherence_title", {}, lang)}</h3>
+      <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">${i18n.t("routine_adherence_title", {}, lang)}</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           ${cardsHtml}
         </div>
@@ -186,8 +186,8 @@
         const isUnlocked = b.unlocked;
 
         const cardStyle = isUnlocked
-          ? "bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border-amber-500/40 text-amber-300"
-          : "bg-slate-800/40 border-slate-700/30 opacity-60 text-slate-400";
+          ? "bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border-amber-500/40 text-amber-600 dark:text-amber-300"
+          : "bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/30 opacity-60 text-slate-500 dark:text-slate-400";
 
         const badgeIcon = isUnlocked ? b.icon : "🔒";
         const progPercent = Math.round(b.progress * 100);
@@ -195,9 +195,9 @@
         return `
           <div class="milestone-badge p-4 rounded-2xl border ${cardStyle} flex flex-col items-center text-center">
             <span class="text-3xl mb-1.5">${badgeIcon}</span>
-            <h4 class="text-xs font-bold text-white mb-1">${title}</h4>
-            <span class="text-[10px] text-slate-400">${b.threshold} ${i18n.t("streak_days_count", { count: b.threshold }, lang)}</span>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-1">${title}</h4>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400">${b.threshold} ${i18n.t("streak_days_count", { count: b.threshold }, lang)}</span>
+            <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
               <div class="bg-amber-400 h-full rounded-full" style="width: ${progPercent}%;"></div>
             </div>
           </div>
@@ -206,8 +206,8 @@
       .join("");
 
     return `
-      <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
-        <h3 class="text-base font-bold text-white mb-4">${i18n.t("milestones_title", {}, lang)}</h3>
+      <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">${i18n.t("milestones_title", {}, lang)}</h3>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           ${badgesHtml}
         </div>
@@ -290,33 +290,33 @@
     const html = `
       <div class="insights-view max-w-lg mx-auto pb-24">
         <div class="mb-6 px-1">
-          <h2 class="text-2xl font-black text-white">${i18n.t("insights_tab", {}, lang)}</h2>
-          <p class="text-xs text-slate-400">${i18n.t("app_tagline", {}, lang)}</p>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white">${i18n.t("insights_tab", {}, lang)}</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("app_tagline", {}, lang)}</p>
         </div>
 
         <!-- Metric Stat Cards -->
         <div class="grid grid-cols-2 gap-3 mb-6">
-          <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-4 shadow-xl">
-            <span class="text-xs font-semibold text-slate-400 block">${i18n.t("best_streak", {}, lang)}</span>
-            <span class="text-3xl font-black text-amber-400 mt-1 block">🏆 ${maxBestStreak}</span>
+          <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("best_streak", {}, lang)}</span>
+            <span class="text-3xl font-black text-amber-500 dark:text-amber-400 mt-1 block">🏆 ${maxBestStreak}</span>
             <span class="text-[11px] text-slate-500 mt-1 block">${i18n.t("streak_days_count", { count: maxBestStreak }, lang)}</span>
           </div>
 
-          <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-4 shadow-xl">
-            <span class="text-xs font-semibold text-slate-400 block">${i18n.t("consistency_score", {}, lang)}</span>
-            <span class="text-3xl font-black text-emerald-400 mt-1 block">${overallStreak.consistencyScore30d}%</span>
+          <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("consistency_score", {}, lang)}</span>
+            <span class="text-3xl font-black text-emerald-500 dark:text-emerald-400 mt-1 block">${overallStreak.consistencyScore30d}%</span>
             <span class="text-[11px] text-slate-500 mt-1 block">90d: ${overallStreak.consistencyScore90d}%</span>
           </div>
 
-          <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-4 shadow-xl">
-            <span class="text-xs font-semibold text-slate-400 block">${i18n.t("total_completions", {}, lang)}</span>
-            <span class="text-3xl font-black text-cyan-400 mt-1 block">${totalAllCompletions}</span>
+          <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("total_completions", {}, lang)}</span>
+            <span class="text-3xl font-black text-cyan-600 dark:text-cyan-400 mt-1 block">${totalAllCompletions}</span>
             <span class="text-[11px] text-slate-500 mt-1 block">${i18n.t("done", {}, lang)}</span>
           </div>
 
-          <div class="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-4 shadow-xl">
-            <span class="text-xs font-semibold text-slate-400 block">${i18n.t("perfect_days", {}, lang)}</span>
-            <span class="text-3xl font-black text-violet-400 mt-1 block">🌟 ${perfectDaysCount}</span>
+          <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
+            <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("perfect_days", {}, lang)}</span>
+            <span class="text-3xl font-black text-violet-600 dark:text-violet-400 mt-1 block">🌟 ${perfectDaysCount}</span>
             <span class="text-[11px] text-slate-500 mt-1 block">100% ${i18n.t("daily_progress", {}, lang)}</span>
           </div>
         </div>

@@ -29,11 +29,15 @@
  * - [Issue #427 AC-2] Clicking ▼ swaps the target habit with the succeeding habit in the same routine cluster
  * - [Issue #427 AC-3] Reordered habit positions persist in IndexedDB and reflect immediately across both Habit Manager and Today views
  * - [Issue #427 AC-4] Edge cases (clicking ▲ on top item or ▼ on bottom item) handled gracefully without errors
+ * - [Issue #429 AC-1] Dual-theme styling via Tailwind dark: variants (Body, Main Container, Top Bar, Nav Dock, View Cards)
+ * - [Issue #429 AC-2] Input fields, cards, badges, and text retain clear contrast in both light and dark modes
+ * - [Issue #429 AC-3] Modal overlays consolidated into single clean backdrop with role="dialog" and aria-modal="true"
  */
 
 const {
   createHabitTrackerSandbox,
   createAssertions,
+  getHtmlContent,
 } = require("./helpers/habit-tracker-harness.js");
 
 const { assert, assertEqual, printSummary } = createAssertions(
@@ -1632,6 +1636,455 @@ async function runUITests() {
     archivedHabitRecord.archived,
     true,
     "[Issue #427 AC-4] [AC-4] Archived status preserved regardless of reorder operations"
+  );
+
+  // ==========================================
+  // [Issue #429 AC-1] Dual-Theme Styling via Tailwind dark: Variants
+  // ==========================================
+  console.log(
+    "\n--- [Issue #429 AC-1] Dual-Theme Styling via Tailwind dark: Variants ---"
+  );
+
+  const htmlContent = getHtmlContent();
+
+  // 1. Static HTML Shell Dual-Theme Classes in habit-tracker/index.html
+  const bodyTagMatch = htmlContent.match(/<body([^>]*)>/i);
+  assert(
+    bodyTagMatch !== null,
+    "[Issue #429 AC-1] habit-tracker/index.html contains <body> tag"
+  );
+  const bodyAttrs = bodyTagMatch ? bodyTagMatch[1] : "";
+  assert(
+    bodyAttrs.includes("dark:bg-slate-950") &&
+      (bodyAttrs.includes("bg-slate-50") ||
+        bodyAttrs.includes("bg-slate-100") ||
+        bodyAttrs.includes("bg-white")),
+    "[Issue #429 AC-1] <body> tag supports dual-theme styling with light background and dark:bg-slate-950"
+  );
+  assert(
+    bodyAttrs.includes("dark:text-slate-100") &&
+      (bodyAttrs.includes("text-slate-900") ||
+        bodyAttrs.includes("text-slate-800")),
+    "[Issue #429 AC-1] <body> tag supports dual-theme text with light text-slate-900/800 and dark:text-slate-100"
+  );
+
+  // Top header bar dual-theme classes
+  const headerMatch = htmlContent.match(/<header([^>]*)>/i);
+  assert(headerMatch !== null, "[Issue #429 AC-1] <header> tag exists");
+  const headerAttrs = headerMatch ? headerMatch[1] : "";
+  assert(
+    headerAttrs.includes("dark:bg-slate-950") &&
+      headerAttrs.includes("dark:border-slate-800"),
+    "[Issue #429 AC-1] <header> top bar specifies dark: variants for background and border"
+  );
+
+  // Bottom navigation dock dual-theme classes
+  const navMatch = htmlContent.match(/<nav([^>]*)>/i);
+  assert(navMatch !== null, "[Issue #429 AC-1] <nav> tag exists");
+  const navAttrs = navMatch ? navMatch[1] : "";
+  assert(
+    navAttrs.includes("dark:bg-slate-950") &&
+      navAttrs.includes("dark:border-slate-800"),
+    "[Issue #429 AC-1] <nav> bottom navigation dock specifies dark: variants for background and border"
+  );
+
+  // Top bar freeze token button & language toggle button dual-theme classes
+  assert(
+    htmlContent.includes("dark:bg-slate-900") &&
+      htmlContent.includes("dark:border-slate-800"),
+    "[Issue #429 AC-1] Top bar controls contain dark: variant classes"
+  );
+
+  // 2. Component Rendered Output Dual-Theme Classes
+  // Habit Cards in Today View
+  const dualHabitCardHtml = renderHabitCard(
+    habitMeditate,
+    { value: 0, completed: false },
+    "vi"
+  );
+  assert(
+    dualHabitCardHtml.includes("dark:bg-slate-900") &&
+      (dualHabitCardHtml.includes("bg-white") ||
+        dualHabitCardHtml.includes("bg-slate-50") ||
+        dualHabitCardHtml.includes("bg-slate-100")),
+    "[Issue #429 AC-1] Habit card container includes light background and dark:bg-slate-900 variant"
+  );
+  assert(
+    dualHabitCardHtml.includes("dark:text-white") ||
+      dualHabitCardHtml.includes("dark:text-slate-100"),
+    "[Issue #429 AC-1] Habit card title includes dark:text-white/dark:text-slate-100 variant"
+  );
+
+  // Manager View Habit Cards
+  const managerDualHtml = renderManagerView(store, null, "vi");
+  assert(
+    managerDualHtml.includes("dark:bg-slate-900") &&
+      (managerDualHtml.includes("bg-white") ||
+        managerDualHtml.includes("bg-slate-50") ||
+        managerDualHtml.includes("bg-slate-100") ||
+        managerDualHtml.includes("bg-slate-800/60")),
+    "[Issue #429 AC-1] Manager view habit cards support dual-theme styling with dark:bg-slate-900"
+  );
+
+  // Insights View Metric Cards
+  const insightsDualHtml = renderInsightsView(store, null, "vi");
+  assert(
+    insightsDualHtml.includes("dark:bg-slate-900") ||
+      insightsDualHtml.includes("dark:bg-slate-800"),
+    "[Issue #429 AC-1] Insights view stat cards specify dark: variants for background"
+  );
+
+  // 3. Runtime Theme Toggle Public API Seam (HabitApp.switchTheme)
+  const { sandbox: themeSandbox } = createHabitTrackerSandbox();
+  themeSandbox.requestAnimationFrame = (fn) => fn();
+  themeSandbox.cancelAnimationFrame = () => {};
+  await themeSandbox.HabitApp.init();
+
+  // Toggle to Light mode
+  themeSandbox.HabitApp.switchTheme("light");
+  const docRoot = themeSandbox.document.documentElement;
+  assert(
+    docRoot.classList.contains("light"),
+    "[Issue #429 AC-1] switchTheme('light') adds 'light' class to html documentElement"
+  );
+  assert(
+    !docRoot.classList.contains("dark"),
+    "[Issue #429 AC-1] switchTheme('light') removes 'dark' class from html documentElement"
+  );
+  assertEqual(
+    themeSandbox.HabitApp.store.getSettings().theme,
+    "light",
+    "[Issue #429 AC-1] switchTheme('light') updates store settings to 'light'"
+  );
+
+  // Toggle to Dark mode
+  themeSandbox.HabitApp.switchTheme("dark");
+  assert(
+    docRoot.classList.contains("dark"),
+    "[Issue #429 AC-1] switchTheme('dark') adds 'dark' class to html documentElement"
+  );
+  assert(
+    !docRoot.classList.contains("light"),
+    "[Issue #429 AC-1] switchTheme('dark') removes 'light' class from html documentElement"
+  );
+  assertEqual(
+    themeSandbox.HabitApp.store.getSettings().theme,
+    "dark",
+    "[Issue #429 AC-1] switchTheme('dark') updates store settings to 'dark'"
+  );
+
+  // Rapid toggling sequence maintains clean classList state
+  for (let i = 0; i < 6; i++) {
+    const nextTheme = i % 2 === 0 ? "light" : "dark";
+    themeSandbox.HabitApp.switchTheme(nextTheme);
+  }
+  assert(
+    docRoot.classList.contains("dark") && !docRoot.classList.contains("light"),
+    "[Issue #429 AC-1] Rapid theme toggling maintains consistent classList state without duplicate class pollution"
+  );
+
+  // ==========================================
+  // [Issue #429 AC-2] Input Contrast & Avoidance of Hardcoded Dark-Only Classes
+  // ==========================================
+  console.log(
+    "\n--- [Issue #429 AC-2] Input Contrast & Avoidance of Hardcoded Dark-Only Classes ---"
+  );
+
+  // 1. Habit Edit Modal Form Inputs Contrast
+  const editModalFormHtml = renderHabitEditModal(habitWater, "vi");
+
+  // Text input #modal-habit-name
+  assert(
+    editModalFormHtml.includes('id="modal-habit-name"'),
+    "[Issue #429 AC-2] Habit edit modal renders #modal-habit-name input"
+  );
+  assert(
+    editModalFormHtml.includes("dark:bg-slate-800") &&
+      (editModalFormHtml.includes("bg-white") ||
+        editModalFormHtml.includes("bg-slate-50") ||
+        editModalFormHtml.includes("bg-slate-100")),
+    "[Issue #429 AC-2] #modal-habit-name input uses light background with dark:bg-slate-800 variant"
+  );
+  assert(
+    editModalFormHtml.includes("dark:text-white") ||
+      editModalFormHtml.includes("dark:text-slate-100") ||
+      editModalFormHtml.includes("text-slate-900"),
+    "[Issue #429 AC-2] #modal-habit-name input text color has light/dark contrast"
+  );
+
+  // Icon input #modal-habit-icon
+  assert(
+    editModalFormHtml.includes('id="modal-habit-icon"'),
+    "[Issue #429 AC-2] Habit edit modal renders #modal-habit-icon input"
+  );
+  assert(
+    editModalFormHtml.includes("dark:bg-slate-800") &&
+      (editModalFormHtml.includes("bg-white") ||
+        editModalFormHtml.includes("bg-slate-50") ||
+        editModalFormHtml.includes("bg-slate-100")),
+    "[Issue #429 AC-2] #modal-habit-icon input uses light background with dark:bg-slate-800 variant"
+  );
+
+  // Modal dialog container card
+  assert(
+    editModalFormHtml.includes("dark:bg-slate-900") &&
+      (editModalFormHtml.includes("bg-white") ||
+        editModalFormHtml.includes("bg-slate-50")),
+    "[Issue #429 AC-2] Modal dialog card uses dual-theme container (bg-white dark:bg-slate-900)"
+  );
+  assert(
+    !editModalFormHtml.includes('class="modal-card bg-slate-900') &&
+      !editModalFormHtml.includes(
+        'class="sheet-card bg-slate-900 border border-slate-800'
+      ),
+    "[Issue #429 AC-2] Modal and sheet dialog cards avoid hardcoded un-prefixed bg-slate-900 without light theme support"
+  );
+
+  // 2. Detail Sheet Contrast
+  const detailSheetContrastHtml = renderDetailSheet(
+    habitWater,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+
+  // Note textarea #habit-note-input
+  assert(
+    detailSheetContrastHtml.includes('id="habit-note-input"'),
+    "[Issue #429 AC-2] Detail sheet renders #habit-note-input textarea"
+  );
+  assert(
+    detailSheetContrastHtml.includes("dark:bg-slate-900") ||
+      detailSheetContrastHtml.includes("dark:bg-slate-800"),
+    "[Issue #429 AC-2] #habit-note-input textarea specifies dark: variant for background"
+  );
+  assert(
+    detailSheetContrastHtml.includes("dark:text-white") ||
+      detailSheetContrastHtml.includes("text-slate-900"),
+    "[Issue #429 AC-2] #habit-note-input textarea has proper text contrast classes"
+  );
+
+  // Detail Sheet dialog container card
+  assert(
+    detailSheetContrastHtml.includes("dark:bg-slate-900") &&
+      (detailSheetContrastHtml.includes("bg-white") ||
+        detailSheetContrastHtml.includes("bg-slate-50")),
+    "[Issue #429 AC-2] Detail sheet card uses dual-theme background with dark:bg-slate-900"
+  );
+
+  // 3. Automated Contrast Scanner: Anti-pattern detection for un-prefixed dark-only classes on cards & containers
+  function findUnprefixedDarkContainerClasses(htmlSnippet, tagName) {
+    const regex = new RegExp(`<${tagName}[^>]*class="([^"]*)"[^>]*>`, "gi");
+    let match;
+    const violations = [];
+    while ((match = regex.exec(htmlSnippet)) !== null) {
+      const classAttr = match[1];
+      const tokens = classAttr.split(/\s+/);
+      const hasUnprefixedDarkBg = tokens.some(
+        (t) =>
+          t === "bg-slate-900" ||
+          t === "bg-slate-950" ||
+          t === "bg-black" ||
+          t === "bg-slate-900/90"
+      );
+      const hasLightBg = tokens.some(
+        (t) =>
+          t === "bg-white" ||
+          t === "bg-slate-50" ||
+          t === "bg-slate-100" ||
+          t.startsWith("bg-white/")
+      );
+      const hasDarkBgVariant = tokens.some(
+        (t) =>
+          t.startsWith("dark:bg-slate-900") ||
+          t.startsWith("dark:bg-slate-950") ||
+          t.startsWith("dark:bg-black")
+      );
+      if (hasUnprefixedDarkBg && (!hasLightBg || !hasDarkBgVariant)) {
+        violations.push(match[0]);
+      }
+    }
+    return violations;
+  }
+
+  const habitCardViolations = findUnprefixedDarkContainerClasses(
+    dualHabitCardHtml,
+    "div"
+  );
+  assertEqual(
+    habitCardViolations.length,
+    0,
+    "[Issue #429 AC-2] Habit card contains zero un-prefixed dark-only container background classes"
+  );
+
+  // ==========================================
+  // [Issue #429 AC-3] Modal Overlay Consolidation & Accessibility Attributes
+  // ==========================================
+  console.log(
+    "\n--- [Issue #429 AC-3] Modal Overlay Consolidation & Accessibility Attributes ---"
+  );
+
+  // 1. Static Backdrop & Accessibility Hierarchy in habit-tracker/index.html
+  const modalOverlayMatch = htmlContent.match(
+    /id="habit-edit-modal-overlay"([^>]*)>/i
+  );
+  assert(
+    modalOverlayMatch !== null,
+    "[Issue #429 AC-3] habit-tracker/index.html contains #habit-edit-modal-overlay"
+  );
+  const detailOverlayMatch = htmlContent.match(
+    /id="detail-sheet-overlay"([^>]*)>/i
+  );
+  assert(
+    detailOverlayMatch !== null,
+    "[Issue #429 AC-3] habit-tracker/index.html contains #detail-sheet-overlay"
+  );
+
+  // Accessibility attributes on modal dialogs (role="dialog", aria-modal="true")
+  const addModalMarkup = renderHabitEditModal(null, "vi");
+  const editModalMarkup = renderHabitEditModal(habitWater, "vi");
+  const detailSheetMarkup = renderDetailSheet(
+    habitWater,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+
+  const hasHabitModalRoleDialog =
+    addModalMarkup.includes('role="dialog"') ||
+    (modalOverlayMatch && modalOverlayMatch[1].includes('role="dialog"'));
+  assert(
+    hasHabitModalRoleDialog,
+    '[Issue #429 AC-3] Habit edit modal provides role="dialog" accessibility attribute'
+  );
+
+  const hasHabitModalAriaModal =
+    addModalMarkup.includes('aria-modal="true"') ||
+    (modalOverlayMatch && modalOverlayMatch[1].includes('aria-modal="true"'));
+  assert(
+    hasHabitModalAriaModal,
+    '[Issue #429 AC-3] Habit edit modal provides aria-modal="true" accessibility attribute'
+  );
+
+  const hasDetailSheetRoleDialog =
+    detailSheetMarkup.includes('role="dialog"') ||
+    (detailOverlayMatch && detailOverlayMatch[1].includes('role="dialog"'));
+  assert(
+    hasDetailSheetRoleDialog,
+    '[Issue #429 AC-3] Detail sheet provides role="dialog" accessibility attribute'
+  );
+
+  const hasDetailSheetAriaModal =
+    detailSheetMarkup.includes('aria-modal="true"') ||
+    (detailOverlayMatch && detailOverlayMatch[1].includes('aria-modal="true"'));
+  assert(
+    hasDetailSheetAriaModal,
+    '[Issue #429 AC-3] Detail sheet provides aria-modal="true" accessibility attribute'
+  );
+
+  // Accessible Label / Name (aria-labelledby or aria-label)
+  const hasHabitModalAriaLabel =
+    addModalMarkup.includes("aria-labelledby=") ||
+    addModalMarkup.includes("aria-label=") ||
+    (modalOverlayMatch &&
+      (modalOverlayMatch[1].includes("aria-labelledby=") ||
+        modalOverlayMatch[1].includes("aria-label=")));
+  assert(
+    hasHabitModalAriaLabel,
+    "[Issue #429 AC-3] Habit edit modal provides accessible label (aria-labelledby or aria-label)"
+  );
+
+  // 2. Consolidation into Single Clean Backdrop (No Nested Backdrops)
+  assert(
+    !addModalMarkup.includes('id="habit-edit-modal-backdrop"') &&
+      !editModalMarkup.includes('id="habit-edit-modal-backdrop"'),
+    "[Issue #429 AC-3] renderHabitEditModal does not emit duplicate nested #habit-edit-modal-backdrop element"
+  );
+
+  assert(
+    !detailSheetMarkup.includes('id="habit-detail-sheet-backdrop"'),
+    "[Issue #429 AC-3] renderDetailSheet does not emit duplicate nested #habit-detail-sheet-backdrop element"
+  );
+
+  // 3. End-to-End DOM Sandbox Verification for Single Backdrop & Overlay Lifecycle
+  const { sandbox: modalDomSandbox, getOrCreateElement: getModalDomEl } =
+    createHabitTrackerSandbox();
+  modalDomSandbox.requestAnimationFrame = (fn) => fn();
+  modalDomSandbox.cancelAnimationFrame = () => {};
+  await modalDomSandbox.HabitApp.init();
+
+  const editModalOverlay = getModalDomEl("habit-edit-modal-overlay");
+  const detailSheetOverlay = getModalDomEl("detail-sheet-overlay");
+
+  // Initial state: both overlays are hidden
+  assert(
+    editModalOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] Habit edit modal overlay is initially hidden"
+  );
+  assert(
+    detailSheetOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] Detail sheet overlay is initially hidden"
+  );
+
+  // Open Add Habit Modal
+  modalDomSandbox.HabitApp.openAddHabitModal();
+  assert(
+    !editModalOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] Opening Add Habit modal removes hidden class from overlay"
+  );
+
+  // Ensure no nested backdrops exist in the DOM inside modal container
+  const modalContainer = getModalDomEl("habit-modal-container");
+  const innerBackdropsInModal =
+    modalContainer.querySelectorAll('[id*="backdrop"]');
+  assertEqual(
+    innerBackdropsInModal.length,
+    0,
+    "[Issue #429 AC-3] Zero duplicate nested backdrop elements inside modal container"
+  );
+
+  // Close Add Habit Modal
+  modalDomSandbox.HabitApp.closeHabitModal();
+  assert(
+    editModalOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] closeHabitModal() restores hidden class on modal overlay"
+  );
+
+  // Open Detail Sheet
+  modalDomSandbox.HabitApp.openDetailSheet("h-water");
+  assert(
+    !detailSheetOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] Opening Detail Sheet removes hidden class from detail sheet overlay"
+  );
+
+  const detailContainer = getModalDomEl("detail-sheet-container");
+  const innerBackdropsInDetail =
+    detailContainer.querySelectorAll('[id*="backdrop"]');
+  assertEqual(
+    innerBackdropsInDetail.length,
+    0,
+    "[Issue #429 AC-3] Zero duplicate nested backdrop elements inside detail sheet container"
+  );
+
+  // Close Detail Sheet
+  modalDomSandbox.HabitApp.closeDetailSheet();
+  assert(
+    detailSheetOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] closeDetailSheet() restores hidden class on detail sheet overlay"
+  );
+
+  // Backdrop Dismissal verification
+  modalDomSandbox.HabitApp.openAddHabitModal();
+  assert(
+    !editModalOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] Modal opened for backdrop dismissal test"
+  );
+  modalDomSandbox.HabitApp.closeHabitModal();
+  assert(
+    editModalOverlay.classList.contains("hidden"),
+    "[Issue #429 AC-3] Modal overlay safely closes on backdrop dismissal"
   );
 }
 
