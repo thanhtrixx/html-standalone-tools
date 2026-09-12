@@ -463,6 +463,40 @@
       settings.cloudSync && settings.cloudSync.gistToken
     );
 
+    const notifPermission =
+      notifications && notifications.getPermission
+        ? notifications.getPermission()
+        : "default";
+    let notifBadge = "";
+    if (notifPermission === "granted") {
+      notifBadge = `<span class="text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-300 dark:border-emerald-800/50">🟢 ${i18n.t("perm_granted", {}, lang)}</span>`;
+    } else if (notifPermission === "denied") {
+      notifBadge = `<span class="text-xs px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold border border-red-300 dark:border-red-800/50">🔴 ${i18n.t("perm_denied", {}, lang)}</span>`;
+    } else {
+      notifBadge = `<span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold border border-slate-200 dark:border-slate-700">⚪ ${i18n.t("perm_default", {}, lang)}</span>`;
+    }
+
+    let notifActionBtn = "";
+    if (notifPermission === "granted") {
+      notifActionBtn = `
+        <button id="btn-test-notification" onclick="window.HabitApp.testNotification()" class="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-2xl border border-slate-200 dark:border-slate-700/50 transition-all flex items-center justify-center gap-2">
+          <span>🚀</span>
+          <span>${i18n.t("send_test_notification_btn", {}, lang)}</span>
+        </button>
+      `;
+    } else if (notifPermission === "denied") {
+      notifActionBtn = `
+        <p class="text-[11px] text-amber-600 dark:text-amber-400 text-center">${i18n.t("toast_notifications_blocked", {}, lang)}</p>
+      `;
+    } else {
+      notifActionBtn = `
+        <button id="btn-enable-notifications" onclick="window.HabitApp.requestNotificationPermission()" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-2xl shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
+          <span>🔔</span>
+          <span>${i18n.t("enable_notifications_btn", {}, lang)}</span>
+        </button>
+      `;
+    }
+
     const html = `
       <div class="settings-view max-w-lg mx-auto pb-24 px-1">
         <div class="mb-6">
@@ -489,6 +523,16 @@
               <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">☀️ ${i18n.t("theme_light", {}, lang)}</button>
             </div>
           </div>
+        </div>
+
+        <!-- Daily Reminders & Notifications Card -->
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">🔔 ${i18n.t("reminders_notifications_title", {}, lang)}</h3>
+            ${notifBadge}
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">${i18n.t("reminders_notifications_desc", {}, lang)}</p>
+          ${notifActionBtn}
         </div>
 
         <!-- Streak Freeze & Vacation Safeguards Card -->
@@ -856,6 +900,7 @@
                 "emoji-preset-btn w-9 h-9 flex items-center justify-center text-lg rounded-xl transition duration-150 hover:scale-110 active:scale-95 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:bg-slate-100 dark:hover:bg-slate-700";
             }
           });
+          updateHabitModalPreview();
         }
       } else if (action === "undo-toast") {
         const app =
@@ -885,6 +930,21 @@
       }
     });
 
+    // Delegated input listener for modal live preview
+    document.addEventListener("input", (e) => {
+      const target = e.target;
+      if (!target) return;
+      if (
+        target.id === "modal-habit-name" ||
+        target.id === "modal-habit-icon" ||
+        target.id === "modal-target-value" ||
+        target.id === "modal-target-unit" ||
+        target.id === "modal-habit-unit"
+      ) {
+        updateHabitModalPreview();
+      }
+    });
+
     // Delegated change listener for form components
     document.addEventListener("change", (e) => {
       const target = e.target;
@@ -902,9 +962,15 @@
               "routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300";
           }
         }
+        updateHabitModalPreview();
       }
 
-      // Measurement type change
+      // Color picker change
+      if (target.name === "modal-color") {
+        updateHabitModalPreview();
+      }
+
+      // Measurement type change & segmented styling
       if (target.name === "type") {
         const targetFields = document.getElementById("modal-target-fields");
         if (targetFields) {
@@ -914,6 +980,20 @@
             targetFields.classList.remove("hidden");
           }
         }
+        const segmentedLabels = document.querySelectorAll(
+          "#segmented-type-picker .segmented-type-option"
+        );
+        segmentedLabels.forEach((lbl) => {
+          const radio = lbl.querySelector('input[type="radio"]');
+          if (radio && radio.checked) {
+            lbl.className =
+              "segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600";
+          } else {
+            lbl.className =
+              "segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+          }
+        });
+        updateHabitModalPreview();
       }
 
       // Schedule type change
@@ -1449,6 +1529,82 @@
   }
 
   /**
+   * Dynamically updates the habit edit/create live preview card
+   */
+  function updateHabitModalPreview() {
+    const previewCard = document.getElementById("modal-live-preview-card");
+    if (!previewCard) return;
+
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+
+    const nameInput = document.getElementById("modal-habit-name");
+    const iconInput = document.getElementById("modal-habit-icon");
+    const targetValInput = document.getElementById("modal-target-value");
+    const unitInput =
+      document.getElementById("modal-target-unit") ||
+      document.getElementById("modal-habit-unit");
+    const colorInput = document.querySelector(
+      'input[name="modal-color"]:checked'
+    );
+    const typeInput = document.querySelector('input[name="type"]:checked');
+
+    const name =
+      (nameInput && nameInput.value.trim()) ||
+      (lang === "vi" ? "Tên thói quen mới" : "New habit name");
+    const icon = (iconInput && iconInput.value.trim()) || "🎯";
+    const color = (colorInput && colorInput.value) || "emerald";
+    const type = (typeInput && typeInput.value) || "binary";
+    const targetVal = (targetValInput && targetValInput.value) || 1;
+    const unit =
+      (unitInput && unitInput.value.trim()) || (type === "timer" ? "mins" : "");
+
+    // Selected routines
+    const routineCheckboxes = document.querySelectorAll(
+      'input[name="routines"]:checked, input[name="modal-routine"]:checked'
+    );
+    const routines = Array.from(routineCheckboxes).map((cb) => cb.value);
+    if (routines.length === 0) {
+      const singleRoutine = document.getElementById("modal-habit-routine");
+      if (singleRoutine && singleRoutine.value) {
+        routines.push(singleRoutine.value);
+      } else {
+        routines.push("morning");
+      }
+    }
+
+    const previewName = document.getElementById("preview-name");
+    if (previewName) previewName.textContent = name;
+
+    const previewIcon = document.getElementById("preview-icon");
+    if (previewIcon) previewIcon.textContent = icon;
+
+    const previewIconBox = document.getElementById("preview-icon-box");
+    if (previewIconBox) {
+      previewIconBox.style.backgroundColor = todayView.getColorHex(color);
+    }
+
+    const previewTypeTarget = document.getElementById("preview-type-target");
+    if (previewTypeTarget) {
+      if (type === "binary") {
+        previewTypeTarget.textContent = i18n.t("type_binary", {}, lang);
+      } else {
+        previewTypeTarget.textContent = `${targetVal} ${unit}`.trim();
+      }
+    }
+
+    const previewRoutines = document.getElementById("preview-routines");
+    if (previewRoutines) {
+      previewRoutines.innerHTML = routines
+        .map(
+          (r) =>
+            `<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${i18n.t(`routine_${r}`, {}, lang)}</span>`
+        )
+        .join("");
+    }
+  }
+
+  /**
    * Opens Habit Edit Modal
    */
   function handleOpenEditModal(habitId = null) {
@@ -1463,6 +1619,7 @@
     if (modalOverlay) {
       modalOverlay.classList.remove("hidden");
     }
+    updateHabitModalPreview();
   }
 
   /**
@@ -1818,6 +1975,62 @@
         });
       }
     },
+    async requestNotificationPermission() {
+      const notifs =
+        (typeof require !== "undefined" && require("./pwa/notifications.js")) ||
+        (typeof window !== "undefined" && window.HabitNotifications) ||
+        notifications;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (!notifs || !notifs.isSupported || !notifs.isSupported()) {
+        notify(i18n.t("toast_notifications_blocked", {}, lang), "error");
+        return "denied";
+      }
+
+      const perm = await notifs.requestPermission();
+      if (perm === "granted") {
+        notify(i18n.t("toast_notifications_enabled", {}, lang), "success");
+        if (store && notifs.scheduleHabitReminders) {
+          notifs.scheduleHabitReminders(store.getHabits(), lang);
+        }
+      } else if (perm === "denied") {
+        notify(i18n.t("toast_notifications_blocked", {}, lang), "warning");
+      }
+      renderActiveTab();
+      return perm;
+    },
+    async testNotification() {
+      const notifs =
+        (typeof require !== "undefined" && require("./pwa/notifications.js")) ||
+        (typeof window !== "undefined" && window.HabitNotifications) ||
+        notifications;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (!notifs || !notifs.isSupported || !notifs.isSupported()) {
+        notify(i18n.t("toast_notifications_blocked", {}, lang), "error");
+        return null;
+      }
+
+      if (notifs.getPermission() !== "granted") {
+        const perm = await notifs.requestPermission();
+        if (perm !== "granted") {
+          notify(i18n.t("toast_notifications_blocked", {}, lang), "warning");
+          renderActiveTab();
+          return null;
+        }
+      }
+
+      const res = await notifs.sendTestNotification(lang);
+      notify(i18n.t("toast_notification_test_sent", {}, lang), "success");
+      renderActiveTab();
+      return res;
+    },
     closeDetailSheet,
     handleOpenDetailSheet,
     openDetailSheet: handleOpenDetailSheet,
@@ -1825,6 +2038,7 @@
     openEditModal: handleOpenEditModal,
     openAddHabitModal: () => handleOpenEditModal(null),
     closeHabitModal,
+    updateHabitModalPreview,
     saveHabitFromModal,
     handleToggleHabit,
     handleStepIncrement,

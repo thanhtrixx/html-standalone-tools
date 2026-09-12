@@ -7,6 +7,7 @@ This document specifies the technical requirements and vertical slice backlog fo
 ## 🎯 Active Feature Development Roadmap (ADR-0003)
 
 ### Slice 1: Statistical Zero-Baseline & Mathematical Engine Fixes
+
 - [ ] **Historical Zero-Baseline Calculation (`engine.js`)**:
   - `calculateStreakAndConsistency`: When `scheduledCount === 0`, return `consistencyScore30d = 0` and `consistencyScore90d = 0` instead of `100`.
   - `calculateWeekdayAdherence`: When `stats[dayOfWeek].scheduled === 0`, return `rate: 0` instead of `100`.
@@ -19,6 +20,7 @@ This document specifies the technical requirements and vertical slice backlog fo
 ---
 
 ### Slice 2: Background & Screen-Off Timer Delta Engine
+
 - [ ] **Timestamp Delta Sync (`app.js`, `store.js`)**:
   - Record `{ habitId, date, startedAt, baseValue }` when timer starts.
   - Calculate real-world elapsed seconds on tick: `currentVal = baseValue + Math.floor((Date.now() - startedAt) / 1000)`.
@@ -30,6 +32,7 @@ This document specifies the technical requirements and vertical slice backlog fo
 ---
 
 ### Slice 3: Multi-Routine Data Model & Dashboard Rendering
+
 - [ ] **Multi-Routine Schema & Migration (`engine.js`, `store.js`, `indexeddb.js`)**:
   - Support `routines: string[]` (e.g. `['morning', 'evening']`) on habit entities.
   - Silent backwards-compatible normalization for habits with legacy single `routine: string`.
@@ -42,6 +45,7 @@ This document specifies the technical requirements and vertical slice backlog fo
 ---
 
 ### Slice 4: Native Gestures & Back Navigation Stack
+
 - [ ] **Tab Swipe Left / Right Navigation (`app.js`)**:
   - Implement container-level touch gesture detector switching between 4 tabs: `Today` (0) ⇄ `Insights` (1) ⇄ `Habits` (2) ⇄ `Settings` (3).
   - Add gesture disambiguation so card swipe-to-complete and sheet open gestures take priority without triggering tab switches.
@@ -49,11 +53,12 @@ This document specifies the technical requirements and vertical slice backlog fo
   - Intercept `window.addEventListener('popstate')`.
   - Close active modal dialogs, detail sheets, or delete confirmation dialogs if open.
   - Navigate to `Today` tab if currently on `Insights`, `Habits`, or `Settings`.
-  - On `Today` tab, show toast *"Nhấn back lần nữa để thoát / Press back again to exit"*; second back press within 2000ms triggers exit.
+  - On `Today` tab, show toast _"Nhấn back lần nữa để thoát / Press back again to exit"_; second back press within 2000ms triggers exit.
 
 ---
 
 ### Slice 5: Add / Edit Habit Form UX Overhaul & Hybrid Daily Reminders
+
 - [ ] **Add / Edit Form UX Modernization (`manager-view.js`, `translations.js`)**:
   - Multi-routine toggle chip selector (🌅 Sáng, ☀️ Chiều, 🌙 Tối, 🔄 Linh hoạt).
   - Segmented measurement type picker (`✓ Check`, `🔢 Số lượng`, `⏱️ Thời gian`).

@@ -137,6 +137,34 @@
         </div>
 
         <form id="habit-edit-form" data-habit-id="${habitId}" class="space-y-4 pt-4">
+          <!-- Interactive Live Preview Card -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">${i18n.t("preview_label", {}, lang)}</label>
+            <div id="modal-live-preview-card" class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3.5 flex items-center justify-between shadow-sm transition-all duration-200">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <div id="preview-icon-box" class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-md transition-all shrink-0" style="background-color: ${todayView.getColorHex(color)};">
+                  <span id="preview-icon">${icon || "🎯"}</span>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h4 id="preview-name" class="font-bold text-slate-900 dark:text-white text-sm truncate">
+                    ${name || (lang === "vi" ? "Tên thói quen mới" : "New habit name")}
+                  </h4>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span id="preview-type-target" class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                      ${type === "binary" ? i18n.t("type_binary", {}, lang) : `${targetValue} ${unit || (type === "timer" ? "mins" : "")}`}
+                    </span>
+                    <div id="preview-routines" class="flex items-center gap-1">
+                      ${assignedRoutines.map((r) => `<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${i18n.t(`routine_${r}`, {}, lang)}</span>`).join("")}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div id="preview-check-badge" class="w-8 h-8 rounded-xl border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 text-xs shrink-0 font-bold">
+                ✓
+              </div>
+            </div>
+          </div>
+
           <!-- Name & Icon -->
           <div class="flex items-center gap-3">
             <div class="w-16">
@@ -157,24 +185,24 @@
             </div>
           </div>
 
-          <!-- Measurement Type -->
+          <!-- Segmented Measurement Type -->
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("habit_type_label", {}, lang)}</label>
-            <div class="grid grid-cols-3 gap-2">
-              <label class="flex flex-col items-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 cursor-pointer text-xs text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("habit_type_label", {}, lang)}</label>
+            <div class="grid grid-cols-3 gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/80" id="segmented-type-picker">
+              <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "binary" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
                 <input type="radio" name="type" value="binary" class="sr-only" ${type === "binary" ? "checked" : ""}>
-                <span class="text-base mb-0.5">✓</span>
-                <span class="font-medium">${i18n.t("type_binary", {}, lang)}</span>
+                <span>✓</span>
+                <span>${i18n.t("type_binary", {}, lang)}</span>
               </label>
-              <label class="flex flex-col items-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 cursor-pointer text-xs text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+              <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "numeric" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
                 <input type="radio" name="type" value="numeric" class="sr-only" ${type === "numeric" ? "checked" : ""}>
-                <span class="text-base mb-0.5">🔢</span>
-                <span class="font-medium">${i18n.t("type_numeric", {}, lang)}</span>
+                <span>🔢</span>
+                <span>${i18n.t("type_numeric", {}, lang)}</span>
               </label>
-              <label class="flex flex-col items-center p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 cursor-pointer text-xs text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+              <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "timer" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
                 <input type="radio" name="type" value="timer" class="sr-only" ${type === "timer" ? "checked" : ""}>
-                <span class="text-base mb-0.5">⏱️</span>
-                <span class="font-medium">${i18n.t("type_timer", {}, lang)}</span>
+                <span>⏱️</span>
+                <span>${i18n.t("type_timer", {}, lang)}</span>
               </label>
             </div>
           </div>

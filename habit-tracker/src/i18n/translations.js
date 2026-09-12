@@ -180,6 +180,19 @@
       toast_habit_completed: "Habit completed",
       toast_habit_incremented: "Progress updated",
       toast_undo_success: "Action undone",
+      preview_label: "Live Preview",
+      reminders_notifications_title: "Daily Reminders & Notifications",
+      reminders_notifications_desc:
+        "Receive local alerts when it is time to complete your scheduled habits",
+      perm_granted: "Enabled",
+      perm_denied: "Blocked",
+      perm_default: "Not enabled",
+      enable_notifications_btn: "Enable Notifications",
+      send_test_notification_btn: "Send Test Alert",
+      toast_notification_test_sent: "Test notification sent!",
+      toast_notifications_enabled: "Daily reminders enabled!",
+      toast_notifications_blocked:
+        "Notifications are blocked in browser permissions.",
       delete_confirm_title: "Delete Habit",
       delete_confirm_desc:
         'Are you sure you want to permanently delete "{name}"? Historical check-in logs will be permanently removed.',
@@ -389,6 +402,19 @@
       toast_habit_completed: "Đã hoàn thành thói quen",
       toast_habit_incremented: "Đã cập nhật tiến độ",
       toast_undo_success: "Đã hoàn tác thao tác",
+      preview_label: "Xem trước",
+      reminders_notifications_title: "Nhắc nhở & Thông báo hàng ngày",
+      reminders_notifications_desc:
+        "Nhận thông báo cục bộ khi đến giờ hoàn thành các thói quen đã lên lịch",
+      perm_granted: "Đã bật",
+      perm_denied: "Bị chặn",
+      perm_default: "Chưa bật",
+      enable_notifications_btn: "Bật thông báo",
+      send_test_notification_btn: "Gửi thông báo thử nghiệm",
+      toast_notification_test_sent: "Đã gửi thông báo thử nghiệm!",
+      toast_notifications_enabled: "Đã bật nhắc nhở hàng ngày!",
+      toast_notifications_blocked:
+        "Thông báo đã bị chặn trong cài đặt trình duyệt.",
       delete_confirm_title: "Xác nhận xóa thói quen",
       delete_confirm_desc:
         'Bạn có chắc chắn muốn xóa vĩnh viễn thói quen "{name}"? Tất cả dữ liệu nhật ký lịch sử sẽ bị xóa hoàn toàn.',
