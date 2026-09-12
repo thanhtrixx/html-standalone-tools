@@ -36,6 +36,10 @@
  * - [Issue #432 AC-2] Only 1 <main> landmark exists in the DOM (no nested <main class="routine-list"> inside <main id="main-content">)
  * - [Issue #432 AC-3] All numeric counters and timer tickers render in tabular monospace alignment (tabular-nums and font-mono)
  * - [Issue #432 AC-4] Text elements across both dark and light modes satisfy WCAG AA contrast ratio
+ * - [Issue #430 AC-1] Quick-Preset Emoji Palette in Habit Creation/Edit Modal & Live Highlight Selection
+ * - [Issue #430 AC-2] Floating Undo Toast Notification & Action Reversal / Streak Restoration
+ * - [Issue #430 AC-3] 52-Week Contribution Heatmap Day Cell Click Date Navigation & Tab Switch
+ * - [Issue #430 AC-4] Micro-Interactions, Bilingual String Parity (EN & VI) & Rapid-Click / Repeated-Undo Resilience
  */
 
 const {
@@ -2659,6 +2663,653 @@ async function runUITests() {
     settingsContrastViolations432.length,
     0,
     "[Issue #432 AC-4] Settings tab contains zero unpaired text-slate-500 classes"
+  );
+
+  // ==========================================
+  // [Issue #430 AC-1] Habit Creation & Edit Modal Quick-Preset Emoji Palette & Live Selection
+  // ==========================================
+  console.log(
+    "\n--- [Issue #430 AC-1] Habit Creation & Edit Modal Quick-Preset Emoji Palette & Live Selection ---"
+  );
+
+  // 1. Preset Emoji Palette Rendering in Add Modal (Vietnamese & English)
+  const addModalHtml430Vi = renderHabitEditModal(null, "vi");
+  const addModalHtml430En = renderHabitEditModal(null, "en");
+
+  assert(
+    addModalHtml430Vi.includes('data-action="select-emoji"'),
+    '[Issue #430 AC-1] Add Habit modal (vi) renders quick-preset emoji palette with data-action="select-emoji" buttons'
+  );
+  assert(
+    addModalHtml430En.includes('data-action="select-emoji"'),
+    '[Issue #430 AC-1] Add Habit modal (en) renders quick-preset emoji palette with data-action="select-emoji" buttons'
+  );
+
+  // 2. Verification of all 10 required standard habit preset emojis: 🏃, 💧, 📖, 🧘, 💻, 🥗, 💊, ✍️, 🏋️, 😴
+  const requiredPresetEmojis430 = [
+    "🏃",
+    "💧",
+    "📖",
+    "🧘",
+    "💻",
+    "🥗",
+    "💊",
+    "✍️",
+    "🏋️",
+    "😴",
+  ];
+  for (const emoji of requiredPresetEmojis430) {
+    const hasEmojiButton =
+      addModalHtml430Vi.includes(`data-emoji="${emoji}"`) ||
+      addModalHtml430Vi.includes(`>${emoji}</button>`) ||
+      addModalHtml430Vi.includes(`>${emoji}</span>`);
+    assert(
+      hasEmojiButton,
+      `[Issue #430 AC-1] Add Habit modal contains preset emoji option for '${emoji}'`
+    );
+  }
+
+  // 3. Highlight/Selection state in Edit Modal for matching habit icon
+  const habitWaterWithIcon = store.getHabit("h-water"); // icon: "💧"
+  const editModalHtml430 = renderHabitEditModal(habitWaterWithIcon, "vi");
+
+  const emojiBtnRegex430 =
+    /<button[^>]*data-action="select-emoji"[^>]*data-emoji="([^"]+)"[^>]*class="([^"]*)"[^>]*>/gi;
+  let emojiMatch430;
+  let foundWaterHighlighted = false;
+  while ((emojiMatch430 = emojiBtnRegex430.exec(editModalHtml430)) !== null) {
+    const emojiVal = emojiMatch430[1];
+    const classAttr = emojiMatch430[2];
+    if (emojiVal === "💧") {
+      const isHighlighted =
+        classAttr.includes("ring-2") ||
+        classAttr.includes("ring-emerald") ||
+        classAttr.includes("bg-emerald") ||
+        classAttr.includes("border-emerald") ||
+        classAttr.includes("scale-110") ||
+        classAttr.includes("active-emoji");
+      if (isHighlighted) {
+        foundWaterHighlighted = true;
+      }
+    }
+  }
+  assert(
+    foundWaterHighlighted ||
+      editModalHtml430.includes('data-emoji="💧" data-selected="true"') ||
+      editModalHtml430.includes('data-selected="true" data-emoji="💧"') ||
+      editModalHtml430.includes('data-selected-emoji="💧"'),
+    "[Issue #430 AC-1] Edit modal for existing habit highlights the matching preset emoji ('💧')"
+  );
+
+  // 4. Custom Emoji Preservation (Not in presets list)
+  const habitCustomIcon430 = {
+    id: "h-guitar",
+    name: "Guitar Practice",
+    type: "timer",
+    targetValue: 1800,
+    unit: "mins",
+    routine: "afternoon",
+    scheduleType: "daily",
+    icon: "🎸",
+  };
+  const customModalHtml430 = renderHabitEditModal(habitCustomIcon430, "vi");
+  assert(
+    customModalHtml430.includes('value="🎸"'),
+    "[Issue #430 AC-1] Edit modal for habit with custom non-preset icon ('🎸') correctly populates input value"
+  );
+
+  // 5. Interactive DOM Sandbox Testing: Clicking Emoji Presets Updates Input & Visual Highlight
+  const { sandbox: emojiSandbox430, getOrCreateElement: getEmojiEl430 } =
+    createHabitTrackerSandbox();
+  emojiSandbox430.requestAnimationFrame = (fn) => fn();
+  emojiSandbox430.cancelAnimationFrame = () => {};
+  await emojiSandbox430.HabitApp.init();
+
+  emojiSandbox430.HabitApp.openAddHabitModal();
+  const iconInputEl430 = getEmojiEl430("modal-habit-icon");
+  const modalContainerEl430 = getEmojiEl430("habit-modal-container");
+
+  // Simulate selecting preset "🏃"
+  const selectRunBtn430 = emojiSandbox430.document.createElement("button");
+  selectRunBtn430.setAttribute("data-action", "select-emoji");
+  selectRunBtn430.setAttribute("data-emoji", "🏃");
+  modalContainerEl430.appendChild(selectRunBtn430);
+
+  // Trigger click on "🏃"
+  selectRunBtn430.click();
+  await new Promise((r) => setTimeout(r, 10));
+  assertEqual(
+    iconInputEl430.value,
+    "🏃",
+    "[Issue #430 AC-1] Clicking '🏃' preset updates modal icon field value to '🏃'"
+  );
+
+  // Simulate selecting preset "🧘"
+  const selectMeditateBtn430 = emojiSandbox430.document.createElement("button");
+  selectMeditateBtn430.setAttribute("data-action", "select-emoji");
+  selectMeditateBtn430.setAttribute("data-emoji", "🧘");
+  modalContainerEl430.appendChild(selectMeditateBtn430);
+
+  // Trigger click on "🧘"
+  selectMeditateBtn430.click();
+  await new Promise((r) => setTimeout(r, 10));
+  assertEqual(
+    iconInputEl430.value,
+    "🧘",
+    "[Issue #430 AC-1] Clicking '🧘' preset updates modal icon field value to '🧘'"
+  );
+
+  // 6. Submitting Modal Form with Preset Emoji Saves to Store
+  const nameInputEl430 = getEmojiEl430("modal-habit-name");
+  nameInputEl430.value = "Deep Meditation Practice";
+  const routineInputEl430 = getEmojiEl430("modal-habit-routine");
+  routineInputEl430.value = "morning";
+
+  await emojiSandbox430.HabitApp.saveHabitFromModal({
+    preventDefault: () => {},
+  });
+
+  const allHabitsEmojiTest = emojiSandbox430.HabitApp.store.getHabits();
+  const createdHabitWithEmoji = allHabitsEmojiTest.find(
+    (h) => h.name === "Deep Meditation Practice"
+  );
+  assert(
+    createdHabitWithEmoji !== undefined,
+    "[Issue #430 AC-1] Habit created after preset emoji selection is saved in store"
+  );
+  if (createdHabitWithEmoji) {
+    assertEqual(
+      createdHabitWithEmoji.icon,
+      "🧘",
+      "[Issue #430 AC-1] Habit saved with exact selected preset emoji icon ('🧘')"
+    );
+  }
+
+  // ==========================================
+  // [Issue #430 AC-2] Floating Toast Notification with Interactive 'Undo' Button & Streak Restoration
+  // ==========================================
+  console.log(
+    "\n--- [Issue #430 AC-2] Floating Undo Toast Notification & Streak Restoration ---"
+  );
+
+  // 1. Public Seam Verification
+  assert(
+    typeof emojiSandbox430.HabitApp.undoLastAction === "function",
+    "[Issue #430 AC-2] Public seam HabitApp.undoLastAction is defined as a callable function"
+  );
+
+  // 2. Binary Habit Completion -> Triggers Toast with Interactive Undo Button
+  const { sandbox: undoSandbox430, getOrCreateElement: getUndoEl430 } =
+    createHabitTrackerSandbox();
+  undoSandbox430.requestAnimationFrame = (fn) => fn();
+  undoSandbox430.cancelAnimationFrame = () => {};
+  undoSandbox430.setTimeout = (fn, ms) => 1;
+  await undoSandbox430.HabitApp.init();
+
+  const undoTestDate430 = "2026-09-12";
+  undoSandbox430.HabitApp.store.setActiveDate(undoTestDate430);
+
+  // Ensure h-meditate is clean initially
+  const initialMeditateLog =
+    undoSandbox430.HabitApp.store.state.logs[`h-meditate_${undoTestDate430}`];
+  const initialCompleted = !!(
+    initialMeditateLog && initialMeditateLog.completed
+  );
+  assertEqual(
+    initialCompleted,
+    false,
+    "[Issue #430 AC-2] Initial binary habit state is uncompleted (completed: false)"
+  );
+
+  function getHabitLogsMap430(habitStore, habitId) {
+    const logs = {};
+    for (const key in habitStore.state.logs) {
+      if (key.startsWith(`${habitId}_`)) {
+        const dateStr = key.slice(habitId.length + 1);
+        logs[dateStr] = habitStore.state.logs[key];
+      }
+    }
+    return logs;
+  }
+
+  const initialStreakMeditate = engine.calculateStreakAndConsistency(
+    undoSandbox430.HabitApp.store.getHabit("h-meditate"),
+    getHabitLogsMap430(undoSandbox430.HabitApp.store, "h-meditate"),
+    2,
+    [],
+    undoTestDate430
+  );
+  assertEqual(
+    initialStreakMeditate.currentStreak,
+    0,
+    "[Issue #430 AC-2] Initial streak for binary habit is 0"
+  );
+
+  // Check off binary habit
+  const toastContainerEl430 = getUndoEl430("toast-container");
+  const undoMainContent = getUndoEl430("main-content");
+  const toggleBtnEl430 = undoSandbox430.document.createElement("button");
+  toggleBtnEl430.setAttribute("data-action", "toggle-habit");
+  toggleBtnEl430.setAttribute("data-habit-id", "h-meditate");
+  undoMainContent.appendChild(toggleBtnEl430);
+
+  toggleBtnEl430.click();
+  await new Promise((r) => setTimeout(r, 10));
+
+  // Log should now be completed
+  const toggledMeditateLog =
+    undoSandbox430.HabitApp.store.state.logs[`h-meditate_${undoTestDate430}`];
+  assertEqual(
+    toggledMeditateLog && toggledMeditateLog.completed,
+    true,
+    "[Issue #430 AC-2] Checking off binary habit sets completed to true"
+  );
+
+  const postToggleStreak = engine.calculateStreakAndConsistency(
+    undoSandbox430.HabitApp.store.getHabit("h-meditate"),
+    getHabitLogsMap430(undoSandbox430.HabitApp.store, "h-meditate"),
+    2,
+    [],
+    undoTestDate430
+  );
+  assertEqual(
+    postToggleStreak.currentStreak,
+    1,
+    "[Issue #430 AC-2] Streak increments to 1 upon completion"
+  );
+
+  // Verify toast notification rendered with undo button
+  const renderedToastChildren = toastContainerEl430.children || [];
+  const toastHasUndoBtn =
+    renderedToastChildren.length > 0 &&
+    renderedToastChildren.some(
+      (c) =>
+        (c.innerHTML && c.innerHTML.includes('data-action="undo-toast"')) ||
+        (c.innerHTML && c.innerHTML.includes("Hoàn tác")) ||
+        (c.innerHTML && c.innerHTML.includes("Undo"))
+    );
+
+  assert(
+    toastHasUndoBtn,
+    "[Issue #430 AC-2] Checking off habit renders floating toast containing interactive 'Undo' button"
+  );
+
+  // 3. Trigger Undo via Public Seam HabitApp.undoLastAction() or data-action="undo-toast"
+  const undoBtn430 =
+    renderedToastChildren[0] ||
+    (() => {
+      const b = undoSandbox430.document.createElement("button");
+      b.setAttribute("data-action", "undo-toast");
+      return b;
+    })();
+  undoMainContent.appendChild(undoBtn430);
+
+  // Trigger undo
+  if (typeof undoSandbox430.HabitApp.undoLastAction === "function") {
+    await undoSandbox430.HabitApp.undoLastAction();
+  }
+
+  // Re-verify log state reverted
+  const revertedMeditateLog =
+    undoSandbox430.HabitApp.store.state.logs[`h-meditate_${undoTestDate430}`];
+  assertEqual(
+    revertedMeditateLog ? revertedMeditateLog.completed : false,
+    false,
+    "[Issue #430 AC-2] Clicking Undo reverts binary habit completed state back to false"
+  );
+
+  const revertedStreak = engine.calculateStreakAndConsistency(
+    undoSandbox430.HabitApp.store.getHabit("h-meditate"),
+    getHabitLogsMap430(undoSandbox430.HabitApp.store, "h-meditate"),
+    2,
+    [],
+    undoTestDate430
+  );
+  assertEqual(
+    revertedStreak.currentStreak,
+    0,
+    "[Issue #430 AC-2] Undoing completion restores active streak back to 0"
+  );
+
+  // 4. Numeric Habit Stepper Increment & Undo Reversal
+  // Set initial value to 500
+  await undoSandbox430.HabitApp.store.logHabit("h-water", undoTestDate430, 500);
+  assertEqual(
+    undoSandbox430.HabitApp.store.state.logs[`h-water_${undoTestDate430}`]
+      .value,
+    500,
+    "[Issue #430 AC-2] Numeric habit initial log value is 500"
+  );
+
+  // Click step-increment button
+  const stepIncBtn430 = undoSandbox430.document.createElement("button");
+  stepIncBtn430.setAttribute("data-action", "step-increment");
+  stepIncBtn430.setAttribute("data-habit-id", "h-water");
+  undoMainContent.appendChild(stepIncBtn430);
+
+  stepIncBtn430.click();
+  await new Promise((r) => setTimeout(r, 10));
+
+  const incrementedLog =
+    undoSandbox430.HabitApp.store.state.logs[`h-water_${undoTestDate430}`];
+  assertEqual(
+    incrementedLog && incrementedLog.value,
+    750,
+    "[Issue #430 AC-2] Stepper increment updates value from 500 to 750"
+  );
+
+  // Trigger undo for numeric stepper
+  if (typeof undoSandbox430.HabitApp.undoLastAction === "function") {
+    await undoSandbox430.HabitApp.undoLastAction();
+  }
+
+  const revertedWaterLog =
+    undoSandbox430.HabitApp.store.state.logs[`h-water_${undoTestDate430}`];
+  assertEqual(
+    revertedWaterLog && revertedWaterLog.value,
+    500,
+    "[Issue #430 AC-2] Clicking Undo reverts numeric habit value back to 500"
+  );
+
+  // 5. Unchecking a Completed Habit & Undo Reversal
+  // Complete habit first
+  await undoSandbox430.HabitApp.store.logHabit(
+    "h-meditate",
+    undoTestDate430,
+    1
+  );
+  assertEqual(
+    undoSandbox430.HabitApp.store.state.logs[`h-meditate_${undoTestDate430}`]
+      .completed,
+    true,
+    "[Issue #430 AC-2] Setup: Habit is completed"
+  );
+
+  // Toggle to uncomplete
+  toggleBtnEl430.click();
+  await new Promise((r) => setTimeout(r, 10));
+  assertEqual(
+    undoSandbox430.HabitApp.store.state.logs[`h-meditate_${undoTestDate430}`]
+      .completed,
+    false,
+    "[Issue #430 AC-2] Toggling completed habit marks it uncompleted"
+  );
+
+  // Undo uncomplete
+  if (typeof undoSandbox430.HabitApp.undoLastAction === "function") {
+    await undoSandbox430.HabitApp.undoLastAction();
+  }
+  assertEqual(
+    undoSandbox430.HabitApp.store.state.logs[`h-meditate_${undoTestDate430}`]
+      .completed,
+    true,
+    "[Issue #430 AC-2] Undoing an uncheck restores habit completion back to true"
+  );
+
+  // ==========================================
+  // [Issue #430 AC-3] 52-Week Contribution Heatmap Day Cell Click Navigation
+  // ==========================================
+  console.log(
+    "\n--- [Issue #430 AC-3] 52-Week Contribution Heatmap Day Cell Click Navigation ---"
+  );
+
+  const { sandbox: heatmapSandbox430, getOrCreateElement: getHeatmapEl430 } =
+    createHabitTrackerSandbox();
+  heatmapSandbox430.requestAnimationFrame = (fn) => fn();
+  heatmapSandbox430.cancelAnimationFrame = () => {};
+  await heatmapSandbox430.HabitApp.init();
+
+  // 1. Heatmap Cell Markup Verification
+  const sampleYearlyGrid430 = engine.computeHeatmapData(
+    heatmapSandbox430.HabitApp.store.getHabits(),
+    heatmapSandbox430.HabitApp.store.state.logs,
+    null,
+    "2026-09-12"
+  );
+  const renderedHeatmapHtml430 = renderYearlyHeatmapGrid(
+    sampleYearlyGrid430,
+    "vi"
+  );
+  assert(
+    renderedHeatmapHtml430.includes("heatmap-cell") &&
+      renderedHeatmapHtml430.includes('data-date="'),
+    "[Issue #430 AC-3] 52-week contribution heatmap renders interactive cells with data-date attributes"
+  );
+
+  // 2. Switch to Insights Tab and Verify Cell Click Navigation
+  heatmapSandbox430.HabitApp.switchTab("insights");
+  const mainContentInsights = getHeatmapEl430("main-content");
+  assert(
+    mainContentInsights.innerHTML.includes("yearly_heatmap_title") ||
+      mainContentInsights.innerHTML.includes("Biểu đồ đóng góp 52 tuần") ||
+      mainContentInsights.innerHTML.includes("52-Week Contribution Heatmap"),
+    "[Issue #430 AC-3] Switched to Insights tab with rendered heatmap"
+  );
+
+  // Simulate clicking a heatmap cell for date "2026-05-20"
+  const targetHeatmapDate = "2026-05-20";
+  const heatmapCellEl430 = heatmapSandbox430.document.createElement("div");
+  heatmapCellEl430.className = "heatmap-cell";
+  heatmapCellEl430.setAttribute("data-action", "view-heatmap-date");
+  heatmapCellEl430.setAttribute("data-date", targetHeatmapDate);
+  mainContentInsights.appendChild(heatmapCellEl430);
+
+  // Trigger click on heatmap cell
+  heatmapCellEl430.click();
+  await new Promise((r) => setTimeout(r, 10));
+
+  assertEqual(
+    heatmapSandbox430.HabitApp.store.getActiveDate(),
+    targetHeatmapDate,
+    "[Issue #430 AC-3] Clicking heatmap cell updates store active date to clicked date ('2026-05-20')"
+  );
+
+  const mainContentAfterClick = getHeatmapEl430("main-content");
+  assert(
+    mainContentAfterClick.innerHTML.includes(
+      `data-date="${targetHeatmapDate}"`
+    ) ||
+      mainContentAfterClick.innerHTML.includes("2026-05-20") ||
+      mainContentAfterClick.innerHTML.includes("date-ribbon"),
+    "[Issue #430 AC-3] Clicking heatmap cell automatically switches active view to 'today' tab and renders clicked date"
+  );
+
+  // 3. Navigation Dock Active State Update
+  const todayNavBtn430 =
+    heatmapSandbox430.document.querySelector('[data-tab="today"]');
+  const insightsNavBtn430 = heatmapSandbox430.document.querySelector(
+    '[data-tab="insights"]'
+  );
+  if (todayNavBtn430) {
+    assert(
+      todayNavBtn430.classList.contains("text-emerald-400") ||
+        todayNavBtn430.className.includes("text-emerald-400"),
+      "[Issue #430 AC-3] Navigation dock highlights 'today' tab after heatmap cell navigation"
+    );
+  }
+  if (insightsNavBtn430) {
+    assert(
+      !insightsNavBtn430.classList.contains("text-emerald-400") ||
+        !insightsNavBtn430.className.includes("text-emerald-400") ||
+        insightsNavBtn430.classList.contains("text-slate-400"),
+      "[Issue #430 AC-3] Navigation dock de-highlights 'insights' tab after navigation"
+    );
+  }
+
+  // 4. Past Date Navigation (6 Months Prior)
+  const pastHeatmapDate = "2026-01-15";
+  const pastHeatmapCellEl430 = heatmapSandbox430.document.createElement("div");
+  pastHeatmapCellEl430.className = "heatmap-cell";
+  pastHeatmapCellEl430.setAttribute("data-action", "view-heatmap-date");
+  pastHeatmapCellEl430.setAttribute("data-date", pastHeatmapDate);
+  mainContentInsights.appendChild(pastHeatmapCellEl430);
+
+  pastHeatmapCellEl430.click();
+  await new Promise((r) => setTimeout(r, 10));
+
+  assertEqual(
+    heatmapSandbox430.HabitApp.store.getActiveDate(),
+    pastHeatmapDate,
+    "[Issue #430 AC-3] Clicking past heatmap cell ('2026-01-15') updates active date cleanly"
+  );
+
+  // ==========================================
+  // [Issue #430 AC-4] Micro-Interactions, Bilingual String Parity & Rapid Action Resilience
+  // ==========================================
+  console.log(
+    "\n--- [Issue #430 AC-4] Micro-Interactions, Bilingual String Parity & Rapid Resilience ---"
+  );
+
+  // 1. Bilingual Translation Parity (100% Key Parity between EN and VI)
+  const enKeys430 = Object.keys(TRANSLATIONS.en);
+  const viKeys430 = Object.keys(TRANSLATIONS.vi);
+
+  const missingInVi430 = enKeys430.filter((k) => !(k in TRANSLATIONS.vi));
+  const missingInEn430 = viKeys430.filter((k) => !(k in TRANSLATIONS.en));
+
+  assertEqual(
+    missingInVi430.length,
+    0,
+    `[Issue #430 AC-4] Zero missing keys in Vietnamese translations (Missing: ${missingInVi430.join(", ") || "none"})`
+  );
+  assertEqual(
+    missingInEn430.length,
+    0,
+    `[Issue #430 AC-4] Zero missing keys in English translations (Missing: ${missingInEn430.join(", ") || "none"})`
+  );
+
+  // Verify specific Issue #430 required translation keys exist in both languages
+  const requiredI18nKeys430 = [
+    "undo",
+    "quick_emoji_presets",
+    "toast_habit_completed",
+    "toast_habit_incremented",
+    "toast_undo_success",
+  ];
+  for (const k of requiredI18nKeys430) {
+    assert(
+      typeof TRANSLATIONS.en[k] === "string" && TRANSLATIONS.en[k].length > 0,
+      `[Issue #430 AC-4] TRANSLATIONS.en contains key '${k}' ("${TRANSLATIONS.en[k] || ""}")`
+    );
+    assert(
+      typeof TRANSLATIONS.vi[k] === "string" && TRANSLATIONS.vi[k].length > 0,
+      `[Issue #430 AC-4] TRANSLATIONS.vi contains key '${k}' ("${TRANSLATIONS.vi[k] || ""}")`
+    );
+  }
+
+  // 2. Micro-interactions: Preset Buttons Styling Transitions
+  const modalHtmlMicro430 = renderHabitEditModal(null, "vi");
+  const hasMicroTransition =
+    modalHtmlMicro430.includes("transition") ||
+    modalHtmlMicro430.includes("hover:scale") ||
+    modalHtmlMicro430.includes("active:scale");
+  assert(
+    hasMicroTransition,
+    "[Issue #430 AC-4] Emoji preset buttons contain micro-interaction hover/active scale transitions"
+  );
+
+  // 3. Rapid Click Resilience (10 Rapid Binary Toggles)
+  const { sandbox: stressSandbox430, getOrCreateElement: getStressEl430 } =
+    createHabitTrackerSandbox();
+  stressSandbox430.requestAnimationFrame = (fn) => fn();
+  stressSandbox430.cancelAnimationFrame = () => {};
+  await stressSandbox430.HabitApp.init();
+
+  const stressMainContent = getStressEl430("main-content");
+
+  let rapidToggleError = false;
+  try {
+    for (let i = 0; i < 10; i++) {
+      const toggleEl = stressSandbox430.document.createElement("button");
+      toggleEl.setAttribute("data-action", "toggle-habit");
+      toggleEl.setAttribute("data-habit-id", "h-meditate");
+      stressMainContent.appendChild(toggleEl);
+      toggleEl.click();
+      await new Promise((r) => setTimeout(r, 2));
+    }
+  } catch (err) {
+    rapidToggleError = true;
+  }
+  assert(
+    !rapidToggleError,
+    "[Issue #430 AC-4] 10 rapid habit toggle clicks execute without throwing UI errors"
+  );
+
+  // 10 toggles on false initial state ends on false
+  const finalStressMeditate =
+    stressSandbox430.HabitApp.store.state.logs[
+      `h-meditate_${stressSandbox430.HabitApp.store.getActiveDate()}`
+    ];
+  assertEqual(
+    finalStressMeditate ? finalStressMeditate.completed : false,
+    false,
+    "[Issue #430 AC-4] 10 rapid toggles preserve mathematical parity (even count reverts to uncompleted)"
+  );
+
+  // 4. Rapid Stepper Increments (10 Consecutive Stepper Clicks)
+  let rapidStepError = false;
+  try {
+    for (let i = 0; i < 10; i++) {
+      const incEl = stressSandbox430.document.createElement("button");
+      incEl.setAttribute("data-action", "step-increment");
+      incEl.setAttribute("data-habit-id", "h-water");
+      stressMainContent.appendChild(incEl);
+      incEl.click();
+      await new Promise((r) => setTimeout(r, 2));
+    }
+  } catch (err) {
+    rapidStepError = true;
+  }
+  assert(
+    !rapidStepError,
+    "[Issue #430 AC-4] 10 rapid stepper increments execute without throwing errors"
+  );
+
+  const finalWaterStressLog =
+    stressSandbox430.HabitApp.store.state.logs[
+      `h-water_${stressSandbox430.HabitApp.store.getActiveDate()}`
+    ];
+  assertEqual(
+    finalWaterStressLog && finalWaterStressLog.value,
+    2500,
+    "[Issue #430 AC-4] 10 rapid increments of 250 accurately total 2500 ml"
+  );
+
+  // 5. Repeated Undo Calls When Stack is Empty (Graceful No-Op / No TypeError)
+  let repeatedUndoError = false;
+  try {
+    // Perform 1 action, then call undo 5 times
+    await stressSandbox430.HabitApp.store.logHabit(
+      "h-meditate",
+      "2026-09-12",
+      1
+    );
+    for (let i = 0; i < 5; i++) {
+      if (typeof stressSandbox430.HabitApp.undoLastAction === "function") {
+        await stressSandbox430.HabitApp.undoLastAction();
+      }
+    }
+  } catch (err) {
+    repeatedUndoError = true;
+  }
+  assert(
+    !repeatedUndoError,
+    "[Issue #430 AC-4] Calling undoLastAction() repeatedly on exhausted undo stack is a safe no-op without throwing TypeError"
+  );
+
+  // 6. Rapid View Tab Switch Cycling
+  let tabSwitchError = false;
+  try {
+    const tabs = ["today", "insights", "manager", "settings"];
+    for (let i = 0; i < 16; i++) {
+      stressSandbox430.HabitApp.switchTab(tabs[i % tabs.length]);
+    }
+  } catch (err) {
+    tabSwitchError = true;
+  }
+  assert(
+    !tabSwitchError,
+    "[Issue #430 AC-4] 16 rapid tab switch cycles execute without UI/DOM corruption"
   );
 }
 

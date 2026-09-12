@@ -86,6 +86,46 @@
       })
       .join("");
 
+    const presetEmojis = [
+      "🏃",
+      "💧",
+      "📖",
+      "🧘",
+      "💻",
+      "🥗",
+      "💊",
+      "✍️",
+      "🏋️",
+      "😴",
+      "🎯",
+      "🚶",
+      "🍎",
+      "🌿",
+      "🧠",
+      "🎨",
+    ];
+
+    const presetEmojisHtml = presetEmojis
+      .map((e) => {
+        const isSelected = icon === e;
+        return `
+          <button
+            type="button"
+            data-action="select-emoji"
+            data-emoji="${e}"
+            aria-label="${e}"
+            class="emoji-preset-btn w-9 h-9 flex items-center justify-center text-lg rounded-xl transition duration-150 hover:scale-110 active:scale-95 ${
+              isSelected
+                ? "bg-emerald-100 dark:bg-emerald-950/80 border-2 border-emerald-500 shadow-sm ring-2 ring-emerald-500/30"
+                : "bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:bg-slate-100 dark:hover:bg-slate-700"
+            }"
+          >
+            ${e}
+          </button>
+        `;
+      })
+      .join("");
+
     return `
       <div class="modal-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl text-slate-900 dark:text-white" role="dialog" aria-modal="true" aria-labelledby="habit-modal-title">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
@@ -103,6 +143,14 @@
             <div class="flex-1">
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("habit_name_label", {}, lang)} *</label>
               <input type="text" id="modal-habit-name" name="name" value="${name}" placeholder="${i18n.t("habit_name_placeholder", {}, lang)}" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+
+          <!-- Quick-Preset Emoji Palette -->
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("quick_emoji_presets", {}, lang)}</label>
+            <div class="flex flex-wrap gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl">
+              ${presetEmojisHtml}
             </div>
           </div>
 

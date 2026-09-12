@@ -48,11 +48,15 @@
         return `
           <div
             class="heatmap-cell w-3 h-3 rounded-xs border transition-all duration-150 cursor-pointer hover:scale-125 hover:z-10 ${colorClass}"
+            data-action="view-heatmap-date"
             data-date="${cell.date}"
             data-rate="${cell.completionRate}"
             data-completed="${cell.completedCount}"
             data-scheduled="${cell.scheduledCount}"
             title="${tooltipText}"
+            role="button"
+            tabindex="0"
+            aria-label="${dateFormatted}"
           ></div>
         `;
       })
