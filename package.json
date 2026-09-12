@@ -53,6 +53,8 @@
     "test:e2e:buy-rent": "playwright test tests/e2e/buy-vs-rent-devices.spec.js",
     "test:e2e:habit": "playwright test tests/e2e/habit-tracker-devices.spec.js",
     "test:e2e:portal": "playwright test tests/e2e/portal-devices.spec.js",
+    "test:e2e:summary": "./scripts/run.sh scripts/e2e-summary.js",
+    "test:e2e-summary": "./scripts/run.sh tests/e2e-summary.test.js",
     "format": "prettier --write .",
     "lint:check": "prettier --check .",
     "pack:release": "./scripts/run.sh scripts/pack-release.js"

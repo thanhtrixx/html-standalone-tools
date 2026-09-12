@@ -150,6 +150,11 @@ const TEST_SUITES = [
     file: "tests/habit-tracker-ui-components.test.js",
     category: "UI/UX",
   },
+  {
+    name: "E2E Summary Parser & Token Aggregator",
+    file: "tests/e2e-summary.test.js",
+    category: "Helpers",
+  },
 ];
 
 function escapeXml(str) {
