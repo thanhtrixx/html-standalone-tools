@@ -41,3 +41,7 @@ Dual-axis review for Standards + 5 Repository Invariants and Spec Conformance. S
 ### Phase 4 Acceptance Criteria & Release Verification
 
 Mechanically audit Acceptance Criteria checkboxes and sign-off on release issues. See `.agents/skills/verify-ac/SKILL.md`.
+
+### Token-Efficient E2E Testing
+
+Compact E2E test execution with summary aggregation, tool-scoped execution, and lazy log retrieval. See `.agents/skills/e2e-token-efficient/SKILL.md`.
