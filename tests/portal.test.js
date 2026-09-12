@@ -153,6 +153,40 @@ async function runTests() {
     );
   }
 
+  // Test 7: [Issue #445 AC-1, AC-2, AC-3] Lifecycle Phase Status Badges & Bilingual Parity
+  assert(
+    htmlContent.includes('data-i18n="statusStable"'),
+    "Portal markup contains statusStable i18n data attribute on tool cards"
+  );
+  assert(
+    htmlContent.includes("data-status-badge"),
+    "Portal cards contain semantic data-status-badge elements"
+  );
+
+  // Assert dictionary keys for status
+  if (dictMatch) {
+    const sandbox = {};
+    vm.createContext(sandbox);
+    vm.runInContext(`var dict = ${dictMatch[1]};`, sandbox);
+    const trans = sandbox.dict;
+    assert(
+      trans && trans.en && trans.en.statusStable === "Stable",
+      "English dictionary contains statusStable: 'Stable'"
+    );
+    assert(
+      trans && trans.en && trans.en.statusActiveDev === "Active Dev",
+      "English dictionary contains statusActiveDev: 'Active Dev'"
+    );
+    assert(
+      trans && trans.vi && trans.vi.statusStable === "Ổn định",
+      "Vietnamese dictionary contains statusStable: 'Ổn định'"
+    );
+    assert(
+      trans && trans.vi && trans.vi.statusActiveDev === "Đang phát triển",
+      "Vietnamese dictionary contains statusActiveDev: 'Đang phát triển'"
+    );
+  }
+
   console.log(`\n==================================================`);
   console.log(`Portal Tests Summary: ${passCount} Passed, ${failCount} Failed`);
   console.log(`==================================================\n`);
