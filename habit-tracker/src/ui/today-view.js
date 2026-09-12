@@ -263,7 +263,7 @@
 
     const scheduledHabits = habits.filter(
       (h) =>
-        (h.routine || engine.ROUTINES.ANYTIME) === routineKey &&
+        engine.getHabitRoutines(h).includes(routineKey) &&
         engine.isScheduledDate(h, selectedDate)
     );
 

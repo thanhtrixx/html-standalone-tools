@@ -4168,6 +4168,87 @@ async function runUITests() {
   } finally {
     Date.now = realDateNow;
   }
+
+  // ==========================================
+  // Issue #459: Multi-Routine UI & Integration
+  // ==========================================
+  const { sandbox: multiUiSandbox } = createHabitTrackerSandbox();
+  await multiUiSandbox.HabitApp.init();
+
+  const dualHabit = {
+    id: "h-dual-routine",
+    name: "Hydration Walk",
+    type: "numeric",
+    targetValue: 2,
+    unit: "bottles",
+    step: 1,
+    routines: ["morning", "evening"],
+    scheduleType: "daily",
+    color: "cyan",
+    icon: "🚶",
+  };
+  await multiUiSandbox.HabitApp.store.addHabit(dualHabit);
+
+  // Render Today Dashboard
+  const mainContainer459 =
+    multiUiSandbox.document.getElementById("main-content");
+  const todayHtml459 = multiUiSandbox.HabitTodayView.renderTodayDashboard(
+    multiUiSandbox.HabitApp.store,
+    mainContainer459,
+    "vi"
+  );
+
+  assert(
+    todayHtml459.includes("h-dual-routine"),
+    "[Issue #459 AC-2] Multi-routine habit is rendered in Today dashboard"
+  );
+
+  // Check occurrences in Morning and Evening routine sections
+  const morningSectionHtml =
+    todayHtml459.split('data-routine="morning"')[1]?.split("</section>")[0] ||
+    "";
+  const eveningSectionHtml =
+    todayHtml459.split('data-routine="evening"')[1]?.split("</section>")[0] ||
+    "";
+
+  assert(
+    morningSectionHtml.includes("h-dual-routine"),
+    "[Issue #459 AC-2] Multi-routine habit is present in Morning routine section"
+  );
+  assert(
+    eveningSectionHtml.includes("h-dual-routine"),
+    "[Issue #459 AC-2] Multi-routine habit is present in Evening routine section"
+  );
+
+  // Increment habit in Morning routine
+  const activeDate459 = multiUiSandbox.HabitApp.store.getActiveDate();
+  await multiUiSandbox.HabitApp.handleStepIncrement(
+    "h-dual-routine",
+    activeDate459
+  );
+
+  const logAfterStep =
+    multiUiSandbox.HabitApp.store.state.logs[`h-dual-routine_${activeDate459}`];
+  assertEqual(
+    logAfterStep.value,
+    1,
+    "[Issue #459 AC-3] Single increment updates shared log value to 1"
+  );
+
+  // Manager View routine badges
+  const managerContainer459 = multiUiSandbox.document.createElement("div");
+  multiUiSandbox.HabitManagerView.renderManagerView(
+    multiUiSandbox.HabitApp.store,
+    managerContainer459,
+    "vi"
+  );
+  const managerHtml459 = managerContainer459.innerHTML;
+  assert(
+    managerHtml459.includes("Sáng") ||
+      managerHtml459.includes("Tối") ||
+      managerHtml459.includes("morning"),
+    "[Issue #459 AC-5] Manager view renders routine badge chips for multi-routine habit"
+  );
 }
 
 runUITests()

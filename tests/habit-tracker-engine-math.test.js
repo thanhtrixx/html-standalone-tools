@@ -692,6 +692,111 @@ try {
     false,
     "[AC-7] Empty scheduled list marks isAllCompleted = false"
   );
+
+  // Issue #459: Multi-routine habit assignment engine tests
+  const multiRoutineHabit = {
+    id: "h-multi-walk",
+    name: "Walking",
+    type: "numeric",
+    targetValue: 5000,
+    unit: "steps",
+    routines: ["morning", "evening"],
+    scheduleType: "daily",
+  };
+  const legacyHabit = {
+    id: "h-legacy",
+    name: "Legacy Afternoon",
+    type: "binary",
+    targetValue: 1,
+    routine: "afternoon",
+    scheduleType: "daily",
+  };
+  const unassignedHabit = {
+    id: "h-none",
+    name: "No routine",
+    type: "binary",
+    targetValue: 1,
+    scheduleType: "daily",
+  };
+
+  assertEqual(
+    JSON.stringify(engine.getHabitRoutines(multiRoutineHabit)),
+    JSON.stringify(["morning", "evening"]),
+    "[Issue #459 AC-1] getHabitRoutines returns full routines array"
+  );
+  assertEqual(
+    JSON.stringify(engine.getHabitRoutines(legacyHabit)),
+    JSON.stringify(["afternoon"]),
+    "[Issue #459 AC-1] getHabitRoutines normalizes legacy routine field"
+  );
+  assertEqual(
+    JSON.stringify(engine.getHabitRoutines(unassignedHabit)),
+    JSON.stringify(["anytime"]),
+    "[Issue #459 AC-1] getHabitRoutines falls back to anytime"
+  );
+
+  const multiTestHabits = [multiRoutineHabit, legacyHabit];
+  const multiLogs = {
+    "h-multi-walk": { value: 5000, completed: true },
+    "h-legacy": { value: 0, completed: false },
+  };
+
+  const morningMR = engine.calculateRoutineProgress(
+    multiTestHabits,
+    multiLogs,
+    "2026-09-12",
+    "morning"
+  );
+  assertEqual(
+    morningMR.total,
+    1,
+    "[Issue #459 AC-2] Multi-routine habit counted in morning routine progress"
+  );
+  assertEqual(
+    morningMR.completed,
+    1,
+    "[Issue #459 AC-2] Multi-routine habit marked completed in morning"
+  );
+
+  const eveningMR = engine.calculateRoutineProgress(
+    multiTestHabits,
+    multiLogs,
+    "2026-09-12",
+    "evening"
+  );
+  assertEqual(
+    eveningMR.total,
+    1,
+    "[Issue #459 AC-2] Multi-routine habit counted in evening routine progress"
+  );
+  assertEqual(
+    eveningMR.percentage,
+    100,
+    "[Issue #459 AC-2] Evening routine progress is 100%"
+  );
+
+  const routineAdherenceStats = engine.calculateRoutineAdherence(
+    multiTestHabits,
+    { "h-multi-walk_2026-09-12": { value: 5000, completed: true } },
+    1,
+    "2026-09-12"
+  );
+  const morningAdherence = routineAdherenceStats.find(
+    (r) => r.routine === "morning"
+  );
+  const eveningAdherence = routineAdherenceStats.find(
+    (r) => r.routine === "evening"
+  );
+  assertEqual(
+    morningAdherence.rate,
+    100,
+    "[Issue #459 AC-3] Routine adherence counts multi-routine habit in morning stats"
+  );
+  assertEqual(
+    eveningAdherence.rate,
+    100,
+    "[Issue #459 AC-3] Routine adherence counts multi-routine habit in evening stats"
+  );
 } catch (err) {
   console.error("❌ Exception during Engine Math test execution:", err);
   process.exit(1);

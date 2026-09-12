@@ -42,7 +42,10 @@
     const targetValue = habit ? habit.targetValue || 1 : 1;
     const unit = habit ? habit.unit || "" : "";
     const step = habit ? habit.step || 1 : 1;
-    const routine = habit ? habit.routine || "morning" : "morning";
+    const assignedRoutines = habit
+      ? engine.getHabitRoutines(habit)
+      : ["morning"];
+    const routine = assignedRoutines[0] || "morning";
     const scheduleType = habit ? habit.scheduleType || "daily" : "daily";
     const scheduleDays = habit
       ? habit.scheduleDays || [0, 1, 2, 3, 4, 5, 6]
@@ -194,8 +197,31 @@
 
           <!-- Routine Assignment -->
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("routine_label", {}, lang)}</label>
-            <select name="routine" id="modal-habit-routine" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-900 dark:text-white">
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("routine_label", {}, lang)}</label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="modal-routine-chips">
+              ${[
+                { id: "morning", icon: "🌅", key: "routine_morning" },
+                { id: "afternoon", icon: "☀️", key: "routine_afternoon" },
+                { id: "evening", icon: "🌙", key: "routine_evening" },
+                { id: "anytime", icon: "🔄", key: "routine_anytime" },
+              ]
+                .map((r) => {
+                  const isChecked = assignedRoutines.includes(r.id);
+                  return `
+                  <label class="routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none ${
+                    isChecked
+                      ? "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-semibold"
+                      : "bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                  }">
+                    <input type="checkbox" name="routines" value="${r.id}" class="sr-only" ${isChecked ? "checked" : ""}>
+                    <span>${r.icon}</span>
+                    <span>${i18n.t(r.key, {}, lang)}</span>
+                  </label>
+                `;
+                })
+                .join("")}
+            </div>
+            <select name="routine" id="modal-habit-routine" class="hidden">
               <option value="morning" ${routine === "morning" ? "selected" : ""}>🌅 ${i18n.t("routine_morning", {}, lang)}</option>
               <option value="afternoon" ${routine === "afternoon" ? "selected" : ""}>☀️ ${i18n.t("routine_afternoon", {}, lang)}</option>
               <option value="evening" ${routine === "evening" ? "selected" : ""}>🌙 ${i18n.t("routine_evening", {}, lang)}</option>
@@ -268,7 +294,9 @@
     const routineSectionsHtml = routineKeys
       .map((rKey) => {
         const routineHabits = habits
-          .filter((h) => !h.archived && (h.routine || "anytime") === rKey)
+          .filter(
+            (h) => !h.archived && engine.getHabitRoutines(h).includes(rKey)
+          )
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         if (routineHabits.length === 0) return "";
 
@@ -277,6 +305,17 @@
             const colorHex = todayView.getColorHex(h.color);
             const isFirst = idx === 0;
             const isLast = idx === routineHabits.length - 1;
+            const assignedRoutines = engine.getHabitRoutines(h);
+            const routineBadges =
+              assignedRoutines.length > 1
+                ? `<div class="flex flex-wrap gap-1 mt-1">${assignedRoutines
+                    .map(
+                      (r) =>
+                        `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">${i18n.t(`routine_${r}`, {}, lang)}</span>`
+                    )
+                    .join("")}</div>`
+                : "";
+
             return `
               <div class="manager-habit-card bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 mb-3 flex items-center justify-between gap-3 shadow-md" data-habit-id="${h.id}">
                 <div class="flex items-center gap-3 flex-1">
@@ -285,6 +324,7 @@
                   <div>
                     <h4 class="font-semibold text-slate-900 dark:text-white text-base">${h.name}</h4>
                     <span class="text-xs text-slate-500 dark:text-slate-400">${i18n.t(`type_${h.type || "binary"}`, {}, lang)}</span>
+                    ${routineBadges}
                   </div>
                 </div>
 

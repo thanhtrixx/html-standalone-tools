@@ -409,6 +409,20 @@
   }
 
   /**
+   * Helper to normalize habit assigned routines array
+   */
+  function getHabitRoutines(habit) {
+    if (!habit) return [ROUTINES.ANYTIME];
+    if (Array.isArray(habit.routines) && habit.routines.length > 0) {
+      return habit.routines;
+    }
+    if (habit.routine) {
+      return [habit.routine];
+    }
+    return [ROUTINES.ANYTIME];
+  }
+
+  /**
    * Aggregates progress for habits in a specific time-of-day routine
    */
   function calculateRoutineProgress(
@@ -430,7 +444,7 @@
 
     const routineHabits = habits.filter(
       (h) =>
-        (h.routine || ROUTINES.ANYTIME) === routineKey &&
+        getHabitRoutines(h).includes(routineKey) &&
         isScheduledDate(h, dateStr)
     );
 
@@ -644,14 +658,18 @@
     for (let i = 0; i < daysBack; i++) {
       const dStr = shiftDateString(refStr, -i);
       for (const h of habits) {
-        const rKey = h.routine || ROUTINES.ANYTIME;
         if (isScheduledDate(h, dStr)) {
-          stats[rKey].scheduled++;
-          const log =
-            logsMap[`${h.id}_${dStr}`] ||
-            (logsMap[h.id] && logsMap[h.id][dStr]);
-          const prog = calculateHabitProgress(h, log);
-          if (prog.isCompleted) stats[rKey].completed++;
+          const assignedRoutines = getHabitRoutines(h);
+          for (const rKey of assignedRoutines) {
+            if (stats[rKey]) {
+              stats[rKey].scheduled++;
+              const log =
+                logsMap[`${h.id}_${dStr}`] ||
+                (logsMap[h.id] && logsMap[h.id][dStr]);
+              const prog = calculateHabitProgress(h, log);
+              if (prog.isCompleted) stats[rKey].completed++;
+            }
+          }
         }
       }
     }
@@ -696,6 +714,7 @@
     SCHEDULE_TYPES,
     HABIT_COLORS,
     MILESTONES,
+    getHabitRoutines,
     calculateHabitProgress,
     toDateString,
     shiftDateString,
