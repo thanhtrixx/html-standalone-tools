@@ -135,6 +135,16 @@ const TEST_SUITES = [
     file: "tests/habit-tracker-i18n.test.js",
     category: "i18n",
   },
+  {
+    name: "Atomic Habit Tracker Storage & Persistence",
+    file: "tests/habit-tracker-storage-persistence.test.js",
+    category: "Data Integrity",
+  },
+  {
+    name: "Atomic Habit Tracker Cloud Sync & Backup",
+    file: "tests/habit-tracker-cloud-sync.test.js",
+    category: "AI & State",
+  },
 ];
 
 function escapeXml(str) {
