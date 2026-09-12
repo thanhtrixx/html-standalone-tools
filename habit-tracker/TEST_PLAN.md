@@ -6,14 +6,14 @@ This document defines the test matrix, public test seams, and verification cover
 
 ## 🎯 Test Suite Architecture
 
-Following the repository's Two-Speed TDD standard (ADR-0010), testing is divided into fast scoped inner-loop suites and full end-to-end device suites.
+Following the repository's Two-Speed TDD standard (ADR-0010 & ADR-0003), testing is divided into fast scoped inner-loop suites and full end-to-end device suites.
 
 ```text
 tests/
-├── habit-tracker-engine-math.test.js        # Pure mathematical engines (streaks, consistency, freeze tokens)
-├── habit-tracker-storage-persistence.test.js # IndexedDB CRUD, silent migration, JSON import/export
+├── habit-tracker-engine-math.test.js        # Pure mathematical models (0% baseline, streaks, consistency, freeze tokens)
+├── habit-tracker-storage-persistence.test.js # IndexedDB CRUD, silent multi-routine migration, JSON import/export
 ├── habit-tracker-cloud-sync.test.js          # Cloud backup encoding, Gist/Drive payloads
-├── habit-tracker-ui-components.test.js       # DOM rendering, swipe gestures, bottom sheet, routines
+├── habit-tracker-ui-components.test.js       # DOM rendering, swipe gestures, back navigation, timer delta, routines
 ├── habit-tracker-pwa-lifecycle.test.js       # Service worker caching, offline fallback, notifications
 ├── habit-tracker-i18n.test.js                # Bilingual dictionary 100% key parity & formatters
 └── e2e/
@@ -26,66 +26,52 @@ tests/
 
 ### 1. Mathematical Domain Engine (`tests/habit-tracker-engine-math.test.js`)
 
-- [ ] **Streak Calculation**:
+- [ ] **Historical 0% Baseline on Empty History**:
+  - `calculateStreakAndConsistency` returns `0%` for 30d/90d consistency when `scheduledCount === 0`.
+  - `calculateWeekdayAdherence` returns `0%` for days with no scheduled history.
+  - `calculateRoutineAdherence` returns `0%` for routines with no scheduled history.
+  - `calculateDailyProgress` and `calculateRoutineProgress` return `percentage: 0`, `ratio: 0.0`, `isAllCompleted: false` when 0 habits scheduled.
+- [ ] **Streak & Freeze Token Calculation**:
   - Increments on consecutive days with $\ge 100\%$ target completion.
   - Correctly evaluates today vs yesterday active status.
-  - Maintains streak across non-scheduled days (e.g. Mon/Wed/Fri schedule on Tuesday/Thursday).
-  - Maintains streak across Vacation / Sick Pause mode dates.
-- [ ] **Streak Freeze Token Application**:
-  - Automatically consumes 1 freeze token on an uncompleted scheduled day.
-  - Prevents streak reset to 0 when freeze token is applied.
-  - Resets to 0 only when no freeze tokens remain on a missed scheduled day.
-- [ ] **Rolling Consistency Score**:
-  - Calculates exact 30-day and 90-day consistency score $\%$.
-  - Excludes paused/vacation days from denominator.
-- [ ] **Quantitative & Timer Progress**:
-  - Calculates numeric counter progress ratio $C_{i, d} = \min(1.0, \text{logged}/\text{target})$.
-  - Calculates timer duration completion.
-- [ ] **Routine & Daily Overall Progress Rings**:
-  - Aggregates progress correctly across active scheduled habits.
+  - Maintains streak across non-scheduled days and Vacation Pause mode.
+  - Consumes freeze token on missed days without resetting streak to 0.
+- [ ] **Multi-Routine Habit Progression**:
+  - Evaluates multi-routine assigned habits (`routines: ['morning', 'evening']`) correctly within routine progress aggregations.
 
-### 2. Storage & Data Portability (`tests/habit-tracker-storage-persistence.test.js`)
+### 2. Timer Delta Engine & Background Accuracy (`tests/habit-tracker-ui-components.test.js`)
 
-- [ ] **IndexedDB CRUD**:
-  - Creates, reads, updates, and deletes habits, logs, routines, and settings.
-- [ ] **Data Export & Import Seams (Issue #426)**:
-  - Invokes `exportToJson()` without throwing `TypeError` and produces valid schema payload.
-  - Imports JSON data in `merge` and `replace` modes via `store.importState()` without crashing.
-- [ ] **Habit Reordering Persistence (Issue #427)**:
-  - Swapping habit positions with `▲`/`▼` mutates order array and persists to database.
+- [ ] **Timestamp Delta Sync**:
+  - Timer calculates elapsed time from `Date.now() - startedAt + baseValue`.
+  - Simulating page visibility change (`visibilityState: visible`) after elapsed duration catches up accurately.
+  - Reaching target duration triggers auto-completion and stops timer loop.
 
-### 3. Form Handling & State Stability (`tests/habit-tracker-ui-components.test.js`)
+### 3. Multi-Routine Data Persistence & Dashboard UI (`tests/habit-tracker-storage-persistence.test.js` & `tests/habit-tracker-ui-components.test.js`)
 
-- [ ] **Form Event Interception (Issue #425)**:
-  - Submitting `#habit-edit-form` calls `e.preventDefault()`, persists habit, and closes modal without page reload.
-  - Submitting `#habit-note-form` calls `e.preventDefault()`, saves reflection note, and updates history without reload.
-- [ ] **Single Modal Overlay & A11y (Issue #429)**:
-  - Validates that opening modal or bottom sheet creates exactly one backdrop overlay in DOM with `role="dialog"`.
-  - Clicking outside closes modal cleanly.
-- [ ] **Light Mode Contrast (Issue #429)**:
-  - Validates responsive dark/light class assignments on cards, text, and inputs.
+- [ ] **Silent Schema Migration**:
+  - Legacy habit with `routine: 'morning'` automatically normalizes to `routines: ['morning']`.
+- [ ] **Multi-Slot Rendering & Synchronized Check-in**:
+  - Habit assigned to `['morning', 'evening']` renders in both routine sections on Today view.
+  - Interacting with morning card updates daily log and syncs state on evening card.
 
-### 4. Interactive UX, Gestures & Motion (`tests/habit-tracker-ui-components.test.js` & E2E)
+### 4. Gestures, Back Navigation & Form UX (`tests/habit-tracker-ui-components.test.js`)
 
-- [ ] **Preset Emoji Picker (Issue #430)**:
-  - Clicking emoji preset updates habit icon input and visual preview.
-- [ ] **Floating Undo Toast (Issue #430)**:
-  - Completing or incrementing a habit displays floating toast with "Undo" action for 4s.
-  - Clicking Undo reverses log value and updates progress rings immediately.
-- [ ] **Interactive 52-Week Heatmap Date Navigation (Issue #430)**:
-  - Clicking past date cell switches active date and navigates to Today tab with active date highlighted.
-- [ ] **Touch Swipe-to-Complete**:
-  - Swipe gesture applies real-time resistance transform and triggers completion on threshold.
+- [ ] **Tab Swipe Left/Right Gesture**:
+  - Swiping horizontally across container switches active tab (`today` $\rightarrow$ `insights` $\rightarrow$ `manager` $\rightarrow$ `settings`).
+  - Swiping directly on a habit card performs card-level completion/sheet action without switching tabs.
+- [ ] **Native Back Stack Hierarchy**:
+  - Back event with modal open closes modal.
+  - Back event on secondary tab switches to Today tab.
+  - Back event on root Today tab triggers exit toast; second back within 2s confirms exit.
+- [ ] **Form Real-time Interactive Preview**:
+  - Updating name, icon, color, or target immediately reflects in modal preview card.
 
 ### 5. Bilingual Localization Parity (`tests/habit-tracker-i18n.test.js`)
 
-- [ ] **Zero Missing Keys (Issue #428)**:
-  - Automated dictionary audit verifies all UI keys (`settings_tab`, `theme_select`, `cloud_backup_title`, `export_json_btn`, `import_json_btn`, `pwa_version`, `check_updates_btn`, `purge_cache_btn`) exist in both `vi` and `en`.
-- [ ] **Dynamic Tab Label Translation**:
-  - Switching language dynamically re-renders bottom navigation dock labels.
+- [ ] **Zero Missing Keys Audit**:
+  - Automated dictionary audit verifies all UI keys exist across both `vi` and `en`.
 
 ### 6. Playwright E2E Multi-Device Verification (`tests/e2e/habit-tracker-devices.spec.js`)
 
 - [ ] Multi-device iPhone 14 & Pixel 7 touch interaction runs.
-- [ ] Habit creation, reordering, check-in, undo toast flow, heatmap navigation, and JSON export.
-- [ ] Standalone compaction build verification (`dist/index.html`).
+- [ ] Tab swipe switching, timer delta resume, multi-routine check-in, back navigation, and JSON export.
