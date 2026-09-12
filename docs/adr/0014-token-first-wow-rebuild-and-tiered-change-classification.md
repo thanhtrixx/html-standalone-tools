@@ -30,11 +30,11 @@ The new WoW document defines ONLY the workflow skeleton and decision points. All
 
 Every change is automatically classified into one of three tiers based on file paths and commit prefix:
 
-| Tier | Scope | Ceremony | Token Budget |
-|------|-------|----------|-------------|
-| **Tier 0 — Zero-Ceremony** | Docs-only (`*.md`, `docs/**`, `AGENTS.md`, `.agents/**`) | Branch → Commit → PR → CI → Merge | ~2k tokens |
-| **Tier 1 — Scoped Lightweight** | Single-tool `fix:`, `refactor:`, `perf:`, `test:`, `style:` | Branch → Scoped Tests → PR → CI Gate → Merge | ~15-25k tokens |
-| **Tier 2 — Full Ceremony** | Multi-tool features, `feat:` on stable tools, shared infra, CI workflows | Branch → Blind Tests → Dual Review → PR → CI Gate → Merge → AC Verify | ~50-80k tokens |
+| Tier                            | Scope                                                                    | Ceremony                                                              | Token Budget   |
+| ------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------- | -------------- |
+| **Tier 0 — Zero-Ceremony**      | Docs-only (`*.md`, `docs/**`, `AGENTS.md`, `.agents/**`)                 | Branch → Commit → PR → CI → Merge                                     | ~2k tokens     |
+| **Tier 1 — Scoped Lightweight** | Single-tool `fix:`, `refactor:`, `perf:`, `test:`, `style:`              | Branch → Scoped Tests → PR → CI Gate → Merge                          | ~15-25k tokens |
+| **Tier 2 — Full Ceremony**      | Multi-tool features, `feat:` on stable tools, shared infra, CI workflows | Branch → Blind Tests → Dual Review → PR → CI Gate → Merge → AC Verify | ~50-80k tokens |
 
 Classification is automatic (path-based rules). Agents may escalate tier but never downgrade.
 
@@ -48,6 +48,7 @@ The tool's lifecycle phase ([ADR-0013](./0013-dual-phase-tool-lifecycle-and-scop
 ### 4. E2E Error Aggregation Script
 
 A standalone `scripts/e2e-summary.js` script wraps Playwright execution:
+
 - Runs Playwright with JSON reporter
 - Outputs compact 1-line summary: `✅ 144/144 passed` or `❌ 3 failed: [details]`
 - Agents read ~100 tokens instead of ~30-50k tokens of raw Playwright output

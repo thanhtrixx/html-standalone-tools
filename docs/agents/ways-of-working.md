@@ -23,6 +23,7 @@ Every change is automatically classified by file paths and commit prefix. Agents
 **Flow**: `Branch → Scoped Tests → PR → CI Gate → Squash Merge`
 
 **Rules**:
+
 - Orchestrator edits inline (no subagents for implementation)
 - Run scoped verification: `npm run test:<tool>` (inner loop)
 - Phase-aware E2E: Required for `Hardened Stable` tools (`npm run test:e2e:<tool>`), optional for `Active Feature Development` tools
@@ -36,6 +37,7 @@ Every change is automatically classified by file paths and commit prefix. Agents
 **Flow**: `Branch → Blind Tests → Implementation → Scoped Tests → Dual Review → PR → CI Gate → Squash Merge → AC Verify`
 
 **Rules**:
+
 - **Phase 1**: Grill requirements ([`grill-wow` skill](../../.agents/skills/grill-wow/SKILL.md)), update domain docs (`CONTEXT.md`, ADRs), decompose into vertical slices, publish GitHub Issues
 - **Phase 2**: Spawn Adversarial Test Hunter subagent ([ADR-0010](../adr/0010-subagent-quality-guardrails-and-two-speed-tdd.md)) for blind seam tests. Inner loop: `npm run test:<tool>`. Outer gate: `npm run verify`
 - **Phase 3**: Spawn dual-axis review subagents (Standards & 5 Invariants + Spec Conformance). PR body includes AC-to-Test Traceability Matrix
@@ -47,10 +49,10 @@ Every change is automatically classified by file paths and commit prefix. Agents
 
 Tool lifecycle phase modulates default tier and verification depth:
 
-| Tool Phase | `feat:` Default Tier | `fix:/refactor:` Default Tier | E2E Requirement |
-|---|---|---|---|
-| `Active Feature Development` | Tier 1 (scoped) | Tier 1 | Optional |
-| `Hardened Stable` | Tier 2 (full ceremony) | Tier 1 | Mandatory (tool-scoped) |
+| Tool Phase                   | `feat:` Default Tier   | `fix:/refactor:` Default Tier | E2E Requirement         |
+| ---------------------------- | ---------------------- | ----------------------------- | ----------------------- |
+| `Active Feature Development` | Tier 1 (scoped)        | Tier 1                        | Optional                |
+| `Hardened Stable`            | Tier 2 (full ceremony) | Tier 1                        | Mandatory (tool-scoped) |
 
 Phase transitions follow the Graduation DoD in [ADR-0013](../adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md). Transition PRs are classified as Tier 1.
 
@@ -78,6 +80,7 @@ The 5 repository invariants are defined in [ADR-0010](../adr/0010-subagent-quali
 5. **Zero Regression** — Clean pass across all test suites
 
 **Non-negotiable process rules**:
+
 - PR-per-issue required before closure
 - Squash & Merge only: `gh pr merge --squash --delete-branch`
 - CI gate (`pr-verify.yml`) must be 100% green before merge
