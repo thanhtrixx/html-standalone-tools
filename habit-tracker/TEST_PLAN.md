@@ -44,47 +44,48 @@ tests/
 - [ ] **Routine & Daily Overall Progress Rings**:
   - Aggregates progress correctly across active scheduled habits.
 
-### 2. Storage & Silent Migration (`tests/habit-tracker-storage-persistence.test.js`)
+### 2. Storage & Data Portability (`tests/habit-tracker-storage-persistence.test.js`)
 
 - [ ] **IndexedDB CRUD**:
   - Creates, reads, updates, and deletes habits, logs, routines, and settings.
-- [ ] **Silent Migration**:
-  - Upgrades legacy schema payloads to v1.0 without data loss.
-- [ ] **Data Portability**:
-  - Generates valid JSON export containing all habits, logs, and settings.
-  - Imports JSON data safely with validation schema and duplicate detection.
+- [ ] **Data Export & Import Seams (Issue #426)**:
+  - Invokes `exportToJson()` without throwing `TypeError` and produces valid schema payload.
+  - Imports JSON data in `merge` and `replace` modes via `store.importState()` without crashing.
+- [ ] **Habit Reordering Persistence (Issue #427)**:
+  - Swapping habit positions with `▲`/`▼` mutates order array and persists to database.
 
-### 3. Cloud Sync & Backup (`tests/habit-tracker-cloud-sync.test.js`)
+### 3. Form Handling & State Stability (`tests/habit-tracker-ui-components.test.js`)
 
-- [ ] Serializes state to encrypted payload.
-- [ ] Validates GitHub Gist and Google Drive backup structures.
+- [ ] **Form Event Interception (Issue #425)**:
+  - Submitting `#habit-edit-form` calls `e.preventDefault()`, persists habit, and closes modal without page reload.
+  - Submitting `#habit-note-form` calls `e.preventDefault()`, saves reflection note, and updates history without reload.
+- [ ] **Single Modal Overlay & A11y (Issue #429)**:
+  - Validates that opening modal or bottom sheet creates exactly one backdrop overlay in DOM with `role="dialog"`.
+  - Clicking outside closes modal cleanly.
+- [ ] **Light Mode Contrast (Issue #429)**:
+  - Validates responsive dark/light class assignments on cards, text, and inputs.
 
-### 4. UI Components & Gestures (`tests/habit-tracker-ui-components.test.js`)
+### 4. Interactive UX, Gestures & Motion (`tests/habit-tracker-ui-components.test.js` & E2E)
 
-- [ ] **Today View**:
-  - Renders 7-day date slider and selects active date.
-  - Renders routine sections (Morning, Afternoon, Evening, Anytime) with accurate progress counts.
-  - Triggers swipe-right completion event and emits celebratory visual effects.
-- [ ] **Insights & Heatmap View**:
-  - Generates 52-week calendar heatmap grid with accurate color density.
-  - Displays Best Streak and 30-day Consistency Score badges.
-- [ ] **Habit Manager View**:
-  - Opens Add/Edit modal, validates required fields, updates state.
-- [ ] **Deep-Dive Bottom Sheet**:
-  - Opens bottom sheet on habit click, displays 365-day mini heatmap and check-in notes.
+- [ ] **Preset Emoji Picker (Issue #430)**:
+  - Clicking emoji preset updates habit icon input and visual preview.
+- [ ] **Floating Undo Toast (Issue #430)**:
+  - Completing or incrementing a habit displays floating toast with "Undo" action for 4s.
+  - Clicking Undo reverses log value and updates progress rings immediately.
+- [ ] **Interactive 52-Week Heatmap Date Navigation (Issue #430)**:
+  - Clicking past date cell switches active date and navigates to Today tab with active date highlighted.
+- [ ] **Touch Swipe-to-Complete**:
+  - Swipe gesture applies real-time resistance transform and triggers completion on threshold.
 
-### 5. PWA Lifecycle & Reminders (`tests/habit-tracker-pwa-lifecycle.test.js`)
+### 5. Bilingual Localization Parity (`tests/habit-tracker-i18n.test.js`)
 
-- [ ] Service worker registers and caches core assets (`index.html`, `manifest.webmanifest`, `icon.svg`).
-- [ ] Local notification scheduler computes next trigger times for habit reminders.
+- [ ] **Zero Missing Keys (Issue #428)**:
+  - Automated dictionary audit verifies all UI keys (`settings_tab`, `theme_select`, `cloud_backup_title`, `export_json_btn`, `import_json_btn`, `pwa_version`, `check_updates_btn`, `purge_cache_btn`) exist in both `vi` and `en`.
+- [ ] **Dynamic Tab Label Translation**:
+  - Switching language dynamically re-renders bottom navigation dock labels.
 
-### 6. Bilingual Parity (`tests/habit-tracker-i18n.test.js`)
+### 6. Playwright E2E Multi-Device Verification (`tests/e2e/habit-tracker-devices.spec.js`)
 
-- [ ] 100% Vietnamese (`vi`) and English (`en`) dictionary key equivalence.
-- [ ] Number and date formatting conforms to locale conventions.
-
-### 7. Playwright E2E Multi-Device (`tests/e2e/habit-tracker-devices.spec.js`)
-
-- [ ] Mobile iPhone & Android touch swipe habit completion flow.
-- [ ] Habit creation, routine assignment, and 100% daily victory confetti check.
-- [ ] Heatmap inspection and note logging flow.
+- [ ] Multi-device iPhone 14 & Pixel 7 touch interaction runs.
+- [ ] Habit creation, reordering, check-in, undo toast flow, heatmap navigation, and JSON export.
+- [ ] Standalone compaction build verification (`dist/index.html`).

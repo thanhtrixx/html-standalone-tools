@@ -1,9 +1,10 @@
-# Atomic Habit & Routine Tracker (v1.0.0)
+# Atomic Habit & Routine Tracker (v1.1.0)
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for atomic habit building, daily routine clustering (Morning, Afternoon, Evening, Anytime), dual-metric consistency scoring (active streak + 30-day/90-day consistency rate), flexible schedules, and private, local-first offline tracking with optional encrypted cloud backup.
 
 For Vietnamese domain vocabulary, copywriting standards, and bilingual translation dictionary, refer to [`I18N.md`](./I18N.md).
 For visual design tokens, gesture physics, micro-interactions, and dark/light themes, refer to [`DESIGN.md`](./DESIGN.md).
+For architectural decision history and UI/UX evolution, refer to [`docs/adr/0001-habit-tracker-architecture-and-data-model.md`](./docs/adr/0001-habit-tracker-architecture-and-data-model.md) and [`docs/adr/0002-impeccable-ui-ux-architecture-and-defect-remediation.md`](./docs/adr/0002-impeccable-ui-ux-architecture-and-defect-remediation.md).
 
 ---
 
@@ -63,13 +64,15 @@ For visual design tokens, gesture physics, micro-interactions, and dark/light th
 
 ---
 
-### 4. User Experience & View Hierarchy
+### 4. User Experience & Impeccable Ergonomics
 
 - **Today View**: Ambient daily dashboard featuring an interactive 7-day date slider, overall daily circular progress ring, time-of-day routine sections (Morning, Afternoon, Evening, Anytime), and fluid swipe-to-complete habit cards with haptic micro-feedback.
   _Avoid_: Main screen, task list, home feed.
-- **Insights & Heatmap View**: Comprehensive analytics tab with GitHub-style 52-week calendar contribution heatmap, all-time best streaks, completion rates by day of week, and routine adherence breakdown.
+- **Insights & Heatmap View**: Comprehensive analytics tab with interactive 52-week calendar contribution heatmap, all-time best streaks, completion rates by day of week, and routine adherence breakdown.
   _Avoid_: Stats tab, report screen, chart view.
-- **Habit Manager View**: Catalog view to add, edit, reorder, color-code, set reminders, archive, and delete habits.
+- **Interactive Heatmap Date Navigation**: Tapping any day cell on the 52-week heatmap immediately navigates to that date in the Today view with an active pulse highlight.
+- **Floating Undo Pill Toast**: A non-intrusive floating bar appearing above the bottom dock for 4 seconds after checking or incrementing a habit, providing 1-tap accidental action reversal.
+- **Habit Manager View**: Catalog view to add, edit, reorder (▲/▼), color-code, set reminders, archive, and delete habits with confirmation.
   _Avoid_: Settings list, habit admin, config tab.
 - **Habit Deep-Dive Sheet**: Expandable bottom sheet displaying 365-day mini heatmap for a single habit, historical check-in logs with per-day journaling notes, milestone badges, and quick configuration.
   _Avoid_: Detail popup, edit dialog, habit modal.
