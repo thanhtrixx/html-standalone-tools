@@ -249,20 +249,70 @@ Autonomous coding agent productivity is constrained by context window limits and
 
 ---
 
+## 🚦 Dual-Phase Tool Lifecycle & Scoped Quality Governance ([ADR-0013](../adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+
+Each standalone tool in this repository operates in one of two distinct lifecycle phases:
+
+```text
+┌────────────────────────────────────────────────────────┐
+│             Active Feature Development                 │
+│  • Primary Focus: Fast Feature Delivery (feat: ...)    │
+│  • Work Backlog: ITEMS_TO_IMPLEMENT.md (P0 / P1 items) │
+│  • Verification: Fast Scoped Inner-Loop (test:<tool>)  │
+└──────────────────────────┬─────────────────────────────┘
+                           │  Graduation DoD Passed
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│                   Hardened Stable                      │
+│  • Primary Focus: Quality, Resilience & Zero Regression│
+│  • Permitted: fix:, refactor:, perf:, a11y, silent mig │
+│  • Feature Changes: Require RFC / spec alignment       │
+│  • Verification: Scoped tool checks + Invariant audit  │
+└────────────────────────────────────────────────────────┘
+```
+
+### 1. Phase Rules & Engineering Focus
+
+- **`Active Feature Development` Mode**:
+  - **Focus**: Shipping new user-facing capabilities, calculation models, and views from `<tool>/ITEMS_TO_IMPLEMENT.md`.
+  - **Workflow**: Conventional `feat(<tool>): ...` commits, rapid iterative domain modeling in `CONTEXT.md`, and authoring baseline test suites.
+- **`Hardened Stable` Mode**:
+  - **Focus**: Rock-solid reliability, preserving existing behavior, performance optimization, and accessibility audits (WCAG AA).
+  - **Workflow**: Bug fixes (`fix(<tool>): ...`), internal code refactoring (`refactor(<tool>): ...`), and performance improvements (`perf(<tool>): ...`).
+  - **Feature Gate**: New feature requests for a stable tool must resolve domain specifications and maintain backwards compatibility before implementation.
+
+### 2. Tool-Scoped Quality Verification
+
+- **Scoped Checks**: When working on an issue or PR targeting `<tool>`, test execution and subagent reviews must focus on the test suites related to the change (`npm run test:<tool>` / `bun run test:<tool>`).
+- **Shared Infrastructure**: Full repository verification (`npm run verify`) is reserved for shared build scripts, portal updates, CI workflows, and release gate sign-offs.
+
+### 3. Formal Graduation Definition of Done (DoD)
+
+To graduate a tool from `Active Feature Development` to `Hardened Stable`, the following 5-point checklist must be completed:
+
+1. **Backlog Completion**: All P0/P1 items in `<tool>/ITEMS_TO_IMPLEMENT.md` marked complete (`[x]`).
+2. **Comprehensive Test Suite**: 100% test coverage across math, silent storage migration, DOM UI, and bilingual dictionaries (`npm run test:<tool>`).
+3. **Multi-Device E2E Verification**: Passing Playwright multi-viewport checks on desktop and mobile viewports.
+4. **Zero Open Defects**: Zero unresolved functional bugs or regressions.
+5. **Graduation Sign-Off**: PR updating tool status in `CONTEXT-MAP.md`, `portal/index.html`, and `<tool>/CONTEXT.md`.
+
+---
+
 ## 💎 Standalone Tool Definition of Done (DoD)
 
-Every standalone tool added to or maintained in this repository must satisfy the following 10-point checklist before completion:
+Every standalone tool added to or maintained in this repository must satisfy the following 11-point checklist before completion:
 
 1. **Directory Isolation**: Dedicated tool directory containing human-readable source `index.html` and compacted deliverable `dist/index.html`.
 2. **Domain Glossary (`CONTEXT.md`)**: Comprehensive bilingual dictionary defining ubiquitous terms, avoided synonyms, and calculation rules.
-3. **Context Map Registration**: Registered in root [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
+3. **Context Map Registration**: Registered in root [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md) with active lifecycle phase.
 4. **Architectural Records (`docs/adr/`)**: Structural, mathematical, and UI/UX trade-offs documented under `<tool-name>/docs/adr/`.
 5. **Specification & Test Plan**: Requirements in `ITEMS_TO_IMPLEMENT.md` and QA verification plan in `TEST_PLAN.md`.
 6. **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary key parity with locale-aware formatters.
 7. **Test Suite Integration**: Pure math unit tests, UI/DOM tests, and i18n tests authored in `tests/` and registered into `scripts/run-tests.js`.
 8. **Subagent Quality Audit ([ADR-0010](../adr/0010-subagent-quality-guardrails-and-two-speed-tdd.md))**: Blind adversarial tests verified at public seams, and PR includes verified AC-to-Test Traceability Matrix.
 9. **Token Strategy & Efficiency Compliance ([ADR-0012](../adr/0012-optimal-token-strategy-and-subagent-economics.md))**: Two-tier delegation threshold respected, fan-in subagent digests ≤ 400 words, and scoped test gates observed.
-10. **CI/CD Build & Release Ready**: Passes unified verification (`bun run verify` / `npm run verify`) and release packaging (`bun run pack:release` / `npm run pack:release`).
+10. **Lifecycle & Quality Governance Compliance ([ADR-0013](../adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))**: Tool phase declared in metadata, scoped quality verification applied, and graduation checklist satisfied for stable tools.
+11. **CI/CD Build & Release Ready**: Passes unified verification (`bun run verify` / `npm run verify`) and release packaging (`bun run pack:release` / `npm run pack:release`).
 
 ---
 
