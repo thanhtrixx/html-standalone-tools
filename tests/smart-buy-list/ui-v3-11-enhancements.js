@@ -690,14 +690,26 @@ async function runTests() {
       "index.html pwaVersionBadge displays v3.11.0 or higher"
     );
 
-    // Verify ADR-0020
+    // Verify ADR-0020 (Consolidated into ADR-0001 or archived in legacy-adrs)
     const adrPath = path.join(
       rootDir,
       "docs",
       "adr",
+      "0001-persistence-cloud-sync-and-deterministic-3way-merge.md"
+    );
+    const legacyAdrPath = path.join(
+      rootDir,
+      "..",
+      "docs",
+      "archive",
+      "legacy-adrs",
+      "smart-buy-list-price-tracker",
       "0020-quick-add-store-picker-available-store-filter-and-github-ratelimit-resiliency.md"
     );
-    assert(fs.existsSync(adrPath), "ADR-0020 markdown file exists");
+    assert(
+      fs.existsSync(adrPath) || fs.existsSync(legacyAdrPath),
+      "ADR-0020 or consolidated ADR-0001 markdown file exists"
+    );
   }
 
   // ---------------------------------------------------------------------------
