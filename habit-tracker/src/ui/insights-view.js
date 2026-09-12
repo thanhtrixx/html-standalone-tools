@@ -105,7 +105,7 @@
         const name = dayNames[stat.dayOfWeek] || dayNames[idx];
         return `
           <div class="flex-1 flex flex-col items-center gap-2">
-            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300">${rate}%</span>
+            <span class="text-[11px] font-bold tabular-nums font-mono text-slate-700 dark:text-slate-300">${rate}%</span>
             <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-24 flex items-end p-0.5">
               <div class="w-full bg-emerald-500 rounded-full transition-all duration-500" style="height: ${rate}%;"></div>
             </div>
@@ -159,7 +159,7 @@
 
             <div class="relative flex items-center justify-center">
               ${ringHtml}
-              <span class="absolute text-[11px] font-bold text-slate-900 dark:text-white">${stat.rate}%</span>
+              <span class="absolute text-[11px] font-bold tabular-nums font-mono text-slate-900 dark:text-white">${stat.rate}%</span>
             </div>
           </div>
         `;
@@ -298,26 +298,26 @@
         <div class="grid grid-cols-2 gap-3 mb-6">
           <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("best_streak", {}, lang)}</span>
-            <span class="text-3xl font-black text-amber-500 dark:text-amber-400 mt-1 block">🏆 ${maxBestStreak}</span>
-            <span class="text-[11px] text-slate-500 mt-1 block">${i18n.t("streak_days_count", { count: maxBestStreak }, lang)}</span>
+            <span class="text-3xl font-black tabular-nums font-mono text-amber-500 dark:text-amber-400 mt-1 block">🏆 ${maxBestStreak}</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">${i18n.t("streak_days_count", { count: maxBestStreak }, lang)}</span>
           </div>
 
           <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("consistency_score", {}, lang)}</span>
-            <span class="text-3xl font-black text-emerald-500 dark:text-emerald-400 mt-1 block">${overallStreak.consistencyScore30d}%</span>
-            <span class="text-[11px] text-slate-500 mt-1 block">90d: ${overallStreak.consistencyScore90d}%</span>
+            <span class="text-3xl font-black tabular-nums font-mono text-emerald-500 dark:text-emerald-400 mt-1 block">${overallStreak.consistencyScore30d}%</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">90d: ${overallStreak.consistencyScore90d}%</span>
           </div>
 
           <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("total_completions", {}, lang)}</span>
-            <span class="text-3xl font-black text-cyan-600 dark:text-cyan-400 mt-1 block">${totalAllCompletions}</span>
-            <span class="text-[11px] text-slate-500 mt-1 block">${i18n.t("done", {}, lang)}</span>
+            <span class="text-3xl font-black tabular-nums font-mono text-cyan-600 dark:text-cyan-400 mt-1 block">${totalAllCompletions}</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">${i18n.t("done", {}, lang)}</span>
           </div>
 
           <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("perfect_days", {}, lang)}</span>
-            <span class="text-3xl font-black text-violet-600 dark:text-violet-400 mt-1 block">🌟 ${perfectDaysCount}</span>
-            <span class="text-[11px] text-slate-500 mt-1 block">100% ${i18n.t("daily_progress", {}, lang)}</span>
+            <span class="text-3xl font-black tabular-nums font-mono text-violet-600 dark:text-violet-400 mt-1 block">🌟 ${perfectDaysCount}</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">100% ${i18n.t("daily_progress", {}, lang)}</span>
           </div>
         </div>
 

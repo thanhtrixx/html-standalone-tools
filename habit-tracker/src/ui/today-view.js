@@ -148,7 +148,7 @@
             -
           </button>
           <div class="text-right min-w-[70px]">
-            <span class="text-sm font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${currentVal} / ${targetVal}</span>
+            <span class="text-sm font-bold tabular-nums font-mono ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${currentVal} / ${targetVal}</span>
             <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${unit}</span>
           </div>
           <button
@@ -171,7 +171,7 @@
       controlHtml = `
         <div class="flex items-center gap-2">
           <div class="text-right">
-            <span class="text-sm font-mono font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
+            <span class="text-sm font-mono tabular-nums font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
             <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${targetDuration}</span>
           </div>
           <button
@@ -292,7 +292,7 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700/50">
+            <span class="text-xs font-semibold tabular-nums font-mono text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-700/50">
               ${routineProg.completed}/${routineProg.total} ${i18n.t("done", {}, lang)}
             </span>
           </div>
@@ -383,7 +383,7 @@
 
             <div class="relative flex items-center justify-center">
               ${progressRingHtml}
-              <span class="absolute text-sm font-extrabold text-slate-900 dark:text-white">${dailyProgress.percentage}%</span>
+              <span class="absolute text-sm font-extrabold tabular-nums font-mono text-slate-900 dark:text-white">${dailyProgress.percentage}%</span>
             </div>
           </div>
 
@@ -394,10 +394,10 @@
         </header>
 
         <!-- Routine Clusters -->
-        <main class="routine-list">
+        <div class="routine-list">
           ${routineSectionsHtml}
           ${emptyStateHtml}
-        </main>
+        </div>
       </div>
     `;
 

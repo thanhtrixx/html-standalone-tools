@@ -336,7 +336,15 @@ function createHabitTrackerSandbox(options = {}) {
 
   function getOrCreateElement(id) {
     if (!elements[id]) {
-      const el = new MockDOMElement(id);
+      const tagName =
+        id === "main-content"
+          ? "main"
+          : id.endsWith("-form")
+            ? "form"
+            : id.endsWith("-btn")
+              ? "button"
+              : "div";
+      const el = new MockDOMElement(id, tagName);
       el.ownerDocument = doc;
       if (defaultHiddenElements.has(id)) {
         el.classList.add("hidden");
