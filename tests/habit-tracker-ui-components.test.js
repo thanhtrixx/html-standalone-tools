@@ -32,6 +32,10 @@
  * - [Issue #429 AC-1] Dual-theme styling via Tailwind dark: variants (Body, Main Container, Top Bar, Nav Dock, View Cards)
  * - [Issue #429 AC-2] Input fields, cards, badges, and text retain clear contrast in both light and dark modes
  * - [Issue #429 AC-3] Modal overlays consolidated into single clean backdrop with role="dialog" and aria-modal="true"
+ * - [Issue #432 AC-1] Document outline passes W3C heading continuity without skipped levels
+ * - [Issue #432 AC-2] Only 1 <main> landmark exists in the DOM (no nested <main class="routine-list"> inside <main id="main-content">)
+ * - [Issue #432 AC-3] All numeric counters and timer tickers render in tabular monospace alignment (tabular-nums and font-mono)
+ * - [Issue #432 AC-4] Text elements across both dark and light modes satisfy WCAG AA contrast ratio
  */
 
 const {
@@ -2085,6 +2089,576 @@ async function runUITests() {
   assert(
     editModalOverlay.classList.contains("hidden"),
     "[Issue #429 AC-3] Modal overlay safely closes on backdrop dismissal"
+  );
+
+  // ==========================================
+  // [Issue #432 AC-1] Document Outline & W3C Heading Continuity
+  // ==========================================
+  console.log(
+    "\n--- [Issue #432 AC-1] Document Outline & W3C Heading Continuity ---"
+  );
+
+  function extractHeadings(htmlSnippet) {
+    const headingRegex = /<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/gi;
+    const headings = [];
+    let match;
+    while ((match = headingRegex.exec(htmlSnippet)) !== null) {
+      headings.push({
+        tag: `h${match[1]}`,
+        level: parseInt(match[1], 10),
+        attrs: match[2],
+        text: match[3].replace(/<[^>]+>/g, "").trim(),
+        raw: match[0],
+      });
+    }
+    return headings;
+  }
+
+  function findSkippedHeadingLevels(headings) {
+    const violations = [];
+    if (!headings || headings.length <= 1) return violations;
+
+    for (let i = 1; i < headings.length; i++) {
+      const prev = headings[i - 1];
+      const curr = headings[i];
+      // Heading level cannot jump by more than +1 (e.g. h1 -> h3 is invalid; h2 -> h4 is invalid)
+      // Decreasing levels (e.g. h4 -> h3, h3 -> h2) represent valid section closures
+      if (curr.level > prev.level + 1) {
+        violations.push({
+          index: i,
+          prev: prev.tag,
+          prevText: prev.text,
+          curr: curr.tag,
+          currText: curr.text,
+          message: `Heading level jumped by ${curr.level - prev.level} from <${prev.tag}> ("${prev.text}") to <${curr.tag}> ("${curr.text}") without intermediate level`,
+        });
+      }
+    }
+    return violations;
+  }
+
+  // 1. Top bar brand uses <h1>
+  const staticHeadings432 = extractHeadings(htmlContent);
+  const h1Headings432 = staticHeadings432.filter((h) => h.level === 1);
+  assertEqual(
+    h1Headings432.length,
+    1,
+    "[Issue #432 AC-1] habit-tracker/index.html top bar brand uses exactly one <h1> heading"
+  );
+  assert(
+    h1Headings432[0] && h1Headings432[0].text.includes("Atomic Habits"),
+    "[Issue #432 AC-1] <h1> contains the application brand title 'Atomic Habits'"
+  );
+
+  // 2. Tab views use <h2> for top section titles
+  const todayViewHtml432 = renderTodayDashboard(store, null, "vi");
+  const todayHeadings432 = extractHeadings(todayViewHtml432);
+  assert(
+    todayHeadings432.some((h) => h.level === 2),
+    "[Issue #432 AC-1] Today view contains <h2> for primary tab title"
+  );
+
+  const insightsViewHeadingHtml432 = renderInsightsView(store, null, "vi");
+  const insightsHeadings432 = extractHeadings(insightsViewHeadingHtml432);
+  assert(
+    insightsHeadings432.some((h) => h.level === 2),
+    "[Issue #432 AC-1] Insights view contains <h2> for primary tab title"
+  );
+
+  const managerViewHeadingHtml432 = renderManagerView(store, null, "vi");
+  const managerHeadings432 = extractHeadings(managerViewHeadingHtml432);
+  assert(
+    managerHeadings432.some((h) => h.level === 2),
+    "[Issue #432 AC-1] Manager view contains <h2> for primary tab title"
+  );
+
+  // 3. Routine clusters and modal subtitles use <h3>
+  const morningSectionHtml432 = renderRoutineSection(
+    "morning",
+    store,
+    selectedDate,
+    "vi"
+  );
+  const morningHeadings432 = extractHeadings(morningSectionHtml432);
+  assert(
+    morningHeadings432.some((h) => h.level === 3),
+    "[Issue #432 AC-1] Routine cluster section uses <h3> for routine header"
+  );
+
+  const modalEditHtml432 = renderHabitEditModal(habitWater, "vi");
+  const modalHeadings432 = extractHeadings(modalEditHtml432);
+  assert(
+    modalHeadings432.some(
+      (h) => h.level === 3 && h.raw.includes('id="habit-modal-title"')
+    ),
+    '[Issue #432 AC-1] Habit Edit Modal uses <h3 id="habit-modal-title"> for modal subtitle'
+  );
+
+  const detailSheetHeadingHtml432 = renderDetailSheet(
+    habitWater,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+  const detailHeadings432 = extractHeadings(detailSheetHeadingHtml432);
+  assert(
+    detailHeadings432.some(
+      (h) => h.level === 3 && h.raw.includes('id="detail-sheet-title"')
+    ),
+    '[Issue #432 AC-1] Habit Detail Sheet uses <h3 id="detail-sheet-title"> for sheet subtitle'
+  );
+
+  // 4. Habit cards use <h4>
+  const habitCardHeadingHtml432 = renderHabitCard(
+    habitWater,
+    { value: 0, completed: false },
+    "vi"
+  );
+  const cardHeadings432 = extractHeadings(habitCardHeadingHtml432);
+  assert(
+    cardHeadings432.some((h) => h.level === 4 && h.text === habitWater.name),
+    "[Issue #432 AC-1] Habit card uses <h4> for habit title"
+  );
+
+  // 5. PWA update banner avoids skipped heading tags
+  const pwaBannerMatch432 = htmlContent.match(
+    /id="pwa-update-banner"[\s\S]*?<\/div>\s*<\/div>/i
+  );
+  if (pwaBannerMatch432) {
+    const pwaBannerHeadings = extractHeadings(pwaBannerMatch432[0]);
+    const bannerHasSkippedHeading = pwaBannerHeadings.some((h) => h.level > 3);
+    assert(
+      !bannerHasSkippedHeading,
+      "[Issue #432 AC-1] PWA update banner avoids skipped heading tags (no lone <h4> jumping directly under document root)"
+    );
+  }
+
+  // 6. Full Outline Continuity Verification in DOM Sandbox
+  const { sandbox: outlineSandbox } = createHabitTrackerSandbox();
+  outlineSandbox.requestAnimationFrame = (fn) => fn();
+  outlineSandbox.cancelAnimationFrame = () => {};
+  await outlineSandbox.HabitApp.init();
+
+  const tabsToTest432 = ["today", "insights", "manager", "settings"];
+  for (const tab of tabsToTest432) {
+    outlineSandbox.HabitApp.switchTab(tab);
+    const mainHtml =
+      outlineSandbox.document.getElementById("main-content").innerHTML;
+    const fullPageSnippet = `
+      <header><h1>Atomic Habits</h1></header>
+      <main id="main-content">${mainHtml}</main>
+    `;
+    const fullOutline = extractHeadings(fullPageSnippet);
+    const violations = findSkippedHeadingLevels(fullOutline);
+    assertEqual(
+      violations.length,
+      0,
+      `[Issue #432 AC-1] W3C heading continuity passes with zero skipped levels on '${tab}' tab`
+    );
+  }
+
+  // Edge case: Empty State in Today View
+  const emptyStore432 = new HabitStore({
+    storage: storageModule.createStorageAdapter({ forceFallback: true }),
+  });
+  await emptyStore432.init();
+  const emptyTodayHtml432 = renderTodayDashboard(emptyStore432, null, "vi");
+  const emptyTodaySnippet = `
+    <header><h1>Atomic Habits</h1></header>
+    <main id="main-content">${emptyTodayHtml432}</main>
+  `;
+  const emptyOutline432 = extractHeadings(emptyTodaySnippet);
+  const emptyViolations432 = findSkippedHeadingLevels(emptyOutline432);
+  assertEqual(
+    emptyViolations432.length,
+    0,
+    "[Issue #432 AC-1] Today view empty state preserves heading continuity (zero skipped levels)"
+  );
+
+  // ==========================================
+  // [Issue #432 AC-2] Single <main> Landmark Enforcement
+  // ==========================================
+  console.log("\n--- [Issue #432 AC-2] Single <main> Landmark Enforcement ---");
+
+  // 1. Static HTML landmark check
+  const mainTagMatches432 = htmlContent.match(/<main[\s>]/gi) || [];
+  assertEqual(
+    mainTagMatches432.length,
+    1,
+    "[Issue #432 AC-2] habit-tracker/index.html contains exactly 1 <main> element"
+  );
+  assert(
+    htmlContent.match(/<main[^>]*id="main-content"/i) !== null,
+    "[Issue #432 AC-2] The single document <main> element is #main-content"
+  );
+
+  // 2. Component renderers do not emit nested <main> elements
+  const todayRendered432 = renderTodayDashboard(store, null, "vi");
+  assert(
+    !todayRendered432.includes("<main") &&
+      !todayRendered432.includes("</main>"),
+    '[Issue #432 AC-2] renderTodayDashboard does not emit nested <main> element (no <main class="routine-list">)'
+  );
+  assert(
+    !renderInsightsView(store, null, "vi").includes("<main"),
+    "[Issue #432 AC-2] renderInsightsView does not emit <main> landmark"
+  );
+  assert(
+    !renderManagerView(store, null, "vi").includes("<main"),
+    "[Issue #432 AC-2] renderManagerView does not emit <main> landmark"
+  );
+  assert(
+    !renderHabitEditModal(null, "vi").includes("<main"),
+    "[Issue #432 AC-2] renderHabitEditModal does not emit <main> landmark"
+  );
+  assert(
+    !renderDetailSheet(habitWater, store, null, "vi", selectedDate).includes(
+      "<main"
+    ),
+    "[Issue #432 AC-2] renderDetailSheet does not emit <main> landmark"
+  );
+
+  // 3. Runtime Landmark DOM verification across all tab navigations
+  const { sandbox: landmarkSandbox } = createHabitTrackerSandbox();
+  landmarkSandbox.requestAnimationFrame = (fn) => fn();
+  landmarkSandbox.cancelAnimationFrame = () => {};
+  await landmarkSandbox.HabitApp.init();
+
+  for (const tab of tabsToTest432) {
+    landmarkSandbox.HabitApp.switchTab(tab);
+    const mainInner =
+      landmarkSandbox.document.getElementById("main-content").innerHTML;
+    assert(
+      !mainInner.includes("<main"),
+      `[Issue #432 AC-2] No nested <main> landmark rendered inside #main-content on '${tab}' tab`
+    );
+  }
+
+  // ==========================================
+  // [Issue #432 AC-3] Tabular Monospace Alignment on Counters & Timers
+  // ==========================================
+  console.log(
+    "\n--- [Issue #432 AC-3] Tabular Monospace Alignment on Counters & Timers ---"
+  );
+
+  // 1. Numeric Habit Card Stepper Counter
+  const numericCardHtml432 = renderHabitCard(
+    habitWater,
+    { value: 500, completed: false },
+    "vi"
+  );
+  const numericCounterMatch432 = numericCardHtml432.match(
+    /<span[^>]*class="([^"]*)"[^>]*>[\s\S]*?(?:500\s*\/\s*2[.,]500|500\s*\/\s*2500)[\s\S]*?<\/span>/i
+  );
+  assert(
+    numericCounterMatch432 !== null,
+    "[Issue #432 AC-3] Numeric habit card renders counter value span"
+  );
+  if (numericCounterMatch432) {
+    const counterClasses = numericCounterMatch432[1].split(/\s+/);
+    assert(
+      counterClasses.includes("tabular-nums"),
+      "[Issue #432 AC-3] Numeric habit counter includes 'tabular-nums' class to prevent layout shifts"
+    );
+    assert(
+      counterClasses.includes("font-mono"),
+      "[Issue #432 AC-3] Numeric habit counter includes 'font-mono' class for monospace alignment"
+    );
+  }
+
+  // 2. Timer Habit Card Duration Ticker
+  const timerCardHtml432 = renderHabitCard(
+    habitReading,
+    { value: 600, completed: false },
+    "vi"
+  );
+  const timerTickerMatch432 = timerCardHtml432.match(
+    /<span[^>]*class="([^"]*)"[^>]*>[\s\S]*?(?:\d+p\s*\d+g|\d+m\s*\d+s|\d+:\d+)[\s\S]*?<\/span>/i
+  );
+  assert(
+    timerTickerMatch432 !== null,
+    "[Issue #432 AC-3] Timer habit card renders duration ticker span"
+  );
+  if (timerTickerMatch432) {
+    const tickerClasses = timerTickerMatch432[1].split(/\s+/);
+    assert(
+      tickerClasses.includes("tabular-nums"),
+      "[Issue #432 AC-3] Timer ticker includes 'tabular-nums' class to prevent layout shifts during countdown"
+    );
+    assert(
+      tickerClasses.includes("font-mono"),
+      "[Issue #432 AC-3] Timer ticker includes 'font-mono' class for fixed-width glyph alignment"
+    );
+  }
+
+  // 3. Today View Ambient Header Daily Progress Ring Counter
+  const todayDashHtml432 = renderTodayDashboard(store, null, "vi");
+  const dailyProgressMatch432 = todayDashHtml432.match(
+    /<span[^>]*class="([^"]*)"[^>]*>\s*\d+%\s*<\/span>/i
+  );
+  assert(
+    dailyProgressMatch432 !== null,
+    "[Issue #432 AC-3] Today dashboard renders daily progress percentage span"
+  );
+  if (dailyProgressMatch432) {
+    const progressClasses = dailyProgressMatch432[1].split(/\s+/);
+    assert(
+      progressClasses.includes("tabular-nums") &&
+        progressClasses.includes("font-mono"),
+      "[Issue #432 AC-3] Daily progress percentage includes 'tabular-nums' and 'font-mono'"
+    );
+  }
+
+  // 4. Routine Section Progress Counter (e.g. 1/3 done)
+  const routineHeaderHtml432 = renderRoutineSection(
+    "morning",
+    store,
+    selectedDate,
+    "vi"
+  );
+  const routineCountMatch432 = routineHeaderHtml432.match(
+    /<span[^>]*class="([^"]*)"[^>]*>[^<]*\d+\/\d+[^<]*<\/span>/i
+  );
+  assert(
+    routineCountMatch432 !== null,
+    "[Issue #432 AC-3] Routine section renders completed/total counter badge"
+  );
+  if (routineCountMatch432) {
+    const routineCountClasses = routineCountMatch432[1].split(/\s+/);
+    assert(
+      routineCountClasses.includes("tabular-nums") &&
+        routineCountClasses.includes("font-mono"),
+      "[Issue #432 AC-3] Routine section progress badge includes 'tabular-nums' and 'font-mono'"
+    );
+  }
+
+  // 5. Top Bar Freeze Token Counter Badge in index.html
+  const freezeTokenBadgeMatch432 = htmlContent.match(
+    /<span[^>]*id="freeze-tokens-count"[^>]*class="([^"]*)"[^>]*>|<span[^>]*class="([^"]*)"[^>]*id="freeze-tokens-count"/i
+  );
+  const freezeTokenBtnMatch432 = htmlContent.match(
+    /<button[^>]*class="([^"]*)"[^>]*onclick="[^"]*settings[^"]*"[^>]*>[\s\S]*?freeze-tokens-count/i
+  );
+  const freezeHasTabular432 =
+    (freezeTokenBadgeMatch432 &&
+      ((
+        freezeTokenBadgeMatch432[1] ||
+        freezeTokenBadgeMatch432[2] ||
+        ""
+      ).includes("tabular-nums") ||
+        (
+          freezeTokenBadgeMatch432[1] ||
+          freezeTokenBadgeMatch432[2] ||
+          ""
+        ).includes("font-mono"))) ||
+    (freezeTokenBtnMatch432 &&
+      (freezeTokenBtnMatch432[1].includes("tabular-nums") ||
+        freezeTokenBtnMatch432[1].includes("font-mono")));
+  assert(
+    freezeHasTabular432,
+    "[Issue #432 AC-3] Freeze token counter badge in top bar includes 'tabular-nums' or 'font-mono'"
+  );
+
+  // 6. Insights View Stat Cards Numeric Metric Displays
+  const insightsHtml432 = renderInsightsView(store, null, "vi");
+  const statCardValues432 = [];
+  const statValueRegex432 =
+    /<span[^>]*class="([^"]*text-3xl[^"]*font-black[^"]*)"[^>]*>([\s\S]*?)<\/span>/gi;
+  let sMatch432;
+  while ((sMatch432 = statValueRegex432.exec(insightsHtml432)) !== null) {
+    statCardValues432.push({
+      classes: sMatch432[1],
+      text: sMatch432[2].trim(),
+    });
+  }
+  assertEqual(
+    statCardValues432.length,
+    4,
+    "[Issue #432 AC-3] Insights view renders 4 key metric stat card values (Best streak, Consistency %, Completions, Perfect days)"
+  );
+  for (let i = 0; i < statCardValues432.length; i++) {
+    const cls = statCardValues432[i].classes.split(/\s+/);
+    assert(
+      cls.includes("tabular-nums") && cls.includes("font-mono"),
+      `[Issue #432 AC-3] Stat card metric ${i + 1} ("${statCardValues432[i].text}") includes tabular-nums and font-mono`
+    );
+  }
+
+  // 7. Detail Sheet Metric Stats Grid Numbers
+  const detailSheetHtml432 = renderDetailSheet(
+    habitWater,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+  const detailStatValues432 = [];
+  const detailStatRegex432 =
+    /<span[^>]*class="([^"]*text-xl[^"]*)"[^>]*>([\s\S]*?)<\/span>/gi;
+  let dMatch432;
+  while ((dMatch432 = detailStatRegex432.exec(detailSheetHtml432)) !== null) {
+    detailStatValues432.push({
+      classes: dMatch432[1],
+      text: dMatch432[2].trim(),
+    });
+  }
+  assert(
+    detailStatValues432.length >= 3,
+    "[Issue #432 AC-3] Detail sheet renders 3 key habit stat values (current streak, best streak, consistency %)"
+  );
+  for (let i = 0; i < detailStatValues432.length; i++) {
+    const cls = detailStatValues432[i].classes.split(/\s+/);
+    assert(
+      cls.includes("tabular-nums") && cls.includes("font-mono"),
+      `[Issue #432 AC-3] Detail sheet stat value ${i + 1} ("${detailStatValues432[i].text}") includes tabular-nums and font-mono`
+    );
+  }
+
+  // 8. Weekday & Routine Adherence Charts Monospace Numbers
+  const weekdayChartMatch432 = insightsHtml432.match(
+    /<span[^>]*class="([^"]*text-\[11px\][^"]*)"[^>]*>\d+%<\/span>/i
+  );
+  assert(
+    weekdayChartMatch432 !== null,
+    "[Issue #432 AC-3] Weekday chart renders rate percentage labels"
+  );
+  if (weekdayChartMatch432) {
+    const wClasses = weekdayChartMatch432[1].split(/\s+/);
+    assert(
+      wClasses.includes("tabular-nums") && wClasses.includes("font-mono"),
+      "[Issue #432 AC-3] Weekday chart rate percentage includes 'tabular-nums' and 'font-mono'"
+    );
+  }
+
+  const routineAdherenceMatch432 = insightsHtml432.match(
+    /<span[^>]*class="([^"]*absolute[^"]*)"[^>]*>\d+%<\/span>/i
+  );
+  assert(
+    routineAdherenceMatch432 !== null,
+    "[Issue #432 AC-3] Routine adherence card renders percentage ring center value"
+  );
+  if (routineAdherenceMatch432) {
+    const rClasses = routineAdherenceMatch432[1].split(/\s+/);
+    assert(
+      rClasses.includes("tabular-nums") && rClasses.includes("font-mono"),
+      "[Issue #432 AC-3] Routine adherence percentage includes 'tabular-nums' and 'font-mono'"
+    );
+  }
+
+  // ==========================================
+  // [Issue #432 AC-4] WCAG AA Text Contrast & Light/Dark Theme Color Pairings
+  // ==========================================
+  console.log(
+    "\n--- [Issue #432 AC-4] WCAG AA Text Contrast & Light/Dark Theme Color Pairings ---"
+  );
+
+  function findUnpairedTextSlate500(htmlSnippet) {
+    const tagRegex =
+      /<([a-z0-9]+)[^>]*class="([^"]*text-slate-500[^"]*)"[^>]*>/gi;
+    const violations = [];
+    let match;
+    while ((match = tagRegex.exec(htmlSnippet)) !== null) {
+      const classAttr = match[2];
+      const tokens = classAttr.split(/\s+/);
+      const hasTextSlate500 = tokens.includes("text-slate-500");
+      const hasDarkTextPair = tokens.some(
+        (t) =>
+          t.startsWith("dark:text-slate-400") ||
+          t.startsWith("dark:text-slate-300") ||
+          t.startsWith("dark:text-slate-200") ||
+          t.startsWith("dark:text-slate-100") ||
+          t.startsWith("dark:text-white")
+      );
+      if (hasTextSlate500 && !hasDarkTextPair) {
+        violations.push({ tag: match[1], classAttr, raw: match[0] });
+      }
+    }
+    return violations;
+  }
+
+  // 1. Static habit-tracker/index.html Text Contrast
+  const indexContrastViolations432 = findUnpairedTextSlate500(htmlContent);
+  assertEqual(
+    indexContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] habit-tracker/index.html contains zero unpaired text-slate-500 classes (all paired with dark:text-...)"
+  );
+
+  // 2. Today View Text Contrast (Vietnamese & English)
+  const todayContrastViolations432 = findUnpairedTextSlate500(todayViewHtml432);
+  assertEqual(
+    todayContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] renderTodayDashboard contains zero unpaired text-slate-500 classes (vi)"
+  );
+  const todayEnHtml432 = renderTodayDashboard(store, null, "en");
+  const todayEnContrastViolations432 = findUnpairedTextSlate500(todayEnHtml432);
+  assertEqual(
+    todayEnContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] renderTodayDashboard contains zero unpaired text-slate-500 classes (en)"
+  );
+
+  // 3. Habit Card Text Contrast
+  const habitCardContrastViolations432 =
+    findUnpairedTextSlate500(numericCardHtml432);
+  assertEqual(
+    habitCardContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] renderHabitCard contains zero unpaired text-slate-500 classes"
+  );
+
+  // 4. Insights View Text Contrast
+  const insightsContrastViolations432 =
+    findUnpairedTextSlate500(insightsHtml432);
+  assertEqual(
+    insightsContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] renderInsightsView contains zero unpaired text-slate-500 classes (all stat labels properly paired)"
+  );
+
+  // 5. Manager View Text Contrast (Active + Archived sections)
+  const managerContrastViolations432 = findUnpairedTextSlate500(
+    managerViewHeadingHtml432
+  );
+  assertEqual(
+    managerContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] renderManagerView contains zero unpaired text-slate-500 classes"
+  );
+
+  // 6. Habit Edit Modal Text Contrast
+  const modalContrastViolations432 = findUnpairedTextSlate500(modalEditHtml432);
+  assertEqual(
+    modalContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] renderHabitEditModal contains zero unpaired text-slate-500 classes"
+  );
+
+  // 7. Detail Sheet Text Contrast
+  const detailContrastViolations432 =
+    findUnpairedTextSlate500(detailSheetHtml432);
+  assertEqual(
+    detailContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] renderDetailSheet contains zero unpaired text-slate-500 classes"
+  );
+
+  // 8. Settings Tab Text Contrast in Sandbox
+  const { sandbox: contrastSandbox } = createHabitTrackerSandbox();
+  contrastSandbox.requestAnimationFrame = (fn) => fn();
+  contrastSandbox.cancelAnimationFrame = () => {};
+  await contrastSandbox.HabitApp.init();
+  contrastSandbox.HabitApp.switchTab("settings");
+  const settingsHtml432 =
+    contrastSandbox.document.getElementById("main-content").innerHTML;
+  const settingsContrastViolations432 =
+    findUnpairedTextSlate500(settingsHtml432);
+  assertEqual(
+    settingsContrastViolations432.length,
+    0,
+    "[Issue #432 AC-4] Settings tab contains zero unpaired text-slate-500 classes"
   );
 }
 

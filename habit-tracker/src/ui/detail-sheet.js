@@ -168,15 +168,15 @@
         <div class="grid grid-cols-3 gap-2 my-4">
           <div class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 p-3 rounded-2xl text-center">
             <span class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 block">${i18n.t("current_streak", {}, lang)}</span>
-            <span class="text-xl font-black text-amber-500 dark:text-amber-400 mt-1 block">🔥 ${streakStats.currentStreak}</span>
+            <span class="text-xl font-black tabular-nums font-mono text-amber-500 dark:text-amber-400 mt-1 block">🔥 ${streakStats.currentStreak}</span>
           </div>
           <div class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 p-3 rounded-2xl text-center">
             <span class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 block">${i18n.t("best_streak", {}, lang)}</span>
-            <span class="text-xl font-black text-slate-900 dark:text-white mt-1 block">🏆 ${streakStats.bestStreak}</span>
+            <span class="text-xl font-black tabular-nums font-mono text-slate-900 dark:text-white mt-1 block">🏆 ${streakStats.bestStreak}</span>
           </div>
           <div class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 p-3 rounded-2xl text-center">
             <span class="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 block">${i18n.t("consistency_score", {}, lang)}</span>
-            <span class="text-xl font-black text-emerald-500 dark:text-emerald-400 mt-1 block">${streakStats.consistencyScore30d}%</span>
+            <span class="text-xl font-black tabular-nums font-mono text-emerald-500 dark:text-emerald-400 mt-1 block">${streakStats.consistencyScore30d}%</span>
           </div>
         </div>
 
