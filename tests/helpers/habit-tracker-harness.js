@@ -473,6 +473,15 @@ function createHabitTrackerSandbox(options = {}) {
 
   function getOrCreateElement(id) {
     if (!elements[id]) {
+      for (const el of Object.values(elements)) {
+        if (el.querySelector) {
+          const found = el.querySelector(`#${id}`);
+          if (found) {
+            elements[id] = found;
+            return found;
+          }
+        }
+      }
       const tagName =
         id === "main-content"
           ? "main"
@@ -483,11 +492,33 @@ function createHabitTrackerSandbox(options = {}) {
               : "div";
       const el = new MockDOMElement(id, tagName);
       el.ownerDocument = doc;
-      if (id === "delete-confirm-modal-overlay") {
+      if (
+        id === "delete-confirm-modal-overlay" ||
+        id === "reset-confirm-modal-overlay"
+      ) {
         el.setAttribute("role", "alertdialog");
         el.setAttribute("aria-modal", "true");
-        el.setAttribute("aria-labelledby", "delete-dialog-title");
-        el.setAttribute("aria-describedby", "delete-dialog-desc");
+        el.setAttribute(
+          "aria-labelledby",
+          id === "delete-confirm-modal-overlay"
+            ? "delete-dialog-title"
+            : "reset-dialog-title"
+        );
+        el.setAttribute(
+          "aria-describedby",
+          id === "delete-confirm-modal-overlay"
+            ? "delete-dialog-desc"
+            : "reset-dialog-desc"
+        );
+      }
+      if (id.startsWith("nav-tab-")) {
+        const tab = id.replace("nav-tab-", "");
+        el.setAttribute("data-tab", tab);
+        el.className = "nav-tab-btn";
+        const dot = new MockDOMElement(`nav-dot-${tab}`, "span");
+        dot.className = "nav-dot";
+        dot.ownerDocument = doc;
+        el.appendChild(dot);
       }
       if (defaultHiddenElements.has(id)) {
         el.classList.add("hidden");
@@ -507,10 +538,19 @@ function createHabitTrackerSandbox(options = {}) {
   const bodyElement = new MockDOMElement("body", "body");
 
   const doc = {
-    getElementById: (id) => getOrCreateElement(id),
+    getElementById: (id) => {
+      if (elements[id]) return elements[id];
+      for (const el of Object.values(elements)) {
+        if (el.querySelector) {
+          const found = el.querySelector(`#${id}`);
+          if (found) return found;
+        }
+      }
+      return getOrCreateElement(id);
+    },
     querySelector: (sel) => {
       if (sel.startsWith("#") && !sel.includes(" ") && !sel.includes("[")) {
-        return getOrCreateElement(sel.slice(1));
+        return doc.getElementById(sel.slice(1));
       }
       if (sel === "html") return docElement;
       if (sel === "body") return bodyElement;
@@ -562,6 +602,11 @@ function createHabitTrackerSandbox(options = {}) {
     documentElement: docElement,
     body: bodyElement,
   };
+
+  // Pre-initialize standard nav dock buttons
+  ["today", "insights", "manager", "settings"].forEach((tab) => {
+    getOrCreateElement(`nav-tab-${tab}`);
+  });
 
   const sandbox = {
     console,

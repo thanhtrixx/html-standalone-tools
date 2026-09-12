@@ -200,6 +200,42 @@
       delete_cancel_btn: "Cancel",
       jump_to_timer: "Active Timer",
 
+      // Data Vault & Clean Data
+      data_vault_title: "Data Hygiene & Vault Reset",
+      data_vault_desc:
+        "Manage storage, reset to starter habits, or purge all local data",
+      reset_defaults_btn: "Reset to Sample Habits",
+      reset_defaults_desc:
+        "Clear historical logs and restore the 3 starter habits",
+      factory_wipe_btn: "Complete Factory Wipe",
+      factory_wipe_desc:
+        "Permanently erase all habits, logs, and settings to empty state",
+      reset_confirm_title: "Reset to Sample Habits",
+      reset_confirm_desc:
+        "Are you sure you want to restore the 3 starter habits? All custom habits and history logs will be cleared.",
+      factory_wipe_confirm_title: "Complete Factory Wipe",
+      factory_wipe_confirm_desc:
+        "WARNING: This will permanently erase all habits, historical check-in logs, and settings. This action cannot be undone!",
+      toast_reset_defaults_success: "Starter habits restored successfully!",
+      toast_factory_wipe_success: "All application data wiped successfully!",
+      reset_confirm_btn: "Reset Data",
+      factory_wipe_confirm_btn: "Factory Wipe",
+
+      // Timer Enhancements
+      timer_running: "Running",
+      timer_paused: "Paused",
+      timer_reset: "Reset",
+      timer_pause: "Pause",
+      timer_resume: "Resume",
+      toast_timer_reset: "Timer reset to 0",
+      minutes_unit: "mins",
+
+      // Detail Sheet
+      edit_habit_shortcut: "Edit Habit",
+      archive_habit_shortcut: "Archive",
+      schedule_rule_label: "Schedule Rule",
+      today_progress_label: "Today Progress",
+
       // Days of week
       day_sun: "Sun",
       day_mon: "Mon",
@@ -421,6 +457,42 @@
       delete_confirm_btn: "Xóa",
       delete_cancel_btn: "Hủy",
       jump_to_timer: "Đang hẹn giờ",
+
+      // Data Vault & Clean Data
+      data_vault_title: "Dữ liệu & Khôi phục",
+      data_vault_desc:
+        "Quản lý dữ liệu, khôi phục thói quen mẫu hoặc xóa toàn bộ",
+      reset_defaults_btn: "Khôi phục thói quen mẫu",
+      reset_defaults_desc:
+        "Xóa toàn bộ nhật ký và đặt lại 3 thói quen mẫu ban đầu",
+      factory_wipe_btn: "Xóa sạch toàn bộ dữ liệu",
+      factory_wipe_desc:
+        "Xóa vĩnh viễn tất cả thói quen, nhật ký và cài đặt về trạng thái trống",
+      reset_confirm_title: "Khôi phục dữ liệu mẫu",
+      reset_confirm_desc:
+        "Bạn có chắc chắn muốn khôi phục 3 thói quen mẫu ban đầu? Toàn bộ thói quen tùy chỉnh và nhật ký sẽ bị xóa.",
+      factory_wipe_confirm_title: "Xác nhận xóa sạch toàn bộ dữ liệu",
+      factory_wipe_confirm_desc:
+        "CẢNH BÁO: Thao tác này sẽ xóa vĩnh viễn tất cả thói quen, lịch sử ghi chép và cài đặt. Bạn không thể hoàn tác thao tác này!",
+      toast_reset_defaults_success: "Đã khôi phục các thói quen mẫu!",
+      toast_factory_wipe_success: "Đã xóa sạch toàn bộ dữ liệu ứng dụng!",
+      reset_confirm_btn: "Khôi phục",
+      factory_wipe_confirm_btn: "Xóa sạch",
+
+      // Timer Enhancements
+      timer_running: "Đang chạy",
+      timer_paused: "Tạm dừng",
+      timer_reset: "Đặt lại",
+      timer_pause: "Tạm dừng",
+      timer_resume: "Tiếp tục",
+      toast_timer_reset: "Đã đặt lại thời gian về 0",
+      minutes_unit: "phút",
+
+      // Detail Sheet
+      edit_habit_shortcut: "Chỉnh sửa",
+      archive_habit_shortcut: "Lưu trữ",
+      schedule_rule_label: "Quy tắc lịch trình",
+      today_progress_label: "Tiến độ hôm nay",
 
       // Days of week
       day_sun: "CN",

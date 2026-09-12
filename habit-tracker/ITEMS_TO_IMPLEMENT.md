@@ -4,67 +4,70 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ---
 
-## 🎯 Active Feature Development Roadmap (ADR-0003)
+## 🎯 Active Feature Development Roadmap (ADR-0003 & ADR-0004)
 
-### Slice 1: Statistical Zero-Baseline & Mathematical Engine Fixes
+### Slice 1: Statistical Zero-Baseline & Mathematical Engine Fixes (ADR-0003)
 
-- [ ] **Historical Zero-Baseline Calculation (`engine.js`)**:
-  - `calculateStreakAndConsistency`: When `scheduledCount === 0`, return `consistencyScore30d = 0` and `consistencyScore90d = 0` instead of `100`.
-  - `calculateWeekdayAdherence`: When `stats[dayOfWeek].scheduled === 0`, return `rate: 0` instead of `100`.
-  - `calculateRoutineAdherence`: When `stats[rKey].scheduled === 0`, return `rate: 0` instead of `100`.
-  - `calculateDailyProgress` & `calculateRoutineProgress`: When total scheduled habits is 0, return `percentage: 0`, `ratio: 0.0`, `isAllCompleted: false`.
-- [ ] **Unit Math Seam Tests (`tests/habit-tracker-engine-math.test.js`)**:
-  - Assert zero-baseline on fresh habits without history.
-  - Assert weekday adherence returns 0% for days with no scheduled history.
+- [x] Historical zero-baseline calculation in `engine.js` (0% for empty history/weekdays).
+- [x] Math seam tests passing 100%.
 
----
+### Slice 2: Background & Screen-Off Timer Delta Engine (ADR-0003)
 
-### Slice 2: Background & Screen-Off Timer Delta Engine
+- [x] Timestamp delta sync on `visibilitychange` and `window.focus`.
+- [x] Auto-complete when target duration reached in background.
 
-- [ ] **Timestamp Delta Sync (`app.js`, `store.js`)**:
-  - Record `{ habitId, date, startedAt, baseValue }` when timer starts.
-  - Calculate real-world elapsed seconds on tick: `currentVal = baseValue + Math.floor((Date.now() - startedAt) / 1000)`.
-  - Hook `document.addEventListener('visibilitychange')` and `window.addEventListener('focus')` to immediately synchronize elapsed time when screen turns back on or app is foregrounded.
-  - Auto-complete habit, stop timer, and trigger victory toast/audio chime when target duration is reached while backgrounded.
-- [ ] **Timer Seam Tests (`tests/habit-tracker-ui-components.test.js`)**:
-  - Simulate elapsed background time via mocked `Date.now()` and visibilitychange event, verifying exact delta catch-up.
+### Slice 3: Multi-Routine Data Model & Dashboard Rendering (ADR-0003)
 
----
+- [x] `routines: string[]` support with backwards-compatible migration.
+- [x] Synchronized multi-instance check-ins and routine badge displays.
 
-### Slice 3: Multi-Routine Data Model & Dashboard Rendering
+### Slice 4: Native Gestures & Back Navigation Stack (ADR-0003)
 
-- [ ] **Multi-Routine Schema & Migration (`engine.js`, `store.js`, `indexeddb.js`)**:
-  - Support `routines: string[]` (e.g. `['morning', 'evening']`) on habit entities.
-  - Silent backwards-compatible normalization for habits with legacy single `routine: string`.
-  - Update `isScheduledDate` / routine filtering to check `habit.routines.includes(rKey)`.
-- [ ] **Today Dashboard & Manager Multi-Routine Section Rendering (`today-view.js`, `manager-view.js`)**:
-  - Render habit card under every assigned routine cluster section on the Today tab.
-  - Synchronize live check-ins across multiple rendered instances of the same habit.
-  - Update Habit Manager catalog to display multi-routine badges and group habits accurately.
+- [x] Container horizontal tab swipe navigation with card disambiguation.
+
+### Slice 5: Add / Edit Habit Form UX Overhaul & Hybrid Reminders (ADR-0003)
+
+- [x] Live preview card, routine chips, emoji palette, and notification settings.
 
 ---
 
-### Slice 4: Native Gestures & Back Navigation Stack
+## 🚀 PWA Back-Stack, Dock Ergonomics, Timer & Data Hygiene (ADR-0004)
 
-- [ ] **Tab Swipe Left / Right Navigation (`app.js`)**:
-  - Implement container-level touch gesture detector switching between 4 tabs: `Today` (0) ⇄ `Insights` (1) ⇄ `Habits` (2) ⇄ `Settings` (3).
-  - Add gesture disambiguation so card swipe-to-complete and sheet open gestures take priority without triggering tab switches.
-- [ ] **Native Back Stack & Double-Back Exit (`app.js`)**:
-  - Intercept `window.addEventListener('popstate')`.
-  - Close active modal dialogs, detail sheets, or delete confirmation dialogs if open.
-  - Navigate to `Today` tab if currently on `Insights`, `Habits`, or `Settings`.
-  - On `Today` tab, show toast _"Nhấn back lần nữa để thoát / Press back again to exit"_; second back press within 2000ms triggers exit.
+### Slice 6: PWA Full History Push-Stack, Modal Dismissal & Double-Back Exit
 
----
+- [x] **History Push on Overlays & Tabs (`app.js`)**:
+  - Invoke `history.pushState({ app: 'habit-tracker', overlay: 'edit' | 'detail' | 'delete' | 'reset', tab: activeTab }, '')` when any modal or bottom sheet opens.
+  - Invoke `history.pushState({ app: 'habit-tracker', tab: nextTab }, '')` when switching between main dock tabs.
+- [x] **Multi-Tier `popstate` Back Navigation**:
+  - Tier 1: Dismiss active overlays (`closeHabitModal`, `closeDetailSheet`, `closeDeleteModal`, `closeResetModal`).
+  - Tier 2: Navigate back to previous tab or `today` root.
+  - Tier 3: Show _"Nhấn back lần nữa để thoát / Press back again to exit"_ on `today` root with 2s timeout before allowing exit.
 
-### Slice 5: Add / Edit Habit Form UX Overhaul & Hybrid Daily Reminders
+### Slice 7: Bottom Navigation Dock Active Capsule Highlighting & Theme Ergonomics
 
-- [ ] **Add / Edit Form UX Modernization (`manager-view.js`, `translations.js`)**:
-  - Multi-routine toggle chip selector (🌅 Sáng, ☀️ Chiều, 🌙 Tối, 🔄 Linh hoạt).
-  - Segmented measurement type picker (`✓ Check`, `🔢 Số lượng`, `⏱️ Thời gian`).
-  - Real-time interactive preview card updating as name, icon, color, and target change.
-  - Expanded quick-pick emoji palette and contextual frequency schedule inputs.
-- [ ] **Hybrid Daily Reminders (`notifications.js`, `app.js`, `translations.js`)**:
-  - 1-tap "Bật thông báo / Enable Notifications" permission banner in Settings with live permission status badge.
-  - Service Worker notification trigger handling for scheduled reminder times.
-  - Ambient reminder pill and toast for habits with active reminder windows.
+- [x] **Active Capsule & Indicator Tokens (`index.html`, `app.js`, `DESIGN.md`)**:
+  - High-contrast active capsule styling (`bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold ring-1 ring-emerald-500/30 rounded-2xl px-3 py-1.5`).
+  - Active indicator micro-dot under the icon.
+  - Muted inactive state with high-contrast text across Light and Dark OLED themes.
+
+### Slice 8: Timer Engine Reactivity, Live Countdown Card, Reset Control & Minute Inputs
+
+- [x] **Habit Form Minute Input (`manager-view.js`, `app.js`)**:
+  - Accept target duration in minutes, with explicit `phút / mins` label and automatic $\times 60$ conversion.
+- [x] **Live Reactive Countdown on Habit Cards (`today-view.js`, `app.js`)**:
+  - Habit card updates real-time ticking `MM:SS` countdown and progress ring every second while running.
+  - Direct Start / Pause (⏯️) and Reset (🔄) action controls directly on the habit card.
+
+### Slice 9: Tiered Data Hygiene Vault & Clean State Reset Modal
+
+- [x] **Data & Vault Reset Card in Settings (`app.js`, `store.js`, `translations.js`)**:
+  - _Khôi phục thói quen mẫu / Reset to Sample Habits_: Clears custom logs and restores 3 starter habits.
+  - _Xóa sạch toàn bộ dữ liệu / Complete Factory Wipe_: Purges all IndexedDB stores (`habits`, `logs`, `settings`, `vacations`) and resets to zero habits.
+  - Double confirmation dialog (`role="alertdialog"`) before executing reset.
+
+### Slice 10: Interactive Habit Detail Sheet & Micro-Journal
+
+- [x] **Interactive Action Controls & Shortcuts (`detail-sheet.js`, `app.js`)**:
+  - Direct 1-tap check-in, numeric stepper, or timer toggle inside sheet header.
+  - Direct **✏️ Sửa / Edit** and **📦 Lưu trữ / Archive** shortcuts.
+  - Tapping any date on the 365-day mini heatmap switches the Reflection Notes editor date.

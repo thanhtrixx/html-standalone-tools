@@ -151,6 +151,11 @@ const TEST_SUITES = [
     category: "UI/UX",
   },
   {
+    name: "Atomic Habit Tracker Fast Smoke & DOM Semantics",
+    file: "tests/habit-tracker-lightpanda-smoke.test.js",
+    category: "Smoke",
+  },
+  {
     name: "E2E Summary Parser & Token Aggregator",
     file: "tests/e2e-summary.test.js",
     category: "Helpers",

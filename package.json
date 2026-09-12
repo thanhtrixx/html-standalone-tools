@@ -43,6 +43,7 @@
     "test:habit:cloud": "./scripts/run.sh tests/habit-tracker-cloud-sync.test.js",
     "test:habit:ui": "./scripts/run.sh tests/habit-tracker-ui-components.test.js",
     "test:habit:i18n": "./scripts/run.sh tests/habit-tracker-i18n.test.js",
+    "test:habit:smoke": "./scripts/run.sh tests/habit-tracker-lightpanda-smoke.test.js",
     "test:helpers": "./scripts/run.sh tests/helpers.test.js",
     "test:ui": "./scripts/run.sh tests/ui-ux.test.js",
     "test:e2e": "playwright test",

@@ -202,45 +202,53 @@
     <nav
       class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800/90 safe-bottom"
     >
-      <div class="max-w-lg mx-auto flex items-center justify-around py-2 px-2">
+      <div
+        class="max-w-lg mx-auto flex items-center justify-around py-1.5 px-3 gap-1"
+      >
         <button
           onclick="window.HabitApp.switchTab('today')"
           data-tab="today"
           id="nav-tab-today"
-          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-emerald-500 dark:text-emerald-400 font-bold transition-all active:scale-95"
+          class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold ring-1 ring-emerald-500/30 shadow-sm"
         >
           <span class="text-xl">🔥</span>
-          <span class="nav-label text-[11px]">Hôm nay</span>
+          <span class="nav-label text-[11px] leading-tight">Hôm nay</span>
+          <span
+            class="nav-dot w-1 h-1 rounded-full bg-emerald-500 dark:bg-emerald-400"
+          ></span>
         </button>
 
         <button
           onclick="window.HabitApp.switchTab('insights')"
           data-tab="insights"
           id="nav-tab-insights"
-          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-slate-500 dark:text-slate-400 transition-all active:scale-95"
+          class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium"
         >
           <span class="text-xl">📊</span>
-          <span class="nav-label text-[11px]">Thống kê</span>
+          <span class="nav-label text-[11px] leading-tight">Thống kê</span>
+          <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
         </button>
 
         <button
           onclick="window.HabitApp.switchTab('manager')"
           data-tab="manager"
           id="nav-tab-manager"
-          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-slate-500 dark:text-slate-400 transition-all active:scale-95"
+          class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium"
         >
           <span class="text-xl">📋</span>
-          <span class="nav-label text-[11px]">Thói quen</span>
+          <span class="nav-label text-[11px] leading-tight">Thói quen</span>
+          <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
         </button>
 
         <button
           onclick="window.HabitApp.switchTab('settings')"
           data-tab="settings"
           id="nav-tab-settings"
-          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-slate-500 dark:text-slate-400 transition-all active:scale-95"
+          class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium"
         >
           <span class="text-xl">⚙️</span>
-          <span class="nav-label text-[11px]">Cài đặt</span>
+          <span class="nav-label text-[11px] leading-tight">Cài đặt</span>
+          <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
         </button>
       </div>
     </nav>
@@ -283,6 +291,19 @@
       onclick="if (event.target === this) window.HabitApp.closeDeleteModal();"
     >
       <div id="delete-modal-container" class="w-full max-w-sm my-auto"></div>
+    </div>
+
+    <!-- ==================== DATA VAULT RESET CONFIRMATION MODAL OVERLAY ==================== -->
+    <div
+      id="reset-confirm-modal-overlay"
+      class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="reset-dialog-title"
+      aria-describedby="reset-dialog-desc"
+      onclick="if (event.target === this) window.HabitApp.closeResetModal();"
+    >
+      <div id="reset-modal-container" class="w-full max-w-sm my-auto"></div>
     </div>
 
     <!-- ==================== 100% VICTORY CONFETTI CANVAS ==================== -->

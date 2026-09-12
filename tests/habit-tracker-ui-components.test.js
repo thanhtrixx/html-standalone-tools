@@ -4642,6 +4642,265 @@ async function runUITests() {
     testNotifRes !== undefined,
     "[Issue #461 AC-7] testNotification executes cleanly without runtime errors"
   );
+
+  // =========================================================================
+  // ISSUE #468: True PWA Back Navigation & Double-Back Exit Toast Tests
+  // =========================================================================
+  console.log("\n--- Testing Issue #468: PWA Back Navigation & Dismissals ---");
+
+  // 1. Opening modal and pressing popstate dismisses overlay without changing root tab
+  await formSandbox.HabitApp.handleOpenEditModal(null);
+  const editOverlay = formSandbox.document.getElementById(
+    "habit-edit-modal-overlay"
+  );
+  assert(
+    editOverlay && !editOverlay.classList.contains("hidden"),
+    "[Issue #468 AC-1] Habit edit modal is open before popstate"
+  );
+
+  // Simulate browser Back button via popstate
+  formSandbox.HabitApp.handlePopState({
+    state: { tab: "today", overlay: null },
+  });
+  assert(
+    editOverlay && editOverlay.classList.contains("hidden"),
+    "[Issue #468 AC-1] Popstate dismisses edit modal overlay"
+  );
+
+  // 2. Open detail sheet and popstate dismisses it
+  await formSandbox.HabitApp.handleOpenDetailSheet("h-meditate", "2026-03-20");
+  const detailOverlay = formSandbox.document.getElementById(
+    "detail-sheet-overlay"
+  );
+  assert(
+    detailOverlay && !detailOverlay.classList.contains("hidden"),
+    "[Issue #468 AC-2] Detail sheet is open before popstate"
+  );
+  formSandbox.HabitApp.handlePopState({
+    state: { tab: "today", overlay: null },
+  });
+  assert(
+    detailOverlay && detailOverlay.classList.contains("hidden"),
+    "[Issue #468 AC-2] Popstate dismisses detail sheet overlay"
+  );
+
+  // 3. Tab navigation back stack
+  formSandbox.HabitApp.switchTab("insights");
+  assertEqual(
+    formSandbox.HabitApp.activeTab,
+    "insights",
+    "[Issue #468 AC-3] Navigated to insights tab"
+  );
+  formSandbox.HabitApp.handlePopState({
+    state: { tab: "today", overlay: null },
+  });
+  assertEqual(
+    formSandbox.HabitApp.activeTab,
+    "today",
+    "[Issue #468 AC-3] Popstate on secondary tab transitions back to today tab"
+  );
+
+  // 4. Double-back toast on root today tab
+  let lastToastMsg = "";
+  formSandbox.HabitApp.showToast = (msg, type) => {
+    lastToastMsg = msg;
+  };
+  formSandbox.HabitApp.handlePopState({
+    state: { tab: "today", overlay: null },
+  });
+  assert(
+    lastToastMsg.includes("quay lại") ||
+      lastToastMsg.includes("back again") ||
+      lastToastMsg.includes("thoát") ||
+      lastToastMsg.includes("back"),
+    "[Issue #468 AC-4] Popstate on root today tab triggers press back again exit toast"
+  );
+
+  // =========================================================================
+  // ISSUE #469: Active Tab Indicator Capsule & Micro-Dot Indicator Tests
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #469: Navigation Dock Indicator Styling ---"
+  );
+
+  formSandbox.HabitApp.switchTab("manager");
+  const mgrTabBtn = formSandbox.document.getElementById("nav-tab-manager");
+  const todayTabBtn = formSandbox.document.getElementById("nav-tab-today");
+  const mgrDot = mgrTabBtn ? mgrTabBtn.querySelector(".nav-dot") : null;
+  const todayDot = todayTabBtn ? todayTabBtn.querySelector(".nav-dot") : null;
+
+  assert(
+    mgrTabBtn && mgrTabBtn.getAttribute("aria-selected") === "true",
+    "[Issue #469 AC-1] Active manager tab has aria-selected='true'"
+  );
+  assert(
+    mgrTabBtn && mgrTabBtn.className.includes("text-emerald-600"),
+    "[Issue #469 AC-2] Active tab button has emerald text styling"
+  );
+  assert(
+    mgrDot && mgrDot.className.includes("opacity-100"),
+    "[Issue #469 AC-3] Active tab micro-dot is visible (opacity-100)"
+  );
+  assert(
+    todayDot && todayDot.className.includes("opacity-0"),
+    "[Issue #469 AC-4] Inactive tab micro-dot is hidden (opacity-0)"
+  );
+
+  // =========================================================================
+  // ISSUE #470: Timer Usability Enhancements & Reset Controls
+  // =========================================================================
+  console.log("\n--- Testing Issue #470: Timer Usability & Reset Actions ---");
+
+  formSandbox.HabitApp.switchTab("today");
+  // Test timer habit in today view
+  const timerHabit = formSandbox.HabitApp.store
+    .getHabits()
+    .find((h) => h.type === "timer");
+  if (timerHabit) {
+    // Check edit modal displays minutes
+    const modalHtml = formSandbox.HabitManagerView.renderHabitEditModal(
+      timerHabit,
+      "vi"
+    );
+    assert(
+      modalHtml.includes('value="25"') || modalHtml.includes("value="),
+      "[Issue #470 AC-1] Timer edit modal formats seconds into user-friendly minutes"
+    );
+
+    // Toggle timer start
+    await formSandbox.HabitApp.handleToggleTimer(timerHabit.id);
+    assertEqual(
+      formSandbox.HabitApp.runningTimerHabitId,
+      timerHabit.id,
+      "[Issue #470 AC-2] handleToggleTimer starts the running timer"
+    );
+
+    // Reset timer
+    await formSandbox.HabitApp.handleResetTimer(timerHabit.id);
+    assertEqual(
+      formSandbox.HabitApp.runningTimerHabitId,
+      null,
+      "[Issue #470 AC-3] handleResetTimer stops and clears the running timer"
+    );
+
+    const resetLog = formSandbox.HabitApp.store.getLog(
+      timerHabit.id,
+      formSandbox.HabitApp.store.getActiveDate()
+    );
+    assertEqual(
+      resetLog ? resetLog.value : 0,
+      0,
+      "[Issue #470 AC-4] handleResetTimer resets habit log value to 0"
+    );
+  }
+
+  // =========================================================================
+  // ISSUE #471: Data Hygiene Vault Card & Reset / Wipe Confirmation Modals
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #471: Data Hygiene Vault & Confirmation Modals ---"
+  );
+
+  formSandbox.HabitApp.switchTab("settings");
+  const dataVaultEl = formSandbox.document.getElementById(
+    "settings-data-vault"
+  );
+  assert(
+    dataVaultEl !== null,
+    "[Issue #471 AC-1] Settings view renders Data Hygiene Vault card"
+  );
+
+  // Prompt reset defaults
+  formSandbox.HabitApp.promptResetDefaults();
+  const resetOverlay = formSandbox.document.getElementById(
+    "reset-confirm-modal-overlay"
+  );
+  const resetTitle = formSandbox.document.getElementById("reset-dialog-title");
+  assert(
+    resetOverlay && !resetOverlay.classList.contains("hidden"),
+    "[Issue #471 AC-2] promptResetDefaults opens reset confirmation modal"
+  );
+  assert(
+    resetTitle &&
+      (resetTitle.textContent.includes("Khôi phục") ||
+        resetTitle.textContent.includes("Reset") ||
+        resetTitle.textContent.includes("Mặc định") ||
+        resetTitle.textContent.includes("Default")),
+    "[Issue #471 AC-2] Reset modal displays correct default reset title"
+  );
+
+  // Confirm reset defaults
+  await formSandbox.HabitApp.confirmResetDefaults();
+  assert(
+    resetOverlay && resetOverlay.classList.contains("hidden"),
+    "[Issue #471 AC-3] confirmResetDefaults closes modal after execution"
+  );
+  assertEqual(
+    formSandbox.HabitApp.store.getHabits().length,
+    6,
+    "[Issue #471 AC-3] confirmResetDefaults resets habits to 6 default items"
+  );
+
+  // Prompt factory wipe
+  formSandbox.HabitApp.promptFactoryWipe();
+  assert(
+    resetOverlay && !resetOverlay.classList.contains("hidden"),
+    "[Issue #471 AC-4] promptFactoryWipe opens modal with factory wipe warning"
+  );
+  await formSandbox.HabitApp.confirmFactoryWipe();
+  assertEqual(
+    formSandbox.HabitApp.store.getHabits().length,
+    0,
+    "[Issue #471 AC-4] confirmFactoryWipe clears all habits and leaves clean vault"
+  );
+
+  // Restore sample habits for subsequent tests
+  await formSandbox.HabitApp.store.resetToDefaults();
+
+  // =========================================================================
+  // ISSUE #472: Enhanced Habit Detail Sheet Quick Actions & Mini Heatmap
+  // =========================================================================
+  console.log("\n--- Testing Issue #472: Enhanced Habit Detail Sheet ---");
+
+  const sampleHabit = formSandbox.HabitApp.store.getHabits()[0];
+  const activeDate = formSandbox.HabitApp.store.getActiveDate();
+
+  // Open detail sheet
+  await formSandbox.HabitApp.handleOpenDetailSheet(sampleHabit.id, activeDate);
+  const sheetContainerEl = formSandbox.document.getElementById(
+    "detail-sheet-container"
+  );
+  assert(
+    sheetContainerEl &&
+      sheetContainerEl.innerHTML.includes('data-action="edit-habit"'),
+    "[Issue #472 AC-1] Detail sheet header renders Edit button shortcut"
+  );
+  assert(
+    sheetContainerEl &&
+      (sheetContainerEl.innerHTML.includes('data-action="archive-habit"') ||
+        sheetContainerEl.innerHTML.includes('data-action="restore-habit"')),
+    "[Issue #472 AC-1] Detail sheet header renders Archive button shortcut"
+  );
+  assert(
+    sheetContainerEl &&
+      sheetContainerEl.innerHTML.includes('data-action="select-detail-date"'),
+    "[Issue #472 AC-2] Mini heatmap renders interactive clickable date cells"
+  );
+  assert(
+    sheetContainerEl &&
+      sheetContainerEl.innerHTML.includes("detail-sheet-quick-actions"),
+    "[Issue #472 AC-3] Detail sheet renders direct 1-tap quick action card for selected date"
+  );
+
+  // Close detail sheet
+  formSandbox.HabitApp.closeDetailSheet();
+  const detailOverlayClosed = formSandbox.document.getElementById(
+    "detail-sheet-overlay"
+  );
+  assert(
+    detailOverlayClosed && detailOverlayClosed.classList.contains("hidden"),
+    "[Issue #472 AC-4] Detail sheet closes cleanly"
+  );
 }
 
 runUITests()

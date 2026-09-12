@@ -172,8 +172,9 @@
     }
     return vacationRanges.some((range) => {
       if (range.active === false) return false;
-      const start = range.startDate;
-      const end = range.endDate || range.startDate;
+      const start = range.startDate || range.start;
+      const end = range.endDate || range.end || start;
+      if (!start) return false;
       return dateStr >= start && dateStr <= end;
     });
   }

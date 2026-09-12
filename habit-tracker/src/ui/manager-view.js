@@ -39,8 +39,22 @@
     const habitId = habit ? habit.id : "";
     const name = habit ? habit.name : "";
     const type = habit ? habit.type || "binary" : "binary";
-    const targetValue = habit ? habit.targetValue || 1 : 1;
-    const unit = habit ? habit.unit || "" : "";
+    const isTimer = type === "timer";
+    const targetValue = habit
+      ? habit.targetValue || (isTimer ? 1200 : 1)
+      : isTimer
+        ? 1200
+        : 1;
+    const displayTargetValue = isTimer
+      ? Math.max(1, Math.round(targetValue / 60))
+      : habit
+        ? habit.targetValue || 1
+        : 1;
+    const unit = habit
+      ? habit.unit || (isTimer ? i18n.t("minutes_unit", {}, lang) : "")
+      : isTimer
+        ? i18n.t("minutes_unit", {}, lang)
+        : "";
     const step = habit ? habit.step || 1 : 1;
     const assignedRoutines = habit
       ? engine.getHabitRoutines(habit)
@@ -151,7 +165,7 @@
                   </h4>
                   <div class="flex items-center gap-2 mt-0.5">
                     <span id="preview-type-target" class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                      ${type === "binary" ? i18n.t("type_binary", {}, lang) : `${targetValue} ${unit || (type === "timer" ? "mins" : "")}`}
+                      ${type === "binary" ? i18n.t("type_binary", {}, lang) : `${displayTargetValue} ${unit || (type === "timer" ? i18n.t("minutes_unit", {}, lang) : "")}`}
                     </span>
                     <div id="preview-routines" class="flex items-center gap-1">
                       ${assignedRoutines.map((r) => `<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${i18n.t(`routine_${r}`, {}, lang)}</span>`).join("")}
@@ -211,7 +225,7 @@
           <div id="modal-target-fields" class="grid grid-cols-3 gap-3 ${type === "binary" ? "hidden" : ""}">
             <div>
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("target_value_label", {}, lang)}</label>
-              <input type="number" id="modal-target-value" name="targetValue" value="${targetValue}" min="1" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <input type="number" id="modal-target-value" name="targetValue" value="${displayTargetValue}" min="1" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("target_unit_label", {}, lang)}</label>

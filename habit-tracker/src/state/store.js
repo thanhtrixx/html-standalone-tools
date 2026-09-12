@@ -128,6 +128,11 @@
       this.notify("active_date_change", this.state.activeDate);
     }
 
+    getLog(habitId, dateInput) {
+      const dateStr = engine.toDateString(dateInput || this.getActiveDate());
+      return this.state.logs[`${habitId}_${dateStr}`] || null;
+    }
+
     // Habits CRUD
     async addHabit(habitData) {
       const assignedRoutines =
@@ -222,7 +227,15 @@
         const h = this.state.habits.find((item) => item.id === id);
         if (h) {
           h.order = index;
-          if (routine) h.routine = routine;
+          if (
+            routine &&
+            (!Array.isArray(h.routines) || !h.routines.includes(routine))
+          ) {
+            h.routines = Array.isArray(h.routines)
+              ? [...h.routines, routine]
+              : [routine];
+            h.routine = h.routines[0];
+          }
           await this.storage.putHabit(h);
         }
       }
@@ -358,6 +371,184 @@
       this.state.settings.vacationRanges = vacations;
       this.notify("vacation_deleted", id);
       return true;
+    }
+
+    async replaceState(newState) {
+      if (!newState || typeof newState !== "object") return;
+
+      // Normalize habits
+      let nextHabits = [];
+      if (Array.isArray(newState.habits)) {
+        nextHabits = [...newState.habits];
+      } else if (newState.habits && typeof newState.habits === "object") {
+        nextHabits = Object.values(newState.habits);
+      }
+
+      for (const h of nextHabits) {
+        if (!Array.isArray(h.routines) || h.routines.length === 0) {
+          h.routines = [h.routine || engine.ROUTINES.ANYTIME];
+        }
+        if (!h.routine) {
+          h.routine = h.routines[0];
+        }
+      }
+
+      // Normalize logs
+      const nextLogs = {};
+      if (Array.isArray(newState.logs)) {
+        for (const log of newState.logs) {
+          const key = log.id || `${log.habitId}_${log.date}`;
+          nextLogs[key] = log;
+        }
+      } else if (newState.logs && typeof newState.logs === "object") {
+        for (const key in newState.logs) {
+          const log = newState.logs[key];
+          const logKey = log.id || `${log.habitId}_${log.date}` || key;
+          nextLogs[logKey] = log;
+        }
+      }
+
+      // Normalize settings & vacations
+      const nextSettings = {
+        ...this.state.settings,
+        ...(newState.settings || {}),
+      };
+
+      const nextVacations = Array.isArray(newState.vacations)
+        ? newState.vacations
+        : Array.isArray(newState.vacationRanges)
+          ? newState.vacationRanges
+          : [];
+      nextSettings.vacationRanges = nextVacations;
+
+      // Persist to storage
+      if (typeof this.storage.clearAll === "function") {
+        await this.storage.clearAll();
+      }
+
+      for (const h of nextHabits) {
+        await this.storage.putHabit(h);
+      }
+      for (const key in nextLogs) {
+        await this.storage.putLog(nextLogs[key]);
+      }
+      for (const key in nextSettings) {
+        if (key !== "vacationRanges") {
+          await this.storage.putSetting(key, nextSettings[key]);
+        }
+      }
+      for (const v of nextVacations) {
+        await this.storage.putVacation(v);
+      }
+
+      this.state.habits = nextHabits;
+      this.state.logs = nextLogs;
+      this.state.settings = nextSettings;
+
+      this.notify("state_replaced", this.state);
+      return this.state;
+    }
+
+    async resetToDefaults() {
+      const defaults = [
+        {
+          id: "h-water",
+          name: "Uống 2.5L Nước",
+          type: "numeric",
+          targetValue: 2500,
+          unit: "ml",
+          step: 250,
+          routines: ["afternoon"],
+          routine: "afternoon",
+          scheduleType: "daily",
+          color: "cyan",
+          icon: "💧",
+          reminderTime: "14:00",
+          archived: false,
+          isPaused: false,
+          createdAt: engine.toDateString(new Date()),
+          order: 0,
+        },
+        {
+          id: "h-meditate",
+          name: "Thiền chánh niệm 10 phút",
+          type: "binary",
+          targetValue: 1,
+          routines: ["morning"],
+          routine: "morning",
+          scheduleType: "daily",
+          color: "indigo",
+          icon: "🧘",
+          reminderTime: "07:00",
+          archived: false,
+          isPaused: false,
+          createdAt: engine.toDateString(new Date()),
+          order: 1,
+        },
+        {
+          id: "h-read",
+          name: "Đọc sách 20 phút",
+          type: "timer",
+          targetValue: 1200,
+          unit: "mins",
+          routines: ["evening"],
+          routine: "evening",
+          scheduleType: "daily",
+          color: "amber",
+          icon: "📖",
+          reminderTime: "21:00",
+          archived: false,
+          isPaused: false,
+          createdAt: engine.toDateString(new Date()),
+          order: 2,
+        },
+      ];
+
+      if (typeof this.storage.clearAll === "function") {
+        await this.storage.clearAll();
+      }
+
+      for (const h of defaults) {
+        await this.storage.putHabit(h);
+      }
+
+      const defaultSettings = {
+        theme: "dark",
+        language: "vi",
+        freezeTokens: 2,
+        remindersEnabled: true,
+        vacationRanges: [],
+      };
+
+      for (const k in defaultSettings) {
+        await this.storage.putSetting(k, defaultSettings[k]);
+      }
+
+      this.state.habits = defaults;
+      this.state.logs = {};
+      this.state.settings = { ...defaultSettings };
+      this.notify("state_reset_defaults", this.state);
+      return this.state;
+    }
+
+    async factoryWipe() {
+      if (typeof this.storage.clearAll === "function") {
+        await this.storage.clearAll();
+      }
+
+      const defaultSettings = {
+        theme: "dark",
+        language: "vi",
+        freezeTokens: 2,
+        remindersEnabled: true,
+        vacationRanges: [],
+      };
+
+      this.state.habits = [];
+      this.state.logs = {};
+      this.state.settings = { ...defaultSettings };
+      this.notify("state_factory_wipe", this.state);
+      return this.state;
     }
   }
 

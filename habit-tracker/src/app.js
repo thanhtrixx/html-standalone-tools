@@ -116,31 +116,28 @@
     const editModal = document.getElementById("habit-edit-modal-overlay");
     const detailSheetEl = document.getElementById("detail-sheet-overlay");
     const deleteModal = document.getElementById("delete-confirm-modal-overlay");
+    const resetModal = document.getElementById("reset-confirm-modal-overlay");
 
     const isEditOpen = editModal && !editModal.classList.contains("hidden");
     const isDetailOpen =
       detailSheetEl && !detailSheetEl.classList.contains("hidden");
     const isDeleteOpen =
       deleteModal && !deleteModal.classList.contains("hidden");
+    const isResetOpen = resetModal && !resetModal.classList.contains("hidden");
 
     // Tier 1: Dismiss active overlays
-    if (isEditOpen || isDetailOpen || isDeleteOpen) {
+    if (isEditOpen || isDetailOpen || isDeleteOpen || isResetOpen) {
       if (isEditOpen) closeHabitModal();
       if (isDetailOpen) closeDetailSheet();
       if (isDeleteOpen) closeDeleteModal();
+      if (isResetOpen) closeResetModal();
       return;
     }
 
     // Tier 2: If on secondary tab -> return to Today tab
     if (activeTab !== "today") {
-      const app =
-        (typeof window !== "undefined" && window.HabitApp) || HabitApp;
-      if (app && typeof app.switchTab === "function") {
-        app.switchTab("today");
-      } else {
-        activeTab = "today";
-        renderApp();
-      }
+      activeTab = "today";
+      renderApp();
       return;
     }
 
@@ -156,7 +153,16 @@
     lastBackPressTime = now;
     pushNavigationState("today");
     const lang = (store && store.getSettings().language) || "vi";
-    showToast(i18n.t("toast_press_back_again", {}, lang), "info");
+    const notify =
+      (typeof window !== "undefined" &&
+        window.HabitApp &&
+        window.HabitApp.showToast) ||
+      (typeof globalThis !== "undefined" &&
+        globalThis.HabitApp &&
+        globalThis.HabitApp.showToast) ||
+      (typeof HabitApp !== "undefined" && HabitApp && HabitApp.showToast) ||
+      showToast;
+    notify(i18n.t("toast_press_back_again", {}, lang), "info");
   }
 
   /**
@@ -367,11 +373,13 @@
    * Updates Top Bar (Freeze tokens counter, active date indicator)
    */
   function updateTopBar() {
-    const settings = store.getSettings();
-    const lang = settings.language || "vi";
+    const settings = store
+      ? store.getSettings()
+      : { language: "vi", freezeTokens: 2 };
+    const lang = (settings && settings.language) || "vi";
     const freezeTokensEl = document.getElementById("freeze-tokens-count");
     if (freezeTokensEl) {
-      freezeTokensEl.textContent = settings.freezeTokens ?? 2;
+      freezeTokensEl.textContent = (settings && settings.freezeTokens) ?? 2;
     }
 
     const langToggleBtn = document.getElementById("lang-toggle-btn");
@@ -399,12 +407,25 @@
     const navButtons = document.querySelectorAll(".nav-tab-btn");
     navButtons.forEach((btn) => {
       const tab = btn.getAttribute("data-tab");
-      if (tab === activeTab) {
-        btn.classList.add("text-emerald-400", "font-bold");
-        btn.classList.remove("text-slate-400");
+      const dot =
+        (btn.querySelector && btn.querySelector(".nav-dot")) ||
+        document.getElementById(`nav-dot-${tab}`);
+      const isActive = tab === activeTab;
+      btn.setAttribute("aria-selected", isActive ? "true" : "false");
+      if (isActive) {
+        btn.className =
+          "nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold ring-1 ring-emerald-500/30 shadow-sm";
+        if (dot) {
+          dot.className =
+            "nav-dot w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 opacity-100 scale-100 transition-all";
+        }
       } else {
-        btn.classList.remove("text-emerald-400", "font-bold");
-        btn.classList.add("text-slate-400");
+        btn.className =
+          "nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium";
+        if (dot) {
+          dot.className =
+            "nav-dot w-1.5 h-1.5 rounded-full bg-transparent opacity-0 scale-0 transition-all";
+        }
       }
 
       if (tab) {
@@ -415,12 +436,6 @@
             : null;
         if (labelEl) {
           labelEl.textContent = tabText;
-        }
-        if (btn.innerHTML && btn.innerHTML.includes("nav-label")) {
-          btn.innerHTML = btn.innerHTML.replace(
-            /<span class="nav-label">[\s\S]*?<\/span>/,
-            `<span class="nav-label">${tabText}</span>`
-          );
         }
       }
     });
@@ -598,6 +613,46 @@
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Data Hygiene & Vault Reset Card -->
+        <div id="settings-data-vault" class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">🧹 ${i18n.t("data_vault_title", {}, lang)}</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">${i18n.t("data_vault_desc", {}, lang)}</p>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/40 gap-3">
+              <div>
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white">${i18n.t("reset_defaults_btn", {}, lang)}</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">${i18n.t("reset_defaults_desc", {}, lang)}</p>
+              </div>
+              <button
+                type="button"
+                id="btn-reset-defaults"
+                data-action="prompt-reset-defaults"
+                onclick="window.HabitApp.promptResetDefaults()"
+                class="px-3.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-bold rounded-xl active:scale-95 transition cursor-pointer whitespace-nowrap"
+              >
+                ${i18n.t("reset_confirm_btn", {}, lang)}
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-rose-50/50 dark:bg-rose-950/20 rounded-2xl border border-rose-200 dark:border-rose-900/40 gap-3">
+              <div>
+                <h4 class="text-xs font-bold text-rose-600 dark:text-rose-400">${i18n.t("factory_wipe_btn", {}, lang)}</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">${i18n.t("factory_wipe_desc", {}, lang)}</p>
+              </div>
+              <button
+                type="button"
+                id="btn-factory-wipe"
+                data-action="prompt-factory-wipe"
+                onclick="window.HabitApp.promptFactoryWipe()"
+                class="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/20 active:scale-95 transition cursor-pointer whitespace-nowrap"
+              >
+                ${i18n.t("factory_wipe_confirm_btn", {}, lang)}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -827,10 +882,31 @@
         await handleStepDecrement(habitId, activeDate);
       } else if (action === "toggle-timer") {
         await handleToggleTimer(habitId, activeDate);
+      } else if (action === "reset-timer") {
+        await handleResetTimer(habitId, activeDate);
       } else if (action === "open-detail") {
         handleOpenDetailSheet(habitId);
       } else if (action === "close-detail-sheet") {
         closeDetailSheet();
+      } else if (action === "select-detail-date") {
+        const date = target.getAttribute("data-date");
+        const hId = target.getAttribute("data-habit-id") || habitId;
+        if (hId && date) {
+          const habit = store.getHabit(hId);
+          const sheetContainer = document.getElementById(
+            "detail-sheet-container"
+          );
+          if (habit && sheetContainer) {
+            const lang = store.getSettings().language || "vi";
+            detailSheet.renderDetailSheet(
+              habit,
+              store,
+              sheetContainer,
+              lang,
+              date
+            );
+          }
+        }
       } else if (action === "select-date") {
         const date = target.getAttribute("data-date");
         if (date) store.setActiveDate(date);
@@ -864,6 +940,16 @@
         } else {
           await confirmDeleteHabit();
         }
+      } else if (action === "prompt-reset-defaults") {
+        promptResetDefaults();
+      } else if (action === "prompt-factory-wipe") {
+        promptFactoryWipe();
+      } else if (action === "cancel-reset") {
+        closeResetModal();
+      } else if (action === "confirm-reset-defaults") {
+        await confirmResetDefaults();
+      } else if (action === "confirm-factory-wipe") {
+        await confirmFactoryWipe();
       } else if (action === "jump-to-timer") {
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
@@ -1072,6 +1158,32 @@
   }
 
   /**
+   * Refreshes Habit Detail Bottom Sheet if currently active/open for specified habit
+   */
+  function refreshDetailSheetIfOpen(habitId, date) {
+    const sheetOverlay = document.getElementById("detail-sheet-overlay");
+    const sheetContainer = document.getElementById("detail-sheet-container");
+    if (
+      sheetOverlay &&
+      !sheetOverlay.classList.contains("hidden") &&
+      sheetContainer
+    ) {
+      const habit = store.getHabit(habitId);
+      if (habit) {
+        const lang =
+          (store.getSettings() && store.getSettings().language) || "vi";
+        detailSheet.renderDetailSheet(
+          habit,
+          store,
+          sheetContainer,
+          lang,
+          date || store.getActiveDate()
+        );
+      }
+    }
+  }
+
+  /**
    * Habit Toggle Handler (Checks 100% daily victory)
    */
   async function handleToggleHabit(habitId, date) {
@@ -1082,6 +1194,7 @@
 
     await store.toggleHabit(habitId, date);
     undoStack.push({ habitId, date, previousLog });
+    refreshDetailSheetIfOpen(habitId, date);
 
     const lang =
       (store && store.getSettings() && store.getSettings().language) || "vi";
@@ -1123,6 +1236,7 @@
     const step = habit.step || 1;
     await store.logHabit(habitId, date, (previousLog.value || 0) + step);
     undoStack.push({ habitId, date, previousLog });
+    refreshDetailSheetIfOpen(habitId, date);
 
     const lang =
       (store && store.getSettings() && store.getSettings().language) || "vi";
@@ -1146,6 +1260,7 @@
     const nextVal = Math.max(0, (previousLog.value || 0) - step);
     await store.logHabit(habitId, date, nextVal);
     undoStack.push({ habitId, date, previousLog });
+    refreshDetailSheetIfOpen(habitId, date);
 
     const lang =
       (store && store.getSettings() && store.getSettings().language) || "vi";
@@ -1339,6 +1454,7 @@
       runningTimerTickCount = 0;
       updateAmbientTimerPill();
       renderActiveTab();
+      refreshDetailSheetIfOpen(habitId, targetDate);
       return;
     }
 
@@ -1365,6 +1481,32 @@
     updateAmbientTimerPill();
     startTimerTicker();
     renderActiveTab();
+    refreshDetailSheetIfOpen(habitId, targetDate);
+  }
+
+  /**
+   * Resets active timer progress to 0 for specified habit and date
+   */
+  async function handleResetTimer(habitId, date) {
+    if (!store || !habitId) return;
+    const targetDate = date || store.getActiveDate();
+
+    if (runningTimerHabitId === habitId) {
+      stopTimerTicker();
+      runningTimerHabitId = null;
+      runningTimerDate = null;
+      runningTimerStartedAt = null;
+      runningTimerBaseValue = 0;
+      runningTimerTickCount = 0;
+      updateAmbientTimerPill();
+    }
+
+    await store.logHabit(habitId, targetDate, 0);
+    renderActiveTab();
+    refreshDetailSheetIfOpen(habitId, targetDate);
+
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_timer_reset", {}, lang), "info");
   }
 
   /**
@@ -1425,6 +1567,170 @@
       overlay.innerHTML = `<div id="delete-modal-container" class="w-full max-w-sm my-auto">${modalHtml}</div>`;
       overlay.classList.remove("hidden");
     }
+    pushNavigationState(activeTab, "delete");
+  }
+
+  /**
+   * Prompts user with accessible sample reset confirmation modal
+   */
+  function promptResetDefaults() {
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    const overlay = document.getElementById("reset-confirm-modal-overlay");
+    const container = document.getElementById("reset-modal-container");
+
+    const modalHtml = `
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-white" role="alertdialog" aria-modal="true" aria-labelledby="reset-dialog-title" aria-describedby="reset-dialog-desc">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl font-bold">
+            🔄
+          </div>
+          <div>
+            <h3 id="reset-dialog-title" class="text-base font-bold text-slate-900 dark:text-white">
+              ${i18n.t("reset_confirm_title", {}, lang)}
+            </h3>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Atomic Habits</span>
+          </div>
+        </div>
+
+        <p id="reset-dialog-desc" class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+          ${i18n.t("reset_confirm_desc", {}, lang)}
+        </p>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button
+            type="button"
+            data-action="cancel-reset"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95 cursor-pointer"
+          >
+            ${i18n.t("cancel", {}, lang)}
+          </button>
+          <button
+            type="button"
+            data-action="confirm-reset-defaults"
+            class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-amber-500/25 transition-all active:scale-95 cursor-pointer"
+          >
+            ${i18n.t("reset_confirm_btn", {}, lang)}
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (container) {
+      container.innerHTML = modalHtml;
+    }
+    if (overlay) {
+      overlay.innerHTML = `<div id="reset-modal-container" class="w-full max-w-sm my-auto">${modalHtml}</div>`;
+      overlay.classList.remove("hidden");
+    }
+    pushNavigationState(activeTab, "reset");
+  }
+
+  /**
+   * Prompts user with accessible complete factory wipe confirmation modal
+   */
+  function promptFactoryWipe() {
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    const overlay = document.getElementById("reset-confirm-modal-overlay");
+    const container = document.getElementById("reset-modal-container");
+
+    const modalHtml = `
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-white" role="alertdialog" aria-modal="true" aria-labelledby="reset-dialog-title" aria-describedby="reset-dialog-desc">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl font-bold">
+            ⚠️
+          </div>
+          <div>
+            <h3 id="reset-dialog-title" class="text-base font-bold text-rose-600 dark:text-rose-400">
+              ${i18n.t("factory_wipe_confirm_title", {}, lang)}
+            </h3>
+            <span class="text-xs text-slate-500 dark:text-slate-400">Factory Wipe</span>
+          </div>
+        </div>
+
+        <p id="reset-dialog-desc" class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed font-medium">
+          ${i18n.t("factory_wipe_confirm_desc", {}, lang)}
+        </p>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button
+            type="button"
+            data-action="cancel-reset"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95 cursor-pointer"
+          >
+            ${i18n.t("cancel", {}, lang)}
+          </button>
+          <button
+            type="button"
+            data-action="confirm-factory-wipe"
+            class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-rose-500/25 transition-all active:scale-95 cursor-pointer"
+          >
+            ${i18n.t("factory_wipe_confirm_btn", {}, lang)}
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (container) {
+      container.innerHTML = modalHtml;
+    }
+    if (overlay) {
+      overlay.innerHTML = `<div id="reset-modal-container" class="w-full max-w-sm my-auto">${modalHtml}</div>`;
+      overlay.classList.remove("hidden");
+    }
+    pushNavigationState(activeTab, "reset");
+  }
+
+  /**
+   * Closes data vault reset confirmation modal
+   */
+  function closeResetModal() {
+    const overlay = document.getElementById("reset-confirm-modal-overlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+    }
+  }
+
+  /**
+   * Confirms reset to starter default habits
+   */
+  async function confirmResetDefaults() {
+    if (!store) return;
+    if (runningTimerHabitId) {
+      stopTimerTicker();
+      runningTimerHabitId = null;
+      runningTimerDate = null;
+      updateAmbientTimerPill();
+    }
+
+    await store.resetToDefaults();
+    await seedDefaultHabits();
+    closeResetModal();
+
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_reset_defaults_success", {}, lang), "success");
+    renderApp();
+  }
+
+  /**
+   * Confirms complete factory wipe
+   */
+  async function confirmFactoryWipe() {
+    if (!store) return;
+    if (runningTimerHabitId) {
+      stopTimerTicker();
+      runningTimerHabitId = null;
+      runningTimerDate = null;
+      updateAmbientTimerPill();
+    }
+
+    await store.factoryWipe();
+    closeResetModal();
+
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_factory_wipe_success", {}, lang), "info");
+    renderApp();
   }
 
   /**
@@ -1516,6 +1822,7 @@
     if (sheetOverlay) {
       sheetOverlay.classList.remove("hidden");
     }
+    pushNavigationState(activeTab, "detail");
   }
 
   /**
@@ -1557,7 +1864,8 @@
     const type = (typeInput && typeInput.value) || "binary";
     const targetVal = (targetValInput && targetValInput.value) || 1;
     const unit =
-      (unitInput && unitInput.value.trim()) || (type === "timer" ? "mins" : "");
+      (unitInput && unitInput.value.trim()) ||
+      (type === "timer" ? i18n.t("minutes_unit", {}, lang) : "");
 
     // Selected routines
     const routineCheckboxes = document.querySelectorAll(
@@ -1620,6 +1928,7 @@
       modalOverlay.classList.remove("hidden");
     }
     updateHabitModalPreview();
+    pushNavigationState(activeTab, "edit");
   }
 
   /**
@@ -1662,14 +1971,22 @@
       (form && form.querySelector('input[name="type"]:checked')) ||
       document.getElementById("modal-habit-type");
     const type = typeEl ? typeEl.value : "binary";
+    const isTimer = type === "timer";
 
     const targetValEl =
       (form && form.querySelector('[name="targetValue"]')) ||
       document.getElementById("modal-target-value");
+    const rawTarget = targetValEl ? parseFloat(targetValEl.value) || 1 : 1;
+    const targetValue = isTimer
+      ? Math.max(1, Math.round(rawTarget * 60))
+      : rawTarget;
+
     const unitEl =
       (form && form.querySelector('[name="unit"]')) ||
       document.getElementById("modal-habit-unit") ||
       document.getElementById("modal-target-unit");
+    const unit = unitEl ? unitEl.value.trim() : isTimer ? "mins" : "";
+
     const stepEl =
       (form && form.querySelector('[name="step"]')) ||
       document.getElementById("modal-step");
@@ -1726,8 +2043,8 @@
       id: habitId || `h-${Date.now()}`,
       name: name,
       type: type,
-      targetValue: targetValEl ? parseFloat(targetValEl.value) || 1 : 1,
-      unit: unitEl ? unitEl.value.trim() : "",
+      targetValue: targetValue,
+      unit: unit,
       step: stepEl ? parseFloat(stepEl.value) || 1 : 1,
       routines: routines,
       routine: routines[0] || "morning",
@@ -1740,12 +2057,13 @@
       reminderTime: reminderEl ? reminderEl.value : "",
     };
 
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
     if (habitId) {
       await store.updateHabit(habitId, habitData);
-      showToast("Đã cập nhật thói quen!", "success");
+      showToast(i18n.t("toast_habit_updated", {}, lang), "success");
     } else {
       await store.addHabit(habitData);
-      showToast("Đã thêm thói quen mới!", "success");
+      showToast(i18n.t("toast_habit_saved", {}, lang), "success");
     }
 
     closeHabitModal();
@@ -1838,7 +2156,11 @@
     showToast,
     undoLastAction,
     switchTab(tab) {
-      activeTab = tab;
+      if (!tab) return;
+      if (tab !== activeTab) {
+        activeTab = tab;
+        pushNavigationState(tab, null);
+      }
       renderApp();
     },
     switchLanguage(lang) {
@@ -1876,7 +2198,16 @@
         notify(i18n.t("toast_vacation_disabled", {}, lang), "info");
       } else {
         store.updateSettings({
-          vacationRanges: [{ start: today, end: "2099-12-31" }],
+          vacationRanges: [
+            {
+              id: `vac-${Date.now()}`,
+              startDate: today,
+              endDate: "2099-12-31",
+              start: today,
+              end: "2099-12-31",
+              active: true,
+            },
+          ],
         });
         notify(i18n.t("toast_vacation_enabled", {}, lang), "info");
       }
@@ -2082,12 +2413,12 @@
       const targetRoutine =
         routine ||
         (store.getHabit(habitId)
-          ? store.getHabit(habitId).routine
+          ? engine.getHabitRoutines(store.getHabit(habitId))[0]
           : "anytime") ||
         "anytime";
       const habits = store
         .getHabits(false)
-        .filter((h) => (h.routine || "anytime") === targetRoutine)
+        .filter((h) => engine.getHabitRoutines(h).includes(targetRoutine))
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
       const currentIndex = habits.findIndex((h) => h.id === habitId);
@@ -2113,6 +2444,12 @@
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_notes_saved", {}, lang), "success");
     },
+    handleResetTimer,
+    promptResetDefaults,
+    promptFactoryWipe,
+    closeResetModal,
+    confirmResetDefaults,
+    confirmFactoryWipe,
     get activeTab() {
       return activeTab;
     },

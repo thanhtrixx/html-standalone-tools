@@ -225,4 +225,100 @@ test.describe("Atomic Habit Tracker Multi-Device UI/UX Suite", () => {
       await expect(page.locator("html")).toHaveClass(/dark/);
     }
   });
+
+  test("8. Data Hygiene Vault Card & Reset Modals", async ({ page }) => {
+    await setupPage(page);
+
+    // Switch to Settings tab
+    await page.click("button[data-tab='settings']");
+    await page.waitForTimeout(100);
+
+    // Data Vault card is visible
+    const dataVaultCard = page.locator("#settings-data-vault");
+    await expect(dataVaultCard).toBeVisible();
+
+    // Trigger Reset Defaults modal
+    const resetDefaultsBtn = page.locator("#btn-reset-defaults");
+    await expect(resetDefaultsBtn).toBeVisible();
+    await resetDefaultsBtn.click();
+    await page.waitForTimeout(100);
+
+    const resetOverlay = page.locator("#reset-confirm-modal-overlay");
+    await expect(resetOverlay).toBeVisible();
+
+    // Cancel modal
+    const cancelBtn = page
+      .locator("button[data-action='cancel-reset']")
+      .first();
+    if (await cancelBtn.isVisible()) {
+      await cancelBtn.click();
+      await page.waitForTimeout(100);
+      await expect(resetOverlay).toBeHidden();
+    }
+  });
+
+  test("9. Navigation Dock Active Tab Highlight & Popstate Navigation", async ({
+    page,
+  }) => {
+    await setupPage(page);
+
+    // Verify initial active tab is today with aria-selected
+    const todayTab = page.locator("#nav-tab-today");
+    await expect(todayTab).toHaveAttribute("aria-selected", "true");
+
+    // Switch to Manager tab
+    const managerTab = page.locator("#nav-tab-manager");
+    await managerTab.click();
+    await page.waitForTimeout(100);
+
+    await expect(managerTab).toHaveAttribute("aria-selected", "true");
+    await expect(todayTab).toHaveAttribute("aria-selected", "false");
+
+    // Test Back button navigation returning to today
+    await page.goBack();
+    await page.waitForTimeout(150);
+    await expect(page.locator("#nav-tab-today")).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+  });
+
+  test("10. Timer Live Pause/Reset and Detail Sheet Header Shortcuts", async ({
+    page,
+  }) => {
+    await setupPage(page);
+
+    // Open detail sheet on first habit card
+    const firstHabitCard = page.locator(".habit-card").first();
+    if (await firstHabitCard.isVisible()) {
+      await firstHabitCard.click();
+      await page.waitForTimeout(150);
+
+      const detailOverlay = page.locator("#detail-sheet-overlay");
+      await expect(detailOverlay).toBeVisible();
+
+      // Verify header edit button shortcut
+      const editBtn = page.locator("button[data-action='edit-habit']").first();
+      await expect(editBtn).toBeVisible();
+
+      // Verify mini heatmap date cell selection
+      const heatmapCell = page
+        .locator(".mini-heatmap-cell[data-action='select-detail-date']")
+        .first();
+      if (await heatmapCell.isVisible()) {
+        await heatmapCell.click();
+        await page.waitForTimeout(100);
+      }
+
+      // Close detail sheet
+      const closeBtn = page
+        .locator("button[data-action='close-detail-sheet']")
+        .first();
+      if (await closeBtn.isVisible()) {
+        await closeBtn.click();
+        await page.waitForTimeout(100);
+        await expect(detailOverlay).toBeHidden();
+      }
+    }
+  });
 });

@@ -8,7 +8,7 @@ A standalone, mobile-first Progressive Web Application (PWA) designed for atomic
 
 For Vietnamese domain vocabulary, copywriting standards, and bilingual translation dictionary, refer to [`I18N.md`](./I18N.md).
 For visual design tokens, gesture physics, micro-interactions, and dark/light themes, refer to [`DESIGN.md`](./DESIGN.md).
-For architectural decision history and UI/UX evolution, refer to [`docs/adr/0001-habit-tracker-architecture-and-data-model.md`](./docs/adr/0001-habit-tracker-architecture-and-data-model.md), [`docs/adr/0002-impeccable-ui-ux-architecture-and-defect-remediation.md`](./docs/adr/0002-impeccable-ui-ux-architecture-and-defect-remediation.md), and [`docs/adr/0003-native-mobile-gestures-timer-delta-and-multi-routine-evolution.md`](./docs/adr/0003-native-mobile-gestures-timer-delta-and-multi-routine-evolution.md).
+For architectural decision history and UI/UX evolution, refer to [`docs/adr/0001-habit-tracker-architecture-and-data-model.md`](./docs/adr/0001-habit-tracker-architecture-and-data-model.md), [`docs/adr/0002-impeccable-ui-ux-architecture-and-defect-remediation.md`](./docs/adr/0002-impeccable-ui-ux-architecture-and-defect-remediation.md), [`docs/adr/0003-native-mobile-gestures-timer-delta-and-multi-routine-evolution.md`](./docs/adr/0003-native-mobile-gestures-timer-delta-and-multi-routine-evolution.md), and [`docs/adr/0004-pwa-back-stack-dock-highlight-timer-reactivity-and-data-hygiene.md`](./docs/adr/0004-pwa-back-stack-dock-highlight-timer-reactivity-and-data-hygiene.md).
 
 ---
 

@@ -165,32 +165,61 @@
         </div>
       `;
     } else if (habit.type === engine.HABIT_TYPES.TIMER) {
+      const isRunning =
+        typeof window !== "undefined" &&
+        window.HabitApp &&
+        window.HabitApp.runningTimerHabitId === habit.id;
       const durationFormatted = i18n.formatDuration(prog.loggedValue, lang);
       const targetDuration = i18n.formatDuration(habit.targetValue, lang);
+      const hasProgress = (prog.loggedValue || 0) > 0;
 
       controlHtml = `
-        <div class="flex items-center gap-2">
-          <div class="text-right">
-            <span class="text-sm font-mono tabular-nums font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
-            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${targetDuration}</span>
+        <div class="flex items-center gap-1.5">
+          ${
+            hasProgress
+              ? `
+            <button
+              type="button"
+              data-action="reset-timer"
+              data-habit-id="${habit.id}"
+              aria-label="${i18n.t("timer_reset", {}, lang)}"
+              class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-xs active:scale-95 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer"
+            >
+              🔄
+            </button>
+          `
+              : ""
+          }
+          <div class="text-right min-w-[65px]">
+            <span class="text-sm font-mono tabular-nums font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : isRunning ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${targetDuration}</span>
           </div>
           <button
             type="button"
             data-action="toggle-timer"
             data-habit-id="${habit.id}"
             data-target="${habit.targetValue}"
-            class="w-9 h-9 rounded-lg flex items-center justify-center text-white active:scale-95 shadow-sm"
+            aria-label="${isRunning ? i18n.t("timer_pause", {}, lang) : i18n.t("timer_start", {}, lang)}"
+            class="w-9 h-9 rounded-xl flex items-center justify-center text-white active:scale-95 shadow-sm transition-all cursor-pointer ${isRunning ? "animate-pulse ring-2 ring-emerald-400/50" : ""}"
             style="background-color: ${colorHex};"
           >
-            ${isCompleted ? "✓" : "▶"}
+            ${isCompleted ? "✓" : isRunning ? "⏸" : "▶"}
           </button>
         </div>
       `;
     }
 
+    const isRunning =
+      habit.type === engine.HABIT_TYPES.TIMER &&
+      typeof window !== "undefined" &&
+      window.HabitApp &&
+      window.HabitApp.runningTimerHabitId === habit.id;
+
     const completedCardStyle = isCompleted
       ? "opacity-85 border-emerald-500/30 dark:border-emerald-500/20"
-      : "border-slate-200 dark:border-slate-800/80";
+      : isRunning
+        ? "border-emerald-500/60 dark:border-emerald-500/50 ring-2 ring-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10"
+        : "border-slate-200 dark:border-slate-800/80";
 
     const noteIndicator =
       logEntry && logEntry.notes
@@ -216,7 +245,10 @@
             <div>
               <h4 class="font-semibold text-slate-900 dark:text-white text-base ${isCompleted ? "line-through text-slate-400 dark:text-slate-500" : ""}">${habit.name}</h4>
               <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                <span>${habit.routine ? i18n.t(`routine_${habit.routine}`, {}, lang) : ""}</span>
+                <span>${engine
+                  .getHabitRoutines(habit)
+                  .map((r) => i18n.t(`routine_${r}`, {}, lang))
+                  .join(", ")}</span>
               </div>
               ${noteIndicator}
             </div>
