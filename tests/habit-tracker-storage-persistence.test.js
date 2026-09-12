@@ -781,6 +781,83 @@ async function runStorageTests() {
     exportedLogs.length,
     "[Issue #426 AC-4] Round-trip import restores exact check-in log count"
   );
+
+  // Issue #459: Multi-Routine Persistence and Silent Store Migration
+  const multiStorage = createMockStorage();
+  const multiDb = storageModule.createStorageAdapter({
+    fallbackStorage: multiStorage,
+    forceFallback: true,
+  });
+
+  // 1. Store a habit with routines array
+  const multiHabit = {
+    id: "h-dual-walk",
+    name: "Morning & Evening Walk",
+    type: "numeric",
+    targetValue: 6000,
+    unit: "steps",
+    step: 1000,
+    routines: ["morning", "evening"],
+    scheduleType: "daily",
+  };
+  await multiDb.putHabit(multiHabit);
+
+  // 2. Store a legacy habit without routines array
+  const legacyStoreHabit = {
+    id: "h-legacy-afternoon",
+    name: "Legacy Afternoon Habit",
+    type: "binary",
+    targetValue: 1,
+    routine: "afternoon",
+    scheduleType: "daily",
+  };
+  await multiDb.putHabit(legacyStoreHabit);
+
+  const testStore = new HabitStore({ storage: multiDb });
+  await testStore.init();
+
+  const retrievedMulti = testStore.getHabit("h-dual-walk");
+  assert(
+    Array.isArray(retrievedMulti.routines),
+    "[Issue #459 AC-4] Multi-routine habit preserves routines as array"
+  );
+  assertEqual(
+    JSON.stringify(retrievedMulti.routines),
+    JSON.stringify(["morning", "evening"]),
+    "[Issue #459 AC-4] Multi-routine habit retains both morning and evening routines"
+  );
+  assertEqual(
+    retrievedMulti.routine,
+    "morning",
+    "[Issue #459 AC-4] Primary routine field synced to routines[0] for backward compatibility"
+  );
+
+  const retrievedLegacy = testStore.getHabit("h-legacy-afternoon");
+  assert(
+    Array.isArray(retrievedLegacy.routines),
+    "[Issue #459 AC-4] Legacy habit silently migrated to have routines array"
+  );
+  assertEqual(
+    JSON.stringify(retrievedLegacy.routines),
+    JSON.stringify(["afternoon"]),
+    "[Issue #459 AC-4] Migrated legacy habit has routines = ['afternoon']"
+  );
+
+  // 3. Update habit routines via store
+  await testStore.updateHabit("h-legacy-afternoon", {
+    routines: ["morning", "afternoon", "evening"],
+  });
+  const updatedHabit459 = testStore.getHabit("h-legacy-afternoon");
+  assertEqual(
+    JSON.stringify(updatedHabit459.routines),
+    JSON.stringify(["morning", "afternoon", "evening"]),
+    "[Issue #459 AC-4] Updating routines via store.updateHabit persists new routines"
+  );
+  assertEqual(
+    updatedHabit459.routine,
+    "morning",
+    "[Issue #459 AC-4] Primary routine field updated to first entry of new routines"
+  );
 }
 
 runStorageTests()

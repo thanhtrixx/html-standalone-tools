@@ -63,6 +63,16 @@
       const habits = await this.storage.getAllHabits();
       this.state.habits = habits || [];
 
+      // Silent migration: normalize routines array
+      for (const h of this.state.habits) {
+        if (!Array.isArray(h.routines) || h.routines.length === 0) {
+          h.routines = [h.routine || engine.ROUTINES.ANYTIME];
+        }
+        if (!h.routine) {
+          h.routine = h.routines[0];
+        }
+      }
+
       // Load logs
       const allLogs = await this.storage.getAllLogs();
       const logsMap = {};
@@ -120,6 +130,11 @@
 
     // Habits CRUD
     async addHabit(habitData) {
+      const assignedRoutines =
+        Array.isArray(habitData.routines) && habitData.routines.length > 0
+          ? habitData.routines
+          : [habitData.routine || engine.ROUTINES.ANYTIME];
+
       const newHabit = {
         id:
           habitData.id ||
@@ -129,7 +144,8 @@
         targetValue: Number(habitData.targetValue) || 1,
         unit: habitData.unit || "",
         step: Number(habitData.step) || 1,
-        routine: habitData.routine || engine.ROUTINES.ANYTIME,
+        routines: assignedRoutines,
+        routine: assignedRoutines[0],
         scheduleType: habitData.scheduleType || engine.SCHEDULE_TYPES.DAILY,
         scheduleDays: habitData.scheduleDays || [0, 1, 2, 3, 4, 5, 6],
         intervalDays: habitData.intervalDays || 1,
@@ -155,9 +171,19 @@
       const idx = this.state.habits.findIndex((h) => h.id === id);
       if (idx === -1) return null;
 
+      const normalizedUpdates = { ...updates };
+      if (
+        Array.isArray(normalizedUpdates.routines) &&
+        normalizedUpdates.routines.length > 0
+      ) {
+        normalizedUpdates.routine = normalizedUpdates.routines[0];
+      } else if (normalizedUpdates.routine && !normalizedUpdates.routines) {
+        normalizedUpdates.routines = [normalizedUpdates.routine];
+      }
+
       const updated = {
         ...this.state.habits[idx],
-        ...updates,
+        ...normalizedUpdates,
       };
 
       await this.storage.putHabit(updated);

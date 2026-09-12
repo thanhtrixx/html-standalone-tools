@@ -699,6 +699,63 @@
         await app.exportDataJSON();
       }
     });
+
+    // Delegated change listener for form components
+    document.addEventListener("change", (e) => {
+      const target = e.target;
+      if (!target) return;
+
+      // Routine chip toggle styling
+      if (target.name === "routines") {
+        const label = target.closest("label.routine-chip");
+        if (label) {
+          if (target.checked) {
+            label.className =
+              "routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-semibold";
+          } else {
+            label.className =
+              "routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300";
+          }
+        }
+      }
+
+      // Measurement type change
+      if (target.name === "type") {
+        const targetFields = document.getElementById("modal-target-fields");
+        if (targetFields) {
+          if (target.value === "binary") {
+            targetFields.classList.add("hidden");
+          } else {
+            targetFields.classList.remove("hidden");
+          }
+        }
+      }
+
+      // Schedule type change
+      if (target.name === "scheduleType") {
+        const specificDays = document.getElementById(
+          "modal-specific-days-container"
+        );
+        const intervalCont = document.getElementById(
+          "modal-interval-container"
+        );
+        if (specificDays) {
+          if (target.value === "specific_days") {
+            specificDays.classList.remove("hidden");
+          } else {
+            specificDays.classList.add("hidden");
+          }
+        }
+        if (intervalCont) {
+          if (target.value === "interval") {
+            intervalCont.classList.remove("hidden");
+          } else {
+            intervalCont.classList.add("hidden");
+          }
+        }
+      }
+    });
+
     // Page visibility & focus listeners for background timer delta synchronization
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
@@ -1292,6 +1349,29 @@
         });
     }
 
+    const routines = [];
+    if (form) {
+      form
+        .querySelectorAll(
+          'input[name="routines"]:checked, input[name="modal-routine"]:checked'
+        )
+        .forEach((cb) => {
+          routines.push(cb.value);
+        });
+    }
+    if (routineEl && routineEl.value) {
+      if (
+        routines.length === 0 ||
+        (routines.length === 1 && !routines.includes(routineEl.value))
+      ) {
+        routines.length = 0;
+        routines.push(routineEl.value);
+      }
+    }
+    if (routines.length === 0) {
+      routines.push("morning");
+    }
+
     const habitData = {
       id: habitId || `h-${Date.now()}`,
       name: name,
@@ -1299,7 +1379,8 @@
       targetValue: targetValEl ? parseFloat(targetValEl.value) || 1 : 1,
       unit: unitEl ? unitEl.value.trim() : "",
       step: stepEl ? parseFloat(stepEl.value) || 1 : 1,
-      routine: routineEl ? routineEl.value : "morning",
+      routines: routines,
+      routine: routines[0] || "morning",
       scheduleType: scheduleEl ? scheduleEl.value : "daily",
       scheduleDays:
         scheduleDays.length > 0 ? scheduleDays : [0, 1, 2, 3, 4, 5, 6],
@@ -1553,6 +1634,8 @@
     closeHabitModal,
     saveHabitFromModal,
     handleToggleHabit,
+    handleStepIncrement,
+    handleStepDecrement,
     handleToggleTimer,
     syncRunningTimer,
     playTimerCompletionSound,
