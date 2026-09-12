@@ -16,6 +16,11 @@
  * - [Manager AC-3] Habit Deep-Dive Bottom Sheet with 365-day mini heatmap
  * - [Manager AC-4] Micro-Journal Reflection Notes CRUD
  * - [Manager AC-5] Archive and Restore Management
+ * - [Insights AC-1] 52-Week Contribution Heatmap Grid
+ * - [Insights AC-2] Heatmap Cell Popover Interactivity
+ * - [Insights AC-3] Key Metric Stat Cards
+ * - [Insights AC-4] Day-of-Week & Routine Trends
+ * - [Insights AC-5] Streak Milestone Badges
  */
 
 const {
@@ -49,6 +54,13 @@ async function runUITests() {
     renderDetailSheet,
     renderMiniHeatmap,
   } = require("../habit-tracker/src/ui/detail-sheet.js");
+  const {
+    renderYearlyHeatmapGrid,
+    renderWeekdayChart,
+    renderRoutineAdherence,
+    renderMilestoneBadges,
+    renderInsightsView,
+  } = require("../habit-tracker/src/ui/insights-view.js");
 
   const storage = storageModule.createStorageAdapter({ forceFallback: true });
   const store = new HabitStore({ storage });
@@ -451,6 +463,166 @@ async function runUITests() {
   assert(
     restoredHabits.some((h) => h.id === "h-yoga"),
     "[Issue #416 AC-5] Restored habit visible in active list again"
+  );
+
+  // ==========================================
+  // [Issue #417 AC-1] 52-Week Contribution Heatmap Grid
+  // ==========================================
+  console.log("\n--- [Issue #417 AC-1] 52-Week Contribution Heatmap Grid ---");
+
+  const heatmapData = engine.computeHeatmapData(
+    store.getHabits(true),
+    store.state.logs,
+    null,
+    selectedDate
+  );
+  assertEqual(
+    heatmapData.length >= 364,
+    true,
+    "[Issue #417 AC-1] 52-week heatmap computes full annual cycle of 364+ cells"
+  );
+
+  const renderedHeatmap = renderYearlyHeatmapGrid(heatmapData, "vi");
+  assert(
+    renderedHeatmap.includes("heatmap-container"),
+    "[Issue #417 AC-1] Rendered heatmap includes container"
+  );
+  assert(
+    renderedHeatmap.includes("grid-rows-7"),
+    "[Issue #417 AC-1] Rendered heatmap uses 7-row calendar grid"
+  );
+  assert(
+    renderedHeatmap.includes('data-date="2026-09-12"'),
+    "[Issue #417 AC-1] Active date is mapped as a cell in the heatmap"
+  );
+
+  // ==========================================
+  // [Issue #417 AC-2] Heatmap Cell Popover Interactivity
+  // ==========================================
+  console.log("\n--- [Issue #417 AC-2] Heatmap Cell Popover Interactivity ---");
+
+  assert(
+    renderedHeatmap.includes('id="heatmap-cell-popover"'),
+    "[Issue #417 AC-2] Heatmap includes cell popover element"
+  );
+  assert(
+    renderedHeatmap.includes("data-rate="),
+    "[Issue #417 AC-2] Heatmap cells encode data-rate for interactive hover/tap"
+  );
+  assert(
+    renderedHeatmap.includes("data-completed="),
+    "[Issue #417 AC-2] Heatmap cells encode completed count"
+  );
+
+  // ==========================================
+  // [Issue #417 AC-3] Key Metric Stat Cards
+  // ==========================================
+  console.log("\n--- [Issue #417 AC-3] Key Metric Stat Cards ---");
+
+  const insightsViewHtml = renderInsightsView(store, null, "vi");
+  assert(
+    insightsViewHtml.includes("Kỷ lục chuỗi dài nhất"),
+    "[Issue #417 AC-3] Stat cards render Best Streak label in Vietnamese"
+  );
+  assert(
+    insightsViewHtml.includes("Độ kiên trì 30 ngày"),
+    "[Issue #417 AC-3] Stat cards render Consistency Score label"
+  );
+  assert(
+    insightsViewHtml.includes("Tổng lượt hoàn thành"),
+    "[Issue #417 AC-3] Stat cards render Total Completions label"
+  );
+  assert(
+    insightsViewHtml.includes("Số ngày đạt 100%"),
+    "[Issue #417 AC-3] Stat cards render Perfect Days label"
+  );
+
+  // ==========================================
+  // [Issue #417 AC-4] Day-of-Week & Routine Trends
+  // ==========================================
+  console.log("\n--- [Issue #417 AC-4] Day-of-Week & Routine Trends ---");
+
+  const weekdayStats = engine.calculateWeekdayAdherence(
+    store.getHabits(true),
+    store.state.logs,
+    90,
+    selectedDate
+  );
+  assertEqual(
+    weekdayStats.length,
+    7,
+    "[Issue #417 AC-4] Weekday adherence computes statistics for all 7 weekdays"
+  );
+
+  const weekdayChartHtml = renderWeekdayChart(weekdayStats, "vi");
+  assert(
+    weekdayChartHtml.includes("Độ kiên trì theo ngày trong tuần"),
+    "[Issue #417 AC-4] Weekday chart renders title"
+  );
+  assert(
+    weekdayChartHtml.includes("T2") && weekdayChartHtml.includes("CN"),
+    "[Issue #417 AC-4] Weekday chart renders localized weekday abbreviations"
+  );
+
+  const routineStats = engine.calculateRoutineAdherence(
+    store.getHabits(true),
+    store.state.logs,
+    30,
+    selectedDate
+  );
+  assertEqual(
+    routineStats.length,
+    4,
+    "[Issue #417 AC-4] Routine adherence computes statistics for 4 routines"
+  );
+
+  const routineAdherenceHtml = renderRoutineAdherence(routineStats, "vi");
+  assert(
+    routineAdherenceHtml.includes("Tỷ lệ hoàn thành theo khung giờ"),
+    "[Issue #417 AC-4] Routine adherence chart renders title"
+  );
+  assert(
+    routineAdherenceHtml.includes("Buổi sáng") &&
+      routineAdherenceHtml.includes("Buổi tối"),
+    "[Issue #417 AC-4] Routine adherence renders localized routine names"
+  );
+
+  // ==========================================
+  // [Issue #417 AC-5] Streak Milestone Badges
+  // ==========================================
+  console.log("\n--- [Issue #417 AC-5] Streak Milestone Badges ---");
+
+  const badges = engine.evaluateMilestoneBadges(30, 50);
+  assertEqual(
+    badges.length,
+    6,
+    "[Issue #417 AC-5] Evaluates 6 milestone badges (7d, 21d, 30d, 66d, 100d, 365d)"
+  );
+  assertEqual(
+    badges.find((b) => b.id === "streak-7").unlocked,
+    true,
+    "[Issue #417 AC-5] 7-day badge unlocked when streak reaches 30"
+  );
+  assertEqual(
+    badges.find((b) => b.id === "streak-30").unlocked,
+    true,
+    "[Issue #417 AC-5] 30-day badge unlocked when streak reaches 30"
+  );
+  assertEqual(
+    badges.find((b) => b.id === "streak-66").unlocked,
+    false,
+    "[Issue #417 AC-5] 66-day badge locked when streak is 30"
+  );
+
+  const badgesHtml = renderMilestoneBadges(badges, "vi");
+  assert(
+    badgesHtml.includes("Huy hiệu cột mốc chuỗi"),
+    "[Issue #417 AC-5] Milestones section renders title"
+  );
+  assert(
+    badgesHtml.includes("Khoá thói quen (66 ngày)") ||
+      badgesHtml.includes("66 ngày"),
+    "[Issue #417 AC-5] 66-day milestone is rendered"
   );
 }
 
