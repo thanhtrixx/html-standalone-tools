@@ -934,7 +934,6 @@
     `;
 
     container.appendChild(toast);
-    container.innerHTML = (container.innerHTML || "") + " " + toast.innerHTML;
     const raf =
       typeof requestAnimationFrame !== "undefined"
         ? requestAnimationFrame

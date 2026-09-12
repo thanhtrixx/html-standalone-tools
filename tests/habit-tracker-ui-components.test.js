@@ -2843,6 +2843,7 @@ async function runUITests() {
     createHabitTrackerSandbox();
   undoSandbox430.requestAnimationFrame = (fn) => fn();
   undoSandbox430.cancelAnimationFrame = () => {};
+  undoSandbox430.setTimeout = (fn, ms) => 1;
   await undoSandbox430.HabitApp.init();
 
   const undoTestDate430 = "2026-09-12";
@@ -2918,14 +2919,15 @@ async function runUITests() {
   );
 
   // Verify toast notification rendered with undo button
-  const renderedToasts430 = toastContainerEl430.querySelectorAll(
-    '[data-action="undo-toast"]'
-  );
+  const renderedToastChildren = toastContainerEl430.children || [];
   const toastHasUndoBtn =
-    renderedToasts430.length > 0 ||
-    toastContainerEl430.innerHTML.includes('data-action="undo-toast"') ||
-    toastContainerEl430.innerHTML.includes("Hoàn tác") ||
-    toastContainerEl430.innerHTML.includes("Undo");
+    renderedToastChildren.length > 0 &&
+    renderedToastChildren.some(
+      (c) =>
+        (c.innerHTML && c.innerHTML.includes('data-action="undo-toast"')) ||
+        (c.innerHTML && c.innerHTML.includes("Hoàn tác")) ||
+        (c.innerHTML && c.innerHTML.includes("Undo"))
+    );
 
   assert(
     toastHasUndoBtn,
@@ -2934,7 +2936,7 @@ async function runUITests() {
 
   // 3. Trigger Undo via Public Seam HabitApp.undoLastAction() or data-action="undo-toast"
   const undoBtn430 =
-    renderedToasts430[0] ||
+    renderedToastChildren[0] ||
     (() => {
       const b = undoSandbox430.document.createElement("button");
       b.setAttribute("data-action", "undo-toast");
