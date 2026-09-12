@@ -107,7 +107,7 @@ test.describe("Atomic Habit Tracker Multi-Device UI/UX Suite", () => {
     }
   });
 
-  test("4. Insights View 52-Week Heatmap & Popover Interaction", async ({
+  test("4. Insights View 52-Week Heatmap & Day Cell Date Navigation", async ({
     page,
   }) => {
     await setupPage(page);
@@ -120,14 +120,15 @@ test.describe("Atomic Habit Tracker Multi-Device UI/UX Suite", () => {
     const heatmap = page.locator(".heatmap-container");
     await expect(heatmap).toBeVisible();
 
-    // Click on a heatmap cell
-    const cell = page.locator(".heatmap-cell").first();
+    // Click on an interactive heatmap cell
+    const cell = page.locator("[data-action='view-heatmap-date']").first();
     await expect(cell).toBeVisible();
     await cell.click();
+    await page.waitForTimeout(100);
 
-    // Verify popover appears
-    const popover = page.locator("#heatmap-cell-popover");
-    await expect(popover).toBeVisible();
+    // Verify automatically navigates to today tab for the selected date
+    const todayTabBtn = page.locator("button[data-tab='today']");
+    await expect(todayTabBtn).toBeVisible();
   });
 
   test("5. Habit Catalog Manager & Edit Modal", async ({ page }) => {

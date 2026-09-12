@@ -201,6 +201,7 @@
       <div
         id="habit-card-${habit.id}"
         data-habit-card="${habit.id}"
+        data-habit-id="${habit.id}"
         class="habit-card relative overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-4 mb-3 border ${completedCardStyle} transition-all duration-300 shadow-md touch-pan-y"
       >
         <!-- Swipe reveal zone (Green check) -->

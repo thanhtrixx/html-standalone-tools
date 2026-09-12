@@ -148,6 +148,19 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <!-- Ambient Running Timer Header Pill -->
+          <button
+            id="header-active-timer-pill"
+            data-action="jump-to-timer"
+            onclick="window.HabitApp.jumpToRunningTimer()"
+            class="hidden items-center gap-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-sm tabular-nums font-mono animate-pulse cursor-pointer hover:bg-emerald-500/20"
+          >
+            <span>⏱️</span>
+            <span id="header-timer-ticker" class="tabular-nums font-mono"
+              >00:00</span
+            >
+          </button>
+
           <!-- Freeze Token Counter Badge -->
           <button
             onclick="window.HabitApp.switchTab('settings')"
@@ -257,6 +270,19 @@
         id="detail-sheet-container"
         class="w-full max-w-lg safe-bottom"
       ></div>
+    </div>
+
+    <!-- ==================== HABIT DELETE CONFIRMATION MODAL OVERLAY ==================== -->
+    <div
+      id="delete-confirm-modal-overlay"
+      class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-desc"
+      onclick="if (event.target === this) window.HabitApp.closeDeleteModal();"
+    >
+      <div id="delete-modal-container" class="w-full max-w-sm my-auto"></div>
     </div>
 
     <!-- ==================== 100% VICTORY CONFETTI CANVAS ==================== -->

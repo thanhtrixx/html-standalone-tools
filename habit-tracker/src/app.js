@@ -70,6 +70,8 @@
   let activeTab = "today"; // 'today' | 'insights' | 'manager' | 'settings'
   let timerInterval = null;
   let runningTimerHabitId = null;
+  let runningTimerDate = null;
+  let pendingDeleteHabitId = null;
   let swipeStartX = 0;
   let swipeStartY = 0;
 
@@ -196,6 +198,7 @@
     updateTopBar();
     renderActiveTab();
     updateNavigationDock();
+    updateAmbientTimerPill();
   }
 
   /**
@@ -255,6 +258,8 @@
     } else if (activeTab === "settings") {
       renderSettingsTab(container, lang);
     }
+
+    updateAmbientTimerPill();
   }
 
   /**
@@ -419,31 +424,108 @@
   }
 
   /**
-   * Binds swipe gesture handlers to habit cards
+   * Binds swipe gesture handlers to habit cards with spring resistance
    */
   function bindHabitCardGestures() {
     const cards = document.querySelectorAll(".habit-card");
     cards.forEach((card) => {
-      const habitId = card.getAttribute("data-habit-id");
+      const habitId =
+        card.getAttribute("data-habit-id") ||
+        card.getAttribute("data-habit-card");
       if (!habitId) return;
+
+      const revealZone =
+        card.querySelector(".swipe-reveal-complete") ||
+        card.querySelector("[data-swipe-reveal]");
+
+      let startX = 0;
+      let startY = 0;
+      let isDragging = false;
 
       card.addEventListener(
         "touchstart",
         (e) => {
-          swipeStartX = e.touches[0].clientX;
-          swipeStartY = e.touches[0].clientY;
+          if (!e.touches || !e.touches[0]) return;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          isDragging = true;
+          card.style.transition = "none";
         },
         { passive: true }
       );
 
-      card.addEventListener("touchend", async (e) => {
-        const endX = e.changedTouches[0].clientX;
-        const endY = e.changedTouches[0].clientY;
-        const diffX = endX - swipeStartX;
-        const diffY = endY - swipeStartY;
+      card.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!isDragging || !e.touches || !e.touches[0]) return;
+          const currentX = e.touches[0].clientX;
+          const currentY = e.touches[0].clientY;
+          const deltaX = currentX - startX;
+          const deltaY = currentY - startY;
 
-        // Ensure mostly horizontal swipe
-        if (Math.abs(diffX) > 80 && Math.abs(diffX) > Math.abs(diffY) * 1.5) {
+          // Vertical scroll protection: if vertical movement is dominant, keep neutral
+          if (Math.abs(deltaY) > Math.abs(deltaX)) {
+            card.style.transform = "translateX(0px)";
+            if (revealZone) {
+              revealZone.style.opacity = "0";
+              revealZone.style.transform = "translateX(-100%)";
+            }
+            return;
+          }
+
+          if (e.cancelable && e.preventDefault) {
+            e.preventDefault();
+          }
+
+          if (deltaX > 0) {
+            // Apply spring damping resistance: linear below 80px, progressive damping above 80px
+            const tx =
+              deltaX <= 80 ? deltaX * 0.85 : 68 + Math.pow(deltaX - 80, 0.7);
+            card.style.transform = `translateX(${tx}px)`;
+            if (revealZone) {
+              const opacity = Math.min(1, tx / 60);
+              revealZone.style.opacity = String(opacity);
+              revealZone.style.transform = `translateX(${Math.min(
+                0,
+                -100 + (tx / 80) * 100
+              )}%)`;
+            }
+          } else {
+            // Leftward drag resistance
+            const tx = -Math.min(40, Math.abs(deltaX) * 0.4);
+            card.style.transform = `translateX(${tx}px)`;
+            if (revealZone) {
+              revealZone.style.opacity = "0";
+              revealZone.style.transform = "translateX(-100%)";
+            }
+          }
+        },
+        { passive: false }
+      );
+
+      card.addEventListener("touchend", async (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        card.style.transition = "";
+        card.style.transform = "";
+        if (revealZone) {
+          revealZone.style.opacity = "";
+          revealZone.style.transform = "";
+        }
+
+        const endX =
+          e.changedTouches && e.changedTouches[0]
+            ? e.changedTouches[0].clientX
+            : startX;
+        const endY =
+          e.changedTouches && e.changedTouches[0]
+            ? e.changedTouches[0].clientY
+            : startY;
+        const diffX = endX - startX;
+        const diffY = endY - startY;
+
+        // Ensure mostly horizontal swipe with threshold >= 80px
+        if (Math.abs(diffX) >= 80 && Math.abs(diffX) > Math.abs(diffY)) {
           if (diffX > 0) {
             // Swipe Right -> Complete Habit
             if (typeof navigator !== "undefined" && navigator.vibrate) {
@@ -533,6 +615,30 @@
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
         await app.handleDeleteHabit(habitId);
+      } else if (action === "cancel-delete") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        if (app && typeof app.closeDeleteModal === "function") {
+          app.closeDeleteModal();
+        } else {
+          closeDeleteModal();
+        }
+      } else if (action === "confirm-delete") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        if (app && typeof app.confirmDeleteHabit === "function") {
+          await app.confirmDeleteHabit();
+        } else {
+          await confirmDeleteHabit();
+        }
+      } else if (action === "jump-to-timer") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        if (app && typeof app.jumpToRunningTimer === "function") {
+          await app.jumpToRunningTimer();
+        } else {
+          jumpToRunningTimer();
+        }
       } else if (action === "reorder-up" || action === "reorder-down") {
         const routine = target.getAttribute("data-routine");
         const app =
@@ -707,41 +813,238 @@
   }
 
   /**
+   * Updates ambient running timer pills in header and dock
+   */
+  function updateAmbientTimerPill() {
+    const headerPill = document.getElementById("header-active-timer-pill");
+    const dockPill = document.getElementById("dock-active-timer-pill");
+
+    if (!runningTimerHabitId || !store) {
+      if (headerPill) headerPill.classList.add("hidden");
+      if (dockPill) dockPill.classList.add("hidden");
+      return;
+    }
+
+    const habit = store.getHabit(runningTimerHabitId);
+    const date = runningTimerDate || store.getActiveDate();
+    const log = (store.state &&
+      store.state.logs &&
+      store.state.logs[`${runningTimerHabitId}_${date}`]) || { value: 0 };
+    const totalSecs = Math.max(0, log.value || 0);
+    const m = String(Math.floor(totalSecs / 60)).padStart(2, "0");
+    const s = String(totalSecs % 60).padStart(2, "0");
+    const tickerStr = `${m}:${s}`;
+    const icon = habit ? habit.icon || "⏱️" : "⏱️";
+    const name = habit ? habit.name : "";
+
+    if (headerPill) {
+      headerPill.classList.remove("hidden");
+      headerPill.className =
+        "items-center gap-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-sm tabular-nums font-mono animate-pulse cursor-pointer hover:bg-emerald-500/20 flex";
+      headerPill.innerHTML = `<span>${icon}</span> <span class="tabular-nums font-mono max-w-[100px] truncate hidden sm:inline">${name}</span> <span id="header-timer-ticker" class="tabular-nums font-mono font-bold">${tickerStr}</span>`;
+    }
+    if (dockPill) {
+      dockPill.classList.remove("hidden");
+      dockPill.className =
+        "items-center gap-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-sm tabular-nums font-mono animate-pulse cursor-pointer hover:bg-emerald-500/20 flex";
+      dockPill.innerHTML = `<span>${icon}</span> <span class="tabular-nums font-mono font-bold">${tickerStr}</span>`;
+    }
+  }
+
+  /**
+   * Jumps to running timer view (switches to 'today' tab and restores active date)
+   */
+  async function jumpToRunningTimer() {
+    if (!runningTimerHabitId || !store) return;
+    if (runningTimerDate) {
+      store.setActiveDate(runningTimerDate);
+    }
+    activeTab = "today";
+    renderApp();
+  }
+
+  /**
    * Habit Timer Toggle
    */
   async function handleToggleTimer(habitId, date) {
     const habit = store.getHabit(habitId);
     if (!habit) return;
+    const targetDate = date || store.getActiveDate();
 
     if (runningTimerHabitId === habitId) {
       // Stop Timer
-      clearInterval(timerInterval);
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
       runningTimerHabitId = null;
+      runningTimerDate = null;
+      updateAmbientTimerPill();
       renderActiveTab();
       return;
     }
 
     if (runningTimerHabitId) {
-      clearInterval(timerInterval);
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
       runningTimerHabitId = null;
+      runningTimerDate = null;
     }
 
     runningTimerHabitId = habitId;
+    runningTimerDate = targetDate;
+    updateAmbientTimerPill();
+
     timerInterval = setInterval(async () => {
-      const currentLog = store.state.logs[`${habitId}_${date}`] || { value: 0 };
+      const currentLog = (store.state &&
+        store.state.logs &&
+        store.state.logs[`${habitId}_${targetDate}`]) || { value: 0 };
       const nextSeconds = (currentLog.value || 0) + 1;
-      await store.logHabit(habitId, date, nextSeconds);
+      await store.logHabit(habitId, targetDate, nextSeconds);
+      updateAmbientTimerPill();
 
       // Auto stop if target reached
       if (nextSeconds >= habit.targetValue) {
-        clearInterval(timerInterval);
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = null;
         runningTimerHabitId = null;
+        runningTimerDate = null;
+        updateAmbientTimerPill();
         renderActiveTab();
-        showToast(`🎉 Đã hoàn thành thời lượng cho ${habit.name}!`, "success");
+        const lang =
+          (store.getSettings() && store.getSettings().language) || "vi";
+        showToast(
+          `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
+          "success"
+        );
       }
     }, 1000);
 
     renderActiveTab();
+  }
+
+  /**
+   * Prompts user with accessible delete confirmation alertdialog modal
+   */
+  async function promptDeleteHabit(habitId) {
+    if (!store || !habitId) return;
+    pendingDeleteHabitId = habitId;
+    const habit = store.getHabit(habitId);
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    const habitName = habit ? habit.name : habitId;
+
+    const overlay = document.getElementById("delete-confirm-modal-overlay");
+    const container = document.getElementById("delete-modal-container");
+
+    const modalHtml = `
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-white" role="alertdialog" aria-modal="true" aria-labelledby="delete-dialog-title" aria-describedby="delete-dialog-desc">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-2xl bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl font-bold">
+            🗑️
+          </div>
+          <div>
+            <h3 id="delete-dialog-title" class="text-base font-bold text-slate-900 dark:text-white">
+              ${i18n.t("delete_confirm_title", {}, lang)}
+            </h3>
+            <span class="text-xs text-slate-500 dark:text-slate-400">${habit ? (habit.icon || "🎯") + " " + habit.name : ""}</span>
+          </div>
+        </div>
+
+        <p id="delete-dialog-desc" class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+          ${i18n.t("delete_confirm_desc", { name: habitName }, lang)}
+        </p>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button
+            type="button"
+            data-action="cancel-delete"
+            class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95 cursor-pointer"
+          >
+            ${i18n.t("delete_cancel_btn", {}, lang)}
+          </button>
+          <button
+            type="button"
+            data-action="confirm-delete"
+            data-habit-id="${habitId}"
+            class="px-5 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-rose-500/25 transition-all active:scale-95 cursor-pointer"
+          >
+            ${i18n.t("delete_confirm_btn", {}, lang)}
+          </button>
+        </div>
+      </div>
+    `;
+
+    if (container) {
+      container.innerHTML = modalHtml;
+    }
+    if (overlay) {
+      overlay.innerHTML = `<div id="delete-modal-container" class="w-full max-w-sm my-auto">${modalHtml}</div>`;
+      overlay.classList.remove("hidden");
+    }
+  }
+
+  /**
+   * Closes delete confirmation modal
+   */
+  function closeDeleteModal() {
+    pendingDeleteHabitId = null;
+    const overlay = document.getElementById("delete-confirm-modal-overlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+    }
+  }
+
+  /**
+   * Confirms habit deletion and purges historical check-in logs
+   */
+  async function confirmDeleteHabit() {
+    if (!store || !pendingDeleteHabitId) return;
+    const habitId = pendingDeleteHabitId;
+
+    if (runningTimerHabitId === habitId) {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      runningTimerHabitId = null;
+      runningTimerDate = null;
+      updateAmbientTimerPill();
+    }
+
+    await store.deleteHabit(habitId);
+    closeDeleteModal();
+
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_habit_deleted", {}, lang), "info");
+    renderApp();
+  }
+
+  /**
+   * Main habit deletion handler
+   */
+  async function handleDeleteHabit(habitId, confirmed = false) {
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    const confirmFn =
+      typeof window !== "undefined" && typeof window.confirm === "function"
+        ? window.confirm
+        : typeof globalThis !== "undefined" &&
+            typeof globalThis.confirm === "function"
+          ? globalThis.confirm
+          : null;
+
+    if (confirmFn) {
+      const isConfirmed = confirmFn(i18n.t("delete_confirm_msg", {}, lang));
+      if (!isConfirmed) {
+        return;
+      }
+      pendingDeleteHabitId = habitId;
+      await confirmDeleteHabit();
+      return;
+    }
+
+    if (confirmed) {
+      pendingDeleteHabitId = habitId;
+      await confirmDeleteHabit();
+    } else {
+      await promptDeleteHabit(habitId);
+    }
   }
 
   /**
@@ -1133,6 +1436,14 @@
     openAddHabitModal: () => handleOpenEditModal(null),
     closeHabitModal,
     saveHabitFromModal,
+    handleToggleHabit,
+    handleToggleTimer,
+    updateAmbientTimerPill,
+    jumpToRunningTimer,
+    promptDeleteHabit,
+    closeDeleteModal,
+    confirmDeleteHabit,
+    handleDeleteHabit,
     handleArchiveHabit: async (id) => {
       await store.archiveHabit(id);
       const lang =
@@ -1148,21 +1459,6 @@
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_habit_restored", {}, lang), "success");
-    },
-    handleDeleteHabit: async (id) => {
-      const lang =
-        (store && store.getSettings() && store.getSettings().language) || "vi";
-      if (
-        typeof window !== "undefined" &&
-        window.confirm &&
-        !window.confirm(i18n.t("delete_confirm_msg", {}, lang))
-      ) {
-        return;
-      }
-      await store.deleteHabit(id);
-      const notify =
-        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
-      notify(i18n.t("toast_habit_deleted", {}, lang), "info");
     },
     handleReorderHabit: async (habitId, routine, direction) => {
       if (!store || !habitId) return;
