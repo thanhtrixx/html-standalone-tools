@@ -631,6 +631,67 @@ try {
     badges100.find((b) => b.id === "streak-100" && b.unlocked),
     "100-day streak badge unlocked"
   );
+
+  // ==========================================
+  // [AC-7] Statistical Zero-Baseline on Empty History (Issue #457)
+  // ==========================================
+  console.log("\n--- [AC-7] Statistical Zero-Baseline on Empty History ---");
+
+  const emptyHabit = {
+    id: "h-empty",
+    name: "New Unstarted Habit",
+    scheduleType: "specific_days",
+    scheduleDays: [1, 3, 5],
+    startDate: "2026-09-12",
+  };
+
+  const emptyStreak = engine.calculateStreakAndConsistency(
+    emptyHabit,
+    {},
+    2,
+    [],
+    "2026-09-12"
+  );
+  assertEqual(
+    emptyStreak.consistencyScore30d,
+    0,
+    "[AC-7] Unstarted habit with 0 scheduled history returns 0% for 30d consistency"
+  );
+  assertEqual(
+    emptyStreak.consistencyScore90d,
+    0,
+    "[AC-7] Unstarted habit with 0 scheduled history returns 0% for 90d consistency"
+  );
+
+  const emptyWeekdayStats = engine.calculateWeekdayAdherence([], {}, 90, "2026-09-12");
+  for (const wStat of emptyWeekdayStats) {
+    assertEqual(
+      wStat.rate,
+      0,
+      `[AC-7] Weekday ${wStat.dayOfWeek} with 0 scheduled days returns rate: 0%`
+    );
+  }
+
+  const emptyRoutineStats = engine.calculateRoutineAdherence([], {}, 30, "2026-09-12");
+  for (const rStat of emptyRoutineStats) {
+    assertEqual(
+      rStat.rate,
+      0,
+      `[AC-7] Routine ${rStat.routine} with 0 scheduled days returns rate: 0%`
+    );
+  }
+
+  const emptyDailyProgress = engine.calculateDailyProgress([], {}, "2026-09-12");
+  assertEqual(
+    emptyDailyProgress.percentage,
+    0,
+    "[AC-7] Empty scheduled list returns 0% daily progress"
+  );
+  assertEqual(
+    emptyDailyProgress.isAllCompleted,
+    false,
+    "[AC-7] Empty scheduled list marks isAllCompleted = false"
+  );
 } catch (err) {
   console.error("❌ Exception during Engine Math test execution:", err);
   process.exit(1);

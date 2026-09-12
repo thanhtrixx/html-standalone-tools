@@ -382,7 +382,7 @@
         }
       }
 
-      if (scheduledCount === 0) return 100;
+      if (scheduledCount === 0) return 0;
       return Math.round((completedCount / scheduledCount) * 100);
     }
 
@@ -422,8 +422,8 @@
       return {
         total: 0,
         completed: 0,
-        percentage: 100,
-        ratio: 1.0,
+        percentage: 0,
+        ratio: 0.0,
         habits: [],
       };
     }
@@ -439,8 +439,8 @@
       return {
         total: 0,
         completed: 0,
-        percentage: 100,
-        ratio: 1.0,
+        percentage: 0,
+        ratio: 0.0,
         habits: [],
       };
     }
@@ -481,9 +481,9 @@
       return {
         total: 0,
         completed: 0,
-        percentage: 100,
-        ratio: 1.0,
-        isAllCompleted: true,
+        percentage: 0,
+        ratio: 0.0,
+        isAllCompleted: false,
       };
     }
 
@@ -494,9 +494,9 @@
       return {
         total: 0,
         completed: 0,
-        percentage: 100,
-        ratio: 1.0,
-        isAllCompleted: true,
+        percentage: 0,
+        ratio: 0.0,
+        isAllCompleted: false,
       };
     }
 
@@ -616,7 +616,7 @@
     return stats.map((s, idx) => ({
       dayOfWeek: idx,
       rate:
-        s.scheduled > 0 ? Math.round((s.completed / s.scheduled) * 100) : 100,
+        s.scheduled > 0 ? Math.round((s.completed / s.scheduled) * 100) : 0,
       scheduled: s.scheduled,
       completed: s.completed,
     }));
@@ -661,7 +661,7 @@
       rate:
         stats[rKey].scheduled > 0
           ? Math.round((stats[rKey].completed / stats[rKey].scheduled) * 100)
-          : 100,
+          : 0,
       scheduled: stats[rKey].scheduled,
       completed: stats[rKey].completed,
     }));
