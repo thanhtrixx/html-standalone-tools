@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="vi" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://accounts.google.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob: https://trile.dev https://*.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://www.googleapis.com https://accounts.google.com https://cloudflareinsights.com https://static.cloudflareinsights.com; font-src 'self' data:; manifest-src 'self';"
+    />
+    <title>Atomic Habit & Routine Tracker</title>
+    <meta
+      name="description"
+      content="Mobile-first standalone PWA habit and routine tracker with mathematical streak/consistency models, 52-week calendar heatmaps, and local-first IndexedDB persistence."
+    />
+    <meta name="theme-color" content="#020617" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Habits" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon-180.png" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://trile.dev/tools/habit-tracker/" />
+    <meta property="og:title" content="Atomic Habit & Routine Tracker" />
+    <meta
+      property="og:description"
+      content="Mobile-first standalone PWA habit and routine tracker with mathematical streak/consistency models, 52-week calendar heatmaps, and local-first IndexedDB persistence."
+    />
+    <meta
+      property="og:image"
+      content="https://trile.dev/tools/habit-tracker/og-image.png"
+    />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://trile.dev/tools/habit-tracker/" />
+    <meta name="twitter:title" content="Atomic Habit & Routine Tracker" />
+    <meta
+      name="twitter:description"
+      content="Mobile-first standalone PWA habit and routine tracker with mathematical streak/consistency models, 52-week calendar heatmaps, and local-first IndexedDB persistence."
+    />
+    <meta
+      name="twitter:image"
+      content="https://trile.dev/tools/habit-tracker/og-image.png"
+    />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#ecfdf5",
+                100: "#d1fae5",
+                400: "#34d399",
+                500: "#10b981",
+                600: "#059669",
+                700: "#047857",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      :root {
+        --bg-base: #020617;
+        --bg-card: #0f172a;
+        --text-base: #f8fafc;
+        --text-muted: #94a3b8;
+        --border-base: #1e293b;
+        --accent: #10b981;
+      }
+      :root.light {
+        --bg-base: #f8fafc;
+        --bg-card: #ffffff;
+        --text-base: #0f172a;
+        --text-muted: #64748b;
+        --border-base: #e2e8f0;
+        --accent: #059669;
+      }
+
+      body {
+        background-color: var(--bg-base);
+        color: var(--text-base);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        touch-action: pan-y;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      /* Native App Bottom Dock Safe Inset */
+      .safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 16px);
+      }
+      .safe-top {
+        padding-top: env(safe-area-inset-top, 16px);
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-white"
+  >
+    <!-- Top Header Bar -->
+    <header
+      class="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 safe-top"
+    >
+      <div class="max-w-lg mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div
+            class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-bold text-base"
+          >
+            🔥
+          </div>
+          <div>
+            <h1
+              class="text-sm font-black text-white tracking-tight leading-none"
+            >
+              Atomic Habits
+            </h1>
+            <span class="text-[10px] text-slate-400">PWA • Offline-First</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Freeze Token Counter Badge -->
+          <button
+            onclick="window.HabitApp.switchTab('settings')"
+            class="flex items-center gap-1 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-full text-xs font-bold text-amber-400 hover:bg-slate-800 transition-colors shadow-sm"
+          >
+            <span>🛡️</span>
+            <span id="freeze-tokens-count">2</span>
+          </button>
+
+          <!-- Language Quick Toggle -->
+          <button
+            id="lang-toggle-btn"
+            onclick="
+              window.HabitApp.switchLanguage(
+                document.getElementById('lang-toggle-btn').textContent === 'VI'
+                  ? 'en'
+                  : 'vi'
+              )
+            "
+            class="px-2.5 py-1 bg-slate-900 border border-slate-800 rounded-full text-xs font-bold text-slate-300 hover:text-white transition-colors"
+          >
+            VI
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main View Container -->
+    <main
+      id="main-content"
+      class="flex-1 max-w-lg mx-auto w-full px-4 pt-4 pb-28"
+    >
+      <!-- Dynamic tab views rendered here -->
+    </main>
+
+    <!-- Bottom Navigation Dock (Docked on Mobile) -->
+    <nav
+      class="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-lg border-t border-slate-800/90 safe-bottom"
+    >
+      <div class="max-w-lg mx-auto flex items-center justify-around py-2 px-2">
+        <button
+          onclick="window.HabitApp.switchTab('today')"
+          data-tab="today"
+          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-emerald-400 font-bold transition-all active:scale-95"
+        >
+          <span class="text-xl">🔥</span>
+          <span class="text-[11px]">Hôm nay</span>
+        </button>
+
+        <button
+          onclick="window.HabitApp.switchTab('insights')"
+          data-tab="insights"
+          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-slate-400 transition-all active:scale-95"
+        >
+          <span class="text-xl">📊</span>
+          <span class="text-[11px]">Thống kê</span>
+        </button>
+
+        <button
+          onclick="window.HabitApp.switchTab('manager')"
+          data-tab="manager"
+          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-slate-400 transition-all active:scale-95"
+        >
+          <span class="text-xl">📋</span>
+          <span class="text-[11px]">Thói quen</span>
+        </button>
+
+        <button
+          onclick="window.HabitApp.switchTab('settings')"
+          data-tab="settings"
+          class="nav-tab-btn flex-1 flex flex-col items-center gap-1 py-1.5 px-2 text-slate-400 transition-all active:scale-95"
+        >
+          <span class="text-xl">⚙️</span>
+          <span class="text-[11px]">Cài đặt</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ==================== HABIT EDIT / CREATE MODAL OVERLAY ==================== -->
+    <div
+      id="habit-edit-modal-overlay"
+      class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"
+      onclick="if (event.target === this) window.HabitApp.closeHabitModal();"
+    >
+      <div id="habit-modal-container" class="w-full max-w-md my-auto"></div>
+    </div>
+
+    <!-- ==================== HABIT DETAIL BOTTOM SHEET OVERLAY ==================== -->
+    <div
+      id="detail-sheet-overlay"
+      class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-end justify-center"
+      onclick="if (event.target === this) window.HabitApp.closeDetailSheet();"
+    >
+      <div
+        id="detail-sheet-container"
+        class="w-full max-w-lg bg-slate-900 border-t border-slate-800 rounded-t-3xl max-h-[90vh] overflow-y-auto shadow-2xl safe-bottom"
+      ></div>
+    </div>
+
+    <!-- ==================== 100% VICTORY CONFETTI CANVAS ==================== -->
+    <canvas
+      id="confetti-canvas"
+      class="fixed inset-0 pointer-events-none z-50 w-full h-full"
+    ></canvas>
+
+    <!-- ==================== TOAST NOTIFICATIONS CONTAINER ==================== -->
+    <div
+      id="toast-container"
+      class="fixed top-16 left-4 right-4 max-w-sm mx-auto z-50 space-y-2 pointer-events-none flex flex-col items-center"
+    ></div>
+
+    <!-- ==================== PWA UPDATE BANNER ==================== -->
+    <div
+      id="pwa-update-banner"
+      class="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-50 hidden"
+    >
+      <div
+        class="bg-slate-900/95 border border-emerald-500/60 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-3 text-slate-100 backdrop-blur-md"
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">✨</span>
+          <div>
+            <h4 class="font-bold text-sm text-emerald-400">
+              Phiên bản mới đã sẵn sàng
+            </h4>
+            <p class="text-xs text-slate-300">
+              Nhấn cập nhật để áp dụng phiên bản mới nhất.
+            </p>
+          </div>
+        </div>
+        <button
+          onclick="window.HabitApp.applyPwaUpdate()"
+          class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-colors whitespace-nowrap active:scale-95"
+        >
+          Cập nhật
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== MODULAR JAVASCRIPT APP SOURCES ==================== -->
+    <script src="src/domain/engine.js"></script>
+    <script src="src/i18n/translations.js"></script>
+    <script src="src/storage/indexeddb.js"></script>
+    <script src="src/state/store.js"></script>
+    <script src="src/sync/export-import.js"></script>
+    <script src="src/sync/cloud-backup.js"></script>
+    <script src="src/pwa/notifications.js"></script>
+    <script src="src/ui/components.js"></script>
+    <script src="src/ui/today-view.js"></script>
+    <script src="src/ui/manager-view.js"></script>
+    <script src="src/ui/detail-sheet.js"></script>
+    <script src="src/ui/insights-view.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>

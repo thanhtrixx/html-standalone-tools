@@ -44,6 +44,10 @@ async function runTests() {
     tools.some((t) => t.name === "smart-buy-list-price-tracker"),
     'Discovered "smart-buy-list-price-tracker" tool'
   );
+  assert(
+    tools.some((t) => t.name === "habit-tracker"),
+    'Discovered "habit-tracker" tool'
+  );
 
   // Test 2: Inlining local assets helper
   const mockDir = path.join(__dirname, "mock_tool");

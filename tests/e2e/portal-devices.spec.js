@@ -47,10 +47,11 @@ test.describe("Portal Catalog & Central Hub Multi-Device UI/UX Suite", () => {
       await assertTouchTargetSize(langBtnVi, 28, 28);
     }
 
-    // Verify all 3 tool launch buttons
+    // Verify all tool launch buttons
     const launchButtons = page.locator('a[data-i18n="launchButton"]');
-    await expect(launchButtons).toHaveCount(3);
-    for (let i = 0; i < 3; i++) {
+    const btnCount = await launchButtons.count();
+    expect(btnCount).toBeGreaterThanOrEqual(4);
+    for (let i = 0; i < btnCount; i++) {
       const btn = launchButtons.nth(i);
       await expect(btn).toBeVisible();
       if (isMobile) {
@@ -116,6 +117,24 @@ test.describe("Portal Catalog & Central Hub Multi-Device UI/UX Suite", () => {
     );
   });
 
+  test("5b. Deep Tool Navigation - Atomic Habit Tracker", async ({ page }) => {
+    const { errors } = await setupPortalPage(page);
+
+    const habitLink = page.locator(
+      'a[href*="habit-tracker"][data-i18n="launchButton"]'
+    );
+    await expect(habitLink).toBeVisible();
+    await habitLink.click();
+
+    await page.waitForURL(/.*habit-tracker/);
+    await page.waitForLoadState("domcontentloaded");
+    await assertNoHorizontalOverflow(page);
+    expect(
+      errors,
+      "Navigating to habit tracker should produce no errors"
+    ).toEqual([]);
+  });
+
   test("6. Bilingual Toggle Stability (EN <-> VI) & Localization Content", async ({
     page,
   }) => {
@@ -138,6 +157,9 @@ test.describe("Portal Catalog & Central Hub Multi-Device UI/UX Suite", () => {
     const tool3 = page.locator('[data-i18n="tool3Title"]');
     await expect(tool3).toHaveText("Dự Phóng Tiết Kiệm Cá Nhân");
 
+    const tool4 = page.locator('[data-i18n="tool4Title"]');
+    await expect(tool4).toHaveText("Sổ Theo Dõi Thói Quen Nguyên Tử");
+
     await assertNoHorizontalOverflow(page);
 
     // Switch back to English
@@ -149,6 +171,7 @@ test.describe("Portal Catalog & Central Hub Multi-Device UI/UX Suite", () => {
     await expect(tool1).toHaveText("Smart Buy-List & Unit Price Tracker");
     await expect(tool2).toHaveText("Buy vs. Rent Home Comparison");
     await expect(tool3).toHaveText("Personal Finance Savings Predictor");
+    await expect(tool4).toHaveText("Atomic Habit & Routine Tracker");
 
     await assertNoHorizontalOverflow(page);
     expect(errors, "Switching languages should produce no errors").toEqual([]);
@@ -174,12 +197,13 @@ test.describe("Portal Catalog & Central Hub Multi-Device UI/UX Suite", () => {
       expect(rel).toContain("noreferrer");
     }
 
-    // Verify standalone download links exist for all 3 tools
+    // Verify standalone download links exist for all tools
     const downloadLinks = page.locator(
       'a[aria-label="Download standalone HTML"]'
     );
-    await expect(downloadLinks).toHaveCount(3);
-    for (let i = 0; i < 3; i++) {
+    const dlCount = await downloadLinks.count();
+    expect(dlCount).toBeGreaterThanOrEqual(4);
+    for (let i = 0; i < dlCount; i++) {
       const href = await downloadLinks.nth(i).getAttribute("href");
       expect(href).toMatch(
         /https:\/\/github\.com\/thanhtrixx\/html-standalone-tools\/releases\/latest\/download\/.+\.html/
