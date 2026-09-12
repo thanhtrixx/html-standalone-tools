@@ -443,9 +443,6 @@
   /**
    * Set up global event delegation
    */
-  /**
-   * Set up global event delegation
-   */
   function setupEventListeners() {
     // Form submit interception
     document.addEventListener("submit", async (e) => {
