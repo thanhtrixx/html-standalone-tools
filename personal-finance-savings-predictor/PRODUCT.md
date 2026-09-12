@@ -42,16 +42,16 @@ exports a **private, anonymized Financial Health Dossier** instead of raw number
 
 ## Durable constraints specific to this tool
 
-- **Pure engine / UI separation** (ADR-0004): the simulation must stay a pure, testable engine.
+- **Pure engine / UI separation** (ADR-0001): the simulation must stay a pure, testable engine.
 - **Locale-aware number/date/currency formatting** and verbal helpers; currency input masking
-  with cursor preservation (ADR-0003, 0011).
-- **Unified threshold Auto-Term allocation with a liquid Emergency Buffer** (ADR-0005, 0006);
-  anniversary-based salary escalation; annual-bonus + recurring cashflow generator (ADR-0002, 0008).
+  with cursor preservation (ADR-0003).
+- **Unified threshold Auto-Term allocation with a liquid Emergency Buffer** (ADR-0001);
+  anniversary-based salary escalation; annual-bonus + recurring cashflow generator (ADR-0001).
 - **Semantic token light theme + responsive mobile ergonomics** with WCAG 2.1 AA/AAA contrast
-  (ADR-0016); dynamic chart re-theming stays in sync on theme switch.
-- **Resilient URL state sharing** must survive dual-mode decompression (ADR-0015).
+  (ADR-0003); dynamic chart re-theming stays in sync on theme switch.
+- **Resilient URL state sharing** must survive dual-mode decompression (ADR-0002).
 - **Privacy Anonymization Mask** is a product feature, not an afterthought — keep it
-  anonymize-by-default on export.
+  anonymize-by-default on export (ADR-0002).
 - Inherit collection constraints: single-file/zero-backend, bilingual vi+en parity, tool isolation,
   dual-path build, GitHub Flow + TDD.
 
@@ -59,6 +59,6 @@ exports a **private, anonymized Financial Health Dossier** instead of raw number
 
 - [`CONTEXT.md`](./CONTEXT.md) — ubiquitous language (Flexible Pool, Fixed/Auto Term Deposit,
   Emergency Buffer, Withdrawal, Annual Bonus, Milestone Date, Scenario Comparison, …).
-- [`I18N.md`](./I18N.md), `icon.svg`, [`docs/adr/`](./docs/adr/) (0001–0018),
+- [`I18N.md`](./I18N.md), `icon.svg`, [`docs/adr/`](./docs/adr/) (0001–0003),
   [`ITEMS_TO_IMPLEMENT.md`](./ITEMS_TO_IMPLEMENT.md), [`TEST_PLAN.md`](./TEST_PLAN.md).
 - Tests: `tests/simulation.test.js`, `tests/ui-ux.test.js`, `tests/i18n.test.js`.

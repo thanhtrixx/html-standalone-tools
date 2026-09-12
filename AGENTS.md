@@ -12,15 +12,15 @@ Canonical 5-role defaults. See `docs/agents/triage-labels.md`.
 
 ### Ways of working & GitHub Flow
 
-Token-first three-tier change classification (Tier 0 Zero-Ceremony / Tier 1 Scoped Lightweight / Tier 2 Full Ceremony), phase-aware quality gating, and Subagent Quality Protocol (ADR-0010, ADR-0012, ADR-0014). See `docs/agents/ways-of-working.md` and `docs/adr/0014-token-first-wow-rebuild-and-tiered-change-classification.md`.
+Token-first three-tier change classification (Tier 0 Zero-Ceremony / Tier 1 Scoped Lightweight / Tier 2 Full Ceremony), phase-aware quality gating, and Subagent Quality Protocol. See `docs/agents/ways-of-working.md` and `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.
 
 ### Token Economics & Subagent Strategy
 
-Two-tier delegation threshold, scoped inner-loop test runner gates, and fan-in digest compression (≤ 300–400 words). See `docs/adr/0012-optimal-token-strategy-and-subagent-economics.md`.
+Two-tier delegation threshold, scoped inner-loop test runner gates, and fan-in digest compression (≤ 300–400 words). See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.
 
 ### Dual-Phase Tool Lifecycle & Scoped Quality
 
-Active Feature Development (velocity) vs Hardened Stable (quality, zero regression), tool-scoped test suites (`npm run test:<tool>`), and graduation DoD. See `docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md`.
+Active Feature Development (velocity) vs Hardened Stable (quality, zero regression), tool-scoped test suites (`npm run test:<tool>`), and graduation DoD. See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.
 
 ### Domain docs
 

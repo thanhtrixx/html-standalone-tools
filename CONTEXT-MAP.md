@@ -2,7 +2,7 @@
 
 This repository is a collection of standalone, client-side HTML tools. Each tool is isolated in its own folder with a dedicated source application, compacted production deliverable (`dist/`), domain glossary, and decision records.
 
-## Contexts & Tool Lifecycle Registry ([ADR-0013](./docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+## Contexts & Tool Lifecycle Registry ([ADR-0003](./docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 Each standalone application is assigned an official lifecycle phase governing engineering focus and quality verification:
 
