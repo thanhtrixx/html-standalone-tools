@@ -4097,6 +4097,77 @@ async function runUITests() {
     !rapidJumpError,
     "[Issue #433 AC-4] 10 rapid jump-to-timer navigations execute smoothly"
   );
+
+  // ==========================================
+  // [Issue #458 AC-1..AC-4] Background Timer Delta Sync Engine Tests
+  // ==========================================
+  console.log("\n--- [Issue #458] Background Timer Delta Sync Engine ---");
+
+  const { sandbox: timerSandbox458 } = createHabitTrackerSandbox();
+  await timerSandbox458.HabitApp.init();
+
+  const timerHabitId = "h-read"; // targetValue = 1200s (20 mins)
+  const testDate = "2026-09-12";
+  timerSandbox458.HabitApp.store.setActiveDate(testDate);
+
+  // Start timer
+  await timerSandbox458.HabitApp.handleToggleTimer(timerHabitId, testDate);
+  assertEqual(
+    timerSandbox458.HabitApp.runningTimerHabitId,
+    timerHabitId,
+    "[Issue #458 AC-1] Starting timer sets runningTimerHabitId"
+  );
+  assert(
+    typeof timerSandbox458.HabitApp.runningTimerStartedAt === "number" &&
+      timerSandbox458.HabitApp.runningTimerStartedAt > 0,
+    "[Issue #458 AC-1] Starting timer records epoch timestamp runningTimerStartedAt"
+  );
+  assertEqual(
+    timerSandbox458.HabitApp.runningTimerBaseValue,
+    0,
+    "[Issue #458 AC-1] Starting timer records initial baseValue = 0"
+  );
+
+  // Simulate background screen-off: 25 seconds elapsed
+  const realDateNow = Date.now;
+  const initialStart = timerSandbox458.HabitApp.runningTimerStartedAt;
+  try {
+    Date.now = () => initialStart + 25000; // +25 seconds
+
+    // Trigger sync
+    await timerSandbox458.HabitApp.syncRunningTimer();
+
+    const logAfter25s =
+      timerSandbox458.HabitApp.store.state.logs[`${timerHabitId}_${testDate}`];
+    assertEqual(
+      logAfter25s.value,
+      25,
+      "[Issue #458 AC-2] Background delta sync accurately advances logged value by 25s"
+    );
+
+    // Simulate target duration reached (1200s)
+    Date.now = () => initialStart + 1205000; // +1205 seconds
+    await timerSandbox458.HabitApp.syncRunningTimer();
+
+    const logAfterComplete =
+      timerSandbox458.HabitApp.store.state.logs[`${timerHabitId}_${testDate}`];
+    assert(
+      logAfterComplete.value >= 1200,
+      "[Issue #458 AC-3] Log value reaches targetValue after background completion"
+    );
+    assertEqual(
+      logAfterComplete.completed,
+      true,
+      "[Issue #458 AC-3] Habit is marked completed"
+    );
+    assertEqual(
+      timerSandbox458.HabitApp.runningTimerHabitId,
+      null,
+      "[Issue #458 AC-3] Running timer state is reset upon auto-completion"
+    );
+  } finally {
+    Date.now = realDateNow;
+  }
 }
 
 runUITests()
