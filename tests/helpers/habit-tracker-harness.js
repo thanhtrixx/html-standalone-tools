@@ -64,11 +64,9 @@ function bundleHabitTrackerFromSrc() {
 }
 
 function getHabitTrackerScripts() {
-  if (cachedScripts) return cachedScripts;
   const srcDir = path.join(HABIT_DIR, "src");
   if (fs.existsSync(srcDir)) {
-    cachedScripts = bundleHabitTrackerFromSrc();
-    return cachedScripts;
+    return bundleHabitTrackerFromSrc();
   }
   return "";
 }
@@ -196,12 +194,12 @@ class MockDOMElement {
     for (const fn of list) {
       fn.call(this, ev);
     }
-    if (
-      event.bubbles &&
-      this.parentElement &&
-      this.parentElement.dispatchEvent
-    ) {
-      this.parentElement.dispatchEvent(event);
+    if (event.bubbles) {
+      if (this.parentElement && this.parentElement.dispatchEvent) {
+        this.parentElement.dispatchEvent(ev);
+      } else if (this.ownerDocument && this.ownerDocument.dispatchEvent) {
+        this.ownerDocument.dispatchEvent(ev);
+      }
     }
     return true;
   }
@@ -258,11 +256,7 @@ class MockDOMElement {
   }
 
   closest(selector) {
-    if (selector.startsWith("#") && this.id === selector.slice(1)) return this;
-    if (selector.startsWith(".") && this.classList.contains(selector.slice(1)))
-      return this;
-    if (this.tagName && this.tagName.toLowerCase() === selector.toLowerCase())
-      return this;
+    if (this.matches(selector)) return this;
     if (this.parentElement && this.parentElement.closest) {
       return this.parentElement.closest(selector);
     }
@@ -273,6 +267,10 @@ class MockDOMElement {
     if (selector.startsWith("#")) return this.id === selector.slice(1);
     if (selector.startsWith("."))
       return this.classList.contains(selector.slice(1));
+    if (selector.startsWith("[") && selector.endsWith("]")) {
+      const attrName = selector.slice(1, -1);
+      return this.hasAttribute(attrName);
+    }
     return this.tagName.toLowerCase() === selector.toLowerCase();
   }
 
@@ -316,7 +314,9 @@ function createHabitTrackerSandbox(options = {}) {
 
   function getOrCreateElement(id) {
     if (!elements[id]) {
-      elements[id] = new MockDOMElement(id);
+      const el = new MockDOMElement(id);
+      el.ownerDocument = doc;
+      elements[id] = el;
     }
     return elements[id];
   }
@@ -348,7 +348,11 @@ function createHabitTrackerSandbox(options = {}) {
       }
       return list;
     },
-    createElement: (tag) => new MockDOMElement("", tag),
+    createElement: (tag) => {
+      const el = new MockDOMElement("", tag);
+      el.ownerDocument = doc;
+      return el;
+    },
     addEventListener: (type, fn) => {
       if (!globalListeners[type]) globalListeners[type] = [];
       globalListeners[type].push(fn);
@@ -397,10 +401,14 @@ function createHabitTrackerSandbox(options = {}) {
     TextEncoder: typeof TextEncoder !== "undefined" ? TextEncoder : undefined,
     TextDecoder: typeof TextDecoder !== "undefined" ? TextDecoder : undefined,
     Uint8Array,
+    Blob: typeof Blob !== "undefined" ? Blob : undefined,
+    URL: typeof URL !== "undefined" ? URL : undefined,
     setTimeout: (fn, ms) => (typeof fn === "function" ? fn() : 1),
     clearTimeout: () => {},
     setInterval: () => 1,
     clearInterval: () => {},
+    requestAnimationFrame: (fn) => (typeof fn === "function" ? fn() : 1),
+    cancelAnimationFrame: () => {},
     location: {
       origin: "http://localhost",
       pathname: "/",

@@ -10,10 +10,15 @@
  * - [AC-3] LocalStorage Fallback Adapter for Private/Restricted Browsing
  * - [AC-4] Full JSON Data Portability (Export & Validated Import with Merge/Replace)
  * - [AC-6] Reactive State Store Actions & Persistence Integration
+ * - [Issue #426 AC-1] Method Export/Import Binding for JSON Export & Function Name Parity
+ * - [Issue #426 AC-2] Browser Download of Formatted .json Backup File (Habits, Logs, Settings)
+ * - [Issue #426 AC-3] Success Toast Notification Display upon JSON Backup Export
+ * - [Issue #426 AC-4] Clean JSON Export Execution without TypeErrors & Public Seam Integrity
  */
 
 const {
   createMockStorage,
+  createHabitTrackerSandbox,
   createAssertions,
 } = require("./helpers/habit-tracker-harness.js");
 
@@ -28,11 +33,8 @@ console.log(
 async function runStorageTests() {
   const storageModule = require("../habit-tracker/src/storage/indexeddb.js");
   const { HabitStore } = require("../habit-tracker/src/state/store.js");
-  const {
-    exportToJson,
-    validateImportJson,
-    importFromJson,
-  } = require("../habit-tracker/src/sync/export-import.js");
+  const exportImport = require("../habit-tracker/src/sync/export-import.js");
+  const { exportToJson, validateImportJson, importFromJson } = exportImport;
 
   // ==========================================
   // [AC-3] LocalStorage Fallback Adapter & CRUD
@@ -333,6 +335,451 @@ async function runStorageTests() {
     store.getSettings().vacationRanges.length,
     1,
     "[AC-6] Vacation range added to settings state"
+  );
+
+  // ==========================================
+  // [Issue #426 AC-1] Method Export/Import Binding & Function Name Parity
+  // ==========================================
+  console.log(
+    "\n--- [Issue #426 AC-1] Method Export/Import Binding Parity ---"
+  );
+
+  // Verify exportImport module exports downloadExportJSON and required portability seams
+  assertEqual(
+    typeof exportImport.downloadExportJSON,
+    "function",
+    "[Issue #426 AC-1] exportImport module exports downloadExportJSON as a callable function"
+  );
+  assertEqual(
+    typeof exportImport.exportToJson,
+    "function",
+    "[Issue #426 AC-1] exportImport module exports exportToJson for JSON generation"
+  );
+  assert(
+    typeof exportImport.validateImportJson === "function" ||
+      typeof exportImport.parseAndValidateImport === "function",
+    "[Issue #426 AC-1] exportImport exports JSON validation public seam"
+  );
+  assert(
+    typeof exportImport.importFromJson === "function" ||
+      typeof exportImport.mergeHabitStates === "function",
+    "[Issue #426 AC-1] exportImport exports import/merge state public seam"
+  );
+
+  // Verify HabitApp binds exportDataJSON in browser sandbox and global exportImport namespace
+  const { sandbox: appSandbox } = createHabitTrackerSandbox();
+  appSandbox.requestAnimationFrame = (fn) => fn();
+  appSandbox.cancelAnimationFrame = () => {};
+  await appSandbox.HabitApp.init();
+
+  assertEqual(
+    typeof appSandbox.HabitApp.exportDataJSON,
+    "function",
+    "[Issue #426 AC-1] HabitApp exposes exportDataJSON method on application instance"
+  );
+  assert(
+    typeof appSandbox.exportImport === "object" &&
+      appSandbox.exportImport !== null,
+    "[Issue #426 AC-1] Global exportImport namespace is registered on window context"
+  );
+  assertEqual(
+    typeof (
+      appSandbox.exportImport && appSandbox.exportImport.downloadExportJSON
+    ),
+    "function",
+    "[Issue #426 AC-1] Window exportImport namespace contains downloadExportJSON function"
+  );
+
+  // ==========================================
+  // [Issue #426 AC-2] Browser Download of Formatted .json Backup File
+  // ==========================================
+  console.log(
+    "\n--- [Issue #426 AC-2] Browser Download of Formatted JSON Backup ---"
+  );
+
+  // Seed rich domain data with habits, logs, and settings
+  const exportStorage = createMockStorage();
+  const exportDb = storageModule.createStorageAdapter({
+    fallbackStorage: exportStorage,
+    forceFallback: true,
+  });
+
+  const sampleHabit1 = {
+    id: "h-meditate",
+    name: "Morning Meditation 🧘",
+    type: "binary",
+    targetValue: 1,
+    routine: "morning",
+    scheduleType: "daily",
+    color: "indigo",
+    icon: "🧘",
+    createdAt: "2026-09-01",
+  };
+  const sampleHabit2 = {
+    id: "h-water",
+    name: "Drink 2.5L Water 💧",
+    type: "numeric",
+    targetValue: 2500,
+    unit: "ml",
+    step: 250,
+    routine: "afternoon",
+    scheduleType: "daily",
+    color: "cyan",
+    icon: "💧",
+    createdAt: "2026-09-02",
+  };
+  const sampleHabit3 = {
+    id: "h-reading",
+    name: "Deep Work 30m ⏱️",
+    type: "timer",
+    targetValue: 1800,
+    unit: "mins",
+    routine: "evening",
+    scheduleType: "daily",
+    color: "amber",
+    icon: "⏱️",
+    createdAt: "2026-09-03",
+  };
+
+  await exportDb.putHabit(sampleHabit1);
+  await exportDb.putHabit(sampleHabit2);
+  await exportDb.putHabit(sampleHabit3);
+
+  const sampleLog1 = {
+    id: "h-meditate_2026-09-12",
+    habitId: "h-meditate",
+    date: "2026-09-12",
+    value: 1,
+    completed: true,
+    notes: "Tâm trí bình an, tập trung cao độ.",
+    timestamp: 1789214400000,
+  };
+  const sampleLog2 = {
+    id: "h-water_2026-09-12",
+    habitId: "h-water",
+    date: "2026-09-12",
+    value: 2500,
+    completed: true,
+    notes: "Uống đủ 10 cốc nước.",
+    timestamp: 1789218000000,
+  };
+
+  await exportDb.putLog(sampleLog1);
+  await exportDb.putLog(sampleLog2);
+
+  await exportDb.putSetting("theme", "dark");
+  await exportDb.putSetting("freezeTokens", 2);
+  await exportDb.putSetting("language", "vi");
+
+  // Track download execution in sandbox via DOM anchor click & URL object
+  const { sandbox: downloadSandbox } = createHabitTrackerSandbox();
+  let capturedBlob = null;
+  let capturedBlobText = "";
+  let anchorClicked = false;
+  let downloadFilename = "";
+
+  downloadSandbox.URL.createObjectURL = (blob) => {
+    capturedBlob = blob;
+    return "blob:http://localhost/mock-export-url";
+  };
+  downloadSandbox.URL.revokeObjectURL = () => {};
+
+  const origCreateEl = downloadSandbox.document.createElement;
+  downloadSandbox.document.createElement = (tag) => {
+    const el = origCreateEl.call(downloadSandbox.document, tag);
+    if (tag.toLowerCase() === "a") {
+      el.click = async () => {
+        anchorClicked = true;
+        downloadFilename = el.download || el.getAttribute("download") || "";
+        if (capturedBlob && typeof capturedBlob.text === "function") {
+          capturedBlobText = await capturedBlob.text();
+        }
+        el.dispatchEvent({ type: "click", bubbles: true });
+      };
+    }
+    return el;
+  };
+
+  await downloadSandbox.HabitApp.init();
+  if (downloadSandbox.HabitApp.store) {
+    await downloadSandbox.HabitApp.store.addHabit(sampleHabit1);
+    await downloadSandbox.HabitApp.store.addHabit(sampleHabit2);
+    await downloadSandbox.HabitApp.store.addHabit(sampleHabit3);
+    await downloadSandbox.HabitApp.store.logHabit(
+      "h-meditate",
+      "2026-09-12",
+      1,
+      "Tâm trí bình an, tập trung cao độ."
+    );
+    await downloadSandbox.HabitApp.store.logHabit(
+      "h-water",
+      "2026-09-12",
+      2500,
+      "Uống đủ 10 cốc nước."
+    );
+  }
+
+  try {
+    await downloadSandbox.HabitApp.exportDataJSON();
+  } catch (err) {
+    // Red phase: captures failure if method binding is broken
+  }
+
+  assert(
+    anchorClicked,
+    "[Issue #426 AC-2] Exporting JSON triggers programmatic click on download anchor element"
+  );
+  assert(
+    downloadFilename.endsWith(".json"),
+    "[Issue #426 AC-2] Downloaded file has .json extension"
+  );
+  assert(
+    downloadFilename.includes("atomic-habit") ||
+      downloadFilename.includes("backup") ||
+      downloadFilename.includes("habits"),
+    "[Issue #426 AC-2] Downloaded filename contains domain backup identifier"
+  );
+
+  // Pure function payload verification from storage
+  const directExportPayload = await exportToJson(exportDb);
+
+  assertEqual(
+    directExportPayload.app,
+    "atomic-habit-tracker",
+    "[Issue #426 AC-2] Export JSON contains app identifier 'atomic-habit-tracker'"
+  );
+  assert(
+    typeof directExportPayload.version === "string" &&
+      directExportPayload.version.length > 0,
+    "[Issue #426 AC-2] Export JSON includes schema version string"
+  );
+  assert(
+    !isNaN(Date.parse(directExportPayload.exportedAt)),
+    "[Issue #426 AC-2] Export JSON contains valid ISO 8601 timestamp"
+  );
+  assert(
+    Array.isArray(directExportPayload.data.habits),
+    "[Issue #426 AC-2] Export JSON data.habits is an array"
+  );
+  assertEqual(
+    directExportPayload.data.habits.length,
+    3,
+    "[Issue #426 AC-2] Export JSON includes all 3 stored habits"
+  );
+  assert(
+    directExportPayload.data.habits.some(
+      (h) => h.id === "h-water" && h.targetValue === 2500 && h.unit === "ml"
+    ),
+    "[Issue #426 AC-2] Numeric habit target value and unit are faithfully preserved"
+  );
+
+  const exportedLogs = Array.isArray(directExportPayload.data.logs)
+    ? directExportPayload.data.logs
+    : Object.values(directExportPayload.data.logs);
+  assert(
+    exportedLogs.length >= 2,
+    "[Issue #426 AC-2] Export JSON includes all check-in logs"
+  );
+
+  const meditationLog = exportedLogs.find(
+    (l) => l.habitId === "h-meditate" || (l.id && l.id.includes("h-meditate"))
+  );
+  assert(
+    meditationLog &&
+      meditationLog.notes === "Tâm trí bình an, tập trung cao độ.",
+    "[Issue #426 AC-2] Micro-journal reflection notes with Vietnamese unicode preserved in export"
+  );
+
+  // Edge case: Empty database export
+  const emptyStorage = createMockStorage();
+  const emptyDb = storageModule.createStorageAdapter({
+    fallbackStorage: emptyStorage,
+    forceFallback: true,
+  });
+  const emptyPayload = await exportToJson(emptyDb);
+  assertEqual(
+    emptyPayload.app,
+    "atomic-habit-tracker",
+    "[Issue #426 AC-2] Empty database exports valid app identifier"
+  );
+  assertEqual(
+    emptyPayload.data.habits.length,
+    0,
+    "[Issue #426 AC-2] Empty database exports empty habits array without throwing"
+  );
+
+  // ==========================================
+  // [Issue #426 AC-3] Success Toast Notification Display
+  // ==========================================
+  console.log("\n--- [Issue #426 AC-3] Success Toast Notification Display ---");
+
+  const { sandbox: toastSandbox } = createHabitTrackerSandbox();
+  let capturedToast = { message: "", type: "" };
+
+  toastSandbox.URL.createObjectURL = () => "blob:http://localhost/toast-test";
+  toastSandbox.URL.revokeObjectURL = () => {};
+
+  await toastSandbox.HabitApp.init();
+
+  const origShowToast = toastSandbox.HabitApp.showToast;
+  toastSandbox.HabitApp.showToast = (msg, type) => {
+    capturedToast = { message: msg, type: type };
+    if (typeof origShowToast === "function") {
+      origShowToast.call(toastSandbox.HabitApp, msg, type);
+    }
+  };
+
+  try {
+    await toastSandbox.HabitApp.exportDataJSON();
+  } catch (err) {
+    // Red phase: captures failure if method binding is broken
+  }
+
+  assert(
+    capturedToast.message.length > 0,
+    "[Issue #426 AC-3] Toast notification is triggered when Export JSON finishes"
+  );
+  assert(
+    capturedToast.message.toLowerCase().includes("tải về") ||
+      capturedToast.message.toLowerCase().includes("download") ||
+      capturedToast.message.toLowerCase().includes("thành công") ||
+      capturedToast.message.toLowerCase().includes("xuất") ||
+      capturedToast.message.toLowerCase().includes("backup") ||
+      capturedToast.message.toLowerCase().includes("json") ||
+      capturedToast.message.toLowerCase().includes("exported"),
+    "[Issue #426 AC-3] Toast message informs user that backup has been exported / downloaded"
+  );
+
+  if (capturedToast.type) {
+    assert(
+      capturedToast.type === "success" || capturedToast.type === "info",
+      "[Issue #426 AC-3] Toast notification type is success or info"
+    );
+  }
+
+  // ==========================================
+  // [Issue #426 AC-4] Clean JSON Export Execution & Error-Free Flow
+  // ==========================================
+  console.log("\n--- [Issue #426 AC-4] Error-Free JSON Export Initiation ---");
+
+  // 1. Direct HabitApp.exportDataJSON execution does not throw TypeError
+  let exportThrewError = false;
+  let exportErrorMessage = "";
+  try {
+    const { sandbox: cleanSandbox } = createHabitTrackerSandbox();
+    cleanSandbox.URL.createObjectURL = () => "blob:http://localhost/clean-test";
+    cleanSandbox.URL.revokeObjectURL = () => {};
+    await cleanSandbox.HabitApp.init();
+    await cleanSandbox.HabitApp.exportDataJSON();
+  } catch (err) {
+    exportThrewError = true;
+    exportErrorMessage = err.message || String(err);
+  }
+
+  assertEqual(
+    exportThrewError,
+    false,
+    `[Issue #426 AC-4] HabitApp.exportDataJSON() executes cleanly without throwing (Error: ${exportErrorMessage})`
+  );
+
+  // 2. Simulate UI Button Click for Export JSON
+  const { sandbox: buttonSandbox, getOrCreateElement: getBtnEl } =
+    createHabitTrackerSandbox();
+  buttonSandbox.URL.createObjectURL = () => "blob:http://localhost/btn-test";
+  buttonSandbox.URL.revokeObjectURL = () => {};
+  await buttonSandbox.HabitApp.init();
+
+  let uiExportTriggered = false;
+  const origExportDataJSON = buttonSandbox.HabitApp.exportDataJSON;
+  buttonSandbox.HabitApp.exportDataJSON = async function () {
+    uiExportTriggered = true;
+    return origExportDataJSON
+      ? origExportDataJSON.apply(this, arguments)
+      : true;
+  };
+
+  buttonSandbox.HabitApp.switchTab("settings");
+  const exportBtn =
+    buttonSandbox.document.querySelector("#btn-export-json") ||
+    getBtnEl("btn-export-json");
+  if (!exportBtn.getAttribute("data-action")) {
+    exportBtn.setAttribute("data-action", "export-json");
+  }
+  exportBtn.click();
+
+  assert(
+    uiExportTriggered,
+    "[Issue #426 AC-4] Clicking #btn-export-json element triggers HabitApp.exportDataJSON without errors"
+  );
+
+  // 3. Seam validation: parseAndValidateImport / validateImportJson
+  const validatorFn =
+    exportImport.parseAndValidateImport || exportImport.validateImportJson;
+  assert(
+    typeof validatorFn === "function",
+    "[Issue #426 AC-4] Validation public seam parseAndValidateImport / validateImportJson is callable"
+  );
+
+  const validCheck = validatorFn(directExportPayload);
+  assertEqual(
+    validCheck.valid,
+    true,
+    "[Issue #426 AC-4] Exported JSON payload passes schema validation"
+  );
+
+  // Adversarial corrupted payload validation checks
+  const corruptPayloads = [
+    null,
+    undefined,
+    "",
+    "not-json",
+    {},
+    { app: "other-app", data: {} },
+    { app: "atomic-habit-tracker", data: "invalid-data-type" },
+    { app: "atomic-habit-tracker" },
+  ];
+
+  for (const corrupt of corruptPayloads) {
+    const res = validatorFn(corrupt);
+    assertEqual(
+      res.valid,
+      false,
+      `[Issue #426 AC-4] Corrupted/invalid payload (${JSON.stringify(corrupt)}) safely rejected without throwing`
+    );
+  }
+
+  // 4. Seam round-trip: mergeHabitStates / importFromJson
+  const importFn = exportImport.mergeHabitStates || exportImport.importFromJson;
+  assert(
+    typeof importFn === "function",
+    "[Issue #426 AC-4] Import/merge public seam mergeHabitStates / importFromJson is callable"
+  );
+
+  const roundTripStorage = createMockStorage();
+  const roundTripDb = storageModule.createStorageAdapter({
+    fallbackStorage: roundTripStorage,
+    forceFallback: true,
+  });
+
+  await importFn(roundTripDb, directExportPayload, "replace");
+  const restoredHabits = await roundTripDb.getAllHabits();
+  const restoredLogs = await roundTripDb.getAllLogs();
+
+  assertEqual(
+    restoredHabits.length,
+    directExportPayload.data.habits.length,
+    "[Issue #426 AC-4] Round-trip import restores exact habit count"
+  );
+  assert(
+    restoredHabits.some(
+      (h) => h.id === "h-meditate" && h.name.includes("Morning Meditation")
+    ),
+    "[Issue #426 AC-4] Restored habit attributes match original exported data"
+  );
+  assertEqual(
+    restoredLogs.length,
+    exportedLogs.length,
+    "[Issue #426 AC-4] Round-trip import restores exact check-in log count"
   );
 }
 
