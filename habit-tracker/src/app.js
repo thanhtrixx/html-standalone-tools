@@ -444,6 +444,39 @@
    * Set up global event delegation
    */
   function setupEventListeners() {
+    // Form submit interception
+    document.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (e.target && e.target.id === "habit-edit-form") {
+        await saveHabitFromModal(e);
+      } else if (e.target && e.target.id === "habit-note-form") {
+        const habitId = e.target.getAttribute("data-habit-id");
+        const date = e.target.getAttribute("data-date");
+        const noteInput =
+          e.target.querySelector("#habit-note-input") ||
+          e.target.querySelector("textarea");
+        const notes = noteInput ? noteInput.value.trim() : "";
+        if (habitId && date) {
+          await HabitApp.handleSaveNotes(habitId, date, notes);
+          const habit = store.getHabit(habitId);
+          const sheetContainer = document.getElementById(
+            "detail-sheet-container"
+          );
+          if (habit && sheetContainer) {
+            const lang = store.getSettings().language || "vi";
+            detailSheet.renderDetailSheet(
+              habit,
+              store,
+              sheetContainer,
+              lang,
+              date
+            );
+          }
+        }
+      }
+    });
+
+    // Global click delegation
     document.addEventListener("click", async (e) => {
       const target = e.target.closest("[data-action]");
       if (!target) return;
@@ -462,11 +495,23 @@
         await handleToggleTimer(habitId, activeDate);
       } else if (action === "open-detail") {
         handleOpenDetailSheet(habitId);
+      } else if (action === "close-detail-sheet") {
+        closeDetailSheet();
       } else if (action === "select-date") {
         const date = target.getAttribute("data-date");
         if (date) store.setActiveDate(date);
       } else if (action === "open-add-habit") {
         handleOpenEditModal(null);
+      } else if (action === "close-modal") {
+        closeHabitModal();
+      } else if (action === "edit-habit") {
+        handleOpenEditModal(habitId);
+      } else if (action === "archive-habit") {
+        await HabitApp.handleArchiveHabit(habitId);
+      } else if (action === "restore-habit") {
+        await HabitApp.handleRestoreHabit(habitId);
+      } else if (action === "delete-habit") {
+        await HabitApp.handleDeleteHabit(habitId);
       }
     });
   }
@@ -619,38 +664,88 @@
    * Saves habit from modal form submission
    */
   async function saveHabitFromModal(event) {
-    if (event) event.preventDefault();
-    const nameEl = document.getElementById("modal-habit-name");
-    const idEl = document.getElementById("modal-habit-id");
-    const typeEl = document.getElementById("modal-habit-type");
-    const targetValEl = document.getElementById("modal-target-value");
-    const unitEl = document.getElementById("modal-habit-unit");
-    const routineEl = document.getElementById("modal-habit-routine");
-    const scheduleEl = document.getElementById("modal-schedule-type");
-    const iconEl = document.getElementById("modal-habit-icon");
-    const colorEl = document.getElementById("modal-habit-color");
-    const reminderEl = document.getElementById("modal-reminder-time");
+    if (event && event.preventDefault) event.preventDefault();
+    const form =
+      event && event.target && event.target.tagName === "FORM"
+        ? event.target
+        : document.getElementById("habit-edit-form");
 
-    if (!nameEl || !nameEl.value.trim()) {
+    const habitId =
+      (form && form.getAttribute("data-habit-id")) ||
+      (document.getElementById("modal-habit-id") &&
+        document.getElementById("modal-habit-id").value) ||
+      "";
+
+    const nameEl =
+      (form && form.querySelector('[name="name"]')) ||
+      document.getElementById("modal-habit-name");
+    const name = nameEl ? nameEl.value.trim() : "";
+
+    if (!name) {
       showToast("Vui lòng nhập tên thói quen", "error");
       return;
     }
 
+    const typeEl =
+      (form && form.querySelector('input[name="type"]:checked')) ||
+      document.getElementById("modal-habit-type");
+    const type = typeEl ? typeEl.value : "binary";
+
+    const targetValEl =
+      (form && form.querySelector('[name="targetValue"]')) ||
+      document.getElementById("modal-target-value");
+    const unitEl =
+      (form && form.querySelector('[name="unit"]')) ||
+      document.getElementById("modal-habit-unit") ||
+      document.getElementById("modal-target-unit");
+    const stepEl =
+      (form && form.querySelector('[name="step"]')) ||
+      document.getElementById("modal-step");
+    const routineEl =
+      (form && form.querySelector('[name="routine"]')) ||
+      document.getElementById("modal-habit-routine");
+    const scheduleEl =
+      (form && form.querySelector('[name="scheduleType"]')) ||
+      document.getElementById("modal-schedule-type");
+    const intervalEl = form && form.querySelector('[name="intervalDays"]');
+    const iconEl =
+      (form && form.querySelector('[name="icon"]')) ||
+      document.getElementById("modal-habit-icon");
+    const colorEl =
+      (form && form.querySelector('input[name="modal-color"]:checked')) ||
+      document.getElementById("modal-habit-color");
+    const reminderEl =
+      (form && form.querySelector('[name="reminderTime"]')) ||
+      document.getElementById("modal-reminder-time");
+
+    const scheduleDays = [];
+    if (form) {
+      form
+        .querySelectorAll('input[name="modal-schedule-day"]:checked')
+        .forEach((cb) => {
+          scheduleDays.push(parseInt(cb.value, 10));
+        });
+    }
+
     const habitData = {
-      id: idEl && idEl.value ? idEl.value : `h-${Date.now()}`,
-      name: nameEl.value.trim(),
-      type: typeEl ? typeEl.value : "binary",
+      id: habitId || `h-${Date.now()}`,
+      name: name,
+      type: type,
       targetValue: targetValEl ? parseFloat(targetValEl.value) || 1 : 1,
       unit: unitEl ? unitEl.value.trim() : "",
-      routine: routineEl ? routineEl.value : "anytime",
+      step: stepEl ? parseFloat(stepEl.value) || 1 : 1,
+      routine: routineEl ? routineEl.value : "morning",
       scheduleType: scheduleEl ? scheduleEl.value : "daily",
+      scheduleDays:
+        scheduleDays.length > 0 ? scheduleDays : [0, 1, 2, 3, 4, 5, 6],
+      intervalDays: intervalEl ? parseInt(intervalEl.value, 10) || 1 : 1,
       icon: iconEl ? iconEl.value.trim() || "🎯" : "🎯",
       color: colorEl ? colorEl.value : "emerald",
       reminderTime: reminderEl ? reminderEl.value : "",
     };
 
-    if (idEl && idEl.value) {
-      await store.updateHabit(idEl.value, habitData);
+    if (habitId) {
+      await store.updateHabit(habitId, habitData);
       showToast("Đã cập nhật thói quen!", "success");
     } else {
       await store.addHabit(habitData);

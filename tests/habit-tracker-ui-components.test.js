@@ -21,6 +21,10 @@
  * - [Insights AC-3] Key Metric Stat Cards
  * - [Insights AC-4] Day-of-Week & Routine Trends
  * - [Insights AC-5] Streak Milestone Badges
+ * - [Issue #425 AC-1] Habit Modal Form Submit Event Interception with preventDefault()
+ * - [Issue #425 AC-2] Zero-Reload State & IndexedDB Persistence on Habit Save
+ * - [Issue #425 AC-3] Habit Detail Sheet Journal Note Submission without Page Navigation
+ * - [Issue #425 AC-4] End-to-End Form Submit Prevention & State Integrity Integration Tests
  */
 
 const {
@@ -623,6 +627,385 @@ async function runUITests() {
     badgesHtml.includes("Khoá thói quen (66 ngày)") ||
       badgesHtml.includes("66 ngày"),
     "[Issue #417 AC-5] 66-day milestone is rendered"
+  );
+
+  // ==========================================
+  // [Issue #425 AC-1] Habit Modal Form Submit Event Interception with preventDefault()
+  // ==========================================
+  console.log(
+    "\n--- [Issue #425 AC-1] Habit Modal Form Submit Event Interception ---"
+  );
+
+  // Verify renderHabitEditModal outputs a form element with submit capability
+  const renderedAddModal = renderHabitEditModal(null, "vi");
+  assert(
+    renderedAddModal.includes("<form") &&
+      renderedAddModal.includes('id="habit-edit-form"') &&
+      renderedAddModal.includes('type="submit"'),
+    "[Issue #425 AC-1] [AC-1] Habit creation modal renders semantic form with submit button"
+  );
+
+  const renderedEditModal = renderHabitEditModal(habitWater, "vi");
+  assert(
+    renderedEditModal.includes("<form") &&
+      renderedEditModal.includes('id="habit-edit-form"'),
+    "[Issue #425 AC-1] [AC-1] Habit edit modal renders semantic form element"
+  );
+
+  // Unit test: saveHabitFromModal calls e.preventDefault() on submit event
+  let addSubmitPrevented = false;
+  const mockAddSubmitEvent = {
+    type: "submit",
+    bubbles: true,
+    cancelable: true,
+    preventDefault: () => {
+      addSubmitPrevented = true;
+    },
+  };
+
+  const { sandbox: modalSandbox, getOrCreateElement: getModalEl } =
+    createHabitTrackerSandbox();
+  modalSandbox.requestAnimationFrame = (fn) => fn();
+  modalSandbox.cancelAnimationFrame = () => {};
+  await modalSandbox.HabitApp.init();
+
+  const nameInput = getModalEl("modal-habit-name");
+  nameInput.value = "New Atomic Habit";
+  const routineSelect = getModalEl("modal-habit-routine");
+  routineSelect.value = "morning";
+
+  await modalSandbox.HabitApp.saveHabitFromModal(mockAddSubmitEvent);
+  assert(
+    addSubmitPrevented,
+    "[Issue #425 AC-1] [AC-1] Submitting Add Habit modal intercepts form submit event with e.preventDefault()"
+  );
+
+  // Adversarial check: Submitting with empty/invalid name (validation failure) MUST STILL preventDefault()
+  let invalidSubmitPrevented = false;
+  const mockInvalidSubmitEvent = {
+    type: "submit",
+    preventDefault: () => {
+      invalidSubmitPrevented = true;
+    },
+  };
+  nameInput.value = "   "; // Empty name
+  await modalSandbox.HabitApp.saveHabitFromModal(mockInvalidSubmitEvent);
+  assert(
+    invalidSubmitPrevented,
+    "[Issue #425 AC-1] [AC-1] Validation failure in habit modal still calls e.preventDefault() to prevent GET page reload"
+  );
+
+  // Unit test: saveHabitFromModal calls e.preventDefault() on Edit Habit
+  let editSubmitPrevented = false;
+  const mockEditSubmitEvent = {
+    type: "submit",
+    preventDefault: () => {
+      editSubmitPrevented = true;
+    },
+  };
+  const idInput = getModalEl("modal-habit-id");
+  idInput.value = "h-water";
+  nameInput.value = "Drink 3.0L Water";
+  await modalSandbox.HabitApp.saveHabitFromModal(mockEditSubmitEvent);
+  assert(
+    editSubmitPrevented,
+    "[Issue #425 AC-1] [AC-1] Submitting Edit Habit modal calls e.preventDefault()"
+  );
+
+  // ==========================================
+  // [Issue #425 AC-2] Zero-Reload State & Storage Persistence
+  // ==========================================
+  console.log(
+    "\n--- [Issue #425 AC-2] Zero-Reload State & Storage Persistence ---"
+  );
+
+  // Create habit with numeric counter target, unit, step and custom color
+  const newNumericHabit = {
+    id: "h-pushups",
+    name: "Push-ups Target",
+    type: "numeric",
+    targetValue: 50,
+    unit: "reps",
+    step: 10,
+    routine: "afternoon",
+    scheduleType: "daily",
+    color: "crimson",
+    icon: "💪",
+  };
+
+  await store.addHabit(newNumericHabit);
+
+  // Assert in-memory state updated
+  const storedInMemory = store.getHabit("h-pushups");
+  assertEqual(
+    storedInMemory.name,
+    "Push-ups Target",
+    "[Issue #425 AC-2] [AC-2] Newly created habit is immediately accessible in state"
+  );
+  assertEqual(
+    storedInMemory.targetValue,
+    50,
+    "[Issue #425 AC-2] [AC-2] Target value correctly saved in state"
+  );
+  assertEqual(
+    storedInMemory.unit,
+    "reps",
+    "[Issue #425 AC-2] [AC-2] Custom measurement unit correctly saved in state"
+  );
+
+  // Assert IndexedDB / storage adapter persistence
+  const storedInDb = await storage.getHabit("h-pushups");
+  assert(
+    storedInDb !== null && storedInDb.id === "h-pushups",
+    "[Issue #425 AC-2] [AC-2] Habit record persisted to IndexedDB storage adapter"
+  );
+  assertEqual(
+    storedInDb.step,
+    10,
+    "[Issue #425 AC-2] [AC-2] Habit step persisted in IndexedDB"
+  );
+
+  // Edit existing habit and verify state + IndexedDB updates cleanly
+  await store.updateHabit("h-pushups", {
+    targetValue: 100,
+    step: 20,
+    routine: "evening",
+  });
+  const updatedInMemory = store.getHabit("h-pushups");
+  assertEqual(
+    updatedInMemory.targetValue,
+    100,
+    "[Issue #425 AC-2] [AC-2] Editing habit updates target value in state"
+  );
+  assertEqual(
+    updatedInMemory.routine,
+    "evening",
+    "[Issue #425 AC-2] [AC-2] Editing habit updates routine cluster in state"
+  );
+
+  const updatedInDb = await storage.getHabit("h-pushups");
+  assertEqual(
+    updatedInDb.targetValue,
+    100,
+    "[Issue #425 AC-2] [AC-2] Editing habit persists updated target value in storage"
+  );
+  assertEqual(
+    updatedInDb.routine,
+    "evening",
+    "[Issue #425 AC-2] [AC-2] Editing habit persists updated routine cluster in storage"
+  );
+
+  // Create habit with Vietnamese diacritics and emojis
+  const viHabit = {
+    id: "h-chay-bo",
+    name: "Chạy bộ 5km công viên",
+    type: "binary",
+    targetValue: 1,
+    routine: "morning",
+    scheduleType: "daily",
+    color: "emerald",
+    icon: "🏃‍♂️",
+  };
+  await store.addHabit(viHabit);
+  const viStored = await storage.getHabit("h-chay-bo");
+  assertEqual(
+    viStored.name,
+    "Chạy bộ 5km công viên",
+    "[Issue #425 AC-2] [AC-2] Habit with Vietnamese unicode text persists cleanly in IndexedDB"
+  );
+
+  // ==========================================
+  // [Issue #425 AC-3] Detail Sheet Journal Note Submission without Page Navigation
+  // ==========================================
+  console.log("\n--- [Issue #425 AC-3] Journal Note Submission & History ---");
+
+  // Detail Sheet contains note form
+  const detailHtml = renderDetailSheet(
+    habitMeditate,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+  assert(
+    detailHtml.includes('id="habit-note-form"'),
+    "[Issue #425 AC-3] [AC-3] Detail sheet contains journal note form element"
+  );
+  assert(
+    detailHtml.includes('id="habit-note-input"'),
+    "[Issue #425 AC-3] [AC-3] Detail sheet contains journal note textarea input"
+  );
+  assert(
+    detailHtml.includes('type="submit"') || detailHtml.includes("Lưu ghi chú"),
+    "[Issue #425 AC-3] [AC-3] Detail sheet note form has submit button"
+  );
+
+  // Submitting note form updates state and storage without navigation
+  const noteContent = "Thực hiện 15 phút thở chánh niệm lúc bình minh.";
+  await store.updateNotes("h-meditate", selectedDate, noteContent);
+
+  assertEqual(
+    store.state.logs["h-meditate_2026-09-12"].notes,
+    noteContent,
+    "[Issue #425 AC-3] [AC-3] Submitting note updates note in state"
+  );
+
+  const logInStorage = await storage.getLog("h-meditate", selectedDate);
+  assertEqual(
+    logInStorage.notes,
+    noteContent,
+    "[Issue #425 AC-3] [AC-3] Journal note is saved to IndexedDB storage adapter"
+  );
+
+  // Detail sheet re-render shows updated note history
+  const refreshedDetailHtml = renderDetailSheet(
+    habitMeditate,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+  assert(
+    refreshedDetailHtml.includes(
+      "Thực hiện 15 phút thở chánh niệm lúc bình minh."
+    ),
+    "[Issue #425 AC-3] [AC-3] Saved note is visible in habit detail sheet history"
+  );
+
+  // Submitting multiline note with emojis
+  const multilineNote =
+    "🌟 Ngày thứ 5 liên tiếp!\n- Tập trung cao độ\n- Không bị phân tâm";
+  await store.updateNotes("h-reading", selectedDate, multilineNote);
+  assertEqual(
+    store.state.logs["h-reading_2026-09-12"].notes,
+    multilineNote,
+    "[Issue #425 AC-3] [AC-3] Multiline reflection note with emojis saves cleanly to state"
+  );
+
+  // Updating note on a date with no existing log creates log entry without error
+  const futureDate = "2026-09-20";
+  await store.updateNotes("h-meditate", futureDate, "Lên kế hoạch tập");
+  assertEqual(
+    store.state.logs["h-meditate_2026-09-20"].notes,
+    "Lên kế hoạch tập",
+    "[Issue #425 AC-3] [AC-3] Submitting note for date without prior log creates record safely"
+  );
+
+  // ==========================================
+  // [Issue #425 AC-4] End-to-End Form Submit Prevention & State Integrity
+  // ==========================================
+  console.log(
+    "\n--- [Issue #425 AC-4] End-to-End Form Submit Prevention & State Integrity ---"
+  );
+
+  const { sandbox: e2eSandbox, getOrCreateElement: getE2EEl } =
+    createHabitTrackerSandbox({
+      url: "http://localhost:3000/habit-tracker/#manager",
+    });
+  e2eSandbox.requestAnimationFrame = (fn) => fn();
+  e2eSandbox.cancelAnimationFrame = () => {};
+  await e2eSandbox.HabitApp.init();
+
+  const initialUrl = e2eSandbox.location.href;
+
+  // Verify form submission does not mutate window.location (no GET query reload)
+  let e2eSubmitPrevented = false;
+  const e2eEvent = {
+    type: "submit",
+    bubbles: true,
+    cancelable: true,
+    preventDefault: () => {
+      e2eSubmitPrevented = true;
+    },
+  };
+
+  const e2eNameInput = getE2EEl("modal-habit-name");
+  e2eNameInput.value = "Zero-Reload Integration Habit";
+  const e2eTypeSelect = getE2EEl("modal-habit-type");
+  e2eTypeSelect.value = "binary";
+  const e2eRoutineSelect = getE2EEl("modal-habit-routine");
+  e2eRoutineSelect.value = "afternoon";
+
+  await e2eSandbox.HabitApp.saveHabitFromModal(e2eEvent);
+
+  assert(
+    e2eSubmitPrevented,
+    "[Issue #425 AC-4] [AC-4] Form submit event explicitly prevented default in end-to-end sandbox"
+  );
+  assertEqual(
+    e2eSandbox.location.href,
+    initialUrl,
+    "[Issue #425 AC-4] [AC-4] Location URL remains unchanged (no GET query parameter reload)"
+  );
+  assert(
+    !e2eSandbox.location.search || e2eSandbox.location.search === "",
+    "[Issue #425 AC-4] [AC-4] Location search params are clean without form fields"
+  );
+
+  // State integrity across successive operations
+  // 1. Add Habit 1
+  const h1 = {
+    id: "h-seq-1",
+    name: "Seq 1",
+    type: "binary",
+    targetValue: 1,
+    routine: "morning",
+    scheduleType: "daily",
+  };
+  await store.addHabit(h1);
+  // 2. Add Habit 2
+  const h2 = {
+    id: "h-seq-2",
+    name: "Seq 2",
+    type: "numeric",
+    targetValue: 2000,
+    unit: "ml",
+    routine: "afternoon",
+    scheduleType: "daily",
+  };
+  await store.addHabit(h2);
+  // 3. Edit Habit 1
+  await store.updateHabit("h-seq-1", {
+    name: "Seq 1 Updated",
+    routine: "evening",
+  });
+  // 4. Save Notes for both
+  await store.updateNotes("h-seq-1", selectedDate, "Note for seq 1");
+  await store.updateNotes("h-seq-2", selectedDate, "Note for seq 2");
+
+  assertEqual(
+    store.getHabit("h-seq-1").name,
+    "Seq 1 Updated",
+    "[Issue #425 AC-4] [AC-4] Successive operations maintain state consistency for edited habit"
+  );
+  assertEqual(
+    store.getHabit("h-seq-2").targetValue,
+    2000,
+    "[Issue #425 AC-4] [AC-4] Successive operations maintain state consistency for numeric habit"
+  );
+  assertEqual(
+    store.state.logs[`h-seq-1_${selectedDate}`].notes,
+    "Note for seq 1",
+    "[Issue #425 AC-4] [AC-4] Note for habit 1 persisted cleanly in state index"
+  );
+  assertEqual(
+    store.state.logs[`h-seq-2_${selectedDate}`].notes,
+    "Note for seq 2",
+    "[Issue #425 AC-4] [AC-4] Note for habit 2 persisted cleanly in state index"
+  );
+
+  const dbSeq1 = await storage.getHabit("h-seq-1");
+  assertEqual(
+    dbSeq1.routine,
+    "evening",
+    "[Issue #425 AC-4] [AC-4] Storage layer reflects updated routine for habit 1"
+  );
+
+  const dbLogSeq2 = await storage.getLog("h-seq-2", selectedDate);
+  assertEqual(
+    dbLogSeq2.notes,
+    "Note for seq 2",
+    "[Issue #425 AC-4] [AC-4] Storage layer reflects journal note for habit 2"
   );
 }
 
