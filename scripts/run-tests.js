@@ -125,6 +125,16 @@ const TEST_SUITES = [
     file: "tests/portal.test.js",
     category: "Portal",
   },
+  {
+    name: "Atomic Habit Tracker Engine Math & Streaks",
+    file: "tests/habit-tracker-engine-math.test.js",
+    category: "Core Math",
+  },
+  {
+    name: "Atomic Habit Tracker i18n Parity & Formatters",
+    file: "tests/habit-tracker-i18n.test.js",
+    category: "i18n",
+  },
 ];
 
 function escapeXml(str) {
@@ -695,6 +705,13 @@ async function main() {
       toolFilter === "smart-buy-list-price-tracker"
     ) {
       return f.includes("smart-buy-list");
+    }
+    if (
+      toolFilter === "habit" ||
+      toolFilter === "habit-tracker" ||
+      toolFilter === "atomic-habit"
+    ) {
+      return f.includes("habit-tracker");
     }
     if (
       toolFilter === "buy-rent" ||
