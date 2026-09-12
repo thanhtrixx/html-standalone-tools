@@ -663,7 +663,12 @@ try {
     "[AC-7] Unstarted habit with 0 scheduled history returns 0% for 90d consistency"
   );
 
-  const emptyWeekdayStats = engine.calculateWeekdayAdherence([], {}, 90, "2026-09-12");
+  const emptyWeekdayStats = engine.calculateWeekdayAdherence(
+    [],
+    {},
+    90,
+    "2026-09-12"
+  );
   for (const wStat of emptyWeekdayStats) {
     assertEqual(
       wStat.rate,
@@ -672,7 +677,12 @@ try {
     );
   }
 
-  const emptyRoutineStats = engine.calculateRoutineAdherence([], {}, 30, "2026-09-12");
+  const emptyRoutineStats = engine.calculateRoutineAdherence(
+    [],
+    {},
+    30,
+    "2026-09-12"
+  );
   for (const rStat of emptyRoutineStats) {
     assertEqual(
       rStat.rate,
@@ -681,7 +691,11 @@ try {
     );
   }
 
-  const emptyDailyProgress = engine.calculateDailyProgress([], {}, "2026-09-12");
+  const emptyDailyProgress = engine.calculateDailyProgress(
+    [],
+    {},
+    "2026-09-12"
+  );
   assertEqual(
     emptyDailyProgress.percentage,
     0,

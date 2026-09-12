@@ -23,7 +23,7 @@ For architectural decision history and UI/UX evolution, refer to [`docs/adr/0001
   - **Numeric Counter (Target Metric)**: Quantitative habit with target value, measurement unit, and incremental step (e.g. _Drink 2,500 ml Water_, _Read 20 Pages_, _Do 50 Push-ups_). Supports quick `+` and `-` increments.
   - **Duration / Timer**: Time-based habit with target duration in minutes/seconds (e.g. _30 mins Deep Work_, _15 mins Stretching_). Features an integrated background-accurate countdown/stopwatch timer with timestamp delta sync and audio chime upon completion.
     _Avoid_: Task type, measurement category, goal format.
-- **Time-of-Day Routine Cluster (Multi-Routine Assignment)**: Circadian grouping of habits into distinct temporal clusters. A habit may be assigned to multiple routines simultaneously (e.g. *Walk* at both Morning 🌅 and Evening 🌙), appearing in each corresponding section with shared cumulative daily target progress:
+- **Time-of-Day Routine Cluster (Multi-Routine Assignment)**: Circadian grouping of habits into distinct temporal clusters. A habit may be assigned to multiple routines simultaneously (e.g. _Walk_ at both Morning 🌅 and Evening 🌙), appearing in each corresponding section with shared cumulative daily target progress:
   - 🌅 **Morning Routine** (e.g., 05:00 – 12:00)
   - ☀️ **Afternoon Routine** (e.g., 12:00 – 17:00)
   - 🌙 **Evening Routine** (e.g., 17:00 – 23:00)
@@ -76,7 +76,7 @@ For architectural decision history and UI/UX evolution, refer to [`docs/adr/0001
 - **Native Back Stack & Double-Back Exit**: Multi-tier back event management hooking `popstate`:
   1. Active Modals / Sheets / Confirmation dialogs close first.
   2. Non-Today tabs navigate back to Today view.
-  3. Root Today view displays a toast *"Nhấn back lần nữa để thoát / Press back again to exit"* with a 2-second timeout before permitting browser history exit.
+  3. Root Today view displays a toast _"Nhấn back lần nữa để thoát / Press back again to exit"_ with a 2-second timeout before permitting browser history exit.
 - **Background & Screen-off Timer Engine**: High-precision timestamp delta synchronization (`Date.now() - startedAt + baseValue`) combined with `visibilitychange` / `focus` listeners and Web Worker intervals, ensuring uninterrupted timer counting and target completion chimes even when the screen turns off or apps switch.
 - **Today View**: Ambient daily dashboard featuring an interactive 7-day date ribbon, overall daily circular progress ring, multi-routine sections, and swipe-to-complete habit cards with haptic micro-feedback.
 - **Insights & Heatmap View**: Analytics tab with 52-week calendar contribution heatmap, all-time best streaks, 0%-baseline day-of-week consistency chart, and routine adherence breakdown.

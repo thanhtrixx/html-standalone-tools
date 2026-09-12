@@ -4337,7 +4337,9 @@ async function runUITests() {
   const habitCardEl460 = navSandbox.document.createElement("div");
   habitCardEl460.className = "habit-card";
   habitCardEl460.setAttribute("data-habit-id", "h-water");
-  navSandbox.document.getElementById("main-content").appendChild(habitCardEl460);
+  navSandbox.document
+    .getElementById("main-content")
+    .appendChild(habitCardEl460);
 
   navSandbox.document.dispatchEvent({
     type: "touchstart",
@@ -4382,7 +4384,8 @@ async function runUITests() {
     "detail-sheet-overlay"
   );
   assert(
-    detailSheetOverlay460 && !detailSheetOverlay460.classList.contains("hidden"),
+    detailSheetOverlay460 &&
+      !detailSheetOverlay460.classList.contains("hidden"),
     "[Issue #460 AC-3] Detail sheet is open before popstate"
   );
   navSandbox.HabitApp.handlePopState({});
@@ -4397,7 +4400,8 @@ async function runUITests() {
     "delete-confirm-modal-overlay"
   );
   assert(
-    deleteModalOverlay460 && !deleteModalOverlay460.classList.contains("hidden"),
+    deleteModalOverlay460 &&
+      !deleteModalOverlay460.classList.contains("hidden"),
     "[Issue #460 AC-3] Delete confirmation is open before popstate"
   );
   navSandbox.HabitApp.handlePopState({});
@@ -4445,6 +4449,199 @@ async function runUITests() {
   } finally {
     Date.now = realDateNow460;
   }
+
+  // =========================================================================
+  // Issue #461 Acceptance Criteria Tests: Form UX Overhaul & Daily Reminders
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #461 Form UX Overhaul & Daily Reminders ---"
+  );
+
+  const { sandbox: formSandbox } = createHabitTrackerSandbox();
+  await formSandbox.HabitApp.init();
+
+  // 1. Live Preview Card Initial Rendering & Structure
+  formSandbox.HabitApp.openAddHabitModal();
+  const modalContainerEl = formSandbox.document.getElementById(
+    "habit-modal-container"
+  );
+  assert(
+    modalContainerEl &&
+      modalContainerEl.innerHTML.includes("modal-live-preview-card"),
+    "[Issue #461 AC-1] Habit modal renders interactive live preview card"
+  );
+  assert(
+    modalContainerEl.innerHTML.includes("segmented-type-picker"),
+    "[Issue #461 AC-1] Habit modal renders segmented measurement type picker"
+  );
+
+  const previewCardEl = formSandbox.document.getElementById(
+    "modal-live-preview-card"
+  );
+  const previewNameEl = formSandbox.document.getElementById("preview-name");
+  const previewIconEl = formSandbox.document.getElementById("preview-icon");
+  const previewIconBoxEl =
+    formSandbox.document.getElementById("preview-icon-box");
+  const previewTypeTargetEl = formSandbox.document.getElementById(
+    "preview-type-target"
+  );
+  const previewRoutinesEl =
+    formSandbox.document.getElementById("preview-routines");
+
+  assert(
+    previewCardEl &&
+      previewNameEl &&
+      previewIconEl &&
+      previewIconBoxEl &&
+      previewTypeTargetEl &&
+      previewRoutinesEl,
+    "[Issue #461 AC-1] Live preview card contains all sub-elements (name, icon, box, type/target, routines)"
+  );
+
+  // 2. Name input typing dynamically updates preview name
+  const nameInputEl = formSandbox.document.getElementById("modal-habit-name");
+  nameInputEl.value = "Mindful Breathing";
+  formSandbox.document.dispatchEvent({
+    type: "input",
+    target: nameInputEl,
+  });
+  assertEqual(
+    previewNameEl.textContent,
+    "Mindful Breathing",
+    "[Issue #461 AC-2] Name input event immediately updates live preview card name"
+  );
+
+  // 3. Quick-Preset Emoji Palette selection dynamically updates icon and preview
+  const emojiPresetBtns = formSandbox.document.querySelectorAll(
+    '[data-action="select-emoji"]'
+  );
+  assert(
+    emojiPresetBtns.length > 0,
+    "[Issue #461 AC-3] Quick-preset emoji palette buttons exist"
+  );
+  const brainEmojiBtn = Array.from(emojiPresetBtns).find(
+    (b) => b.getAttribute("data-emoji") === "🧠"
+  );
+  if (brainEmojiBtn) {
+    formSandbox.document.dispatchEvent({
+      type: "click",
+      target: brainEmojiBtn,
+    });
+    const iconInputEl = formSandbox.document.getElementById("modal-habit-icon");
+    assertEqual(
+      iconInputEl.value,
+      "🧠",
+      "[Issue #461 AC-3] Emoji preset click updates modal icon input value"
+    );
+    assertEqual(
+      previewIconEl.textContent,
+      "🧠",
+      "[Issue #461 AC-3] Emoji preset click updates live preview icon"
+    );
+  }
+
+  // 4. Color radio selection updates preview icon box background color
+  const indigoColorRadio = formSandbox.document.querySelector(
+    'input[name="modal-color"][value="indigo"]'
+  );
+  if (indigoColorRadio) {
+    indigoColorRadio.checked = true;
+    formSandbox.document.dispatchEvent({
+      type: "change",
+      target: indigoColorRadio,
+    });
+    assertEqual(
+      previewIconBoxEl.style.backgroundColor,
+      "#6366f1",
+      "[Issue #461 AC-4] Color theme radio change updates preview icon box background"
+    );
+  }
+
+  // 5. Segmented Measurement Picker switching (binary -> numeric -> timer)
+  const numericTypeRadio = formSandbox.document.querySelector(
+    'input[name="type"][value="numeric"]'
+  );
+  if (numericTypeRadio) {
+    numericTypeRadio.checked = true;
+    formSandbox.document.dispatchEvent({
+      type: "change",
+      target: numericTypeRadio,
+    });
+    const targetFieldsEl = formSandbox.document.getElementById(
+      "modal-target-fields"
+    );
+    assert(
+      targetFieldsEl && !targetFieldsEl.classList.contains("hidden"),
+      "[Issue #461 AC-5] Switching type to numeric reveals target fields"
+    );
+
+    const targetValInputEl =
+      formSandbox.document.getElementById("modal-target-value");
+    const unitInputEl =
+      formSandbox.document.getElementById("modal-target-unit");
+    if (targetValInputEl) targetValInputEl.value = "2000";
+    if (unitInputEl) unitInputEl.value = "ml";
+
+    formSandbox.document.dispatchEvent({
+      type: "input",
+      target: targetValInputEl,
+    });
+    assertEqual(
+      previewTypeTargetEl.textContent,
+      "2000 ml",
+      "[Issue #461 AC-5] Target value and unit update preview target text"
+    );
+  }
+
+  // 6. Routine chips multi-selection updates preview routine tags
+  const morningChip = formSandbox.document.querySelector(
+    'input[name="routines"][value="morning"]'
+  );
+  const eveningChip = formSandbox.document.querySelector(
+    'input[name="routines"][value="evening"]'
+  );
+  if (morningChip && eveningChip) {
+    morningChip.checked = true;
+    eveningChip.checked = true;
+    formSandbox.document.dispatchEvent({
+      type: "change",
+      target: eveningChip,
+    });
+    assert(
+      previewRoutinesEl.innerHTML.includes("Sáng") ||
+        previewRoutinesEl.innerHTML.includes("Tối") ||
+        previewRoutinesEl.innerHTML.includes("Morning") ||
+        previewRoutinesEl.innerHTML.includes("Evening"),
+      "[Issue #461 AC-6] Selected routine chips appear as badge pills in live preview"
+    );
+  }
+
+  // 7. Settings Tab Daily Reminders & Notification Permission Cards
+  formSandbox.HabitApp.closeHabitModal();
+  formSandbox.HabitApp.switchTab("settings");
+  const settingsContainer = formSandbox.document.getElementById("main-content");
+  assert(
+    settingsContainer &&
+      (settingsContainer.innerHTML.includes("btn-enable-notifications") ||
+        settingsContainer.innerHTML.includes("btn-test-notification")),
+    "[Issue #461 AC-7] Settings tab renders Daily Reminders & Notification card"
+  );
+
+  // Test Notification request permission and test delivery
+  const notifPermRes =
+    await formSandbox.HabitApp.requestNotificationPermission();
+  assert(
+    notifPermRes === "granted" ||
+      notifPermRes === "denied" ||
+      notifPermRes === "default",
+    "[Issue #461 AC-7] requestNotificationPermission returns valid permission string"
+  );
+
+  const testNotifRes = await formSandbox.HabitApp.testNotification();
+  assert(
+    testNotifRes !== undefined,
+    "[Issue #461 AC-7] testNotification executes cleanly without runtime errors"
+  );
 }
 
 runUITests()

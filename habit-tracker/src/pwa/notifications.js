@@ -124,6 +124,21 @@
         }
       });
     },
+
+    /**
+     * Sends a test notification to verify delivery
+     */
+    async sendTestNotification(lang = "vi") {
+      const title =
+        lang === "vi"
+          ? "Thử nghiệm nhắc nhở thói quen 🎯"
+          : "Habit Tracker Test Reminder 🎯";
+      const body =
+        lang === "vi"
+          ? "Hệ thống thông báo và nhắc nhở đang hoạt động hoàn hảo!"
+          : "Notifications and daily reminders are working perfectly!";
+      return await this.showNotification(title, { body, tag: "test-reminder" });
+    },
   };
 
   if (typeof module !== "undefined" && module.exports) {

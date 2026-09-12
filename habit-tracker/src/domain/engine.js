@@ -444,8 +444,7 @@
 
     const routineHabits = habits.filter(
       (h) =>
-        getHabitRoutines(h).includes(routineKey) &&
-        isScheduledDate(h, dateStr)
+        getHabitRoutines(h).includes(routineKey) && isScheduledDate(h, dateStr)
     );
 
     const total = routineHabits.length;
@@ -629,8 +628,7 @@
 
     return stats.map((s, idx) => ({
       dayOfWeek: idx,
-      rate:
-        s.scheduled > 0 ? Math.round((s.completed / s.scheduled) * 100) : 0,
+      rate: s.scheduled > 0 ? Math.round((s.completed / s.scheduled) * 100) : 0,
       scheduled: s.scheduled,
       completed: s.completed,
     }));
