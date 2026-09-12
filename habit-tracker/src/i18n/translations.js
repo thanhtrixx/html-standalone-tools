@@ -162,6 +162,7 @@
       toast_drive_auth_required:
         "Google Drive Sync: Please connect Google Drive account in Settings",
       toast_update_checked: "Checked for latest updates.",
+      toast_press_back_again: "Press back again to exit",
       delete_confirm_msg:
         "Are you sure you want to permanently delete this habit? Historical logs will be deleted.",
       toast_habit_saved: "Habit saved successfully!",
@@ -370,6 +371,7 @@
       toast_drive_auth_required:
         "Google Drive Sync: Vui lòng kết nối tài khoản Google Drive trong Cài đặt",
       toast_update_checked: "Đã kiểm tra phiên bản mới nhất.",
+      toast_press_back_again: "Nhấn back lần nữa để thoát",
       delete_confirm_msg:
         "Bạn có chắc chắn muốn xóa vĩnh viễn thói quen này? Toàn bộ lịch sử sẽ bị xóa.",
       toast_habit_saved: "Đã lưu thói quen thành công!",

@@ -66,8 +66,10 @@
       : global.HabitNotifications;
 
   // Application State
+  const APP_TABS = ["today", "insights", "manager", "settings"];
   let store = null;
   let activeTab = "today"; // 'today' | 'insights' | 'manager' | 'settings'
+  let lastBackPressTime = 0;
   let timerInterval = null;
   let timerWorker = null;
   let runningTimerHabitId = null;
@@ -78,6 +80,186 @@
   let pendingDeleteHabitId = null;
   let swipeStartX = 0;
   let swipeStartY = 0;
+
+  /**
+   * Pushes history state for navigation
+   */
+  function pushNavigationState(tab, overlay = null) {
+    if (typeof history !== "undefined" && history.pushState) {
+      try {
+        history.pushState(
+          { app: "habit-tracker", tab: tab || activeTab, overlay },
+          ""
+        );
+      } catch (_) {}
+    }
+  }
+
+  /**
+   * Replaces history state for navigation
+   */
+  function replaceNavigationState(tab, overlay = null) {
+    if (typeof history !== "undefined" && history.replaceState) {
+      try {
+        history.replaceState(
+          { app: "habit-tracker", tab: tab || activeTab, overlay },
+          ""
+        );
+      } catch (_) {}
+    }
+  }
+
+  /**
+   * Handles browser / hardware back button navigation with tiered hierarchy
+   */
+  function handlePopState(e) {
+    const editModal = document.getElementById("habit-edit-modal-overlay");
+    const detailSheetEl = document.getElementById("detail-sheet-overlay");
+    const deleteModal = document.getElementById("delete-confirm-modal-overlay");
+
+    const isEditOpen = editModal && !editModal.classList.contains("hidden");
+    const isDetailOpen =
+      detailSheetEl && !detailSheetEl.classList.contains("hidden");
+    const isDeleteOpen =
+      deleteModal && !deleteModal.classList.contains("hidden");
+
+    // Tier 1: Dismiss active overlays
+    if (isEditOpen || isDetailOpen || isDeleteOpen) {
+      if (isEditOpen) closeHabitModal();
+      if (isDetailOpen) closeDetailSheet();
+      if (isDeleteOpen) closeDeleteModal();
+      return;
+    }
+
+    // Tier 2: If on secondary tab -> return to Today tab
+    if (activeTab !== "today") {
+      const app =
+        (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+      if (app && typeof app.switchTab === "function") {
+        app.switchTab("today");
+      } else {
+        activeTab = "today";
+        renderApp();
+      }
+      return;
+    }
+
+    // Tier 3: On Today root -> 2s double-back exit confirmation
+    const now = Date.now();
+    if (lastBackPressTime && now - lastBackPressTime < 2000) {
+      // Allow default browser back / exit
+      lastBackPressTime = 0;
+      return;
+    }
+
+    // First back press on root Today view -> show exit warning toast & push state to keep page active
+    lastBackPressTime = now;
+    pushNavigationState("today");
+    const lang = (store && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_press_back_again", {}, lang), "info");
+  }
+
+  /**
+   * Setup container horizontal swipe gesture detector
+   */
+  function setupTabSwipeGestures() {
+    let startX = 0;
+    let startY = 0;
+    let isEligible = false;
+
+    document.addEventListener(
+      "touchstart",
+      (e) => {
+        if (!e.touches || !e.touches[0]) return;
+        const target = e.target;
+
+        // Skip if touch starts on habit cards, date ribbon, form inputs, buttons, sliders, or overlays
+        const skipSelectors = [
+          ".habit-card",
+          "#date-ribbon",
+          "input",
+          "textarea",
+          "select",
+          "button",
+          "canvas",
+          "#habit-edit-modal-overlay",
+          "#detail-sheet-overlay",
+          "#delete-confirm-modal-overlay",
+        ];
+        const isExcluded = skipSelectors.some(
+          (sel) => target && target.closest && target.closest(sel)
+        );
+        if (isExcluded) {
+          isEligible = false;
+          return;
+        }
+
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        isEligible = true;
+      },
+      { passive: true }
+    );
+
+    document.addEventListener(
+      "touchend",
+      (e) => {
+        if (!isEligible) return;
+        isEligible = false;
+
+        const touch =
+          (e.changedTouches && e.changedTouches[0]) ||
+          (e.touches && e.touches[0]);
+        if (!touch) return;
+
+        const endX = touch.clientX;
+        const endY = touch.clientY;
+        const diffX = endX - startX;
+        const diffY = endY - startY;
+
+        // Horizontal swipe threshold: distance >= 50px, horizontal dominant
+        if (Math.abs(diffX) >= 50 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+          const currentIdx = APP_TABS.indexOf(activeTab);
+          if (diffX < 0) {
+            // Swipe Left -> next tab
+            if (currentIdx < APP_TABS.length - 1) {
+              if (typeof navigator !== "undefined" && navigator.vibrate) {
+                try {
+                  navigator.vibrate(10);
+                } catch (_) {}
+              }
+              const app =
+                (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+              if (app && typeof app.switchTab === "function") {
+                app.switchTab(APP_TABS[currentIdx + 1]);
+              } else {
+                activeTab = APP_TABS[currentIdx + 1];
+                renderApp();
+              }
+            }
+          } else {
+            // Swipe Right -> prev tab
+            if (currentIdx > 0) {
+              if (typeof navigator !== "undefined" && navigator.vibrate) {
+                try {
+                  navigator.vibrate(10);
+                } catch (_) {}
+              }
+              const app =
+                (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+              if (app && typeof app.switchTab === "function") {
+                app.switchTab(APP_TABS[currentIdx - 1]);
+              } else {
+                activeTab = APP_TABS[currentIdx - 1];
+                renderApp();
+              }
+            }
+          }
+        }
+      },
+      { passive: true }
+    );
+  }
 
   /**
    * Initializes the application
@@ -95,6 +277,9 @@
     // Apply stored theme and language
     const settings = store.getSettings();
     applyTheme(settings.theme || "dark");
+
+    // Replace root history state
+    replaceNavigationState(activeTab);
 
     // Bind store reactivity
     store.subscribe(() => {
@@ -765,6 +950,14 @@
     window.addEventListener("focus", () => {
       syncRunningTimer();
     });
+
+    // Tab swipe gestures & hardware back button popstate listener
+    setupTabSwipeGestures();
+    if (typeof window !== "undefined" && window.addEventListener) {
+      window.addEventListener("popstate", (e) => {
+        handlePopState(e);
+      });
+    }
   }
 
   const undoStack = [];
@@ -1706,6 +1899,11 @@
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_notes_saved", {}, lang), "success");
     },
+    get activeTab() {
+      return activeTab;
+    },
+    handlePopState,
+    setupTabSwipeGestures,
   };
 
   global.HabitApp = HabitApp;

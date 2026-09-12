@@ -397,6 +397,9 @@ class MockDOMElement {
 
   matches(selector) {
     if (!selector) return false;
+    if (selector.includes(",")) {
+      return selector.split(",").some((s) => this.matches(s.trim()));
+    }
     if (selector.startsWith("#")) return this.id === selector.slice(1);
     if (selector.startsWith(".")) {
       const cls = selector.slice(1);
