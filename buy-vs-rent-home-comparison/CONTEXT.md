@@ -1,6 +1,6 @@
 # Buy vs. Rent Home Comparison
 
-> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0003](../docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 A standalone, client-side financial decision engine and dual-path wealth simulator designed to evaluate the long-term economic outcomes of homeownership versus renting and investing the difference.
 
@@ -161,3 +161,10 @@ _Avoid_: Math docs, formula sheet, help guide
 **Dynamic Formula Trace**:
 An interactive mathematical display that dynamically substitutes the user's active input numbers into general formulas (e.g. EMI, Equity, PRR) to demonstrate step-by-step arithmetic without black-box opacity.
 _Avoid_: Static equation, example calculation, dummy trace
+
+---
+
+## 📚 Architectural Decision Records (ADRs)
+
+- [ADR-0001: Deterministic Wealth Simulation and Mortgage Math Engine](./docs/adr/0001-deterministic-wealth-simulation-and-mortgage-math-engine.md)
+- [ADR-0002: Interactive Workbench, Sensitivity Matrix, and Chart Architecture](./docs/adr/0002-interactive-workbench-sensitivity-matrix-and-chart-architecture.md)

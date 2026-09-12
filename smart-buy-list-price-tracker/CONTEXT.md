@@ -1,6 +1,6 @@
 # Smart Buy-List & Unit Price Tracker
 
-> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0003](../docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 
@@ -155,41 +155,8 @@ For Vietnamese domain vocabulary, copywriting standards, and the bilingual termi
 
 ## 📚 Architectural Decision Records (ADRs)
 
-- [ADR-0001: IndexedDB Storage Engine & Google Drive Sync Seam](./docs/adr/0001-indexeddb-storage-engine-and-google-drive-sync-seam.md)
-- [ADR-0002: Measurement Normalization & Deal Scoring Intelligence](./docs/adr/0002-measurement-normalization-and-deal-scoring-intelligence.md)
-- [ADR-0003: URL Payload Compression & PWA Offline Architecture](./docs/adr/0003-url-payload-compression-and-pwa-offline-architecture.md) _(Partially superseded by ADR-0014, 0015, 0018)_
-- [ADR-0004: Material You Navigation & Item Comparator](./docs/adr/0004-material-you-navigation-and-item-comparator.md)
-- [ADR-0005: Store Management, Grouping, Swipe Gestures & Option Hub](./docs/adr/0005-store-management-grouping-swipe-gestures-and-option-hub.md) _(Superseded by ADR-0026)_
-- [ADR-0006: Differentiated Planning & Buy Mode Card UX](./docs/adr/0006-differentiated-planning-and-buy-mode-card-ux.md)
-- [ADR-0007: PWA Service Worker Lifecycle & Update Strategy](./docs/adr/0007-pwa-service-worker-lifecycle-and-update-strategy.md)
-- [ADR-0008: Price History Buy List Reorder](./docs/adr/0008-price-history-buy-list-reorder.md)
-- [ADR-0009: Clipboard JSON Interchange & Native QR Scanner](./docs/adr/0009-clipboard-json-interchange-and-native-qr-scanner.md) _(Superseded by ADR-0018)_
-- [ADR-0010: Ledger Item Deletion, Comparator Unit & Form Prefill](./docs/adr/0010-ledger-item-deletion-comparator-unit-and-form-prefill.md)
-- [ADR-0011: Google Drive Cloud Sync Storage Seam](./docs/adr/0011-google-drive-cloud-sync-storage-seam.md) _(Partially superseded by ADR-0014, 0016)_
-- [ADR-0012: GitHub Gist Cloud Storage Provider](./docs/adr/0012-github-gist-cloud-storage-provider.md) _(Partially superseded by ADR-0014, 0016, 0018)_
-- [ADR-0013: Vietnamese-First Defaults, Smart Omnibox & Currency Ergonomics](./docs/adr/0013-vietnamese-first-defaults-smart-omnibox-and-currency-ergonomics.md)
-- [ADR-0014: Calm Cloud Sync, Adaptive Ledger & Vietnamese Flag Polish](./docs/adr/0014-calm-cloud-sync-adaptive-ledger-and-vietnamese-flag-polish.md)
-- [ADR-0015: PWA Companion Asset Compaction & Single-Source Versioning](./docs/adr/0015-pwa-companion-asset-compaction-and-single-source-versioning.md)
-- [ADR-0016: Deterministic 3-Way Cloud Merge, Deletion Tombstones & Mutation Concurrency](./docs/adr/0016-deterministic-3way-cloud-merge-tombstones-and-concurrency.md)
-- [ADR-0017: Planning Trip Completion, Clean Empty State, Ledger Ergonomics & Comparator Unit Sync](./docs/adr/0017-planning-trip-completion-ledger-ergonomics-and-comparator-unit-sync.md)
-- [ADR-0018: Enhanced Share Buy-List, Complete QR Code Purge, Symmetrical Settings File Interchange & In-Store Trip Bar Polish](./docs/adr/0018-share-enhancement-qr-removal-and-buy-mode-polish.md)
-- [ADR-0019: GitHub Gist 403 Resiliency, Ledger Price Increment, Country Flag Branding & Dedicated Store Filter Chips](./docs/adr/0019-github-gist-403-resiliency-ledger-price-increment-and-store-filter-chips.md)
-- [ADR-0020: Quick Add Store Picker, Available-Only Store Filtering, Clean Filter Chips, GitHub Rate Limit Resiliency & Symmetrical Cloud Overrides](./docs/adr/0020-quick-add-store-picker-available-store-filter-and-github-ratelimit-resiliency.md)
-- [ADR-0021: Unified Trip Completion Bar Visibility, Settings Data Management Button Standardization, GitHub Rate Limit Diagnostics & Cloud Sync Semantics](./docs/adr/0021-unified-trip-completion-settings-sample-buttons-github-ratelimit-diagnostics-and-sync-semantics.md)
-- [ADR-0022: Full Item Edit, Streamlined Planning Card, Quick Add Simplification & Store Icon Consistency](./docs/adr/0022-full-item-edit-streamlined-planning-card-quick-add-simplification-and-store-icon-consistency.md)
-- [ADR-0023: Harden parseSmartGroceryInput Parser, Store Aliases & Validation Guards](./docs/adr/0023-harden-smart-grocery-input-parser-and-store-aliases.md)
-- [ADR-0024: innerHTML User Input Sanitization & Content-Security-Policy Meta Tag](./docs/adr/0024-sanitize-innerhtml-and-content-security-policy.md)
-- [ADR-0025: IndexedDB Storage Engine & GitHub PAT Security Migration](./docs/adr/0025-indexeddb-storage-engine-and-pat-security-migration.md)
-- [ADR-0026: 4-Tab Page Navigation, Horizontal Swipe Gestures, Modal Ergonomics & Omnibox Pre-Fill](./docs/adr/0026-four-tab-page-navigation-gesture-hierarchy-modal-ergonomics-and-omnibox-prefill.md)
-- [ADR-0027: Review Remediation, Event Delegation, Math Robustness & PWA v4.2.0](./docs/adr/0027-review-remediation-modular-source-and-pwa-v4-2-0.md)
-- [ADR-0028: Test Suite Domain Consolidation & Zero-Drift Harness](./docs/adr/0028-test-suite-domain-consolidation-and-zero-drift-harness.md)
-- [ADR-0029: Pure Event Delegation, Two-Tier PWA Back Navigation & Responsive Tablet Deal Intelligence](./docs/adr/0029-event-delegation-pwa-back-navigation-and-tablet-deal-intelligence.md)
-- [ADR-0030: Share Payload Compression, Interactive Merge Protocol, Ambient Cloud Sync Indicator & Snapshot Safeguards](./docs/adr/0030-share-compression-interactive-merge-ambient-sync-and-snapshot-safeguards.md)
-- [ADR-0031: Modular Source Architecture, JSDoc Domain Contracts & Observable State Container](./docs/adr/0031-modular-source-architecture-jsdoc-contracts-and-state-container.md)
-- [ADR-0032: Two-Tier PWA Back Exit Guard, Gist URL Resilience, Responsive Deal Badges, and Cloud Sync Status Polish](./docs/adr/0032-back-navigation-gist-resilience-responsive-badges-and-sync-visuals.md)
-- [ADR-0033: Critique Remediation: Buy Mode Deal Intelligence, Viewport Decluttering, Two-Tier Planning Cards, and Trip Victory Receipt](./docs/adr/0033-critique-remediation-buy-mode-intelligence-viewport-declutter-and-victory-receipt.md)
-- [ADR-0034: PWA v4.6.0 Release, Planning Card Overflow & Deletion Ergonomics, Unchecked Checkbox Clarity, and Price History Touch Targets](./docs/adr/0034-pwa-v4-6-0-planning-ergonomics-checkbox-clarity-and-ledger-actions.md)
-- [ADR-0035: Responsive Deal Badge Expansion, Tailwind Content Scanner, Trip Completion Price History State Synchronization & Checkbox Contrast](./docs/adr/0035-responsive-deal-badge-expansion-trip-completion-sync-and-checkbox-contrast.md)
-- [ADR-0036: Test Architecture Upgrade — Artifact-First Testing, Single Source of Truth State Container, and Semantic Invariants](./docs/adr/0036-test-architecture-artifact-first-single-state-and-semantic-invariants.md)
-- [ADR-0037: Deal Badge Whitespace Purge, Buy Mode Card Streamlining & PWA v4.6.1](./docs/adr/0037-deal-badge-leading-whitespace-purge-and-buy-mode-card-streamlining.md)
-- [ADR-0038: Comprehensive Impeccable UI/UX Enhancements, In-Aisle Ergonomics & Motion Architecture](./docs/adr/0038-comprehensive-impeccable-ui-ux-enhancements.md)
+- [ADR-0001: Persistence, Cloud Sync, and Deterministic 3-Way Merge](./docs/adr/0001-persistence-cloud-sync-and-deterministic-3way-merge.md)
+- [ADR-0002: Measurement Normalization, Deal Scoring, and Parser Intelligence](./docs/adr/0002-measurement-normalization-deal-scoring-and-parser-intelligence.md)
+- [ADR-0003: PWA Modular Source Architecture and Security Hardening](./docs/adr/0003-pwa-modular-source-architecture-and-security-hardening.md)
+- [ADR-0004: UI/UX Navigation, Gesture Hierarchy, and Interaction Design](./docs/adr/0004-ui-ux-navigation-gesture-hierarchy-and-interaction-design.md)
+- [ADR-0005: Test Architecture, Artifact-First Invariants, and Harness](./docs/adr/0005-test-architecture-artifact-first-invariants-and-harness.md)

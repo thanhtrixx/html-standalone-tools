@@ -1,6 +1,6 @@
 # Portal Hub Context
 
-> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0003](../docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 The **Portal Hub** is the central catalog and launcher for the HTML Standalone Tools suite hosted on GitHub Pages (`https://thanhtrixx.github.io/html-standalone-tools/`).
 

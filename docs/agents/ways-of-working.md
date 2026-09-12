@@ -1,6 +1,6 @@
 # Ways of Working (WoW) & GitHub Flow
 
-Standard engineering workflow for human engineers and autonomous coding agents. Optimized for **maximum AI agent code generation throughput** with minimum ceremonial token overhead ([ADR-0014](../adr/0014-token-first-wow-rebuild-and-tiered-change-classification.md)).
+Standard engineering workflow for human engineers and autonomous coding agents. Optimized for **maximum AI agent code generation throughput** with minimum ceremonial token overhead ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md)).
 
 ---
 
@@ -39,13 +39,13 @@ Every change is automatically classified by file paths and commit prefix. Agents
 **Rules**:
 
 - **Phase 1**: Grill requirements ([`grill-wow` skill](../../.agents/skills/grill-wow/SKILL.md)), update domain docs (`CONTEXT.md`, ADRs), decompose into vertical slices, publish GitHub Issues
-- **Phase 2**: Spawn Adversarial Test Hunter subagent ([ADR-0010](../adr/0010-subagent-quality-guardrails-and-two-speed-tdd.md)) for blind seam tests. Inner loop: `npm run test:<tool>`. Outer gate: `npm run verify`
+- **Phase 2**: Spawn Adversarial Test Hunter subagent ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md)) for blind seam tests. Inner loop: `npm run test:<tool>`. Outer gate: `npm run verify`
 - **Phase 3**: Spawn dual-axis review subagents (Standards & 5 Invariants + Spec Conformance). PR body includes AC-to-Test Traceability Matrix
 - **Phase 4**: AC Verification subagent sign-off. Close issue with `gh issue close`
 
 ---
 
-## Phase-Aware Quality Gating ([ADR-0013](../adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+## Phase-Aware Quality Gating ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 Tool lifecycle phase modulates default tier and verification depth:
 
@@ -54,13 +54,13 @@ Tool lifecycle phase modulates default tier and verification depth:
 | `Active Feature Development` | Tier 1 (scoped)        | Tier 1                        | Optional                |
 | `Hardened Stable`            | Tier 2 (full ceremony) | Tier 1                        | Mandatory (tool-scoped) |
 
-Phase transitions follow the Graduation DoD in [ADR-0013](../adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md). Transition PRs are classified as Tier 1.
+Phase transitions follow the Graduation DoD in [ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md). Transition PRs are classified as Tier 1.
 
 Current tool phases: See [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
 
 ---
 
-## Token Economics ([ADR-0012](../adr/0012-optimal-token-strategy-and-subagent-economics.md))
+## Token Economics ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 - **Two-Tier Delegation**: Micro-fixes (< 5 lines) → orchestrator inline. Features/reviews → dedicated subagents.
 - **Fan-In Digests**: Subagent returns ≤ 300-400 word structured summaries. Raw logs forbidden.
@@ -71,7 +71,7 @@ Current tool phases: See [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
 
 ## Core Invariants & Quality Guardrails
 
-The 5 repository invariants are defined in [ADR-0010](../adr/0010-subagent-quality-guardrails-and-two-speed-tdd.md) and enforced during Tier 2 reviews:
+The 5 repository invariants are defined in [ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md) and enforced during Tier 2 reviews:
 
 1. **Zero Runtime Dependencies** — No unbundled npm runtime imports in browser source/dist
 2. **Silent Data Migration** — Storage changes include backwards-compatible auto-migration

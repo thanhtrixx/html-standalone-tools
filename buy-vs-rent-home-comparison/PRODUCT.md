@@ -28,14 +28,14 @@ matrix over appreciation vs. rent-investment yield, and — for a second opinion
   clearly reported **Net Worth Crossover Date** (ADR-0001).
 - **Dual-phase mortgage amortization** — a **Teaser Rate** period then a **Floating Rate
   Benchmark** — supporting Annuity (fixed EMI) and Linear Principal Reduction schemes, with
-  **Early Prepayment Penalty Tiers** (ADR-0002).
+  **Early Prepayment Penalty Tiers** (ADR-0001).
 - **Opportunity-cost delta reinvestment** and **deficit handling** for the Rent path
-  (ADR-0003); **Realizable Home Equity** net of **Selling Friction** (ADR-0004); **decoupled
-  inflation with continuous purchasing power** (ADR-0005).
+  (ADR-0001); **Realizable Home Equity** net of **Selling Friction** (ADR-0001); **decoupled
+  inflation with continuous purchasing power** (ADR-0001).
 - **Continuous multi-variable sensitivity matrix** (appreciation × rent yield → crossover horizon)
-  with live reactivity and navigation (ADR-0008, 0010).
+  with live reactivity and navigation (ADR-0002).
 - **Methodology & Formula Hub** with **Dynamic Formula Traces** (live variable substitution) and
-  **contextual tooltips** — the math is auditable, not a black box (ADR-0006, 0007, 0009).
+  **contextual tooltips** — the math is auditable, not a black box (ADR-0002).
 - **Strategy Persona Presets** (Urban Condo, Suburban Landed House, Aggressive FIRE Renter,
   High-Yield Expat), **currency input masking** + **dynamic verbal helpers**
   (`2.5 Tỷ VND`), and a **Privacy Anonymization Mask** for the dossier.
@@ -46,12 +46,12 @@ matrix over appreciation vs. rent-investment yield, and — for a second opinion
   simulation pure and testable (ADR-0001).
 - **Dual-phase amortization + prepayment penalties**, **opportunity-cost delta**, and
   **realizable equity with selling friction** are core product semantics — do not collapse them
-  into a simpler single-rate or gross-equity model (ADR-0002, 0003, 0004).
+  into a simpler single-rate or gross-equity model (ADR-0001).
 - **Decoupled inflation + continuous purchasing power** must stay separate from nominal curves
-  (ADR-0005).
+  (ADR-0001).
 - **Transparency is the product**: methodology/formula hub and dynamic traces are features
-  (ADR-0006, 0007, 0009). Sensitivity matrix reactivity and timeline navigation are preserved
-  (ADR-0008, 0010).
+  (ADR-0002). Sensitivity matrix reactivity and timeline navigation are preserved
+  (ADR-0002).
 - **Privacy Anonymization Mask** keeps the dossier anonymize-by-default on export.
 - Inherit collection constraints: single-file/zero-backend, bilingual vi+en parity, tool isolation,
   WCAG 2.1 AA/AAA, dual-path build, GitHub Flow + TDD.
@@ -62,7 +62,7 @@ matrix over appreciation vs. rent-investment yield, and — for a second opinion
   PRR, Gross Rental Yield, Mortgage Amortization Scheme, Teaser/Floating Rate, Realizable Home
   Equity, Selling Friction, Sensitivity Matrix, …).
 - [`I18N.md`](./I18N.md), [`buy-home-research.md`](./buy-home-research.md), `icon.svg`,
-  [`docs/adr/`](./docs/adr/) (0001–0010), [`ITEMS_TO_IMPLEMENT.md`](./ITEMS_TO_IMPLEMENT.md),
+  [`docs/adr/`](./docs/adr/) (0001–0002), [`ITEMS_TO_IMPLEMENT.md`](./ITEMS_TO_IMPLEMENT.md),
   [`TEST_PLAN.md`](./TEST_PLAN.md).
 - Tests: `tests/buy-vs-rent-simulation.test.js`, `-ui-i18n`, `-charts`, `-sharing-dossier`,
   `-tooltips-formulas`.

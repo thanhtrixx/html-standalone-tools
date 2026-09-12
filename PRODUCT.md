@@ -43,7 +43,7 @@ The collection serves **three distinct user moments**, one per tool:
 
 The secondary user of the _collection_ (as opposed to any single tool) is the **author**, who
 builds, compacts, tests, and distributes these tools to external static hosts
-(`trile-dev/static/tools/`). See [`docs/adr/0006`](./docs/adr/0006-configurable-external-distribution-sync.md).
+(`trile-dev/static/tools/`). See [`docs/adr/0001`](./docs/adr/0001-standalone-architecture-build-pipeline-and-runtime.md).
 
 ## What it makes possible
 
@@ -57,7 +57,7 @@ network round-trips. The meaningfully different position, shared across all thre
   price multiples / percent shares, dates → relative offsets, institution names masked) before
   leaving the device.
 - **Zero-backend single-file portability.** One HTML file, minified, runs anywhere — email it,
-  host it, open it offline. This is the north-star that every tool inherits (ADR-0003).
+  host it, open it offline. This is the north-star that every tool inherits (ADR-0001).
 - **Bilingual, locale-native.** 100% Vietnamese/English dictionary parity; locale-aware number,
   date, currency masking, and verbal helpers (`2.5 Tỷ VND`).
 - **Trust through transparency.** The financial tools expose the **methodology and live formula

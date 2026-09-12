@@ -1,6 +1,6 @@
 # Personal Finance Savings Predictor
 
-> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0003](../docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 A standalone, client-side financial simulation and wealth projection tool designed for multi-tier savings, compound salary growth, and inflation modeling.
 
@@ -151,3 +151,11 @@ _Avoid_: Data hide, obfuscation
 **Interactive Floating Tooltip Engine**:
 A zero-dependency floating popover engine providing instant (<100ms) hover explanations, mobile touch toggle with event isolation from parent form labels, smart viewport collision detection, and full WCAG 2.1 AA keyboard accessibility across all simulation parameters, summary KPI metric cards, Savings Accounts Hub portfolio pills, analytics tabs, real/nominal toggles, and privacy masks.
 _Avoid_: Native browser title tooltip, delayed OS tooltips, un-isolated label clicks
+
+---
+
+## 📚 Architectural Decision Records (ADRs)
+
+- [ADR-0001: Financial Simulation Engine and Cashflow Rules](./docs/adr/0001-financial-simulation-engine-and-cashflow-rules.md)
+- [ADR-0002: State Serialization, URL Compression, and AI Dossier Engine](./docs/adr/0002-state-serialization-url-compression-and-ai-dossier-engine.md)
+- [ADR-0003: UI/UX Architecture, Theme Tokens, and Interaction Components](./docs/adr/0003-ui-ux-architecture-theme-tokens-and-interaction-components.md)

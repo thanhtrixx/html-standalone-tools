@@ -42,13 +42,8 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── smart-buy-list-material-you.test.js     # Smart Buy-List Material You navigation tests
 │   └── smart-buy-list-pacing-touch-polish.test.js # Smart Buy-List progress pacing & touch tests
 ├── docs/
-│   ├── adr/                                    # System-wide Architecture Decision Records (0001–0006)
-│   │   ├── 0001-multi-tool-repository-structure.md
-│   │   ├── 0002-zero-build-standalone-single-file-html-constraint.md (superseded)
-│   │   ├── 0003-compacted-standalone-html-build-pipeline.md
-│   │   ├── 0004-ci-pr-verification-and-automated-release-pipeline.md
-│   │   ├── 0005-unified-test-runner-and-multi-format-reporting.md
-│   │   └── 0006-configurable-external-distribution-sync.md
+│   ├── adr/                                    # System-wide Architecture Decision Records (0001–0003)
+│   ├── archive/                                # Legacy ADR archive for auditability
 │   └── agents/                                 # Issue tracker & skill specifications
 ├── personal-finance-savings-predictor/         # Standalone Tool: Savings Predictor
 │   ├── index.html                              # Source application (HTML/CSS/JS)
@@ -57,7 +52,7 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── CONTEXT.md                              # Tool-specific domain glossary
 │   ├── I18N.md                                 # Bilingual terminology & translation guide
 │   ├── docs/
-│   │   └── adr/                                # Tool-specific architecture decisions (0001–0018)
+│   │   └── adr/                                # Tool-specific architecture decisions (0001–0003)
 │   ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R41)
 │   └── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
 ├── buy-vs-rent-home-comparison/                # Standalone Tool: Buy vs Rent Comparison
@@ -67,7 +62,7 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 │   ├── CONTEXT.md                              # Tool-specific domain glossary
 │   ├── I18N.md                                 # Bilingual terminology & translation guide
 │   ├── docs/
-│   │   └── adr/                                # Tool-specific architecture decisions (0001–0010)
+│   │   └── adr/                                # Tool-specific architecture decisions (0001–0002)
 │   ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R38)
 │   ├── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
 │   └── buy-home-research.md                    # Real estate market & financial math research
@@ -78,7 +73,7 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
     ├── CONTEXT.md                              # Tool-specific domain glossary
     ├── I18N.md                                 # Bilingual terminology & translation guide
     ├── docs/
-    │   └── adr/                                # Tool-specific architecture decisions (0001–0004)
+    │   └── adr/                                # Tool-specific architecture decisions (0001–0005)
     ├── ITEMS_TO_IMPLEMENT.md                   # Feature requirements & engine specs (R1–R35)
     ├── TEST_PLAN.md                            # Comprehensive test suite & QA checklist
     ├── icon.svg                                # Vector application icon
@@ -98,7 +93,7 @@ This repository is structured as a **multi-tool workspace**, where each tool liv
 
 ## 🚀 Build, Lint & Test Commands
 
-This repository provides **100% Dual-Runtime Compatibility (Bun + Node.js)** ([ADR-0007](./docs/adr/0007-migrate-runtime-and-package-manager-to-bun.md)). **Bun** is recommended for accelerated inner loops (~35% faster test runs, sub-second installs), but all commands work identically with **Node.js / npm**.
+This repository provides **100% Dual-Runtime Compatibility (Bun + Node.js)** ([ADR-0001](./docs/adr/0001-standalone-architecture-build-pipeline-and-runtime.md)). **Bun** is recommended for accelerated inner loops (~35% faster test runs, sub-second installs), but all commands work identically with **Node.js / npm**.
 
 ```bash
 # Run full verification quality gate (Lint + Build + Test)
