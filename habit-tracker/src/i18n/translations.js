@@ -16,7 +16,8 @@
         "Build lasting routines with atomic habits and anti-guilt consistency",
       today_tab: "Today",
       insights_tab: "Insights",
-      manager_tab: "Manager",
+      manager_tab: "Habits",
+      settings_tab: "Settings",
 
       // Routine Clusters
       routine_morning: "Morning",
@@ -117,13 +118,28 @@
       heatmap_less: "Less",
       heatmap_more: "More",
 
-      // Settings & Data Portability
+      // Settings & Appearance
       settings_title: "Settings & Cloud Sync",
+      theme_select: "Theme & Appearance",
       theme_mode: "Theme Mode",
-      theme_dark: "Dark OLED",
+      theme_dark: "Dark (OLED)",
       theme_light: "Light",
+      theme_system: "System",
       language_select: "Language",
+      freeze_tokens_desc: "Automatically protect streak during busy days",
+      vacation_mode_desc: "Freeze active streak during long trips or recovery",
+      vacation_active_btn: "Paused ⏸️",
+      vacation_inactive_btn: "Pause Mode ✈️",
+      cloud_backup_title: "Cloud Backup & Sync",
       cloud_backup: "Encrypted Cloud Backup",
+      cloud_connected: "Connected",
+      cloud_not_connected: "Not configured",
+      export_import_title: "Export & Import Data",
+      export_json_btn: "Export JSON File",
+      import_json_btn: "Import JSON File",
+      check_updates_btn: "Check for Updates",
+      purge_cache_btn: "Purge Cache & Reload",
+      pwa_version: "PWA Version",
       export_json: "Export Data (JSON)",
       import_json: "Import Data (JSON)",
       import_confirm:
@@ -134,6 +150,28 @@
       export_success: "JSON backup downloaded",
       cloud_sync_now: "Sync Cloud Backup Now",
       cloud_sync_success: "Cloud backup synced successfully",
+
+      // System Toasts & Dialogs
+      toast_backup_exported: "Backup JSON file exported successfully!",
+      toast_habit_deleted: "Habit deleted successfully",
+      toast_notes_saved: "Journal note saved successfully!",
+      toast_habit_archived: "Habit archived successfully",
+      toast_habit_restored: "Habit restored successfully",
+      toast_gist_pat_required:
+        "GitHub Gist Sync: Please configure PAT Token in Settings",
+      toast_drive_auth_required:
+        "Google Drive Sync: Please connect Google Drive account in Settings",
+      toast_update_checked: "Checked for latest updates.",
+      delete_confirm_msg:
+        "Are you sure you want to permanently delete this habit? Historical logs will be deleted.",
+      toast_habit_saved: "Habit saved successfully!",
+      toast_habit_updated: "Habit updated successfully!",
+      toast_freeze_token_added: "Added {count} streak freeze tokens!",
+      toast_vacation_enabled: "Vacation mode enabled.",
+      toast_vacation_disabled: "Vacation mode disabled.",
+      toast_import_success: "Data imported successfully!",
+      toast_import_file_error: "File error: {errors}",
+      toast_import_error: "Import error: {message}",
 
       // Days of week
       day_sun: "Sun",
@@ -173,6 +211,7 @@
       today_tab: "Hôm nay",
       insights_tab: "Thống kê",
       manager_tab: "Thói quen",
+      settings_tab: "Cài đặt",
 
       // Routine Clusters
       routine_morning: "Buổi sáng",
@@ -274,13 +313,28 @@
       heatmap_less: "Ít",
       heatmap_more: "Nhiều",
 
-      // Settings & Data Portability
+      // Settings & Appearance
       settings_title: "Cài đặt & Sao lưu",
+      theme_select: "Giao diện",
       theme_mode: "Giao diện",
       theme_dark: "Tối (OLED)",
       theme_light: "Sáng",
+      theme_system: "Hệ thống",
       language_select: "Ngôn ngữ",
+      freeze_tokens_desc: "Tự động bảo lưu chuỗi khi bận rộn",
+      vacation_mode_desc: "Đóng băng chuỗi cho kỳ nghỉ dài",
+      vacation_active_btn: "Đang tạm dừng ⏸️",
+      vacation_inactive_btn: "Bật tạm dừng ✈️",
+      cloud_backup_title: "Sao lưu đám mây",
       cloud_backup: "Sao lưu đám mây mã hóa",
+      cloud_connected: "Đã liên kết",
+      cloud_not_connected: "Chưa thiết lập",
+      export_import_title: "Xuất & Nhập dữ liệu",
+      export_json_btn: "Xuất tệp JSON",
+      import_json_btn: "Nhập tệp JSON",
+      check_updates_btn: "Kiểm tra bản cập nhật",
+      purge_cache_btn: "Xóa bộ nhớ đệm & Tải lại",
+      pwa_version: "Phiên bản PWA",
       export_json: "Xuất dữ liệu (JSON)",
       import_json: "Nhập dữ liệu (JSON)",
       import_confirm:
@@ -291,6 +345,28 @@
       export_success: "Đã tải về bản sao lưu JSON",
       cloud_sync_now: "Đồng bộ đám mây ngay",
       cloud_sync_success: "Đã đồng bộ đám mây thành công",
+
+      // System Toasts & Dialogs
+      toast_backup_exported: "Đã xuất tệp sao lưu JSON thành công!",
+      toast_habit_deleted: "Đã xóa thói quen",
+      toast_notes_saved: "Đã lưu ghi chú nhật ký!",
+      toast_habit_archived: "Đã lưu trữ thói quen",
+      toast_habit_restored: "Đã khôi phục thói quen",
+      toast_gist_pat_required:
+        "GitHub Gist Sync: Vui lòng thiết lập PAT Token trong Cài đặt",
+      toast_drive_auth_required:
+        "Google Drive Sync: Vui lòng kết nối tài khoản Google Drive trong Cài đặt",
+      toast_update_checked: "Đã kiểm tra phiên bản mới nhất.",
+      delete_confirm_msg:
+        "Bạn có chắc chắn muốn xóa vĩnh viễn thói quen này? Toàn bộ lịch sử sẽ bị xóa.",
+      toast_habit_saved: "Đã lưu thói quen thành công!",
+      toast_habit_updated: "Đã cập nhật thói quen thành công!",
+      toast_freeze_token_added: "Đã thêm {count} vé bảo lưu chuỗi!",
+      toast_vacation_enabled: "Đã bật chế độ tạm dừng nghỉ phép.",
+      toast_vacation_disabled: "Đã tắt chế độ tạm dừng.",
+      toast_import_success: "Đã nhập dữ liệu thành công!",
+      toast_import_file_error: "Lỗi tệp: {errors}",
+      toast_import_error: "Lỗi nhập tệp: {message}",
 
       // Days of week
       day_sun: "CN",

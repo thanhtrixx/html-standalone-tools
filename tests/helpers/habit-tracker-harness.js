@@ -98,7 +98,7 @@ class MockDOMElement {
   constructor(id = "", tagName = "div") {
     this.id = id;
     this.tagName = tagName.toUpperCase();
-    this.className = "";
+    this._className = "";
     this._classList = new Set();
     this.style = {};
     this.dataset = {};
@@ -121,11 +121,11 @@ class MockDOMElement {
         tokens.forEach((t) => {
           if (t) self._classList.add(t);
         });
-        self.className = Array.from(self._classList).join(" ");
+        self._className = Array.from(self._classList).join(" ");
       },
       remove: (...tokens) => {
         tokens.forEach((t) => self._classList.delete(t));
-        self.className = Array.from(self._classList).join(" ");
+        self._className = Array.from(self._classList).join(" ");
       },
       contains: (token) => self._classList.has(token),
       toggle: (token, force) => {
@@ -136,15 +136,24 @@ class MockDOMElement {
         }
         if (self._classList.has(token)) {
           self._classList.delete(token);
-          self.className = Array.from(self._classList).join(" ");
+          self._className = Array.from(self._classList).join(" ");
           return false;
         } else {
           self._classList.add(token);
-          self.className = Array.from(self._classList).join(" ");
+          self._className = Array.from(self._classList).join(" ");
           return true;
         }
       },
     };
+  }
+
+  get className() {
+    return this._className || "";
+  }
+
+  set className(val) {
+    this._className = String(val || "");
+    this._classList = new Set(this._className.split(/\s+/).filter(Boolean));
   }
 
   setAttribute(name, val) {
@@ -265,8 +274,14 @@ class MockDOMElement {
 
   matches(selector) {
     if (selector.startsWith("#")) return this.id === selector.slice(1);
-    if (selector.startsWith("."))
-      return this.classList.contains(selector.slice(1));
+    if (selector.startsWith(".")) {
+      const cls = selector.slice(1);
+      return (
+        this.classList.contains(cls) ||
+        (this.className &&
+          this.className.split(/\s+/).filter(Boolean).includes(cls))
+      );
+    }
     if (selector.startsWith("[") && selector.endsWith("]")) {
       const attrName = selector.slice(1, -1);
       return this.hasAttribute(attrName);

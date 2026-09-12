@@ -202,6 +202,8 @@
    * Updates the active state of bottom navigation buttons
    */
   function updateNavigationDock() {
+    const settings = store ? store.getSettings() : { language: "vi" };
+    const lang = (settings && settings.language) || "vi";
     const navButtons = document.querySelectorAll(".nav-tab-btn");
     navButtons.forEach((btn) => {
       const tab = btn.getAttribute("data-tab");
@@ -211,6 +213,23 @@
       } else {
         btn.classList.remove("text-emerald-400", "font-bold");
         btn.classList.add("text-slate-400");
+      }
+
+      if (tab) {
+        const tabText = i18n.t(`${tab}_tab`, {}, lang);
+        const labelEl =
+          btn.querySelector && typeof btn.querySelector === "function"
+            ? btn.querySelector(".nav-label")
+            : null;
+        if (labelEl) {
+          labelEl.textContent = tabText;
+        }
+        if (btn.innerHTML && btn.innerHTML.includes("nav-label")) {
+          btn.innerHTML = btn.innerHTML.replace(
+            /<span class="nav-label">[\s\S]*?<\/span>/,
+            `<span class="nav-label">${tabText}</span>`
+          );
+        }
       }
     });
   }
@@ -272,8 +291,8 @@
           <div class="flex items-center justify-between pt-3">
             <span class="text-xs text-slate-300">${i18n.t("theme_select", {}, lang)}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme !== "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">🌙 Dark OLED</button>
-              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">☀️ Light</button>
+              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme !== "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">🌙 ${i18n.t("theme_dark", {}, lang)}</button>
+              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">☀️ ${i18n.t("theme_light", {}, lang)}</button>
             </div>
           </div>
         </div>
@@ -285,7 +304,7 @@
           <div class="flex items-center justify-between py-2 border-b border-slate-800/60">
             <div>
               <span class="text-xs text-slate-300 block font-semibold">${i18n.t("freeze_tokens_left", { count: settings.freezeTokens ?? 2 }, lang)}</span>
-              <span class="text-[11px] text-slate-500">Tự động bảo lưu chuỗi khi bận rộn</span>
+              <span class="text-[11px] text-slate-500">${i18n.t("freeze_tokens_desc", {}, lang)}</span>
             </div>
             <button onclick="window.HabitApp.addFreezeTokens(1)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold rounded-xl active:scale-95 transition-all">
               +1 🛡️
@@ -295,10 +314,10 @@
           <div class="flex items-center justify-between pt-3">
             <div>
               <span class="text-xs text-slate-300 block font-semibold">${i18n.t("vacation_pause_mode", {}, lang)}</span>
-              <span class="text-[11px] text-slate-500">Đóng băng chuỗi cho kỳ nghỉ dài</span>
+              <span class="text-[11px] text-slate-500">${i18n.t("vacation_mode_desc", {}, lang)}</span>
             </div>
             <button onclick="window.HabitApp.toggleVacationMode()" class="px-3 py-1.5 ${settings.vacationRanges && settings.vacationRanges.length > 0 ? "bg-amber-600/80 text-white" : "bg-slate-800 text-slate-300"} text-xs font-bold rounded-xl active:scale-95 transition-all">
-              ${settings.vacationRanges && settings.vacationRanges.length > 0 ? "Đang tạm dừng ⏸️" : "Bật tạm dừng ✈️"}
+              ${settings.vacationRanges && settings.vacationRanges.length > 0 ? i18n.t("vacation_active_btn", {}, lang) : i18n.t("vacation_inactive_btn", {}, lang)}
             </button>
           </div>
         </div>
@@ -325,7 +344,7 @@
                 <span class="text-lg">📁</span>
                 <div>
                   <h4 class="text-xs font-bold text-white">Google Drive Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-400">${isDriveConnected ? "Đã liên kết" : "Chưa thiết lập"}</span>
+                  <span class="text-[10px] text-slate-400">${isDriveConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
@@ -336,7 +355,7 @@
                 <span class="text-lg">🐙</span>
                 <div>
                   <h4 class="text-xs font-bold text-white">GitHub Gist Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-400">${isGistConnected ? "Đã liên kết" : "Chưa thiết lập"}</span>
+                  <span class="text-[10px] text-slate-400">${isGistConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
@@ -786,6 +805,7 @@
           : "bg-slate-800 text-slate-200";
 
     toast.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold ${bg} transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-center gap-2`;
+    toast.textContent = message;
     toast.innerHTML = `<span>${type === "success" ? "✅" : type === "error" ? "⚠️" : "ℹ️"}</span> <span>${message}</span>`;
 
     container.appendChild(toast);
@@ -846,45 +866,73 @@
       renderApp();
     },
     switchLanguage(lang) {
-      store.updateSettings({ language: lang });
+      if (store) {
+        store.updateSettings({ language: lang });
+      }
+      renderApp();
     },
     switchTheme(theme) {
       applyTheme(theme);
-      store.updateSettings({ theme });
+      if (store) {
+        store.updateSettings({ theme });
+      }
     },
     addFreezeTokens(count) {
-      const current = store.getSettings().freezeTokens || 0;
+      const current =
+        (store.getSettings() && store.getSettings().freezeTokens) || 0;
       store.updateSettings({ freezeTokens: current + count });
-      showToast(`Đã nạp thêm ${count} vé bảo lưu chuỗi!`, "success");
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_freeze_token_added", { count }, lang), "success");
     },
     toggleVacationMode() {
-      const current = store.getSettings().vacationRanges || [];
+      const current =
+        (store.getSettings() && store.getSettings().vacationRanges) || [];
       const today = store.getActiveDate();
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       if (current.length > 0) {
         store.updateSettings({ vacationRanges: [] });
-        showToast("Đã tắt chế độ tạm dừng!", "info");
+        notify(i18n.t("toast_vacation_disabled", {}, lang), "info");
       } else {
         store.updateSettings({
           vacationRanges: [{ start: today, end: "2099-12-31" }],
         });
-        showToast("Đã bật chế độ tạm dừng nghỉ phép!", "info");
+        notify(i18n.t("toast_vacation_enabled", {}, lang), "info");
       }
     },
     exportDataJSON() {
       if (!store) return;
       exportImport.downloadExportJSON(store.state);
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
-      notify("Đã tải xuống bản sao lưu JSON!", "success");
+      notify(i18n.t("toast_backup_exported", {}, lang), "success");
     },
     async importDataJSON(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       try {
         const text = await file.text();
         const res = exportImport.parseAndValidateImport(text);
         if (!res.valid) {
-          showToast(`Lỗi tệp: ${res.errors.join(", ")}`, "error");
+          notify(
+            i18n.t(
+              "toast_import_file_error",
+              { errors: res.errors.join(", ") },
+              lang
+            ),
+            "error"
+          );
           return;
         }
         const merged = exportImport.mergeHabitStates(
@@ -893,29 +941,38 @@
           "merge"
         );
         await store.replaceState(merged);
-        showToast("Khôi phục dữ liệu thành công!", "success");
+        notify(i18n.t("toast_import_success", {}, lang), "success");
       } catch (err) {
-        showToast(`Lỗi nhập tệp: ${err.message}`, "error");
+        notify(
+          i18n.t("toast_import_error", { message: err.message }, lang),
+          "error"
+        );
       }
     },
     promptDriveBackup() {
-      showToast(
-        "Google Drive Sync: Vui lòng thiết lập Client ID trong Settings",
-        "info"
-      );
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_drive_auth_required", {}, lang), "info");
     },
     promptGistBackup() {
-      showToast(
-        "GitHub Gist Sync: Vui lòng thiết lập PAT Token trong Settings",
-        "info"
-      );
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_gist_pat_required", {}, lang), "info");
     },
     checkForUpdates() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistration().then((reg) => {
           if (reg) {
             reg.update();
-            showToast("Đã kiểm tra phiên bản mới nhất.", "info");
+            notify(i18n.t("toast_update_checked", {}, lang), "info");
           }
         });
       }
@@ -948,15 +1005,34 @@
     saveHabitFromModal,
     handleArchiveHabit: async (id) => {
       await store.archiveHabit(id);
-      showToast("Đã lưu trữ thói quen", "info");
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_habit_archived", {}, lang), "info");
     },
     handleRestoreHabit: async (id) => {
       await store.restoreHabit(id);
-      showToast("Đã khôi phục thói quen", "success");
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_habit_restored", {}, lang), "success");
     },
     handleDeleteHabit: async (id) => {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      if (
+        typeof window !== "undefined" &&
+        window.confirm &&
+        !window.confirm(i18n.t("delete_confirm_msg", {}, lang))
+      ) {
+        return;
+      }
       await store.deleteHabit(id);
-      showToast("Đã xoá thói quen", "info");
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_habit_deleted", {}, lang), "info");
     },
     handleReorderHabit: async (habitId, routine, direction) => {
       if (!store || !habitId) return;
@@ -988,7 +1064,11 @@
     },
     handleSaveNotes: async (habitId, date, notes) => {
       await store.updateNotes(habitId, date, notes);
-      showToast("Đã lưu ghi chú nhật ký!", "success");
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_notes_saved", {}, lang), "success");
     },
   };
 
