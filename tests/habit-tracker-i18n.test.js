@@ -706,7 +706,28 @@ async function runI18nTests() {
     "[Issue #428 AC-3] Habit restore action does not use hardcoded Vietnamese string in English mode"
   );
 
-  // 3. Test Delete Habit Toast in English
+  // 3. Test Delete Habit Confirmation & Toast in English
+  let confirmPromptMessage = null;
+  toastSandbox.confirm = (msg) => {
+    confirmPromptMessage = msg;
+    return false; // User cancels deletion
+  };
+
+  const initialHabitCount = toastSandbox.HabitApp.store.getHabits(false).length;
+  await toastSandbox.HabitApp.handleDeleteHabit("h-read");
+  assertEqual(
+    confirmPromptMessage,
+    t("delete_confirm_msg", {}, "en"),
+    "[Issue #428 AC-3] Habit delete triggers confirmation dialog with localized English message"
+  );
+  assertEqual(
+    toastSandbox.HabitApp.store.getHabits(false).length,
+    initialHabitCount,
+    "[Issue #428 AC-3] Habit is not deleted when user cancels confirmation dialog"
+  );
+
+  // Confirm deletion
+  toastSandbox.confirm = (msg) => true;
   await toastSandbox.HabitApp.handleDeleteHabit("h-read");
   lastToast =
     toastContainer.children &&
@@ -715,7 +736,7 @@ async function runI18nTests() {
     Boolean(
       lastToast && lastToast.textContent.toLowerCase().includes("deleted")
     ),
-    "[Issue #428 AC-3] Habit delete action triggers localized English toast"
+    "[Issue #428 AC-3] Habit delete action triggers localized English toast after confirmation"
   );
   assert(
     Boolean(

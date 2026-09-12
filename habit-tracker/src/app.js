@@ -291,8 +291,8 @@
           <div class="flex items-center justify-between pt-3">
             <span class="text-xs text-slate-300">${i18n.t("theme_select", {}, lang)}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme !== "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">🌙 Dark OLED</button>
-              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">☀️ Light</button>
+              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme !== "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">🌙 ${i18n.t("theme_dark", {}, lang)}</button>
+              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-400"}">☀️ ${i18n.t("theme_light", {}, lang)}</button>
             </div>
           </div>
         </div>
@@ -304,7 +304,7 @@
           <div class="flex items-center justify-between py-2 border-b border-slate-800/60">
             <div>
               <span class="text-xs text-slate-300 block font-semibold">${i18n.t("freeze_tokens_left", { count: settings.freezeTokens ?? 2 }, lang)}</span>
-              <span class="text-[11px] text-slate-500">Tự động bảo lưu chuỗi khi bận rộn</span>
+              <span class="text-[11px] text-slate-500">${i18n.t("freeze_tokens_desc", {}, lang)}</span>
             </div>
             <button onclick="window.HabitApp.addFreezeTokens(1)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold rounded-xl active:scale-95 transition-all">
               +1 🛡️
@@ -314,10 +314,10 @@
           <div class="flex items-center justify-between pt-3">
             <div>
               <span class="text-xs text-slate-300 block font-semibold">${i18n.t("vacation_pause_mode", {}, lang)}</span>
-              <span class="text-[11px] text-slate-500">Đóng băng chuỗi cho kỳ nghỉ dài</span>
+              <span class="text-[11px] text-slate-500">${i18n.t("vacation_mode_desc", {}, lang)}</span>
             </div>
             <button onclick="window.HabitApp.toggleVacationMode()" class="px-3 py-1.5 ${settings.vacationRanges && settings.vacationRanges.length > 0 ? "bg-amber-600/80 text-white" : "bg-slate-800 text-slate-300"} text-xs font-bold rounded-xl active:scale-95 transition-all">
-              ${settings.vacationRanges && settings.vacationRanges.length > 0 ? "Đang tạm dừng ⏸️" : "Bật tạm dừng ✈️"}
+              ${settings.vacationRanges && settings.vacationRanges.length > 0 ? i18n.t("vacation_active_btn", {}, lang) : i18n.t("vacation_inactive_btn", {}, lang)}
             </button>
           </div>
         </div>
@@ -344,7 +344,7 @@
                 <span class="text-lg">📁</span>
                 <div>
                   <h4 class="text-xs font-bold text-white">Google Drive Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-400">${isDriveConnected ? "Đã liên kết" : "Chưa thiết lập"}</span>
+                  <span class="text-[10px] text-slate-400">${isDriveConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
@@ -355,7 +355,7 @@
                 <span class="text-lg">🐙</span>
                 <div>
                   <h4 class="text-xs font-bold text-white">GitHub Gist Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-400">${isGistConnected ? "Đã liên kết" : "Chưa thiết lập"}</span>
+                  <span class="text-[10px] text-slate-400">${isGistConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
@@ -925,7 +925,14 @@
         const text = await file.text();
         const res = exportImport.parseAndValidateImport(text);
         if (!res.valid) {
-          notify(`Lỗi tệp: ${res.errors.join(", ")}`, "error");
+          notify(
+            i18n.t(
+              "toast_import_file_error",
+              { errors: res.errors.join(", ") },
+              lang
+            ),
+            "error"
+          );
           return;
         }
         const merged = exportImport.mergeHabitStates(
@@ -936,7 +943,10 @@
         await store.replaceState(merged);
         notify(i18n.t("toast_import_success", {}, lang), "success");
       } catch (err) {
-        notify(`Lỗi nhập tệp: ${err.message}`, "error");
+        notify(
+          i18n.t("toast_import_error", { message: err.message }, lang),
+          "error"
+        );
       }
     },
     promptDriveBackup() {
@@ -1010,9 +1020,16 @@
       notify(i18n.t("toast_habit_restored", {}, lang), "success");
     },
     handleDeleteHabit: async (id) => {
-      await store.deleteHabit(id);
       const lang =
         (store && store.getSettings() && store.getSettings().language) || "vi";
+      if (
+        typeof window !== "undefined" &&
+        window.confirm &&
+        !window.confirm(i18n.t("delete_confirm_msg", {}, lang))
+      ) {
+        return;
+      }
+      await store.deleteHabit(id);
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_habit_deleted", {}, lang), "info");
