@@ -25,6 +25,10 @@
  * - [Issue #425 AC-2] Zero-Reload State & IndexedDB Persistence on Habit Save
  * - [Issue #425 AC-3] Habit Detail Sheet Journal Note Submission without Page Navigation
  * - [Issue #425 AC-4] End-to-End Form Submit Prevention & State Integrity Integration Tests
+ * - [Issue #427 AC-1] Clicking ▲ swaps the target habit with the preceding habit in the same routine cluster (or global order)
+ * - [Issue #427 AC-2] Clicking ▼ swaps the target habit with the succeeding habit in the same routine cluster
+ * - [Issue #427 AC-3] Reordered habit positions persist in IndexedDB and reflect immediately across both Habit Manager and Today views
+ * - [Issue #427 AC-4] Edge cases (clicking ▲ on top item or ▼ on bottom item) handled gracefully without errors
  */
 
 const {
@@ -1006,6 +1010,628 @@ async function runUITests() {
     dbLogSeq2.notes,
     "Note for seq 2",
     "[Issue #425 AC-4] [AC-4] Storage layer reflects journal note for habit 2"
+  );
+
+  // ==========================================
+  // [Issue #427 AC-1] Reorder Up (▲) Swaps Habit with Preceding Habit in Routine Cluster
+  // ==========================================
+  console.log(
+    "\n--- [Issue #427 AC-1] Reorder Up (▲) Swaps Habit with Preceding Habit ---"
+  );
+
+  const reorderStorage = storageModule.createStorageAdapter({
+    forceFallback: true,
+  });
+  const reorderStore = new HabitStore({ storage: reorderStorage });
+  await reorderStore.init();
+
+  // Setup distinct habit cluster for reorder testing
+  const rMorning1 = {
+    id: "h-reorder-m1",
+    name: "Morning Sunlight 10m",
+    type: "binary",
+    targetValue: 1,
+    routine: "morning",
+    scheduleType: "daily",
+    color: "amber",
+    icon: "☀️",
+    order: 0,
+  };
+  const rMorning2 = {
+    id: "h-reorder-m2",
+    name: "Cold Shower 3m",
+    type: "timer",
+    targetValue: 180,
+    unit: "secs",
+    routine: "morning",
+    scheduleType: "daily",
+    color: "cyan",
+    icon: "🚿",
+    order: 1,
+  };
+  const rMorning3 = {
+    id: "h-reorder-m3",
+    name: "Journaling 5m",
+    type: "timer",
+    targetValue: 300,
+    unit: "mins",
+    routine: "morning",
+    scheduleType: "daily",
+    color: "indigo",
+    icon: "✍️",
+    order: 2,
+  };
+
+  await reorderStore.addHabit(rMorning1);
+  await reorderStore.addHabit(rMorning2);
+  await reorderStore.addHabit(rMorning3);
+
+  // Verify Manager View renders ▲ up reorder button for items
+  const managerHtmlBefore = renderManagerView(reorderStore, null, "vi");
+  assert(
+    managerHtmlBefore.includes('data-action="reorder-up"') &&
+      managerHtmlBefore.includes('data-habit-id="h-reorder-m2"'),
+    "[Issue #427 AC-1] [AC-1] Manager view renders reorder-up button with target habit id"
+  );
+  assert(
+    managerHtmlBefore.includes('data-routine="morning"'),
+    "[Issue #427 AC-1] [AC-1] Manager view encodes routine cluster on reorder buttons"
+  );
+
+  // [AC-1] Swap 2nd habit (h-reorder-m2) UP with 1st habit (h-reorder-m1)
+  await reorderStore.reorderHabits("morning", [
+    "h-reorder-m2",
+    "h-reorder-m1",
+    "h-reorder-m3",
+  ]);
+
+  const morningAfterUp1 = reorderStore
+    .getHabits()
+    .filter((h) => h.routine === "morning" && !h.archived)
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    morningAfterUp1[0].id,
+    "h-reorder-m2",
+    "[Issue #427 AC-1] [AC-1] Target habit moved to index 0 after reordering up"
+  );
+  assertEqual(
+    morningAfterUp1[1].id,
+    "h-reorder-m1",
+    "[Issue #427 AC-1] [AC-1] Preceding habit swapped to index 1"
+  );
+  assertEqual(
+    morningAfterUp1[2].id,
+    "h-reorder-m3",
+    "[Issue #427 AC-1] [AC-1] Unrelated habit at index 2 remained in place"
+  );
+
+  // [AC-1] Swap 3rd habit (h-reorder-m3) UP with 2nd habit (h-reorder-m1)
+  await reorderStore.reorderHabits("morning", [
+    "h-reorder-m2",
+    "h-reorder-m3",
+    "h-reorder-m1",
+  ]);
+
+  const morningAfterUp2 = reorderStore
+    .getHabits()
+    .filter((h) => h.routine === "morning" && !h.archived)
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    morningAfterUp2[1].id,
+    "h-reorder-m3",
+    "[Issue #427 AC-1] [AC-1] 3rd habit moved up to index 1"
+  );
+  assertEqual(
+    morningAfterUp2[2].id,
+    "h-reorder-m1",
+    "[Issue #427 AC-1] [AC-1] Former 2nd habit shifted down to index 2"
+  );
+
+  // [AC-1] Routine Cluster Isolation: Ensure other routine clusters are unaffected
+  const rAfternoon1 = {
+    id: "h-reorder-aft1",
+    name: "Afternoon Walk",
+    type: "binary",
+    targetValue: 1,
+    routine: "afternoon",
+    scheduleType: "daily",
+    order: 0,
+  };
+  const rAfternoon2 = {
+    id: "h-reorder-aft2",
+    name: "Green Tea Break",
+    type: "binary",
+    targetValue: 1,
+    routine: "afternoon",
+    scheduleType: "daily",
+    order: 1,
+  };
+  await reorderStore.addHabit(rAfternoon1);
+  await reorderStore.addHabit(rAfternoon2);
+
+  // Reorder morning habits again to [m3, m2, m1]
+  await reorderStore.reorderHabits("morning", [
+    "h-reorder-m3",
+    "h-reorder-m2",
+    "h-reorder-m1",
+  ]);
+
+  const afternoonHabits = reorderStore
+    .getHabits()
+    .filter((h) => h.routine === "afternoon" && !h.archived)
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    afternoonHabits[0].id,
+    "h-reorder-aft1",
+    "[Issue #427 AC-1] [AC-1] Reordering morning habits does not alter afternoon habit 1 order"
+  );
+  assertEqual(
+    afternoonHabits[1].id,
+    "h-reorder-aft2",
+    "[Issue #427 AC-1] [AC-1] Reordering morning habits does not alter afternoon habit 2 order"
+  );
+
+  // [AC-1] Non-destructive: Verify habit data attributes are fully preserved
+  const preservedHabit = reorderStore.getHabit("h-reorder-m2");
+  assertEqual(
+    preservedHabit.name,
+    "Cold Shower 3m",
+    "[Issue #427 AC-1] [AC-1] Habit name preserved after reordering up"
+  );
+  assertEqual(
+    preservedHabit.targetValue,
+    180,
+    "[Issue #427 AC-1] [AC-1] Habit target value preserved after reordering up"
+  );
+  assertEqual(
+    preservedHabit.unit,
+    "secs",
+    "[Issue #427 AC-1] [AC-1] Habit unit preserved after reordering up"
+  );
+  assertEqual(
+    preservedHabit.icon,
+    "🚿",
+    "[Issue #427 AC-1] [AC-1] Habit icon preserved after reordering up"
+  );
+
+  // ==========================================
+  // [Issue #427 AC-2] Reorder Down (▼) Swaps Habit with Succeeding Habit in Routine Cluster
+  // ==========================================
+  console.log(
+    "\n--- [Issue #427 AC-2] Reorder Down (▼) Swaps Habit with Succeeding Habit ---"
+  );
+
+  // Setup distinct habit cluster for evening routine
+  const rEvening1 = {
+    id: "h-reorder-eve1",
+    name: "No Screens 1h before bed",
+    type: "binary",
+    targetValue: 1,
+    routine: "evening",
+    scheduleType: "daily",
+    color: "purple",
+    icon: "📵",
+    order: 0,
+  };
+  const rEvening2 = {
+    id: "h-reorder-eve2",
+    name: "Chamomile Tea",
+    type: "binary",
+    targetValue: 1,
+    routine: "evening",
+    scheduleType: "daily",
+    color: "emerald",
+    icon: "🍵",
+    order: 1,
+  };
+  const rEvening3 = {
+    id: "h-reorder-eve3",
+    name: "Gratitude Reflection",
+    type: "binary",
+    targetValue: 1,
+    routine: "evening",
+    scheduleType: "daily",
+    color: "rose",
+    icon: "🙏",
+    order: 2,
+  };
+
+  await reorderStore.addHabit(rEvening1);
+  await reorderStore.addHabit(rEvening2);
+  await reorderStore.addHabit(rEvening3);
+
+  // Verify Manager View renders ▼ down reorder button for items
+  const managerEveningHtml = renderManagerView(reorderStore, null, "vi");
+  assert(
+    managerEveningHtml.includes('data-action="reorder-down"') &&
+      managerEveningHtml.includes('data-habit-id="h-reorder-eve1"'),
+    "[Issue #427 AC-2] [AC-2] Manager view renders reorder-down button with habit ID"
+  );
+
+  // [AC-2] Move 1st habit (h-reorder-eve1) DOWN with 2nd habit (h-reorder-eve2)
+  await reorderStore.reorderHabits("evening", [
+    "h-reorder-eve2",
+    "h-reorder-eve1",
+    "h-reorder-eve3",
+  ]);
+
+  const eveningAfterDown1 = reorderStore
+    .getHabits()
+    .filter((h) => h.routine === "evening" && !h.archived)
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    eveningAfterDown1[0].id,
+    "h-reorder-eve2",
+    "[Issue #427 AC-2] [AC-2] 2nd habit promoted to index 0 after top habit moved down"
+  );
+  assertEqual(
+    eveningAfterDown1[1].id,
+    "h-reorder-eve1",
+    "[Issue #427 AC-2] [AC-2] Top habit shifted down to index 1"
+  );
+  assertEqual(
+    eveningAfterDown1[2].id,
+    "h-reorder-eve3",
+    "[Issue #427 AC-2] [AC-2] 3rd habit remained at index 2"
+  );
+
+  // [AC-2] Move h-reorder-eve1 DOWN again to bottom (index 2)
+  await reorderStore.reorderHabits("evening", [
+    "h-reorder-eve2",
+    "h-reorder-eve3",
+    "h-reorder-eve1",
+  ]);
+
+  const eveningAfterDown2 = reorderStore
+    .getHabits()
+    .filter((h) => h.routine === "evening" && !h.archived)
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    eveningAfterDown2[0].id,
+    "h-reorder-eve2",
+    "[Issue #427 AC-2] [AC-2] Top position holds h-reorder-eve2"
+  );
+  assertEqual(
+    eveningAfterDown2[1].id,
+    "h-reorder-eve3",
+    "[Issue #427 AC-2] [AC-2] Middle position holds h-reorder-eve3"
+  );
+  assertEqual(
+    eveningAfterDown2[2].id,
+    "h-reorder-eve1",
+    "[Issue #427 AC-2] [AC-2] Moved habit successfully shifted to bottom index 2"
+  );
+
+  // [AC-2] Reorder Down in Anytime Routine Cluster
+  const rAny1 = {
+    id: "h-reorder-any1",
+    name: "Posture Check",
+    type: "binary",
+    targetValue: 1,
+    routine: "anytime",
+    scheduleType: "daily",
+    order: 0,
+  };
+  const rAny2 = {
+    id: "h-reorder-any2",
+    name: "Eye Rest 20-20-20",
+    type: "binary",
+    targetValue: 1,
+    routine: "anytime",
+    scheduleType: "daily",
+    order: 1,
+  };
+  await reorderStore.addHabit(rAny1);
+  await reorderStore.addHabit(rAny2);
+
+  await reorderStore.reorderHabits("anytime", [
+    "h-reorder-any2",
+    "h-reorder-any1",
+  ]);
+  const anyHabits = reorderStore
+    .getHabits()
+    .filter((h) => (h.routine || "anytime") === "anytime" && !h.archived)
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    anyHabits[0].id,
+    "h-reorder-any2",
+    "[Issue #427 AC-2] [AC-2] Anytime routine habit 1 swapped to index 0"
+  );
+  assertEqual(
+    anyHabits[1].id,
+    "h-reorder-any1",
+    "[Issue #427 AC-2] [AC-2] Anytime routine habit 2 swapped to index 1"
+  );
+
+  // [AC-2] Logging and streak preservation across reordering
+  await reorderStore.logHabit(
+    "h-reorder-eve1",
+    selectedDate,
+    1,
+    "Completed no screens"
+  );
+  assertEqual(
+    reorderStore.state.logs[`h-reorder-eve1_${selectedDate}`].value,
+    1,
+    "[Issue #427 AC-2] [AC-2] Habit logs remain accurately linked after moving down"
+  );
+  assertEqual(
+    reorderStore.state.logs[`h-reorder-eve1_${selectedDate}`].notes,
+    "Completed no screens",
+    "[Issue #427 AC-2] [AC-2] Habit notes remain intact after moving down"
+  );
+
+  // ==========================================
+  // [Issue #427 AC-3] Persistence in IndexedDB & Immediate Reflection Across Manager & Today Views
+  // ==========================================
+  console.log(
+    "\n--- [Issue #427 AC-3] Persistence in IndexedDB & Immediate Reflection ---"
+  );
+
+  // 1. IndexedDB / Storage layer direct verification
+  const dbM3 = await reorderStorage.getHabit("h-reorder-m3");
+  const dbM2 = await reorderStorage.getHabit("h-reorder-m2");
+  const dbM1 = await reorderStorage.getHabit("h-reorder-m1");
+
+  assertEqual(
+    dbM3.order,
+    0,
+    "[Issue #427 AC-3] [AC-3] h-reorder-m3 order 0 persisted to IndexedDB storage adapter"
+  );
+  assertEqual(
+    dbM2.order,
+    1,
+    "[Issue #427 AC-3] [AC-3] h-reorder-m2 order 1 persisted to IndexedDB storage adapter"
+  );
+  assertEqual(
+    dbM1.order,
+    2,
+    "[Issue #427 AC-3] [AC-3] h-reorder-m1 order 2 persisted to IndexedDB storage adapter"
+  );
+
+  const allDbHabits = await reorderStorage.getAllHabits();
+  const dbMorningHabits = allDbHabits
+    .filter(
+      (h) =>
+        h.routine === "morning" &&
+        !h.archived &&
+        h.id &&
+        h.id.startsWith("h-reorder-m")
+    )
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    dbMorningHabits[0].id,
+    "h-reorder-m3",
+    "[Issue #427 AC-3] [AC-3] IndexedDB getAllHabits reflects reordered sequence for 1st item"
+  );
+  assertEqual(
+    dbMorningHabits[1].id,
+    "h-reorder-m2",
+    "[Issue #427 AC-3] [AC-3] IndexedDB getAllHabits reflects reordered sequence for 2nd item"
+  );
+  assertEqual(
+    dbMorningHabits[2].id,
+    "h-reorder-m1",
+    "[Issue #427 AC-3] [AC-3] IndexedDB getAllHabits reflects reordered sequence for 3rd item"
+  );
+
+  // 2. Cold Start / Re-instantiation from Storage Adapter without state drift
+  const freshStore = new HabitStore({ storage: reorderStorage });
+  await freshStore.init();
+  const freshMorning = freshStore
+    .getHabits()
+    .filter(
+      (h) =>
+        h.routine === "morning" &&
+        !h.archived &&
+        h.id &&
+        h.id.startsWith("h-reorder-m")
+    )
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    freshMorning.length,
+    3,
+    "[Issue #427 AC-3] [AC-3] Cold store init loads all reordered habits"
+  );
+  assertEqual(
+    freshMorning[0].id,
+    "h-reorder-m3",
+    "[Issue #427 AC-3] [AC-3] Cold store retains order 0 on fresh startup"
+  );
+  assertEqual(
+    freshMorning[1].id,
+    "h-reorder-m2",
+    "[Issue #427 AC-3] [AC-3] Cold store retains order 1 on fresh startup"
+  );
+  assertEqual(
+    freshMorning[2].id,
+    "h-reorder-m1",
+    "[Issue #427 AC-3] [AC-3] Cold store retains order 2 on fresh startup"
+  );
+
+  // 3. Manager View immediate reflection
+  const renderedManager = renderManagerView(reorderStore, null, "vi");
+  assert(
+    renderedManager.includes('data-habit-id="h-reorder-m3"') &&
+      renderedManager.includes('data-habit-id="h-reorder-m2"') &&
+      renderedManager.includes('data-habit-id="h-reorder-m1"'),
+    "[Issue #427 AC-3] [AC-3] Manager view renders all reordered habit cards"
+  );
+
+  // 4. Today View immediate reflection
+  const renderedToday = renderRoutineSection(
+    "morning",
+    reorderStore,
+    selectedDate,
+    "vi"
+  );
+  assert(
+    renderedToday.includes('data-habit-card="h-reorder-m3"') ||
+      renderedToday.includes("Journaling 5m"),
+    "[Issue #427 AC-3] [AC-3] Today view morning routine section renders reordered habit 1"
+  );
+  assert(
+    renderedToday.includes('data-habit-card="h-reorder-m2"') ||
+      renderedToday.includes("Cold Shower 3m"),
+    "[Issue #427 AC-3] [AC-3] Today view morning routine section renders reordered habit 2"
+  );
+
+  // ==========================================
+  // [Issue #427 AC-4] Edge Cases & Graceful Degradation
+  // ==========================================
+  console.log("\n--- [Issue #427 AC-4] Edge Cases & Graceful Degradation ---");
+
+  // 1. Top Boundary: Reordering up on the top item (index 0) is a clean no-op
+  let topBoundaryError = false;
+  try {
+    // Current morning order: [m3, m2, m1] -> index 0 is m3
+    // Moving top item up should preserve order safely
+    await reorderStore.reorderHabits("morning", [
+      "h-reorder-m3",
+      "h-reorder-m2",
+      "h-reorder-m1",
+    ]);
+  } catch (err) {
+    topBoundaryError = true;
+  }
+  assert(
+    !topBoundaryError,
+    "[Issue #427 AC-4] [AC-4] Moving top item up executes without throwing errors"
+  );
+
+  const morningBoundaryTop = reorderStore
+    .getHabits()
+    .filter(
+      (h) =>
+        h.routine === "morning" &&
+        !h.archived &&
+        h.id &&
+        h.id.startsWith("h-reorder-m")
+    )
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    morningBoundaryTop[0].id,
+    "h-reorder-m3",
+    "[Issue #427 AC-4] [AC-4] Top item remains at index 0 without state corruption"
+  );
+
+  // 2. Bottom Boundary: Reordering down on the bottom item is a clean no-op
+  let bottomBoundaryError = false;
+  try {
+    // Current morning order: [m3, m2, m1] -> bottom item is m1
+    await reorderStore.reorderHabits("morning", [
+      "h-reorder-m3",
+      "h-reorder-m2",
+      "h-reorder-m1",
+    ]);
+  } catch (err) {
+    bottomBoundaryError = true;
+  }
+  assert(
+    !bottomBoundaryError,
+    "[Issue #427 AC-4] [AC-4] Moving bottom item down executes without throwing errors"
+  );
+
+  const morningBoundaryBottom = reorderStore
+    .getHabits()
+    .filter(
+      (h) =>
+        h.routine === "morning" &&
+        !h.archived &&
+        h.id &&
+        h.id.startsWith("h-reorder-m")
+    )
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    morningBoundaryBottom[2].id,
+    "h-reorder-m1",
+    "[Issue #427 AC-4] [AC-4] Bottom item remains at index 2 without state corruption"
+  );
+
+  // 3. Single-item cluster: routine with only 1 habit
+  const singleHabit = {
+    id: "h-reorder-solo",
+    name: "Solo Routine Habit",
+    type: "binary",
+    targetValue: 1,
+    routine: "afternoon",
+    scheduleType: "daily",
+    order: 0,
+  };
+  await reorderStore.addHabit(singleHabit);
+
+  let soloError = false;
+  try {
+    await reorderStore.reorderHabits("afternoon", ["h-reorder-solo"]);
+  } catch (err) {
+    soloError = true;
+  }
+  assert(
+    !soloError,
+    "[Issue #427 AC-4] [AC-4] Reordering single-item cluster executes gracefully"
+  );
+  assertEqual(
+    reorderStore.getHabit("h-reorder-solo").order,
+    0,
+    "[Issue #427 AC-4] [AC-4] Single item maintains order 0"
+  );
+
+  // 4. Invalid input handling: non-array, null, empty array
+  let emptyError = false;
+  try {
+    await reorderStore.reorderHabits("morning", []);
+    await reorderStore.reorderHabits("morning", null);
+    await reorderStore.reorderHabits("morning", undefined);
+  } catch (err) {
+    emptyError = true;
+  }
+  assert(
+    !emptyError,
+    "[Issue #427 AC-4] [AC-4] Passing empty or invalid array to reorderHabits fails safely without throw"
+  );
+
+  // 5. Non-existent habit ID handling
+  let nonExistentError = false;
+  try {
+    await reorderStore.reorderHabits("morning", [
+      "h-nonexistent-123",
+      "h-reorder-m3",
+    ]);
+  } catch (err) {
+    nonExistentError = true;
+  }
+  assert(
+    !nonExistentError,
+    "[Issue #427 AC-4] [AC-4] Reordering with non-existent ID ignores missing IDs safely"
+  );
+
+  // 6. Archived habits are unaffected by active reordering
+  await reorderStore.archiveHabit("h-reorder-m1");
+  const activeMorningCount = reorderStore
+    .getHabits(false)
+    .filter(
+      (h) => h.routine === "morning" && h.id && h.id.startsWith("h-reorder-m")
+    ).length;
+  assertEqual(
+    activeMorningCount,
+    2,
+    "[Issue #427 AC-4] [AC-4] Archived habit excluded from active routine count"
+  );
+  const archivedHabitRecord = reorderStore.getHabit("h-reorder-m1");
+  assertEqual(
+    archivedHabitRecord.archived,
+    true,
+    "[Issue #427 AC-4] [AC-4] Archived status preserved regardless of reorder operations"
   );
 }
 

@@ -95,8 +95,10 @@
 
     // Getters
     getHabits(includeArchived = false) {
-      if (includeArchived) return this.state.habits;
-      return this.state.habits.filter((h) => !h.archived);
+      const list = includeArchived
+        ? [...this.state.habits]
+        : this.state.habits.filter((h) => !h.archived);
+      return list.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     }
 
     getHabit(id) {
@@ -189,14 +191,16 @@
 
     async reorderHabits(routine, orderedIds) {
       if (!Array.isArray(orderedIds)) return;
-      orderedIds.forEach((id, index) => {
+      for (let index = 0; index < orderedIds.length; index++) {
+        const id = orderedIds[index];
         const h = this.state.habits.find((item) => item.id === id);
         if (h) {
           h.order = index;
-          h.routine = routine;
-          this.storage.putHabit(h);
+          if (routine) h.routine = routine;
+          await this.storage.putHabit(h);
         }
-      });
+      }
+      this.state.habits.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
       this.notify("habits_reordered", { routine, orderedIds });
     }
 

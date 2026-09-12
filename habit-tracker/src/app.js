@@ -514,6 +514,15 @@
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
         await app.handleDeleteHabit(habitId);
+      } else if (action === "reorder-up" || action === "reorder-down") {
+        const routine = target.getAttribute("data-routine");
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        await app.handleReorderHabit(
+          habitId,
+          routine,
+          action === "reorder-up" ? "up" : "down"
+        );
       } else if (action === "export-json") {
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
@@ -948,6 +957,34 @@
     handleDeleteHabit: async (id) => {
       await store.deleteHabit(id);
       showToast("Đã xoá thói quen", "info");
+    },
+    handleReorderHabit: async (habitId, routine, direction) => {
+      if (!store || !habitId) return;
+      const targetRoutine =
+        routine ||
+        (store.getHabit(habitId)
+          ? store.getHabit(habitId).routine
+          : "anytime") ||
+        "anytime";
+      const habits = store
+        .getHabits(false)
+        .filter((h) => (h.routine || "anytime") === targetRoutine)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+      const currentIndex = habits.findIndex((h) => h.id === habitId);
+      if (currentIndex === -1) return;
+
+      const targetIndex =
+        direction === "up" ? currentIndex - 1 : currentIndex + 1;
+      if (targetIndex < 0 || targetIndex >= habits.length) return;
+
+      const orderedIds = habits.map((h) => h.id);
+      const temp = orderedIds[currentIndex];
+      orderedIds[currentIndex] = orderedIds[targetIndex];
+      orderedIds[targetIndex] = temp;
+
+      await store.reorderHabits(targetRoutine, orderedIds);
+      renderActiveTab();
     },
     handleSaveNotes: async (habitId, date, notes) => {
       await store.updateNotes(habitId, date, notes);
