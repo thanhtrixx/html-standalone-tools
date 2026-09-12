@@ -69,8 +69,12 @@
   let store = null;
   let activeTab = "today"; // 'today' | 'insights' | 'manager' | 'settings'
   let timerInterval = null;
+  let timerWorker = null;
   let runningTimerHabitId = null;
   let runningTimerDate = null;
+  let runningTimerStartedAt = null;
+  let runningTimerBaseValue = 0;
+  let runningTimerTickCount = 0;
   let pendingDeleteHabitId = null;
   let swipeStartX = 0;
   let swipeStartY = 0;
@@ -695,6 +699,15 @@
         await app.exportDataJSON();
       }
     });
+    // Page visibility & focus listeners for background timer delta synchronization
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        syncRunningTimer();
+      }
+    });
+    window.addEventListener("focus", () => {
+      syncRunningTimer();
+    });
   }
 
   const undoStack = [];
@@ -864,6 +877,120 @@
   }
 
   /**
+   * Plays a harmonic audio chime when a timer habit completes
+   */
+  function playTimerCompletionSound() {
+    try {
+      const AudioCtx =
+        typeof window !== "undefined" &&
+        (window.AudioContext || window.webkitAudioContext);
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.6);
+    } catch (_) {}
+  }
+
+  /**
+   * Synchronizes active timer value with exact elapsed timestamp delta
+   */
+  async function syncRunningTimer(isIntervalTick = false) {
+    if (!runningTimerHabitId || !runningTimerStartedAt || !store) return;
+    const habit = store.getHabit(runningTimerHabitId);
+    if (!habit) return;
+
+    if (isIntervalTick) {
+      runningTimerTickCount++;
+    }
+
+    const targetDate = runningTimerDate || store.getActiveDate();
+    const timeElapsed = Math.max(
+      0,
+      Math.floor((Date.now() - runningTimerStartedAt) / 1000)
+    );
+    const elapsedSecs = Math.max(runningTimerTickCount, timeElapsed);
+    runningTimerTickCount = elapsedSecs;
+    const nextSeconds = runningTimerBaseValue + elapsedSecs;
+
+    await store.logHabit(runningTimerHabitId, targetDate, nextSeconds);
+    updateAmbientTimerPill();
+
+    // Auto stop if target reached
+    if (nextSeconds >= habit.targetValue) {
+      stopTimerTicker();
+      runningTimerHabitId = null;
+      runningTimerDate = null;
+      runningTimerStartedAt = null;
+      runningTimerBaseValue = 0;
+      runningTimerTickCount = 0;
+      updateAmbientTimerPill();
+      renderActiveTab();
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      showToast(
+        `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
+        "success"
+      );
+      playTimerCompletionSound();
+    }
+  }
+
+  /**
+   * Starts background timer ticker using Web Worker (or setInterval fallback)
+   */
+  function startTimerTicker() {
+    stopTimerTicker();
+    try {
+      if (
+        typeof Worker !== "undefined" &&
+        typeof Blob !== "undefined" &&
+        typeof URL !== "undefined" &&
+        typeof URL.createObjectURL === "function"
+      ) {
+        const blob = new Blob(
+          ["setInterval(function() { postMessage('tick'); }, 1000);"],
+          { type: "application/javascript" }
+        );
+        const workerUrl = URL.createObjectURL(blob);
+        timerWorker = new Worker(workerUrl);
+        timerWorker.onmessage = () => {
+          syncRunningTimer(true);
+        };
+        return;
+      }
+    } catch (_) {}
+
+    timerInterval = setInterval(() => {
+      syncRunningTimer(true);
+    }, 1000);
+  }
+
+  /**
+   * Stops timer ticker interval and worker
+   */
+  function stopTimerTicker() {
+    if (timerWorker) {
+      try {
+        timerWorker.terminate();
+      } catch (_) {}
+      timerWorker = null;
+    }
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  /**
    * Habit Timer Toggle
    */
   async function handleToggleTimer(habitId, date) {
@@ -873,51 +1000,40 @@
 
     if (runningTimerHabitId === habitId) {
       // Stop Timer
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = null;
+      await syncRunningTimer();
+      stopTimerTicker();
       runningTimerHabitId = null;
       runningTimerDate = null;
+      runningTimerStartedAt = null;
+      runningTimerBaseValue = 0;
+      runningTimerTickCount = 0;
       updateAmbientTimerPill();
       renderActiveTab();
       return;
     }
 
     if (runningTimerHabitId) {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = null;
+      await syncRunningTimer();
+      stopTimerTicker();
       runningTimerHabitId = null;
       runningTimerDate = null;
+      runningTimerStartedAt = null;
+      runningTimerBaseValue = 0;
+      runningTimerTickCount = 0;
     }
+
+    const currentLog = (store.state &&
+      store.state.logs &&
+      store.state.logs[`${habitId}_${targetDate}`]) || { value: 0 };
 
     runningTimerHabitId = habitId;
     runningTimerDate = targetDate;
+    runningTimerStartedAt = Date.now();
+    runningTimerBaseValue = currentLog.value || 0;
+    runningTimerTickCount = 0;
+
     updateAmbientTimerPill();
-
-    timerInterval = setInterval(async () => {
-      const currentLog = (store.state &&
-        store.state.logs &&
-        store.state.logs[`${habitId}_${targetDate}`]) || { value: 0 };
-      const nextSeconds = (currentLog.value || 0) + 1;
-      await store.logHabit(habitId, targetDate, nextSeconds);
-      updateAmbientTimerPill();
-
-      // Auto stop if target reached
-      if (nextSeconds >= habit.targetValue) {
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = null;
-        runningTimerHabitId = null;
-        runningTimerDate = null;
-        updateAmbientTimerPill();
-        renderActiveTab();
-        const lang =
-          (store.getSettings() && store.getSettings().language) || "vi";
-        showToast(
-          `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
-          "success"
-        );
-      }
-    }, 1000);
-
+    startTimerTicker();
     renderActiveTab();
   }
 
@@ -1438,6 +1554,17 @@
     saveHabitFromModal,
     handleToggleHabit,
     handleToggleTimer,
+    syncRunningTimer,
+    playTimerCompletionSound,
+    get runningTimerHabitId() {
+      return runningTimerHabitId;
+    },
+    get runningTimerStartedAt() {
+      return runningTimerStartedAt;
+    },
+    get runningTimerBaseValue() {
+      return runningTimerBaseValue;
+    },
     updateAmbientTimerPill,
     jumpToRunningTimer,
     promptDeleteHabit,
@@ -1498,12 +1625,15 @@
     },
   };
 
-  if (typeof module !== "undefined" && module.exports) {
-    module.exports = HabitApp;
-  } else {
-    global.HabitApp = HabitApp;
+  global.HabitApp = HabitApp;
+
+  if (typeof window !== "undefined" && window.addEventListener) {
     window.addEventListener("DOMContentLoaded", () => {
       HabitApp.init();
     });
+  }
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = HabitApp;
   }
 })(typeof window !== "undefined" ? window : globalThis);
