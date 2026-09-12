@@ -221,14 +221,16 @@
 
     const routineSectionsHtml = routineKeys
       .map((rKey) => {
-        const routineHabits = habits.filter(
-          (h) => !h.archived && (h.routine || "anytime") === rKey
-        );
+        const routineHabits = habits
+          .filter((h) => !h.archived && (h.routine || "anytime") === rKey)
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
         if (routineHabits.length === 0) return "";
 
         const itemsHtml = routineHabits
           .map((h, idx) => {
             const colorHex = todayView.getColorHex(h.color);
+            const isFirst = idx === 0;
+            const isLast = idx === routineHabits.length - 1;
             return `
               <div class="manager-habit-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 mb-3 flex items-center justify-between gap-3 shadow-md" data-habit-id="${h.id}">
                 <div class="flex items-center gap-3 flex-1">
@@ -242,8 +244,8 @@
 
                 <div class="flex items-center gap-1.5">
                   <!-- Reorder buttons -->
-                  <button type="button" data-action="reorder-up" data-habit-id="${h.id}" data-routine="${rKey}" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 text-xs" title="Move Up">▲</button>
-                  <button type="button" data-action="reorder-down" data-habit-id="${h.id}" data-routine="${rKey}" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 text-xs" title="Move Down">▼</button>
+                  <button type="button" data-action="reorder-up" data-habit-id="${h.id}" data-routine="${rKey}" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 text-xs ${isFirst ? "opacity-30 cursor-not-allowed" : ""}" ${isFirst ? 'disabled="disabled"' : ""} title="Move Up">▲</button>
+                  <button type="button" data-action="reorder-down" data-habit-id="${h.id}" data-routine="${rKey}" class="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 text-xs ${isLast ? "opacity-30 cursor-not-allowed" : ""}" ${isLast ? 'disabled="disabled"' : ""} title="Move Down">▼</button>
                   <!-- Edit -->
                   <button type="button" data-action="edit-habit" data-habit-id="${h.id}" class="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 text-sm ml-1" title="${i18n.t("edit", {}, lang)}">✏️</button>
                   <!-- Archive -->
