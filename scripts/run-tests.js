@@ -145,6 +145,11 @@ const TEST_SUITES = [
     file: "tests/habit-tracker-cloud-sync.test.js",
     category: "AI & State",
   },
+  {
+    name: "Atomic Habit Tracker UI Components & Gestures",
+    file: "tests/habit-tracker-ui-components.test.js",
+    category: "UI/UX",
+  },
 ];
 
 function escapeXml(str) {
