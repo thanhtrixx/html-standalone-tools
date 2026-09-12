@@ -172,6 +172,13 @@
       toast_import_success: "Data imported successfully!",
       toast_import_file_error: "File error: {errors}",
       toast_import_error: "Import error: {message}",
+      undo: "Undo",
+      undo_action: "Undo",
+      quick_emoji_presets: "Preset Emojis",
+      select_emoji_preset: "Preset Emojis",
+      toast_habit_completed: "Habit completed",
+      toast_habit_incremented: "Progress updated",
+      toast_undo_success: "Action undone",
 
       // Days of week
       day_sun: "Sun",
@@ -367,6 +374,13 @@
       toast_import_success: "Đã nhập dữ liệu thành công!",
       toast_import_file_error: "Lỗi tệp: {errors}",
       toast_import_error: "Lỗi nhập tệp: {message}",
+      undo: "Hoàn tác",
+      undo_action: "Hoàn tác",
+      quick_emoji_presets: "Biểu tượng gợi ý",
+      select_emoji_preset: "Biểu tượng gợi ý",
+      toast_habit_completed: "Đã hoàn thành thói quen",
+      toast_habit_incremented: "Đã cập nhật tiến độ",
+      toast_undo_success: "Đã hoàn tác thao tác",
 
       // Days of week
       day_sun: "CN",

@@ -542,6 +542,47 @@
           routine,
           action === "reorder-up" ? "up" : "down"
         );
+      } else if (action === "select-emoji") {
+        const emoji = target.getAttribute("data-emoji");
+        if (emoji) {
+          const iconInput = document.getElementById("modal-habit-icon");
+          if (iconInput) {
+            iconInput.value = emoji;
+          }
+          const allPresets = document.querySelectorAll(
+            '[data-action="select-emoji"]'
+          );
+          allPresets.forEach((btn) => {
+            if (btn.getAttribute("data-emoji") === emoji) {
+              btn.className =
+                "emoji-preset-btn w-9 h-9 flex items-center justify-center text-lg rounded-xl transition duration-150 hover:scale-110 active:scale-95 bg-emerald-100 dark:bg-emerald-950/80 border-2 border-emerald-500 shadow-sm ring-2 ring-emerald-500/30";
+            } else {
+              btn.className =
+                "emoji-preset-btn w-9 h-9 flex items-center justify-center text-lg rounded-xl transition duration-150 hover:scale-110 active:scale-95 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 hover:bg-slate-100 dark:hover:bg-slate-700";
+            }
+          });
+        }
+      } else if (action === "undo-toast") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        if (app && typeof app.undoLastAction === "function") {
+          await app.undoLastAction();
+        } else {
+          await undoLastAction();
+        }
+      } else if (action === "view-heatmap-date") {
+        const targetDate = target.getAttribute("data-date");
+        if (targetDate) {
+          store.setActiveDate(targetDate);
+          const app =
+            (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+          if (app && typeof app.switchTab === "function") {
+            app.switchTab("today");
+          } else {
+            activeTab = "today";
+            renderApp();
+          }
+        }
       } else if (action === "export-json") {
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
@@ -550,12 +591,61 @@
     });
   }
 
+  const undoStack = [];
+
+  /**
+   * Undoes the last habit logging or toggling action
+   */
+  async function undoLastAction() {
+    if (!undoStack || undoStack.length === 0) return;
+    const last = undoStack.pop();
+    if (!last || !store) return;
+
+    const { habitId, date, previousLog } = last;
+    const prevValue = previousLog ? previousLog.value : 0;
+    const prevNotes = previousLog ? previousLog.notes || "" : "";
+    const prevCompleted = previousLog ? !!previousLog.completed : false;
+
+    await store.logHabit(habitId, date, prevValue, prevNotes);
+
+    const currentLog = store.state.logs[`${habitId}_${date}`];
+    if (currentLog && currentLog.completed !== prevCompleted) {
+      currentLog.completed = prevCompleted;
+      if (store.storage && store.storage.saveLog) {
+        await store.storage.saveLog(currentLog);
+      }
+    }
+
+    renderActiveTab();
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_undo_success", {}, lang), "info");
+  }
+
   /**
    * Habit Toggle Handler (Checks 100% daily victory)
    */
   async function handleToggleHabit(habitId, date) {
     if (!store || !habitId) return;
+    const previousLog = store.state.logs[`${habitId}_${date}`]
+      ? { ...store.state.logs[`${habitId}_${date}`] }
+      : { habitId, date, value: 0, completed: false };
+
     await store.toggleHabit(habitId, date);
+    undoStack.push({ habitId, date, previousLog });
+
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    const currentLog = store.state.logs[`${habitId}_${date}`];
+    const isNowDone = currentLog && currentLog.completed;
+    const toastMsg = isNowDone
+      ? i18n.t("toast_habit_completed", {}, lang)
+      : i18n.t("toast_habit_saved", {}, lang);
+
+    showToast(toastMsg, "success", {
+      label: i18n.t("undo", {}, lang),
+      dataAction: "undo-toast",
+    });
 
     // Check if 100% daily completion reached
     const dailyState = store.getDailyState(date);
@@ -577,9 +667,20 @@
   async function handleStepIncrement(habitId, date) {
     const habit = store.getHabit(habitId);
     if (!habit) return;
-    const log = store.state.logs[`${habitId}_${date}`] || { value: 0 };
+    const previousLog = store.state.logs[`${habitId}_${date}`]
+      ? { ...store.state.logs[`${habitId}_${date}`] }
+      : { habitId, date, value: 0, completed: false };
+
     const step = habit.step || 1;
-    await store.logHabit(habitId, date, (log.value || 0) + step);
+    await store.logHabit(habitId, date, (previousLog.value || 0) + step);
+    undoStack.push({ habitId, date, previousLog });
+
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_habit_incremented", {}, lang), "info", {
+      label: i18n.t("undo", {}, lang),
+      dataAction: "undo-toast",
+    });
   }
 
   /**
@@ -588,10 +689,21 @@
   async function handleStepDecrement(habitId, date) {
     const habit = store.getHabit(habitId);
     if (!habit) return;
-    const log = store.state.logs[`${habitId}_${date}`] || { value: 0 };
+    const previousLog = store.state.logs[`${habitId}_${date}`]
+      ? { ...store.state.logs[`${habitId}_${date}`] }
+      : { habitId, date, value: 0, completed: false };
+
     const step = habit.step || 1;
-    const nextVal = Math.max(0, (log.value || 0) - step);
+    const nextVal = Math.max(0, (previousLog.value || 0) - step);
     await store.logHabit(habitId, date, nextVal);
+    undoStack.push({ habitId, date, previousLog });
+
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    showToast(i18n.t("toast_habit_incremented", {}, lang), "info", {
+      label: i18n.t("undo", {}, lang),
+      dataAction: "undo-toast",
+    });
   }
 
   /**
@@ -790,9 +902,9 @@
   }
 
   /**
-   * Toast notification helper
+   * Toast notification helper with optional interactive action button (e.g. Undo)
    */
-  function showToast(message, type = "info") {
+  function showToast(message, type = "info", action = null) {
     const container = document.getElementById("toast-container");
     if (!container) return;
 
@@ -804,11 +916,25 @@
           ? "bg-red-600 text-white"
           : "bg-slate-800 text-slate-200";
 
-    toast.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold ${bg} transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-center gap-2`;
+    toast.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold ${bg} transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto flex items-center justify-between gap-3`;
     toast.textContent = message;
-    toast.innerHTML = `<span>${type === "success" ? "✅" : type === "error" ? "⚠️" : "ℹ️"}</span> <span>${message}</span>`;
+
+    let actionBtnHtml = "";
+    if (action && action.label) {
+      const actionAttr = action.dataAction || "undo-toast";
+      actionBtnHtml = `<button type="button" data-action="${actionAttr}" class="px-2.5 py-1 text-xs font-bold bg-white/20 hover:bg-white/30 active:scale-95 text-white rounded-lg transition">${action.label}</button>`;
+    }
+
+    toast.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span>${type === "success" ? "✅" : type === "error" ? "⚠️" : "ℹ️"}</span>
+        <span>${message}</span>
+      </div>
+      ${actionBtnHtml}
+    `;
 
     container.appendChild(toast);
+    container.innerHTML = (container.innerHTML || "") + " " + toast.innerHTML;
     const raf =
       typeof requestAnimationFrame !== "undefined"
         ? requestAnimationFrame
@@ -820,7 +946,7 @@
     setTimeout(() => {
       toast.classList.add("translate-y-2", "opacity-0");
       setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
   }
 
   /**
@@ -861,6 +987,7 @@
       return store;
     },
     showToast,
+    undoLastAction,
     switchTab(tab) {
       activeTab = tab;
       renderApp();
