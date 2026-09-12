@@ -11,6 +11,11 @@
  * - [AC-4] Touch Swipe-Right to Complete Gesture & Web Haptics
  * - [AC-5] 100% Daily Victory Confetti Celebration
  * - [AC-6] Dark OLED & Light Mode Theme Toggle
+ * - [Manager AC-1] Habit Edit Modal Form & Live Preview
+ * - [Manager AC-2] Routine Habit Reordering
+ * - [Manager AC-3] Habit Deep-Dive Bottom Sheet with 365-day mini heatmap
+ * - [Manager AC-4] Micro-Journal Reflection Notes CRUD
+ * - [Manager AC-5] Archive and Restore Management
  */
 
 const {
@@ -36,6 +41,14 @@ async function runUITests() {
     renderTodayDashboard,
     triggerVictoryConfetti,
   } = require("../habit-tracker/src/ui/today-view.js");
+  const {
+    renderHabitEditModal,
+    renderManagerView,
+  } = require("../habit-tracker/src/ui/manager-view.js");
+  const {
+    renderDetailSheet,
+    renderMiniHeatmap,
+  } = require("../habit-tracker/src/ui/detail-sheet.js");
 
   const storage = storageModule.createStorageAdapter({ forceFallback: true });
   const store = new HabitStore({ storage });
@@ -294,6 +307,150 @@ async function runUITests() {
     store.getSettings().theme,
     "dark",
     "[AC-6] Store settings updated to dark OLED mode"
+  );
+
+  // ==========================================
+  // [Issue #416 AC-1] Habit Edit Modal
+  // ==========================================
+  console.log("\n--- [Issue #416 AC-1] Habit Creation & Edit Modal ---");
+
+  const addModalHtml = renderHabitEditModal(null, "vi");
+  assert(
+    addModalHtml.includes("Thêm thói quen"),
+    "[Issue #416 AC-1] Add modal renders title"
+  );
+  assert(
+    addModalHtml.includes("modal-habit-name"),
+    "[Issue #416 AC-1] Modal includes habit name field"
+  );
+  assert(
+    addModalHtml.includes("modal-habit-routine"),
+    "[Issue #416 AC-1] Modal includes routine selector"
+  );
+  assert(
+    addModalHtml.includes("modal-schedule-type"),
+    "[Issue #416 AC-1] Modal includes schedule selector"
+  );
+
+  const editModalHtml = renderHabitEditModal(habitWater, "vi");
+  assert(
+    editModalHtml.includes("Sửa thói quen"),
+    "[Issue #416 AC-1] Edit modal renders title for existing habit"
+  );
+  assert(
+    editModalHtml.includes("Drink 2.5L Water"),
+    "[Issue #416 AC-1] Edit modal prefills habit name"
+  );
+
+  // ==========================================
+  // [Issue #416 AC-2] Routine Reordering
+  // ==========================================
+  console.log("\n--- [Issue #416 AC-2] Routine Reordering ---");
+
+  await store.addHabit({
+    id: "h-yoga",
+    name: "Morning Yoga",
+    type: "binary",
+    targetValue: 1,
+    routine: "morning",
+    scheduleType: "daily",
+  });
+
+  await store.reorderHabits("morning", ["h-yoga", "h-meditate"]);
+  const morningHabits = store
+    .getHabits()
+    .filter((h) => h.routine === "morning")
+    .sort((a, b) => a.order - b.order);
+  assertEqual(
+    morningHabits[0].id,
+    "h-yoga",
+    "[Issue #416 AC-2] Yoga reordered to first position"
+  );
+  assertEqual(
+    morningHabits[1].id,
+    "h-meditate",
+    "[Issue #416 AC-2] Meditation reordered to second position"
+  );
+
+  // ==========================================
+  // [Issue #416 AC-3] Habit Deep-Dive Sheet & Heatmap
+  // ==========================================
+  console.log(
+    "\n--- [Issue #416 AC-3] Habit Deep-Dive Sheet & Mini Heatmap ---"
+  );
+
+  const detailSheetHtml = renderDetailSheet(
+    habitWater,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+  assert(
+    detailSheetHtml.includes("Chi tiết thói quen") ||
+      detailSheetHtml.includes("Drink 2.5L Water"),
+    "[Issue #416 AC-3] Detail sheet renders habit name"
+  );
+  assert(
+    detailSheetHtml.includes("mini-heatmap-grid"),
+    "[Issue #416 AC-3] Detail sheet contains 365-day mini heatmap grid"
+  );
+  assert(
+    detailSheetHtml.includes("🔥"),
+    "[Issue #416 AC-3] Detail sheet contains streak status badge"
+  );
+
+  // ==========================================
+  // [Issue #416 AC-4] Micro-Journal Reflection Notes
+  // ==========================================
+  console.log("\n--- [Issue #416 AC-4] Micro-Journal Reflection Notes ---");
+
+  await store.updateNotes(
+    "h-water",
+    selectedDate,
+    "Drank infused lemon water."
+  );
+  assertEqual(
+    store.state.logs["h-water_2026-09-12"].notes,
+    "Drank infused lemon water.",
+    "[Issue #416 AC-4] Reflection note saved to log entry"
+  );
+
+  const updatedDetailHtml = renderDetailSheet(
+    habitWater,
+    store,
+    null,
+    "vi",
+    selectedDate
+  );
+  assert(
+    updatedDetailHtml.includes("Drank infused lemon water."),
+    "[Issue #416 AC-4] Reflection note displayed in detail sheet history"
+  );
+
+  // ==========================================
+  // [Issue #416 AC-5] Archive and Restore
+  // ==========================================
+  console.log("\n--- [Issue #416 AC-5] Archive and Restore Habits ---");
+
+  await store.archiveHabit("h-yoga");
+  const activeHabits = store.getHabits(false);
+  assert(
+    !activeHabits.some((h) => h.id === "h-yoga"),
+    "[Issue #416 AC-5] Archived habit hidden from active list"
+  );
+
+  const allWithArchived = store.getHabits(true);
+  assert(
+    allWithArchived.some((h) => h.id === "h-yoga" && h.archived),
+    "[Issue #416 AC-5] Archived habit preserved in catalog"
+  );
+
+  await store.restoreHabit("h-yoga");
+  const restoredHabits = store.getHabits(false);
+  assert(
+    restoredHabits.some((h) => h.id === "h-yoga"),
+    "[Issue #416 AC-5] Restored habit visible in active list again"
   );
 }
 
