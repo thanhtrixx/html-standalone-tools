@@ -1,5 +1,7 @@
 # Personal Finance Savings Predictor
 
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+
 A standalone, client-side financial simulation and wealth projection tool designed for multi-tier savings, compound salary growth, and inflation modeling.
 
 For Vietnamese domain vocabulary, copywriting standards, and the bilingual terminology guide, refer to [I18N.md](./I18N.md).

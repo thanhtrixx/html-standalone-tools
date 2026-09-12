@@ -1,4 +1,6 @@
-# Atomic Habit & Routine Tracker (v1.1.0)
+# Atomic Habit & Routine Tracker
+
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for atomic habit building, daily routine clustering (Morning, Afternoon, Evening, Anytime), dual-metric consistency scoring (active streak + 30-day/90-day consistency rate), flexible schedules, and private, local-first offline tracking with optional encrypted cloud backup.
 

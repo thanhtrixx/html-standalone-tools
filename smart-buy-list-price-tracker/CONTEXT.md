@@ -1,4 +1,6 @@
-# Smart Buy-List & Unit Price Tracker (v4.6.2)
+# Smart Buy-List & Unit Price Tracker
+
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
 
 A standalone, mobile-first Progressive Web Application (PWA) designed for grocery and household shopping list management, multi-store purchase ledger tracking, real-time package unit price normalization, and in-aisle deal intelligence.
 

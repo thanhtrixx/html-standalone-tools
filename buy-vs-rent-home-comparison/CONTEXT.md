@@ -1,5 +1,7 @@
 # Buy vs. Rent Home Comparison
 
+> **Lifecycle Phase:** `Hardened Stable` ([ADR-0013](../docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md))
+
 A standalone, client-side financial decision engine and dual-path wealth simulator designed to evaluate the long-term economic outcomes of homeownership versus renting and investing the difference.
 
 For Vietnamese domain vocabulary, copywriting standards, and the bilingual terminology guide, refer to [I18N.md](./I18N.md).

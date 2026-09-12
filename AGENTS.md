@@ -18,6 +18,10 @@ Standard engineering lifecycle, GitHub Flow, Subagent Quality Protocol (PR-per-i
 
 Two-tier delegation threshold, scoped inner-loop test runner gates, and fan-in digest compression (≤ 300–400 words). See `docs/adr/0012-optimal-token-strategy-and-subagent-economics.md`.
 
+### Dual-Phase Tool Lifecycle & Scoped Quality
+
+Active Feature Development (velocity) vs Hardened Stable (quality, zero regression), tool-scoped test suites (`npm run test:<tool>`), and graduation DoD. See `docs/adr/0013-dual-phase-tool-lifecycle-and-scoped-quality-governance.md`.
+
 ### Domain docs
 
 Multi-context (`CONTEXT-MAP.md` and per-tool `CONTEXT.md` / `docs/adr/`). See `docs/agents/domain.md`.
