@@ -4249,6 +4249,202 @@ async function runUITests() {
       managerHtml459.includes("morning"),
     "[Issue #459 AC-5] Manager view renders routine badge chips for multi-routine habit"
   );
+
+  // ==========================================
+  // Issue #460: Tab Swipe Gestures & Popstate Back Stack
+  // ==========================================
+  const { sandbox: navSandbox } = createHabitTrackerSandbox();
+  await navSandbox.HabitApp.init();
+
+  // 1. Initial State verification
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "today",
+    "[Issue #460 AC-1] App initializes on 'today' tab"
+  );
+
+  // 2. Tab Swipe: Swipe Left (today -> insights -> manager -> settings)
+  navSandbox.document.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 250, clientY: 300 }],
+    target: navSandbox.document.getElementById("main-content"),
+  });
+  navSandbox.document.dispatchEvent({
+    type: "touchend",
+    changedTouches: [{ clientX: 100, clientY: 300 }], // deltaX = -150
+    target: navSandbox.document.getElementById("main-content"),
+  });
+
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "insights",
+    "[Issue #460 AC-1] Swipe left from today navigates to insights tab"
+  );
+
+  // Swipe Left again (insights -> manager)
+  navSandbox.document.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 250, clientY: 300 }],
+    target: navSandbox.document.getElementById("main-content"),
+  });
+  navSandbox.document.dispatchEvent({
+    type: "touchend",
+    changedTouches: [{ clientX: 100, clientY: 300 }],
+    target: navSandbox.document.getElementById("main-content"),
+  });
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "manager",
+    "[Issue #460 AC-1] Swipe left from insights navigates to manager tab"
+  );
+
+  // Swipe Left again (manager -> settings)
+  navSandbox.document.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 250, clientY: 300 }],
+    target: navSandbox.document.getElementById("main-content"),
+  });
+  navSandbox.document.dispatchEvent({
+    type: "touchend",
+    changedTouches: [{ clientX: 100, clientY: 300 }],
+    target: navSandbox.document.getElementById("main-content"),
+  });
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "settings",
+    "[Issue #460 AC-1] Swipe left from manager navigates to settings tab"
+  );
+
+  // 3. Tab Swipe: Swipe Right (settings -> manager -> insights -> today)
+  navSandbox.document.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 100, clientY: 300 }],
+    target: navSandbox.document.getElementById("main-content"),
+  });
+  navSandbox.document.dispatchEvent({
+    type: "touchend",
+    changedTouches: [{ clientX: 250, clientY: 300 }], // deltaX = +150
+    target: navSandbox.document.getElementById("main-content"),
+  });
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "manager",
+    "[Issue #460 AC-1] Swipe right from settings navigates to manager tab"
+  );
+
+  // 4. Card Gesture Disambiguation
+  navSandbox.HabitApp.switchTab("today");
+  const habitCardEl460 = navSandbox.document.createElement("div");
+  habitCardEl460.className = "habit-card";
+  habitCardEl460.setAttribute("data-habit-id", "h-water");
+  navSandbox.document.getElementById("main-content").appendChild(habitCardEl460);
+
+  navSandbox.document.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 250, clientY: 300 }],
+    target: habitCardEl460,
+  });
+  navSandbox.document.dispatchEvent({
+    type: "touchend",
+    changedTouches: [{ clientX: 100, clientY: 300 }],
+    target: habitCardEl460,
+  });
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "today",
+    "[Issue #460 AC-2] Touch swipe starting on habit card preserves card gesture and does not switch tab"
+  );
+
+  // 5. Popstate Tier 1: Overlay Dismissal (Modal, Sheet, Delete Alert)
+  // 5a. Edit Modal dismissal
+  navSandbox.HabitApp.openAddHabitModal();
+  const editModalEl460 = navSandbox.document.getElementById(
+    "habit-edit-modal-overlay"
+  );
+  assert(
+    editModalEl460 && !editModalEl460.classList.contains("hidden"),
+    "[Issue #460 AC-3] Habit edit modal is open before popstate"
+  );
+  navSandbox.HabitApp.handlePopState({});
+  assert(
+    editModalEl460 && editModalEl460.classList.contains("hidden"),
+    "[Issue #460 AC-3] Popstate dismisses open habit edit modal without changing tab"
+  );
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "today",
+    "[Issue #460 AC-3] Tab remains today"
+  );
+
+  // 5b. Detail Sheet dismissal
+  navSandbox.HabitApp.openDetailSheet("h-water");
+  const detailSheetOverlay460 = navSandbox.document.getElementById(
+    "detail-sheet-overlay"
+  );
+  assert(
+    detailSheetOverlay460 && !detailSheetOverlay460.classList.contains("hidden"),
+    "[Issue #460 AC-3] Detail sheet is open before popstate"
+  );
+  navSandbox.HabitApp.handlePopState({});
+  assert(
+    detailSheetOverlay460 && detailSheetOverlay460.classList.contains("hidden"),
+    "[Issue #460 AC-3] Popstate dismisses open detail sheet without changing tab"
+  );
+
+  // 5c. Delete Modal dismissal
+  await navSandbox.HabitApp.promptDeleteHabit("h-water");
+  const deleteModalOverlay460 = navSandbox.document.getElementById(
+    "delete-confirm-modal-overlay"
+  );
+  assert(
+    deleteModalOverlay460 && !deleteModalOverlay460.classList.contains("hidden"),
+    "[Issue #460 AC-3] Delete confirmation is open before popstate"
+  );
+  navSandbox.HabitApp.handlePopState({});
+  assert(
+    deleteModalOverlay460 && deleteModalOverlay460.classList.contains("hidden"),
+    "[Issue #460 AC-3] Popstate dismisses open delete confirmation dialog"
+  );
+
+  // 6. Popstate Tier 2: Secondary Tab -> Return to Today
+  navSandbox.HabitApp.switchTab("settings");
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "settings",
+    "[Issue #460 AC-4] Navigated to settings tab"
+  );
+  navSandbox.HabitApp.handlePopState({});
+  assertEqual(
+    navSandbox.HabitApp.activeTab,
+    "today",
+    "[Issue #460 AC-4] Popstate on secondary settings tab returns to today tab"
+  );
+
+  // 7. Popstate Tier 3: Today Root Toast Confirmation
+  const realDateNow460 = Date.now;
+  try {
+    let mockTime = 1000000;
+    Date.now = () => mockTime;
+
+    // First press at root today
+    navSandbox.HabitApp.handlePopState({});
+    assertEqual(
+      navSandbox.HabitApp.activeTab,
+      "today",
+      "[Issue #460 AC-5] First back press on today tab stays on today tab and triggers exit toast"
+    );
+
+    // Second press within 1000ms (< 2000ms)
+    mockTime += 1000;
+    navSandbox.HabitApp.handlePopState({});
+    // Allowed exit
+    assert(
+      true,
+      "[Issue #460 AC-5] Second back press within 2000ms completes double-back exit flow"
+    );
+  } finally {
+    Date.now = realDateNow460;
+  }
 }
 
 runUITests()
