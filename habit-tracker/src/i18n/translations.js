@@ -179,6 +179,12 @@
       toast_habit_completed: "Habit completed",
       toast_habit_incremented: "Progress updated",
       toast_undo_success: "Action undone",
+      delete_confirm_title: "Delete Habit",
+      delete_confirm_desc:
+        'Are you sure you want to permanently delete "{name}"? Historical check-in logs will be permanently removed.',
+      delete_confirm_btn: "Delete",
+      delete_cancel_btn: "Cancel",
+      jump_to_timer: "Active Timer",
 
       // Days of week
       day_sun: "Sun",
@@ -381,6 +387,12 @@
       toast_habit_completed: "Đã hoàn thành thói quen",
       toast_habit_incremented: "Đã cập nhật tiến độ",
       toast_undo_success: "Đã hoàn tác thao tác",
+      delete_confirm_title: "Xác nhận xóa thói quen",
+      delete_confirm_desc:
+        'Bạn có chắc chắn muốn xóa vĩnh viễn thói quen "{name}"? Tất cả dữ liệu nhật ký lịch sử sẽ bị xóa hoàn toàn.',
+      delete_confirm_btn: "Xóa",
+      delete_cancel_btn: "Hủy",
+      jump_to_timer: "Đang hẹn giờ",
 
       // Days of week
       day_sun: "CN",

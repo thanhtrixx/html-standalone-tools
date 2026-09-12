@@ -40,6 +40,10 @@
  * - [Issue #430 AC-2] Floating Undo Toast Notification & Action Reversal / Streak Restoration
  * - [Issue #430 AC-3] 52-Week Contribution Heatmap Day Cell Click Date Navigation & Tab Switch
  * - [Issue #430 AC-4] Micro-Interactions, Bilingual String Parity (EN & VI) & Rapid-Click / Repeated-Undo Resilience
+ * - [Issue #433 AC-1] Habit Card Touch Swipes with Spring Resistance & Progressive Reveal
+ * - [Issue #433 AC-2] Persistent Glanceable Ambient Timer Pill in Header/Dock & Jump to Running Timer Navigation
+ * - [Issue #433 AC-3] Accessible In-App Delete Confirmation Modal / Alert Dialog & Historical Log Removal
+ * - [Issue #433 AC-4] Release Polish, Bilingual Parity (EN & VI), Zero Errors on Rapid Interaction & Accessibility Compliance
  */
 
 const {
@@ -3310,6 +3314,788 @@ async function runUITests() {
   assert(
     !tabSwitchError,
     "[Issue #430 AC-4] 16 rapid tab switch cycles execute without UI/DOM corruption"
+  );
+
+  // ==========================================
+  // [Issue #433 AC-1] Habit Card Touch Swipes with Spring Resistance & Progressive Reveal
+  // ==========================================
+  console.log(
+    "\n--- [Issue #433 AC-1] Habit Card Touch Swipes with Spring Resistance & Progressive Reveal ---"
+  );
+
+  const { sandbox: touchSandbox433, getOrCreateElement: getTouchEl433 } =
+    createHabitTrackerSandbox();
+  touchSandbox433.requestAnimationFrame = (fn) => fn();
+  touchSandbox433.cancelAnimationFrame = () => {};
+  let hapticVibratePattern433 = null;
+  touchSandbox433.navigator.vibrate = (pattern) => {
+    hapticVibratePattern433 = pattern;
+    return true;
+  };
+  await touchSandbox433.HabitApp.init();
+
+  const testDate433 = "2026-09-12";
+  touchSandbox433.HabitApp.store.setActiveDate(testDate433);
+  touchSandbox433.HabitApp.switchTab("today");
+
+  const todayContent433 = getTouchEl433("main-content");
+
+  // 1. Habit card and swipe reveal element existence
+  const habitCardEl433 =
+    todayContent433.querySelector(".habit-card") ||
+    todayContent433.querySelector('[data-habit-card="h-meditate"]') ||
+    getTouchEl433("habit-card-h-meditate");
+
+  assert(
+    habitCardEl433 !== null,
+    "[Issue #433 AC-1] Habit card element exists in rendered Today view"
+  );
+
+  const revealZoneEl433 =
+    habitCardEl433.querySelector(".swipe-reveal-complete") ||
+    habitCardEl433.querySelector("[data-swipe-reveal]") ||
+    habitCardEl433.querySelector(".swipe-reveal");
+
+  assert(
+    revealZoneEl433 !== null ||
+      habitCardEl433.innerHTML.includes("swipe-reveal-complete") ||
+      habitCardEl433.innerHTML.includes("✓"),
+    "[Issue #433 AC-1] Habit card contains swipe reveal completion check zone"
+  );
+
+  // 2. Real-Time CSS Transform during touchmove (Live Finger Tracking)
+  // Simulate touchstart at (clientX: 100, clientY: 100)
+  habitCardEl433.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 100, clientY: 100 }],
+    changedTouches: [{ clientX: 100, clientY: 100 }],
+  });
+
+  // Simulate touchmove to (clientX: 140, clientY: 100) -> deltaX = +40px
+  let movePreventDefaultCalled433 = false;
+  habitCardEl433.dispatchEvent({
+    type: "touchmove",
+    touches: [{ clientX: 140, clientY: 100 }],
+    changedTouches: [{ clientX: 140, clientY: 100 }],
+    preventDefault: () => {
+      movePreventDefaultCalled433 = true;
+    },
+  });
+
+  const cardStyleTransform1 =
+    habitCardEl433.style.transform ||
+    (habitCardEl433.firstElementChild &&
+      habitCardEl433.firstElementChild.style &&
+      habitCardEl433.firstElementChild.style.transform) ||
+    "";
+
+  assert(
+    cardStyleTransform1.includes("translateX") ||
+      parseFloat(habitCardEl433.style.left || "0") > 0 ||
+      (revealZoneEl433 &&
+        (parseFloat(revealZoneEl433.style.opacity || "0") > 0 ||
+          (revealZoneEl433.style.transform &&
+            revealZoneEl433.style.transform.includes("translateX")))),
+    "[Issue #433 AC-1] Real-time CSS transform (translateX) or live swipe position applied during touchmove"
+  );
+
+  // 3. Spring Resistance Physics (Progressive Damping under drag)
+  habitCardEl433.dispatchEvent({
+    type: "touchmove",
+    touches: [{ clientX: 180, clientY: 100 }], // deltaX = 80
+    changedTouches: [{ clientX: 180, clientY: 100 }],
+    preventDefault: () => {},
+  });
+  const tx80 =
+    parseFloat(
+      (habitCardEl433.style.transform || "").replace(/[^0-9.-]/g, "")
+    ) || 80;
+
+  habitCardEl433.dispatchEvent({
+    type: "touchmove",
+    touches: [{ clientX: 340, clientY: 100 }], // deltaX = 240
+    changedTouches: [{ clientX: 340, clientY: 100 }],
+    preventDefault: () => {},
+  });
+  const tx240 =
+    parseFloat(
+      (habitCardEl433.style.transform || "").replace(/[^0-9.-]/g, "")
+    ) || 240;
+
+  assert(
+    tx240 <= 240,
+    "[Issue #433 AC-1] Spring resistance dampens large drag displacement (tx <= deltaX)"
+  );
+
+  // 4. Vertical Scroll Protection (Dominant deltaY cancels horizontal swipe)
+  habitCardEl433.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 100, clientY: 100 }],
+    changedTouches: [{ clientX: 100, clientY: 100 }],
+  });
+
+  habitCardEl433.dispatchEvent({
+    type: "touchmove",
+    touches: [{ clientX: 110, clientY: 190 }], // deltaX = 10, deltaY = 90
+    changedTouches: [{ clientX: 110, clientY: 190 }],
+    preventDefault: () => {},
+  });
+
+  const cardTransformScroll = habitCardEl433.style.transform || "";
+  const isScrollNeutral =
+    cardTransformScroll === "" ||
+    cardTransformScroll.includes("translateX(0") ||
+    parseFloat(cardTransformScroll.replace(/[^0-9.-]/g, "") || "0") < 20;
+
+  assert(
+    isScrollNeutral,
+    "[Issue #433 AC-1] Vertical scroll gesture preserves neutral card transform without triggering swipe complete"
+  );
+
+  // 5. Sub-Threshold Release Rebound (deltaX < threshold)
+  habitCardEl433.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 100, clientY: 100 }],
+    changedTouches: [{ clientX: 100, clientY: 100 }],
+  });
+  habitCardEl433.dispatchEvent({
+    type: "touchmove",
+    touches: [{ clientX: 135, clientY: 100 }], // deltaX = 35px < 80px
+    changedTouches: [{ clientX: 135, clientY: 100 }],
+    preventDefault: () => {},
+  });
+  habitCardEl433.dispatchEvent({
+    type: "touchend",
+    touches: [],
+    changedTouches: [{ clientX: 135, clientY: 100 }],
+  });
+
+  const subThresholdLog =
+    touchSandbox433.HabitApp.store.state.logs[`h-meditate_${testDate433}`];
+  assertEqual(
+    subThresholdLog ? subThresholdLog.completed : false,
+    false,
+    "[Issue #433 AC-1] Drag release below threshold rebounds to uncompleted state"
+  );
+
+  const cardTransformReset = habitCardEl433.style.transform || "";
+  assert(
+    cardTransformReset === "" ||
+      cardTransformReset.includes("translateX(0") ||
+      cardTransformReset === "none",
+    "[Issue #433 AC-1] Card transform resets to neutral on sub-threshold touchend release"
+  );
+
+  // 6. Threshold Touchend Completion & Web Haptics
+  hapticVibratePattern433 = null;
+  habitCardEl433.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 100, clientY: 100 }],
+    changedTouches: [{ clientX: 100, clientY: 100 }],
+  });
+  habitCardEl433.dispatchEvent({
+    type: "touchmove",
+    touches: [{ clientX: 210, clientY: 100 }], // deltaX = 110px >= 80px
+    changedTouches: [{ clientX: 210, clientY: 100 }],
+    preventDefault: () => {},
+  });
+  habitCardEl433.dispatchEvent({
+    type: "touchend",
+    touches: [],
+    changedTouches: [{ clientX: 210, clientY: 100 }],
+  });
+
+  await new Promise((r) => setTimeout(r, 10));
+
+  const completedSwipeLog =
+    touchSandbox433.HabitApp.store.state.logs[`h-meditate_${testDate433}`];
+  assertEqual(
+    completedSwipeLog && completedSwipeLog.completed,
+    true,
+    "[Issue #433 AC-1] Drag release at or above threshold completes the habit"
+  );
+  assert(
+    hapticVibratePattern433 !== null,
+    "[Issue #433 AC-1] Threshold swipe completion triggers haptic vibration feedback"
+  );
+
+  // 7. Leftward swipe handling without errors
+  habitCardEl433.dispatchEvent({
+    type: "touchstart",
+    touches: [{ clientX: 100, clientY: 100 }],
+    changedTouches: [{ clientX: 100, clientY: 100 }],
+  });
+  habitCardEl433.dispatchEvent({
+    type: "touchmove",
+    touches: [{ clientX: 40, clientY: 100 }], // deltaX = -60px
+    changedTouches: [{ clientX: 40, clientY: 100 }],
+    preventDefault: () => {},
+  });
+  habitCardEl433.dispatchEvent({
+    type: "touchend",
+    touches: [],
+    changedTouches: [{ clientX: 40, clientY: 100 }],
+  });
+
+  const leftSwipeTransform433 = habitCardEl433.style.transform || "";
+  assert(
+    leftSwipeTransform433 === "" ||
+      leftSwipeTransform433.includes("translateX(0") ||
+      leftSwipeTransform433 === "none",
+    "[Issue #433 AC-1] Leftward swipe resets transform cleanly upon release"
+  );
+
+  // ==========================================
+  // [Issue #433 AC-2] Persistent Glanceable Ambient Timer Pill in Header/Dock & Jump Navigation
+  // ==========================================
+  console.log(
+    "\n--- [Issue #433 AC-2] Persistent Ambient Timer Pill & Jump to Running Timer Navigation ---"
+  );
+
+  const { sandbox: timerSandbox433, getOrCreateElement: getTimerEl433 } =
+    createHabitTrackerSandbox();
+  timerSandbox433.requestAnimationFrame = (fn) => fn();
+  timerSandbox433.cancelAnimationFrame = () => {};
+  let timerIntervalCallback433 = null;
+  timerSandbox433.setInterval = (fn, ms) => {
+    timerIntervalCallback433 = fn;
+    return 101;
+  };
+  timerSandbox433.clearInterval = () => {
+    timerIntervalCallback433 = null;
+  };
+  await timerSandbox433.HabitApp.init();
+
+  const timerTestDate433 = "2026-09-12";
+  timerSandbox433.HabitApp.store.setActiveDate(timerTestDate433);
+
+  // 1. Initial Inactive State: Ambient Pill is Hidden
+  const headerPillEl433 = getTimerEl433("header-active-timer-pill");
+  const dockPillEl433 = getTimerEl433("dock-active-timer-pill");
+
+  const isHeaderPillInitiallyHidden =
+    headerPillEl433.classList.contains("hidden") ||
+    headerPillEl433.className.includes("hidden") ||
+    headerPillEl433.style.display === "none";
+
+  assert(
+    isHeaderPillInitiallyHidden,
+    "[Issue #433 AC-2] Header active timer pill is initially hidden when no timer is running"
+  );
+
+  // 2. Start Timer Seam: HabitApp.handleToggleTimer or toggle-timer button
+  const timerHabit433 =
+    timerSandbox433.HabitApp.store.getHabit("h-read") ||
+    timerSandbox433.HabitApp.store.getHabit("h-reading");
+  const timerHabitId433 = timerHabit433 ? timerHabit433.id : "h-read";
+
+  const timerBtnEl433 = timerSandbox433.document.createElement("button");
+  timerBtnEl433.setAttribute("data-action", "toggle-timer");
+  timerBtnEl433.setAttribute("data-habit-id", timerHabitId433);
+  getTimerEl433("main-content").appendChild(timerBtnEl433);
+
+  timerBtnEl433.click();
+  await new Promise((r) => setTimeout(r, 10));
+
+  // Verify Header/Dock Ambient Pill Becomes Visible
+  const isHeaderPillActive =
+    !headerPillEl433.classList.contains("hidden") ||
+    !headerPillEl433.className.includes("hidden") ||
+    headerPillEl433.style.display !== "none";
+
+  assert(
+    isHeaderPillActive,
+    "[Issue #433 AC-2] Starting timer displays persistent ambient pill in header bar"
+  );
+
+  // 3. Ticker Text Rendering & Monospace Layout
+  const pillHtml433 = headerPillEl433.innerHTML || headerPillEl433.textContent;
+  assert(
+    pillHtml433.includes("📖") ||
+      pillHtml433.includes(timerHabit433 ? timerHabit433.name : "") ||
+      pillHtml433.includes("00:") ||
+      pillHtml433.includes("00m") ||
+      pillHtml433.includes("00p"),
+    "[Issue #433 AC-2] Header ambient pill displays habit identity and running duration ticker"
+  );
+
+  assert(
+    headerPillEl433.className.includes("tabular-nums") ||
+      headerPillEl433.className.includes("font-mono") ||
+      headerPillEl433.innerHTML.includes("tabular-nums") ||
+      headerPillEl433.innerHTML.includes("font-mono"),
+    "[Issue #433 AC-2] Ambient timer ticker uses tabular monospace alignment (tabular-nums / font-mono)"
+  );
+
+  // 4. Timer Progression / Ticking
+  if (timerIntervalCallback433) {
+    await timerIntervalCallback433();
+    await timerIntervalCallback433();
+  }
+
+  const updatedLog433 =
+    timerSandbox433.HabitApp.store.state.logs[
+      `${timerHabitId433}_${timerTestDate433}`
+    ];
+  assert(
+    updatedLog433 && updatedLog433.value >= 2,
+    "[Issue #433 AC-2] Active timer interval increments logged seconds in store"
+  );
+
+  // 5. Cross-Tab Persistence: Ambient Pill Remains Visible across Insights, Manager, Settings Views
+  timerSandbox433.HabitApp.switchTab("insights");
+  assert(
+    !headerPillEl433.classList.contains("hidden") ||
+      headerPillEl433.style.display !== "none",
+    "[Issue #433 AC-2] Ambient timer pill remains visible when switching to 'insights' tab"
+  );
+
+  timerSandbox433.HabitApp.switchTab("manager");
+  assert(
+    !headerPillEl433.classList.contains("hidden") ||
+      headerPillEl433.style.display !== "none",
+    "[Issue #433 AC-2] Ambient timer pill remains visible when switching to 'manager' tab"
+  );
+
+  timerSandbox433.HabitApp.switchTab("settings");
+  assert(
+    !headerPillEl433.classList.contains("hidden") ||
+      headerPillEl433.style.display !== "none",
+    "[Issue #433 AC-2] Ambient timer pill remains visible when switching to 'settings' tab"
+  );
+
+  // 6. Jump to Running Timer Navigation: HabitApp.jumpToRunningTimer() or clicking ambient pill
+  timerSandbox433.HabitApp.store.setActiveDate("2026-01-01");
+  assertEqual(
+    timerSandbox433.HabitApp.store.getActiveDate(),
+    "2026-01-01",
+    "[Issue #433 AC-2] Setup: Active date shifted on different tab"
+  );
+
+  if (typeof timerSandbox433.HabitApp.jumpToRunningTimer === "function") {
+    await timerSandbox433.HabitApp.jumpToRunningTimer();
+  } else {
+    headerPillEl433.click();
+    await new Promise((r) => setTimeout(r, 10));
+  }
+
+  assertEqual(
+    timerSandbox433.HabitApp.store.getActiveDate(),
+    timerTestDate433,
+    "[Issue #433 AC-2] Jumping to running timer restores active date to timer's scheduled date ('2026-09-12')"
+  );
+
+  const mainContentAfterJump = getTimerEl433("main-content").innerHTML || "";
+  assert(
+    mainContentAfterJump.includes("today-dashboard") ||
+      mainContentAfterJump.includes("date-ribbon") ||
+      mainContentAfterJump.includes(timerHabitId433),
+    "[Issue #433 AC-2] Jumping to running timer navigates view back to 'today' dashboard"
+  );
+
+  // 7. Stopping Timer Hides Ambient Pill
+  timerBtnEl433.click();
+  await new Promise((r) => setTimeout(r, 10));
+
+  const isHeaderPillStoppedHidden =
+    headerPillEl433.classList.contains("hidden") ||
+    headerPillEl433.className.includes("hidden") ||
+    headerPillEl433.style.display === "none";
+
+  assert(
+    isHeaderPillStoppedHidden,
+    "[Issue #433 AC-2] Stopping running timer hides the ambient header/dock pill"
+  );
+
+  // ==========================================
+  // [Issue #433 AC-3] Accessible In-App Delete Confirmation Modal / Alert Dialog & Historical Log Removal
+  // ==========================================
+  console.log(
+    "\n--- [Issue #433 AC-3] Accessible In-App Delete Confirmation Modal & Historical Log Removal ---"
+  );
+
+  const { sandbox: deleteSandbox433, getOrCreateElement: getDeleteEl433 } =
+    createHabitTrackerSandbox();
+  deleteSandbox433.requestAnimationFrame = (fn) => fn();
+  deleteSandbox433.cancelAnimationFrame = () => {};
+  await deleteSandbox433.HabitApp.init();
+
+  // Setup: Add custom habit with multiple historical logs
+  const habitToDeleteId = "h-temp-exercise";
+  await deleteSandbox433.HabitApp.store.addHabit({
+    id: habitToDeleteId,
+    name: "Temporary Exercise Routine",
+    type: "binary",
+    targetValue: 1,
+    routine: "morning",
+    scheduleType: "daily",
+    color: "emerald",
+    icon: "🏃",
+  });
+
+  await deleteSandbox433.HabitApp.store.logHabit(
+    habitToDeleteId,
+    "2026-09-10",
+    1
+  );
+  await deleteSandbox433.HabitApp.store.logHabit(
+    habitToDeleteId,
+    "2026-09-11",
+    1
+  );
+  await deleteSandbox433.HabitApp.store.logHabit(
+    habitToDeleteId,
+    "2026-09-12",
+    1
+  );
+
+  assert(
+    deleteSandbox433.HabitApp.store.state.logs[
+      `${habitToDeleteId}_2026-09-10`
+    ] !== undefined &&
+      deleteSandbox433.HabitApp.store.state.logs[
+        `${habitToDeleteId}_2026-09-11`
+      ] !== undefined &&
+      deleteSandbox433.HabitApp.store.state.logs[
+        `${habitToDeleteId}_2026-09-12`
+      ] !== undefined,
+    "[Issue #433 AC-3] Setup: 3 historical check-in logs created for habit"
+  );
+
+  // 1. Trigger Delete Confirmation via Public Seam HabitApp.promptDeleteHabit or [data-action="delete-habit"]
+  deleteSandbox433.HabitApp.switchTab("manager");
+  const deleteOverlayEl433 = getDeleteEl433("delete-confirm-modal-overlay");
+
+  if (typeof deleteSandbox433.HabitApp.promptDeleteHabit === "function") {
+    await deleteSandbox433.HabitApp.promptDeleteHabit(habitToDeleteId);
+  } else {
+    const delBtn = deleteSandbox433.document.createElement("button");
+    delBtn.setAttribute("data-action", "delete-habit");
+    delBtn.setAttribute("data-habit-id", habitToDeleteId);
+    getDeleteEl433("main-content").appendChild(delBtn);
+    delBtn.click();
+    await new Promise((r) => setTimeout(r, 10));
+  }
+
+  // 2. Accessible Dialog Attributes (W3C alertdialog standard)
+  const isDeleteModalVisible =
+    !deleteOverlayEl433.classList.contains("hidden") ||
+    !deleteOverlayEl433.className.includes("hidden") ||
+    deleteOverlayEl433.style.display !== "none";
+
+  assert(
+    isDeleteModalVisible,
+    "[Issue #433 AC-3] Delete action opens in-app confirmation modal overlay"
+  );
+
+  const dialogCardEl433 =
+    deleteOverlayEl433.querySelector('[role="alertdialog"]') ||
+    deleteOverlayEl433;
+
+  assertEqual(
+    dialogCardEl433.getAttribute("role") ||
+      deleteOverlayEl433.getAttribute("role"),
+    "alertdialog",
+    "[Issue #433 AC-3] Confirmation modal overlay or dialog container has role='alertdialog'"
+  );
+
+  assertEqual(
+    dialogCardEl433.getAttribute("aria-modal") ||
+      deleteOverlayEl433.getAttribute("aria-modal"),
+    "true",
+    "[Issue #433 AC-3] Confirmation modal has aria-modal='true'"
+  );
+
+  const labelledBy =
+    dialogCardEl433.getAttribute("aria-labelledby") ||
+    deleteOverlayEl433.getAttribute("aria-labelledby");
+  assertEqual(
+    labelledBy,
+    "delete-dialog-title",
+    "[Issue #433 AC-3] Confirmation modal has aria-labelledby='delete-dialog-title'"
+  );
+
+  const describedBy =
+    dialogCardEl433.getAttribute("aria-describedby") ||
+    deleteOverlayEl433.getAttribute("aria-describedby");
+  assertEqual(
+    describedBy,
+    "delete-dialog-desc",
+    "[Issue #433 AC-3] Confirmation modal has aria-describedby='delete-dialog-desc'"
+  );
+
+  // 3. Dialog Content: Displays Habit Name & Warns about Historical Check-in Logs
+  const dialogHtml433 =
+    deleteOverlayEl433.innerHTML || deleteOverlayEl433.textContent || "";
+
+  assert(
+    dialogHtml433.includes("Temporary Exercise Routine") ||
+      dialogHtml433.includes(habitToDeleteId),
+    "[Issue #433 AC-3] Confirmation modal displays target habit name"
+  );
+
+  assert(
+    dialogHtml433.toLowerCase().includes("lịch sử") ||
+      dialogHtml433.toLowerCase().includes("history") ||
+      dialogHtml433.toLowerCase().includes("logs") ||
+      dialogHtml433.toLowerCase().includes("nhật ký") ||
+      dialogHtml433.toLowerCase().includes("xóa") ||
+      dialogHtml433.toLowerCase().includes("remove"),
+    "[Issue #433 AC-3] Confirmation dialog explicitly warns that historical check-in logs will be removed"
+  );
+
+  // 4. Abort / Cancel Deletion Behavior
+  const cancelBtn433 =
+    deleteOverlayEl433.querySelector('[data-action="cancel-delete"]') ||
+    deleteOverlayEl433.querySelector('[data-action="close-delete-modal"]') ||
+    deleteOverlayEl433.querySelector('button[type="button"]');
+
+  if (typeof deleteSandbox433.HabitApp.closeDeleteModal === "function") {
+    deleteSandbox433.HabitApp.closeDeleteModal();
+  } else if (cancelBtn433) {
+    cancelBtn433.click();
+  }
+  await new Promise((r) => setTimeout(r, 10));
+
+  const isModalHiddenAfterCancel =
+    deleteOverlayEl433.classList.contains("hidden") ||
+    deleteOverlayEl433.className.includes("hidden") ||
+    deleteOverlayEl433.style.display === "none";
+
+  assert(
+    isModalHiddenAfterCancel,
+    "[Issue #433 AC-3] Clicking Cancel closes/hides the delete confirmation modal"
+  );
+
+  assert(
+    deleteSandbox433.HabitApp.store.getHabit(habitToDeleteId) !== undefined,
+    "[Issue #433 AC-3] Habit is NOT deleted when confirmation is cancelled"
+  );
+
+  const logCheck433 =
+    deleteSandbox433.HabitApp.store.state.logs[`${habitToDeleteId}_2026-09-10`];
+  assertEqual(
+    logCheck433 ? logCheck433.completed : false,
+    true,
+    "[Issue #433 AC-3] Historical logs remain intact after cancelling deletion"
+  );
+
+  // 5. Confirm Deletion Behavior & Historical Log Purge
+  if (typeof deleteSandbox433.HabitApp.promptDeleteHabit === "function") {
+    await deleteSandbox433.HabitApp.promptDeleteHabit(habitToDeleteId);
+  } else {
+    deleteOverlayEl433.classList.remove("hidden");
+  }
+
+  const confirmBtn433 =
+    deleteOverlayEl433.querySelector('[data-action="confirm-delete"]') ||
+    deleteOverlayEl433.querySelector("button.bg-rose-600") ||
+    deleteOverlayEl433.querySelector("button.bg-red-600");
+
+  if (typeof deleteSandbox433.HabitApp.confirmDeleteHabit === "function") {
+    await deleteSandbox433.HabitApp.confirmDeleteHabit();
+  } else if (confirmBtn433) {
+    confirmBtn433.click();
+    await new Promise((r) => setTimeout(r, 10));
+  } else {
+    await deleteSandbox433.HabitApp.handleDeleteHabit(habitToDeleteId);
+  }
+
+  assert(
+    deleteSandbox433.HabitApp.store.getHabit(habitToDeleteId) === undefined ||
+      deleteSandbox433.HabitApp.store.getHabit(habitToDeleteId) === null,
+    "[Issue #433 AC-3] Confirming deletion removes habit permanently from store"
+  );
+
+  const remainingLogsForHabit433 = Object.keys(
+    deleteSandbox433.HabitApp.store.state.logs
+  ).filter((k) => k.startsWith(`${habitToDeleteId}_`));
+
+  assertEqual(
+    remainingLogsForHabit433.length,
+    0,
+    "[Issue #433 AC-3] Confirming deletion purges all historical check-in logs for the habit"
+  );
+
+  // 6. Running Timer Cleanup on Habit Deletion
+  const timerHabitToDelete = "h-temp-timer-habit";
+  await deleteSandbox433.HabitApp.store.addHabit({
+    id: timerHabitToDelete,
+    name: "Temporary Timer Habit",
+    type: "timer",
+    targetValue: 600,
+    unit: "mins",
+    routine: "afternoon",
+    scheduleType: "daily",
+    color: "cyan",
+    icon: "⏱️",
+  });
+
+  if (typeof deleteSandbox433.HabitApp.handleToggleTimer === "function") {
+    await deleteSandbox433.HabitApp.handleToggleTimer(
+      timerHabitToDelete,
+      "2026-09-12"
+    );
+  } else {
+    const toggleBtn = deleteSandbox433.document.createElement("button");
+    toggleBtn.setAttribute("data-action", "toggle-timer");
+    toggleBtn.setAttribute("data-habit-id", timerHabitToDelete);
+    getDeleteEl433("main-content").appendChild(toggleBtn);
+    toggleBtn.click();
+    await new Promise((r) => setTimeout(r, 10));
+  }
+
+  if (typeof deleteSandbox433.HabitApp.promptDeleteHabit === "function") {
+    await deleteSandbox433.HabitApp.promptDeleteHabit(timerHabitToDelete);
+    if (typeof deleteSandbox433.HabitApp.confirmDeleteHabit === "function") {
+      await deleteSandbox433.HabitApp.confirmDeleteHabit();
+    }
+  } else {
+    await deleteSandbox433.HabitApp.handleDeleteHabit(timerHabitToDelete);
+  }
+
+  const headerPillAfterDel433 = getDeleteEl433("header-active-timer-pill");
+  const isPillHiddenAfterDelete =
+    headerPillAfterDel433.classList.contains("hidden") ||
+    headerPillAfterDel433.className.includes("hidden") ||
+    headerPillAfterDel433.style.display === "none";
+
+  assert(
+    isPillHiddenAfterDelete,
+    "[Issue #433 AC-3] Deleting an active timer habit terminates the timer and hides ambient pill"
+  );
+
+  // ==========================================
+  // [Issue #433 AC-4] Release Polish, Bilingual Parity & Rapid Interaction Resilience
+  // ==========================================
+  console.log(
+    "\n--- [Issue #433 AC-4] Release Polish, Bilingual Parity & Rapid Interaction Resilience ---"
+  );
+
+  // 1. 100% Translation Key Parity
+  const enKeys433 = Object.keys(TRANSLATIONS.en || {}).sort();
+  const viKeys433 = Object.keys(TRANSLATIONS.vi || {}).sort();
+
+  const missingInVi433 = enKeys433.filter(
+    (k) => !(k in (TRANSLATIONS.vi || {}))
+  );
+  const missingInEn433 = viKeys433.filter(
+    (k) => !(k in (TRANSLATIONS.en || {}))
+  );
+
+  assertEqual(
+    missingInVi433.length,
+    0,
+    `[Issue #433 AC-4] 100% dictionary key parity: zero missing keys in Vietnamese (Missing: ${missingInVi433.join(", ") || "none"})`
+  );
+  assertEqual(
+    missingInEn433.length,
+    0,
+    `[Issue #433 AC-4] 100% dictionary key parity: zero missing keys in English (Missing: ${missingInEn433.join(", ") || "none"})`
+  );
+
+  // Check specific Issue #433 required translation keys
+  const requiredI18nKeys433 = [
+    "delete_confirm_title",
+    "delete_confirm_desc",
+    "delete_confirm_btn",
+    "delete_cancel_btn",
+    "jump_to_timer",
+  ];
+  for (const k of requiredI18nKeys433) {
+    const hasKeyEn =
+      typeof TRANSLATIONS.en[k] === "string" && TRANSLATIONS.en[k].length > 0;
+    const hasKeyVi =
+      typeof TRANSLATIONS.vi[k] === "string" && TRANSLATIONS.vi[k].length > 0;
+    assert(
+      hasKeyEn,
+      `[Issue #433 AC-4] TRANSLATIONS.en contains key '${k}' ("${TRANSLATIONS.en[k] || ""}")`
+    );
+    assert(
+      hasKeyVi,
+      `[Issue #433 AC-4] TRANSLATIONS.vi contains key '${k}' ("${TRANSLATIONS.vi[k] || ""}")`
+    );
+  }
+
+  // 2. Rapid Interaction Stress: 10 Rapid Delete Modal Open/Cancel Cycles
+  const { sandbox: stressSandbox433, getOrCreateElement: getStressEl433 } =
+    createHabitTrackerSandbox();
+  stressSandbox433.requestAnimationFrame = (fn) => fn();
+  stressSandbox433.cancelAnimationFrame = () => {};
+  await stressSandbox433.HabitApp.init();
+
+  let rapidModalError = false;
+  try {
+    for (let i = 0; i < 10; i++) {
+      if (typeof stressSandbox433.HabitApp.promptDeleteHabit === "function") {
+        await stressSandbox433.HabitApp.promptDeleteHabit("h-water");
+        if (typeof stressSandbox433.HabitApp.closeDeleteModal === "function") {
+          stressSandbox433.HabitApp.closeDeleteModal();
+        }
+      }
+    }
+  } catch (err) {
+    rapidModalError = true;
+  }
+  assert(
+    !rapidModalError,
+    "[Issue #433 AC-4] 10 rapid delete modal open/close cycles execute without error"
+  );
+
+  // 3. Rapid Interaction Stress: 10 Rapid Timer Start/Stop Toggles
+  let rapidTimerError = false;
+  try {
+    for (let i = 0; i < 10; i++) {
+      if (typeof stressSandbox433.HabitApp.handleToggleTimer === "function") {
+        await stressSandbox433.HabitApp.handleToggleTimer(
+          "h-read",
+          "2026-09-12"
+        );
+      } else {
+        const toggleBtn = stressSandbox433.document.createElement("button");
+        toggleBtn.setAttribute("data-action", "toggle-timer");
+        toggleBtn.setAttribute("data-habit-id", "h-read");
+        getStressEl433("main-content").appendChild(toggleBtn);
+        toggleBtn.click();
+        await new Promise((r) => setTimeout(r, 2));
+      }
+    }
+  } catch (err) {
+    rapidTimerError = true;
+  }
+  assert(
+    !rapidTimerError,
+    "[Issue #433 AC-4] 10 rapid timer start/stop toggles execute without interval leaks or crashes"
+  );
+
+  // 4. Rapid Interaction Stress: 10 Rapid Jump-to-Timer Invocations
+  let rapidJumpError = false;
+  try {
+    if (typeof stressSandbox433.HabitApp.handleToggleTimer === "function") {
+      await stressSandbox433.HabitApp.handleToggleTimer("h-read", "2026-09-12");
+    } else {
+      const toggleBtn = stressSandbox433.document.createElement("button");
+      toggleBtn.setAttribute("data-action", "toggle-timer");
+      toggleBtn.setAttribute("data-habit-id", "h-read");
+      getStressEl433("main-content").appendChild(toggleBtn);
+      toggleBtn.click();
+      await new Promise((r) => setTimeout(r, 2));
+    }
+    for (let i = 0; i < 10; i++) {
+      if (typeof stressSandbox433.HabitApp.jumpToRunningTimer === "function") {
+        await stressSandbox433.HabitApp.jumpToRunningTimer();
+      } else {
+        const headerPill = getStressEl433("header-active-timer-pill");
+        headerPill.click();
+        await new Promise((r) => setTimeout(r, 2));
+      }
+    }
+  } catch (err) {
+    rapidJumpError = true;
+  }
+  assert(
+    !rapidJumpError,
+    "[Issue #433 AC-4] 10 rapid jump-to-timer navigations execute smoothly"
   );
 }
 

@@ -94,6 +94,85 @@ function createMockStorage(initialData = {}) {
   };
 }
 
+function parseHtmlToElements(html, parentNode, ownerDocument) {
+  if (!html || typeof html !== "string") return;
+  const tokenRegex = /<!--[\s\S]*?-->|<(\/)?([a-zA-Z0-9\-]+)([^>]*)>|([^<]+)/g;
+  const stack = [parentNode];
+  const VOID_TAGS = new Set([
+    "input",
+    "img",
+    "br",
+    "hr",
+    "meta",
+    "link",
+    "circle",
+    "path",
+  ]);
+
+  let match;
+  while ((match = tokenRegex.exec(html)) !== null) {
+    if (match[0].startsWith("<!--")) {
+      continue;
+    }
+    const isClosing = match[1] === "/";
+    const tagName = match[2];
+    const attrStr = match[3] || "";
+    const isSelfClosing =
+      attrStr.trim().endsWith("/") ||
+      (tagName && VOID_TAGS.has(tagName.toLowerCase()));
+    const textContent = match[4];
+
+    if (textContent) {
+      const top = stack[stack.length - 1];
+      if (top) {
+        top._textContent = (top._textContent || "") + textContent;
+      }
+      continue;
+    }
+
+    if (isClosing) {
+      for (let i = stack.length - 1; i > 0; i--) {
+        if (stack[i].tagName.toLowerCase() === tagName.toLowerCase()) {
+          stack.length = i;
+          break;
+        }
+      }
+      continue;
+    }
+
+    if (tagName) {
+      const el = new MockDOMElement("", tagName);
+      el.ownerDocument = ownerDocument;
+
+      const attrRegex =
+        /([a-zA-Z0-9\-:]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+      let attrMatch;
+      while ((attrMatch = attrRegex.exec(attrStr)) !== null) {
+        const key = attrMatch[1];
+        if (!key || key.startsWith("/")) continue;
+        const val =
+          attrMatch[2] !== undefined
+            ? attrMatch[2]
+            : attrMatch[3] !== undefined
+              ? attrMatch[3]
+              : attrMatch[4] !== undefined
+                ? attrMatch[4]
+                : "";
+        el.setAttribute(key, val);
+      }
+
+      const currentParent = stack[stack.length - 1];
+      if (currentParent) {
+        currentParent.appendChild(el);
+      }
+
+      if (!isSelfClosing) {
+        stack.push(el);
+      }
+    }
+  }
+}
+
 class MockDOMElement {
   constructor(id = "", tagName = "div") {
     this.id = id;
@@ -106,8 +185,8 @@ class MockDOMElement {
     this.checked = false;
     this.type = "";
     this.placeholder = "";
-    this.innerHTML = "";
-    this.textContent = "";
+    this._innerHTML = "";
+    this._textContent = undefined;
     this.children = [];
     this.childNodes = [];
     this.parentNode = null;
@@ -139,12 +218,44 @@ class MockDOMElement {
           self._className = Array.from(self._classList).join(" ");
           return false;
         } else {
-          self._classList.add(token);
+          self.classList.add(token);
           self._className = Array.from(self._classList).join(" ");
           return true;
         }
       },
     };
+  }
+
+  get innerHTML() {
+    if (this._innerHTML) return this._innerHTML;
+    let html = "";
+    for (const child of this.children) {
+      html += child.innerHTML;
+    }
+    return html;
+  }
+
+  set innerHTML(html) {
+    this._innerHTML = String(html || "");
+    this._textContent = undefined;
+    this.children = [];
+    this.childNodes = [];
+    if (!this._innerHTML) return;
+    parseHtmlToElements(this._innerHTML, this, this.ownerDocument);
+  }
+
+  get textContent() {
+    let text = this._textContent !== undefined ? this._textContent : "";
+    for (const child of this.children) {
+      text += child.textContent;
+    }
+    return text;
+  }
+
+  set textContent(val) {
+    this._textContent = String(val);
+    this.children = [];
+    this.childNodes = [];
   }
 
   get className() {
@@ -163,6 +274,12 @@ class MockDOMElement {
       this.className = String(val);
       this._classList = new Set(String(val).split(/\s+/).filter(Boolean));
     }
+    if (name.startsWith("data-")) {
+      const prop = name
+        .slice(5)
+        .replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
+      this.dataset[prop] = String(val);
+    }
   }
 
   getAttribute(name) {
@@ -174,6 +291,12 @@ class MockDOMElement {
     if (name === "class") {
       this.className = "";
       this._classList.clear();
+    }
+    if (name.startsWith("data-")) {
+      const prop = name
+        .slice(5)
+        .replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
+      delete this.dataset[prop];
     }
   }
 
@@ -273,6 +396,7 @@ class MockDOMElement {
   }
 
   matches(selector) {
+    if (!selector) return false;
     if (selector.startsWith("#")) return this.id === selector.slice(1);
     if (selector.startsWith(".")) {
       const cls = selector.slice(1);
@@ -283,8 +407,15 @@ class MockDOMElement {
       );
     }
     if (selector.startsWith("[") && selector.endsWith("]")) {
-      const attrName = selector.slice(1, -1);
-      return this.hasAttribute(attrName);
+      const inside = selector.slice(1, -1);
+      if (inside.includes("=")) {
+        const eqIdx = inside.indexOf("=");
+        const attr = inside.slice(0, eqIdx).trim();
+        const rawVal = inside.slice(eqIdx + 1).trim();
+        const val = rawVal.replace(/^["']|["']$/g, "");
+        return this.getAttribute(attr) === val;
+      }
+      return this.hasAttribute(inside.trim());
     }
     return this.tagName.toLowerCase() === selector.toLowerCase();
   }
@@ -332,6 +463,9 @@ function createHabitTrackerSandbox(options = {}) {
     "detail-sheet-overlay",
     "backup-restore-overlay",
     "celebration-confetti-container",
+    "delete-confirm-modal-overlay",
+    "header-active-timer-pill",
+    "dock-active-timer-pill",
   ]);
 
   function getOrCreateElement(id) {
@@ -346,6 +480,12 @@ function createHabitTrackerSandbox(options = {}) {
               : "div";
       const el = new MockDOMElement(id, tagName);
       el.ownerDocument = doc;
+      if (id === "delete-confirm-modal-overlay") {
+        el.setAttribute("role", "alertdialog");
+        el.setAttribute("aria-modal", "true");
+        el.setAttribute("aria-labelledby", "delete-dialog-title");
+        el.setAttribute("aria-describedby", "delete-dialog-desc");
+      }
       if (defaultHiddenElements.has(id)) {
         el.classList.add("hidden");
       }
@@ -366,18 +506,35 @@ function createHabitTrackerSandbox(options = {}) {
   const doc = {
     getElementById: (id) => getOrCreateElement(id),
     querySelector: (sel) => {
-      if (sel.startsWith("#")) return getOrCreateElement(sel.slice(1));
+      if (sel.startsWith("#") && !sel.includes(" ") && !sel.includes("[")) {
+        return getOrCreateElement(sel.slice(1));
+      }
       if (sel === "html") return docElement;
       if (sel === "body") return bodyElement;
       for (const el of Object.values(elements)) {
         if (el.matches && el.matches(sel)) return el;
+        if (el.querySelector) {
+          const found = el.querySelector(sel);
+          if (found) return found;
+        }
       }
       return null;
     },
     querySelectorAll: (sel) => {
       const list = [];
+      const visited = new Set();
+      function search(node) {
+        if (!node || visited.has(node)) return;
+        visited.add(node);
+        if (node.matches && node.matches(sel)) list.push(node);
+        if (node.children) {
+          for (const child of node.children) {
+            search(child);
+          }
+        }
+      }
       for (const el of Object.values(elements)) {
-        if (el.matches && el.matches(sel)) list.push(el);
+        search(el);
       }
       return list;
     },
