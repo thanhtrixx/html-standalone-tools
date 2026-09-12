@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="50%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="fireGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="16" flood-color="#10b981" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect x="16" y="16" width="480" height="480" rx="108" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="4"/>
+
+  <!-- Glowing Progress Ring -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#1e293b" stroke-width="28"/>
+  <circle cx="256" cy="256" r="160" fill="none" stroke="url(#ringGrad)" stroke-width="28" stroke-linecap="round" stroke-dasharray="1005" stroke-dashoffset="220" filter="url(#glow)"/>
+
+  <!-- Checkmark -->
+  <path d="M190 260 L235 305 L325 200" fill="none" stroke="#ffffff" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Streak Flame Badge Top Right -->
+  <g transform="translate(320, 90)">
+    <circle cx="44" cy="44" r="38" fill="#1e293b" stroke="#f59e0b" stroke-width="4"/>
+    <path d="M44 20 C44 20, 56 34, 56 46 C56 54, 50 62, 44 62 C38 62, 32 54, 32 46 C32 38, 38 28, 44 20 Z" fill="url(#fireGrad)"/>
+    <path d="M44 36 C44 36, 50 44, 50 50 C50 54, 47 58, 44 58 C41 58, 38 54, 38 50 C38 46, 41 40, 44 36 Z" fill="#ffffff"/>
+  </g>
+</svg>

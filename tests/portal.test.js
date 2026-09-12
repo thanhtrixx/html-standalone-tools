@@ -55,6 +55,11 @@ async function runTests() {
       htmlContent.includes("./personal-finance-savings-predictor/index.html"),
     "Contains relative link to personal-finance-savings-predictor"
   );
+  assert(
+    htmlContent.includes("./habit-tracker/") ||
+      htmlContent.includes("./habit-tracker/index.html"),
+    "Contains relative link to habit-tracker"
+  );
 
   // Test 4: Repository and Release Links
   assert(
