@@ -224,9 +224,34 @@ Every issue follows **GitHub Flow** with an isolated branch:
 
 ---
 
+## 💰 Token Economics & Subagent Efficiency Guardrails ([ADR-0012](../adr/0012-optimal-token-strategy-and-subagent-economics.md))
+
+Autonomous coding agent productivity is constrained by context window limits and quadratic transcript re-ingestion ($O(N^2)$). All human engineers and AI agents must adhere to the following token governance protocols:
+
+### 1. Two-Tier Delegation Threshold Rule
+
+- **Tier 1 — Inline Orchestrator Execution (Micro-Fixes)**:
+  - _Scope_: Single-file cosmetic fixes, documentation typo fixes, translation string tweaks, or trivial hotfixes touching `< 5` lines.
+  - _Action_: Orchestrator performs edits inline and verifies with local scoped unit checks without spawning subagents. (Avoids ~15k–25k token subagent bootstrap tax on micro-tasks).
+- **Tier 2 — Mandatory Subagent Delegation (Features, Logic & Reviews)**:
+  - _Scope_: Multi-file features, calculation engines, UI gesture/interaction logic, Phase 2 blind seam test generation, and Phase 3 dual-axis reviews.
+  - _Action_: Spawn dedicated subagents (`Adversarial Test Hunter`, `Standards & Invariants Reviewer`, `Spec Conformance Reviewer`). The ~15k token bootstrap cost prevents 60k–150k tokens of circular debugging loops.
+
+### 2. Fan-Out / Fan-In Context Decoupling
+
+- **Fan-Out (Pruned Inputs)**: Subagents receive only the specific issue ACs, target domain files (`CONTEXT.md`), and diff hunks—never whole-repo context dumps.
+- **Fan-In (High-Density Structured Digests ≤ 300–400 Words)**: Subagents return concise tabular or bulleted summaries citing exact files, line numbers, and boolean test outcomes. Raw terminal dumps and whole-file diffs are strictly forbidden from return payloads.
+
+### 3. Scoped Inner-Loop Test Runner Gate
+
+- **Subagent Inner Loop Scope**: Subagents in Phase 2/3 are restricted to fast scoped unit/domain test runners (`npm test` / `npm run test:<tool>`) using compact 1-line reporters.
+- **Phase 4 Orchestrator Gate**: Full multi-browser Playwright E2E sweeps (`npm run verify`) are executed centrally by the primary orchestrator before release sign-off. This prevents local preview server port collisions on `localhost:4173` and saves ~30k–50k tokens of log noise per subagent.
+
+---
+
 ## 💎 Standalone Tool Definition of Done (DoD)
 
-Every standalone tool added to or maintained in this repository must satisfy the following 9-point checklist before completion:
+Every standalone tool added to or maintained in this repository must satisfy the following 10-point checklist before completion:
 
 1. **Directory Isolation**: Dedicated tool directory containing human-readable source `index.html` and compacted deliverable `dist/index.html`.
 2. **Domain Glossary (`CONTEXT.md`)**: Comprehensive bilingual dictionary defining ubiquitous terms, avoided synonyms, and calculation rules.
@@ -235,8 +260,9 @@ Every standalone tool added to or maintained in this repository must satisfy the
 5. **Specification & Test Plan**: Requirements in `ITEMS_TO_IMPLEMENT.md` and QA verification plan in `TEST_PLAN.md`.
 6. **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary key parity with locale-aware formatters.
 7. **Test Suite Integration**: Pure math unit tests, UI/DOM tests, and i18n tests authored in `tests/` and registered into `scripts/run-tests.js`.
-8. **Subagent Quality Audit**: Blind adversarial tests verified at public seams, and PR includes verified AC-to-Test Traceability Matrix.
-9. **CI/CD Build & Release Ready**: Passes unified verification (`bun run verify` / `npm run verify`) and release packaging (`bun run pack:release` / `npm run pack:release`).
+8. **Subagent Quality Audit ([ADR-0010](../adr/0010-subagent-quality-guardrails-and-two-speed-tdd.md))**: Blind adversarial tests verified at public seams, and PR includes verified AC-to-Test Traceability Matrix.
+9. **Token Strategy & Efficiency Compliance ([ADR-0012](../adr/0012-optimal-token-strategy-and-subagent-economics.md))**: Two-tier delegation threshold respected, fan-in subagent digests ≤ 400 words, and scoped test gates observed.
+10. **CI/CD Build & Release Ready**: Passes unified verification (`bun run verify` / `npm run verify`) and release packaging (`bun run pack:release` / `npm run pack:release`).
 
 ---
 
