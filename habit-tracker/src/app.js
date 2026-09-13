@@ -100,6 +100,9 @@
   let habitsSubView = "catalog"; // 'catalog' | 'identity'
   let swipeStartX = 0;
   let swipeStartY = 0;
+  let activeFocusModalHabitId = null;
+  let timerDisplayMode = "remaining"; // 'remaining' | 'elapsed'
+  let timerSoundEnabled = true;
 
   /**
    * Pushes history state for navigation
@@ -133,24 +136,43 @@
    * Handles browser / hardware back button navigation with tiered hierarchy
    */
   function handlePopState(e) {
+    const focusTimerModal = document.getElementById(
+      "focus-timer-modal-overlay"
+    );
     const editModal = document.getElementById("habit-edit-modal-overlay");
     const detailSheetEl = document.getElementById("detail-sheet-overlay");
     const deleteModal = document.getElementById("delete-confirm-modal-overlay");
     const resetModal = document.getElementById("reset-confirm-modal-overlay");
+    const wizardModal = document.getElementById(
+      "identity-wizard-modal-overlay"
+    );
 
+    const isFocusTimerOpen =
+      focusTimerModal && !focusTimerModal.classList.contains("hidden");
     const isEditOpen = editModal && !editModal.classList.contains("hidden");
     const isDetailOpen =
       detailSheetEl && !detailSheetEl.classList.contains("hidden");
     const isDeleteOpen =
       deleteModal && !deleteModal.classList.contains("hidden");
     const isResetOpen = resetModal && !resetModal.classList.contains("hidden");
+    const isWizardOpen =
+      wizardModal && !wizardModal.classList.contains("hidden");
 
     // Tier 1: Dismiss active overlays
-    if (isEditOpen || isDetailOpen || isDeleteOpen || isResetOpen) {
+    if (
+      isFocusTimerOpen ||
+      isEditOpen ||
+      isDetailOpen ||
+      isDeleteOpen ||
+      isResetOpen ||
+      isWizardOpen
+    ) {
+      if (isFocusTimerOpen) closeFocusTimerModal();
       if (isEditOpen) closeHabitModal();
       if (isDetailOpen) closeDetailSheet();
       if (isDeleteOpen) closeDeleteModal();
       if (isResetOpen) closeResetModal();
+      if (isWizardOpen) closeIdentityWizard();
       return;
     }
 
@@ -211,6 +233,7 @@
           "#habit-edit-modal-overlay",
           "#detail-sheet-overlay",
           "#delete-confirm-modal-overlay",
+          "#focus-timer-modal-overlay",
         ];
         const isExcluded = skipSelectors.some(
           (sel) => target && target.closest && target.closest(sel)
@@ -947,6 +970,9 @@
     document.addEventListener("keydown", (e) => {
       // 1. Escape: Dismiss any active modal/sheet/popover
       if (e.key === "Escape") {
+        const focusModal = document.getElementById(
+          "focus-timer-modal-overlay"
+        );
         const editModal = document.getElementById("habit-edit-modal-overlay");
         const detailSheetEl = document.getElementById("detail-sheet-overlay");
         const deleteModal = document.getElementById(
@@ -962,6 +988,10 @@
 
         if (popover && !popover.classList.contains("hidden")) {
           popover.classList.add("hidden");
+        }
+        if (focusModal && !focusModal.classList.contains("hidden")) {
+          closeFocusTimerModal();
+          return;
         }
         if (editModal && !editModal.classList.contains("hidden")) {
           closeHabitModal();
@@ -1145,6 +1175,17 @@
         await handleToggleTimer(habitId, activeDate);
       } else if (action === "reset-timer") {
         await handleResetTimer(habitId, activeDate);
+      } else if (action === "open-focus-timer") {
+        openFocusTimerModal(habitId);
+      } else if (action === "close-focus-timer") {
+        closeFocusTimerModal();
+      } else if (action === "toggle-timer-display-mode") {
+        toggleTimerDisplayMode();
+      } else if (action === "timer-toggle-sound") {
+        toggleTimerSound();
+      } else if (action === "timer-adjust") {
+        const delta = parseInt(target.getAttribute("data-delta") || "60", 10);
+        await handleTimerAdjust(habitId, delta);
       } else if (action === "open-detail") {
         handleOpenDetailSheet(habitId);
       } else if (action === "close-detail-sheet") {
@@ -1668,7 +1709,7 @@
   }
 
   /**
-   * Jumps to running timer view (switches to 'today' tab and restores active date)
+   * Jumps to running timer view (switches to 'today' tab, restores active date, and opens Focus Timer modal)
    */
   async function jumpToRunningTimer() {
     if (!runningTimerHabitId || !store) return;
@@ -1677,6 +1718,7 @@
     }
     activeTab = "today";
     renderApp();
+    openFocusTimerModal(runningTimerHabitId);
   }
 
   /**
@@ -1712,7 +1754,7 @@
   let hasTriggeredCelebrationForRun = false;
 
   /**
-   * Directly updates reactive timer DOM elements across header, dock, active card, and detail sheet without disk I/O
+   * Directly updates reactive timer DOM elements across header, dock, active card, detail sheet, and focus timer modal without disk I/O
    */
   function updateTimerDom(habitId, currentSecs, targetSecs) {
     if (!store) return;
@@ -1759,6 +1801,70 @@
     );
     if (detailTicker) {
       detailTicker.textContent = durationFormatted;
+    }
+
+    // 6. Focus Timer Modal reactive elements
+    if (activeFocusModalHabitId === habitId) {
+      const modalDigits = document.getElementById("focus-modal-timer-digits");
+      const modalSubTicker = document.getElementById("focus-modal-sub-ticker");
+      const modalRing = document.getElementById("focus-modal-svg-ring");
+      const modalModeBadge = document.getElementById("focus-modal-mode-badge");
+      const modalPlayBtn = document.getElementById("focus-modal-play-btn");
+
+      let displayTimeStr = "";
+      let modeLabel = "";
+      if (currentSecs >= targetSecs && targetSecs > 0) {
+        const om = String(Math.floor(overtimeSecs / 60)).padStart(2, "0");
+        const os = String(overtimeSecs % 60).padStart(2, "0");
+        displayTimeStr = `+${om}:${os}`;
+        modeLabel = i18n.t("focus_timer_overtime", {}, lang);
+      } else if (timerDisplayMode === "elapsed") {
+        displayTimeStr = tickerStr;
+        modeLabel = i18n.t("focus_timer_elapsed", {}, lang);
+      } else {
+        const rm = String(Math.floor(remainingSecs / 60)).padStart(2, "0");
+        const rs = String(remainingSecs % 60).padStart(2, "0");
+        displayTimeStr = `${rm}:${rs}`;
+        modeLabel = i18n.t("focus_timer_remaining", {}, lang);
+      }
+
+      if (modalDigits) {
+        modalDigits.textContent = displayTimeStr;
+        const isRunning = runningTimerHabitId === habitId;
+        if (isCompleted || isRunning) {
+          modalDigits.className =
+            "text-4xl sm:text-5xl font-black font-mono tabular-nums tracking-tight text-emerald-400";
+        } else {
+          modalDigits.className =
+            "text-4xl sm:text-5xl font-black font-mono tabular-nums tracking-tight text-white";
+        }
+      }
+
+      if (modalModeBadge) {
+        modalModeBadge.textContent = `${modeLabel} ⇄`;
+      }
+
+      if (modalSubTicker) {
+        modalSubTicker.textContent = `${durationFormatted} / ${targetFormatted}`;
+      }
+
+      if (modalRing) {
+        const radius = 90;
+        const circumference = 2 * Math.PI * radius; // 565.487
+        const ratio = targetSecs > 0 ? Math.min(1.0, currentSecs / targetSecs) : 1;
+        const strokeDashoffset = circumference * (1 - ratio);
+        modalRing.setAttribute("stroke-dashoffset", strokeDashoffset);
+      }
+
+      if (modalPlayBtn) {
+        const isRunning = runningTimerHabitId === habitId;
+        modalPlayBtn.innerHTML = `<span class="text-base">${isRunning ? "⏸" : "▶"}</span><span>${isRunning ? i18n.t("focus_timer_pause", {}, lang) : i18n.t("focus_timer_start", {}, lang)}</span>`;
+        if (isRunning) {
+          modalPlayBtn.classList.add("animate-pulse", "ring-4", "ring-emerald-500/20");
+        } else {
+          modalPlayBtn.classList.remove("animate-pulse", "ring-4", "ring-emerald-500/20");
+        }
+      }
     }
   }
 
@@ -1840,7 +1946,9 @@
       `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
       "success"
     );
-    playTimerCompletionSound();
+    if (timerSoundEnabled) {
+      playTimerCompletionSound();
+    }
 
     if (todayView && typeof todayView.triggerVictoryConfetti === "function") {
       todayView.triggerVictoryConfetti();
@@ -1993,18 +2101,34 @@
       updateAmbientTimerPill();
       renderActiveTab();
       refreshDetailSheetIfOpen(habitId, targetDate);
+      if (activeFocusModalHabitId === habitId) {
+        const currentLog = (store.state &&
+          store.state.logs &&
+          store.state.logs[`${habitId}_${targetDate}`]) || { value: 0 };
+        updateTimerDom(habitId, currentLog.value || 0, habit.targetValue);
+      }
       return;
     }
 
     if (runningTimerHabitId) {
       await flushRunningTimerToStorage();
       stopTimerTicker();
+      const prevHabitId = runningTimerHabitId;
       runningTimerHabitId = null;
       runningTimerDate = null;
       runningTimerStartedAt = null;
       runningTimerBaseValue = 0;
       runningTimerTickCount = 0;
       hasTriggeredCelebrationForRun = false;
+      if (activeFocusModalHabitId === prevHabitId) {
+        const prevHabit = store.getHabit(prevHabitId);
+        if (prevHabit) {
+          const prevLog = (store.state &&
+            store.state.logs &&
+            store.state.logs[`${prevHabitId}_${targetDate}`]) || { value: 0 };
+          updateTimerDom(prevHabitId, prevLog.value || 0, prevHabit.targetValue);
+        }
+      }
     }
 
     const currentLog = (store.state &&
@@ -2023,6 +2147,9 @@
     startTimerTicker();
     renderActiveTab();
     refreshDetailSheetIfOpen(habitId, targetDate);
+    if (activeFocusModalHabitId === habitId) {
+      updateTimerDom(habitId, runningTimerBaseValue, habit.targetValue);
+    }
   }
 
   /**
@@ -2045,9 +2172,132 @@
     await store.logHabit(habitId, targetDate, 0);
     renderActiveTab();
     refreshDetailSheetIfOpen(habitId, targetDate);
+    if (activeFocusModalHabitId === habitId) {
+      const habit = store.getHabit(habitId);
+      if (habit) {
+        updateTimerDom(habitId, 0, habit.targetValue);
+      }
+    }
 
     const lang = (store.getSettings() && store.getSettings().language) || "vi";
     showToast(i18n.t("toast_timer_reset", {}, lang), "info");
+  }
+
+  /**
+   * Opens the immersive Focus Timer modal for a duration habit
+   */
+  function openFocusTimerModal(habitId) {
+    if (!store || !habitId) return;
+    const habit = store.getHabit(habitId);
+    if (!habit || habit.type !== "duration") return;
+
+    activeFocusModalHabitId = habitId;
+    const overlay = document.getElementById("focus-timer-modal-overlay");
+    if (!overlay) return;
+
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    const modalHtml = todayView.renderFocusTimerModal(
+      store,
+      habitId,
+      timerDisplayMode,
+      timerSoundEnabled,
+      lang
+    );
+
+    overlay.innerHTML = `<div id="focus-timer-modal-container" class="w-full max-w-md my-auto">${modalHtml}</div>`;
+    overlay.classList.remove("hidden");
+    pushNavigationState(activeTab, "focus-timer");
+  }
+
+  /**
+   * Closes the immersive Focus Timer modal
+   */
+  function closeFocusTimerModal() {
+    activeFocusModalHabitId = null;
+    const overlay = document.getElementById("focus-timer-modal-overlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+      overlay.innerHTML = "";
+    }
+  }
+
+  /**
+   * Toggles between remaining and elapsed countdown presentation modes
+   */
+  function toggleTimerDisplayMode() {
+    timerDisplayMode =
+      timerDisplayMode === "remaining" ? "elapsed" : "remaining";
+    if (activeFocusModalHabitId && store) {
+      const habit = store.getHabit(activeFocusModalHabitId);
+      if (habit) {
+        const targetDate = runningTimerDate || store.getActiveDate();
+        const currentLog = (store.state &&
+          store.state.logs &&
+          store.state.logs[`${activeFocusModalHabitId}_${targetDate}`]) || {
+          value: 0,
+        };
+        const currentSecs =
+          runningTimerHabitId === activeFocusModalHabitId
+            ? runningTimerBaseValue + runningTimerTickCount
+            : currentLog.value || 0;
+        updateTimerDom(activeFocusModalHabitId, currentSecs, habit.targetValue);
+      }
+    }
+  }
+
+  /**
+   * Toggles completion sound effects on/off
+   */
+  function toggleTimerSound() {
+    timerSoundEnabled = !timerSoundEnabled;
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+    const soundBtn = document.querySelector(
+      '[data-action="timer-toggle-sound"]'
+    );
+    if (soundBtn) {
+      soundBtn.textContent = timerSoundEnabled ? "🔔" : "🔕";
+      soundBtn.setAttribute(
+        "aria-label",
+        timerSoundEnabled
+          ? i18n.t("focus_timer_sound_on", {}, lang)
+          : i18n.t("focus_timer_sound_off", {}, lang)
+      );
+      soundBtn.title = timerSoundEnabled
+        ? i18n.t("focus_timer_sound_on", {}, lang)
+        : i18n.t("focus_timer_sound_off", {}, lang);
+    }
+  }
+
+  /**
+   * Adjusts active or logged duration by a delta in seconds (+60, +300, -60)
+   */
+  async function handleTimerAdjust(habitId, deltaSeconds) {
+    if (!store || !habitId) return;
+    const habit = store.getHabit(habitId);
+    if (!habit || habit.type !== "duration") return;
+
+    const targetDate =
+      runningTimerHabitId === habitId
+        ? runningTimerDate || store.getActiveDate()
+        : store.getActiveDate();
+
+    if (runningTimerHabitId === habitId) {
+      runningTimerBaseValue = Math.max(0, runningTimerBaseValue + deltaSeconds);
+      await syncRunningTimer(false);
+    } else {
+      const currentLog = (store.state &&
+        store.state.logs &&
+        store.state.logs[`${habitId}_${targetDate}`]) || { value: 0 };
+      const currentVal = currentLog.value || 0;
+      const nextVal = Math.max(0, currentVal + deltaSeconds);
+      await store.logHabit(habitId, targetDate, nextVal);
+      renderActiveTab();
+      refreshDetailSheetIfOpen(habitId, targetDate);
+      if (activeFocusModalHabitId === habitId) {
+        updateTimerDom(habitId, nextVal, habit.targetValue);
+      }
+    }
   }
 
   /**
@@ -3156,6 +3406,20 @@
       notify(i18n.t("toast_notes_saved", {}, lang), "success");
     },
     handleResetTimer,
+    openFocusTimerModal,
+    closeFocusTimerModal,
+    toggleTimerDisplayMode,
+    toggleTimerSound,
+    handleTimerAdjust,
+    get activeFocusModalHabitId() {
+      return activeFocusModalHabitId;
+    },
+    get timerDisplayMode() {
+      return timerDisplayMode;
+    },
+    get timerSoundEnabled() {
+      return timerSoundEnabled;
+    },
     promptResetDefaults,
     promptFactoryWipe,
     closeResetModal,
