@@ -76,20 +76,26 @@
 
     <style>
       :root {
-        --bg-base: #020617;
-        --bg-card: #0f172a;
+        --bg-base: #0b0f19;
+        --bg-card: rgba(19, 28, 49, 0.7);
+        --bg-surface: rgba(15, 23, 42, 0.75);
         --text-base: #f8fafc;
         --text-muted: #94a3b8;
-        --border-base: #1e293b;
+        --border-base: rgba(255, 255, 255, 0.08);
+        --border-highlight: rgba(16, 185, 129, 0.4);
         --accent: #10b981;
+        --accent-glow: rgba(16, 185, 129, 0.35);
       }
       :root.light {
         --bg-base: #f8fafc;
         --bg-card: #ffffff;
+        --bg-surface: #f1f5f9;
         --text-base: #0f172a;
         --text-muted: #64748b;
         --border-base: #e2e8f0;
+        --border-highlight: rgba(16, 185, 129, 0.5);
         --accent: #059669;
+        --accent-glow: rgba(5, 150, 105, 0.25);
       }
 
       body {
@@ -122,27 +128,31 @@
     </style>
   </head>
   <body
-    class="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-white pb-20 safe-bottom"
+    class="min-h-screen bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-white pb-20 safe-bottom"
   >
     <!-- Top Header Bar -->
     <header
-      class="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 safe-top"
+      class="sticky top-0 z-40 bg-white/80 dark:bg-[#0b0f19]/85 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/10 px-4 py-3 safe-top shadow-sm"
     >
       <div class="max-w-lg mx-auto flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div
-            class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 font-bold text-base"
+            class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25 font-bold text-base ring-1 ring-white/20"
           >
             🔥
           </div>
           <div>
             <h1
-              class="text-sm font-black text-slate-900 dark:text-white tracking-tight leading-none"
+              class="text-sm font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1.5"
             >
-              Atomic Habits
+              <span>Atomic Habits</span>
+              <span
+                class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30"
+                >PRO</span
+              >
             </h1>
             <span class="text-[10px] text-slate-500 dark:text-slate-400"
-              >PWA • Offline-First</span
+              >Obsidian Glow • Offline-First</span
             >
           </div>
         </div>
@@ -164,7 +174,8 @@
           <!-- Freeze Token Counter Badge -->
           <button
             onclick="window.HabitApp.switchTab('settings')"
-            class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-2.5 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors shadow-sm tabular-nums font-mono"
+            class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 px-2.5 py-1 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors shadow-sm tabular-nums font-mono"
+            title="Streak Freeze Tokens"
           >
             <span>🛡️</span>
             <span id="freeze-tokens-count" class="tabular-nums font-mono"
@@ -182,9 +193,57 @@
                   : 'vi'
               )
             "
-            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             VI
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 Perspective Lenses Switcher -->
+      <div id="top-lens-switcher" class="max-w-lg mx-auto pt-2.5">
+        <div
+          class="grid grid-cols-4 p-1 rounded-2xl bg-slate-100/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/10 backdrop-blur-md shadow-inner text-xs font-semibold"
+        >
+          <button
+            onclick="window.HabitApp.switchTab('today')"
+            data-tab="today"
+            data-lens="today"
+            id="lens-btn-today"
+            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20"
+          >
+            <span>🔥</span>
+            <span class="lens-label">Hôm nay</span>
+          </button>
+          <button
+            onclick="window.HabitApp.switchTab('timeline')"
+            data-tab="timeline"
+            data-lens="timeline"
+            id="lens-btn-timeline"
+            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          >
+            <span>⏳</span>
+            <span class="lens-label">Lịch trình</span>
+          </button>
+          <button
+            onclick="window.HabitApp.switchTab('matrix')"
+            data-tab="matrix"
+            data-lens="matrix"
+            id="lens-btn-matrix"
+            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          >
+            <span>📊</span>
+            <span class="lens-label">Ma trận</span>
+          </button>
+          <button
+            onclick="window.HabitApp.switchTab('identity')"
+            data-tab="identity"
+            data-lens="identity"
+            id="lens-btn-identity"
+            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+          >
+            <span>🧬</span>
+            <span class="lens-label">Bản sắc</span>
           </button>
         </div>
       </div>
@@ -200,7 +259,7 @@
 
     <!-- Bottom Navigation Dock (Docked on Mobile) -->
     <nav
-      class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800/90 safe-bottom"
+      class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#0b0f19]/95 backdrop-blur-lg border-t border-slate-200 dark:border-white/10 safe-bottom"
     >
       <div
         class="max-w-lg mx-auto flex items-center justify-around py-1.5 px-3 gap-1"
@@ -227,6 +286,15 @@
           <span class="text-xl">📊</span>
           <span class="nav-label text-[11px] leading-tight">Thống kê</span>
           <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
+        </button>
+
+        <button
+          onclick="window.HabitApp.openHabitModal()"
+          id="nav-btn-quick-add"
+          aria-label="Add Habit"
+          class="flex items-center justify-center w-11 h-11 mx-1 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-bold text-2xl shadow-lg shadow-emerald-500/30 transition-transform active:scale-90 hover:scale-105"
+        >
+          +
         </button>
 
         <button

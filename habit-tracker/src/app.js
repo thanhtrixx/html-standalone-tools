@@ -395,7 +395,52 @@
     updateTopBar();
     renderActiveTab();
     updateNavigationDock();
+    updateLensSwitcher();
     updateAmbientTimerPill();
+  }
+
+  /**
+   * Updates the active state of top lens switcher buttons
+   */
+  function updateLensSwitcher() {
+    const settings = store ? store.getSettings() : { language: "vi" };
+    const lang = (settings && settings.language) || "vi";
+    const lensButtons = document.querySelectorAll(".lens-tab-btn");
+
+    // Mapping between activeTab and lens ID
+    const tabToLensMap = {
+      today: "today",
+      timeline: "timeline",
+      matrix: "matrix",
+      insights: "matrix",
+      identity: "identity",
+      manager: "identity",
+    };
+    const currentLens = tabToLensMap[activeTab] || "today";
+
+    lensButtons.forEach((btn) => {
+      const lens = btn.getAttribute("data-lens");
+      const isActive = lens === currentLens;
+      btn.setAttribute("aria-selected", isActive ? "true" : "false");
+
+      if (isActive) {
+        btn.className =
+          "lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20";
+      } else {
+        btn.className =
+          "lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium";
+      }
+
+      if (lens) {
+        const labelEl =
+          btn.querySelector && typeof btn.querySelector === "function"
+            ? btn.querySelector(".lens-label")
+            : null;
+        if (labelEl) {
+          labelEl.textContent = i18n.t(`lens_${lens}`, {}, lang);
+        }
+      }
+    });
   }
 
   /**
@@ -454,10 +499,13 @@
     if (activeTab === "today") {
       todayView.renderTodayDashboard(store, container, lang);
       bindHabitCardGestures();
-    } else if (activeTab === "insights") {
+    } else if (activeTab === "timeline") {
+      todayView.renderTodayDashboard(store, container, lang);
+      bindHabitCardGestures();
+    } else if (activeTab === "insights" || activeTab === "matrix") {
       insightsView.renderInsightsView(store, container, lang);
       bindHeatmapInteractions();
-    } else if (activeTab === "manager") {
+    } else if (activeTab === "manager" || activeTab === "identity") {
       managerView.renderManagerView(store, container, lang);
     } else if (activeTab === "settings") {
       renderSettingsTab(container, lang);

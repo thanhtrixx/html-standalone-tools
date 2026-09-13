@@ -19,6 +19,37 @@
       manager_tab: "Habits",
       settings_tab: "Settings",
 
+      // 4 Perspective Lenses
+      lens_today: "Today",
+      lens_timeline: "Timeline",
+      lens_matrix: "Matrix",
+      lens_identity: "Identity",
+
+      // Life Domains
+      domain_health: "Health & Vitality",
+      domain_craft: "Deep Work & Craft",
+      domain_mind: "Mind & Wisdom",
+      domain_discipline: "Daily Discipline",
+      domain_all: "All Domains",
+
+      // Starter Kits
+      starter_kits_title: "Curated Starter Kits",
+      starter_kits_subtitle: "Activate a proven habit system in 1 tap",
+      starter_morning_mastery_title: "Morning Mastery",
+      starter_morning_mastery_desc:
+        "Hydration, mindfulness, light stretching and daily focus.",
+      starter_deep_focus_title: "Deep Focus & Flow",
+      starter_deep_focus_desc:
+        "45-min deep work blocks, reading 20 pages, and distraction shielding.",
+      starter_health_vitality_title: "Health & Vitality",
+      starter_health_vitality_desc:
+        "2500ml water intake, 30-min exercise, and consistent sleep schedule.",
+      starter_zen_mindfulness_title: "Zen & Mindfulness",
+      starter_zen_mindfulness_desc:
+        "Gratitude journal, nature walk, and digital sunset.",
+      apply_starter_kit: "Activate Kit",
+      starter_kit_applied_toast: "Starter kit activated successfully!",
+
       // Routine Clusters
       routine_morning: "Morning",
       routine_morning_time: "05:00 – 12:00",
@@ -275,6 +306,37 @@
       insights_tab: "Thống kê",
       manager_tab: "Thói quen",
       settings_tab: "Cài đặt",
+
+      // 4 Perspective Lenses
+      lens_today: "Hôm nay",
+      lens_timeline: "Lịch trình",
+      lens_matrix: "Ma trận",
+      lens_identity: "Bản sắc",
+
+      // Life Domains
+      domain_health: "Sức khỏe & Sinh lực",
+      domain_craft: "Tập trung & Sự nghiệp",
+      domain_mind: "Tâm trí & Trí tuệ",
+      domain_discipline: "Kỷ luật & Nề nếp",
+      domain_all: "Tất cả",
+
+      // Starter Kits
+      starter_kits_title: "Gói thói quen khởi động",
+      starter_kits_subtitle: "Kích hoạt hệ thống thói quen chỉ với 1 chạm",
+      starter_morning_mastery_title: "Khởi đầu tỉnh thức",
+      starter_morning_mastery_desc:
+        "Uống nước, thiền định, giãn cơ và lập kế hoạch ngày.",
+      starter_deep_focus_title: "Tập trung sâu & Dòng chảy",
+      starter_deep_focus_desc:
+        "Khối làm việc 45 phút, đọc 20 trang sách và chặn mạng xã hội.",
+      starter_health_vitality_title: "Sức khỏe & Sinh lực",
+      starter_health_vitality_desc:
+        "Uống 2500ml nước, tập luyện 30 phút và ngủ đúng giờ.",
+      starter_zen_mindfulness_title: "Tĩnh tâm & An lạc",
+      starter_zen_mindfulness_desc:
+        "Nhật ký biết ơn, đi bộ thư giãn và tắt màn hình buổi tối.",
+      apply_starter_kit: "Kích hoạt gói",
+      starter_kit_applied_toast: "Đã kích hoạt gói thói quen thành công!",
 
       // Routine Clusters
       routine_morning: "Buổi sáng",
