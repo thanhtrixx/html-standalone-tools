@@ -4920,7 +4920,9 @@ async function runUITests() {
     "[Issue #478 AC-2] Timeline view renders circadian time-block stream"
   );
   assert(
-    mainContentEl && (mainContentEl.innerHTML.includes("data-routine=\"morning\"") || mainContentEl.innerHTML.includes("data-routine=\"afternoon\"")),
+    mainContentEl &&
+      (mainContentEl.innerHTML.includes('data-routine="morning"') ||
+        mainContentEl.innerHTML.includes('data-routine="afternoon"')),
     "[Issue #478 AC-3] Timeline view partitions scheduled habits by routine anchors"
   );
 
@@ -4967,17 +4969,20 @@ async function runUITests() {
 
   // Switch to identity lens
   identitySandbox.HabitApp.switchLens("identity");
-  const identityContentEl = identitySandbox.document.getElementById("main-content");
+  const identityContentEl =
+    identitySandbox.document.getElementById("main-content");
   assert(
     identityContentEl && identityContentEl.innerHTML.includes("identity-view"),
     "[Issue #480 AC-1] Switching to identity lens renders .identity-view container"
   );
   assert(
-    identityContentEl && identityContentEl.innerHTML.includes("life-domain-card"),
+    identityContentEl &&
+      identityContentEl.innerHTML.includes("life-domain-card"),
     "[Issue #480 AC-1] Identity view renders Life Domain cards with neon glow"
   );
   assert(
-    identityContentEl && identityContentEl.innerHTML.includes("starter-kit-card"),
+    identityContentEl &&
+      identityContentEl.innerHTML.includes("starter-kit-card"),
     "[Issue #480 AC-2] Identity view renders 1-Click Starter Kit cards"
   );
 

@@ -107,7 +107,8 @@
       })
       .join("");
 
-    const isAllDone = routineProg.total > 0 && routineProg.completed === routineProg.total;
+    const isAllDone =
+      routineProg.total > 0 && routineProg.completed === routineProg.total;
 
     return `
       <div class="timeline-block relative pl-7 pb-8" data-routine="${routineKey}">

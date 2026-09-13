@@ -103,7 +103,7 @@
               <span class="text-2xl p-2 rounded-xl bg-slate-100 dark:bg-slate-800/80">${meta.icon}</span>
               <div>
                 <h4 class="font-bold text-slate-900 dark:text-white text-sm leading-tight">${title}</h4>
-                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 block">${domainHabits.length} ${i18n.t("habits_count", { count: domainHabits.length }, lang) || (lang === 'vi' ? 'thói quen' : 'habits')}</span>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 block">${domainHabits.length} ${i18n.t("habits_count", { count: domainHabits.length }, lang) || (lang === "vi" ? "thói quen" : "habits")}</span>
               </div>
             </div>
 
@@ -211,7 +211,7 @@
     }
 
     const html = `
-      <div class="identity-view manager-view max-w-lg mx-auto pb-24">
+      <div class="identity-view max-w-lg mx-auto pb-24">
         <!-- Identity Header -->
         <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-5 mb-5 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between">
           <div>
