@@ -214,7 +214,7 @@
                 : ""
             }
             <div>
-              <span class="text-base font-mono tabular-nums font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : isRunning ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
+              <span id="detail-timer-ticker-${habit.id}" class="text-base font-mono tabular-nums font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : isRunning ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
               <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${targetDuration}</span>
             </div>
           </div>

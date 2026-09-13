@@ -3708,6 +3708,93 @@ async function runUITests() {
   );
 
   // ==========================================
+  // [Issue #494] Reactive Web Worker & Delta Timer Engine Overhaul
+  // ==========================================
+  console.log(
+    "\n--- [Issue #494] Reactive Web Worker & Delta Timer Engine Overhaul ---"
+  );
+
+  const { sandbox: timerEngineSandbox, getOrCreateElement: getTimerEngineEl } =
+    createHabitTrackerSandbox();
+  timerEngineSandbox.requestAnimationFrame = (fn) => fn();
+  timerEngineSandbox.cancelAnimationFrame = () => {};
+
+  let wakeLockRequested = false;
+  let wakeLockReleased = false;
+  timerEngineSandbox.navigator.wakeLock = {
+    request: async (type) => {
+      wakeLockRequested = true;
+      return {
+        release: async () => {
+          wakeLockReleased = true;
+        },
+        addEventListener: () => {},
+      };
+    },
+  };
+
+  let workerTickCallback = null;
+  timerEngineSandbox.setInterval = (fn, ms) => {
+    workerTickCallback = fn;
+    return 202;
+  };
+  timerEngineSandbox.clearInterval = () => {
+    workerTickCallback = null;
+  };
+
+  await timerEngineSandbox.HabitApp.init();
+  const testTimerHabitId = "h-reading-reactive";
+  await timerEngineSandbox.HabitApp.store.addHabit({
+    id: testTimerHabitId,
+    name: "Deep Focus Reading",
+    type: "timer",
+    targetValue: 4, // 4 seconds for test auto-complete
+    routine: "morning",
+    icon: "📚",
+    domain: "growth",
+  });
+
+  const timerToday = timerEngineSandbox.HabitApp.store.getActiveDate();
+
+  // 1. Start reactive timer
+  await timerEngineSandbox.HabitApp.handleToggleTimer(testTimerHabitId, timerToday);
+  assert(
+    wakeLockRequested,
+    "[Issue #494 AC-6] Screen Wake Lock is requested when timer is actively running"
+  );
+
+  // 2. Interval Tick updates in-memory logs and DOM tickers
+  if (workerTickCallback) {
+    await workerTickCallback();
+    await workerTickCallback();
+  }
+
+  const interimLog =
+    timerEngineSandbox.HabitApp.store.state.logs[`${testTimerHabitId}_${timerToday}`];
+  assert(
+    interimLog && interimLog.value >= 2,
+    "[Issue #494 AC-1] Timer delta interval updates in-memory logged duration"
+  );
+
+  // 3. Auto-complete when target reached (2 more ticks = 4 seconds total)
+  if (workerTickCallback) {
+    await workerTickCallback();
+    await workerTickCallback();
+  }
+
+  const completedLog =
+    timerEngineSandbox.HabitApp.store.state.logs[`${testTimerHabitId}_${timerToday}`];
+  assert(
+    completedLog && completedLog.value >= 4,
+    "[Issue #494 AC-5] Timer completes automatically when target duration is achieved"
+  );
+
+  assert(
+    wakeLockReleased,
+    "[Issue #494 AC-6] Screen Wake Lock is released upon timer completion"
+  );
+
+  // ==========================================
   // [Issue #433 AC-3] Accessible In-App Delete Confirmation Modal / Alert Dialog & Historical Log Removal
   // ==========================================
   console.log(
