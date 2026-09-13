@@ -648,14 +648,18 @@
         <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">☁️ ${i18n.t("cloud_backup_title", {}, lang)} & ${i18n.t("export_import_title", {}, lang)}</h3>
 
-          <div class="grid grid-cols-2 gap-2 mb-4">
-            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all">
+          <div class="grid grid-cols-3 gap-2 mb-4">
+            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
               <span>📥</span>
-              <span>${i18n.t("export_json_btn", {}, lang)}</span>
+              <span class="truncate">JSON</span>
             </button>
-            <label class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-xs font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all">
+            <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
+              <span>📊</span>
+              <span class="truncate">CSV</span>
+            </button>
+            <label class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all">
               <span>📤</span>
-              <span>${i18n.t("import_json_btn", {}, lang)}</span>
+              <span class="truncate">Import</span>
               <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
             </label>
           </div>
@@ -1096,6 +1100,10 @@
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
         await app.exportDataJSON();
+      } else if (action === "export-csv") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        await app.exportDataCSV();
       }
     });
 
@@ -2316,6 +2324,15 @@
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_backup_exported", {}, lang), "success");
+    },
+    exportDataCSV() {
+      if (!store) return;
+      exportImport.downloadExportCSV(store.state);
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("toast_csv_exported", {}, lang), "success");
     },
     async importDataJSON(event) {
       const file = event.target.files && event.target.files[0];

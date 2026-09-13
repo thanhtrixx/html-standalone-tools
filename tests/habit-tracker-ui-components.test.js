@@ -4989,6 +4989,62 @@ async function runUITests() {
     newCount > initialCount,
     "[Issue #480 AC-2] Applying starter kit adds new habits to the store"
   );
+
+  // ----------------------------------------------------
+  // Issue #481: Detail Drawer & Data Vault Verification
+  // ----------------------------------------------------
+  const { sandbox: vaultSandbox } = createHabitTrackerSandbox();
+  await vaultSandbox.HabitApp.init();
+
+  // Test CSV export
+  const exportImportMod = require("../habit-tracker/src/sync/export-import.js");
+  const csvContent = exportImportMod.exportToCsv(vaultSandbox.HabitApp.store);
+  assert(
+    typeof csvContent === "string" &&
+      csvContent.includes("Date") &&
+      csvContent.includes("Habit Name"),
+    "[Issue #481 AC-4] exportToCsv generates CSV headers and data records"
+  );
+
+  // Test Data Vault replaceState restore
+  const testState = {
+    habits: [
+      {
+        id: "h-test-vault",
+        name: "Vault Test Habit",
+        type: "binary",
+        targetValue: 1,
+        routines: ["morning"],
+        domain: "mind",
+        scheduleType: "daily",
+      },
+    ],
+    logs: [
+      {
+        id: "h-test-vault_2026-09-13",
+        habitId: "h-test-vault",
+        date: "2026-09-13",
+        completed: true,
+        value: 1,
+      },
+    ],
+    settings: {
+      theme: "dark",
+      language: "vi",
+    },
+  };
+
+  await vaultSandbox.HabitApp.store.replaceState(testState);
+  assertEqual(
+    vaultSandbox.HabitApp.store.getHabits().length,
+    1,
+    "[Issue #481 AC-3] replaceState successfully replaces habits in the store"
+  );
+  assertEqual(
+    vaultSandbox.HabitApp.store.getHabits()[0].id,
+    "h-test-vault",
+    "[Issue #481 AC-3] replaceState loads correct habit record"
+  );
 }
 
 runUITests()
