@@ -92,6 +92,8 @@
   let runningTimerStartedAt = null;
   let runningTimerBaseValue = 0;
   let runningTimerTickCount = 0;
+  let lastTimerPersistedAt = 0;
+  let wakeLockSentinel = null;
   let pendingDeleteHabitId = null;
   let swipeStartX = 0;
   let swipeStartY = 0;
@@ -1211,14 +1213,33 @@
       }
     });
 
-    // Page visibility & focus listeners for background timer delta synchronization
-    document.addEventListener("visibilitychange", () => {
+    // Page visibility & focus listeners for background timer delta synchronization & wake lock
+    document.addEventListener("visibilitychange", async () => {
       if (document.visibilityState === "visible") {
-        syncRunningTimer();
+        if (runningTimerHabitId) {
+          await requestWakeLock();
+          syncRunningTimer();
+        }
+      } else {
+        if (runningTimerHabitId) {
+          await flushRunningTimerToStorage();
+        }
       }
     });
     window.addEventListener("focus", () => {
-      syncRunningTimer();
+      if (runningTimerHabitId) {
+        syncRunningTimer();
+      }
+    });
+    window.addEventListener("pagehide", () => {
+      if (runningTimerHabitId) {
+        flushRunningTimerToStorage();
+      }
+    });
+    window.addEventListener("beforeunload", () => {
+      if (runningTimerHabitId) {
+        flushRunningTimerToStorage();
+      }
     });
 
     // Tab swipe gestures & hardware back button popstate listener
@@ -1426,6 +1447,108 @@
   }
 
   /**
+   * Requests Screen Wake Lock to keep display active while timer runs
+   */
+  async function requestWakeLock() {
+    try {
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.wakeLock &&
+        typeof navigator.wakeLock.request === "function"
+      ) {
+        wakeLockSentinel = await navigator.wakeLock.request("screen");
+        wakeLockSentinel.addEventListener("release", () => {
+          wakeLockSentinel = null;
+        });
+      }
+    } catch (_) {}
+  }
+
+  /**
+   * Releases Screen Wake Lock
+   */
+  async function releaseWakeLock() {
+    try {
+      if (wakeLockSentinel && typeof wakeLockSentinel.release === "function") {
+        await wakeLockSentinel.release();
+        wakeLockSentinel = null;
+      }
+    } catch (_) {}
+  }
+
+  /**
+   * Directly updates reactive timer DOM elements across header, dock, active card, and detail sheet without disk I/O
+   */
+  function updateTimerDom(habitId, currentSecs, targetSecs) {
+    if (!store) return;
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    const durationFormatted = i18n.formatDuration(currentSecs, lang);
+    const targetFormatted = i18n.formatDuration(targetSecs, lang);
+
+    // 1. Header ambient ticker
+    const headerTicker = document.getElementById("header-timer-ticker");
+    if (headerTicker) {
+      const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
+      const s = String(currentSecs % 60).padStart(2, "0");
+      headerTicker.textContent = `${m}:${s}`;
+    }
+
+    // 2. Dock ambient ticker
+    const dockPill = document.getElementById("dock-active-timer-pill");
+    if (dockPill) {
+      const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
+      const s = String(currentSecs % 60).padStart(2, "0");
+      const habit = store.getHabit(habitId);
+      const icon = habit ? habit.icon || "⏱️" : "⏱️";
+      dockPill.innerHTML = `<span>${icon}</span> <span class="tabular-nums font-mono font-bold">${m}:${s}</span>`;
+    }
+
+    // 3. Card expandable drawer ticker
+    const cardTicker = document.getElementById(`card-timer-ticker-${habitId}`);
+    if (cardTicker) {
+      cardTicker.textContent = durationFormatted;
+    }
+
+    // 4. Card header sub-progress
+    const cardSubTicker = document.getElementById(`card-sub-ticker-${habitId}`);
+    if (cardSubTicker) {
+      cardSubTicker.textContent = `${durationFormatted} / ${targetFormatted}`;
+    }
+
+    // 5. Detail sheet ticker
+    const detailTicker = document.getElementById(`detail-timer-ticker-${habitId}`);
+    if (detailTicker) {
+      detailTicker.textContent = durationFormatted;
+    }
+  }
+
+  /**
+   * Flushes running timer state directly to persistent storage (IndexedDB)
+   */
+  async function flushRunningTimerToStorage() {
+    if (!runningTimerHabitId || !runningTimerStartedAt || !store) return;
+    const now = Date.now();
+    const timeElapsed = Math.max(
+      0,
+      Math.floor((now - runningTimerStartedAt) / 1000)
+    );
+    const elapsedSecs = Math.max(runningTimerTickCount, timeElapsed);
+    const totalSecs = runningTimerBaseValue + elapsedSecs;
+    const targetDate = runningTimerDate || store.getActiveDate();
+
+    if (store.state && store.state.logs) {
+      store.state.logs[`${runningTimerHabitId}_${targetDate}`] = {
+        value: totalSecs,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    lastTimerPersistedAt = now;
+    try {
+      await store.logHabit(runningTimerHabitId, targetDate, totalSecs);
+    } catch (_) {}
+  }
+
+  /**
    * Plays a harmonic audio chime when a timer habit completes
    */
   function playTimerCompletionSound() {
@@ -1450,7 +1573,53 @@
   }
 
   /**
-   * Synchronizes active timer value with exact elapsed timestamp delta
+   * Handles timer target completion with celebration sound, confetti, and notification
+   */
+  async function handleTimerCompleted(habit, targetDate, nextSeconds) {
+    stopTimerTicker();
+    await releaseWakeLock();
+
+    const habitId = habit.id;
+    runningTimerHabitId = null;
+    runningTimerDate = null;
+    runningTimerStartedAt = null;
+    runningTimerBaseValue = 0;
+    runningTimerTickCount = 0;
+
+    // Immediate persistence on completion
+    await store.logHabit(habitId, targetDate, nextSeconds);
+
+    updateAmbientTimerPill();
+    renderActiveTab();
+    refreshDetailSheetIfOpen(habitId, targetDate);
+
+    const lang =
+      (store.getSettings() && store.getSettings().language) || "vi";
+    showToast(
+      `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
+      "success"
+    );
+    playTimerCompletionSound();
+
+    if (todayView && typeof todayView.triggerVictoryConfetti === "function") {
+      todayView.triggerVictoryConfetti();
+    }
+
+    try {
+      if (
+        typeof Notification !== "undefined" &&
+        Notification.permission === "granted"
+      ) {
+        new Notification(habit.name, {
+          body: i18n.t("timer_completed", {}, lang),
+          icon: "assets/icon.png",
+        });
+      }
+    } catch (_) {}
+  }
+
+  /**
+   * Synchronizes active timer value with exact elapsed timestamp delta and throttled persistence
    */
   async function syncRunningTimer(isIntervalTick = false) {
     if (!runningTimerHabitId || !runningTimerStartedAt || !store) return;
@@ -1461,35 +1630,36 @@
       runningTimerTickCount++;
     }
 
+    const now = Date.now();
     const targetDate = runningTimerDate || store.getActiveDate();
     const timeElapsed = Math.max(
       0,
-      Math.floor((Date.now() - runningTimerStartedAt) / 1000)
+      Math.floor((now - runningTimerStartedAt) / 1000)
     );
     const elapsedSecs = Math.max(runningTimerTickCount, timeElapsed);
     runningTimerTickCount = elapsedSecs;
     const nextSeconds = runningTimerBaseValue + elapsedSecs;
 
-    await store.logHabit(runningTimerHabitId, targetDate, nextSeconds);
-    updateAmbientTimerPill();
+    // In-memory update for instant synchronous access
+    if (store.state && store.state.logs) {
+      store.state.logs[`${runningTimerHabitId}_${targetDate}`] = {
+        value: nextSeconds,
+        updatedAt: new Date().toISOString(),
+      };
+    }
 
-    // Auto stop if target reached
+    // Reactive DOM update across UI components
+    updateTimerDom(runningTimerHabitId, nextSeconds, habit.targetValue);
+
+    // Throttled IndexedDB persistence: flush every 10 seconds
+    if (now - lastTimerPersistedAt >= 10000) {
+      lastTimerPersistedAt = now;
+      store.logHabit(runningTimerHabitId, targetDate, nextSeconds).catch(() => {});
+    }
+
+    // Auto complete if target reached
     if (nextSeconds >= habit.targetValue) {
-      stopTimerTicker();
-      runningTimerHabitId = null;
-      runningTimerDate = null;
-      runningTimerStartedAt = null;
-      runningTimerBaseValue = 0;
-      runningTimerTickCount = 0;
-      updateAmbientTimerPill();
-      renderActiveTab();
-      const lang =
-        (store.getSettings() && store.getSettings().language) || "vi";
-      showToast(
-        `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
-        "success"
-      );
-      playTimerCompletionSound();
+      await handleTimerCompleted(habit, targetDate, nextSeconds);
     }
   }
 
@@ -1498,6 +1668,9 @@
    */
   function startTimerTicker() {
     stopTimerTicker();
+    requestWakeLock();
+    lastTimerPersistedAt = Date.now();
+
     try {
       if (
         typeof Worker !== "undefined" &&
@@ -1537,6 +1710,7 @@
       clearInterval(timerInterval);
       timerInterval = null;
     }
+    releaseWakeLock();
   }
 
   /**
@@ -1548,8 +1722,8 @@
     const targetDate = date || store.getActiveDate();
 
     if (runningTimerHabitId === habitId) {
-      // Stop Timer
-      await syncRunningTimer();
+      // Stop Timer - immediate persistence
+      await flushRunningTimerToStorage();
       stopTimerTicker();
       runningTimerHabitId = null;
       runningTimerDate = null;
@@ -1563,7 +1737,7 @@
     }
 
     if (runningTimerHabitId) {
-      await syncRunningTimer();
+      await flushRunningTimerToStorage();
       stopTimerTicker();
       runningTimerHabitId = null;
       runningTimerDate = null;
@@ -1581,6 +1755,7 @@
     runningTimerStartedAt = Date.now();
     runningTimerBaseValue = currentLog.value || 0;
     runningTimerTickCount = 0;
+    lastTimerPersistedAt = Date.now();
 
     updateAmbientTimerPill();
     startTimerTicker();
