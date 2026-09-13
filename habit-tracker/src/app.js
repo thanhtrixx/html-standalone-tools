@@ -1709,6 +1709,8 @@
     } catch (_) {}
   }
 
+  let hasTriggeredCelebrationForRun = false;
+
   /**
    * Directly updates reactive timer DOM elements across header, dock, active card, and detail sheet without disk I/O
    */
@@ -1717,23 +1719,26 @@
     const lang = (store.getSettings() && store.getSettings().language) || "vi";
     const durationFormatted = i18n.formatDuration(currentSecs, lang);
     const targetFormatted = i18n.formatDuration(targetSecs, lang);
+    const isCompleted = currentSecs >= targetSecs;
+    const remainingSecs = Math.max(0, targetSecs - currentSecs);
+    const overtimeSecs = Math.max(0, currentSecs - targetSecs);
+
+    const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
+    const s = String(currentSecs % 60).padStart(2, "0");
+    const tickerStr = `${m}:${s}`;
 
     // 1. Header ambient ticker
     const headerTicker = document.getElementById("header-timer-ticker");
     if (headerTicker) {
-      const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
-      const s = String(currentSecs % 60).padStart(2, "0");
-      headerTicker.textContent = `${m}:${s}`;
+      headerTicker.textContent = tickerStr;
     }
 
     // 2. Dock ambient ticker
     const dockPill = document.getElementById("dock-active-timer-pill");
     if (dockPill) {
-      const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
-      const s = String(currentSecs % 60).padStart(2, "0");
       const habit = store.getHabit(habitId);
       const icon = habit ? habit.icon || "⏱️" : "⏱️";
-      dockPill.innerHTML = `<span>${icon}</span> <span class="tabular-nums font-mono font-bold">${m}:${s}</span>`;
+      dockPill.innerHTML = `<span>${icon}</span> <span class="tabular-nums font-mono font-bold">${tickerStr}</span>`;
     }
 
     // 3. Card expandable drawer ticker
@@ -1772,8 +1777,16 @@
     const targetDate = runningTimerDate || store.getActiveDate();
 
     if (store.state && store.state.logs) {
+      const existing = store.state.logs[`${runningTimerHabitId}_${targetDate}`] || {};
+      const habit = store.getHabit(runningTimerHabitId);
+      const isCompleted = habit ? totalSecs >= habit.targetValue : false;
       store.state.logs[`${runningTimerHabitId}_${targetDate}`] = {
+        ...existing,
+        id: `${runningTimerHabitId}_${targetDate}`,
+        habitId: runningTimerHabitId,
+        date: targetDate,
         value: totalSecs,
+        completed: isCompleted,
         updatedAt: new Date().toISOString(),
       };
     }
@@ -1808,20 +1821,14 @@
   }
 
   /**
-   * Handles timer target completion with celebration sound, confetti, and notification
+   * Handles timer target completion celebration without abruptly killing timer (supports overtime)
    */
   async function handleTimerCompleted(habit, targetDate, nextSeconds) {
-    stopTimerTicker();
-    await releaseWakeLock();
+    if (hasTriggeredCelebrationForRun) return;
+    hasTriggeredCelebrationForRun = true;
 
     const habitId = habit.id;
-    runningTimerHabitId = null;
-    runningTimerDate = null;
-    runningTimerStartedAt = null;
-    runningTimerBaseValue = 0;
-    runningTimerTickCount = 0;
-
-    // Immediate persistence on completion
+    // Immediate persistence on reaching target
     await store.logHabit(habitId, targetDate, nextSeconds);
 
     updateAmbientTimerPill();
@@ -1846,7 +1853,7 @@
       ) {
         new Notification(habit.name, {
           body: i18n.t("timer_completed", {}, lang),
-          icon: "assets/icon.png",
+          icon: "icon.svg",
         });
       }
     } catch (_) {}
@@ -1873,11 +1880,18 @@
     const elapsedSecs = Math.max(runningTimerTickCount, timeElapsed);
     runningTimerTickCount = elapsedSecs;
     const nextSeconds = runningTimerBaseValue + elapsedSecs;
+    const isCompleted = nextSeconds >= habit.targetValue;
 
     // In-memory update for instant synchronous access
     if (store.state && store.state.logs) {
+      const existing = store.state.logs[`${runningTimerHabitId}_${targetDate}`] || {};
       store.state.logs[`${runningTimerHabitId}_${targetDate}`] = {
+        ...existing,
+        id: `${runningTimerHabitId}_${targetDate}`,
+        habitId: runningTimerHabitId,
+        date: targetDate,
         value: nextSeconds,
+        completed: isCompleted,
         updatedAt: new Date().toISOString(),
       };
     }
@@ -1893,8 +1907,8 @@
         .catch(() => {});
     }
 
-    // Auto complete if target reached
-    if (nextSeconds >= habit.targetValue) {
+    // Trigger completion celebration once when target reached (timer continues ticking for overtime)
+    if (isCompleted && !hasTriggeredCelebrationForRun) {
       await handleTimerCompleted(habit, targetDate, nextSeconds);
     }
   }
@@ -1923,9 +1937,18 @@
         timerWorker.onmessage = () => {
           syncRunningTimer(true);
         };
+        timerWorker.onerror = (err) => {
+          console.warn("[TimerWorker] Worker runtime error, falling back to interval:", err);
+          stopTimerTicker();
+          timerInterval = setInterval(() => {
+            syncRunningTimer(true);
+          }, 1000);
+        };
         return;
       }
-    } catch (_) {}
+    } catch (e) {
+      console.warn("[TimerWorker] Failed to create worker:", e);
+    }
 
     timerInterval = setInterval(() => {
       syncRunningTimer(true);
@@ -1966,6 +1989,7 @@
       runningTimerStartedAt = null;
       runningTimerBaseValue = 0;
       runningTimerTickCount = 0;
+      hasTriggeredCelebrationForRun = false;
       updateAmbientTimerPill();
       renderActiveTab();
       refreshDetailSheetIfOpen(habitId, targetDate);
@@ -1980,6 +2004,7 @@
       runningTimerStartedAt = null;
       runningTimerBaseValue = 0;
       runningTimerTickCount = 0;
+      hasTriggeredCelebrationForRun = false;
     }
 
     const currentLog = (store.state &&
@@ -1991,6 +2016,7 @@
     runningTimerStartedAt = Date.now();
     runningTimerBaseValue = currentLog.value || 0;
     runningTimerTickCount = 0;
+    hasTriggeredCelebrationForRun = currentLog.value >= habit.targetValue;
     lastTimerPersistedAt = Date.now();
 
     updateAmbientTimerPill();
