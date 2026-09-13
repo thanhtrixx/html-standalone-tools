@@ -2,9 +2,11 @@
  * Atomic Habit Tracker Identity & Life Domains Lens View
  *
  * Implements:
+ * - Segmented Sub-View Switcher (My Habits Catalog vs Identity Pillars & Starter Kits)
  * - Life Domain Alignment Cards (Health, Mind, Craft, Discipline) with Neon Glow
- * - Curated 1-Click Starter Kits (Morning Mastery, Deep Focus, Health, Zen)
+ * - Curated 1-Click Starter Kits Horizontal Carousel (Morning Mastery, Deep Focus, Health, Zen)
  * - Comprehensive Habit Catalog Management (Add, Edit, Reorder, Archive, Delete)
+ * - 3-Step First-Run Identity Setup Wizard
  */
 
 (function (global) {
@@ -98,18 +100,22 @@
         );
 
         return `
-          <div class="life-domain-card bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-4 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between transition-all hover:scale-[1.02]" style="border-left: 4px solid ${meta.hex};">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl p-2 rounded-xl bg-slate-100 dark:bg-slate-800/80">${meta.icon}</span>
+          <div class="life-domain-card domain-card bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between transition-all hover:border-emerald-500/40" style="box-shadow: 0 4px 20px -2px ${meta.glow};">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 shrink-0">
+                ${meta.icon}
+              </div>
               <div>
-                <h4 class="font-bold text-slate-900 dark:text-white text-sm leading-tight">${title}</h4>
-                <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 block">${domainHabits.length} ${i18n.t("habits_count", { count: domainHabits.length }, lang) || (lang === "vi" ? "thói quen" : "habits")}</span>
+                <h4 class="font-bold text-slate-900 dark:text-white text-base leading-snug">${title}</h4>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">${domainHabits.length} thói quen</span>
+                  <span class="text-slate-300 dark:text-slate-700">&bull;</span>
+                  <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">${rate}%</span>
+                </div>
               </div>
             </div>
-
-            <div class="relative flex items-center justify-center">
+            <div class="shrink-0 flex items-center justify-center">
               ${ringHtml}
-              <span class="absolute text-[10px] font-bold tabular-nums font-mono text-slate-900 dark:text-white">${rate}%</span>
             </div>
           </div>
         `;
@@ -117,12 +123,14 @@
       .join("");
 
     return `
-      <div class="life-domains-hub mb-6">
-        <div class="flex items-center justify-between mb-3 px-1">
-          <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("domain_all", {}, lang)}</h3>
-          <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Identity System</span>
+      <div class="life-domains-section mb-6">
+        <div class="mb-3 px-1 flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">4 Trụ Cột Bản Sắc</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cân bằng phát triển bản thân theo phương pháp Atomic Habits</p>
+          </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           ${cardsHtml}
         </div>
       </div>
@@ -130,7 +138,7 @@
   }
 
   /**
-   * Renders Curated 1-Click Starter Kits Section
+   * Renders Curated 1-Click Starter Kits Section with Horizontal Scroll Carousel
    */
   function renderStarterKitsSection(lang = "vi") {
     const kits = engine.STARTER_KITS || [];
@@ -149,19 +157,19 @@
           .join("");
 
         return `
-          <div class="starter-kit-card bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-5 border border-slate-200 dark:border-slate-800/80 shadow-lg flex flex-col justify-between transition-all hover:border-emerald-500/50">
+          <div class="starter-kit-card min-w-[260px] sm:min-w-[280px] max-w-[300px] shrink-0 snap-start bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-4.5 border border-slate-200 dark:border-slate-800/80 shadow-lg flex flex-col justify-between transition-all hover:border-emerald-500/50">
             <div>
               <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-2.5">
-                  <span class="text-3xl">${kit.icon}</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">${kit.icon}</span>
                   <div>
-                    <h4 class="font-black text-slate-900 dark:text-white text-base leading-tight">${title}</h4>
-                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider font-mono">${kit.habits.length} Habits Pack</span>
+                    <h4 class="font-black text-slate-900 dark:text-white text-sm leading-tight">${title}</h4>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider font-mono">${kit.habits.length} Habits</span>
                   </div>
                 </div>
               </div>
-              <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">${desc}</p>
-              <div class="flex flex-wrap gap-1.5 mb-4">
+              <p class="text-xs text-slate-600 dark:text-slate-400 mb-2.5 leading-relaxed line-clamp-2">${desc}</p>
+              <div class="flex flex-wrap gap-1 mb-3">
                 ${habitPills}
               </div>
             </div>
@@ -170,7 +178,7 @@
               type="button"
               data-action="apply-starter-kit"
               data-kit-id="${kit.id}"
-              class="w-full py-2.5 px-4 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              class="w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <span>⚡</span>
               <span>${i18n.t("apply_starter_kit", {}, lang)}</span>
@@ -182,11 +190,13 @@
 
     return `
       <div class="starter-kits-section mb-6">
-        <div class="mb-3 px-1">
-          <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("starter_kits_title", {}, lang)}</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("starter_kits_subtitle", {}, lang)}</p>
+        <div class="mb-3 px-1 flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("starter_kits_title", {}, lang)}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("starter_kits_subtitle", {}, lang)}</p>
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex gap-3 overflow-x-auto pb-2.5 snap-x no-scrollbar">
           ${cardsHtml}
         </div>
       </div>
@@ -271,7 +281,7 @@
       const domainCards = domainMeta
         .map((dm) => {
           return `
-            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-start gap-3 transition-all hover:border-emerald-500/40" style="border-left: 3px solid ${dm.hex};">
+            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-start gap-3 transition-all hover:border-emerald-500/40">
               <span class="text-2xl p-2 rounded-xl bg-white dark:bg-slate-800 shrink-0 shadow-sm">${dm.icon}</span>
               <div>
                 <h4 class="font-bold text-slate-900 dark:text-white text-sm leading-tight">${i18n.t(dm.titleKey, {}, lang)}</h4>
@@ -471,7 +481,12 @@
   /**
    * Renders the complete Identity & Life Domains View inside Habits Catalog
    */
-  function renderIdentityView(store, containerElement, lang = "vi") {
+  function renderIdentityView(
+    store,
+    containerElement,
+    lang = "vi",
+    activeSubView = "catalog"
+  ) {
     if (!store) return "";
     const habits = store.getHabits(true);
     const logs = store.state.logs;
@@ -481,14 +496,22 @@
 
     // Reuse manager catalog for habit CRUD & reordering
     let managerHtml = "";
-    if (managerView && typeof managerView.renderManagerView === "function") {
-      managerHtml = managerView.renderManagerView(store, null, lang);
+    const mgr =
+      (typeof managerView !== "undefined" && managerView) ||
+      (typeof global !== "undefined" && global.HabitManagerView) ||
+      (typeof window !== "undefined" && window.HabitManagerView) ||
+      (typeof require !== "undefined" ? require("./manager-view.js") : null);
+
+    if (mgr && typeof mgr.renderManagerView === "function") {
+      managerHtml = mgr.renderManagerView(store, null, lang);
     }
+
+    const isCatalog = activeSubView === "catalog";
 
     const html = `
       <div class="identity-view max-w-lg mx-auto pb-24">
         <!-- Habits Catalog Header -->
-        <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-5 mb-5 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between">
+        <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-5 mb-4 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between">
           <div>
             <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">${i18n.t("app_title", {}, lang)}</span>
             <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">${i18n.t("habits_tab", {}, lang)}</h2>
@@ -503,34 +526,66 @@
           </button>
         </div>
 
-        <!-- Launch Setup Wizard Quick Banner -->
-        <button
-          type="button"
-          data-action="open-identity-wizard"
-          class="w-full mb-5 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-between text-left transition-all hover:border-emerald-500/60 shadow-sm cursor-pointer"
-        >
-          <div class="flex items-center gap-3">
-            <span class="text-2xl p-2 rounded-xl bg-emerald-500/20 text-emerald-500">✨</span>
-            <div>
-              <span class="font-bold text-slate-900 dark:text-white text-sm block">${i18n.t("wizard_title", {}, lang)}</span>
-              <span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">${i18n.t("wizard_subtitle", {}, lang)}</span>
-            </div>
-          </div>
-          <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-500/10 dark:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/30">➔</span>
-        </button>
+        <!-- Habits Sub-View Segmented Switcher -->
+        <div class="flex p-1 mb-5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/80" id="habits-subview-switcher">
+          <button
+            type="button"
+            data-action="switch-habits-subview"
+            data-subview="catalog"
+            id="subview-btn-catalog"
+            class="flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              isCatalog
+                ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }"
+          >
+            <span>📋</span>
+            <span>${i18n.t("habits_subview_catalog", {}, lang)}</span>
+          </button>
+          <button
+            type="button"
+            data-action="switch-habits-subview"
+            data-subview="identity"
+            id="subview-btn-identity"
+            class="flex-1 py-2 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+              !isCatalog
+                ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+            }"
+          >
+            <span>🏛️</span>
+            <span>${i18n.t("habits_subview_identity", {}, lang)}</span>
+          </button>
+        </div>
 
-        <!-- Life Domains Hub -->
-        ${domainsHtml}
-
-        <!-- Curated 1-Click Starter Kits -->
-        ${starterKitsHtml}
-
-        <!-- Habit Catalog & Reordering Management -->
-        <div class="habit-catalog-section mt-6">
-          <div class="mb-3 px-1 flex items-center justify-between">
-            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("manage_habits_tab", {}, lang)}</h3>
-          </div>
+        <!-- SUBVIEW 1: Habits Catalog & Routine Management -->
+        <div id="habits-catalog-subview" class="${isCatalog ? "" : "hidden"}">
           ${managerHtml}
+        </div>
+
+        <!-- SUBVIEW 2: Identity Pillars & Starter Kits -->
+        <div id="habits-identity-subview" class="${!isCatalog ? "" : "hidden"}">
+          <!-- Launch Setup Wizard Quick Banner -->
+          <button
+            type="button"
+            data-action="open-identity-wizard"
+            class="w-full mb-5 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-between text-left transition-all hover:border-emerald-500/60 shadow-sm cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-2xl p-2 rounded-xl bg-emerald-500/20 text-emerald-500">✨</span>
+              <div>
+                <span class="font-bold text-slate-900 dark:text-white text-sm block">${i18n.t("wizard_title", {}, lang)}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">${i18n.t("wizard_subtitle", {}, lang)}</span>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-500/10 dark:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/30">➔</span>
+          </button>
+
+          <!-- Life Domains Hub -->
+          ${domainsHtml}
+
+          <!-- Curated 1-Click Starter Kits Carousel -->
+          ${starterKitsHtml}
         </div>
       </div>
     `;

@@ -8,7 +8,7 @@
     />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://accounts.google.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob: https://trile.dev https://*.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' https://api.github.com https://www.googleapis.com https://accounts.google.com https://cloudflareinsights.com https://static.cloudflareinsights.com; font-src 'self' data:; manifest-src 'self';"
+      content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:8400 https://cdn.tailwindcss.com https://accounts.google.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob: https://trile.dev https://*.googleusercontent.com https://avatars.githubusercontent.com; connect-src 'self' http://localhost:8400 ws://localhost:8400 https://api.github.com https://www.googleapis.com https://accounts.google.com https://cloudflareinsights.com https://static.cloudflareinsights.com; font-src 'self' data:; manifest-src 'self';"
     />
     <title>Atomic Habit & Routine Tracker</title>
     <meta
@@ -146,12 +146,8 @@
               class="text-sm font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1.5"
             >
               <span>Atomic Habits</span>
-              <span
-                class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30"
-                >PRO</span
-              >
             </h1>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400"
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium"
               >Obsidian Glow • Offline-First</span
             >
           </div>
@@ -186,16 +182,12 @@
           <!-- Language Quick Toggle -->
           <button
             id="lang-toggle-btn"
-            onclick="
-              window.HabitApp.switchLanguage(
-                document.getElementById('lang-toggle-btn').textContent === 'VI'
-                  ? 'en'
-                  : 'vi'
-              )
-            "
-            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+            onclick="window.HabitApp.toggleLanguage()"
+            class="px-2.5 py-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-base leading-none hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+            title="Ngôn ngữ: 🇻🇳 Tiếng Việt — Bấm để đổi sang 🇺🇸 English"
+            aria-label="Ngôn ngữ: 🇻🇳 Tiếng Việt — Bấm để đổi sang 🇺🇸 English"
           >
-            VI
+            🇻🇳
           </button>
         </div>
       </div>
@@ -232,12 +224,10 @@
           data-tab="today"
           id="nav-tab-today"
           class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold ring-1 ring-emerald-500/30 shadow-sm"
+          aria-selected="true"
         >
           <span class="text-xl">🔥</span>
           <span class="nav-label text-[11px] leading-tight">Hôm nay</span>
-          <span
-            class="nav-dot w-1 h-1 rounded-full bg-emerald-500 dark:bg-emerald-400"
-          ></span>
         </button>
 
         <button
@@ -245,10 +235,10 @@
           data-tab="insights"
           id="nav-tab-insights"
           class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium"
+          aria-selected="false"
         >
           <span class="text-xl">📊</span>
           <span class="nav-label text-[11px] leading-tight">Thống kê</span>
-          <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
         </button>
 
         <button
@@ -256,10 +246,10 @@
           data-tab="manager"
           id="nav-tab-manager"
           class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium"
+          aria-selected="false"
         >
           <span class="text-xl">🎯</span>
           <span class="nav-label text-[11px] leading-tight">Thói quen</span>
-          <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
         </button>
 
         <button
@@ -267,10 +257,10 @@
           data-tab="settings"
           id="nav-tab-settings"
           class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium"
+          aria-selected="false"
         >
           <span class="text-xl">⚙️</span>
           <span class="nav-label text-[11px] leading-tight">Cài đặt</span>
-          <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
         </button>
       </div>
     </nav>
@@ -360,7 +350,7 @@
       class="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-50 hidden"
     >
       <div
-        class="bg-white/95 dark:bg-slate-900/95 border border-emerald-500/60 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-3 text-slate-900 dark:text-slate-100 backdrop-blur-md"
+        class="bg-white/95 dark:bg-slate-900/95 border border-emerald-500/50 rounded-2xl p-4 shadow-xl flex items-center justify-between gap-3 text-slate-900 dark:text-slate-100 backdrop-blur-md"
       >
         <div class="flex items-center gap-3">
           <span class="text-2xl">✨</span>
@@ -375,7 +365,7 @@
         </div>
         <button
           onclick="window.HabitApp.applyPwaUpdate()"
-          class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-lg transition-colors whitespace-nowrap active:scale-95"
+          class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg transition-colors whitespace-nowrap active:scale-95 cursor-pointer"
         >
           Cập nhật
         </button>

@@ -3,8 +3,9 @@
  *
  * Implements:
  * - Habit Catalog List grouped by Routine
- * - Habit Reordering (Up/Down order controls)
- * - Add/Edit Habit Modal with live preview, color themes, emoji picker, schedule builder
+ * - Habit Reordering (Up/Down order controls with accessible targets)
+ * - Add/Edit Habit Modal with 2-Stage Progressive Form, Live Preview, and Popover Emoji Picker
+ * - Consolidated Habit Card Actions with Primary Edit and Context Menu
  * - Archive & Restore management
  * - Delete Habit with confirmation
  */
@@ -28,7 +29,7 @@
       : global.HabitTodayView;
 
   /**
-   * Renders the Add / Edit Habit Modal HTML
+   * Renders the Add / Edit Habit Modal HTML with 2-Stage Progressive Disclosure
    */
   function renderHabitEditModal(habit = null, lang = "vi") {
     const isEdit = !!(habit && habit.id);
@@ -147,172 +148,233 @@
       <div class="modal-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl text-slate-900 dark:text-white" role="dialog" aria-modal="true" aria-labelledby="habit-modal-title">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
           <h3 id="habit-modal-title" class="text-xl font-bold">${modalTitle}</h3>
-          <button type="button" data-action="close-modal" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-2xl leading-none">&times;</button>
+          <button type="button" data-action="close-modal" aria-label="${i18n.t("close", {}, lang)}" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-2xl leading-none">&times;</button>
         </div>
 
-        <form id="habit-edit-form" data-habit-id="${habitId}" class="space-y-4 pt-4">
-          <!-- Interactive Live Preview Card -->
-          <div>
-            <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">${i18n.t("preview_label", {}, lang)}</label>
-            <div id="modal-live-preview-card" class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3.5 flex items-center justify-between shadow-sm transition-all duration-200">
-              <div class="flex items-center gap-3 flex-1 min-w-0">
-                <div id="preview-icon-box" class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-md transition-all shrink-0" style="background-color: ${todayView.getColorHex(color)};">
-                  <span id="preview-icon">${icon || "🎯"}</span>
-                </div>
-                <div class="min-w-0 flex-1">
-                  <h4 id="preview-name" class="font-bold text-slate-900 dark:text-white text-sm truncate">
-                    ${name || (lang === "vi" ? "Tên thói quen mới" : "New habit name")}
-                  </h4>
-                  <div class="flex items-center gap-2 mt-0.5">
-                    <span id="preview-type-target" class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                      ${type === "binary" ? i18n.t("type_binary", {}, lang) : `${displayTargetValue} ${unit || (type === "timer" ? i18n.t("minutes_unit", {}, lang) : "")}`}
-                    </span>
-                    <div id="preview-routines" class="flex items-center gap-1">
-                      ${assignedRoutines.map((r) => `<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${i18n.t(`routine_${r}`, {}, lang)}</span>`).join("")}
-                    </div>
+        <!-- 2-Stage Modal Stepper Indicator -->
+        <div class="flex items-center gap-2 mt-4 mb-2 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/80" id="modal-stage-switcher">
+          <button type="button" data-action="modal-switch-stage" data-stage="1" id="stage-tab-1" class="flex-1 py-1.5 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600">
+            <span>1</span>
+            <span>${i18n.t("modal_stage_1_title", {}, lang)}</span>
+          </button>
+          <button type="button" data-action="modal-switch-stage" data-stage="2" id="stage-tab-2" class="flex-1 py-1.5 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+            <span>2</span>
+            <span>${i18n.t("modal_stage_2_title", {}, lang)}</span>
+          </button>
+        </div>
+
+        <!-- Interactive Live Preview Card (Unified) -->
+        <div class="pt-2">
+          <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">${i18n.t("preview_label", {}, lang)}</label>
+          <div id="modal-live-preview-card" class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-3.5 flex items-center justify-between shadow-sm transition-all duration-200">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div id="preview-icon-box" class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shadow-md transition-all shrink-0" style="background-color: ${todayView.getColorHex(color)};">
+                <span id="preview-icon">${icon || "🎯"}</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <h4 id="preview-name" class="font-bold text-slate-900 dark:text-white text-sm truncate">
+                  ${name || (lang === "vi" ? "Tên thói quen mới" : "New habit name")}
+                </h4>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span id="preview-type-target" class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    ${type === "binary" ? i18n.t("type_binary", {}, lang) : `${displayTargetValue} ${unit || (type === "timer" ? i18n.t("minutes_unit", {}, lang) : "")}`}
+                  </span>
+                  <div id="preview-routines" class="flex items-center gap-1">
+                    ${assignedRoutines.map((r) => `<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${i18n.t(`routine_${r}`, {}, lang)}</span>`).join("")}
                   </div>
                 </div>
               </div>
-              <div id="preview-check-badge" class="w-8 h-8 rounded-xl border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 text-xs shrink-0 font-bold">
-                ✓
+            </div>
+            <div id="preview-check-badge" class="w-8 h-8 rounded-xl border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 text-xs shrink-0 font-bold">
+              ✓
+            </div>
+          </div>
+        </div>
+
+        <form id="habit-edit-form" data-habit-id="${habitId}" class="space-y-4 pt-3">
+          <!-- STAGE 1: Basic Ritual -->
+          <div id="modal-stage-1" class="space-y-4">
+            <!-- Name & Popover Emoji Selector -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("habit_name_label", {}, lang)} *</label>
+              <div class="flex items-center gap-2.5">
+                <div class="relative">
+                  <button
+                    type="button"
+                    id="habit-emoji-popover-trigger"
+                    data-action="toggle-emoji-popover"
+                    aria-label="${i18n.t("change_emoji", {}, lang)}"
+                    class="w-12 h-11 flex items-center justify-center text-2xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl hover:border-emerald-500 transition cursor-pointer shadow-sm"
+                  >
+                    <span id="current-emoji-display">${icon}</span>
+                  </button>
+                  <input type="text" id="modal-habit-icon" name="icon" value="${icon}" class="sr-only">
+                  
+                  <!-- Popover Emoji Picker Palette -->
+                  <div id="habit-emoji-popover" class="hidden absolute left-0 top-13 z-40 w-64 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700">
+                    <span class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">${i18n.t("quick_emoji_presets", {}, lang)}</span>
+                    <div class="grid grid-cols-4 gap-1.5">
+                      ${presetEmojisHtml}
+                    </div>
+                  </div>
+                </div>
+
+                <input
+                  type="text"
+                  id="modal-habit-name"
+                  name="name"
+                  value="${name}"
+                  placeholder="${i18n.t("habit_name_placeholder", {}, lang)}"
+                  required
+                  class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2.5 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                >
               </div>
             </div>
-          </div>
 
-          <!-- Name & Icon -->
-          <div class="flex items-center gap-3">
-            <div class="w-16">
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("icon_emoji_label", {}, lang)}</label>
-              <input type="text" id="modal-habit-icon" name="icon" value="${icon}" class="w-full text-center text-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-1 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
-            <div class="flex-1">
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("habit_name_label", {}, lang)} *</label>
-              <input type="text" id="modal-habit-name" name="name" value="${name}" placeholder="${i18n.t("habit_name_placeholder", {}, lang)}" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
-          </div>
-
-          <!-- Quick-Preset Emoji Palette -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("quick_emoji_presets", {}, lang)}</label>
-            <div class="flex flex-wrap gap-1.5 p-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl">
-              ${presetEmojisHtml}
-            </div>
-          </div>
-
-          <!-- Segmented Measurement Type -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("habit_type_label", {}, lang)}</label>
-            <div class="grid grid-cols-3 gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/80" id="segmented-type-picker">
-              <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "binary" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
-                <input type="radio" name="type" value="binary" class="sr-only" ${type === "binary" ? "checked" : ""}>
-                <span>✓</span>
-                <span>${i18n.t("type_binary", {}, lang)}</span>
-              </label>
-              <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "numeric" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
-                <input type="radio" name="type" value="numeric" class="sr-only" ${type === "numeric" ? "checked" : ""}>
-                <span>🔢</span>
-                <span>${i18n.t("type_numeric", {}, lang)}</span>
-              </label>
-              <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "timer" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
-                <input type="radio" name="type" value="timer" class="sr-only" ${type === "timer" ? "checked" : ""}>
-                <span>⏱️</span>
-                <span>${i18n.t("type_timer", {}, lang)}</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Target & Unit (For numeric / timer) -->
-          <div id="modal-target-fields" class="grid grid-cols-3 gap-3 ${type === "binary" ? "hidden" : ""}">
+            <!-- Segmented Measurement Type -->
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("target_value_label", {}, lang)}</label>
-              <input type="number" id="modal-target-value" name="targetValue" value="${displayTargetValue}" min="1" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("habit_type_label", {}, lang)}</label>
+              <div class="grid grid-cols-3 gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/80" id="segmented-type-picker">
+                <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "binary" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
+                  <input type="radio" name="type" value="binary" class="sr-only" ${type === "binary" ? "checked" : ""}>
+                  <span>✓</span>
+                  <span>${i18n.t("type_binary", {}, lang)}</span>
+                </label>
+                <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "numeric" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
+                  <input type="radio" name="type" value="numeric" class="sr-only" ${type === "numeric" ? "checked" : ""}>
+                  <span>🔢</span>
+                  <span>${i18n.t("type_numeric", {}, lang)}</span>
+                </label>
+                <label class="segmented-type-option flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl cursor-pointer text-xs font-semibold transition select-none ${type === "timer" ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600" : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}">
+                  <input type="radio" name="type" value="timer" class="sr-only" ${type === "timer" ? "checked" : ""}>
+                  <span>⏱️</span>
+                  <span>${i18n.t("type_timer", {}, lang)}</span>
+                </label>
+              </div>
             </div>
+
+            <!-- Target & Unit (For numeric / timer) -->
+            <div id="modal-target-fields" class="grid grid-cols-3 gap-3 ${type === "binary" ? "hidden" : ""}">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("target_value_label", {}, lang)}</label>
+                <input type="number" id="modal-target-value" name="targetValue" value="${displayTargetValue}" min="1" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("target_unit_label", {}, lang)}</label>
+                <input type="text" id="modal-target-unit" name="unit" value="${unit}" placeholder="ml, pages, mins" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("step_delta_label", {}, lang)}</label>
+                <input type="number" id="modal-step" name="step" value="${step}" min="1" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              </div>
+            </div>
+
+            <!-- Stage 1 Footer Actions -->
+            <div class="flex items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="submit"
+                data-action="quick-save"
+                class="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer flex items-center gap-1.5"
+              >
+                <span>⚡</span>
+                <span>${i18n.t("modal_btn_quick_save", {}, lang)}</span>
+              </button>
+              <button
+                type="button"
+                data-action="modal-next-stage"
+                class="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-md shadow-emerald-500/20 transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+              >
+                <span>${i18n.t("modal_btn_next_stage", {}, lang)}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- STAGE 2: Schedule & Styling -->
+          <div id="modal-stage-2" class="space-y-4 hidden">
+            <!-- Routine Assignment -->
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("target_unit_label", {}, lang)}</label>
-              <input type="text" id="modal-target-unit" name="unit" value="${unit}" placeholder="ml, pages, mins" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("routine_label", {}, lang)}</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="modal-routine-chips">
+                ${[
+                  { id: "morning", icon: "🌅", key: "routine_morning" },
+                  { id: "afternoon", icon: "☀️", key: "routine_afternoon" },
+                  { id: "evening", icon: "🌙", key: "routine_evening" },
+                  { id: "anytime", icon: "🔄", key: "routine_anytime" },
+                ]
+                  .map((r) => {
+                    const isChecked = assignedRoutines.includes(r.id);
+                    return `
+                    <label class="routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none ${
+                      isChecked
+                        ? "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-semibold"
+                        : "bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
+                    }">
+                      <input type="checkbox" name="routines" value="${r.id}" class="sr-only" ${isChecked ? "checked" : ""}>
+                      <span>${r.icon}</span>
+                      <span>${i18n.t(r.key, {}, lang)}</span>
+                    </label>
+                  `;
+                  })
+                  .join("")}
+              </div>
+              <select name="routine" id="modal-habit-routine" class="hidden">
+                <option value="morning" ${routine === "morning" ? "selected" : ""}>🌅 ${i18n.t("routine_morning", {}, lang)}</option>
+                <option value="afternoon" ${routine === "afternoon" ? "selected" : ""}>☀️ ${i18n.t("routine_afternoon", {}, lang)}</option>
+                <option value="evening" ${routine === "evening" ? "selected" : ""}>🌙 ${i18n.t("routine_evening", {}, lang)}</option>
+                <option value="anytime" ${routine === "anytime" ? "selected" : ""}>🔄 ${i18n.t("routine_anytime", {}, lang)}</option>
+              </select>
             </div>
+
+            <!-- Frequency Schedule -->
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("step_delta_label", {}, lang)}</label>
-              <input type="number" id="modal-step" name="step" value="${step}" min="1" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            </div>
-          </div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("schedule_label", {}, lang)}</label>
+              <select name="scheduleType" id="modal-schedule-type" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-900 dark:text-white mb-2">
+                <option value="daily" ${scheduleType === "daily" ? "selected" : ""}>${i18n.t("freq_daily", {}, lang)}</option>
+                <option value="specific_days" ${scheduleType === "specific_days" ? "selected" : ""}>${i18n.t("freq_specific_days", {}, lang)}</option>
+                <option value="interval" ${scheduleType === "interval" ? "selected" : ""}>${i18n.t("freq_interval", {}, lang)}</option>
+              </select>
 
-          <!-- Routine Assignment -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("routine_label", {}, lang)}</label>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="modal-routine-chips">
-              ${[
-                { id: "morning", icon: "🌅", key: "routine_morning" },
-                { id: "afternoon", icon: "☀️", key: "routine_afternoon" },
-                { id: "evening", icon: "🌙", key: "routine_evening" },
-                { id: "anytime", icon: "🔄", key: "routine_anytime" },
-              ]
-                .map((r) => {
-                  const isChecked = assignedRoutines.includes(r.id);
-                  return `
-                  <label class="routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none ${
-                    isChecked
-                      ? "bg-emerald-500/10 border-emerald-500 text-emerald-600 dark:text-emerald-400 font-semibold"
-                      : "bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300"
-                  }">
-                    <input type="checkbox" name="routines" value="${r.id}" class="sr-only" ${isChecked ? "checked" : ""}>
-                    <span>${r.icon}</span>
-                    <span>${i18n.t(r.key, {}, lang)}</span>
-                  </label>
-                `;
-                })
-                .join("")}
-            </div>
-            <select name="routine" id="modal-habit-routine" class="hidden">
-              <option value="morning" ${routine === "morning" ? "selected" : ""}>🌅 ${i18n.t("routine_morning", {}, lang)}</option>
-              <option value="afternoon" ${routine === "afternoon" ? "selected" : ""}>☀️ ${i18n.t("routine_afternoon", {}, lang)}</option>
-              <option value="evening" ${routine === "evening" ? "selected" : ""}>🌙 ${i18n.t("routine_evening", {}, lang)}</option>
-              <option value="anytime" ${routine === "anytime" ? "selected" : ""}>🔄 ${i18n.t("routine_anytime", {}, lang)}</option>
-            </select>
-          </div>
+              <div id="modal-specific-days-container" class="grid grid-cols-4 gap-2 pt-1 ${scheduleType === "specific_days" ? "" : "hidden"}">
+                ${specificDaysHtml}
+              </div>
 
-          <!-- Frequency Schedule -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("schedule_label", {}, lang)}</label>
-            <select name="scheduleType" id="modal-schedule-type" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-900 dark:text-white mb-2">
-              <option value="daily" ${scheduleType === "daily" ? "selected" : ""}>${i18n.t("freq_daily", {}, lang)}</option>
-              <option value="specific_days" ${scheduleType === "specific_days" ? "selected" : ""}>${i18n.t("freq_specific_days", {}, lang)}</option>
-              <option value="interval" ${scheduleType === "interval" ? "selected" : ""}>${i18n.t("freq_interval", {}, lang)}</option>
-            </select>
-
-            <div id="modal-specific-days-container" class="grid grid-cols-4 gap-2 pt-1 ${scheduleType === "specific_days" ? "" : "hidden"}">
-              ${specificDaysHtml}
+              <div id="modal-interval-container" class="flex items-center gap-2 pt-1 ${scheduleType === "interval" ? "" : "hidden"}">
+                <span class="text-xs text-slate-500 dark:text-slate-400">Every</span>
+                <input type="number" name="intervalDays" value="${intervalDays}" min="1" max="30" class="w-20 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-1.5 px-3 text-sm text-center text-slate-900 dark:text-white">
+                <span class="text-xs text-slate-500 dark:text-slate-400">days</span>
+              </div>
             </div>
 
-            <div id="modal-interval-container" class="flex items-center gap-2 pt-1 ${scheduleType === "interval" ? "" : "hidden"}">
-              <span class="text-xs text-slate-500 dark:text-slate-400">Every</span>
-              <input type="number" name="intervalDays" value="${intervalDays}" min="1" max="30" class="w-20 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-1.5 px-3 text-sm text-center text-slate-900 dark:text-white">
-              <span class="text-xs text-slate-500 dark:text-slate-400">days</span>
+            <!-- Color Theme Pills -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">${i18n.t("color_theme_label", {}, lang)}</label>
+              <div class="flex items-center gap-3">
+                ${colorPillsHtml}
+              </div>
             </div>
-          </div>
 
-          <!-- Color Theme Pills -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">${i18n.t("color_theme_label", {}, lang)}</label>
-            <div class="flex items-center gap-3">
-              ${colorPillsHtml}
+            <!-- Daily Reminder Time -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("reminder_time_label", {}, lang)}</label>
+              <input type="time" name="reminderTime" value="${reminderTime}" class="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             </div>
-          </div>
 
-          <!-- Daily Reminder Time -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">${i18n.t("reminder_time_label", {}, lang)}</label>
-            <input type="time" name="reminderTime" value="${reminderTime}" class="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <button type="button" data-action="close-modal" class="px-4 py-2 text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-xl">
-              ${i18n.t("cancel", {}, lang)}
-            </button>
-            <button type="submit" class="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition active:scale-95">
-              ${i18n.t("save", {}, lang)}
-            </button>
+            <!-- Stage 2 Footer Actions -->
+            <div class="flex items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                data-action="modal-prev-stage"
+                class="py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 dark:hover:bg-slate-700 transition cursor-pointer flex items-center gap-1.5"
+              >
+                <span>${i18n.t("modal_btn_prev_stage", {}, lang)}</span>
+              </button>
+              <button
+                type="submit"
+                class="py-2.5 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 transition active:scale-95 cursor-pointer"
+              >
+                ${isEdit ? i18n.t("save", {}, lang) : i18n.t("add_habit", {}, lang)}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -359,27 +421,91 @@
                 : "";
 
             return `
-              <div class="manager-habit-card bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 mb-3 flex items-center justify-between gap-3 shadow-md" data-habit-id="${h.id}">
-                <div class="flex items-center gap-3 flex-1">
-                  <div class="w-1.5 h-10 rounded-full" style="background-color: ${colorHex};"></div>
-                  <span class="text-2xl">${h.icon || "🎯"}</span>
-                  <div>
-                    <h4 class="font-semibold text-slate-900 dark:text-white text-base">${h.name}</h4>
+              <div class="manager-habit-card bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-3.5 mb-3 flex items-center justify-between gap-3 shadow-md transition-all hover:border-emerald-500/40" data-habit-id="${h.id}">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <div class="w-1.5 h-10 rounded-full shrink-0" style="background-color: ${colorHex};"></div>
+                  <span class="text-2xl shrink-0">${h.icon || "🎯"}</span>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base truncate">${h.name}</h4>
                     <span class="text-xs text-slate-500 dark:text-slate-400">${i18n.t(`type_${h.type || "binary"}`, {}, lang)}</span>
                     ${routineBadges}
                   </div>
                 </div>
 
-                <div class="flex items-center gap-1.5">
-                  <!-- Reorder buttons -->
-                  <button type="button" data-action="reorder-up" data-habit-id="${h.id}" data-routine="${rKey}" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs border border-slate-200 dark:border-transparent ${isFirst ? "opacity-30 cursor-not-allowed" : ""}" ${isFirst ? 'disabled="disabled"' : ""} title="Move Up">▲</button>
-                  <button type="button" data-action="reorder-down" data-habit-id="${h.id}" data-routine="${rKey}" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs border border-slate-200 dark:border-transparent ${isLast ? "opacity-30 cursor-not-allowed" : ""}" ${isLast ? 'disabled="disabled"' : ""} title="Move Down">▼</button>
-                  <!-- Edit -->
-                  <button type="button" data-action="edit-habit" data-habit-id="${h.id}" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-sm ml-1 border border-slate-200 dark:border-transparent" title="${i18n.t("edit", {}, lang)}">✏️</button>
-                  <!-- Archive -->
-                  <button type="button" data-action="archive-habit" data-habit-id="${h.id}" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-sm border border-slate-200 dark:border-transparent" title="${i18n.t("archive_habit", {}, lang)}">📦</button>
-                  <!-- Delete -->
-                  <button type="button" data-action="delete-habit" data-habit-id="${h.id}" class="p-1.5 rounded-lg bg-rose-50 dark:bg-slate-800 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950 text-sm border border-rose-200 dark:border-transparent" title="${i18n.t("delete", {}, lang)}">🗑️</button>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <!-- Reorder buttons with generous touch targets -->
+                  <button
+                    type="button"
+                    data-action="reorder-up"
+                    data-habit-id="${h.id}"
+                    data-routine="${rKey}"
+                    aria-label="${i18n.t("move_up", {}, lang) || "Move Up"}"
+                    class="p-2 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs border border-slate-200 dark:border-slate-700/60 transition ${isFirst ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}"
+                    ${isFirst ? 'disabled="disabled"' : ""}
+                    title="Move Up"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    type="button"
+                    data-action="reorder-down"
+                    data-habit-id="${h.id}"
+                    data-routine="${rKey}"
+                    aria-label="${i18n.t("move_down", {}, lang) || "Move Down"}"
+                    class="p-2 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs border border-slate-200 dark:border-slate-700/60 transition ${isLast ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}"
+                    ${isLast ? 'disabled="disabled"' : ""}
+                    title="Move Down"
+                  >
+                    ▼
+                  </button>
+                  
+                  <!-- Primary Edit Button -->
+                  <button
+                    type="button"
+                    data-action="edit-habit"
+                    data-habit-id="${h.id}"
+                    aria-label="${i18n.t("edit", {}, lang)}"
+                    class="px-2.5 py-1.5 min-h-[34px] flex items-center gap-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold border border-slate-200 dark:border-slate-700/60 transition cursor-pointer"
+                    title="${i18n.t("edit", {}, lang)}"
+                  >
+                    <span>✏️</span>
+                    <span class="hidden sm:inline">${i18n.t("edit", {}, lang)}</span>
+                  </button>
+
+                  <!-- Consolidated 3-dot context menu for secondary/destructive actions -->
+                  <div class="relative inline-block text-left">
+                    <button
+                      type="button"
+                      data-action="toggle-card-menu"
+                      data-habit-id="${h.id}"
+                      aria-label="${i18n.t("more_actions", {}, lang)}"
+                      class="p-2 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs border border-slate-200 dark:border-slate-700/60 transition cursor-pointer font-bold"
+                    >
+                      •••
+                    </button>
+                    <div id="card-menu-${h.id}" class="card-context-menu hidden absolute right-0 mt-1.5 w-36 rounded-2xl bg-white dark:bg-slate-800 shadow-xl border border-slate-200 dark:border-slate-700/80 py-1 z-30">
+                      <button
+                        type="button"
+                        data-action="archive-habit"
+                        data-habit-id="${h.id}"
+                        aria-label="${i18n.t("archive_habit", {}, lang)}"
+                        class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer"
+                      >
+                        <span>📦</span>
+                        <span>${i18n.t("archive_habit", {}, lang)}</span>
+                      </button>
+                      <button
+                        type="button"
+                        data-action="delete-habit"
+                        data-habit-id="${h.id}"
+                        aria-label="${i18n.t("delete", {}, lang)}"
+                        class="w-full text-left px-3 py-2 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer border-t border-slate-100 dark:border-slate-700/50"
+                      >
+                        <span>🗑️</span>
+                        <span>${i18n.t("delete", {}, lang)}</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             `;

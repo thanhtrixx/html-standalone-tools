@@ -28,6 +28,24 @@ colors:
   domain-discipline: "#f59e0b"
   domain-discipline-glow: "rgba(245, 158, 11, 0.3)"
 typography:
+  display-hero:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    fontSize: "3rem"
+    fontWeight: 900
+    lineHeight: 1.1
+    letterSpacing: "-0.035em"
+  display-metric:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    fontSize: "2.25rem"
+    fontWeight: 800
+    lineHeight: 1.15
+    letterSpacing: "-0.03em"
+  display-stat:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 700
+    lineHeight: 1.25
+    letterSpacing: "-0.02em"
   display:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     fontSize: "1.75rem"
@@ -40,6 +58,11 @@ typography:
     fontWeight: 700
     lineHeight: 1.3
     letterSpacing: "-0.015em"
+  title-lg:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    fontSize: "1.125rem"
+    fontWeight: 600
+    lineHeight: 1.35
   title:
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     fontSize: "1rem"
@@ -55,7 +78,16 @@ typography:
     fontSize: "0.75rem"
     fontWeight: 600
     letterSpacing: "0.05em"
+  micro:
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    fontSize: "0.6875rem"
+    fontWeight: 600
+    letterSpacing: "0.025em"
+  mono:
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
+    fontWeight: 600
 rounded:
+  xs: "0.25rem"
   sm: "0.5rem"
   md: "0.75rem"
   lg: "1rem"

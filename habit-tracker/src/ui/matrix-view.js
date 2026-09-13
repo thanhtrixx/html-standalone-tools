@@ -327,7 +327,7 @@
 
           <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200 dark:border-slate-800/80 rounded-3xl p-4 shadow-xl">
             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("perfect_days", {}, lang)}</span>
-            <span class="text-3xl font-black tabular-nums font-mono text-violet-600 dark:text-violet-400 mt-1 block">🌟 ${perfectDaysCount}</span>
+            <span class="text-3xl font-black tabular-nums font-mono text-amber-500 dark:text-amber-400 mt-1 block">🌟 ${perfectDaysCount}</span>
             <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">100% ${i18n.t("daily_progress", {}, lang)}</span>
           </div>
         </div>
