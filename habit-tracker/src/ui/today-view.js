@@ -130,12 +130,9 @@
       window.HabitApp &&
       window.HabitApp.runningTimerHabitId === habit.id;
 
-    const isExpanded =
-      expandedHabits.has(habit.id) || isRunning;
+    const isExpanded = expandedHabits.has(habit.id) || isRunning;
 
-    const checkBg = isCompleted
-      ? `style="background-color: ${colorHex};"`
-      : "";
+    const checkBg = isCompleted ? `style="background-color: ${colorHex};"` : "";
     const checkIcon = isCompleted ? "✓" : "";
 
     // 1-Tap Checkbox for ALL habits

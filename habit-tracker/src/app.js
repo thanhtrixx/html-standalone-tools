@@ -1163,8 +1163,7 @@
           closeIdentityWizard();
         }
       } else if (action === "wizard-finish") {
-        const kitId =
-          target.getAttribute("data-kit-id") || wizardSelectedKitId;
+        const kitId = target.getAttribute("data-kit-id") || wizardSelectedKitId;
         if (kitId && store) {
           const lang =
             (store.getSettings() && store.getSettings().language) || "vi";
@@ -1579,7 +1578,9 @@
     }
 
     // 5. Detail sheet ticker
-    const detailTicker = document.getElementById(`detail-timer-ticker-${habitId}`);
+    const detailTicker = document.getElementById(
+      `detail-timer-ticker-${habitId}`
+    );
     if (detailTicker) {
       detailTicker.textContent = durationFormatted;
     }
@@ -1656,8 +1657,7 @@
     renderActiveTab();
     refreshDetailSheetIfOpen(habitId, targetDate);
 
-    const lang =
-      (store.getSettings() && store.getSettings().language) || "vi";
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
     showToast(
       `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
       "success"
@@ -1717,7 +1717,9 @@
     // Throttled IndexedDB persistence: flush every 10 seconds
     if (now - lastTimerPersistedAt >= 10000) {
       lastTimerPersistedAt = now;
-      store.logHabit(runningTimerHabitId, targetDate, nextSeconds).catch(() => {});
+      store
+        .logHabit(runningTimerHabitId, targetDate, nextSeconds)
+        .catch(() => {});
     }
 
     // Auto complete if target reached
