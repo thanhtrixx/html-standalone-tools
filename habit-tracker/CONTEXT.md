@@ -62,13 +62,15 @@ The application organizes daily execution, deep analytics, habit catalog managem
 
 ---
 
-### 4. Reactive Timer Architecture (PWA-Timer Standard)
+### 4. Reactive Timer Architecture (PWA-Timer Standard) & Focus Session Mode
 
-- **Inline Web Worker**: Executes timer ticks on a background thread to prevent UI thread jitter and tab throttling.
+- **Inline Web Worker & Fallback**: Executes timer ticks on a background thread with CSP-compliant `worker-src 'self' blob:;` policy and instantaneous fallback to `setInterval` if worker creation is blocked.
 - **Exact Timestamp Delta**: Calculates elapsed duration using `Math.floor((Date.now() - startedAt) / 1000)` ensuring 100% time accuracy across phone lock, app switching, and tab suspension.
-- **Reactive DOM Ticker**: Directly updates the card duration label and header pill on each tick without executing heavy disk I/O.
+- **Hybrid Countdown with Overtime Logging**: Counts down from target duration (e.g. 20:00 ➔ 00:00). When target is reached, triggers completion chime and celebratory confetti, then continues counting up (+00:01, +00:02...) to record full overtime focus sessions.
+- **Immersive Focus Timer Modal**: A dedicated distraction-free modal (`#focus-timer-modal-overlay`) featuring a large circular SVG progress dial, remaining/elapsed time display, play/pause/reset controls, quick time steppers (`+1m`, `+5m`), and ambient domain glow.
+- **Reactive DOM Ticker**: Directly updates card duration, header pill, and focus modal without heavy disk I/O.
 - **Throttled IndexedDB Flush**: Writes timer logs to IndexedDB periodically (every 10s, on pause, on target completion, and on `visibilitychange`/`pagehide`).
-- **Screen Wake Lock & Web Audio**: Holds screen wake lock while ticking and sounds harmonic chime upon reaching target duration.
+- **Screen Wake Lock & Web Audio**: Holds screen wake lock while ticking and sounds harmonic sine chime upon reaching target duration.
 
 ---
 
@@ -87,9 +89,13 @@ The application organizes daily execution, deep analytics, habit catalog managem
 
 ---
 
-### 6. Interaction Ergonomics & PWA Invariants
+### 6. Interaction Ergonomics, Modal Hierarchy & PWA Invariants
 
-- **Sleek Top Header**: Stripped of sub-header clutter; carries title, ambient running timer pill, freeze token counter badge, and language toggle.
-- **Clean 4-Tab Bottom Dock**: Ergonomic thumb access to `Today`, `Insights`, `Habits`, and `Settings` with safe-bottom insets for modern mobile viewports.
+- **Sleek Top Header**: Stripped of sub-header clutter and taglines; carries title, ambient running timer pill, freeze token counter badge, and language toggle.
+- **Clean 4-Tab Bottom Dock**: Ergonomic thumb access to `Today`, `Insights`, `Habits`, and `Settings` without floating button obstructions.
+- **Dual Empty-State Gateway**: Both `Today` and `Habits` tabs offer prominent dual CTAs when empty: Primary `✨ Identity Setup Wizard` and Secondary `+ Add Habit`.
+- **Post-Wipe Auto-Onboarding**: Factory Wipe automatically routes to Today and presents the Identity Setup Wizard modal.
+- **Modal Stacking Hierarchy**: Enforces strict z-index layering (`Detail Sheet` at `z-50`, `Edit Modal` at `z-60`, `Focus Timer` at `z-60`) ensuring nested actions (e.g. Details ➔ Edit Habit) render properly without clipping.
 - **Local-First Zero-Backend Persistence**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
 - **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage.
+

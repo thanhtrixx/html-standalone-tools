@@ -63,7 +63,23 @@ tests/
   - Renders 3-step setup modal for first-time users or empty state.
   - Displays life domain summary cards and starter kits within the `habits` tab.
 
-### 4. Bilingual Parity & Accessibility (`tests/habit-tracker-i18n.test.js`)
+### 5. Focus Timer Engine, Empty States & Modal Hierarchy (`tests/habit-tracker-ui-components.test.js`)
 
-- [x] 100% dictionary parity between Vietnamese (`vi`) and English (`en`) for all navigation tabs, modalities, and actions.
-- [x] Minimum 44px touch targets on mobile for all interactive buttons and checkboxes.
+- [ ] **CSP Compliance & Timer Worker Resilience**:
+  - `startTimerTicker()` initializes Web Worker when supported or cleanly falls back to `setInterval` without throwing uncaught exceptions.
+  - Sub-second DOM ticker accurately reflects elapsed duration calculated from timestamp deltas.
+  - Screen Wake Lock API is invoked on timer start and released on stop/pause/reset.
+- [ ] **Immersive Focus Timer Modal**:
+  - `#focus-timer-modal-overlay` opens on ambient header/dock pill click or card timer tap.
+  - Renders large circular progress ring with reactive stroke dashoffset and hybrid countdown/overtime display.
+  - Quick time adjustment steppers (`+1m`, `+5m`, `-1m`) mutate the target/duration reactively.
+  - Web Audio sine harmonic chime is synthesized upon reaching 100% completion.
+- [ ] **Dual Empty-State Gateway & Factory Wipe Automation**:
+  - Empty `Today` view displays both `✨ Identity Setup Wizard` and `+ Add Habit` buttons.
+  - Empty `Habits` catalog view displays both `✨ Identity Setup Wizard` and `+ Add Habit` buttons.
+  - Calling `confirmFactoryWipe()` wipes database, redirects to `Today`, and auto-launches the 3-step Identity Setup Wizard modal.
+- [ ] **Shell Decluttering & Modal Layering Invariants**:
+  - `#floating-quick-add-btn` is completely absent from the DOM.
+  - Top header is free of the subtitle `Obsidian Glow • Offline-First`.
+  - `#habit-edit-modal-overlay` has `z-index >= 60` and displays above `#detail-sheet-overlay` (`z-50`) without z-index collisions.
+
