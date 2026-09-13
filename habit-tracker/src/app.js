@@ -55,6 +55,11 @@
       ? require("./ui/manager-view.js")
       : global.HabitManagerView;
 
+  const identityView =
+    typeof require !== "undefined"
+      ? require("./ui/identity-view.js")
+      : global.HabitIdentityView;
+
   const detailSheet =
     typeof require !== "undefined"
       ? require("./ui/detail-sheet.js")
@@ -519,7 +524,10 @@
       renderFn(store, container, lang);
       bindHeatmapInteractions();
     } else if (activeTab === "manager" || activeTab === "identity") {
-      managerView.renderManagerView(store, container, lang);
+      const renderFn =
+        (identityView && identityView.renderIdentityView) ||
+        (managerView && managerView.renderManagerView);
+      renderFn(store, container, lang);
     } else if (activeTab === "settings") {
       renderSettingsTab(container, lang);
     }
@@ -1067,6 +1075,20 @@
             app.switchTab("today");
           } else {
             activeTab = "today";
+            renderApp();
+          }
+        }
+      } else if (action === "apply-starter-kit") {
+        const kitId = target.getAttribute("data-kit-id");
+        if (kitId) {
+          const app =
+            (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+          if (app && typeof app.applyStarterKit === "function") {
+            await app.applyStarterKit(kitId);
+          } else if (store) {
+            const lang = (store.getSettings() && store.getSettings().language) || "vi";
+            await store.applyStarterKit(kitId, lang);
+            showToast(i18n.t("starter_kit_applied_toast", {}, lang), "success");
             renderApp();
           }
         }
@@ -2226,6 +2248,16 @@
     },
     switchLens(lens) {
       this.switchTab(lens);
+    },
+    async applyStarterKit(kitId) {
+      if (!store) return [];
+      const lang = (store.getSettings() && store.getSettings().language) || "vi";
+      const created = await store.applyStarterKit(kitId, lang);
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      notify(i18n.t("starter_kit_applied_toast", {}, lang), "success");
+      renderApp();
+      return created;
     },
     switchLanguage(lang) {
       if (store) {

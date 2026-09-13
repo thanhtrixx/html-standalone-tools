@@ -4958,6 +4958,37 @@ async function runUITests() {
         matrixContentEl.innerHTML.includes("Day of Week Consistency")),
     "[Issue #479 AC-3] Matrix view renders 0-baseline day-of-week adherence chart"
   );
+
+  // ----------------------------------------------------
+  // Issue #480: Identity & Life Domains Lens + Starter Kits Verification
+  // ----------------------------------------------------
+  const { sandbox: identitySandbox } = createHabitTrackerSandbox();
+  await identitySandbox.HabitApp.init();
+
+  // Switch to identity lens
+  identitySandbox.HabitApp.switchLens("identity");
+  const identityContentEl = identitySandbox.document.getElementById("main-content");
+  assert(
+    identityContentEl && identityContentEl.innerHTML.includes("identity-view"),
+    "[Issue #480 AC-1] Switching to identity lens renders .identity-view container"
+  );
+  assert(
+    identityContentEl && identityContentEl.innerHTML.includes("life-domain-card"),
+    "[Issue #480 AC-1] Identity view renders Life Domain cards with neon glow"
+  );
+  assert(
+    identityContentEl && identityContentEl.innerHTML.includes("starter-kit-card"),
+    "[Issue #480 AC-2] Identity view renders 1-Click Starter Kit cards"
+  );
+
+  // Apply Starter Kit
+  const initialCount = identitySandbox.HabitApp.store.getHabits().length;
+  await identitySandbox.HabitApp.applyStarterKit("morning_mastery");
+  const newCount = identitySandbox.HabitApp.store.getHabits().length;
+  assert(
+    newCount > initialCount,
+    "[Issue #480 AC-2] Applying starter kit adds new habits to the store"
+  );
 }
 
 runUITests()
