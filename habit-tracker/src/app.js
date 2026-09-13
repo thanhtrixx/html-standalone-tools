@@ -949,6 +949,18 @@
 
       if (action === "toggle-habit") {
         await handleToggleHabit(habitId, activeDate);
+      } else if (action === "toggle-expand") {
+        if (todayView && typeof todayView.toggleHabitExpanded === "function") {
+          todayView.toggleHabitExpanded(habitId);
+          const panel = document.getElementById(`habit-expand-${habitId}`);
+          const chevron = document.getElementById(`chevron-${habitId}`);
+          if (panel) {
+            panel.classList.toggle("hidden");
+          }
+          if (chevron) {
+            chevron.classList.toggle("rotate-180");
+          }
+        }
       } else if (action === "step-increment") {
         await handleStepIncrement(habitId, activeDate);
       } else if (action === "step-decrement") {
