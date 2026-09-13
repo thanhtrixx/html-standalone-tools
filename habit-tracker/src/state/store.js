@@ -151,6 +151,7 @@
         step: Number(habitData.step) || 1,
         routines: assignedRoutines,
         routine: assignedRoutines[0],
+        domain: habitData.domain || "health",
         scheduleType: habitData.scheduleType || engine.SCHEDULE_TYPES.DAILY,
         scheduleDays: habitData.scheduleDays || [0, 1, 2, 3, 4, 5, 6],
         intervalDays: habitData.intervalDays || 1,
@@ -170,6 +171,26 @@
       this.state.habits.push(newHabit);
       this.notify("habit_added", newHabit);
       return newHabit;
+    }
+
+    async applyStarterKit(kitId, lang = "vi") {
+      const kit = engine.STARTER_KITS.find((k) => k.id === kitId);
+      if (!kit || !Array.isArray(kit.habits)) return [];
+
+      const created = [];
+      for (const hData of kit.habits) {
+        const name =
+          lang === "vi" && hData.nameVi
+            ? hData.nameVi
+            : hData.nameEn || hData.name;
+        const habit = await this.addHabit({
+          ...hData,
+          name,
+        });
+        created.push(habit);
+      }
+      this.notify("starter_kit_applied", { kitId, created });
+      return created;
     }
 
     async updateHabit(id, updates) {

@@ -858,6 +858,38 @@ async function runStorageTests() {
     "morning",
     "[Issue #459 AC-4] Primary routine field updated to first entry of new routines"
   );
+
+  // ==========================================
+  // [Issue #475] Starter Kits & Domain Seeding
+  // ==========================================
+  console.log("--- [Issue #475] Starter Kits & Domain Seeding ---");
+
+  const starterStorage = createMockStorage();
+  const starterStore = new HabitStore({
+    storage: storageModule.createStorageAdapter({
+      fallbackStorage: starterStorage,
+      forceFallback: true,
+    }),
+  });
+  await starterStore.init();
+
+  const createdMorning = await starterStore.applyStarterKit(
+    "morning_mastery",
+    "vi"
+  );
+  assert(
+    Array.isArray(createdMorning) && createdMorning.length === 4,
+    "[Issue #475 AC-3] Morning Mastery starter kit created 4 habits"
+  );
+  assertEqual(
+    createdMorning[0].domain,
+    "health",
+    "[Issue #475 AC-3] First habit has health domain"
+  );
+  assert(
+    starterStore.getHabits().length >= 4,
+    "[Issue #475 AC-3] Store contains created starter habits"
+  );
 }
 
 runStorageTests()
