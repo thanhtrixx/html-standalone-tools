@@ -3793,13 +3793,18 @@ async function runUITests() {
       `${testTimerHabitId}_${timerToday}`
     ];
   assert(
-    completedLog && completedLog.value >= 4,
-    "[Issue #494 AC-5] Timer completes automatically when target duration is achieved"
+    completedLog && completedLog.value >= 4 && completedLog.completed === true,
+    "[Issue #494 AC-5] Timer marks habit completed when target duration is achieved"
   );
 
+  // Stop timer and verify wake lock released
+  await timerEngineSandbox.HabitApp.handleToggleTimer(
+    testTimerHabitId,
+    timerToday
+  );
   assert(
     wakeLockReleased,
-    "[Issue #494 AC-6] Screen Wake Lock is released upon timer completion"
+    "[Issue #494 AC-6] Screen Wake Lock is released upon timer stop"
   );
 
   // ==========================================
@@ -4331,10 +4336,13 @@ async function runUITests() {
       true,
       "[Issue #458 AC-3] Habit is marked completed"
     );
+
+    // Stop timer session
+    await timerSandbox458.HabitApp.handleToggleTimer(timerHabitId, testDate);
     assertEqual(
       timerSandbox458.HabitApp.runningTimerHabitId,
       null,
-      "[Issue #458 AC-3] Running timer state is reset upon auto-completion"
+      "[Issue #458 AC-3] Running timer state is reset upon stopping timer"
     );
   } finally {
     Date.now = realDateNow;
@@ -5442,6 +5450,109 @@ async function runUITests() {
     !stage1El.classList.contains("hidden"),
     "[Issue #504 AC-4] Returned to Stage 1 successfully"
   );
+
+  // ==========================================
+  // [Issue #507] Resilient CSP-compliant Timer Worker & Hybrid Overtime Engine
+  // ==========================================
+  console.log(
+    "\n--- [Issue #507] Resilient CSP-compliant Timer Worker & Hybrid Overtime Engine ---"
+  );
+
+  const { sandbox: timer507Sandbox } = createHabitTrackerSandbox();
+  await timer507Sandbox.HabitApp.init();
+
+  const testHabit507 = {
+    id: "h-timer-test-507",
+    name: "Focus Deep Work",
+    type: "timer",
+    targetValue: 10, // 10 seconds target
+    routine: "morning",
+    icon: "⚡",
+    domain: "craft",
+  };
+  await timer507Sandbox.HabitApp.store.addHabit(testHabit507);
+  const date507 = timer507Sandbox.HabitApp.store.getActiveDate();
+
+  // 1. CSP Invariant Test
+  const fs = require("fs");
+  const path = require("path");
+  const indexHtmlPath = path.join(__dirname, "../habit-tracker/index.html");
+  const indexHtmlContent = fs.readFileSync(indexHtmlPath, "utf8");
+  assert(
+    indexHtmlContent.includes("worker-src 'self' blob:;"),
+    "[Issue #507 AC-1] Content-Security-Policy includes worker-src 'self' blob:;"
+  );
+
+  // 2. Start Timer & Delta Calculation
+  const realNow507 = Date.now;
+  const startTimestamp507 = 1700000000000;
+  try {
+    Date.now = () => startTimestamp507;
+    await timer507Sandbox.HabitApp.handleToggleTimer(testHabit507.id, date507);
+    assertEqual(
+      timer507Sandbox.HabitApp.runningTimerHabitId,
+      testHabit507.id,
+      "[Issue #507 AC-2] Starting timer sets runningTimerHabitId"
+    );
+
+    // Advance by 5 seconds (interim)
+    Date.now = () => startTimestamp507 + 5000;
+    await timer507Sandbox.HabitApp.syncRunningTimer();
+    const interimLog507 =
+      timer507Sandbox.HabitApp.store.state.logs[`${testHabit507.id}_${date507}`];
+    assertEqual(
+      interimLog507.value,
+      5,
+      "[Issue #507 AC-3] Delta time calculates exactly 5s elapsed"
+    );
+    assertEqual(
+      interimLog507.completed,
+      false,
+      "[Issue #507 AC-3] Habit is not completed yet at 5s / 10s"
+    );
+
+    // Advance to 10 seconds (target reached)
+    Date.now = () => startTimestamp507 + 10000;
+    await timer507Sandbox.HabitApp.syncRunningTimer();
+    const targetLog507 =
+      timer507Sandbox.HabitApp.store.state.logs[`${testHabit507.id}_${date507}`];
+    assertEqual(
+      targetLog507.value,
+      10,
+      "[Issue #507 AC-4] Target duration 10s is reached"
+    );
+    assertEqual(
+      targetLog507.completed,
+      true,
+      "[Issue #507 AC-4] Habit is marked completed upon hitting target duration"
+    );
+    assertEqual(
+      timer507Sandbox.HabitApp.runningTimerHabitId,
+      testHabit507.id,
+      "[Issue #507 AC-4] Timer continues running for overtime focus logging"
+    );
+
+    // Advance to 15 seconds (5s overtime)
+    Date.now = () => startTimestamp507 + 15000;
+    await timer507Sandbox.HabitApp.syncRunningTimer();
+    const overtimeLog507 =
+      timer507Sandbox.HabitApp.store.state.logs[`${testHabit507.id}_${date507}`];
+    assertEqual(
+      overtimeLog507.value,
+      15,
+      "[Issue #507 AC-4] Overtime logging correctly accumulates 15s"
+    );
+
+    // Stop timer
+    await timer507Sandbox.HabitApp.handleToggleTimer(testHabit507.id, date507);
+    assertEqual(
+      timer507Sandbox.HabitApp.runningTimerHabitId,
+      null,
+      "[Issue #507 AC-5] Stopping timer clears runningTimerHabitId"
+    );
+  } finally {
+    Date.now = realNow507;
+  }
 
   polishSandbox.HabitApp.closeHabitModal();
 }
