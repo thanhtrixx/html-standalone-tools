@@ -87,6 +87,21 @@
     `;
   }
 
+  // Track expanded cards
+  const expandedHabits = new Set();
+
+  function toggleHabitExpanded(habitId) {
+    if (expandedHabits.has(habitId)) {
+      expandedHabits.delete(habitId);
+    } else {
+      expandedHabits.add(habitId);
+    }
+  }
+
+  function isHabitExpanded(habitId) {
+    return expandedHabits.has(habitId);
+  }
+
   /**
    * Helper to get color hex by theme pill name
    */
@@ -96,7 +111,7 @@
   }
 
   /**
-   * Renders single Habit Card component
+   * Renders single Habit Card component with Checkbox-First modality and in-place expansion
    */
   function renderHabitCard(
     habit,
@@ -109,111 +124,193 @@
     const colorHex = getColorHex(habit.color);
     const isCompleted = prog.isCompleted;
 
-    // Measurement controls
-    let controlHtml = "";
-
-    if (habit.type === engine.HABIT_TYPES.BINARY) {
-      const checkBg = isCompleted
-        ? `style="background-color: ${colorHex};"`
-        : "";
-      const checkIcon = isCompleted ? "✓" : "";
-      controlHtml = `
-        <button
-          type="button"
-          data-action="toggle-habit"
-          data-habit-id="${habit.id}"
-          aria-label="${i18n.t("completed", {}, lang)}"
-          class="w-11 h-11 rounded-full border-2 border-slate-300 dark:border-slate-600/60 flex items-center justify-center text-white font-bold text-lg transition-transform active:scale-90"
-          ${checkBg}
-        >
-          ${checkIcon}
-        </button>
-      `;
-    } else if (habit.type === engine.HABIT_TYPES.NUMERIC) {
-      const step = habit.step || 1;
-      const unit = habit.unit || "";
-      const currentVal = i18n.formatNumber(prog.loggedValue, lang);
-      const targetVal = i18n.formatNumber(habit.targetValue, lang);
-
-      controlHtml = `
-        <div class="flex items-center gap-2">
-          <button
-            type="button"
-            data-action="step-decrement"
-            data-habit-id="${habit.id}"
-            data-step="${step}"
-            aria-label="Decrease"
-            class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center font-bold text-base active:scale-95 border border-slate-200 dark:border-slate-700/50"
-          >
-            -
-          </button>
-          <div class="text-right min-w-[70px]">
-            <span class="text-sm font-bold tabular-nums font-mono ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${currentVal} / ${targetVal}</span>
-            <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${unit}</span>
-          </div>
-          <button
-            type="button"
-            data-action="step-increment"
-            data-habit-id="${habit.id}"
-            data-step="${step}"
-            aria-label="Increase"
-            class="w-8 h-8 rounded-lg text-white flex items-center justify-center font-bold text-base active:scale-95 shadow-sm"
-            style="background-color: ${colorHex};"
-          >
-            +
-          </button>
-        </div>
-      `;
-    } else if (habit.type === engine.HABIT_TYPES.TIMER) {
-      const isRunning =
-        typeof window !== "undefined" &&
-        window.HabitApp &&
-        window.HabitApp.runningTimerHabitId === habit.id;
-      const durationFormatted = i18n.formatDuration(prog.loggedValue, lang);
-      const targetDuration = i18n.formatDuration(habit.targetValue, lang);
-      const hasProgress = (prog.loggedValue || 0) > 0;
-
-      controlHtml = `
-        <div class="flex items-center gap-1.5">
-          ${
-            hasProgress
-              ? `
-            <button
-              type="button"
-              data-action="reset-timer"
-              data-habit-id="${habit.id}"
-              aria-label="${i18n.t("timer_reset", {}, lang)}"
-              class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-xs active:scale-95 border border-slate-200 dark:border-slate-700/50 transition cursor-pointer"
-            >
-              🔄
-            </button>
-          `
-              : ""
-          }
-          <div class="text-right min-w-[65px]">
-            <span class="text-sm font-mono tabular-nums font-bold ${isCompleted ? "text-emerald-500 dark:text-emerald-400" : isRunning ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"}">${durationFormatted}</span>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${targetDuration}</span>
-          </div>
-          <button
-            type="button"
-            data-action="toggle-timer"
-            data-habit-id="${habit.id}"
-            data-target="${habit.targetValue}"
-            aria-label="${isRunning ? i18n.t("timer_pause", {}, lang) : i18n.t("timer_start", {}, lang)}"
-            class="w-9 h-9 rounded-xl flex items-center justify-center text-white active:scale-95 shadow-sm transition-all cursor-pointer ${isRunning ? "animate-pulse ring-2 ring-emerald-400/50" : ""}"
-            style="background-color: ${colorHex};"
-          >
-            ${isCompleted ? "✓" : isRunning ? "⏸" : "▶"}
-          </button>
-        </div>
-      `;
-    }
-
     const isRunning =
       habit.type === engine.HABIT_TYPES.TIMER &&
       typeof window !== "undefined" &&
       window.HabitApp &&
       window.HabitApp.runningTimerHabitId === habit.id;
+
+    const isExpanded =
+      expandedHabits.has(habit.id) || isRunning;
+
+    const checkBg = isCompleted
+      ? `style="background-color: ${colorHex};"`
+      : "";
+    const checkIcon = isCompleted ? "✓" : "";
+
+    // 1-Tap Checkbox for ALL habits
+    const checkboxHtml = `
+      <button
+        type="button"
+        data-action="toggle-habit"
+        data-habit-id="${habit.id}"
+        aria-label="${i18n.t("completed", {}, lang)}"
+        class="w-10 h-10 rounded-full border-2 ${
+          isCompleted
+            ? "border-transparent shadow-md ring-2 ring-white/20"
+            : "border-slate-300 dark:border-slate-600/60 hover:border-emerald-500/60 bg-slate-50/50 dark:bg-slate-800/40"
+        } flex items-center justify-center text-white font-bold text-base transition-all duration-200 active:scale-90 cursor-pointer shrink-0"
+        ${checkBg}
+      >
+        ${checkIcon}
+      </button>
+    `;
+
+    // Subtitle progress indicator & inline expansion panel
+    let progressSubtitle = "";
+    let expandPanelHtml = "";
+
+    if (habit.type === engine.HABIT_TYPES.NUMERIC) {
+      const step = habit.step || 1;
+      const unit = habit.unit || "";
+      const currentVal = i18n.formatNumber(prog.loggedValue, lang);
+      const targetVal = i18n.formatNumber(habit.targetValue, lang);
+
+      progressSubtitle = `
+        <div class="inline-flex items-center gap-1 text-xs ${
+          isCompleted
+            ? "text-emerald-500 dark:text-emerald-400"
+            : "text-slate-600 dark:text-slate-300"
+        }">
+          <span class="tabular-nums font-mono font-bold">${currentVal} / ${targetVal}</span>
+          <span class="text-[11px] text-slate-500 dark:text-slate-400">${unit}</span>
+        </div>
+      `;
+
+      expandPanelHtml = `
+        <div id="habit-expand-${habit.id}" class="habit-expand-panel ${
+          isExpanded ? "" : "hidden"
+        } mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              data-action="step-decrement"
+              data-habit-id="${habit.id}"
+              data-step="${step}"
+              aria-label="Decrease"
+              class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 flex items-center justify-center font-bold text-base border border-slate-200 dark:border-slate-700/50 cursor-pointer"
+            >
+              -
+            </button>
+            <div class="text-center min-w-[70px]">
+              <span class="text-sm font-bold tabular-nums font-mono ${
+                isCompleted
+                  ? "text-emerald-500 dark:text-emerald-400"
+                  : "text-slate-900 dark:text-white"
+              }">${currentVal} / ${targetVal}</span>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${unit}</span>
+            </div>
+            <button
+              type="button"
+              data-action="step-increment"
+              data-habit-id="${habit.id}"
+              data-step="${step}"
+              aria-label="Increase"
+              class="w-8 h-8 rounded-lg text-white active:scale-95 flex items-center justify-center font-bold text-base shadow-sm cursor-pointer"
+              style="background-color: ${colorHex};"
+            >
+              +
+            </button>
+          </div>
+
+          <button
+            type="button"
+            data-action="open-detail"
+            data-habit-id="${habit.id}"
+            class="text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium py-1 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/40 cursor-pointer"
+          >
+            ${lang === "vi" ? "Chi tiết" : "Details"} ➔
+          </button>
+        </div>
+      `;
+    } else if (habit.type === engine.HABIT_TYPES.TIMER) {
+      const durationFormatted = i18n.formatDuration(prog.loggedValue, lang);
+      const targetDuration = i18n.formatDuration(habit.targetValue, lang);
+      const hasProgress = (prog.loggedValue || 0) > 0;
+
+      progressSubtitle = `
+        <div class="inline-flex items-center gap-1 text-xs ${
+          isCompleted
+            ? "text-emerald-500 dark:text-emerald-400"
+            : isRunning
+              ? "text-emerald-500 dark:text-emerald-400 animate-pulse"
+              : "text-slate-600 dark:text-slate-300"
+        }">
+          <span>⏱️</span>
+          <span id="card-sub-ticker-${habit.id}" class="tabular-nums font-mono font-bold">${durationFormatted}</span>
+          <span class="text-slate-400 font-normal">/ ${targetDuration}</span>
+        </div>
+      `;
+
+      expandPanelHtml = `
+        <div id="habit-expand-${habit.id}" class="habit-expand-panel ${
+          isExpanded ? "" : "hidden"
+        } mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            ${
+              hasProgress
+                ? `
+              <button
+                type="button"
+                data-action="reset-timer"
+                data-habit-id="${habit.id}"
+                aria-label="${i18n.t("timer_reset", {}, lang)}"
+                class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 active:scale-95 flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700/50 cursor-pointer"
+              >
+                🔄
+              </button>
+            `
+                : ""
+            }
+            <button
+              type="button"
+              data-action="toggle-timer"
+              data-habit-id="${habit.id}"
+              data-target="${habit.targetValue}"
+              aria-label="${
+                isRunning
+                  ? i18n.t("timer_pause", {}, lang)
+                  : i18n.t("timer_start", {}, lang)
+              }"
+              class="h-8 px-3 rounded-lg flex items-center justify-center gap-1.5 text-white active:scale-95 text-xs font-bold shadow-sm transition-all cursor-pointer ${
+                isRunning ? "animate-pulse ring-2 ring-emerald-400/50" : ""
+              }"
+              style="background-color: ${colorHex};"
+            >
+              <span>${isRunning ? "⏸" : "▶"}</span>
+              <span>${
+                isRunning
+                  ? i18n.t("timer_pause", {}, lang)
+                  : i18n.t("timer_start", {}, lang)
+              }</span>
+            </button>
+            <div class="text-left pl-1">
+              <span id="card-timer-ticker-${habit.id}" class="text-sm font-mono tabular-nums font-bold ${
+                isCompleted
+                  ? "text-emerald-500 dark:text-emerald-400"
+                  : isRunning
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-slate-900 dark:text-white"
+              }">${durationFormatted}</span>
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">/ ${targetDuration}</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            data-action="open-detail"
+            data-habit-id="${habit.id}"
+            class="text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium py-1 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/40 cursor-pointer"
+          >
+            ${lang === "vi" ? "Chi tiết" : "Details"} ➔
+          </button>
+        </div>
+      `;
+    }
+
+    const hasExpandable =
+      habit.type === engine.HABIT_TYPES.NUMERIC ||
+      habit.type === engine.HABIT_TYPES.TIMER;
 
     const completedCardStyle = isCompleted
       ? "opacity-85 border-emerald-500/30 dark:border-emerald-500/20"
@@ -223,15 +320,26 @@
 
     const noteIndicator =
       logEntry && logEntry.notes
-        ? `<span class="inline-flex items-center text-[10px] text-slate-500 dark:text-slate-400 mt-1"><span class="mr-1">📝</span>${logEntry.notes.slice(0, 24)}${logEntry.notes.length > 24 ? "..." : ""}</span>`
+        ? `<span class="inline-flex items-center text-[10px] text-slate-500 dark:text-slate-400 mt-0.5"><span class="mr-1">📝</span>${logEntry.notes.slice(
+            0,
+            24
+          )}${logEntry.notes.length > 24 ? "..." : ""}</span>`
         : "";
+
+    const cardClickAction = hasExpandable ? "toggle-expand" : "open-detail";
+
+    const expandChevron = hasExpandable
+      ? `<i class="text-xs not-italic text-slate-400 dark:text-slate-500 transition-transform duration-200 ${
+          isExpanded ? "rotate-180" : ""
+        }" id="chevron-${habit.id}">▾</i>`
+      : "";
 
     return `
       <div
         id="habit-card-${habit.id}"
         data-habit-card="${habit.id}"
         data-habit-id="${habit.id}"
-        class="habit-card relative overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-4 mb-3 border ${completedCardStyle} transition-all duration-300 shadow-md touch-pan-y"
+        class="habit-card relative overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-3.5 mb-3 border ${completedCardStyle} transition-all duration-300 shadow-md touch-pan-y"
       >
         <!-- Swipe reveal zone (Green check) -->
         <div class="swipe-reveal-complete absolute inset-y-0 left-0 w-24 bg-emerald-500 text-white flex items-center justify-center font-bold text-lg opacity-0 -translate-x-full transition-all pointer-events-none">
@@ -239,25 +347,39 @@
         </div>
 
         <div class="flex items-center justify-between gap-3 relative z-10">
-          <div class="flex items-center gap-3 cursor-pointer select-none flex-1" data-action="open-detail" data-habit-id="${habit.id}">
-            <div class="w-1.5 h-10 rounded-full" style="background-color: ${colorHex};"></div>
-            <div class="text-2xl">${habit.icon || "🎯"}</div>
-            <div>
-              <h4 class="font-semibold text-slate-900 dark:text-white text-base ${isCompleted ? "line-through text-slate-400 dark:text-slate-500" : ""}">${habit.name}</h4>
-              <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <div
+            class="flex items-center gap-3 cursor-pointer select-none flex-1 min-w-0"
+            data-action="${cardClickAction}"
+            data-habit-id="${habit.id}"
+          >
+            <div class="w-1.5 h-10 rounded-full shrink-0" style="background-color: ${colorHex};"></div>
+            <div class="text-2xl shrink-0">${habit.icon || "🎯"}</div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <h4 class="font-semibold text-slate-900 dark:text-white text-sm truncate ${
+                  isCompleted
+                    ? "line-through text-slate-400 dark:text-slate-500"
+                    : ""
+                }">${habit.name}</h4>
+                ${expandChevron}
+              </div>
+              <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 <span>${engine
                   .getHabitRoutines(habit)
                   .map((r) => i18n.t(`routine_${r}`, {}, lang))
                   .join(", ")}</span>
+                ${progressSubtitle ? `&bull; ${progressSubtitle}` : ""}
               </div>
               ${noteIndicator}
             </div>
           </div>
 
-          <div class="flex items-center">
-            ${controlHtml}
+          <div class="flex items-center shrink-0">
+            ${checkboxHtml}
           </div>
         </div>
+
+        ${expandPanelHtml}
       </div>
     `;
   }
@@ -457,6 +579,8 @@
     renderTodayDashboard,
     triggerVictoryConfetti,
     getColorHex,
+    toggleHabitExpanded,
+    isHabitExpanded,
   };
 
   if (typeof module !== "undefined" && module.exports) {
