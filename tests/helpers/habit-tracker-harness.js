@@ -470,6 +470,9 @@ function createHabitTrackerSandbox(options = {}) {
     "backup-restore-overlay",
     "celebration-confetti-container",
     "delete-confirm-modal-overlay",
+    "reset-confirm-modal-overlay",
+    "focus-timer-modal-overlay",
+    "identity-wizard-modal-overlay",
     "header-active-timer-pill",
     "dock-active-timer-pill",
   ]);

@@ -98,30 +98,34 @@ This document specifies the technical requirements and vertical slice backlog fo
 ## ⏱️ Focus Timer Engine, Identity Wizard Gateway & Modal Layering (ADR-0008)
 
 ### Slice 1: Timer Engine Resilience & CSP Worker Repair
-- [ ] Update `index.html` Content-Security-Policy to include `worker-src 'self' blob:;` and ensure inline Web Worker creation is allowed.
-- [ ] Harden `startTimerTicker()` in `src/app.js` with foolproof fallback to `setInterval` if worker instantiation or message dispatch fails.
-- [ ] Implement timestamp delta calculation `Math.floor((Date.now() - startedAt) / 1000)` with sub-second DOM reactivity and zero dropped ticks across background tab sleep / lock screen.
-- [ ] Integrate Screen Wake Lock API (`navigator.wakeLock`) management: acquire on start, release on pause/stop/finish.
-- [ ] Web Audio harmonic sine chime and celebration confetti on reaching target duration with hybrid overtime count-up (+00:01, +00:02...).
+
+- [x] Update `index.html` Content-Security-Policy to include `worker-src 'self' blob:;` and ensure inline Web Worker creation is allowed.
+- [x] Harden `startTimerTicker()` in `src/app.js` with foolproof fallback to `setInterval` if worker instantiation or message dispatch fails.
+- [x] Implement timestamp delta calculation `Math.floor((Date.now() - startedAt) / 1000)` with sub-second DOM reactivity and zero dropped ticks across background tab sleep / lock screen.
+- [x] Integrate Screen Wake Lock API (`navigator.wakeLock`) management: acquire on start, release on pause/stop/finish.
+- [x] Web Audio harmonic sine chime and celebration confetti on reaching target duration with hybrid overtime count-up (+00:01, +00:02...).
 
 ### Slice 2: Immersive Focus Timer Modal & Ambient Controls
-- [ ] Add `#focus-timer-modal-overlay` container to `index.html` and implement `renderFocusTimerModal` in `src/ui/today-view.js` / `src/app.js`.
-- [ ] Large reactive SVG circular progress dial with remaining/elapsed countdown toggle.
-- [ ] Quick time adjuster buttons: `+1m`, `+5m`, `-1m` with instant target/time update.
-- [ ] Play, Pause, and Reset controls with domain glow background bloom and sound chime toggle.
-- [ ] Ambient header pill (`#header-active-timer-pill`) and dock pill (`#dock-active-timer-pill`) click action opens the Focus Timer modal.
+
+- [x] Add `#focus-timer-modal-overlay` container to `index.html` and implement `renderFocusTimerModal` in `src/ui/today-view.js` / `src/app.js`.
+- [x] Large reactive SVG circular progress dial with remaining/elapsed countdown toggle.
+- [x] Quick time adjuster buttons: `+1m`, `+5m`, `-1m` with instant target/time update.
+- [x] Play, Pause, and Reset controls with domain glow background bloom and sound chime toggle.
+- [x] Ambient header pill (`#header-active-timer-pill`) and dock pill (`#dock-active-timer-pill`) click action opens the Focus Timer modal.
 
 ### Slice 3: Empty State Gateway & Post-Wipe Wizard Auto-Launch
-- [ ] Enhance empty state on `Today` view when `habits.length === 0` to display dual CTAs: Primary `✨ Thiết lập Bản Sắc (3-Step Identity Wizard)` and Secondary `+ Thêm thói quen thủ công`.
-- [ ] Enhance empty state on `Habits` catalog view (`src/ui/manager-view.js` and `src/ui/identity-view.js`) when `habits.length === 0` with both Identity Wizard and Add Habit buttons.
-- [ ] Update `confirmFactoryWipe()` in `src/app.js` to clear data, navigate to `Today` tab, and immediately auto-launch the Identity Setup Wizard modal.
+
+- [x] Enhance empty state on `Today` view when `habits.length === 0` to display dual CTAs: Primary `✨ Thiết lập Bản Sắc (3-Step Identity Wizard)` and Secondary `+ Thêm thói quen thủ công`.
+- [x] Enhance empty state on `Habits` catalog view (`src/ui/manager-view.js` and `src/ui/identity-view.js`) when `habits.length === 0` with both Identity Wizard and Add Habit buttons.
+- [x] Update `confirmFactoryWipe()` in `src/app.js` to clear data, navigate to `Today` tab, and immediately auto-launch the Identity Setup Wizard modal.
 
 ### Slice 4: Shell Decluttering, Modal Layering Fix & Test Verification
-- [ ] Remove `#floating-quick-add-btn` from `index.html` and clean up unused code in `src/app.js`.
-- [ ] Remove subtitle `Obsidian Glow • Offline-First` from header in `index.html`.
-- [ ] Fix modal stacking hierarchy: elevate `#habit-edit-modal-overlay` and `#focus-timer-modal-overlay` to `z-[60]` so opening Edit Habit from within Detail Sheet (`z-50`) renders cleanly on top.
-- [ ] Update unit and UI component test suites in `tests/habit-tracker-ui-components.test.js` and `tests/habit-tracker-engine-math.test.js` to assert Focus Timer, empty state CTAs, and modal z-index invariants.
-- [ ] Ensure 100% assertions pass on `npm run test:habit` and `npm run verify`.
+
+- [x] Remove `#floating-quick-add-btn` from `index.html` and clean up unused code in `src/app.js`.
+- [x] Remove subtitle `Obsidian Glow • Offline-First` from header in `index.html`.
+- [x] Fix modal stacking hierarchy: elevate `#habit-edit-modal-overlay` and `#focus-timer-modal-overlay` to `z-[60]` so opening Edit Habit from within Detail Sheet (`z-50`) renders cleanly on top.
+- [x] Update unit and UI component test suites in `tests/habit-tracker-ui-components.test.js` and `tests/habit-tracker-engine-math.test.js` to assert Focus Timer, empty state CTAs, and modal z-index invariants.
+- [x] Ensure 100% assertions pass on `npm run test:habit` and `npm run verify`.
 
 ---
 
@@ -130,4 +134,3 @@ This document specifies the technical requirements and vertical slice backlog fo
 - [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
 - [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
 - [x] Outer repository gate clean: `npm run verify`.
-

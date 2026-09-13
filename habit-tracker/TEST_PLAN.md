@@ -82,4 +82,3 @@ tests/
   - `#floating-quick-add-btn` is completely absent from the DOM.
   - Top header is free of the subtitle `Obsidian Glow • Offline-First`.
   - `#habit-edit-modal-overlay` has `z-index >= 60` and displays above `#detail-sheet-overlay` (`z-50`) without z-index collisions.
-

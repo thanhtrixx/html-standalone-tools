@@ -158,21 +158,29 @@
     const isWizardOpen =
       wizardModal && !wizardModal.classList.contains("hidden");
 
-    // Tier 1: Dismiss active overlays
-    if (
-      isFocusTimerOpen ||
-      isEditOpen ||
-      isDetailOpen ||
-      isDeleteOpen ||
-      isResetOpen ||
-      isWizardOpen
-    ) {
-      if (isFocusTimerOpen) closeFocusTimerModal();
-      if (isEditOpen) closeHabitModal();
-      if (isDetailOpen) closeDetailSheet();
-      if (isDeleteOpen) closeDeleteModal();
-      if (isResetOpen) closeResetModal();
-      if (isWizardOpen) closeIdentityWizard();
+    // Tier 1: Dismiss active overlays (top-most first)
+    if (isFocusTimerOpen) {
+      closeFocusTimerModal();
+      return;
+    }
+    if (isDeleteOpen) {
+      closeDeleteModal();
+      return;
+    }
+    if (isResetOpen) {
+      closeResetModal();
+      return;
+    }
+    if (isWizardOpen) {
+      closeIdentityWizard();
+      return;
+    }
+    if (isEditOpen) {
+      closeHabitModal();
+      return;
+    }
+    if (isDetailOpen) {
+      closeDetailSheet();
       return;
     }
 
@@ -970,9 +978,7 @@
     document.addEventListener("keydown", (e) => {
       // 1. Escape: Dismiss any active modal/sheet/popover
       if (e.key === "Escape") {
-        const focusModal = document.getElementById(
-          "focus-timer-modal-overlay"
-        );
+        const focusModal = document.getElementById("focus-timer-modal-overlay");
         const editModal = document.getElementById("habit-edit-modal-overlay");
         const detailSheetEl = document.getElementById("detail-sheet-overlay");
         const deleteModal = document.getElementById(
@@ -1851,7 +1857,8 @@
       if (modalRing) {
         const radius = 90;
         const circumference = 2 * Math.PI * radius; // 565.487
-        const ratio = targetSecs > 0 ? Math.min(1.0, currentSecs / targetSecs) : 1;
+        const ratio =
+          targetSecs > 0 ? Math.min(1.0, currentSecs / targetSecs) : 1;
         const strokeDashoffset = circumference * (1 - ratio);
         modalRing.setAttribute("stroke-dashoffset", strokeDashoffset);
       }
@@ -1860,9 +1867,17 @@
         const isRunning = runningTimerHabitId === habitId;
         modalPlayBtn.innerHTML = `<span class="text-base">${isRunning ? "⏸" : "▶"}</span><span>${isRunning ? i18n.t("focus_timer_pause", {}, lang) : i18n.t("focus_timer_start", {}, lang)}</span>`;
         if (isRunning) {
-          modalPlayBtn.classList.add("animate-pulse", "ring-4", "ring-emerald-500/20");
+          modalPlayBtn.classList.add(
+            "animate-pulse",
+            "ring-4",
+            "ring-emerald-500/20"
+          );
         } else {
-          modalPlayBtn.classList.remove("animate-pulse", "ring-4", "ring-emerald-500/20");
+          modalPlayBtn.classList.remove(
+            "animate-pulse",
+            "ring-4",
+            "ring-emerald-500/20"
+          );
         }
       }
     }
@@ -1883,7 +1898,8 @@
     const targetDate = runningTimerDate || store.getActiveDate();
 
     if (store.state && store.state.logs) {
-      const existing = store.state.logs[`${runningTimerHabitId}_${targetDate}`] || {};
+      const existing =
+        store.state.logs[`${runningTimerHabitId}_${targetDate}`] || {};
       const habit = store.getHabit(runningTimerHabitId);
       const isCompleted = habit ? totalSecs >= habit.targetValue : false;
       store.state.logs[`${runningTimerHabitId}_${targetDate}`] = {
@@ -1992,7 +2008,8 @@
 
     // In-memory update for instant synchronous access
     if (store.state && store.state.logs) {
-      const existing = store.state.logs[`${runningTimerHabitId}_${targetDate}`] || {};
+      const existing =
+        store.state.logs[`${runningTimerHabitId}_${targetDate}`] || {};
       store.state.logs[`${runningTimerHabitId}_${targetDate}`] = {
         ...existing,
         id: `${runningTimerHabitId}_${targetDate}`,
@@ -2046,7 +2063,10 @@
           syncRunningTimer(true);
         };
         timerWorker.onerror = (err) => {
-          console.warn("[TimerWorker] Worker runtime error, falling back to interval:", err);
+          console.warn(
+            "[TimerWorker] Worker runtime error, falling back to interval:",
+            err
+          );
           stopTimerTicker();
           timerInterval = setInterval(() => {
             syncRunningTimer(true);
@@ -2126,7 +2146,11 @@
           const prevLog = (store.state &&
             store.state.logs &&
             store.state.logs[`${prevHabitId}_${targetDate}`]) || { value: 0 };
-          updateTimerDom(prevHabitId, prevLog.value || 0, prevHabit.targetValue);
+          updateTimerDom(
+            prevHabitId,
+            prevLog.value || 0,
+            prevHabit.targetValue
+          );
         }
       }
     }
