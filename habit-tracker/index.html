@@ -199,66 +199,33 @@
           </button>
         </div>
       </div>
-
-      <!-- 4 Perspective Lenses Switcher -->
-      <div id="top-lens-switcher" class="max-w-lg mx-auto pt-2.5">
-        <div
-          class="grid grid-cols-4 p-1 rounded-2xl bg-slate-100/90 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md shadow-inner text-xs font-semibold"
-        >
-          <button
-            onclick="window.HabitApp.switchTab('today')"
-            data-lens="today"
-            id="lens-btn-today"
-            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20"
-          >
-            <span>🔥</span>
-            <span class="lens-label">Hôm nay</span>
-          </button>
-          <button
-            onclick="window.HabitApp.switchTab('timeline')"
-            data-lens="timeline"
-            id="lens-btn-timeline"
-            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-          >
-            <span>⏳</span>
-            <span class="lens-label">Lịch trình</span>
-          </button>
-          <button
-            onclick="window.HabitApp.switchTab('matrix')"
-            data-lens="matrix"
-            id="lens-btn-matrix"
-            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-          >
-            <span>📊</span>
-            <span class="lens-label">Ma trận</span>
-          </button>
-          <button
-            onclick="window.HabitApp.switchTab('identity')"
-            data-lens="identity"
-            id="lens-btn-identity"
-            class="lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
-          >
-            <span>🧬</span>
-            <span class="lens-label">Bản sắc</span>
-          </button>
-        </div>
-      </div>
     </header>
 
     <!-- Main View Container -->
     <main
       id="main-content"
-      class="flex-1 max-w-lg mx-auto w-full px-4 pt-4 pb-28"
+      class="flex-1 max-w-lg mx-auto w-full px-4 pt-4 pb-28 relative"
     >
       <!-- Dynamic tab views rendered here -->
     </main>
+
+    <!-- Floating Quick Add Button -->
+    <button
+      id="floating-quick-add-btn"
+      data-action="open-habit-modal"
+      onclick="window.HabitApp.openHabitModal()"
+      aria-label="Add Habit"
+      class="fixed bottom-20 right-4 sm:right-[max(1rem,calc(50vw-15rem))] z-30 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-bold text-2xl shadow-xl shadow-emerald-500/30 transition-transform active:scale-90 hover:scale-105 cursor-pointer ring-2 ring-white/20"
+    >
+      +
+    </button>
 
     <!-- Bottom Navigation Dock (Docked on Mobile) -->
     <nav
       class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800/90 safe-bottom"
     >
       <div
-        class="max-w-lg mx-auto flex items-center justify-around py-1.5 px-3 gap-1"
+        class="max-w-lg mx-auto flex items-center justify-around py-1.5 px-3 gap-2"
       >
         <button
           onclick="window.HabitApp.switchTab('today')"
@@ -285,21 +252,12 @@
         </button>
 
         <button
-          onclick="window.HabitApp.openHabitModal()"
-          id="nav-btn-quick-add"
-          aria-label="Add Habit"
-          class="flex items-center justify-center w-11 h-11 mx-1 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-bold text-2xl shadow-lg shadow-emerald-500/30 transition-transform active:scale-90 hover:scale-105"
-        >
-          +
-        </button>
-
-        <button
           onclick="window.HabitApp.switchTab('manager')"
           data-tab="manager"
           id="nav-tab-manager"
           class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-2xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium"
         >
-          <span class="text-xl">📋</span>
+          <span class="text-xl">🎯</span>
           <span class="nav-label text-[11px] leading-tight">Thói quen</span>
           <span class="nav-dot w-1 h-1 rounded-full bg-transparent"></span>
         </button>
