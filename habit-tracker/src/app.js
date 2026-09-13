@@ -2249,9 +2249,10 @@
     undoLastAction,
     switchTab(tab) {
       if (!tab) return;
-      if (tab !== activeTab) {
-        activeTab = tab;
-        pushNavigationState(tab, null);
+      const normalized = tab === "habits" ? "manager" : tab;
+      if (normalized !== activeTab) {
+        activeTab = normalized;
+        pushNavigationState(normalized, null);
       }
       renderApp();
     },

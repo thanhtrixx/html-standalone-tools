@@ -17,6 +17,7 @@
       today_tab: "Today",
       insights_tab: "Insights",
       manager_tab: "Habits",
+      habits_tab: "Habits",
       settings_tab: "Settings",
 
       // 4 Perspective Lenses
@@ -307,6 +308,7 @@
       today_tab: "Hôm nay",
       insights_tab: "Thống kê",
       manager_tab: "Thói quen",
+      habits_tab: "Thói quen",
       settings_tab: "Cài đặt",
 
       // 4 Perspective Lenses

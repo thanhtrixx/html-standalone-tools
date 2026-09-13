@@ -13,7 +13,7 @@ tests/
 ├── habit-tracker-engine-math.test.js        # Pure mathematical models (0% baseline, streaks, consistency, freeze tokens)
 ├── habit-tracker-storage-persistence.test.js # IndexedDB CRUD, fresh database seed, starter kits, JSON import/export
 ├── habit-tracker-cloud-sync.test.js          # Cloud backup encoding, Gist/Drive payloads
-├── habit-tracker-ui-components.test.js       # 4-Lens rendering, multi-modal cards, timer reactivity, drawer, starter kits
+├── habit-tracker-ui-components.test.js       # 4-Tab bottom dock, checkbox-first cards, inline expansions, reactive timer, identity wizard
 ├── habit-tracker-i18n.test.js                # Bilingual dictionary 100% key parity & formatters
 └── e2e/
     └── habit-tracker-devices.spec.js         # Playwright multi-device mobile (iPhone, Android) & desktop
@@ -36,33 +36,34 @@ tests/
 
 ### 2. Storage, Persistence & Starter Kits (`tests/habit-tracker-storage-persistence.test.js`)
 
-- [ ] **Starter Kits Seeding**:
+- [ ] **Starter Kits Seeding & Identity Setup**:
   - Seeds 4 curated starter packs (_Morning Mastery_, _Deep Focus_, _Vitality_, _Zen_).
 - [ ] **Data Vault JSON Backup & Safe Restore**:
   - `replaceState()` successfully restores complete state and updates in-memory cache without throwing exceptions.
 - [ ] **CSV Export**:
   - Produces valid UTF-8 formatted CSV rows with headers and habit log records.
 
-### 3. UI Components, 4-Lens Perspective & Multi-Modal Cards (`tests/habit-tracker-ui-components.test.js`)
+### 3. UI Components, 4-Tab Navigation & Checkbox-First Modality (`tests/habit-tracker-ui-components.test.js`)
 
-- [ ] **Top Lens Switcher**:
-  - Switching between `today`, `timeline`, `matrix`, and `identity` lenses renders the appropriate views and updates active pill tokens.
-- [ ] **Today Action Board**:
-  - Hero progress ring renders accurate completion percentage and momentum score.
-  - Domain filter pills filter cards by Health, Mind, Craft, and Discipline.
-  - Binary 1-tap checkbox toggles completion and updates daily progress.
-  - Stepper card `+` and `-` buttons accurately adjust logged values and custom units.
-  - Timer card provides live countdown ticking, Start/Pause, Reset, and triggers completion audio/haptics.
-- [ ] **Timeline & Routines Lens**:
-  - Renders circadian time-block streams (Morning, Afternoon, Evening, Bedtime) with completion counter badges.
-- [ ] **Matrix & Analytics Lens**:
-  - Renders 52-week activity heatmap, 0-baseline day-of-week adherence chart, and streak records.
-- [ ] **Identity & Life Domains Lens**:
-  - Renders domain summary cards and 1-click starter kit activation triggers.
-- [ ] **Habit Detail Drawer & Overlays**:
-  - Slide-over drawer displays habit heatmap, 30-day consistency score, and reflection notes log.
+- [ ] **4-Tab Bottom Dock Navigation**:
+  - Switching between `today`, `insights`, `habits`, and `settings` renders the respective views and updates active tab styling.
+  - Sub-header lens bar is removed; top header remains sleek and uncluttered.
+  - Redundant `+` button is removed from bottom dock.
+- [ ] **Checkbox-First Habit Cards**:
+  - All habit cards render a 1-tap checkbox.
+  - Binary habits toggle completed state on checkbox tap.
+  - Numeric & Timer habits log full target completion on checkbox tap.
+  - Tapping card body on Numeric/Timer habits expands inline drawer/accordion with steppers and live timer controls.
+- [ ] **Reactive Timer Execution**:
+  - Dispatches sub-second ticks via Web Worker delta calculation.
+  - Reactively updates DOM duration text, progress ring, and ambient header pill.
+  - Throttles IndexedDB writes to avoid disk saturation during active counting.
+  - Triggers completion chime and confetti upon reaching target duration.
+- [ ] **Identity Onboarding Wizard & Life Pillars in Habits**:
+  - Renders 3-step setup modal for first-time users or empty state.
+  - Displays life domain summary cards and starter kits within the `habits` tab.
 
 ### 4. Bilingual Parity & Accessibility (`tests/habit-tracker-i18n.test.js`)
 
-- [ ] 100% dictionary parity between Vietnamese (`vi`) and English (`en`).
-- [ ] WCAG 2.1 AA/AAA contrast ratios across Dark and Light themes.
+- [ ] 100% dictionary parity between Vietnamese (`vi`) and English (`en`) for all navigation tabs, modalities, and actions.
+- [ ] Minimum 44px touch targets on mobile for all interactive buttons and checkboxes.
