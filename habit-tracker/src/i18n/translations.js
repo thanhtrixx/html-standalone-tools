@@ -167,6 +167,7 @@
       cloud_not_connected: "Not configured",
       export_import_title: "Export & Import Data",
       export_json_btn: "Export JSON File",
+      export_csv_btn: "Export CSV File",
       import_json_btn: "Import JSON File",
       check_updates_btn: "Check for Updates",
       purge_cache_btn: "Purge Cache & Reload",
@@ -184,6 +185,7 @@
 
       // System Toasts & Dialogs
       toast_backup_exported: "Backup JSON file exported successfully!",
+      toast_csv_exported: "CSV data exported successfully!",
       toast_habit_deleted: "Habit deleted successfully",
       toast_notes_saved: "Journal note saved successfully!",
       toast_habit_archived: "Habit archived successfully",
@@ -456,6 +458,7 @@
       cloud_not_connected: "Chưa thiết lập",
       export_import_title: "Xuất & Nhập dữ liệu",
       export_json_btn: "Xuất tệp JSON",
+      export_csv_btn: "Xuất tệp CSV",
       import_json_btn: "Nhập tệp JSON",
       check_updates_btn: "Kiểm tra bản cập nhật",
       purge_cache_btn: "Xóa bộ nhớ đệm & Tải lại",
@@ -473,6 +476,7 @@
 
       // System Toasts & Dialogs
       toast_backup_exported: "Đã xuất tệp sao lưu JSON thành công!",
+      toast_csv_exported: "Đã xuất dữ liệu CSV thành công!",
       toast_habit_deleted: "Đã xóa thói quen",
       toast_notes_saved: "Đã lưu ghi chú nhật ký!",
       toast_habit_archived: "Đã lưu trữ thói quen",

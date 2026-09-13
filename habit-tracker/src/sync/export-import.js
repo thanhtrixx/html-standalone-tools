@@ -326,12 +326,114 @@
     };
   }
 
+  /**
+   * Converts habit logs and metadata into standardized UTF-8 CSV string
+   */
+  function exportToCsv(storeOrState) {
+    const payload = formatExportPayload(storeOrState);
+    const habitsMap = {};
+    (payload.data.habits || []).forEach((h) => {
+      habitsMap[h.id] = h;
+    });
+
+    const headers = [
+      "Date",
+      "Habit ID",
+      "Habit Name",
+      "Type",
+      "Domain",
+      "Routine",
+      "Target Value",
+      "Logged Value",
+      "Unit",
+      "Completed",
+      "Notes",
+    ];
+
+    const escapeCsv = (str) => {
+      if (str === null || str === undefined) return '""';
+      const val = String(str).replace(/"/g, '""');
+      return `"${val}"`;
+    };
+
+    const rows = [headers.map(escapeCsv).join(",")];
+
+    const logs = payload.data.logs || [];
+    const sortedLogs = [...logs].sort((a, b) =>
+      (b.date || "").localeCompare(a.date || "")
+    );
+
+    for (const log of sortedLogs) {
+      const habit = habitsMap[log.habitId] || {};
+      const row = [
+        escapeCsv(log.date || ""),
+        escapeCsv(log.habitId || ""),
+        escapeCsv(habit.name || log.habitId || ""),
+        escapeCsv(habit.type || "binary"),
+        escapeCsv(habit.domain || "health"),
+        escapeCsv(
+          (habit.routines && habit.routines.join("; ")) ||
+            habit.routine ||
+            "anytime"
+        ),
+        escapeCsv(habit.targetValue || 1),
+        escapeCsv(log.value !== undefined ? log.value : log.completed ? 1 : 0),
+        escapeCsv(habit.unit || ""),
+        escapeCsv(log.completed ? "TRUE" : "FALSE"),
+        escapeCsv(log.notes || ""),
+      ];
+      rows.push(row.join(","));
+    }
+
+    return rows.join("\r\n");
+  }
+
+  /**
+   * Triggers browser download of standardized CSV file with UTF-8 BOM
+   */
+  function downloadExportCSV(storeOrState, customFilename = null) {
+    const csvContent = exportToCsv(storeOrState);
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const filename =
+      customFilename || `atomic-habit-tracker-export-${dateStr}.csv`;
+
+    if (typeof document !== "undefined" && typeof Blob !== "undefined") {
+      const blob = new Blob(["\uFEFF" + csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
+      const url =
+        typeof URL !== "undefined" && URL.createObjectURL
+          ? URL.createObjectURL(blob)
+          : "";
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.style.display = "none";
+      if (document.body) {
+        document.body.appendChild(a);
+      }
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) {
+          a.parentNode.removeChild(a);
+        }
+        if (typeof URL !== "undefined" && URL.revokeObjectURL) {
+          URL.revokeObjectURL(url);
+        }
+      }, 500);
+    }
+
+    return { filename, content: csvContent };
+  }
+
   const exportImportExports = {
     APP_IDENTIFIER,
     SCHEMA_VERSION,
     exportToJson,
     formatExportPayload,
     downloadExportJSON,
+    exportToCsv,
+    downloadExportCSV,
     validateImportJson,
     parseAndValidateImport,
     mergeHabitStates,
