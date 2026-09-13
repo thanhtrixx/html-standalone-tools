@@ -2576,9 +2576,11 @@
     await store.factoryWipe();
     closeResetModal();
 
+    activeTab = "today";
     const lang = (store.getSettings() && store.getSettings().language) || "vi";
     showToast(i18n.t("toast_factory_wipe_success", {}, lang), "info");
     renderApp();
+    openIdentityWizard(1);
   }
 
   /**

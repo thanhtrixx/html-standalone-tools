@@ -97,6 +97,8 @@
         "All your scheduled habits for today are completed. Keep up the great momentum!",
       no_habits_scheduled_today: "No habits scheduled for this day.",
       add_first_habit: "Add your first habit",
+      empty_state_wizard_btn: "Identity Setup Wizard",
+      empty_state_manual_btn: "Add Habit",
 
       // Habit Detail Bottom Sheet
       habit_details: "Habit Deep-Dive",
@@ -438,6 +440,8 @@
       no_habits_scheduled_today:
         "Không có thói quen nào được lên lịch cho ngày này.",
       add_first_habit: "Thêm thói quen đầu tiên",
+      empty_state_wizard_btn: "Thiết lập Bản Sắc (Wizard)",
+      empty_state_manual_btn: "Thêm thói quen",
 
       // Habit Detail Bottom Sheet
       habit_details: "Chi tiết thói quen",

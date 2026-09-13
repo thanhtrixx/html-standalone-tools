@@ -174,7 +174,11 @@
     }
 
     async applyStarterKit(kitId, lang = "vi") {
-      const kit = engine.STARTER_KITS.find((k) => k.id === kitId);
+      const normalizedId = (kitId || "").replace(/-/g, "_");
+      const hyphenId = (kitId || "").replace(/_/g, "-");
+      const kit = engine.STARTER_KITS.find(
+        (k) => k.id === kitId || k.id === normalizedId || k.id === hyphenId
+      );
       if (!kit || !Array.isArray(kit.habits)) return [];
 
       const created = [];
