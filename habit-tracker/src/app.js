@@ -65,6 +65,11 @@
       ? require("./ui/insights-view.js")
       : global.HabitInsightsView;
 
+  const matrixView =
+    typeof require !== "undefined"
+      ? require("./ui/matrix-view.js")
+      : global.HabitMatrixView;
+
   const notifications =
     typeof require !== "undefined"
       ? require("./pwa/notifications.js")
@@ -508,7 +513,10 @@
       timelineView.renderTimelineView(store, container, lang);
       bindHabitCardGestures();
     } else if (activeTab === "insights" || activeTab === "matrix") {
-      insightsView.renderInsightsView(store, container, lang);
+      const renderFn =
+        (matrixView && matrixView.renderMatrixView) ||
+        (insightsView && insightsView.renderInsightsView);
+      renderFn(store, container, lang);
       bindHeatmapInteractions();
     } else if (activeTab === "manager" || activeTab === "identity") {
       managerView.renderManagerView(store, container, lang);

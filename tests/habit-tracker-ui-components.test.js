@@ -4930,6 +4930,34 @@ async function runUITests() {
     mainContentEl && mainContentEl.innerHTML.includes("timeline-block"),
     "[Issue #478 AC-4] switchLens('timeline') successfully activates and renders timeline stream"
   );
+
+  // ----------------------------------------------------
+  // Issue #479: Matrix & Analytics Lens Verification
+  // ----------------------------------------------------
+  const { sandbox: matrixSandbox } = createHabitTrackerSandbox();
+  await matrixSandbox.HabitApp.init();
+
+  // Switch to matrix lens
+  matrixSandbox.HabitApp.switchLens("matrix");
+  const matrixContentEl = matrixSandbox.document.getElementById("main-content");
+  assert(
+    matrixContentEl && matrixContentEl.innerHTML.includes("matrix-view"),
+    "[Issue #479 AC-1] Switching to matrix lens renders .matrix-view container"
+  );
+  assert(
+    matrixContentEl && matrixContentEl.innerHTML.includes("heatmap-container"),
+    "[Issue #479 AC-1] Matrix view renders 52-week activity heatmap"
+  );
+  assert(
+    matrixContentEl && matrixContentEl.innerHTML.includes("milestone-badge"),
+    "[Issue #479 AC-4] Matrix view renders streak milestone badges"
+  );
+  assert(
+    matrixContentEl &&
+      (matrixContentEl.innerHTML.includes("Độ kiên trì theo ngày") ||
+        matrixContentEl.innerHTML.includes("Day of Week Consistency")),
+    "[Issue #479 AC-3] Matrix view renders 0-baseline day-of-week adherence chart"
+  );
 }
 
 runUITests()
