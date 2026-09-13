@@ -42,11 +42,11 @@ const HABIT_BUNDLE_MODULES = [
   "src/ui/components.js",
   "src/ui/today-view.js",
   "src/ui/timeline-view.js",
+  "src/ui/manager-view.js",
+  "src/ui/detail-sheet.js",
   "src/ui/insights-view.js",
   "src/ui/matrix-view.js",
   "src/ui/identity-view.js",
-  "src/ui/manager-view.js",
-  "src/ui/detail-sheet.js",
   "src/pwa/notifications.js",
   "src/app.js",
 ];

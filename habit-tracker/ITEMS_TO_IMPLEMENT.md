@@ -46,3 +46,57 @@ This document specifies the technical requirements and vertical slice backlog fo
 - [x] Update `tests/habit-tracker-ui-components.test.js` to assert the 4-tab dock, checkbox-first card interactions, accordion expansions, reactive timer ticks, and identity onboarding wizard.
 - [x] Ensure 100% test pass on `npm run test:habit`.
 - [x] Verify zero regressions across `npm run verify`.
+
+---
+
+## 🎨 Impeccable Critique Remediation Roadmap (Issue #504)
+
+### Slice 1: Visual Polish & Obsidian Glow Token Homogenization
+
+- [x] Fix PWA update banner WCAG AA contrast (upgraded to 7.95:1 AAA with `text-slate-950 font-semibold` on `bg-emerald-500`).
+- [x] Eliminate `border-left: 4px solid ...` side-tab artifacts in `src/ui/identity-view.js` in favor of ambient glow/border rings.
+- [x] Harmonize KPI card heading colors with Obsidian Glow domain tokens (`amber-500` / emerald / cyan).
+- [x] Clean header branding: removed legacy PRO badge, elevated subtitle micro-typography to $\ge 11\text{px}$.
+- [x] Standardize `#0b0f19` dark canvas and frosted glassmorphism card surfaces.
+- [x] Interactive live polish: Country flag emoji language switcher (`🇻🇳` / `🇺🇸`) with instant 1-tap toggling and accessibility tooltips.
+- [x] Bottom navigation dock active tab indicator polish (clean luminous pill without dot icon artifacts).
+
+### Slice 2: Desktop Keyboard Ergonomics & Accessibility (P0)
+
+- [x] Global `Escape` key listener in `src/app.js` to dismiss all active modals/sheets (`#habit-edit-modal-overlay`, `#detail-sheet-overlay`, `#identity-wizard-overlay`, `#habit-delete-modal-overlay`).
+- [x] Focus trap and focus restoration for modal dialogs.
+- [x] Desktop hotkeys: `1-4` (tabs), `N` (new habit), `T` (jump to today).
+
+### Slice 3: Habits Tab IA & Card Action Decluttering (P1)
+
+- [x] Implement segmented sub-view switcher in `Habits` tab (`#habits-subview-switcher`):
+  - **Tab 1: `My Habits (Danh mục)`**: Displays routine clusters and active habit management cards.
+  - **Tab 2: `Identity & Starter Kits (Hệ giá trị & Gợi ý)`**: Displays 4 Life Domain identity rings and a compact horizontal starter kit carousel.
+- [x] Convert Starter Kits into a responsive horizontal scroll carousel with 1-click preview and install modal.
+- [x] Consolidate Manager Card action bar in `src/ui/manager-view.js`:
+  - Primary `✏️ Edit` button with high-contrast label and $\ge 40\text{px}$ touch target.
+  - Generous `▲` / `▼` priority reordering arrows ($\ge 40\text{px}$) with explicit `aria-label`s.
+  - Consolidated `••• More` action popover/menu containing `📦 Archive` and `🗑️ Delete` with safety guardrails.
+
+### Slice 4: Habit Creation Modal Progressive Disclosure (P1)
+
+- [x] Restructure Add/Edit Habit Modal (`#habit-edit-modal-overlay`) into 2-stage progressive disclosure:
+  - **Stage 1 (Basic Ritual)**: Habit Name, interactive Popover Emoji Trigger (`#habit-emoji-popover-trigger`), Measurement Type (Binary / Numeric / Timer), Target Value & Unit, and 1-tap "Save Immediately" (using sensible defaults) / "Next: Schedule" button.
+  - **Stage 2 (Schedule & Theme)**: Multi-routine selector, Weekday schedule chips, Domain color theme picker, Daily reminder time, and "Save Habit" button.
+- [x] Collapse 16-emoji grid into an interactive popover picker that opens upon clicking the emoji trigger button and auto-dismisses on emoji selection or outside click.
+- [x] Add full bilingual translation parity in `src/i18n/translations.js` for all stage tabs, picker buttons, and context menu actions.
+
+### Slice 5: Safety & Interaction Polish
+
+- [x] Add floating undo toast upon habit deletion (`undoDeleteHabit`).
+- [x] Increase light mode date ribbon border contrast to `#cbd5e1`.
+- [x] Dismiss heatmap cell tooltip on outside click.
+- [x] Manager View action buttons updated with touch dimensions $\ge 44\text{px}$ and explicit `aria-label`s.
+
+---
+
+## 🧪 Verification & DoD Gate
+
+- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [x] Outer repository gate clean: `npm run verify`.

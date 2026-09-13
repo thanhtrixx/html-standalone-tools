@@ -56,8 +56,8 @@
           : false;
 
         const activeClasses = isSelected
-          ? "date-pill-active bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400"
-          : "bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700/40";
+          ? "date-pill-active bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400"
+          : "bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 border border-slate-300 dark:border-slate-700/60 shadow-xs";
 
         const dotIndicator = isAllDone
           ? `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1"></span>`

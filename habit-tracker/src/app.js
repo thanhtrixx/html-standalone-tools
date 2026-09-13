@@ -97,6 +97,7 @@
   let wizardCurrentStep = 1;
   let wizardSelectedKitId = "morning-mastery";
   let pendingDeleteHabitId = null;
+  let habitsSubView = "catalog"; // 'catalog' | 'identity'
   let swipeStartX = 0;
   let swipeStartY = 0;
 
@@ -403,7 +404,13 @@
 
     const langToggleBtn = document.getElementById("lang-toggle-btn");
     if (langToggleBtn) {
-      langToggleBtn.textContent = lang === "vi" ? "VI" : "EN";
+      langToggleBtn.textContent = lang === "vi" ? "🇻🇳" : "🇺🇸";
+      const titleText =
+        lang === "vi"
+          ? "Ngôn ngữ: 🇻🇳 Tiếng Việt — Bấm để đổi sang 🇺🇸 English"
+          : "Language: 🇺🇸 English — Click to switch to 🇻🇳 Tiếng Việt";
+      langToggleBtn.title = titleText;
+      langToggleBtn.setAttribute("aria-label", titleText);
     }
   }
 
@@ -528,10 +535,17 @@
       renderFn(store, container, lang);
       bindHeatmapInteractions();
     } else if (activeTab === "manager" || activeTab === "identity") {
-      const renderFn =
-        (identityView && identityView.renderIdentityView) ||
-        (managerView && managerView.renderManagerView);
-      renderFn(store, container, lang);
+      if (
+        identityView &&
+        typeof identityView.renderIdentityView === "function"
+      ) {
+        identityView.renderIdentityView(store, container, lang, habitsSubView);
+      } else if (
+        managerView &&
+        typeof managerView.renderManagerView === "function"
+      ) {
+        managerView.renderManagerView(store, container, lang);
+      }
     } else if (activeTab === "settings") {
       renderSettingsTab(container, lang);
     }
@@ -929,6 +943,102 @@
    * Set up global event delegation
    */
   function setupEventListeners() {
+    // Global Keyboard Accessibility & Shortcuts
+    document.addEventListener("keydown", (e) => {
+      // 1. Escape: Dismiss any active modal/sheet/popover
+      if (e.key === "Escape") {
+        const editModal = document.getElementById("habit-edit-modal-overlay");
+        const detailSheetEl = document.getElementById("detail-sheet-overlay");
+        const deleteModal = document.getElementById(
+          "delete-confirm-modal-overlay"
+        );
+        const resetModal = document.getElementById(
+          "reset-confirm-modal-overlay"
+        );
+        const wizardModal = document.getElementById(
+          "identity-wizard-modal-overlay"
+        );
+        const popover = document.getElementById("heatmap-cell-popover");
+
+        if (popover && !popover.classList.contains("hidden")) {
+          popover.classList.add("hidden");
+        }
+        if (editModal && !editModal.classList.contains("hidden")) {
+          closeHabitModal();
+          return;
+        }
+        if (detailSheetEl && !detailSheetEl.classList.contains("hidden")) {
+          closeDetailSheet();
+          return;
+        }
+        if (deleteModal && !deleteModal.classList.contains("hidden")) {
+          closeDeleteModal();
+          return;
+        }
+        if (resetModal && !resetModal.classList.contains("hidden")) {
+          closeResetModal();
+          return;
+        }
+        if (wizardModal && !wizardModal.classList.contains("hidden")) {
+          closeIdentityWizard();
+          return;
+        }
+        return;
+      }
+
+      // Ignore accelerators if typing inside text fields
+      const activeTag = document.activeElement
+        ? document.activeElement.tagName.toLowerCase()
+        : "";
+      if (
+        activeTag === "input" ||
+        activeTag === "textarea" ||
+        activeTag === "select" ||
+        (document.activeElement && document.activeElement.isContentEditable)
+      ) {
+        return;
+      }
+
+      // Hotkeys (1-4: Switch Tabs)
+      if (e.key === "1") {
+        e.preventDefault();
+        HabitApp.switchTab("today");
+      } else if (e.key === "2") {
+        e.preventDefault();
+        HabitApp.switchTab("insights");
+      } else if (e.key === "3") {
+        e.preventDefault();
+        HabitApp.switchTab("manager");
+      } else if (e.key === "4") {
+        e.preventDefault();
+        HabitApp.switchTab("settings");
+      } else if (e.key === "n" || e.key === "N") {
+        // N: Add Habit
+        const editModal = document.getElementById("habit-edit-modal-overlay");
+        if (!editModal || editModal.classList.contains("hidden")) {
+          e.preventDefault();
+          handleOpenEditModal(null);
+        }
+      } else if (e.key === "t" || e.key === "T") {
+        // T: Jump to today
+        if (store) {
+          const todayStr = engine.toDateString(new Date());
+          store.setActiveDate(todayStr);
+        }
+      }
+    });
+
+    // Dismiss heatmap popover on outside click
+    document.addEventListener("click", (e) => {
+      const popover = document.getElementById("heatmap-cell-popover");
+      if (!popover || popover.classList.contains("hidden")) return;
+      const clickedCell = e.target.closest(".heatmap-cell");
+      const clickedPopover = e.target.closest("#heatmap-cell-popover");
+      if (!clickedCell && !clickedPopover) {
+        popover.classList.add("hidden");
+      }
+    });
+
     // Form submit interception
     document.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -963,6 +1073,23 @@
 
     // Global click delegation
     document.addEventListener("click", async (e) => {
+      // Outside click dismissal for context menus & emoji popovers
+      if (
+        !e.target.closest('[data-action="toggle-card-menu"]') &&
+        !e.target.closest(".card-context-menu")
+      ) {
+        document
+          .querySelectorAll(".card-context-menu")
+          .forEach((m) => m.classList.add("hidden"));
+      }
+      if (
+        !e.target.closest('[data-action="toggle-emoji-popover"]') &&
+        !e.target.closest("#habit-emoji-popover")
+      ) {
+        const popover = document.getElementById("habit-emoji-popover");
+        if (popover) popover.classList.add("hidden");
+      }
+
       const target = e.target.closest("[data-action]");
       if (!target) return;
 
@@ -972,6 +1099,32 @@
 
       if (action === "toggle-habit") {
         await handleToggleHabit(habitId, activeDate);
+      } else if (action === "switch-habits-subview") {
+        const subview = target.getAttribute("data-subview") || "catalog";
+        habitsSubView = subview;
+        renderActiveTab();
+      } else if (action === "toggle-card-menu") {
+        const menuId = `card-menu-${habitId}`;
+        const menu = document.getElementById(menuId);
+        const allMenus = document.querySelectorAll(".card-context-menu");
+        allMenus.forEach((m) => {
+          if (m !== menu) m.classList.add("hidden");
+        });
+        if (menu) {
+          menu.classList.toggle("hidden");
+        }
+      } else if (action === "toggle-emoji-popover") {
+        const popover = document.getElementById("habit-emoji-popover");
+        if (popover) {
+          popover.classList.toggle("hidden");
+        }
+      } else if (action === "modal-switch-stage") {
+        const stage = parseInt(target.getAttribute("data-stage") || "1", 10);
+        switchModalStage(stage);
+      } else if (action === "modal-next-stage") {
+        switchModalStage(2);
+      } else if (action === "modal-prev-stage") {
+        switchModalStage(1);
       } else if (action === "toggle-expand") {
         if (todayView && typeof todayView.toggleHabitExpanded === "function") {
           todayView.toggleHabitExpanded(habitId);
@@ -1082,6 +1235,16 @@
           if (iconInput) {
             iconInput.value = emoji;
           }
+          const currentEmojiDisplay = document.getElementById(
+            "current-emoji-display"
+          );
+          if (currentEmojiDisplay) {
+            currentEmojiDisplay.textContent = emoji;
+          }
+          const popover = document.getElementById("habit-emoji-popover");
+          if (popover) {
+            popover.classList.add("hidden");
+          }
           const allPresets = document.querySelectorAll(
             '[data-action="select-emoji"]'
           );
@@ -1103,6 +1266,14 @@
           await app.undoLastAction();
         } else {
           await undoLastAction();
+        }
+      } else if (action === "undo-delete-habit") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        if (app && typeof app.undoDeleteHabit === "function") {
+          await app.undoDeleteHabit();
+        } else {
+          await undoDeleteHabit();
         }
       } else if (action === "view-heatmap-date") {
         const targetDate = target.getAttribute("data-date");
@@ -2145,12 +2316,33 @@
     }
   }
 
+  let lastDeletedHabitData = null;
+
   /**
-   * Confirms habit deletion and purges historical check-in logs
+   * Confirms habit deletion and purges historical check-in logs with instant undo capability
    */
   async function confirmDeleteHabit() {
     if (!store || !pendingDeleteHabitId) return;
     const habitId = pendingDeleteHabitId;
+    const habit = store.getHabit(habitId);
+    if (!habit) {
+      closeDeleteModal();
+      return;
+    }
+
+    // Capture habit copy and associated logs for instant undo recovery
+    const logs = [];
+    if (store.state && store.state.logs) {
+      Object.keys(store.state.logs).forEach((key) => {
+        if (key.startsWith(`${habitId}_`)) {
+          logs.push(JSON.parse(JSON.stringify(store.state.logs[key])));
+        }
+      });
+    }
+    lastDeletedHabitData = {
+      habit: JSON.parse(JSON.stringify(habit)),
+      logs,
+    };
 
     if (runningTimerHabitId === habitId) {
       if (timerInterval) clearInterval(timerInterval);
@@ -2164,7 +2356,34 @@
     closeDeleteModal();
 
     const lang = (store.getSettings() && store.getSettings().language) || "vi";
-    showToast(i18n.t("toast_habit_deleted", {}, lang), "info");
+    showToast(i18n.t("toast_habit_deleted", {}, lang), "info", {
+      label: i18n.t("undo", {}, lang) || "Undo",
+      dataAction: "undo-delete-habit",
+    });
+    renderApp();
+  }
+
+  /**
+   * Restores the most recently deleted habit and its check-in history
+   */
+  async function undoDeleteHabit() {
+    if (!lastDeletedHabitData || !store) return;
+    const { habit, logs } = lastDeletedHabitData;
+    lastDeletedHabitData = null;
+
+    await store.addHabit(habit);
+    if (logs && logs.length > 0 && store.storage && store.storage.saveLog) {
+      for (const log of logs) {
+        store.state.logs[`${log.habitId}_${log.date}`] = log;
+        await store.storage.saveLog(log);
+      }
+    }
+
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+    showToast(
+      i18n.t("toast_habit_restored", {}, lang) || "Habit restored",
+      "success"
+    );
     renderApp();
   }
 
@@ -2339,6 +2558,39 @@
     const modalOverlay = document.getElementById("habit-edit-modal-overlay");
     if (modalOverlay) {
       modalOverlay.classList.add("hidden");
+    }
+  }
+
+  /**
+   * Switches Add/Edit Habit Modal between Stage 1 (Basic) and Stage 2 (Schedule & Styling)
+   */
+  function switchModalStage(stage = 1) {
+    const stage1 = document.getElementById("modal-stage-1");
+    const stage2 = document.getElementById("modal-stage-2");
+    const tab1 = document.getElementById("stage-tab-1");
+    const tab2 = document.getElementById("stage-tab-2");
+    if (stage === 1) {
+      if (stage1) stage1.classList.remove("hidden");
+      if (stage2) stage2.classList.add("hidden");
+      if (tab1) {
+        tab1.className =
+          "flex-1 py-1.5 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600";
+      }
+      if (tab2) {
+        tab2.className =
+          "flex-1 py-1.5 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+      }
+    } else {
+      if (stage1) stage1.classList.add("hidden");
+      if (stage2) stage2.classList.remove("hidden");
+      if (tab2) {
+        tab2.className =
+          "flex-1 py-1.5 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600";
+      }
+      if (tab1) {
+        tab1.className =
+          "flex-1 py-1.5 px-3 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+      }
     }
   }
 
@@ -2556,6 +2808,7 @@
     },
     showToast,
     undoLastAction,
+    undoDeleteHabit,
     switchTab(tab) {
       if (!tab) return;
       const normalized = tab === "habits" ? "manager" : tab;
@@ -2578,6 +2831,12 @@
       notify(i18n.t("starter_kit_applied_toast", {}, lang), "success");
       renderApp();
       return created;
+    },
+    toggleLanguage() {
+      const current =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const nextLang = current === "vi" ? "en" : "vi";
+      this.switchLanguage(nextLang);
     },
     switchLanguage(lang) {
       if (store) {
@@ -2816,6 +3075,7 @@
     promptDeleteHabit,
     closeDeleteModal,
     confirmDeleteHabit,
+    undoDeleteHabit,
     handleDeleteHabit,
     handleArchiveHabit: async (id) => {
       await store.archiveHabit(id);
@@ -2887,6 +3147,14 @@
     get activeTab() {
       return activeTab;
     },
+    get habitsSubView() {
+      return habitsSubView;
+    },
+    switchHabitsSubView: (subview) => {
+      habitsSubView = subview;
+      renderActiveTab();
+    },
+    switchModalStage,
     handlePopState,
     setupTabSwipeGestures,
   };

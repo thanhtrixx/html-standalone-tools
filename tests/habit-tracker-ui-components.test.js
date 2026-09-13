@@ -5221,6 +5221,229 @@ async function runUITests() {
     "h-test-vault",
     "[Issue #481 AC-3] replaceState loads correct habit record"
   );
+
+  // ==========================================
+  // [Issue #504] Impeccable Polish & Accessibility Tests
+  // ==========================================
+  console.log(
+    "\n🧪 [Issue #504] Testing Impeccable Polish & Accessibility Features..."
+  );
+  const { sandbox: polishSandbox } = createHabitTrackerSandbox();
+  await polishSandbox.HabitApp.init();
+
+  // Test 1: PWA Banner contrast and typography
+  const rawIndexHtml = getHtmlContent();
+  assert(
+    rawIndexHtml.includes("text-slate-950") &&
+      rawIndexHtml.includes("bg-emerald-500"),
+    "[Issue #504 AC-1] PWA update banner button uses high-contrast text-slate-950 on emerald-500"
+  );
+  assert(
+    rawIndexHtml.includes("text-[11px]"),
+    "[Issue #504 AC-1] Micro-typography uses >=11px font size"
+  );
+  assert(
+    rawIndexHtml.includes("Atomic Habits") &&
+      !rawIndexHtml.includes(">PRO</span>"),
+    "[Issue #504 AC-1] Clean header brand title without PRO badge"
+  );
+  assert(
+    rawIndexHtml.includes("🇻🇳"),
+    "[Issue #504 AC-1] Language switcher initializes with national flag emoji"
+  );
+  assert(
+    !rawIndexHtml.includes("border-left: 4px solid") &&
+      !rawIndexHtml.includes("border-left: 3px solid"),
+    "[Issue #504 AC-1] Side-tab border-left antipatterns are removed from UI templates"
+  );
+
+  // Test 2: Habit deletion and instant undo
+  const initialHabitCount = polishSandbox.HabitApp.store.getHabits().length;
+  const targetHabit = polishSandbox.HabitApp.store.getHabits()[0];
+  const targetHabitId = targetHabit.id;
+
+  // Confirm delete
+  polishSandbox.window.pendingDeleteHabitId = targetHabitId;
+  await polishSandbox.HabitApp.handleDeleteHabit(targetHabitId, true);
+  assertEqual(
+    polishSandbox.HabitApp.store.getHabits().length,
+    initialHabitCount - 1,
+    "[Issue #504 AC-5] Habit successfully deleted from store"
+  );
+
+  // Trigger undo delete
+  await polishSandbox.HabitApp.undoDeleteHabit();
+  assertEqual(
+    polishSandbox.HabitApp.store.getHabits().length,
+    initialHabitCount,
+    "[Issue #504 AC-5] Habit successfully restored via undoDeleteHabit"
+  );
+  assertEqual(
+    polishSandbox.HabitApp.store.getHabits().find((h) => h.id === targetHabitId)
+      ?.name,
+    targetHabit.name,
+    "[Issue #504 AC-5] Restored habit preserves exact metadata"
+  );
+
+  // Test 3: Tab Switching Hotkeys
+  polishSandbox.HabitApp.switchTab("insights");
+  assertEqual(
+    polishSandbox.HabitApp.activeTab,
+    "insights",
+    "[Issue #504 AC-2] Tab switches to insights"
+  );
+  polishSandbox.HabitApp.switchTab("today");
+  assertEqual(
+    polishSandbox.HabitApp.activeTab,
+    "today",
+    "[Issue #504 AC-2] Tab switches back to today"
+  );
+
+  // ----------------------------------------------------
+  // Issue #504 Slice 3: Habits Tab IA & Card Actions
+  // ----------------------------------------------------
+  console.log("\n--- [Issue #504 Slice 3] Habits Tab IA & Card Actions ---");
+  polishSandbox.HabitApp.switchTab("manager");
+  assertEqual(
+    polishSandbox.HabitApp.activeTab,
+    "manager",
+    "[Issue #504 AC-3] Active tab is manager/habits"
+  );
+
+  const subviewSwitcher = polishSandbox.document.getElementById(
+    "habits-subview-switcher"
+  );
+  assert(
+    !!subviewSwitcher,
+    "[Issue #504 AC-3] Habits tab renders segmented subview switcher"
+  );
+
+  const catalogSubView = polishSandbox.document.getElementById(
+    "habits-catalog-subview"
+  );
+  const identitySubView = polishSandbox.document.getElementById(
+    "habits-identity-subview"
+  );
+  assert(
+    !!catalogSubView && !!identitySubView,
+    "[Issue #504 AC-3] Habits tab provides isolated catalog and identity subviews"
+  );
+  assert(
+    !catalogSubView.classList.contains("hidden"),
+    "[Issue #504 AC-3] Default subview is catalog"
+  );
+
+  // Switch to identity subview
+  polishSandbox.HabitApp.switchHabitsSubView("identity");
+  assertEqual(
+    polishSandbox.HabitApp.habitsSubView,
+    "identity",
+    "[Issue #504 AC-3] Successfully switched to identity & starter kits subview"
+  );
+  const starterCarousel = polishSandbox.document.querySelector(
+    ".starter-kits-section"
+  );
+  assert(
+    !!starterCarousel,
+    "[Issue #504 AC-3] Identity subview renders Starter Kits section"
+  );
+
+  // Switch back to catalog subview
+  polishSandbox.HabitApp.switchHabitsSubView("catalog");
+  assertEqual(
+    polishSandbox.HabitApp.habitsSubView,
+    "catalog",
+    "[Issue #504 AC-3] Successfully switched back to catalog subview"
+  );
+
+  const managerCards = polishSandbox.document.querySelectorAll(
+    ".manager-habit-card"
+  );
+  assert(
+    managerCards.length > 0,
+    "[Issue #504 AC-3] Manager view renders habit cards"
+  );
+
+  const firstCard = managerCards[0];
+  const editBtn = firstCard.querySelector('[data-action="edit-habit"]');
+  const upBtn = firstCard.querySelector('[data-action="reorder-up"]');
+  const downBtn = firstCard.querySelector('[data-action="reorder-down"]');
+  const moreMenuBtn = firstCard.querySelector(
+    '[data-action="toggle-card-menu"]'
+  );
+  assert(
+    !!editBtn && !!upBtn && !!downBtn && !!moreMenuBtn,
+    "[Issue #504 AC-3] Manager card consolidates primary edit, reorder, and 3-dot context menu"
+  );
+
+  // ----------------------------------------------------
+  // Issue #504 Slice 4: 2-Stage Modal & Popover Emoji
+  // ----------------------------------------------------
+  console.log(
+    "\n--- [Issue #504 Slice 4] 2-Stage Modal & Popover Emoji Picker ---"
+  );
+  polishSandbox.HabitApp.openAddHabitModal();
+
+  const modalStageSwitcher = polishSandbox.document.getElementById(
+    "modal-stage-switcher"
+  );
+  assert(
+    !!modalStageSwitcher,
+    "[Issue #504 AC-4] Add/Edit Habit Modal renders 2-stage switcher"
+  );
+
+  const stage1El = polishSandbox.document.getElementById("modal-stage-1");
+  const stage2El = polishSandbox.document.getElementById("modal-stage-2");
+  assert(
+    !!stage1El && !stage1El.classList.contains("hidden"),
+    "[Issue #504 AC-4] Modal initializes on Stage 1 (Basic Ritual)"
+  );
+  assert(
+    !!stage2El && stage2El.classList.contains("hidden"),
+    "[Issue #504 AC-4] Stage 2 (Schedule & Styling) is hidden initially"
+  );
+
+  const emojiTrigger = polishSandbox.document.getElementById(
+    "habit-emoji-popover-trigger"
+  );
+  const emojiPopover = polishSandbox.document.getElementById(
+    "habit-emoji-popover"
+  );
+  assert(
+    !!emojiTrigger && !!emojiPopover,
+    "[Issue #504 AC-4] Modal provides popover emoji trigger and collapsible palette"
+  );
+
+  const quickSaveBtn = polishSandbox.document.querySelector(
+    '[data-action="quick-save"]'
+  );
+  const nextStageBtn = polishSandbox.document.querySelector(
+    '[data-action="modal-next-stage"]'
+  );
+  assert(
+    !!quickSaveBtn && !!nextStageBtn,
+    "[Issue #504 AC-4] Stage 1 provides Quick Save and Next: Schedule actions"
+  );
+
+  // Advance to Stage 2
+  polishSandbox.HabitApp.switchModalStage(2);
+  assert(
+    stage1El.classList.contains("hidden"),
+    "[Issue #504 AC-4] Stage 1 hidden after switching to Stage 2"
+  );
+  assert(
+    !stage2El.classList.contains("hidden"),
+    "[Issue #504 AC-4] Stage 2 visible after switching to Stage 2"
+  );
+
+  // Return to Stage 1
+  polishSandbox.HabitApp.switchModalStage(1);
+  assert(
+    !stage1El.classList.contains("hidden"),
+    "[Issue #504 AC-4] Returned to Stage 1 successfully"
+  );
+
+  polishSandbox.HabitApp.closeHabitModal();
 }
 
 runUITests()
