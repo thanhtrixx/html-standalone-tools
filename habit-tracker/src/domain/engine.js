@@ -449,9 +449,6 @@
     if (habit.startDate && dateStr < toDateString(habit.startDate)) {
       return false;
     }
-    if (habit.createdAt && dateStr < toDateString(habit.createdAt)) {
-      return false;
-    }
 
     if (isDateInVacation(dateStr, vacationRanges)) {
       return false;
