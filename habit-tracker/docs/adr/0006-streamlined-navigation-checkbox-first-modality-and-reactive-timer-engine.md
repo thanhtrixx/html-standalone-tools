@@ -15,7 +15,7 @@ Following user discovery and architectural review in Phase 1 ([Grill WoW](../../
 2. **Bottom Dock `+` Clutter**: The central `+` button in the navigation dock occupied prime thumb estate and conflicted with contextual creation flows.
 3. **Card Visual Overload vs Speed**: Numeric steppers and timer controls on daily habit cards consumed excessive card area and created visual noise. Daily tracking demands an ultra-clean, uniform list with simple, satisfying checkboxes.
 4. **Active/Background Timer Freeze**: The timer ticker wrote to IndexedDB on every 1,000ms tick without updating the active card DOM duration ticker in real-time, appearing frozen when active and getting throttled in background tabs.
-5. **Identity Friction**: The *Identity & Life Domains* system is powerful for personal alignment but takes time upfront when users first set up the app. Housing it permanently on a top sub-header bar added daily friction instead of guiding users progressively.
+5. **Identity Friction**: The _Identity & Life Domains_ system is powerful for personal alignment but takes time upfront when users first set up the app. Housing it permanently on a top sub-header bar added daily friction instead of guiding users progressively.
 
 ---
 
@@ -72,10 +72,12 @@ Following user discovery and architectural review in Phase 1 ([Grill WoW](../../
 ## Consequences
 
 ### Positive
+
 - **Distraction-Free UI**: 40% more visible vertical screen real estate without the sub-header bar.
 - **High-Velocity Check-Ins**: Uniform checkboxes allow daily check-ins in seconds.
 - **Rock-Solid Timer**: Eliminates active screen freeze and timer drift across background/foreground transitions.
 - **Clear Information Architecture**: Predictable 4-tab mental model matching native mobile conventions.
 
 ### Negative / Mitigations
+
 - Existing UI component tests asserting `#top-lens-switcher` or dock `+` must be updated to assert the unified 4-tab dock and expandable habit card semantics.

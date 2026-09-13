@@ -502,17 +502,17 @@ function createHabitTrackerSandbox(options = {}) {
         el.setAttribute("role", "alertdialog");
         el.setAttribute("aria-modal", "true");
         el.setAttribute(
-            "aria-labelledby",
-            id === "delete-confirm-modal-overlay"
-              ? "delete-dialog-title"
-              : "reset-dialog-title"
-          );
+          "aria-labelledby",
+          id === "delete-confirm-modal-overlay"
+            ? "delete-dialog-title"
+            : "reset-dialog-title"
+        );
         el.setAttribute(
-            "aria-describedby",
-            id === "delete-confirm-modal-overlay"
-              ? "delete-dialog-desc"
-              : "reset-dialog-desc"
-          );
+          "aria-describedby",
+          id === "delete-confirm-modal-overlay"
+            ? "delete-dialog-desc"
+            : "reset-dialog-desc"
+        );
       }
       if (id === "identity-wizard-modal-overlay") {
         el.setAttribute("role", "dialog");
