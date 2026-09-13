@@ -5741,6 +5741,102 @@ async function runUITests() {
   await timer508Sandbox.HabitApp.handleToggleTimer(testHabit508.id, date508);
   timer508Sandbox.HabitApp.closeFocusTimerModal();
 
+  // ==========================================
+  // [Issue #509] Dual empty-state onboarding gateway & post-wipe wizard auto-launch
+  // ==========================================
+  console.log("\n--- [Issue #509] Dual empty-state onboarding gateway & post-wipe wizard auto-launch ---");
+
+  const { sandbox: empty509Sandbox } = createHabitTrackerSandbox();
+  await empty509Sandbox.HabitApp.init();
+
+  // Wipe to guarantee 0 habits
+  await empty509Sandbox.HabitApp.store.factoryWipe();
+  assertEqual(
+    empty509Sandbox.HabitApp.store.getHabits().length,
+    0,
+    "[Issue #509 AC-1] Store has 0 habits after factory wipe"
+  );
+
+  // 1. Today View Empty State Rendering
+  const todayEmptyVi = empty509Sandbox.HabitTodayView.renderTodayDashboard(
+    empty509Sandbox.HabitApp.store,
+    null,
+    "vi"
+  );
+  assert(
+    todayEmptyVi.includes('data-action="open-identity-wizard"'),
+    "[Issue #509 AC-1] Today empty state includes Identity Wizard CTA button"
+  );
+  assert(
+    todayEmptyVi.includes('data-action="open-add-habit"'),
+    "[Issue #509 AC-1] Today empty state includes Add Habit manual CTA button"
+  );
+  assert(
+    todayEmptyVi.includes("Thiết lập Bản Sắc"),
+    "[Issue #509 AC-1] Today empty state renders Vietnamese wizard label"
+  );
+
+  const todayEmptyEn = empty509Sandbox.HabitTodayView.renderTodayDashboard(
+    empty509Sandbox.HabitApp.store,
+    null,
+    "en"
+  );
+  assert(
+    todayEmptyEn.includes("Identity Setup Wizard"),
+    "[Issue #509 AC-1] Today empty state renders English wizard label"
+  );
+
+  // 2. Manager / Habits Catalog View Empty State Rendering
+  const managerEmptyVi = empty509Sandbox.HabitManagerView.renderManagerView(
+    empty509Sandbox.HabitApp.store,
+    null,
+    "vi"
+  );
+  assert(
+    managerEmptyVi.includes('data-action="open-identity-wizard"'),
+    "[Issue #509 AC-2] Manager view empty state includes Identity Wizard CTA button"
+  );
+  assert(
+    managerEmptyVi.includes('data-action="open-add-habit"'),
+    "[Issue #509 AC-2] Manager view empty state includes Add Habit CTA button"
+  );
+
+  // 3. Factory Wipe Auto-Onboarding
+  // Start on settings tab, perform factory wipe
+  empty509Sandbox.HabitApp.switchTab("settings");
+  assertEqual(
+    empty509Sandbox.HabitApp.activeTab,
+    "settings",
+    "[Issue #509 AC-3] Active tab is settings before factory wipe"
+  );
+
+  await empty509Sandbox.HabitApp.confirmFactoryWipe();
+  assertEqual(
+    empty509Sandbox.HabitApp.activeTab,
+    "today",
+    "[Issue #509 AC-3] confirmFactoryWipe automatically switches view to 'today'"
+  );
+  const wizardOverlay509 = empty509Sandbox.document.getElementById("identity-wizard-modal-overlay");
+  assertEqual(
+    wizardOverlay509.classList.contains("hidden"),
+    false,
+    "[Issue #509 AC-3] confirmFactoryWipe automatically launches Identity Setup Wizard"
+  );
+  assertEqual(
+    empty509Sandbox.HabitApp.wizardCurrentStep,
+    1,
+    "[Issue #509 AC-3] Wizard is opened at Step 1"
+  );
+
+  // 4. Applying Starter Kit from Wizard seeds habits
+  await empty509Sandbox.HabitApp.store.applyStarterKit("morning-mastery", "vi");
+  assertEqual(
+    empty509Sandbox.HabitApp.store.getHabits().length >= 3,
+    true,
+    "[Issue #509 AC-4] Applying starter kit seeds habits successfully"
+  );
+  empty509Sandbox.HabitApp.closeIdentityWizard();
+
   polishSandbox.HabitApp.closeHabitModal();
 }
 

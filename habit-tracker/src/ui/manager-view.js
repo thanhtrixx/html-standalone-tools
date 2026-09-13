@@ -522,6 +522,35 @@
       .join("");
 
     const archivedHabits = habits.filter((h) => h.archived);
+    const hasAnyHabits = habits.length > 0;
+    const emptyStateHtml = !hasAnyHabits
+      ? `
+        <div class="text-center py-16 px-4 bg-white/50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl">
+          <div class="text-5xl mb-3">🌱</div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">${i18n.t("no_habits_scheduled_today", {}, lang)}</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">${i18n.t("app_tagline", {}, lang)}</p>
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              type="button"
+              data-action="open-identity-wizard"
+              class="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-500/25 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>✨</span>
+              <span>${i18n.t("empty_state_wizard_btn", {}, lang)}</span>
+            </button>
+            <button
+              type="button"
+              data-action="open-add-habit"
+              class="w-full sm:w-auto px-5 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-2xl border border-slate-200 dark:border-slate-700/80 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>+</span>
+              <span>${i18n.t("empty_state_manual_btn", {}, lang)}</span>
+            </button>
+          </div>
+        </div>
+      `
+      : "";
+
     const archivedHtml =
       archivedHabits.length > 0
         ? `
@@ -565,6 +594,7 @@
         </div>
 
         <div class="routine-manager-groups">
+          ${emptyStateHtml}
           ${routineSectionsHtml}
           ${archivedHtml}
         </div>
