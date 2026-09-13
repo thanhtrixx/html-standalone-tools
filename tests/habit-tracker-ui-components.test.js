@@ -5499,7 +5499,9 @@ async function runUITests() {
     Date.now = () => startTimestamp507 + 5000;
     await timer507Sandbox.HabitApp.syncRunningTimer();
     const interimLog507 =
-      timer507Sandbox.HabitApp.store.state.logs[`${testHabit507.id}_${date507}`];
+      timer507Sandbox.HabitApp.store.state.logs[
+        `${testHabit507.id}_${date507}`
+      ];
     assertEqual(
       interimLog507.value,
       5,
@@ -5515,7 +5517,9 @@ async function runUITests() {
     Date.now = () => startTimestamp507 + 10000;
     await timer507Sandbox.HabitApp.syncRunningTimer();
     const targetLog507 =
-      timer507Sandbox.HabitApp.store.state.logs[`${testHabit507.id}_${date507}`];
+      timer507Sandbox.HabitApp.store.state.logs[
+        `${testHabit507.id}_${date507}`
+      ];
     assertEqual(
       targetLog507.value,
       10,
@@ -5536,7 +5540,9 @@ async function runUITests() {
     Date.now = () => startTimestamp507 + 15000;
     await timer507Sandbox.HabitApp.syncRunningTimer();
     const overtimeLog507 =
-      timer507Sandbox.HabitApp.store.state.logs[`${testHabit507.id}_${date507}`];
+      timer507Sandbox.HabitApp.store.state.logs[
+        `${testHabit507.id}_${date507}`
+      ];
     assertEqual(
       overtimeLog507.value,
       15,
@@ -5557,7 +5563,9 @@ async function runUITests() {
   // ==========================================
   // [Issue #508] Immersive Focus Timer Modal & Quick Controls
   // ==========================================
-  console.log("\n--- [Issue #508] Immersive Focus Timer Modal & Quick Controls ---");
+  console.log(
+    "\n--- [Issue #508] Immersive Focus Timer Modal & Quick Controls ---"
+  );
 
   const { sandbox: timer508Sandbox } = createHabitTrackerSandbox();
   await timer508Sandbox.HabitApp.init();
@@ -5602,7 +5610,9 @@ async function runUITests() {
     "[Issue #508 AC-1] Rendered Focus Modal includes display mode toggle"
   );
   assert(
-    renderedVi.includes('data-delta="60"') && renderedVi.includes('data-delta="300"') && renderedVi.includes('data-delta="-60"'),
+    renderedVi.includes('data-delta="60"') &&
+      renderedVi.includes('data-delta="300"') &&
+      renderedVi.includes('data-delta="-60"'),
     "[Issue #508 AC-2] Rendered Focus Modal contains +1m, +5m, -1m quick adjust buttons"
   );
   assert(
@@ -5638,7 +5648,9 @@ async function runUITests() {
     testHabit508.id,
     "[Issue #508 AC-1] openFocusTimerModal sets activeFocusModalHabitId"
   );
-  const overlay508 = timer508Sandbox.document.getElementById("focus-timer-modal-overlay");
+  const overlay508 = timer508Sandbox.document.getElementById(
+    "focus-timer-modal-overlay"
+  );
   assertEqual(
     overlay508.classList.contains("hidden"),
     false,
@@ -5685,7 +5697,9 @@ async function runUITests() {
 
   // 6. handleTimerAdjust when timer is paused/idle
   await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, 60); // +1m
-  let logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  let logVal508 =
+    timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]
+      ?.value || 0;
   assertEqual(
     logVal508,
     60,
@@ -5693,7 +5707,9 @@ async function runUITests() {
   );
 
   await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, 300); // +5m
-  logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  logVal508 =
+    timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]
+      ?.value || 0;
   assertEqual(
     logVal508,
     360,
@@ -5701,7 +5717,9 @@ async function runUITests() {
   );
 
   await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, -60); // -1m
-  logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  logVal508 =
+    timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]
+      ?.value || 0;
   assertEqual(
     logVal508,
     300,
@@ -5709,7 +5727,9 @@ async function runUITests() {
   );
 
   await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, -500); // clamp at 0
-  logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  logVal508 =
+    timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]
+      ?.value || 0;
   assertEqual(
     logVal508,
     0,
@@ -5744,7 +5764,9 @@ async function runUITests() {
   // ==========================================
   // [Issue #509] Dual empty-state onboarding gateway & post-wipe wizard auto-launch
   // ==========================================
-  console.log("\n--- [Issue #509] Dual empty-state onboarding gateway & post-wipe wizard auto-launch ---");
+  console.log(
+    "\n--- [Issue #509] Dual empty-state onboarding gateway & post-wipe wizard auto-launch ---"
+  );
 
   const { sandbox: empty509Sandbox } = createHabitTrackerSandbox();
   await empty509Sandbox.HabitApp.init();
@@ -5816,7 +5838,9 @@ async function runUITests() {
     "today",
     "[Issue #509 AC-3] confirmFactoryWipe automatically switches view to 'today'"
   );
-  const wizardOverlay509 = empty509Sandbox.document.getElementById("identity-wizard-modal-overlay");
+  const wizardOverlay509 = empty509Sandbox.document.getElementById(
+    "identity-wizard-modal-overlay"
+  );
   assertEqual(
     wizardOverlay509.classList.contains("hidden"),
     false,
@@ -5836,6 +5860,115 @@ async function runUITests() {
     "[Issue #509 AC-4] Applying starter kit seeds habits successfully"
   );
   empty509Sandbox.HabitApp.closeIdentityWizard();
+
+  // ==========================================
+  // [Issue #510] Shell IA decluttering & modal stacking z-index hierarchy
+  // ==========================================
+  console.log(
+    "\n--- [Issue #510] Shell IA decluttering & modal stacking z-index hierarchy ---"
+  );
+
+  const fs510 = require("fs");
+  const path510 = require("path");
+  const indexHtmlPath510 = path510.join(
+    __dirname,
+    "../habit-tracker/index.html"
+  );
+  const indexHtml510 = fs510.readFileSync(indexHtmlPath510, "utf8");
+
+  // 1. Floating Quick Add Button Removal
+  assertEqual(
+    indexHtml510.includes('id="floating-quick-add-btn"'),
+    false,
+    "[Issue #510 AC-1] #floating-quick-add-btn is completely removed from index.html"
+  );
+
+  // 2. Header Subtitle Decluttering
+  assertEqual(
+    indexHtml510.includes("Obsidian Glow • Offline-First"),
+    false,
+    "[Issue #510 AC-2] Subtitle 'Obsidian Glow • Offline-First' is completely removed from header"
+  );
+
+  // 3. Stacking Context / Z-Index Hierarchy
+  assert(
+    indexHtml510.includes(
+      'id="habit-edit-modal-overlay"\n      class="fixed inset-0 z-[60]'
+    ) ||
+      indexHtml510.includes(
+        'id="habit-edit-modal-overlay" class="fixed inset-0 z-[60]'
+      ) ||
+      indexHtml510.includes(
+        'z-[60] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"'
+      ),
+    "[Issue #510 AC-3] Habit edit modal overlay has z-[60] stacking context"
+  );
+  assert(
+    indexHtml510.includes('id="detail-sheet-overlay"') &&
+      indexHtml510.includes("z-50"),
+    "[Issue #510 AC-3] Detail sheet overlay has z-50 stacking context"
+  );
+  assert(
+    indexHtml510.includes('id="focus-timer-modal-overlay"') &&
+      indexHtml510.includes("z-[60]"),
+    "[Issue #510 AC-3] Focus timer modal overlay has z-[60] stacking context"
+  );
+
+  // 4. Sequential Dismissal & Multi-Layer Stacking
+  const { sandbox: stack510Sandbox } = createHabitTrackerSandbox();
+  await stack510Sandbox.HabitApp.init();
+
+  const testHabit510 = {
+    id: "habit-stack-510",
+    name: "Layering Test Habit",
+    type: "binary",
+    routines: ["morning"],
+    active: true,
+  };
+  await stack510Sandbox.HabitApp.store.addHabit(testHabit510);
+
+  // Open Detail Sheet
+  stack510Sandbox.HabitApp.handleOpenDetailSheet(testHabit510.id);
+  const detailSheetEl510 = stack510Sandbox.document.getElementById(
+    "detail-sheet-overlay"
+  );
+  assertEqual(
+    detailSheetEl510.classList.contains("hidden"),
+    false,
+    "[Issue #510 AC-4] Detail sheet is open"
+  );
+
+  // Open Edit Modal on top of Detail Sheet
+  stack510Sandbox.HabitApp.handleOpenEditModal(testHabit510.id);
+  const editModalEl510 = stack510Sandbox.document.getElementById(
+    "habit-edit-modal-overlay"
+  );
+  assertEqual(
+    editModalEl510.classList.contains("hidden"),
+    false,
+    "[Issue #510 AC-4] Edit modal is open on top of Detail Sheet"
+  );
+
+  // Trigger Popstate (Hardware back / browser back) -> closes topmost Edit Modal first
+  stack510Sandbox.HabitApp.handlePopState({});
+  assertEqual(
+    editModalEl510.classList.contains("hidden"),
+    true,
+    "[Issue #510 AC-5] Popstate closes topmost edit modal first"
+  );
+  assertEqual(
+    detailSheetEl510.classList.contains("hidden"),
+    false,
+    "[Issue #510 AC-5] Detail sheet remains open underneath after first popstate"
+  );
+
+  // Trigger second Popstate -> closes Detail Sheet
+  stack510Sandbox.HabitApp.handlePopState({});
+  assertEqual(
+    detailSheetEl510.classList.contains("hidden"),
+    true,
+    "[Issue #510 AC-5] Second popstate closes Detail Sheet"
+  );
 
   polishSandbox.HabitApp.closeHabitModal();
 }

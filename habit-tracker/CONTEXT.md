@@ -98,4 +98,3 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **Modal Stacking Hierarchy**: Enforces strict z-index layering (`Detail Sheet` at `z-50`, `Edit Modal` at `z-60`, `Focus Timer` at `z-60`) ensuring nested actions (e.g. Details ➔ Edit Habit) render properly without clipping.
 - **Local-First Zero-Backend Persistence**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
 - **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage.
-

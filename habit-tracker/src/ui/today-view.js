@@ -619,13 +619,12 @@
         store.getActiveDate && typeof store.getActiveDate === "function"
           ? store.getActiveDate()
           : new Date().toISOString().split("T")[0];
-      logEntry =
-        (store.state &&
-          store.state.logs &&
-          store.state.logs[`${habitId}_${activeDate}`]) || {
-          value: 0,
-          completed: false,
-        };
+      logEntry = (store.state &&
+        store.state.logs &&
+        store.state.logs[`${habitId}_${activeDate}`]) || {
+        value: 0,
+        completed: false,
+      };
       isRunning =
         typeof HabitApp !== "undefined" &&
         HabitApp.runningTimerHabitId === habitId;
