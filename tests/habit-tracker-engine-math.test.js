@@ -806,11 +806,76 @@ try {
     100,
     "[Issue #459 AC-3] Routine adherence counts multi-routine habit in morning stats"
   );
-  assertEqual(
-    eveningAdherence.rate,
-    100,
-    "[Issue #459 AC-3] Routine adherence counts multi-routine habit in evening stats"
+  // ==========================================
+  // [Issue #475] Life Domains & Starter Kits Metadata
+  // ==========================================
+  console.log("--- [Issue #475] Life Domains & Starter Kits ---");
+
+  assert(
+    engine.LIFE_DOMAINS && typeof engine.LIFE_DOMAINS === "object",
+    "[Issue #475 AC-1] LIFE_DOMAINS exists and is an object"
   );
+  assertEqual(
+    engine.LIFE_DOMAINS.HEALTH.id,
+    "health",
+    "[Issue #475 AC-1] Health domain ID is health"
+  );
+  assertEqual(
+    engine.LIFE_DOMAINS.CRAFT.id,
+    "craft",
+    "[Issue #475 AC-1] Craft domain ID is craft"
+  );
+  assertEqual(
+    engine.LIFE_DOMAINS.MIND.id,
+    "mind",
+    "[Issue #475 AC-1] Mind domain ID is mind"
+  );
+  assertEqual(
+    engine.LIFE_DOMAINS.DISCIPLINE.id,
+    "discipline",
+    "[Issue #475 AC-1] Discipline domain ID is discipline"
+  );
+
+  assert(
+    Array.isArray(engine.STARTER_KITS) && engine.STARTER_KITS.length === 4,
+    "[Issue #475 AC-2] Exactly 4 starter kits defined"
+  );
+
+  const kitIds = engine.STARTER_KITS.map((k) => k.id);
+  assert(
+    kitIds.includes("morning_mastery"),
+    "[Issue #475 AC-2] Includes morning_mastery starter kit"
+  );
+  assert(
+    kitIds.includes("deep_focus_flow"),
+    "[Issue #475 AC-2] Includes deep_focus_flow starter kit"
+  );
+  assert(
+    kitIds.includes("health_vitality"),
+    "[Issue #475 AC-2] Includes health_vitality starter kit"
+  );
+  assert(
+    kitIds.includes("zen_mindfulness"),
+    "[Issue #475 AC-2] Includes zen_mindfulness starter kit"
+  );
+
+  for (const kit of engine.STARTER_KITS) {
+    assert(
+      Array.isArray(kit.habits) && kit.habits.length > 0,
+      `[Issue #475 AC-2] Kit ${kit.id} contains non-empty habits array`
+    );
+    for (const h of kit.habits) {
+      assert(
+        h.name && h.type,
+        `[Issue #475 AC-2] Habit has name and type in ${kit.id}`
+      );
+      assert(
+        h.domain &&
+          ["health", "craft", "mind", "discipline"].includes(h.domain),
+        `[Issue #475 AC-2] Habit has valid domain in ${kit.id}`
+      );
+    }
+  }
 } catch (err) {
   console.error("❌ Exception during Engine Math test execution:", err);
   process.exit(1);

@@ -11,10 +11,9 @@ Following the repository's Two-Speed TDD standard (ADR-0010 & ADR-0003), testing
 ```text
 tests/
 ├── habit-tracker-engine-math.test.js        # Pure mathematical models (0% baseline, streaks, consistency, freeze tokens)
-├── habit-tracker-storage-persistence.test.js # IndexedDB CRUD, silent multi-routine migration, JSON import/export
+├── habit-tracker-storage-persistence.test.js # IndexedDB CRUD, fresh database seed, starter kits, JSON import/export
 ├── habit-tracker-cloud-sync.test.js          # Cloud backup encoding, Gist/Drive payloads
-├── habit-tracker-ui-components.test.js       # DOM rendering, swipe gestures, back navigation, timer delta, routines
-├── habit-tracker-pwa-lifecycle.test.js       # Service worker caching, offline fallback, notifications
+├── habit-tracker-ui-components.test.js       # 4-Lens rendering, multi-modal cards, timer reactivity, drawer, starter kits
 ├── habit-tracker-i18n.test.js                # Bilingual dictionary 100% key parity & formatters
 └── e2e/
     └── habit-tracker-devices.spec.js         # Playwright multi-device mobile (iPhone, Android) & desktop
@@ -33,45 +32,37 @@ tests/
   - `calculateDailyProgress` and `calculateRoutineProgress` return `percentage: 0`, `ratio: 0.0`, `isAllCompleted: false` when 0 habits scheduled.
 - [ ] **Streak & Freeze Token Calculation**:
   - Increments on consecutive days with $\ge 100\%$ target completion.
-  - Correctly evaluates today vs yesterday active status.
-  - Maintains streak across non-scheduled days and Vacation Pause mode.
   - Consumes freeze token on missed days without resetting streak to 0.
-- [ ] **Multi-Routine Habit Progression**:
-  - Evaluates multi-routine assigned habits (`routines: ['morning', 'evening']`) correctly within routine progress aggregations.
 
-### 2. Timer Delta Engine & Background Accuracy (`tests/habit-tracker-ui-components.test.js`)
+### 2. Storage, Persistence & Starter Kits (`tests/habit-tracker-storage-persistence.test.js`)
 
-- [ ] **Timestamp Delta Sync**:
-  - Timer calculates elapsed time from `Date.now() - startedAt + baseValue`.
-  - Simulating page visibility change (`visibilityState: visible`) after elapsed duration catches up accurately.
-  - Reaching target duration triggers auto-completion and stops timer loop.
+- [ ] **Starter Kits Seeding**:
+  - Seeds 4 curated starter packs (_Morning Mastery_, _Deep Focus_, _Vitality_, _Zen_).
+- [ ] **Data Vault JSON Backup & Safe Restore**:
+  - `replaceState()` successfully restores complete state and updates in-memory cache without throwing exceptions.
+- [ ] **CSV Export**:
+  - Produces valid UTF-8 formatted CSV rows with headers and habit log records.
 
-### 3. Multi-Routine Data Persistence & Dashboard UI (`tests/habit-tracker-storage-persistence.test.js` & `tests/habit-tracker-ui-components.test.js`)
+### 3. UI Components, 4-Lens Perspective & Multi-Modal Cards (`tests/habit-tracker-ui-components.test.js`)
 
-- [ ] **Silent Schema Migration**:
-  - Legacy habit with `routine: 'morning'` automatically normalizes to `routines: ['morning']`.
-- [ ] **Multi-Slot Rendering & Synchronized Check-in**:
-  - Habit assigned to `['morning', 'evening']` renders in both routine sections on Today view.
-  - Interacting with morning card updates daily log and syncs state on evening card.
+- [ ] **Top Lens Switcher**:
+  - Switching between `today`, `timeline`, `matrix`, and `identity` lenses renders the appropriate views and updates active pill tokens.
+- [ ] **Today Action Board**:
+  - Hero progress ring renders accurate completion percentage and momentum score.
+  - Domain filter pills filter cards by Health, Mind, Craft, and Discipline.
+  - Binary 1-tap checkbox toggles completion and updates daily progress.
+  - Stepper card `+` and `-` buttons accurately adjust logged values and custom units.
+  - Timer card provides live countdown ticking, Start/Pause, Reset, and triggers completion audio/haptics.
+- [ ] **Timeline & Routines Lens**:
+  - Renders circadian time-block streams (Morning, Afternoon, Evening, Bedtime) with completion counter badges.
+- [ ] **Matrix & Analytics Lens**:
+  - Renders 52-week activity heatmap, 0-baseline day-of-week adherence chart, and streak records.
+- [ ] **Identity & Life Domains Lens**:
+  - Renders domain summary cards and 1-click starter kit activation triggers.
+- [ ] **Habit Detail Drawer & Overlays**:
+  - Slide-over drawer displays habit heatmap, 30-day consistency score, and reflection notes log.
 
-### 4. Gestures, Back Navigation & Form UX (`tests/habit-tracker-ui-components.test.js`)
+### 4. Bilingual Parity & Accessibility (`tests/habit-tracker-i18n.test.js`)
 
-- [ ] **Tab Swipe Left/Right Gesture**:
-  - Swiping horizontally across container switches active tab (`today` $\rightarrow$ `insights` $\rightarrow$ `manager` $\rightarrow$ `settings`).
-  - Swiping directly on a habit card performs card-level completion/sheet action without switching tabs.
-- [ ] **Native Back Stack Hierarchy**:
-  - Back event with modal open closes modal.
-  - Back event on secondary tab switches to Today tab.
-  - Back event on root Today tab triggers exit toast; second back within 2s confirms exit.
-- [ ] **Form Real-time Interactive Preview**:
-  - Updating name, icon, color, or target immediately reflects in modal preview card.
-
-### 5. Bilingual Localization Parity (`tests/habit-tracker-i18n.test.js`)
-
-- [ ] **Zero Missing Keys Audit**:
-  - Automated dictionary audit verifies all UI keys exist across both `vi` and `en`.
-
-### 6. Playwright E2E Multi-Device Verification (`tests/e2e/habit-tracker-devices.spec.js`)
-
-- [ ] Multi-device iPhone 14 & Pixel 7 touch interaction runs.
-- [ ] Tab swipe switching, timer delta resume, multi-routine check-in, back navigation, and JSON export.
+- [ ] 100% dictionary parity between Vietnamese (`vi`) and English (`en`).
+- [ ] WCAG 2.1 AA/AAA contrast ratios across Dark and Light themes.
