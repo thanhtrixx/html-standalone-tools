@@ -1090,7 +1090,8 @@
           if (app && typeof app.applyStarterKit === "function") {
             await app.applyStarterKit(kitId);
           } else if (store) {
-            const lang = (store.getSettings() && store.getSettings().language) || "vi";
+            const lang =
+              (store.getSettings() && store.getSettings().language) || "vi";
             await store.applyStarterKit(kitId, lang);
             showToast(i18n.t("starter_kit_applied_toast", {}, lang), "success");
             renderApp();
@@ -2259,7 +2260,8 @@
     },
     async applyStarterKit(kitId) {
       if (!store) return [];
-      const lang = (store.getSettings() && store.getSettings().language) || "vi";
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
       const created = await store.applyStarterKit(kitId, lang);
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
