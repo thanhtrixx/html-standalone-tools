@@ -288,6 +288,29 @@
       day_friday: "Friday",
       day_saturday: "Saturday",
 
+      // Identity Setup Wizard
+      wizard_title: "Identity Setup Wizard",
+      wizard_subtitle: "Build your personal habit system in 3 simple steps",
+      wizard_step_1_title: "Core Life Pillars",
+      wizard_step_1_desc:
+        "Ground your habits in 4 foundational domains: Health, Mind, Craft, and Discipline.",
+      wizard_step_2_title: "1-Click Starter Kits",
+      wizard_step_2_desc:
+        "Choose a curated kit or adopt starter habits designed by behavioral science.",
+      wizard_step_3_title: "Ready to Build Atomic Habits",
+      wizard_step_3_desc:
+        "Your system is primed. Small 1% improvements create massive compounding results.",
+      wizard_btn_next: "Next ➔",
+      wizard_btn_back: "Back",
+      wizard_btn_finish: "Start Tracking Today 🔥",
+      wizard_btn_skip: "Skip Wizard",
+      open_identity_wizard: "Launch Setup Wizard",
+      wizard_domain_health_desc: "Physical energy, hydration, exercise, sleep",
+      wizard_domain_mind_desc: "Mental clarity, reading, mindfulness, focus",
+      wizard_domain_craft_desc: "Deep work, coding, writing, key projects",
+      wizard_domain_discipline_desc:
+        "Daily adherence, routine consistency, tracking",
+
       // Actions
       cancel: "Cancel",
       save: "Save",
@@ -579,6 +602,33 @@
       day_thursday: "Thứ năm",
       day_friday: "Thứ sáu",
       day_saturday: "Thứ bảy",
+
+      // Identity Setup Wizard
+      wizard_title: "Hướng Dẫn Thiết Lập Bản Sắc",
+      wizard_subtitle:
+        "Xây dựng hệ thống thói quen cá nhân trong 3 bước đơn giản",
+      wizard_step_1_title: "Trụ Cột Cuộc Sống",
+      wizard_step_1_desc:
+        "Neo giữ thói quen vào 4 lĩnh vực cốt lõi: Sức khỏe, Tâm trí, Sự nghiệp và Kỷ luật.",
+      wizard_step_2_title: "Gói Khởi Động 1-Chạm",
+      wizard_step_2_desc:
+        "Chọn một gói thói quen tuyển chọn theo khoa học hành vi để bắt đầu ngay.",
+      wizard_step_3_title: "Sẵn Sàng Bứt Phá Thói Quen",
+      wizard_step_3_desc:
+        "Hệ thống đã sẵn sàng. Tiến bộ 1% mỗi ngày sẽ tạo nên sự chuyển hóa vượt bậc.",
+      wizard_btn_next: "Tiếp theo ➔",
+      wizard_btn_back: "Quay lại",
+      wizard_btn_finish: "Bắt đầu Hôm nay 🔥",
+      wizard_btn_skip: "Bỏ qua",
+      open_identity_wizard: "Mở Hướng dẫn Thiết lập",
+      wizard_domain_health_desc:
+        "Năng lượng thể chất, nước uống, tập luyện, giấc ngủ",
+      wizard_domain_mind_desc:
+        "Tâm trí sáng suốt, đọc sách, tĩnh tâm, tập trung",
+      wizard_domain_craft_desc:
+        "Làm việc sâu, lập trình, viết lách, dự án trọng điểm",
+      wizard_domain_discipline_desc:
+        "Tính kiên trì, nề nếp kỷ luật, theo dõi đều đặn",
 
       // Actions
       cancel: "Hủy",
