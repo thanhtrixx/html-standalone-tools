@@ -2,7 +2,7 @@
 
 > **Lifecycle Phase:** `Active Feature Development` ([ADR-0003](../docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
-A standalone, mobile-first Progressive Web Application (PWA) designed for frictionless daily habit tracking, atomic identity formation, multi-modal logging (binary, quantitative counters, timers), four dynamic perspective lenses (Today Action Board, Routine Timeline, Matrix & Analytics, Identity & Life Domains), and private, zero-backend offline IndexedDB persistence.
+A standalone, mobile-first Progressive Web Application (PWA) designed for frictionless daily habit tracking, atomic identity formation, multi-modal logging (checkbox-first binary, expandable quantitative counters, reactive interval timers), a streamlined 4-tab bottom navigation architecture (`Today`, `Insights`, `Habits`, `Settings`), and private, zero-backend offline IndexedDB persistence.
 
 For Vietnamese domain vocabulary, copywriting standards, and bilingual translation dictionary, refer to [`I18N.md`](./I18N.md).
 For visual design tokens, gesture physics, micro-interactions, and dark/light themes, refer to [`DESIGN.md`](./DESIGN.md).
@@ -13,31 +13,33 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0003-native-mobile-gestures-timer-delta-and-multi-routine-evolution.md`](./docs/adr/0003-native-mobile-gestures-timer-delta-and-multi-routine-evolution.md)
 - [`docs/adr/0004-pwa-back-stack-dock-highlight-timer-reactivity-and-data-hygiene.md`](./docs/adr/0004-pwa-back-stack-dock-highlight-timer-reactivity-and-data-hygiene.md)
 - [`docs/adr/0005-obsidian-glow-multi-lens-architecture-and-ux-overhaul.md`](./docs/adr/0005-obsidian-glow-multi-lens-architecture-and-ux-overhaul.md)
+- [`docs/adr/0006-streamlined-navigation-checkbox-first-modality-and-reactive-timer-engine.md`](./docs/adr/0006-streamlined-navigation-checkbox-first-modality-and-reactive-timer-engine.md)
 
 ---
 
 ## 🏛️ Domain Concepts & Ubiquitous Language
 
-### 1. The 4 Perspective Lenses (Navigation & Mental Model)
+### 1. The 4 Application Tabs (Bottom Dock Navigation)
 
-The application organizes daily execution and long-term reflection into four top-level perspective lenses:
+The application organizes daily execution, deep analytics, habit catalog management, and preferences into four primary tabs:
 
-- **Today Action Board (`today`)**: The high-velocity daily action board. Features a hero progress ring, 7-day date strip, domain filter pills, quick 1-tap completions, and instant stepper increments.
-- **Timeline & Routines Lens (`timeline`)**: Chronological circadian schedule view grouping habits into Morning 🌅, Afternoon ☀️, Evening 🌙, and Bedtime/Night 🌌 time-blocks with cue-routine connection indicators.
-- **Matrix & Analytics Lens (`matrix`)**: Quantitative analytics hub featuring a 52-week GitHub-style contribution heatmap, 0-baseline day-of-week radar/bar adherence charts, streak records, and completion velocity.
-- **Identity & Life Domains Lens (`identity`)**: Holistic habit architecture grouped by life pillars (Health & Vitality, Mind & Wisdom, Deep Work & Craft, Daily Discipline) with 1-click curated Starter Kits.
-  _Avoid_: Tab page, screen switch, view mode.
+- **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day horizontal date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with inline expandability.
+- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring a 52-week GitHub-style contribution heatmap, 0-baseline day-of-week radar/bar adherence charts, streak milestone records, and completion velocity.
+- **Habits Catalog & Identity (`habits`)**: Comprehensive personal habit catalog management (Add, Edit, Reorder, Archive, Delete) with integrated **Identity System & Life Pillars** (Health, Mind, Craft, Discipline) and Curated Starter Kits.
+- **Settings & Data Vault (`settings`)**: Configuration hub for streak freeze tokens, vacation pause mode, bilingual language switching (VI/EN), dark/light theme toggle, and 1-click JSON backup/restore & CSV export.
+  _Avoid_: Sub-header bar, lens switcher, tab page, screen switch.
 
 ---
 
-### 2. Habit Taxonomy & Multi-Modal Measurement
+### 2. Habit Taxonomy & Checkbox-First Multi-Modal Measurement
 
 - **Habit**: A recurring personal behavior or ritual tracked over time with a defined target, frequency schedule, routine assignment, domain category, and visual accent glow.
   _Avoid_: Task, todo, chore, activity, job.
-- **Habit Modality (Measurement Type)**:
-  - **Binary (Check-off)**: Simple boolean completion ($0$ or $1$) with tactile spring animation and luminous glow bloom.
-  - **Numeric Counter (Target Metric)**: Quantitative habit with target quota, custom unit (`ml`, `pages`, `reps`, `km`), and rapid `+` / `-` stepper buttons.
-  - **Duration / Timer**: Time-based habit with target duration in minutes/seconds. Features background-accurate timestamp delta counting, live ticking card display, audio chime, and pause/reset controls.
+- **Checkbox-First Card Display & Modality**:
+  - **Uniform Checkbox**: Every habit card on the main board presents a tactile 1-tap checkbox with luminous domain glow bloom.
+  - **Binary (Check-off)**: Simple boolean completion ($0 \leftrightarrow 1$) with tactile spring animation.
+  - **Numeric Counter (Target Metric)**: Quantitative habit with target quota and custom unit (`ml`, `pages`, `reps`, `km`). Tapping the checkbox marks 100% completion; tapping the card expands inline `+/-` number steppers for granular logging.
+  - **Duration / Timer**: Time-based habit with target duration in minutes/seconds. Tapping the checkbox marks full completion; tapping the card expands live Web Worker-driven Timer controls (Play/Pause/Reset) with sub-second DOM reactivity and Web Audio chime.
     _Avoid_: Task type, measurement category, goal format.
 - **Life Domain**: High-level personal pillar categorizing habits:
   - 🌿 **Health & Vitality** (Emerald Glow)
@@ -48,9 +50,10 @@ The application organizes daily execution and long-term reflection into four top
 
 ---
 
-### 3. Curated Starter Kits
+### 3. Progressive Identity Onboarding & Starter Kits
 
-- **Starter Kit**: Pre-configured habit packs that allow immediate 1-click onboarding without empty-state paralysis:
+- **Identity Onboarding Wizard**: A 3-step setup modal appearing on first run or empty state to introduce life domains and guide initial habit configuration without overwhelming the daily dashboard.
+- **Curated Starter Kits**: Pre-configured habit packs that allow immediate 1-click adoption:
   - **Morning Mastery**: Morning hydration, 10-min meditation, light stretching, daily planning.
   - **Deep Focus & Flow**: 45-min pomodoro session, zero social media block, reading 20 pages.
   - **Health & Vitality**: 2500ml water tracking, 30-min workout, 8 hours sleep schedule.
@@ -59,7 +62,17 @@ The application organizes daily execution and long-term reflection into four top
 
 ---
 
-### 4. Streaks, Momentum & Mathematical Formulas
+### 4. Reactive Timer Architecture (PWA-Timer Standard)
+
+- **Inline Web Worker**: Executes timer ticks on a background thread to prevent UI thread jitter and tab throttling.
+- **Exact Timestamp Delta**: Calculates elapsed duration using `Math.floor((Date.now() - startedAt) / 1000)` ensuring 100% time accuracy across phone lock, app switching, and tab suspension.
+- **Reactive DOM Ticker**: Directly updates the card duration label and header pill on each tick without executing heavy disk I/O.
+- **Throttled IndexedDB Flush**: Writes timer logs to IndexedDB periodically (every 10s, on pause, on target completion, and on `visibilitychange`/`pagehide`).
+- **Screen Wake Lock & Web Audio**: Holds screen wake lock while ticking and sounds harmonic chime upon reaching target duration.
+
+---
+
+### 5. Streaks, Momentum & Mathematical Formulas
 
 - **Daily Habit Completion Rate ($C_{i, d}$)**:
   $$C_{i, d} = \min\left(1.0, \frac{\text{Logged Value}_{i, d}}{\text{Target Value}_{i}}\right)$$
@@ -74,11 +87,9 @@ The application organizes daily execution and long-term reflection into four top
 
 ---
 
-### 5. Interaction Ergonomics & PWA Invariants
+### 6. Interaction Ergonomics & PWA Invariants
 
-- **Top Lens Switcher**: Sleek segmented pill header with luminous active indicator and smooth sliding transitions.
-- **Bottom Ergonomic Action Bar**: Thumb-accessible bottom bar housing the Quick Add button (`+`), Floating Undo Pill Toast, and Settings/Data Vault trigger.
-- **Interactive Habit Detail Drawer**: Slide-over drawer exposing habit-level calendar heatmap, 30-day consistency score, streak records, notes reflection log, and edit controls.
-- **Local-First Zero-Backend Architecture**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
-- **Data Portability**: Clean JSON backup/restore and CSV log export with safe state replacement.
+- **Sleek Top Header**: Stripped of sub-header clutter; carries title, ambient running timer pill, freeze token counter badge, and language toggle.
+- **Clean 4-Tab Bottom Dock**: Ergonomic thumb access to `Today`, `Insights`, `Habits`, and `Settings` with safe-bottom insets for modern mobile viewports.
+- **Local-First Zero-Backend Persistence**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
 - **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage.
