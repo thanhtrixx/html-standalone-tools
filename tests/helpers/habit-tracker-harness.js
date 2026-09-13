@@ -41,6 +41,7 @@ const HABIT_BUNDLE_MODULES = [
   "src/sync/cloud-backup.js",
   "src/ui/components.js",
   "src/ui/today-view.js",
+  "src/ui/timeline-view.js",
   "src/ui/insights-view.js",
   "src/ui/manager-view.js",
   "src/ui/detail-sheet.js",

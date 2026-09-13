@@ -45,6 +45,11 @@
       ? require("./ui/today-view.js")
       : global.HabitTodayView;
 
+  const timelineView =
+    typeof require !== "undefined"
+      ? require("./ui/timeline-view.js")
+      : global.HabitTimelineView;
+
   const managerView =
     typeof require !== "undefined"
       ? require("./ui/manager-view.js")
@@ -500,7 +505,7 @@
       todayView.renderTodayDashboard(store, container, lang);
       bindHabitCardGestures();
     } else if (activeTab === "timeline") {
-      todayView.renderTodayDashboard(store, container, lang);
+      timelineView.renderTimelineView(store, container, lang);
       bindHabitCardGestures();
     } else if (activeTab === "insights" || activeTab === "matrix") {
       insightsView.renderInsightsView(store, container, lang);
@@ -2210,6 +2215,9 @@
         pushNavigationState(tab, null);
       }
       renderApp();
+    },
+    switchLens(lens) {
+      this.switchTab(lens);
     },
     switchLanguage(lang) {
       if (store) {
