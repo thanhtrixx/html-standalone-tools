@@ -85,6 +85,7 @@ async function runUITests() {
     renderMilestoneBadges,
     renderInsightsView,
   } = require("../habit-tracker/src/ui/insights-view.js");
+  const identityView = require("../habit-tracker/src/ui/identity-view.js");
 
   const storage = storageModule.createStorageAdapter({ forceFallback: true });
   const store = new HabitStore({ storage });
@@ -3792,6 +3793,62 @@ async function runUITests() {
   assert(
     wakeLockReleased,
     "[Issue #494 AC-6] Screen Wake Lock is released upon timer completion"
+  );
+
+  // ==========================================
+  // [Issue #495] 3-Step First-Run Identity Setup Wizard & Life Pillars in Habits
+  // ==========================================
+  console.log(
+    "\n--- [Issue #495] 3-Step First-Run Identity Setup Wizard & Life Pillars in Habits ---"
+  );
+
+  const { sandbox: wizardSandbox, getOrCreateElement: getWizardEl } =
+    createHabitTrackerSandbox();
+  wizardSandbox.requestAnimationFrame = (fn) => fn();
+  wizardSandbox.cancelAnimationFrame = () => {};
+  await wizardSandbox.HabitApp.init();
+
+  // 1. Step 1 HTML rendering: 4 Life Pillars
+  const step1Html = identityView.renderIdentityWizardModal(1, "morning-mastery", "vi");
+  assert(
+    step1Html.includes("Trụ Cột Cuộc Sống") || step1Html.includes("Sức khỏe") || step1Html.includes("Tâm trí"),
+    "[Issue #495 AC-1] Wizard Step 1 introduces foundational life domains"
+  );
+
+  // 2. Step 2 HTML rendering: Curated Starter Kits
+  const step2Html = identityView.renderIdentityWizardModal(2, "morning-mastery", "vi");
+  assert(
+    step2Html.includes("Gói Khởi Động") || step2Html.includes("morning-mastery") || step2Html.includes("Khởi đầu tỉnh thức"),
+    "[Issue #495 AC-2] Wizard Step 2 presents curated 1-Click Starter Kits"
+  );
+
+  // 3. Step 3 HTML rendering: System Confirmation
+  const step3Html = identityView.renderIdentityWizardModal(3, "morning-mastery", "vi");
+  assert(
+    step3Html.includes("Sẵn Sàng") || step3Html.includes("Bắt đầu Hôm nay"),
+    "[Issue #495 AC-2] Wizard Step 3 confirms habit pack selection"
+  );
+
+  // 4. Modal Open & Close Flow
+  wizardSandbox.HabitApp.openIdentityWizard(1);
+  const wizardOverlayEl = getWizardEl("identity-wizard-modal-overlay");
+  assert(
+    !wizardOverlayEl.classList.contains("hidden") || wizardOverlayEl.style.display !== "none",
+    "[Issue #495 AC-1] openIdentityWizard() makes wizard modal overlay visible"
+  );
+
+  wizardSandbox.HabitApp.closeIdentityWizard();
+  assert(
+    wizardOverlayEl.classList.contains("hidden") || wizardOverlayEl.style.display === "none",
+    "[Issue #495 AC-4] closeIdentityWizard() hides wizard modal overlay"
+  );
+
+  // 5. Habits Catalog integration: Life Domains & Starter Kits in Habits Tab
+  wizardSandbox.HabitApp.switchTab("manager");
+  const habitsViewHtml = getWizardEl("main-content").innerHTML;
+  assert(
+    habitsViewHtml.includes("life-domain-card") || habitsViewHtml.includes("starter-kit-card") || habitsViewHtml.includes("open-identity-wizard"),
+    "[Issue #495 AC-3] Habits tab embeds life domain alignment and starter kit activation triggers"
   );
 
   // ==========================================

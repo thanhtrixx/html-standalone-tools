@@ -94,6 +94,8 @@
   let runningTimerTickCount = 0;
   let lastTimerPersistedAt = 0;
   let wakeLockSentinel = null;
+  let wizardCurrentStep = 1;
+  let wizardSelectedKitId = "morning-mastery";
   let pendingDeleteHabitId = null;
   let swipeStartX = 0;
   let swipeStartY = 0;
@@ -697,6 +699,25 @@
           <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">${i18n.t("data_vault_desc", {}, lang)}</p>
 
           <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-2xl border border-emerald-500/30 gap-3">
+              <div>
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <span>✨</span>
+                  <span>${i18n.t("wizard_title", {}, lang)}</span>
+                </h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">${i18n.t("wizard_subtitle", {}, lang)}</p>
+              </div>
+              <button
+                type="button"
+                id="btn-launch-wizard"
+                data-action="open-identity-wizard"
+                onclick="window.HabitApp.openIdentityWizard()"
+                class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold rounded-xl shadow-md shadow-emerald-500/20 active:scale-95 transition cursor-pointer whitespace-nowrap"
+              >
+                ${i18n.t("open_identity_wizard", {}, lang)}
+              </button>
+            </div>
+
             <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/40 gap-3">
               <div>
                 <h4 class="text-xs font-bold text-slate-900 dark:text-white">${i18n.t("reset_defaults_btn", {}, lang)}</h4>
@@ -1111,6 +1132,48 @@
             renderApp();
           }
         }
+      } else if (action === "open-identity-wizard") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        if (app && typeof app.openIdentityWizard === "function") {
+          app.openIdentityWizard(1);
+        } else {
+          openIdentityWizard(1);
+        }
+      } else if (action === "wizard-next-step") {
+        wizardCurrentStep = Math.min(3, wizardCurrentStep + 1);
+        renderWizardModal();
+      } else if (action === "wizard-prev-step") {
+        wizardCurrentStep = Math.max(1, wizardCurrentStep - 1);
+        renderWizardModal();
+      } else if (action === "wizard-select-kit") {
+        const kitId =
+          target.getAttribute("data-kit-id") ||
+          target.closest("[data-kit-id]")?.getAttribute("data-kit-id");
+        if (kitId) {
+          wizardSelectedKitId = kitId;
+          renderWizardModal();
+        }
+      } else if (action === "wizard-skip") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        if (app && typeof app.closeIdentityWizard === "function") {
+          app.closeIdentityWizard();
+        } else {
+          closeIdentityWizard();
+        }
+      } else if (action === "wizard-finish") {
+        const kitId =
+          target.getAttribute("data-kit-id") || wizardSelectedKitId;
+        if (kitId && store) {
+          const lang =
+            (store.getSettings() && store.getSettings().language) || "vi";
+          await store.applyStarterKit(kitId, lang);
+          showToast(i18n.t("starter_kit_applied_toast", {}, lang), "success");
+        }
+        closeIdentityWizard();
+        activeTab = "today";
+        renderApp();
       } else if (action === "export-json") {
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
@@ -1972,6 +2035,63 @@
   }
 
   /**
+   * Opens 3-step Identity Setup Wizard Modal
+   */
+  function openIdentityWizard(step = 1, kitId = "morning-mastery") {
+    wizardCurrentStep = step;
+    wizardSelectedKitId = kitId;
+    renderWizardModal();
+    const overlay = document.getElementById("identity-wizard-modal-overlay");
+    if (overlay) {
+      overlay.classList.remove("hidden");
+    }
+    pushNavigationState(activeTab, "wizard");
+  }
+
+  /**
+   * Closes Identity Setup Wizard Modal
+   */
+  function closeIdentityWizard() {
+    const overlay = document.getElementById("identity-wizard-modal-overlay");
+    if (overlay) {
+      overlay.classList.add("hidden");
+    }
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("habit_wizard_done", "true");
+      }
+    } catch (_) {}
+  }
+
+  /**
+   * Renders the current step of the Identity Setup Wizard
+   */
+  function renderWizardModal() {
+    const overlay = document.getElementById("identity-wizard-modal-overlay");
+    const container = document.getElementById("identity-wizard-container");
+    const lang =
+      (store && store.getSettings() && store.getSettings().language) || "vi";
+
+    if (
+      !identityView ||
+      typeof identityView.renderIdentityWizardModal !== "function"
+    )
+      return;
+    const modalHtml = identityView.renderIdentityWizardModal(
+      wizardCurrentStep,
+      wizardSelectedKitId,
+      lang
+    );
+
+    if (container) {
+      container.innerHTML = modalHtml;
+    }
+    if (overlay) {
+      overlay.innerHTML = `<div id="identity-wizard-container" class="w-full max-w-xl my-auto">${modalHtml}</div>`;
+    }
+  }
+
+  /**
    * Confirms reset to starter default habits
    */
   async function confirmResetDefaults() {
@@ -2753,6 +2873,15 @@
     closeResetModal,
     confirmResetDefaults,
     confirmFactoryWipe,
+    openIdentityWizard,
+    closeIdentityWizard,
+    renderWizardModal,
+    get wizardCurrentStep() {
+      return wizardCurrentStep;
+    },
+    get wizardSelectedKitId() {
+      return wizardSelectedKitId;
+    },
     get activeTab() {
       return activeTab;
     },

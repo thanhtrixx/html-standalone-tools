@@ -328,6 +328,18 @@
       <div id="reset-modal-container" class="w-full max-w-sm my-auto"></div>
     </div>
 
+    <!-- ==================== IDENTITY SETUP WIZARD MODAL OVERLAY ==================== -->
+    <div
+      id="identity-wizard-modal-overlay"
+      class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="wizard-modal-title"
+      onclick="if (event.target === this) window.HabitApp.closeIdentityWizard();"
+    >
+      <div id="identity-wizard-container" class="w-full max-w-xl my-auto"></div>
+    </div>
+
     <!-- ==================== 100% VICTORY CONFETTI CANVAS ==================== -->
     <canvas
       id="confetti-canvas"
