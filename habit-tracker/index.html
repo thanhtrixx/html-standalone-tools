@@ -318,6 +318,18 @@
       <div id="reset-modal-container" class="w-full max-w-sm my-auto"></div>
     </div>
 
+    <!-- ==================== IMMERSIVE FOCUS TIMER MODAL OVERLAY ==================== -->
+    <div
+      id="focus-timer-modal-overlay"
+      class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="focus-timer-title"
+      onclick="if (event.target === this) window.HabitApp.closeFocusTimerModal();"
+    >
+      <div id="focus-timer-container" class="w-full max-w-md my-auto"></div>
+    </div>
+
     <!-- ==================== IDENTITY SETUP WIZARD MODAL OVERLAY ==================== -->
     <div
       id="identity-wizard-modal-overlay"

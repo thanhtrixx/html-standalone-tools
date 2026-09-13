@@ -5554,6 +5554,193 @@ async function runUITests() {
     Date.now = realNow507;
   }
 
+  // ==========================================
+  // [Issue #508] Immersive Focus Timer Modal & Quick Controls
+  // ==========================================
+  console.log("\n--- [Issue #508] Immersive Focus Timer Modal & Quick Controls ---");
+
+  const { sandbox: timer508Sandbox } = createHabitTrackerSandbox();
+  await timer508Sandbox.HabitApp.init();
+  const testHabit508 = {
+    id: "habit-focus-508",
+    name: "Deep Meditation",
+    type: "duration",
+    targetValue: 600, // 10 minutes
+    unit: "mins",
+    icon: "🧘",
+    color: "emerald",
+    routines: ["morning"],
+    frequency: "daily",
+    active: true,
+  };
+  await timer508Sandbox.HabitApp.store.addHabit(testHabit508);
+  const date508 = "2026-09-13";
+  timer508Sandbox.HabitApp.store.setActiveDate(date508);
+
+  // 1. Direct renderFocusTimerModal check (Vietnamese)
+  const renderedVi = timer508Sandbox.HabitTodayView.renderFocusTimerModal(
+    timer508Sandbox.HabitApp.store,
+    testHabit508.id,
+    "remaining",
+    true,
+    "vi"
+  );
+  assert(
+    renderedVi.includes('id="focus-timer-modal"'),
+    "[Issue #508 AC-1] Rendered Focus Modal contains #focus-timer-modal container"
+  );
+  assert(
+    renderedVi.includes('id="focus-modal-svg-ring"'),
+    "[Issue #508 AC-1] Rendered Focus Modal contains circular SVG progress ring"
+  );
+  assert(
+    renderedVi.includes('id="focus-modal-timer-digits"'),
+    "[Issue #508 AC-1] Rendered Focus Modal contains large timer digits"
+  );
+  assert(
+    renderedVi.includes('data-action="toggle-timer-display-mode"'),
+    "[Issue #508 AC-1] Rendered Focus Modal includes display mode toggle"
+  );
+  assert(
+    renderedVi.includes('data-delta="60"') && renderedVi.includes('data-delta="300"') && renderedVi.includes('data-delta="-60"'),
+    "[Issue #508 AC-2] Rendered Focus Modal contains +1m, +5m, -1m quick adjust buttons"
+  );
+  assert(
+    renderedVi.includes('data-action="timer-toggle-sound"'),
+    "[Issue #508 AC-3] Rendered Focus Modal includes sound effect toggle button"
+  );
+  assert(
+    renderedVi.includes("Thời gian còn lại"),
+    "[Issue #508 AC-1] Vietnamese translation contains 'Thời gian còn lại' for remaining mode"
+  );
+
+  // 2. Direct renderFocusTimerModal check (English)
+  const renderedEn = timer508Sandbox.HabitTodayView.renderFocusTimerModal(
+    timer508Sandbox.HabitApp.store,
+    testHabit508.id,
+    "elapsed",
+    false,
+    "en"
+  );
+  assert(
+    renderedEn.includes("Elapsed"),
+    "[Issue #508 AC-1] English translation contains 'Elapsed' for elapsed mode"
+  );
+  assert(
+    renderedEn.includes("🔕"),
+    "[Issue #508 AC-3] When sound is disabled, sound icon renders 🔕"
+  );
+
+  // 3. openFocusTimerModal & closeFocusTimerModal
+  timer508Sandbox.HabitApp.openFocusTimerModal(testHabit508.id);
+  assertEqual(
+    timer508Sandbox.HabitApp.activeFocusModalHabitId,
+    testHabit508.id,
+    "[Issue #508 AC-1] openFocusTimerModal sets activeFocusModalHabitId"
+  );
+  const overlay508 = timer508Sandbox.document.getElementById("focus-timer-modal-overlay");
+  assertEqual(
+    overlay508.classList.contains("hidden"),
+    false,
+    "[Issue #508 AC-1] Focus modal overlay is visible"
+  );
+
+  // 4. toggleTimerDisplayMode
+  assertEqual(
+    timer508Sandbox.HabitApp.timerDisplayMode,
+    "remaining",
+    "[Issue #508 AC-2] Default timerDisplayMode is 'remaining'"
+  );
+  timer508Sandbox.HabitApp.toggleTimerDisplayMode();
+  assertEqual(
+    timer508Sandbox.HabitApp.timerDisplayMode,
+    "elapsed",
+    "[Issue #508 AC-2] toggleTimerDisplayMode switches to 'elapsed'"
+  );
+  timer508Sandbox.HabitApp.toggleTimerDisplayMode();
+  assertEqual(
+    timer508Sandbox.HabitApp.timerDisplayMode,
+    "remaining",
+    "[Issue #508 AC-2] toggleTimerDisplayMode switches back to 'remaining'"
+  );
+
+  // 5. toggleTimerSound
+  assertEqual(
+    timer508Sandbox.HabitApp.timerSoundEnabled,
+    true,
+    "[Issue #508 AC-3] Default timerSoundEnabled is true"
+  );
+  timer508Sandbox.HabitApp.toggleTimerSound();
+  assertEqual(
+    timer508Sandbox.HabitApp.timerSoundEnabled,
+    false,
+    "[Issue #508 AC-3] toggleTimerSound toggles to false"
+  );
+  timer508Sandbox.HabitApp.toggleTimerSound();
+  assertEqual(
+    timer508Sandbox.HabitApp.timerSoundEnabled,
+    true,
+    "[Issue #508 AC-3] toggleTimerSound toggles back to true"
+  );
+
+  // 6. handleTimerAdjust when timer is paused/idle
+  await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, 60); // +1m
+  let logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  assertEqual(
+    logVal508,
+    60,
+    "[Issue #508 AC-4] handleTimerAdjust (+60s) updates log to 60s"
+  );
+
+  await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, 300); // +5m
+  logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  assertEqual(
+    logVal508,
+    360,
+    "[Issue #508 AC-4] handleTimerAdjust (+300s) updates log to 360s"
+  );
+
+  await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, -60); // -1m
+  logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  assertEqual(
+    logVal508,
+    300,
+    "[Issue #508 AC-4] handleTimerAdjust (-60s) updates log to 300s"
+  );
+
+  await timer508Sandbox.HabitApp.handleTimerAdjust(testHabit508.id, -500); // clamp at 0
+  logVal508 = timer508Sandbox.HabitApp.store.state.logs[`${testHabit508.id}_${date508}`]?.value || 0;
+  assertEqual(
+    logVal508,
+    0,
+    "[Issue #508 AC-4] handleTimerAdjust clamps at 0 for negative deltas"
+  );
+
+  // 7. jumpToRunningTimer opens focus modal
+  await timer508Sandbox.HabitApp.handleToggleTimer(testHabit508.id, date508);
+  assertEqual(
+    timer508Sandbox.HabitApp.runningTimerHabitId,
+    testHabit508.id,
+    "[Issue #508 AC-5] Timer is running"
+  );
+  timer508Sandbox.HabitApp.closeFocusTimerModal();
+  assertEqual(
+    timer508Sandbox.HabitApp.activeFocusModalHabitId,
+    null,
+    "[Issue #508 AC-5] closeFocusTimerModal clears active modal"
+  );
+
+  await timer508Sandbox.HabitApp.jumpToRunningTimer();
+  assertEqual(
+    timer508Sandbox.HabitApp.activeFocusModalHabitId,
+    testHabit508.id,
+    "[Issue #508 AC-5] jumpToRunningTimer switches to active timer habit and opens modal"
+  );
+
+  // Clean up timer
+  await timer508Sandbox.HabitApp.handleToggleTimer(testHabit508.id, date508);
+  timer508Sandbox.HabitApp.closeFocusTimerModal();
+
   polishSandbox.HabitApp.closeHabitModal();
 }
 

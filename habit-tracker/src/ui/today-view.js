@@ -293,14 +293,26 @@
             </div>
           </div>
 
-          <button
-            type="button"
-            data-action="open-detail"
-            data-habit-id="${habit.id}"
-            class="text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium py-1 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/40 cursor-pointer"
-          >
-            ${lang === "vi" ? "Chi tiết" : "Details"} ➔
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              data-action="open-focus-timer"
+              data-habit-id="${habit.id}"
+              class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold py-1 px-2.5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/30 hover:bg-emerald-500/30 active:scale-95 transition cursor-pointer flex items-center gap-1"
+            >
+              <span>🎯</span>
+              <span>Focus</span>
+            </button>
+
+            <button
+              type="button"
+              data-action="open-detail"
+              data-habit-id="${habit.id}"
+              class="text-[11px] text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium py-1 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/40 cursor-pointer"
+            >
+              ${lang === "vi" ? "Chi tiết" : "Details"} ➔
+            </button>
+          </div>
         </div>
       `;
     }
@@ -569,11 +581,252 @@
     components.createConfettiBurst(canvasElement, onComplete);
   }
 
+  /**
+   * Renders Immersive Focus Timer Modal
+   */
+  function renderFocusTimerModal(
+    habitOrStore,
+    logEntryOrHabitId = { value: 0, completed: false },
+    isRunningOrDisplayMode = false,
+    timerDisplayModeOrSound = "remaining",
+    soundEnabledOrLang = true,
+    langOrUnused = "vi"
+  ) {
+    let habit = habitOrStore;
+    let logEntry = logEntryOrHabitId;
+    let isRunning = isRunningOrDisplayMode;
+    let timerDisplayMode = timerDisplayModeOrSound;
+    let soundEnabled = soundEnabledOrLang;
+    let lang = langOrUnused;
+
+    // Support (store, habitId, timerDisplayMode, soundEnabled, lang)
+    if (habitOrStore && typeof habitOrStore.getHabit === "function") {
+      const store = habitOrStore;
+      const habitId = logEntryOrHabitId;
+      habit = store.getHabit(habitId);
+      const activeDate =
+        store.getActiveDate && typeof store.getActiveDate === "function"
+          ? store.getActiveDate()
+          : new Date().toISOString().split("T")[0];
+      logEntry =
+        (store.state &&
+          store.state.logs &&
+          store.state.logs[`${habitId}_${activeDate}`]) || {
+          value: 0,
+          completed: false,
+        };
+      isRunning =
+        typeof HabitApp !== "undefined" &&
+        HabitApp.runningTimerHabitId === habitId;
+      timerDisplayMode =
+        typeof isRunningOrDisplayMode === "string"
+          ? isRunningOrDisplayMode
+          : "remaining";
+      soundEnabled =
+        typeof timerDisplayModeOrSound === "boolean"
+          ? timerDisplayModeOrSound
+          : true;
+      lang =
+        typeof soundEnabledOrLang === "string"
+          ? soundEnabledOrLang
+          : store.getSettings && typeof store.getSettings === "function"
+            ? store.getSettings().language || "vi"
+            : "vi";
+    }
+
+    if (!habit) return "";
+
+    const currentSecs = Math.max(0, (logEntry && logEntry.value) || 0);
+    const targetSecs = Math.max(1, habit.targetValue || 1200);
+    const isCompleted = currentSecs >= targetSecs;
+    const remainingSecs = Math.max(0, targetSecs - currentSecs);
+    const overtimeSecs = Math.max(0, currentSecs - targetSecs);
+
+    const colorHex = getColorHex(habit.color);
+
+    let displayTimeStr = "";
+    let modeLabel = "";
+
+    if (isCompleted) {
+      const m = String(Math.floor(overtimeSecs / 60)).padStart(2, "0");
+      const s = String(overtimeSecs % 60).padStart(2, "0");
+      displayTimeStr = `+${m}:${s}`;
+      modeLabel = i18n.t("focus_timer_overtime", {}, lang);
+    } else if (timerDisplayMode === "elapsed") {
+      const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
+      const s = String(currentSecs % 60).padStart(2, "0");
+      displayTimeStr = `${m}:${s}`;
+      modeLabel = i18n.t("focus_timer_elapsed", {}, lang);
+    } else {
+      const m = String(Math.floor(remainingSecs / 60)).padStart(2, "0");
+      const s = String(remainingSecs % 60).padStart(2, "0");
+      displayTimeStr = `${m}:${s}`;
+      modeLabel = i18n.t("focus_timer_remaining", {}, lang);
+    }
+
+    const targetFormatted = i18n.formatDuration(targetSecs, lang);
+    const durationFormatted = i18n.formatDuration(currentSecs, lang);
+
+    const radius = 90;
+    const circumference = 2 * Math.PI * radius; // 565.487
+    const ratio = Math.min(1.0, currentSecs / targetSecs);
+    const strokeDashoffset = circumference * (1 - ratio);
+
+    const routineNames = engine
+      .getHabitRoutines(habit)
+      .map((r) => i18n.t(`routine_${r}`, {}, lang))
+      .join(", ");
+
+    return `
+      <div id="focus-timer-modal" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl text-white relative overflow-hidden transition-transform max-w-md mx-auto" style="box-shadow: 0 10px 40px -5px ${colorHex}33;">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-xl shadow-md shrink-0" style="background-color: ${colorHex}22; border: 1px solid ${colorHex}66;">
+              <span>${habit.icon || "⏱️"}</span>
+            </div>
+            <div class="min-w-0">
+              <h3 id="focus-timer-title" class="font-bold text-base truncate">${habit.name}</h3>
+              <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                <span>${routineNames}</span>
+                <span>&bull;</span>
+                <span>${i18n.t("focus_timer_target", { target: targetFormatted }, lang)}</span>
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            data-action="close-focus-timer"
+            aria-label="${i18n.t("close", {}, lang)}"
+            class="text-slate-400 hover:text-white text-2xl leading-none p-1.5 rounded-xl hover:bg-slate-800 transition cursor-pointer"
+          >&times;</button>
+        </div>
+
+        <!-- Center Circular Dial -->
+        <div class="relative flex flex-col items-center justify-center my-8">
+          <svg class="w-64 h-64 -rotate-90 transform" viewBox="0 0 200 200">
+            <!-- Background Track -->
+            <circle
+              cx="100"
+              cy="100"
+              r="${radius}"
+              class="stroke-slate-800 fill-none"
+              stroke-width="10"
+            />
+            <!-- Foreground Reactive Progress Stroke -->
+            <circle
+              id="focus-modal-svg-ring"
+              cx="100"
+              cy="100"
+              r="${radius}"
+              fill="none"
+              stroke="${colorHex}"
+              stroke-width="10"
+              stroke-linecap="round"
+              stroke-dasharray="${circumference}"
+              stroke-dashoffset="${strokeDashoffset}"
+              class="transition-all duration-300"
+            />
+          </svg>
+
+          <!-- Inside Dial Content -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+            <button
+              type="button"
+              data-action="toggle-timer-display-mode"
+              class="text-[11px] font-bold uppercase tracking-widest text-slate-400 hover:text-emerald-400 transition cursor-pointer px-2.5 py-1 rounded-full bg-slate-800/60 border border-slate-700/60 mb-2"
+              id="focus-modal-mode-badge"
+            >
+              ${modeLabel} ⇄
+            </button>
+            <div
+              id="focus-modal-timer-digits"
+              class="text-4xl sm:text-5xl font-black font-mono tabular-nums tracking-tight ${isCompleted ? "text-emerald-400" : isRunning ? "text-emerald-400" : "text-white"}"
+            >
+              ${displayTimeStr}
+            </div>
+            <div id="focus-modal-sub-ticker" class="text-xs text-slate-400 font-mono mt-2 tabular-nums">
+              ${durationFormatted} / ${targetFormatted}
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Time Adjustment Steppers -->
+        <div class="flex items-center justify-center gap-2 mb-6">
+          <button
+            type="button"
+            data-action="timer-adjust"
+            data-habit-id="${habit.id}"
+            data-delta="-60"
+            class="py-1.5 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-xs font-bold text-slate-300 active:scale-95 transition cursor-pointer"
+          >
+            -1m
+          </button>
+          <button
+            type="button"
+            data-action="timer-adjust"
+            data-habit-id="${habit.id}"
+            data-delta="60"
+            class="py-1.5 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-xs font-bold text-slate-300 active:scale-95 transition cursor-pointer"
+          >
+            +1m
+          </button>
+          <button
+            type="button"
+            data-action="timer-adjust"
+            data-habit-id="${habit.id}"
+            data-delta="300"
+            class="py-1.5 px-3 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700/60 text-xs font-bold text-slate-300 active:scale-95 transition cursor-pointer"
+          >
+            +5m
+          </button>
+        </div>
+
+        <!-- Primary Control Actions -->
+        <div class="flex items-center justify-between gap-3 pt-4 border-t border-slate-800">
+          <button
+            type="button"
+            data-action="reset-timer"
+            data-habit-id="${habit.id}"
+            aria-label="${i18n.t("focus_timer_reset", {}, lang)}"
+            class="w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center text-lg border border-slate-700/60 text-slate-300 transition cursor-pointer"
+            title="${i18n.t("focus_timer_reset", {}, lang)}"
+          >
+            🔄
+          </button>
+
+          <button
+            type="button"
+            data-action="toggle-timer"
+            data-habit-id="${habit.id}"
+            id="focus-modal-play-btn"
+            class="flex-1 py-3.5 px-6 rounded-2xl font-black text-sm text-slate-950 flex items-center justify-center gap-2 shadow-lg active:scale-95 transition cursor-pointer ${isRunning ? "animate-pulse ring-4 ring-emerald-500/20" : ""}"
+            style="background-color: ${colorHex};"
+          >
+            <span class="text-base">${isRunning ? "⏸" : "▶"}</span>
+            <span>${isRunning ? i18n.t("focus_timer_pause", {}, lang) : i18n.t("focus_timer_start", {}, lang)}</span>
+          </button>
+
+          <button
+            type="button"
+            data-action="timer-toggle-sound"
+            aria-label="${soundEnabled ? i18n.t("focus_timer_sound_on", {}, lang) : i18n.t("focus_timer_sound_off", {}, lang)}"
+            class="w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 active:scale-95 flex items-center justify-center text-lg border border-slate-700/60 text-slate-300 transition cursor-pointer"
+            title="${soundEnabled ? i18n.t("focus_timer_sound_on", {}, lang) : i18n.t("focus_timer_sound_off", {}, lang)}"
+          >
+            ${soundEnabled ? "🔔" : "🔕"}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   const todayExports = {
     renderDateRibbon,
     renderHabitCard,
     renderRoutineSection,
     renderTodayDashboard,
+    renderFocusTimerModal,
     triggerVictoryConfetti,
     getColorHex,
     toggleHabitExpanded,
