@@ -4901,6 +4901,35 @@ async function runUITests() {
     detailOverlayClosed && detailOverlayClosed.classList.contains("hidden"),
     "[Issue #472 AC-4] Detail sheet closes cleanly"
   );
+
+  // ----------------------------------------------------
+  // Issue #478: Timeline & Routines Lens Verification
+  // ----------------------------------------------------
+  const { sandbox: timelineSandbox } = createHabitTrackerSandbox();
+  await timelineSandbox.HabitApp.init();
+
+  // Switch to timeline lens
+  timelineSandbox.HabitApp.switchTab("timeline");
+  const mainContentEl = timelineSandbox.document.getElementById("main-content");
+  assert(
+    mainContentEl && mainContentEl.innerHTML.includes("timeline-view"),
+    "[Issue #478 AC-1] Switching to timeline lens renders .timeline-view container"
+  );
+  assert(
+    mainContentEl && mainContentEl.innerHTML.includes("timeline-stream"),
+    "[Issue #478 AC-2] Timeline view renders circadian time-block stream"
+  );
+  assert(
+    mainContentEl && (mainContentEl.innerHTML.includes("data-routine=\"morning\"") || mainContentEl.innerHTML.includes("data-routine=\"afternoon\"")),
+    "[Issue #478 AC-3] Timeline view partitions scheduled habits by routine anchors"
+  );
+
+  // Switch via switchLens
+  timelineSandbox.HabitApp.switchLens("timeline");
+  assert(
+    mainContentEl && mainContentEl.innerHTML.includes("timeline-block"),
+    "[Issue #478 AC-4] switchLens('timeline') successfully activates and renders timeline stream"
+  );
 }
 
 runUITests()
