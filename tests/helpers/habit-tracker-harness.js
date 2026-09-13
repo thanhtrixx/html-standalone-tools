@@ -44,6 +44,7 @@ const HABIT_BUNDLE_MODULES = [
   "src/ui/timeline-view.js",
   "src/ui/insights-view.js",
   "src/ui/matrix-view.js",
+  "src/ui/identity-view.js",
   "src/ui/manager-view.js",
   "src/ui/detail-sheet.js",
   "src/pwa/notifications.js",
