@@ -14,6 +14,9 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0004-pwa-back-stack-dock-highlight-timer-reactivity-and-data-hygiene.md`](./docs/adr/0004-pwa-back-stack-dock-highlight-timer-reactivity-and-data-hygiene.md)
 - [`docs/adr/0005-obsidian-glow-multi-lens-architecture-and-ux-overhaul.md`](./docs/adr/0005-obsidian-glow-multi-lens-architecture-and-ux-overhaul.md)
 - [`docs/adr/0006-streamlined-navigation-checkbox-first-modality-and-reactive-timer-engine.md`](./docs/adr/0006-streamlined-navigation-checkbox-first-modality-and-reactive-timer-engine.md)
+- [`docs/adr/0007-obsidian-glow-visual-polish-keyboard-ergonomics-and-ia-decluttering.md`](./docs/adr/0007-obsidian-glow-visual-polish-keyboard-ergonomics-and-ia-decluttering.md)
+- [`docs/adr/0008-focus-timer-modal-resilient-worker-empty-state-wizard-and-layering.md`](./docs/adr/0008-focus-timer-modal-resilient-worker-empty-state-wizard-and-layering.md)
+- [`docs/adr/0009-header-alignment-insights-accuracy-language-wizard-and-floating-timer.md`](./docs/adr/0009-header-alignment-insights-accuracy-language-wizard-and-floating-timer.md)
 
 ---
 
@@ -24,7 +27,7 @@ For architectural decision history and UI/UX evolution, refer to:
 The application organizes daily execution, deep analytics, habit catalog management, and preferences into four primary tabs:
 
 - **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day horizontal date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with inline expandability.
-- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring a 52-week GitHub-style contribution heatmap, 0-baseline day-of-week radar/bar adherence charts, streak milestone records, and completion velocity.
+- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring a 52-week GitHub-style contribution heatmap, global aggregate consistency scores (30d/90d), 0-baseline day-of-week adherence charts, streak milestone records, and completion velocity.
 - **Habits Catalog & Identity (`habits`)**: Comprehensive personal habit catalog management (Add, Edit, Reorder, Archive, Delete) with integrated **Identity System & Life Pillars** (Health, Mind, Craft, Discipline) and Curated Starter Kits.
 - **Settings & Data Vault (`settings`)**: Configuration hub for streak freeze tokens, vacation pause mode, bilingual language switching (VI/EN), dark/light theme toggle, and 1-click JSON backup/restore & CSV export.
   _Avoid_: Sub-header bar, lens switcher, tab page, screen switch.
@@ -52,7 +55,11 @@ The application organizes daily execution, deep analytics, habit catalog managem
 
 ### 3. Progressive Identity Onboarding & Starter Kits
 
-- **Identity Onboarding Wizard**: A 3-step setup modal appearing on first run or empty state to introduce life domains and guide initial habit configuration without overwhelming the daily dashboard.
+- **4-Step Language-First Identity Setup Wizard**: A 4-step setup modal appearing on first run or empty state:
+  - **Step 1: Language Selection**: Prominent interactive cards (`🇻🇳 Tiếng Việt` / `🇺🇸 English`) with immediate reactivity.
+  - **Step 2: 4 Life Pillars**: Introduction to core domains (`Health`, `Mind`, `Craft`, `Discipline`).
+  - **Step 3: Curated Starter Kits**: 1-tap kit selection.
+  - **Step 4: Confirmation & Launch**: Habit preview and single-click activation.
 - **Curated Starter Kits**: Pre-configured habit packs that allow immediate 1-click adoption:
   - **Morning Mastery**: Morning hydration, 10-min meditation, light stretching, daily planning.
   - **Deep Focus & Flow**: 45-min pomodoro session, zero social media block, reading 20 pages.
@@ -62,13 +69,14 @@ The application organizes daily execution, deep analytics, habit catalog managem
 
 ---
 
-### 4. Reactive Timer Architecture (PWA-Timer Standard) & Focus Session Mode
+### 4. Reactive Timer Architecture & Floating Dynamic Island
 
 - **Inline Web Worker & Fallback**: Executes timer ticks on a background thread with CSP-compliant `worker-src 'self' blob:;` policy and instantaneous fallback to `setInterval` if worker creation is blocked.
 - **Exact Timestamp Delta**: Calculates elapsed duration using `Math.floor((Date.now() - startedAt) / 1000)` ensuring 100% time accuracy across phone lock, app switching, and tab suspension.
 - **Hybrid Countdown with Overtime Logging**: Counts down from target duration (e.g. 20:00 ➔ 00:00). When target is reached, triggers completion chime and celebratory confetti, then continues counting up (+00:01, +00:02...) to record full overtime focus sessions.
+- **Floating Dynamic Timer Island (`#floating-timer-island`)**: An ergonomic floating island anchored above the bottom dock (`bottom-20` / `z-40`) visible across all tabs. Displays habit icon, habit name, live countdown, mini progress bar, and 1-tap Play/Pause toggle. Tapping opens the Focus Timer Modal.
 - **Immersive Focus Timer Modal**: A dedicated distraction-free modal (`#focus-timer-modal-overlay`) featuring a large circular SVG progress dial, remaining/elapsed time display, play/pause/reset controls, quick time steppers (`+1m`, `+5m`), and ambient domain glow.
-- **Reactive DOM Ticker**: Directly updates card duration, header pill, and focus modal without heavy disk I/O.
+- **Card Drawer Streamlining**: Simple control bar (`[ ▶ Start / ⏸ Pause ]`, `[ 🔄 Reset ]`, large focal ticker `12:00 / 20:00`, `[ 🎯 Focus Mode ]`, `[ Details ➔ ]`) without redundant sub-tickers.
 - **Throttled IndexedDB Flush**: Writes timer logs to IndexedDB periodically (every 10s, on pause, on target completion, and on `visibilitychange`/`pagehide`).
 - **Screen Wake Lock & Web Audio**: Holds screen wake lock while ticking and sounds harmonic sine chime upon reaching target duration.
 
@@ -78,23 +86,24 @@ The application organizes daily execution, deep analytics, habit catalog managem
 
 - **Daily Habit Completion Rate ($C_{i, d}$)**:
   $$C_{i, d} = \min\left(1.0, \frac{\text{Logged Value}_{i, d}}{\text{Target Value}_{i}}\right)$$
-- **Active Consecutive Streak ($S_i$)**: Consecutive scheduled active days where $C_{i, d} \ge 1.0$.
+- **Active Consecutive Streak ($S_i$)**: Consecutive scheduled active days where $C_{i, d} \ge 1.0$. Freeze tokens only preserve existing active streaks ($> 0$), never start streaks on empty days.
 - **Streak Freeze Token**: Anti-guilt buffer (2 tokens per 30-day window) preserving streak count on missed scheduled days.
-- **Rolling 30-Day Consistency Score ($\text{Score}_{30\text{d}}$)**:
-  $$\text{Score}_{30\text{d}} = \begin{cases} 0\% & \text{if Total Scheduled Days} = 0 \\ \frac{\sum_{d=1}^{30} \mathbf{1}_{C_{i, d} \ge 1.0}}{\text{Total Scheduled Days in last 30 days (excluding Paused)}} \times 100\% & \text{otherwise} \end{cases}$$
+- **Global Rolling Consistency Score ($\text{Score}_{\text{window}}$)**:
+  $$\text{Score}_{\text{window}} = \begin{cases} 0\% & \text{if Total Scheduled Habit-Days} = 0 \\ \frac{\sum_{d=1}^{W} \text{Completed Scheduled Habits}}{\sum_{d=1}^{W} \text{Total Scheduled Habits}} \times 100\% & \text{otherwise} \end{cases}$$
 - **Day-of-Week Consistency Rate ($\text{Rate}_{w}$)**:
   $$\text{Rate}_{w} = \begin{cases} 0\% & \text{if Scheduled}_{w} = 0 \\ \frac{\text{Completed}_{w}}{\text{Scheduled}_{w}} \times 100\% & \text{otherwise} \end{cases}$$
 - **Overall Daily Progress Percentage ($D_d$)**:
   $$D_d = \begin{cases} 0\% & \text{if } N_{\text{scheduled today}} = 0 \\ \frac{\sum_{i \in \text{scheduled today}} C_{i, d}}{N_{\text{scheduled today}}} \times 100\% & \text{otherwise} \end{cases}$$
+- **Perfect Days**: Count of calendar days with scheduled habits $> 0$ and $D_d = 100\%$.
 
 ---
 
 ### 6. Interaction Ergonomics, Modal Hierarchy & PWA Invariants
 
-- **Sleek Top Header**: Stripped of sub-header clutter and taglines; carries title, ambient running timer pill, freeze token counter badge, and language toggle.
+- **Standardized Top Header**: Fixed `h-8` (32px) height constraint on all left logo and right-side interactive badges (`#freeze-tokens-count`, `#lang-toggle-btn`) with centered baselines and uniform touch ergonomics.
 - **Clean 4-Tab Bottom Dock**: Ergonomic thumb access to `Today`, `Insights`, `Habits`, and `Settings` without floating button obstructions.
 - **Dual Empty-State Gateway**: Both `Today` and `Habits` tabs offer prominent dual CTAs when empty: Primary `✨ Identity Setup Wizard` and Secondary `+ Add Habit`.
 - **Post-Wipe Auto-Onboarding**: Factory Wipe automatically routes to Today and presents the Identity Setup Wizard modal.
-- **Modal Stacking Hierarchy**: Enforces strict z-index layering (`Detail Sheet` at `z-50`, `Edit Modal` at `z-60`, `Focus Timer` at `z-60`) ensuring nested actions (e.g. Details ➔ Edit Habit) render properly without clipping.
+- **Modal Stacking Hierarchy**: Enforces strict z-index layering (`Detail Sheet` at `z-50`, `Edit Modal` at `z-60`, `Focus Timer` at `z-60`) ensuring nested actions render properly without clipping.
 - **Local-First Zero-Backend Persistence**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
 - **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage.

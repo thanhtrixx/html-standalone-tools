@@ -65,20 +65,37 @@ tests/
 
 ### 5. Focus Timer Engine, Empty States & Modal Hierarchy (`tests/habit-tracker-ui-components.test.js`)
 
-- [ ] **CSP Compliance & Timer Worker Resilience**:
+- [x] **CSP Compliance & Timer Worker Resilience**:
   - `startTimerTicker()` initializes Web Worker when supported or cleanly falls back to `setInterval` without throwing uncaught exceptions.
   - Sub-second DOM ticker accurately reflects elapsed duration calculated from timestamp deltas.
   - Screen Wake Lock API is invoked on timer start and released on stop/pause/reset.
-- [ ] **Immersive Focus Timer Modal**:
+- [x] **Immersive Focus Timer Modal**:
   - `#focus-timer-modal-overlay` opens on ambient header/dock pill click or card timer tap.
   - Renders large circular progress ring with reactive stroke dashoffset and hybrid countdown/overtime display.
   - Quick time adjustment steppers (`+1m`, `+5m`, `-1m`) mutate the target/duration reactively.
   - Web Audio sine harmonic chime is synthesized upon reaching 100% completion.
-- [ ] **Dual Empty-State Gateway & Factory Wipe Automation**:
+- [x] **Dual Empty-State Gateway & Factory Wipe Automation**:
   - Empty `Today` view displays both `✨ Identity Setup Wizard` and `+ Add Habit` buttons.
   - Empty `Habits` catalog view displays both `✨ Identity Setup Wizard` and `+ Add Habit` buttons.
   - Calling `confirmFactoryWipe()` wipes database, redirects to `Today`, and auto-launches the 3-step Identity Setup Wizard modal.
-- [ ] **Shell Decluttering & Modal Layering Invariants**:
+- [x] **Shell Decluttering & Modal Layering Invariants**:
   - `#floating-quick-add-btn` is completely absent from the DOM.
   - Top header is free of the subtitle `Obsidian Glow • Offline-First`.
   - `#habit-edit-modal-overlay` has `z-index >= 60` and displays above `#detail-sheet-overlay` (`z-50`) without z-index collisions.
+
+### 6. Header Alignment, Insights Accuracy & Floating Dynamic Island (ADR-0009)
+
+- [ ] **Header Height Harmony**:
+  - Logo (`w-8 h-8`), title text, freeze token badge (`#freeze-tokens-count`), and language switcher (`#lang-toggle-btn`) render with uniform height (`32px`) and vertically centered flex baselines.
+- [ ] **Insights Mathematical Integrity & Zero-Baseline Gating**:
+  - `calculateStreakAndConsistency` preserves `bestStreak: 0` and consumes 0 freeze tokens on empty history.
+  - `calculateOverallConsistencyScore` returns exact percentage of scheduled habit completions across 30d/90d windows.
+  - `renderInsightsView` renders localized `heatmap_subtitle` and zero duplicate titles.
+- [ ] **4-Step Language-First Identity Setup Wizard**:
+  - Step 1 renders language selection (`🇻🇳` / `🇺🇸`); selecting language reactively updates modal UI and persists to store.
+  - Stepper indicators accurately reflect 4 steps with working back/next navigation.
+- [ ] **Timer Card Decluttering & Floating Dynamic Mini-Player**:
+  - Button label uses `Start` / `Bắt đầu` and `Pause` / `Tạm dừng`.
+  - Card drawer renders a clean single ticker row without duplicate numbers.
+  - `#floating-timer-island` appears above bottom dock when timer is running and provides 1-tap play/pause and focus modal expansion across all tabs.
+
