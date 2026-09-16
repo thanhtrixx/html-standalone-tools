@@ -1012,6 +1012,69 @@ try {
     0,
     "[Issue #520 AC-1] 0-streak habit with 10 freeze tokens uses 0 freeze tokens"
   );
+
+  // ==========================================
+  // [Issue #534] Invariant Start-Date Scheduling & Weekday Adherence Accuracy
+  // ==========================================
+  const habit534 = {
+    id: "h-day-one",
+    scheduleType: "daily",
+    createdAt: "2026-09-12",
+  };
+
+  // 1. Prior dates strictly return false from isScheduledDate
+  assertEqual(
+    engine.isScheduledDate(habit534, "2026-09-11"),
+    false,
+    "[Issue #534 AC-1] isScheduledDate returns false for dates prior to habit inception (createdAt)"
+  );
+  assertEqual(
+    engine.isScheduledDate(habit534, "2026-09-12"),
+    true,
+    "[Issue #534 AC-1] isScheduledDate returns true for inception date"
+  );
+
+  // 2. Day-one weekday adherence with 100% completion evaluates to 100% adherence (eliminates 8% bug)
+  const logs534 = {
+    "h-day-one_2026-09-12": {
+      habitId: "h-day-one",
+      date: "2026-09-12",
+      completed: true,
+      value: 1,
+    },
+  };
+  const weekdayStats534 = engine.calculateWeekdayAdherence(
+    [habit534],
+    logs534,
+    90,
+    "2026-09-12"
+  );
+
+  // 2026-09-12 is Saturday (dayOfWeek = 6)
+  const saturdayStat = weekdayStats534.find((s) => s.dayOfWeek === 6);
+  assertEqual(
+    saturdayStat.scheduled,
+    1,
+    "[Issue #534 AC-2] Day-one habit has exactly 1 scheduled Saturday within active lifetime"
+  );
+  assertEqual(
+    saturdayStat.rate,
+    100,
+    "[Issue #534 AC-2] Day-one 100% completion evaluates to 100% weekday adherence without historical skew"
+  );
+
+  // 3. Consistency score and routine adherence evaluation
+  const consistencyScore534 = engine.calculateOverallConsistencyScore(
+    [habit534],
+    logs534,
+    30,
+    "2026-09-12"
+  );
+  assertEqual(
+    consistencyScore534,
+    100,
+    "[Issue #534 AC-4] calculateOverallConsistencyScore evaluates to 100% for day-one completion without pre-inception penalties"
+  );
 } catch (err) {
   console.error("❌ Exception during Engine Math test execution:", err);
   process.exit(1);

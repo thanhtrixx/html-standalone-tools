@@ -508,7 +508,7 @@
           reminderTime: "14:00",
           archived: false,
           isPaused: false,
-          createdAt: engine.toDateString(new Date()),
+          createdAt: "2026-01-01",
           order: 0,
         },
         {
@@ -524,7 +524,7 @@
           reminderTime: "07:00",
           archived: false,
           isPaused: false,
-          createdAt: engine.toDateString(new Date()),
+          createdAt: "2026-01-01",
           order: 1,
         },
         {
@@ -541,7 +541,7 @@
           reminderTime: "21:00",
           archived: false,
           isPaused: false,
-          createdAt: engine.toDateString(new Date()),
+          createdAt: "2026-01-01",
           order: 2,
         },
       ];
