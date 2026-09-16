@@ -81,6 +81,8 @@ const startTime = Date.now();
       { id: "detail-sheet-overlay", role: "dialog" },
       { id: "delete-confirm-modal-overlay", role: "alertdialog" },
       { id: "reset-confirm-modal-overlay", role: "alertdialog" },
+      { id: "focus-timer-modal-overlay", role: "dialog" },
+      { id: "floating-timer-island", role: "region" },
       { id: "pwa-update-banner", role: "banner" },
     ];
 

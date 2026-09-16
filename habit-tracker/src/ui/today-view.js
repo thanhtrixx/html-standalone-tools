@@ -244,21 +244,6 @@
           isExpanded ? "" : "hidden"
         } mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
           <div class="flex items-center gap-2">
-            ${
-              hasProgress
-                ? `
-              <button
-                type="button"
-                data-action="reset-timer"
-                data-habit-id="${habit.id}"
-                aria-label="${i18n.t("timer_reset", {}, lang)}"
-                class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 active:scale-95 flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700/50 cursor-pointer"
-              >
-                🔄
-              </button>
-            `
-                : ""
-            }
             <button
               type="button"
               data-action="toggle-timer"
@@ -281,6 +266,22 @@
                   : i18n.t("timer_start", {}, lang)
               }</span>
             </button>
+            ${
+              hasProgress
+                ? `
+              <button
+                type="button"
+                data-action="reset-timer"
+                data-habit-id="${habit.id}"
+                aria-label="${i18n.t("timer_reset", {}, lang)}"
+                title="${i18n.t("timer_reset", {}, lang)}"
+                class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 active:scale-95 flex items-center justify-center text-xs border border-slate-200 dark:border-slate-700/50 cursor-pointer"
+              >
+                🔄
+              </button>
+            `
+                : ""
+            }
             <div class="text-left pl-1">
               <span id="card-timer-ticker-${habit.id}" class="text-sm font-mono tabular-nums font-bold ${
                 isCompleted
