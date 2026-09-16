@@ -111,3 +111,23 @@ tests/
   - No stale DOM lookups to `#header-active-timer-pill`.
   - Habit card sub-ticker text interpolation renders exactly `05:00 / 20m` without duplicate `/ 20m` suffixing.
   - Card expanded drawer renders clean action buttons without redundant text readouts.
+
+### 9. Starter Kit Ergonomics, Wizard Unchecking, i18n Parity & Routine Exclusivity (ADR-0012)
+
+- [ ] **Starter Kits Carousel & Drag Navigation (`tests/habit-tracker-ui-components.test.js`)**:
+  - Carousel renders accessible `#starter-kits-prev-btn` and `#starter-kits-next-btn` with $\ge 44\times 44\text{px}$ touch targets.
+  - Clicking prev/next buttons updates `scrollLeft` of the container smoothly.
+  - Container maintains `overflow-x-auto snap-x snap-start` and mouse drag-to-scroll class hooks.
+- [ ] **Wizard Step 3 Kit Normalization & 0-Kit Unchecking (`tests/habit-tracker-ui-components.test.js`)**:
+  - Starter kit IDs normalized to kebab-case in `engine.STARTER_KITS`.
+  - Clicking any selected kit (including `morning-mastery`) successfully unchecks it even when it is the sole selected item.
+  - Step 4 handles 0 selected kits by showing empty state guidance or allowing blank slate onboarding.
+- [ ] **100% i18n Bilingual Parity & Hardcoded String Absence (`tests/habit-tracker-i18n.test.js`)**:
+  - Zero hardcoded Vietnamese strings across `identity-view.js` and `index.html`.
+  - PWA update banner dynamically displays English and Vietnamese text upon language switch.
+  - Complete parity between `en` and `vi` translation dictionary keys.
+- [ ] **Routine Assignment Mutual Exclusivity (`tests/habit-tracker-ui-components.test.js`)**:
+  - Checking `anytime` chip unchecks `morning`, `afternoon`, and `evening` chips.
+  - Checking any of `morning`, `afternoon`, or `evening` chips unchecks `anytime` chip.
+  - Selecting multiple circadian chips (e.g. `morning` + `evening`) preserves both selections.
+
