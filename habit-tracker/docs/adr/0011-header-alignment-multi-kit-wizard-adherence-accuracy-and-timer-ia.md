@@ -74,10 +74,12 @@ Following user review and field testing of the `habit-tracker` application, four
 ## Consequences
 
 ### Positive
+
 - Header alignment is pixel-perfect across browsers and devices.
 - New users can adopt rich multi-domain habits (e.g. 10 habits across 3 starter packs) seamlessly during setup.
 - Analytics, consistency scores, and weekday charts reflect 100% mathematical integrity on day one.
 - Timer UI is uncluttered and eliminates all duplicate text artifacts.
 
 ### Negative
+
 - Multi-kit selection requires managing array state in wizard navigation.

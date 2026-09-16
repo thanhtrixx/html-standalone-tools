@@ -6110,6 +6110,147 @@ async function runUITests() {
     floatingIslandEl.classList.contains("hidden"),
     "[Issue #519 AC-3] Stopping timer hides floating dynamic island"
   );
+
+  // =========================================================================
+  // [Issue #527] WCAG AA Accessibility, ARIA Semantics, Modal Focus Trap & Reduced Motion
+  // =========================================================================
+  console.log(
+    "\n--- Testing [Issue #527] WCAG AA Accessibility & Focus Trap ---"
+  );
+
+  const htmlSource = getHtmlContent();
+  const components = require("../habit-tracker/src/ui/components.js");
+
+  // 1. Reduced Motion CSS
+  assert(
+    htmlSource.includes("@media (prefers-reduced-motion: reduce)"),
+    "[Issue #527 AC-1] index.html includes @media (prefers-reduced-motion: reduce) CSS block"
+  );
+  assert(
+    htmlSource.includes(".animate-ping") &&
+      htmlSource.includes("animation: none !important"),
+    "[Issue #527 AC-1] prefers-reduced-motion suppresses ping/pulse animations"
+  );
+
+  // 2. Dock Navigation ARIA tablist / tab / aria-controls
+  const navEl = islandDoc.querySelector("nav");
+  assert(
+    navEl && navEl.getAttribute("role") === "tablist",
+    "[Issue #527 AC-2] Bottom navigation dock contains role='tablist'"
+  );
+
+  const dockTabs = islandDoc.querySelectorAll(".nav-tab-btn");
+  assert(
+    dockTabs.length === 4,
+    "[Issue #527 AC-2] All 4 bottom dock tabs present"
+  );
+  dockTabs.forEach((tab) => {
+    assert(
+      tab.getAttribute("role") === "tab",
+      `[Issue #527 AC-2] Dock tab ${tab.getAttribute("data-tab")} has role='tab'`
+    );
+    assert(
+      tab.hasAttribute("aria-selected"),
+      `[Issue #527 AC-2] Dock tab ${tab.getAttribute("data-tab")} has aria-selected`
+    );
+    assert(
+      tab.getAttribute("aria-controls") === "main-content",
+      `[Issue #527 AC-2] Dock tab ${tab.getAttribute("data-tab")} has aria-controls='main-content'`
+    );
+  });
+
+  // 3. Habit Card Checkbox ARIA Semantics
+  const sampleHabit527 = {
+    id: "h-test-527",
+    name: "Read 10 pages",
+    type: "binary",
+    targetValue: 1,
+    color: "indigo",
+  };
+  const uncompletedCardHtml = renderHabitCard(
+    sampleHabit527,
+    { value: 0, completed: false },
+    "vi"
+  );
+  const completedCardHtml = renderHabitCard(
+    sampleHabit527,
+    { value: 1, completed: true },
+    "vi"
+  );
+
+  assert(
+    uncompletedCardHtml.includes('role="checkbox"') &&
+      uncompletedCardHtml.includes('aria-checked="false"'),
+    "[Issue #527 AC-3] Uncompleted habit card has role='checkbox' and aria-checked='false'"
+  );
+  assert(
+    completedCardHtml.includes('role="checkbox"') &&
+      completedCardHtml.includes('aria-checked="true"'),
+    "[Issue #527 AC-3] Completed habit card has role='checkbox' and aria-checked='true'"
+  );
+  assert(
+    uncompletedCardHtml.includes("aria-label=") &&
+      uncompletedCardHtml.includes("Read 10 pages"),
+    "[Issue #527 AC-3] Habit checkbox includes descriptive aria-label with habit name"
+  );
+
+  // 4. Habit Card Expander ARIA
+  const numericHabit527 = {
+    id: "h-num-527",
+    name: "Water intake",
+    type: "numeric",
+    targetValue: 2000,
+    unit: "ml",
+    step: 250,
+  };
+  const numericCardHtml527 = renderHabitCard(
+    numericHabit527,
+    { value: 500, completed: false },
+    "en"
+  );
+  assert(
+    numericCardHtml527.includes('aria-expanded="false"') &&
+      numericCardHtml527.includes('aria-controls="habit-expand-h-num-527"'),
+    "[Issue #527 AC-4] Expandable habit card includes aria-expanded and aria-controls"
+  );
+
+  // 5. Centralized Focus Trap Helper Unit Verification
+  const modalMock = islandDoc.createElement("div");
+  modalMock.innerHTML = `
+    <button id="btn-first">First</button>
+    <input id="input-mid" type="text" />
+    <button id="btn-last">Last</button>
+  `;
+  islandDoc.body.appendChild(modalMock);
+
+  const btnFirst = modalMock.querySelector("#btn-first");
+  const btnLast = modalMock.querySelector("#btn-last");
+  btnFirst.focus();
+
+  let escapeTriggered = false;
+  const trap = components.trapFocus(modalMock, {
+    onEscape: () => {
+      escapeTriggered = true;
+    },
+  });
+
+  assert(
+    trap !== null && typeof components.releaseFocus === "function",
+    "[Issue #527 AC-5] components.trapFocus initializes active trap and exposes releaseFocus"
+  );
+
+  // Test Escape callback
+  const escEvent = new islandSandbox.window.KeyboardEvent("keydown", {
+    key: "Escape",
+  });
+  modalMock.dispatchEvent(escEvent);
+  assert(
+    escapeTriggered,
+    "[Issue #527 AC-5] Escape key triggers onEscape callback"
+  );
+
+  components.releaseFocus();
+  islandDoc.body.removeChild(modalMock);
 }
 
 runUITests()

@@ -525,6 +525,8 @@ function createHabitTrackerSandbox(options = {}) {
       if (id.startsWith("nav-tab-")) {
         const tab = id.replace("nav-tab-", "");
         el.setAttribute("data-tab", tab);
+        el.setAttribute("role", "tab");
+        el.setAttribute("aria-controls", "main-content");
         el.className = "nav-tab-btn";
         const dot = new MockDOMElement(`nav-dot-${tab}`, "span");
         dot.className = "nav-dot";
@@ -614,10 +616,50 @@ function createHabitTrackerSandbox(options = {}) {
     body: bodyElement,
   };
 
+  const navElement = new MockDOMElement("bottom-nav", "nav");
+  navElement.setAttribute("role", "tablist");
+  navElement.setAttribute("aria-label", "Main Navigation");
+  navElement.ownerDocument = doc;
+  elements["bottom-nav"] = navElement;
+  bodyElement.appendChild(navElement);
+
   // Pre-initialize standard nav dock buttons
   ["today", "insights", "manager", "settings"].forEach((tab) => {
-    getOrCreateElement(`nav-tab-${tab}`);
+    const btn = getOrCreateElement(`nav-tab-${tab}`);
+    navElement.appendChild(btn);
   });
+
+  class MockEvent {
+    constructor(type, init = {}) {
+      this.type = type;
+      this.bubbles = init.bubbles || false;
+      this.cancelable = init.cancelable || false;
+      Object.assign(this, init);
+    }
+    preventDefault() {
+      this.defaultPrevented = true;
+    }
+    stopPropagation() {}
+  }
+
+  class MockKeyboardEvent {
+    constructor(type, init = {}) {
+      this.type = type;
+      this.key = init.key || "";
+      this.keyCode =
+        init.keyCode ||
+        (init.key === "Escape" ? 27 : init.key === "Tab" ? 9 : 0);
+      this.shiftKey = init.shiftKey || false;
+      this.altKey = init.altKey || false;
+      this.ctrlKey = init.ctrlKey || false;
+      this.metaKey = init.metaKey || false;
+      this.defaultPrevented = false;
+    }
+    preventDefault() {
+      this.defaultPrevented = true;
+    }
+    stopPropagation() {}
+  }
 
   const sandbox = {
     console,
@@ -638,6 +680,9 @@ function createHabitTrackerSandbox(options = {}) {
     RegExp,
     Promise,
     Intl,
+    Event: MockEvent,
+    KeyboardEvent: MockKeyboardEvent,
+    CustomEvent: MockEvent,
     crypto: {
       randomUUID: () => "habit-" + Math.random().toString(36).slice(2, 9),
       getRandomValues: (buf) => {

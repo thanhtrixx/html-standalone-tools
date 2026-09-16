@@ -116,6 +116,16 @@
       return;
     }
 
+    // Suppress particle explosions for users preferring reduced motion
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      if (typeof onComplete === "function") onComplete();
+      return;
+    }
+
     const ctx = canvas.getContext ? canvas.getContext("2d") : null;
     if (!ctx) {
       if (typeof onComplete === "function") onComplete();
@@ -196,11 +206,134 @@
     renderFrame();
   }
 
+  let activeFocusTrap = null;
+
+  /**
+   * Centralized Focus Trap Helper for Modals and Sheets
+   */
+  function trapFocus(modalEl, options = {}) {
+    if (!modalEl) return null;
+
+    if (activeFocusTrap) {
+      releaseFocus();
+    }
+
+    const previousActiveElement =
+      typeof document !== "undefined" ? document.activeElement : null;
+    const focusableSelectors =
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+    function getFocusableElements() {
+      if (!modalEl.querySelectorAll) return [];
+      const elements = Array.from(modalEl.querySelectorAll(focusableSelectors));
+      return elements.filter(
+        (el) =>
+          !el.disabled &&
+          el.getAttribute("aria-hidden") !== "true" &&
+          (el.offsetParent !== null ||
+            el.offsetWidth > 0 ||
+            el.offsetHeight > 0 ||
+            typeof window === "undefined" ||
+            !window.getComputedStyle)
+      );
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape" || event.keyCode === 27) {
+        if (typeof options.onEscape === "function") {
+          options.onEscape(event);
+        }
+        return;
+      }
+
+      if (event.key !== "Tab" && event.keyCode !== 9) return;
+
+      const focusable = getFocusableElements();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const firstElement = focusable[0];
+      const lastElement = focusable[focusable.length - 1];
+
+      if (event.shiftKey) {
+        if (
+          document.activeElement === firstElement ||
+          !modalEl.contains(document.activeElement)
+        ) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (
+          document.activeElement === lastElement ||
+          !modalEl.contains(document.activeElement)
+        ) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    }
+
+    if (modalEl.addEventListener) {
+      modalEl.addEventListener("keydown", handleKeyDown);
+    }
+    if (typeof document !== "undefined" && document.addEventListener) {
+      document.addEventListener("keydown", handleKeyDown);
+    }
+
+    // Set initial focus
+    const focusable = getFocusableElements();
+    if (options.initialFocus && modalEl.querySelector(options.initialFocus)) {
+      modalEl.querySelector(options.initialFocus).focus();
+    } else if (focusable.length > 0) {
+      focusable[0].focus();
+    } else if (modalEl.focus) {
+      if (!modalEl.hasAttribute("tabindex"))
+        modalEl.setAttribute("tabindex", "-1");
+      modalEl.focus();
+    }
+
+    activeFocusTrap = {
+      modalEl,
+      previousActiveElement,
+      handleKeyDown,
+    };
+
+    return activeFocusTrap;
+  }
+
+  /**
+   * Release current focus trap and restore focus to trigger element
+   */
+  function releaseFocus() {
+    if (!activeFocusTrap) return;
+    const { modalEl, previousActiveElement, handleKeyDown } = activeFocusTrap;
+    if (modalEl && modalEl.removeEventListener) {
+      modalEl.removeEventListener("keydown", handleKeyDown);
+    }
+    if (typeof document !== "undefined" && document.removeEventListener) {
+      document.removeEventListener("keydown", handleKeyDown);
+    }
+    if (
+      previousActiveElement &&
+      typeof previousActiveElement.focus === "function"
+    ) {
+      try {
+        previousActiveElement.focus();
+      } catch (e) {}
+    }
+    activeFocusTrap = null;
+  }
+
   const componentExports = {
     renderSvgProgressRing,
     triggerHapticFeedback,
     playCompletionChime,
     createConfettiBurst,
+    trapFocus,
+    releaseFocus,
   };
 
   if (typeof module !== "undefined" && module.exports) {
