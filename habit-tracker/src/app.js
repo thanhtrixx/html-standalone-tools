@@ -85,6 +85,7 @@
   let lastTimerPersistedAt = 0;
   let wakeLockSentinel = null;
   let wizardCurrentStep = 1;
+  let wizardSelectedKitIds = ["morning-mastery"];
   let wizardSelectedKitId = "morning-mastery";
   let pendingDeleteHabitId = null;
   let habitsSubView = "catalog"; // 'catalog' | 'identity'
@@ -1381,7 +1382,15 @@
           target.getAttribute("data-kit-id") ||
           target.closest("[data-kit-id]")?.getAttribute("data-kit-id");
         if (kitId) {
-          wizardSelectedKitId = kitId;
+          const idx = wizardSelectedKitIds.indexOf(kitId);
+          if (idx >= 0) {
+            if (wizardSelectedKitIds.length > 1) {
+              wizardSelectedKitIds.splice(idx, 1);
+            }
+          } else {
+            wizardSelectedKitIds.push(kitId);
+          }
+          wizardSelectedKitId = wizardSelectedKitIds[0] || kitId;
           renderWizardModal();
         }
       } else if (action === "wizard-skip") {
@@ -1393,11 +1402,30 @@
           closeIdentityWizard();
         }
       } else if (action === "wizard-finish") {
-        const kitId = target.getAttribute("data-kit-id") || wizardSelectedKitId;
-        if (kitId && store) {
+        let kitIds = wizardSelectedKitIds;
+        try {
+          const rawIds = target.getAttribute("data-kit-ids");
+          if (rawIds) {
+            const parsed = JSON.parse(rawIds);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              kitIds = parsed;
+            }
+          }
+        } catch (_) {}
+        if ((!kitIds || kitIds.length === 0) && wizardSelectedKitId) {
+          kitIds = [wizardSelectedKitId];
+        }
+
+        if (kitIds && kitIds.length > 0 && store) {
           const lang =
             (store.getSettings() && store.getSettings().language) || "vi";
-          await store.applyStarterKit(kitId, lang);
+          if (typeof store.applyStarterKits === "function") {
+            await store.applyStarterKits(kitIds, lang);
+          } else {
+            for (const kid of kitIds) {
+              await store.applyStarterKit(kid, lang);
+            }
+          }
           showToast(i18n.t("starter_kit_applied_toast", {}, lang), "success");
         }
         closeIdentityWizard();
@@ -2611,9 +2639,15 @@
   /**
    * Opens 3-step Identity Setup Wizard Modal
    */
-  function openIdentityWizard(step = 1, kitId = "morning-mastery") {
+  function openIdentityWizard(step = 1, kitIds = ["morning-mastery"]) {
     wizardCurrentStep = step;
-    wizardSelectedKitId = kitId;
+    if (Array.isArray(kitIds)) {
+      wizardSelectedKitIds = [...kitIds];
+      wizardSelectedKitId = kitIds[0] || "morning-mastery";
+    } else if (typeof kitIds === "string") {
+      wizardSelectedKitIds = [kitIds];
+      wizardSelectedKitId = kitIds;
+    }
     renderWizardModal();
     const overlay = document.getElementById("identity-wizard-modal-overlay");
     if (overlay) {
@@ -2659,7 +2693,7 @@
       return;
     const modalHtml = identityView.renderIdentityWizardModal(
       wizardCurrentStep,
-      wizardSelectedKitId,
+      wizardSelectedKitIds,
       lang
     );
 
@@ -3245,16 +3279,19 @@
     switchLens(lens) {
       this.switchTab(lens);
     },
-    async applyStarterKit(kitId) {
+    async applyStarterKits(kitIds) {
       if (!store) return [];
       const lang =
         (store.getSettings() && store.getSettings().language) || "vi";
-      const created = await store.applyStarterKit(kitId, lang);
+      const created = await store.applyStarterKits(kitIds, lang);
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("starter_kit_applied_toast", {}, lang), "success");
       renderApp();
       return created;
+    },
+    async applyStarterKit(kitId) {
+      return this.applyStarterKits([kitId]);
     },
     toggleLanguage() {
       const current =
@@ -3579,8 +3616,11 @@
     get wizardCurrentStep() {
       return wizardCurrentStep;
     },
+    get wizardSelectedKitIds() {
+      return wizardSelectedKitIds;
+    },
     get wizardSelectedKitId() {
-      return wizardSelectedKitId;
+      return wizardSelectedKitIds[0] || wizardSelectedKitId;
     },
     get activeTab() {
       return activeTab;

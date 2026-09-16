@@ -173,28 +173,45 @@
       return newHabit;
     }
 
-    async applyStarterKit(kitId, lang = "vi") {
-      const normalizedId = (kitId || "").replace(/-/g, "_");
-      const hyphenId = (kitId || "").replace(/_/g, "-");
-      const kit = engine.STARTER_KITS.find(
-        (k) => k.id === kitId || k.id === normalizedId || k.id === hyphenId
-      );
-      if (!kit || !Array.isArray(kit.habits)) return [];
+    async applyStarterKits(kitIds, lang = "vi") {
+      const ids = Array.isArray(kitIds) ? kitIds : [kitIds];
+      if (ids.length === 0) return [];
 
       const created = [];
-      for (const hData of kit.habits) {
-        const name =
-          lang === "vi" && hData.nameVi
-            ? hData.nameVi
-            : hData.nameEn || hData.name;
-        const habit = await this.addHabit({
-          ...hData,
-          name,
-        });
-        created.push(habit);
+      const nameCounts = {};
+
+      for (const kitId of ids) {
+        const normalizedId = (kitId || "").replace(/-/g, "_");
+        const hyphenId = (kitId || "").replace(/_/g, "-");
+        const kit = engine.STARTER_KITS.find(
+          (k) => k.id === kitId || k.id === normalizedId || k.id === hyphenId
+        );
+        if (!kit || !Array.isArray(kit.habits)) continue;
+
+        for (const hData of kit.habits) {
+          let baseName =
+            lang === "vi" && hData.nameVi
+              ? hData.nameVi
+              : hData.nameEn || hData.name;
+          nameCounts[baseName] = (nameCounts[baseName] || 0) + 1;
+          const finalName =
+            nameCounts[baseName] > 1
+              ? `${baseName} (${nameCounts[baseName]})`
+              : baseName;
+
+          const habit = await this.addHabit({
+            ...hData,
+            name: finalName,
+          });
+          created.push(habit);
+        }
       }
-      this.notify("starter_kit_applied", { kitId, created });
+      this.notify("starter_kits_applied", { kitIds: ids, created });
       return created;
+    }
+
+    async applyStarterKit(kitId, lang = "vi") {
+      return this.applyStarterKits([kitId], lang);
     }
 
     async updateHabit(id, updates) {
