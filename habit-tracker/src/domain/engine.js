@@ -78,7 +78,7 @@
 
   const STARTER_KITS = [
     {
-      id: "morning_mastery",
+      id: "morning-mastery",
       titleKey: "starter_morning_mastery_title",
       descKey: "starter_morning_mastery_desc",
       domain: "mind",
@@ -143,7 +143,7 @@
       ],
     },
     {
-      id: "deep_focus_flow",
+      id: "deep-focus-flow",
       titleKey: "starter_deep_focus_title",
       descKey: "starter_deep_focus_desc",
       domain: "craft",
@@ -195,7 +195,7 @@
       ],
     },
     {
-      id: "health_vitality",
+      id: "health-vitality",
       titleKey: "starter_health_vitality_title",
       descKey: "starter_health_vitality_desc",
       domain: "health",
@@ -247,7 +247,7 @@
       ],
     },
     {
-      id: "zen_mindfulness",
+      id: "zen-mindfulness",
       titleKey: "starter_zen_mindfulness_title",
       descKey: "starter_zen_mindfulness_desc",
       domain: "mind",

@@ -36,6 +36,23 @@
       // Starter Kits
       starter_kits_title: "Curated Starter Kits",
       starter_kits_subtitle: "Activate a proven habit system in 1 tap",
+      carousel_prev_kits: "Previous starter kits",
+      carousel_next_kits: "Next starter kits",
+      identity_pillars_title: "4 Core Life Pillars",
+      identity_pillars_subtitle:
+        "Balance personal growth using the Atomic Habits framework",
+      domain_habits_count: "{count} habits",
+      domain_habits_count_singular: "1 habit",
+      sw_update_title: "New Version Available",
+      sw_update_desc: "Click update to apply the latest improvements.",
+      sw_update_btn: "Update",
+      toast_habit_name_required: "Please enter a habit name",
+      wizard_step_4_blank_title: "Start with a Blank Slate",
+      wizard_step_4_blank_desc:
+        "You haven't selected any starter packs. You will start with an empty board and create your custom atomic habits.",
+      wizard_step_4_blank_hint_title: "Custom Habit Formation",
+      wizard_step_4_blank_hint_desc:
+        "Click Launch to jump directly into your daily action board.",
       starter_morning_mastery_title: "Morning Mastery",
       starter_morning_mastery_desc:
         "Hydration, mindfulness, light stretching and daily focus.",
@@ -386,6 +403,23 @@
       // Starter Kits
       starter_kits_title: "Gói thói quen khởi động",
       starter_kits_subtitle: "Kích hoạt hệ thống thói quen chỉ với 1 chạm",
+      carousel_prev_kits: "Xem gói trước",
+      carousel_next_kits: "Xem gói tiếp theo",
+      identity_pillars_title: "4 Trụ Cột Bản Sắc",
+      identity_pillars_subtitle:
+        "Cân bằng phát triển bản thân theo phương pháp Atomic Habits",
+      domain_habits_count: "{count} thói quen",
+      domain_habits_count_singular: "1 thói quen",
+      sw_update_title: "Phiên bản mới đã sẵn sàng",
+      sw_update_desc: "Nhấn cập nhật để áp dụng phiên bản mới nhất.",
+      sw_update_btn: "Cập nhật",
+      toast_habit_name_required: "Vui lòng nhập tên thói quen",
+      wizard_step_4_blank_title: "Bắt đầu với bảng trắng",
+      wizard_step_4_blank_desc:
+        "Bạn chưa chọn gói thói quen nào. Bạn sẽ bắt đầu với danh sách trống và tự tạo thói quen theo nhu cầu riêng.",
+      wizard_step_4_blank_hint_title: "Tự do xây dựng lộ trình cá nhân",
+      wizard_step_4_blank_hint_desc:
+        "Nhấn Bắt đầu ngay để chuyển đến bảng theo dõi hàng ngày.",
       starter_morning_mastery_title: "Khởi đầu tỉnh thức",
       starter_morning_mastery_desc:
         "Uống nước, thiền định, giãn cơ và lập kế hoạch ngày.",

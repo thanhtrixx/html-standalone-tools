@@ -235,6 +235,43 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ---
 
+## ⚡ Starter Kit Ergonomics, Wizard Unchecking, i18n Parity & Routine Exclusivity (ADR-0012)
+
+### Slice 1: Starter Kits Carousel Navigation & Drag Ergonomics (P1)
+
+- [ ] Add accessible Left / Right navigation chevron buttons (`#starter-kits-prev-btn`, `#starter-kits-next-btn`) with minimum 44×44px touch targets on the Starter Kits section in `src/ui/identity-view.js`.
+- [ ] Implement mouse drag-to-scroll interaction and keyboard left/right arrow navigation on the carousel container.
+- [ ] Preserve smooth CSS snap points (`snap-x snap-start`) and mobile touch swiping.
+
+### Slice 2: Wizard Step 3 Kit ID Normalization & Unrestricted Uncheck (P0)
+
+- [ ] Standardize starter kit IDs across `src/domain/engine.js`, `src/i18n/translations.js`, and `src/app.js` to kebab-case (`morning-mastery`, `deep-focus`, `health-vitality`, `zen-mindfulness`).
+- [ ] Remove restrictive length guard in `src/app.js` (`action === "wizard-select-kit"`) to allow unchecking any kit down to 0 selected kits.
+- [ ] Update Step 4 review to gracefully handle 0 selected kits with a blank slate message or prompt to add custom habits.
+
+### Slice 3: Systematic i18n Audit & Hardcoded String Purge (P1)
+
+- [ ] Extract hardcoded strings in `src/ui/identity-view.js` (`"4 Trụ Cột Bản Sắc"`, `"Cân bằng phát triển bản thân theo phương pháp Atomic Habits"`, `"${domainHabits.length} thói quen"`) to `src/i18n/translations.js` (`identity_pillars_title`, `identity_pillars_subtitle`, `domain_habits_count`).
+- [ ] Localize PWA Service Worker update prompt in `index.html` dynamically upon render and language toggle (`sw_update_title`, `sw_update_desc`, `sw_update_btn`).
+- [ ] Localize toast error messages in `src/app.js` (`toast_habit_name_required`).
+- [ ] Add automated regression assertions in `tests/habit-tracker-i18n.test.js` checking 100% dictionary parity and absence of hardcoded text in UI templates.
+
+### Slice 4: Routine Assignment Mutual Exclusivity (P1)
+
+- [ ] In `src/app.js` and `src/ui/manager-view.js`, enforce mutual exclusivity between `anytime` and circadian routine slots:
+  - Checking `anytime` unchecks `morning`, `afternoon`, and `evening`.
+  - Checking any of `morning`, `afternoon`, or `evening` unchecks `anytime`.
+  - Allow multi-selection among circadian slots (e.g. `morning` + `evening`).
+- [ ] Update habit creation / edit modal preview and form data parsing to reflect exclusive routine state.
+
+### Slice 5: Automated Verification & Regression Suite (P0)
+
+- [ ] Add unit and UI component tests in `tests/habit-tracker-ui-components.test.js` verifying carousel button navigation, drag physics classes, wizard unchecking down to 0 kits, and routine mutual exclusivity.
+- [ ] Add i18n regression assertions in `tests/habit-tracker-i18n.test.js`.
+- [ ] Verify 100% pass on `npm run test:habit` and `npm run verify`.
+
+---
+
 ## 🧪 Verification & DoD Gate
 
 - [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.

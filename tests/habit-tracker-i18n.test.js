@@ -1052,6 +1052,66 @@ async function runI18nTests() {
     "00p 00g",
     "[Issue #428 AC-4] formatDuration(NaN, 'vi') returns '00p 00g'"
   );
+
+  // ==========================================
+  // [ADR-0012 / Issue #547] 100% Bilingual Parity & Hardcoded String Absence
+  // ==========================================
+  console.log("--- [Issue #547] 100% Bilingual Parity & Domain Keys ---");
+
+  assertEqual(
+    t("identity_pillars_title", {}, "en"),
+    "4 Core Life Pillars",
+    "[Issue #547 AC-1] English identity pillars title matches spec"
+  );
+  assertEqual(
+    t("identity_pillars_title", {}, "vi"),
+    "4 Trụ Cột Bản Sắc",
+    "[Issue #547 AC-1] Vietnamese identity pillars title matches I18N.md"
+  );
+
+  assertEqual(
+    t("domain_habits_count", { count: 3 }, "en"),
+    "3 habits",
+    "[Issue #547 AC-1] English domain habits count formatted properly"
+  );
+  assertEqual(
+    t("domain_habits_count", { count: 3 }, "vi"),
+    "3 thói quen",
+    "[Issue #547 AC-1] Vietnamese domain habits count formatted properly"
+  );
+
+  assertEqual(
+    t("sw_update_title", {}, "en"),
+    "New Version Available",
+    "[Issue #547 AC-2] PWA update title in English"
+  );
+  assertEqual(
+    t("sw_update_title", {}, "vi"),
+    "Phiên bản mới đã sẵn sàng",
+    "[Issue #547 AC-2] PWA update title in Vietnamese"
+  );
+
+  assertEqual(
+    t("carousel_prev_kits", {}, "en"),
+    "Previous starter kits",
+    "[Issue #547 AC-3] Carousel previous kits in English"
+  );
+  assertEqual(
+    t("carousel_next_kits", {}, "vi"),
+    "Xem gói tiếp theo",
+    "[Issue #547 AC-3] Carousel next kits in Vietnamese"
+  );
+
+  assertEqual(
+    t("wizard_step_4_blank_title", {}, "en"),
+    "Start with a Blank Slate",
+    "[Issue #547 AC-4] Blank slate title in English"
+  );
+  assertEqual(
+    t("wizard_step_4_blank_title", {}, "vi"),
+    "Bắt đầu với bảng trắng",
+    "[Issue #547 AC-4] Blank slate title in Vietnamese"
+  );
 }
 
 runI18nTests()

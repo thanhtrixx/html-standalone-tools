@@ -19,6 +19,7 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0009-header-alignment-insights-accuracy-language-wizard-and-floating-timer.md`](./docs/adr/0009-header-alignment-insights-accuracy-language-wizard-and-floating-timer.md)
 - [`docs/adr/0010-wcag-accessibility-focus-traps-touch-targets-and-codebase-distillation.md`](./docs/adr/0010-wcag-accessibility-focus-traps-touch-targets-and-codebase-distillation.md)
 - [`docs/adr/0011-header-alignment-multi-kit-wizard-adherence-accuracy-and-timer-ia.md`](./docs/adr/0011-header-alignment-multi-kit-wizard-adherence-accuracy-and-timer-ia.md)
+- [`docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md`](./docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md)
 
 ---
 
@@ -46,6 +47,8 @@ The application organizes daily execution, deep analytics, habit catalog managem
   - **Numeric Counter (Target Metric)**: Quantitative habit with target quota and custom unit (`ml`, `pages`, `reps`, `km`). Tapping the checkbox marks 100% completion; tapping the card expands inline `+/-` number steppers for granular logging.
   - **Duration / Timer**: Time-based habit with target duration in minutes/seconds. Tapping the checkbox marks full completion; tapping the card expands live Web Worker-driven Timer controls (Play/Pause/Reset) with sub-second DOM reactivity and Web Audio chime.
     _Avoid_: Task type, measurement category, goal format.
+- **Routine Assignment**: Time-of-day circadian grouping (`morning`, `afternoon`, `evening`) or flexible untethered execution (`anytime`).
+  - **Mutual Exclusivity Rule**: Selecting `Anytime` automatically unchecks `Morning`, `Afternoon`, and `Evening`. Selecting any specific circadian slot automatically unchecks `Anytime`. Multi-selection between specific circadian slots (`Morning` + `Evening`) is fully supported.
 - **Life Domain**: High-level personal pillar categorizing habits:
   - 🌿 **Health & Vitality** (Emerald Glow)
   - ⚡ **Deep Work & Craft** (Cyan Glow)
@@ -60,9 +63,9 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **4-Step Language-First Identity Setup Wizard**: A 4-step setup modal appearing on first run or empty state:
   - **Step 1: Language Selection**: Prominent interactive cards (`🇻🇳 Tiếng Việt` / `🇺🇸 English`) with immediate reactivity.
   - **Step 2: 4 Life Pillars**: Introduction to core domains (`Health`, `Mind`, `Craft`, `Discipline`).
-  - **Step 3: Multi-Select Starter Kits**: Multi-toggle kit selection cards (allowing selecting 1 to 4 kits concurrently).
-  - **Step 4: Confirmation & Launch**: Habit preview aggregating all selected packs (with automatic numbered disambiguation for identical habit names across kits) and single-click atomic activation.
-- **Curated Starter Kits**: Pre-configured habit packs that allow immediate adoption:
+  - **Step 3: Multi-Select Starter Kits**: Multi-toggle kit selection cards supporting selecting 0 to 4 kits concurrently with normalized kebab-case IDs (`morning-mastery`, `deep-focus`, `health-vitality`, `zen-mindfulness`) and unrestricted unchecking.
+  - **Step 4: Confirmation & Launch**: Habit preview aggregating all selected packs (with automatic numbered disambiguation for identical habit names across kits, or custom blank slate option when 0 kits are chosen) and single-click atomic activation.
+- **Curated Starter Kits Carousel**: Pre-configured habit packs with horizontal snap scroll, desktop left/right chevron navigation buttons, and mouse drag-to-scroll physics:
   - **Morning Mastery**: Morning hydration, 10-min meditation, light stretching, daily planning.
   - **Deep Focus & Flow**: 45-min pomodoro session, zero social media block, reading 20 pages.
   - **Health & Vitality**: 2500ml water tracking, 30-min workout, 8 hours sleep schedule.
