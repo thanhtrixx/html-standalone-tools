@@ -1693,13 +1693,18 @@
   }
 
   /**
-   * Updates ambient running timer pills in header and dock
+   * Updates ambient running timer pills in header, dock, and floating dynamic island
    */
   function updateAmbientTimerPill() {
+    const floatingIsland = document.getElementById("floating-timer-island");
     const headerPill = document.getElementById("header-active-timer-pill");
     const dockPill = document.getElementById("dock-active-timer-pill");
 
     if (!runningTimerHabitId || !store) {
+      if (floatingIsland) {
+        floatingIsland.classList.add("hidden", "translate-y-4", "opacity-0");
+        floatingIsland.classList.remove("translate-y-0", "opacity-100");
+      }
       if (headerPill) headerPill.classList.add("hidden");
       if (dockPill) dockPill.classList.add("hidden");
       return;
@@ -1711,11 +1716,58 @@
       store.state.logs &&
       store.state.logs[`${runningTimerHabitId}_${date}`]) || { value: 0 };
     const totalSecs = Math.max(0, log.value || 0);
+    const targetSecs = (habit && habit.targetValue) || 1200;
+    const lang = (store.getSettings() && store.getSettings().language) || "vi";
+
+    const durationFormatted = i18n.formatDuration(totalSecs, lang);
+    const targetFormatted = i18n.formatDuration(targetSecs, lang);
+    const progressPct = Math.min(
+      100,
+      Math.round((totalSecs / (targetSecs || 1)) * 100)
+    );
+
+    const icon = habit ? habit.icon || "⏱️" : "⏱️";
+    const name = habit ? habit.name : "";
+
+    if (floatingIsland) {
+      floatingIsland.classList.remove("hidden");
+      setTimeout(() => {
+        floatingIsland.classList.remove("translate-y-4", "opacity-0");
+        floatingIsland.classList.add("translate-y-0", "opacity-100");
+      }, 10);
+
+      const iconEl = document.getElementById("floating-timer-icon");
+      if (iconEl) iconEl.textContent = icon;
+
+      const nameEl = document.getElementById("floating-timer-name");
+      if (nameEl) nameEl.textContent = name;
+
+      const tickerEl = document.getElementById("floating-timer-ticker");
+      if (tickerEl)
+        tickerEl.textContent = `${durationFormatted} / ${targetFormatted}`;
+
+      const progressBarEl = document.getElementById(
+        "floating-timer-progress-bar"
+      );
+      if (progressBarEl) progressBarEl.style.width = `${progressPct}%`;
+
+      const playBtn = document.getElementById("floating-timer-play-btn");
+      if (playBtn) {
+        playBtn.setAttribute("data-habit-id", runningTimerHabitId);
+        playBtn.setAttribute("data-target", targetSecs);
+        playBtn.innerHTML = "⏸";
+        playBtn.setAttribute("aria-label", i18n.t("timer_pause", {}, lang));
+      }
+
+      const bodyBtn = document.getElementById("floating-timer-body-btn");
+      if (bodyBtn) {
+        bodyBtn.setAttribute("data-habit-id", runningTimerHabitId);
+      }
+    }
+
     const m = String(Math.floor(totalSecs / 60)).padStart(2, "0");
     const s = String(totalSecs % 60).padStart(2, "0");
     const tickerStr = `${m}:${s}`;
-    const icon = habit ? habit.icon || "⏱️" : "⏱️";
-    const name = habit ? habit.name : "";
 
     if (headerPill) {
       headerPill.classList.remove("hidden");
@@ -1791,6 +1843,33 @@
     const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
     const s = String(currentSecs % 60).padStart(2, "0");
     const tickerStr = `${m}:${s}`;
+
+    // 0. Floating Dynamic Timer Island
+    const floatingTicker = document.getElementById("floating-timer-ticker");
+    if (floatingTicker) {
+      floatingTicker.textContent = `${durationFormatted} / ${targetFormatted}`;
+    }
+    const floatingProgress = document.getElementById(
+      "floating-timer-progress-bar"
+    );
+    if (floatingProgress) {
+      const pct = Math.min(
+        100,
+        Math.round((currentSecs / (targetSecs || 1)) * 100)
+      );
+      floatingProgress.style.width = `${pct}%`;
+    }
+    const floatingPlayBtn = document.getElementById("floating-timer-play-btn");
+    if (floatingPlayBtn) {
+      const isRunning = runningTimerHabitId === habitId;
+      floatingPlayBtn.innerHTML = isRunning ? "⏸" : "▶";
+      floatingPlayBtn.setAttribute(
+        "aria-label",
+        isRunning
+          ? i18n.t("timer_pause", {}, lang)
+          : i18n.t("timer_start", {}, lang)
+      );
+    }
 
     // 1. Header ambient ticker
     const headerTicker = document.getElementById("header-timer-ticker");
@@ -2230,7 +2309,7 @@
   function openFocusTimerModal(habitId) {
     if (!store || !habitId) return;
     const habit = store.getHabit(habitId);
-    if (!habit || habit.type !== "duration") return;
+    if (!habit || (habit.type !== "timer" && habit.type !== "duration")) return;
 
     activeFocusModalHabitId = habitId;
     const overlay = document.getElementById("focus-timer-modal-overlay");

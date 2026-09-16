@@ -5984,6 +5984,129 @@ async function runUITests() {
   );
 
   polishSandbox.HabitApp.closeHabitModal();
+
+  // ==========================================
+  // ISSUE #519: Floating Dynamic Timer Island & Impeccable Timer Card Redesign
+  // ==========================================
+  console.log("\n=== Testing Issue #519: Floating Dynamic Timer Island & Decluttered Card ===");
+
+  const islandSandbox = createHabitTrackerSandbox().sandbox;
+  islandSandbox.requestAnimationFrame = (cb) => {
+    cb();
+    return 1;
+  };
+  islandSandbox.cancelAnimationFrame = () => {};
+  await islandSandbox.HabitApp.init();
+
+  const islandDoc = islandSandbox.document;
+  const floatingIslandEl = islandDoc.getElementById("floating-timer-island");
+  assert(
+    floatingIslandEl !== null,
+    "[Issue #519 AC-3] Floating dynamic timer island exists in DOM (#floating-timer-island)"
+  );
+
+  assert(
+    floatingIslandEl.classList.contains("hidden"),
+    "[Issue #519 AC-3] Floating timer island is initially hidden when idle"
+  );
+
+  // Find or create a duration/timer habit
+  let timerHabit519 = islandSandbox.HabitApp.store
+    .getHabits()
+    .find((h) => h.type === "timer");
+  if (!timerHabit519) {
+    const newHabit = await islandSandbox.HabitApp.store.saveHabit({
+      name: "Meditation Practice",
+      type: "timer",
+      targetValue: 1200,
+      color: "emerald",
+      icon: "🧘",
+      schedule: { type: "daily" },
+    });
+    timerHabit519 = newHabit;
+  }
+
+  // 1. Check card drawer HTML rendering for concise labels
+  const cardHtmlVi = islandSandbox.HabitTodayView.renderTodayDashboard(
+    islandSandbox.HabitApp.store,
+    null,
+    "vi"
+  );
+  assert(
+    cardHtmlVi.includes("Bắt đầu") && !cardHtmlVi.includes("Bắt đầu hẹn giờ"),
+    "[Issue #519 AC-1] Timer buttons render concise 'Bắt đầu' in Vietnamese"
+  );
+
+  const cardHtmlEn = islandSandbox.HabitTodayView.renderTodayDashboard(
+    islandSandbox.HabitApp.store,
+    null,
+    "en"
+  );
+  assert(
+    cardHtmlEn.includes("Start") && !cardHtmlEn.includes("Start Timer"),
+    "[Issue #519 AC-1] Timer buttons render concise 'Start' in English"
+  );
+
+  // 2. Start Timer and verify floating island activation
+  await islandSandbox.HabitApp.handleToggleTimer(
+    timerHabit519.id,
+    islandSandbox.HabitApp.store.getActiveDate()
+  );
+
+  assert(
+    !floatingIslandEl.classList.contains("hidden"),
+    "[Issue #519 AC-3] Floating island unhides automatically on timer start"
+  );
+
+  const floatingIcon = islandDoc.getElementById("floating-timer-icon");
+  const floatingName = islandDoc.getElementById("floating-timer-name");
+  const floatingTicker = islandDoc.getElementById("floating-timer-ticker");
+  const floatingProgress = islandDoc.getElementById(
+    "floating-timer-progress-bar"
+  );
+  const floatingPlayBtn = islandDoc.getElementById("floating-timer-play-btn");
+
+  assert(
+    floatingIcon !== null &&
+      floatingName !== null &&
+      floatingTicker !== null &&
+      floatingProgress !== null &&
+      floatingPlayBtn !== null,
+    "[Issue #519 AC-3] Floating island renders icon, name, ticker, progress bar, and play/pause controls"
+  );
+
+  // 3. Verify cross-tab presence
+  islandSandbox.HabitApp.switchTab("insights");
+  assert(
+    !floatingIslandEl.classList.contains("hidden"),
+    "[Issue #519 AC-3] Floating island remains visible across Insights tab"
+  );
+
+  islandSandbox.HabitApp.switchTab("settings");
+  assert(
+    !floatingIslandEl.classList.contains("hidden"),
+    "[Issue #519 AC-3] Floating island remains visible across Settings tab"
+  );
+
+  // 4. Click Body Button -> Opens Focus Timer Modal
+  islandSandbox.HabitApp.switchTab("today");
+  islandSandbox.HabitApp.openFocusTimerModal(timerHabit519.id);
+  const focusModal519 = islandDoc.getElementById("focus-timer-modal-overlay");
+  assert(
+    focusModal519 && !focusModal519.classList.contains("hidden"),
+    "[Issue #519 AC-3] Tapping floating island opens Focus Timer Modal"
+  );
+  islandSandbox.HabitApp.closeFocusTimerModal();
+
+  // 5. Stop timer -> Floating island hides
+  await islandSandbox.HabitApp.handleToggleTimer(
+    timerHabit519.id,
+    islandSandbox.HabitApp.store.getActiveDate()
+  );
+  assert(
+    floatingIslandEl.classList.contains("hidden"),
+    "[Issue #519 AC-3] Stopping timer hides floating dynamic island"
+  );
 }
 
 runUITests()

@@ -110,9 +110,9 @@
       save_note: "Save Note",
       delete_note: "Delete Note",
       note_saved: "Reflection note saved",
-      timer_start: "Start Timer",
-      timer_pause: "Pause Timer",
-      timer_reset: "Reset Timer",
+      timer_start: "Start",
+      timer_pause: "Pause",
+      timer_reset: "Reset",
       timer_completed: "Timer completed!",
 
       // Manager View
@@ -461,8 +461,8 @@
       save_note: "Lưu ghi chú",
       delete_note: "Xóa ghi chú",
       note_saved: "Đã lưu ghi chú nhật ký",
-      timer_start: "Bắt đầu hẹn giờ",
-      timer_pause: "Tạm dừng hẹn giờ",
+      timer_start: "Bắt đầu",
+      timer_pause: "Tạm dừng",
       timer_reset: "Đặt lại",
       timer_completed: "Đã hết giờ!",
 
