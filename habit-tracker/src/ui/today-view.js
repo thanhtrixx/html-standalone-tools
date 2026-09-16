@@ -136,12 +136,15 @@
     const checkIcon = isCompleted ? "✓" : "";
 
     // 1-Tap Checkbox for ALL habits
+    const checkboxLabel = `${lang === "vi" ? "Hoàn thành thói quen" : "Complete habit"}: ${habit.name}`;
     const checkboxHtml = `
       <button
         type="button"
         data-action="toggle-habit"
         data-habit-id="${habit.id}"
-        aria-label="${i18n.t("completed", {}, lang)}"
+        role="checkbox"
+        aria-checked="${isCompleted ? "true" : "false"}"
+        aria-label="${checkboxLabel}"
         class="w-10 h-10 rounded-full border-2 ${
           isCompleted
             ? "border-transparent shadow-md ring-2 ring-white/20"
@@ -361,6 +364,11 @@
             class="flex items-center gap-3 cursor-pointer select-none flex-1 min-w-0"
             data-action="${cardClickAction}"
             data-habit-id="${habit.id}"
+            ${
+              hasExpandable
+                ? `role="button" aria-expanded="${isExpanded ? "true" : "false"}" aria-controls="habit-expand-${habit.id}"`
+                : ""
+            }
           >
             <div class="w-1.5 h-10 rounded-full shrink-0" style="background-color: ${colorHex};"></div>
             <div class="text-2xl shrink-0">${habit.icon || "🎯"}</div>

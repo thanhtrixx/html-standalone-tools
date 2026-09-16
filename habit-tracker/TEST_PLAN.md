@@ -83,6 +83,18 @@ tests/
   - Top header is free of the subtitle `Obsidian Glow • Offline-First`.
   - `#habit-edit-modal-overlay` has `z-index >= 60` and displays above `#detail-sheet-overlay` (`z-50`) without z-index collisions.
 
+### 7. WCAG AA Accessibility, Touch Targets & Codebase Distillation (ADR-0010)
+
+- [x] **WCAG AA Semantics & Motion Sensitivity (`tests/habit-tracker-ui-components.test.js`)**:
+  - `@media (prefers-reduced-motion: reduce)` in `index.html` suppresses confetti explosions and pauses animations.
+  - Bottom navigation dock enforces `role="tablist"` and `role="tab"` + `aria-controls="main-content"`.
+  - Habit completion buttons enforce `role="checkbox"`, `aria-checked="true|false"`, and localized `aria-label`.
+  - Habit card expand triggers enforce `aria-expanded` and `aria-controls`.
+  - Centralized `trapFocus` and `releaseFocus` helper cycles Tab keys and handles Escape key dismiss.
+- [x] **Touch Targets & Micro-Typography Normalization (`tests/habit-tracker-ui-components.test.js`)**:
+  - All interactive buttons enforce $\ge 44\times 44\text{px}$ hitboxes.
+  - Sub-captions normalized to `text-[11px]` micro ramp token.
+
 ### 8. Header Alignment, Multi-Kit Wizard, Adherence Invariants & Timer IA (ADR-0011)
 
 - [ ] **Mathematical Invariant & Adherence Accuracy (`tests/habit-tracker-engine-math.test.js`)**:
@@ -99,4 +111,3 @@ tests/
   - No stale DOM lookups to `#header-active-timer-pill`.
   - Habit card sub-ticker text interpolation renders exactly `05:00 / 20m` without duplicate `/ 20m` suffixing.
   - Card expanded drawer renders clean action buttons without redundant text readouts.
-

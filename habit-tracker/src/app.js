@@ -2339,6 +2339,9 @@
 
     overlay.innerHTML = `<div id="focus-timer-modal-container" class="w-full max-w-md my-auto">${modalHtml}</div>`;
     overlay.classList.remove("hidden");
+    if (components && typeof components.trapFocus === "function") {
+      components.trapFocus(overlay, { onEscape: closeFocusTimerModal });
+    }
     pushNavigationState(activeTab, "focus-timer");
   }
 
@@ -2347,6 +2350,9 @@
    */
   function closeFocusTimerModal() {
     activeFocusModalHabitId = null;
+    if (components && typeof components.releaseFocus === "function") {
+      components.releaseFocus();
+    }
     const overlay = document.getElementById("focus-timer-modal-overlay");
     if (overlay) {
       overlay.classList.add("hidden");
@@ -2490,6 +2496,9 @@
     if (overlay) {
       overlay.innerHTML = `<div id="delete-modal-container" class="w-full max-w-sm my-auto">${modalHtml}</div>`;
       overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, { onEscape: closeDeleteModal });
+      }
     }
     pushNavigationState(activeTab, "delete");
   }
@@ -2546,6 +2555,9 @@
     if (overlay) {
       overlay.innerHTML = `<div id="reset-modal-container" class="w-full max-w-sm my-auto">${modalHtml}</div>`;
       overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, { onEscape: closeResetModal });
+      }
     }
     pushNavigationState(activeTab, "reset");
   }
@@ -2602,6 +2614,9 @@
     if (overlay) {
       overlay.innerHTML = `<div id="reset-modal-container" class="w-full max-w-sm my-auto">${modalHtml}</div>`;
       overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, { onEscape: closeResetModal });
+      }
     }
     pushNavigationState(activeTab, "reset");
   }
@@ -2610,6 +2625,9 @@
    * Closes data vault reset confirmation modal
    */
   function closeResetModal() {
+    if (components && typeof components.releaseFocus === "function") {
+      components.releaseFocus();
+    }
     const overlay = document.getElementById("reset-confirm-modal-overlay");
     if (overlay) {
       overlay.classList.add("hidden");
@@ -2626,6 +2644,9 @@
     const overlay = document.getElementById("identity-wizard-modal-overlay");
     if (overlay) {
       overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, { onEscape: closeIdentityWizard });
+      }
     }
     pushNavigationState(activeTab, "wizard");
   }
@@ -2634,6 +2655,9 @@
    * Closes Identity Setup Wizard Modal
    */
   function closeIdentityWizard() {
+    if (components && typeof components.releaseFocus === "function") {
+      components.releaseFocus();
+    }
     const overlay = document.getElementById("identity-wizard-modal-overlay");
     if (overlay) {
       overlay.classList.add("hidden");
@@ -2721,6 +2745,9 @@
    */
   function closeDeleteModal() {
     pendingDeleteHabitId = null;
+    if (components && typeof components.releaseFocus === "function") {
+      components.releaseFocus();
+    }
     const overlay = document.getElementById("delete-confirm-modal-overlay");
     if (overlay) {
       overlay.classList.add("hidden");
@@ -2852,6 +2879,9 @@
     const sheetOverlay = document.getElementById("detail-sheet-overlay");
     if (sheetOverlay) {
       sheetOverlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(sheetOverlay, { onEscape: closeDetailSheet });
+      }
     }
     pushNavigationState(activeTab, "detail");
   }
@@ -2860,6 +2890,9 @@
    * Closes Detail Sheet
    */
   function closeDetailSheet() {
+    if (components && typeof components.releaseFocus === "function") {
+      components.releaseFocus();
+    }
     const sheetOverlay = document.getElementById("detail-sheet-overlay");
     if (sheetOverlay) {
       sheetOverlay.classList.add("hidden");
@@ -2957,6 +2990,9 @@
     const modalOverlay = document.getElementById("habit-edit-modal-overlay");
     if (modalOverlay) {
       modalOverlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(modalOverlay, { onEscape: closeHabitModal });
+      }
     }
     updateHabitModalPreview();
     pushNavigationState(activeTab, "edit");
@@ -2966,6 +3002,9 @@
    * Closes Habit Edit Modal
    */
   function closeHabitModal() {
+    if (components && typeof components.releaseFocus === "function") {
+      components.releaseFocus();
+    }
     const modalOverlay = document.getElementById("habit-edit-modal-overlay");
     if (modalOverlay) {
       modalOverlay.classList.add("hidden");
