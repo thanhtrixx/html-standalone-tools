@@ -1912,7 +1912,7 @@
     // 4. Card header sub-progress
     const cardSubTicker = document.getElementById(`card-sub-ticker-${habitId}`);
     if (cardSubTicker) {
-      cardSubTicker.textContent = `${durationFormatted} / ${targetFormatted}`;
+      cardSubTicker.textContent = durationFormatted;
     }
 
     // 5. Detail sheet ticker
@@ -3594,6 +3594,7 @@
       notify(i18n.t("toast_notes_saved", {}, lang), "success");
     },
     handleResetTimer,
+    updateTimerDom,
     openFocusTimerModal,
     closeFocusTimerModal,
     toggleTimerDisplayMode,
