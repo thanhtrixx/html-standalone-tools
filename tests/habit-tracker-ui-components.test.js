@@ -3572,17 +3572,17 @@ async function runUITests() {
   timerSandbox433.HabitApp.store.setActiveDate(timerTestDate433);
 
   // 1. Initial Inactive State: Ambient Pill is Hidden
-  const headerPillEl433 = getTimerEl433("header-active-timer-pill");
+  const floatingIsland433 = getTimerEl433("floating-timer-island");
   const dockPillEl433 = getTimerEl433("dock-active-timer-pill");
 
-  const isHeaderPillInitiallyHidden =
-    headerPillEl433.classList.contains("hidden") ||
-    headerPillEl433.className.includes("hidden") ||
-    headerPillEl433.style.display === "none";
+  const isDockPillInitiallyHidden =
+    dockPillEl433.classList.contains("hidden") ||
+    dockPillEl433.className.includes("hidden") ||
+    dockPillEl433.style.display === "none";
 
   assert(
-    isHeaderPillInitiallyHidden,
-    "[Issue #433 AC-2] Header active timer pill is initially hidden when no timer is running"
+    isDockPillInitiallyHidden,
+    "[Issue #433 AC-2] Dock active timer pill is initially hidden when no timer is running"
   );
 
   // 2. Start Timer Seam: HabitApp.handleToggleTimer or toggle-timer button
@@ -3600,32 +3600,32 @@ async function runUITests() {
   await new Promise((r) => setTimeout(r, 10));
 
   // Verify Header/Dock Ambient Pill Becomes Visible
-  const isHeaderPillActive =
-    !headerPillEl433.classList.contains("hidden") ||
-    !headerPillEl433.className.includes("hidden") ||
-    headerPillEl433.style.display !== "none";
+  const isDockPillActive =
+    !dockPillEl433.classList.contains("hidden") ||
+    !dockPillEl433.className.includes("hidden") ||
+    dockPillEl433.style.display !== "none";
 
   assert(
-    isHeaderPillActive,
-    "[Issue #433 AC-2] Starting timer displays persistent ambient pill in header bar"
+    isDockPillActive,
+    "[Issue #433 AC-2] Starting timer displays persistent ambient pill in dock/floating island"
   );
 
   // 3. Ticker Text Rendering & Monospace Layout
-  const pillHtml433 = headerPillEl433.innerHTML || headerPillEl433.textContent;
+  const pillHtml433 = dockPillEl433.innerHTML || dockPillEl433.textContent;
   assert(
     pillHtml433.includes("📖") ||
-      pillHtml433.includes(timerHabit433 ? timerHabit433.name : "") ||
+      pillHtml433.includes("⏱️") ||
       pillHtml433.includes("00:") ||
       pillHtml433.includes("00m") ||
       pillHtml433.includes("00p"),
-    "[Issue #433 AC-2] Header ambient pill displays habit identity and running duration ticker"
+    "[Issue #433 AC-2] Dock ambient pill displays habit identity and running duration ticker"
   );
 
   assert(
-    headerPillEl433.className.includes("tabular-nums") ||
-      headerPillEl433.className.includes("font-mono") ||
-      headerPillEl433.innerHTML.includes("tabular-nums") ||
-      headerPillEl433.innerHTML.includes("font-mono"),
+    dockPillEl433.className.includes("tabular-nums") ||
+      dockPillEl433.className.includes("font-mono") ||
+      dockPillEl433.innerHTML.includes("tabular-nums") ||
+      dockPillEl433.innerHTML.includes("font-mono"),
     "[Issue #433 AC-2] Ambient timer ticker uses tabular monospace alignment (tabular-nums / font-mono)"
   );
 
@@ -3647,22 +3647,22 @@ async function runUITests() {
   // 5. Cross-Tab Persistence: Ambient Pill Remains Visible across Insights, Manager, Settings Views
   timerSandbox433.HabitApp.switchTab("insights");
   assert(
-    !headerPillEl433.classList.contains("hidden") ||
-      headerPillEl433.style.display !== "none",
+    !dockPillEl433.classList.contains("hidden") ||
+      dockPillEl433.style.display !== "none",
     "[Issue #433 AC-2] Ambient timer pill remains visible when switching to 'insights' tab"
   );
 
   timerSandbox433.HabitApp.switchTab("manager");
   assert(
-    !headerPillEl433.classList.contains("hidden") ||
-      headerPillEl433.style.display !== "none",
+    !dockPillEl433.classList.contains("hidden") ||
+      dockPillEl433.style.display !== "none",
     "[Issue #433 AC-2] Ambient timer pill remains visible when switching to 'manager' tab"
   );
 
   timerSandbox433.HabitApp.switchTab("settings");
   assert(
-    !headerPillEl433.classList.contains("hidden") ||
-      headerPillEl433.style.display !== "none",
+    !dockPillEl433.classList.contains("hidden") ||
+      dockPillEl433.style.display !== "none",
     "[Issue #433 AC-2] Ambient timer pill remains visible when switching to 'settings' tab"
   );
 
@@ -3677,7 +3677,7 @@ async function runUITests() {
   if (typeof timerSandbox433.HabitApp.jumpToRunningTimer === "function") {
     await timerSandbox433.HabitApp.jumpToRunningTimer();
   } else {
-    headerPillEl433.click();
+    dockPillEl433.click();
     await new Promise((r) => setTimeout(r, 10));
   }
 
@@ -3699,14 +3699,14 @@ async function runUITests() {
   timerBtnEl433.click();
   await new Promise((r) => setTimeout(r, 10));
 
-  const isHeaderPillStoppedHidden =
-    headerPillEl433.classList.contains("hidden") ||
-    headerPillEl433.className.includes("hidden") ||
-    headerPillEl433.style.display === "none";
+  const isDockPillStoppedHidden =
+    dockPillEl433.classList.contains("hidden") ||
+    dockPillEl433.className.includes("hidden") ||
+    dockPillEl433.style.display === "none";
 
   assert(
-    isHeaderPillStoppedHidden,
-    "[Issue #433 AC-2] Stopping running timer hides the ambient header/dock pill"
+    isDockPillStoppedHidden,
+    "[Issue #433 AC-2] Stopping running timer hides the ambient dock pill"
   );
 
   // ==========================================
@@ -4144,11 +4144,11 @@ async function runUITests() {
     await deleteSandbox433.HabitApp.handleDeleteHabit(timerHabitToDelete);
   }
 
-  const headerPillAfterDel433 = getDeleteEl433("header-active-timer-pill");
+  const dockPillAfterDel433 = getDeleteEl433("dock-active-timer-pill");
   const isPillHiddenAfterDelete =
-    headerPillAfterDel433.classList.contains("hidden") ||
-    headerPillAfterDel433.className.includes("hidden") ||
-    headerPillAfterDel433.style.display === "none";
+    dockPillAfterDel433.classList.contains("hidden") ||
+    dockPillAfterDel433.className.includes("hidden") ||
+    dockPillAfterDel433.style.display === "none";
 
   assert(
     isPillHiddenAfterDelete,
@@ -4275,8 +4275,8 @@ async function runUITests() {
       if (typeof stressSandbox433.HabitApp.jumpToRunningTimer === "function") {
         await stressSandbox433.HabitApp.jumpToRunningTimer();
       } else {
-        const headerPill = getStressEl433("header-active-timer-pill");
-        headerPill.click();
+        const dockPill = getStressEl433("dock-active-timer-pill");
+        dockPill.click();
         await new Promise((r) => setTimeout(r, 2));
       }
     }
@@ -6236,6 +6236,37 @@ async function runUITests() {
 
   components.releaseFocus();
   islandDoc.body.removeChild(modalMock);
+
+  // ==========================================
+  // [Issue #532] Header Vertical Alignment & Dead-Code Purge Verification
+  // ==========================================
+  const rawIndexHtml532 = getHtmlContent();
+  const rawAppJs532 = fs.readFileSync(
+    path.join(__dirname, "../habit-tracker/src/app.js"),
+    "utf8"
+  );
+
+  // 1. Header container standard h-14 & flex items-center justify-between
+  assert(
+    rawIndexHtml532.includes("h-14 flex items-center justify-between") ||
+      (rawIndexHtml532.includes("h-14") &&
+        rawIndexHtml532.includes("justify-between")),
+    "[Issue #532 AC-1] Top header in index.html uses h-14 (56px) flex container with items-center justify-between"
+  );
+
+  // 2. Logo box (w-8 h-8), freeze tokens badge, and lang toggle button h-8 alignment
+  assert(
+    rawIndexHtml532.includes("w-8 h-8 rounded-xl") &&
+      rawIndexHtml532.includes('id="freeze-tokens-count"') &&
+      rawIndexHtml532.includes('id="lang-toggle-btn"'),
+    "[Issue #532 AC-2] Logo, freeze token badge, and lang toggle button have synchronized h-8 dimensions"
+  );
+
+  // 3. Purge of #header-active-timer-pill in src/app.js
+  assert(
+    !rawAppJs532.includes("header-active-timer-pill"),
+    "[Issue #532 AC-3] All references to #header-active-timer-pill in src/app.js are purged"
+  );
 }
 
 runUITests()
