@@ -958,6 +958,60 @@ try {
     0,
     "[ADR-0009] Consistency score is 0% when 0 habits scheduled"
   );
+
+  // Multi-day rolling consistency score test
+  const habitDaily = {
+    id: "h-daily",
+    scheduleType: "daily",
+    startDate: "2026-08-01",
+    targetValue: 1,
+  };
+  const sampleLogs30d = {};
+  // 15 completed days out of 30 days
+  for (let i = 0; i < 30; i++) {
+    const d = engine.shiftDateString("2026-09-16", -i);
+    if (i % 2 === 0) {
+      sampleLogs30d[`h-daily_${d}`] = {
+        id: `h-daily_${d}`,
+        value: 1,
+        completed: true,
+      };
+    }
+  }
+  const score30d = engine.calculateOverallConsistencyScore(
+    [habitDaily],
+    sampleLogs30d,
+    30,
+    "2026-09-16"
+  );
+  assertEqual(
+    score30d,
+    50,
+    "[Issue #520 AC-1] 30-day aggregate consistency calculation accurately returns 50% (15/30)"
+  );
+
+  // Inactive habit with 10 freeze tokens over 60 days
+  const inactiveStats = engine.calculateStreakAndConsistency(
+    { id: "h-zero-long", scheduleType: "daily", startDate: "2026-01-01" },
+    {},
+    10,
+    "2026-09-16"
+  );
+  assertEqual(
+    inactiveStats.currentStreak,
+    0,
+    "[Issue #520 AC-1] 0-streak habit with 10 freeze tokens retains 0 current streak"
+  );
+  assertEqual(
+    inactiveStats.bestStreak,
+    0,
+    "[Issue #520 AC-1] 0-streak habit with 10 freeze tokens retains 0 best streak"
+  );
+  assertEqual(
+    inactiveStats.freezeTokensUsed,
+    0,
+    "[Issue #520 AC-1] 0-streak habit with 10 freeze tokens uses 0 freeze tokens"
+  );
 } catch (err) {
   console.error("❌ Exception during Engine Math test execution:", err);
   process.exit(1);

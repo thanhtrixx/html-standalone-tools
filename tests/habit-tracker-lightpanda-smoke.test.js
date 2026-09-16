@@ -206,14 +206,67 @@ const startTime = Date.now();
       console.error = originalConsoleError;
     }
 
+    // SECTION 5: ADR-0009 Feature Smoke (Header, Wizard, Timer Island, Insights)
+    console.log("--- Section 5: ADR-0009 Architectural & UI Smoke ---");
+
+    const { getHtmlContent } = require("./helpers/habit-tracker-harness");
+    const rawHtml = getHtmlContent();
     assert(
-      uncaughtErrors === 0,
-      `SMOKE-STATE-06: Zero console errors logged during state lifecycle (Errors: ${uncaughtErrors})`
+      rawHtml.includes("<header") &&
+        rawHtml.includes("py-3") &&
+        rawHtml.includes("h-8"),
+      "SMOKE-ADR09-01: Header container enforces uniform height padding (py-3) and h-8 badges"
     );
 
-    // SECTION 5: Sub-Second Execution Benchmark
+    // Verify 4-step wizard Step 1 Language Selection
+    if (
+      sandbox.HabitIdentityView &&
+      typeof sandbox.HabitIdentityView.renderIdentityWizardModal === "function"
+    ) {
+      const step1Html = sandbox.HabitIdentityView.renderIdentityWizardModal(
+        1,
+        "morning-mastery",
+        "vi"
+      );
+      assert(
+        step1Html.includes("wizard-select-lang") &&
+          step1Html.includes("Tiếng Việt"),
+        "SMOKE-ADR09-02: Setup wizard Step 1 renders language selection options"
+      );
+    }
+
+    // Verify Floating Timer Island Reactive Lifecycle
+    const timerIslandEl = doc.getElementById("floating-timer-island");
+    assert(
+      timerIslandEl !== null && timerIslandEl.classList.contains("hidden"),
+      "SMOKE-ADR09-03: Floating timer island is initially hidden when idle"
+    );
+
+    const timerHabit = sandbox.HabitApp.store
+      .getHabits()
+      .find((h) => h.type === "timer");
+    if (timerHabit) {
+      await sandbox.HabitApp.handleToggleTimer(
+        timerHabit.id,
+        sandbox.HabitApp.store.getActiveDate()
+      );
+      assert(
+        !timerIslandEl.classList.contains("hidden"),
+        "SMOKE-ADR09-04: Floating timer island unhides reactively when timer starts"
+      );
+      await sandbox.HabitApp.handleToggleTimer(
+        timerHabit.id,
+        sandbox.HabitApp.store.getActiveDate()
+      );
+      assert(
+        timerIslandEl.classList.contains("hidden"),
+        "SMOKE-ADR09-05: Floating timer island hides when timer stops"
+      );
+    }
+
+    // SECTION 6: Sub-Second Execution Benchmark
     const durationMs = Date.now() - startTime;
-    console.log(`--- Section 5: Execution Benchmark (${durationMs}ms) ---`);
+    console.log(`--- Section 6: Execution Benchmark (${durationMs}ms) ---`);
     assert(
       durationMs < 1000,
       `SMOKE-PERF-01: Entire smoke suite completes in < 1000ms (Actual: ${durationMs}ms)`

@@ -1363,7 +1363,10 @@
           target.getAttribute("data-lang") ||
           target.closest("[data-lang]")?.getAttribute("data-lang");
         if (selectedLang && store) {
-          await store.updateSettings({ lang: selectedLang, language: selectedLang });
+          await store.updateSettings({
+            lang: selectedLang,
+            language: selectedLang,
+          });
           const langBtn = document.getElementById("lang-toggle-btn");
           if (langBtn) {
             langBtn.innerHTML = `<span class="leading-none select-none">${selectedLang === "vi" ? "🇻🇳" : "🇺🇸"}</span>`;
