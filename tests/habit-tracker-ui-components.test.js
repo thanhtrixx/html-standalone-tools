@@ -6330,6 +6330,108 @@ async function runUITests() {
       initialHabitCount533 + appliedHabits533.length,
     "[Issue #533 AC-4] Store habit count increases by total count of all kit habits"
   );
+
+  // ==========================================
+  // [Issue #535] Streamlined Timer Display Architecture & Duplication Elimination
+  // ==========================================
+  console.log(
+    "\n--- [Issue #535] Streamlined Timer Display Architecture & Duplication Elimination ---"
+  );
+
+  const { sandbox: timerSandbox535, getOrCreateElement: getTimerEl535 } =
+    createHabitTrackerSandbox();
+  timerSandbox535.requestAnimationFrame = (fn) => fn();
+  timerSandbox535.cancelAnimationFrame = () => {};
+  await timerSandbox535.HabitApp.init();
+
+  const timerHabit535 = {
+    id: "h-timer-test-535",
+    name: "Deep Focus 25m",
+    type: "timer",
+    targetValue: 1500, // 25 mins
+    routine: "morning",
+    scheduleType: "daily",
+    color: "amber",
+    icon: "📖",
+    createdAt: "2026-01-01",
+  };
+  await timerSandbox535.HabitApp.store.addHabit(timerHabit535);
+  timerSandbox535.HabitApp.store.setActiveDate("2026-09-16");
+
+  // 1. Render Today card for timer habit
+  const timerCardHtml535 = timerSandbox535.HabitTodayView.renderHabitCard(
+    timerHabit535,
+    { loggedValue: 300, isCompleted: false },
+    timerSandbox535.HabitApp.store,
+    "2026-09-16",
+    false,
+    null,
+    "en"
+  );
+
+  assert(
+    timerCardHtml535.includes('id="card-sub-ticker-h-timer-test-535"'),
+    "[Issue #535 AC-1] Timer habit card contains card-sub-ticker element"
+  );
+  assert(
+    !timerCardHtml535.includes("25m / 25m / 25m"),
+    "[Issue #535 AC-1] Card sub-ticker does not contain duplicate nested / 25m string"
+  );
+
+  // 2. Expanded Card Drawer features clean action buttons without redundant inline static ticker text
+  const expandedTimerCardHtml = timerSandbox535.HabitTodayView.renderHabitCard(
+    timerHabit535,
+    { loggedValue: 300, isCompleted: false },
+    timerSandbox535.HabitApp.store,
+    "2026-09-16",
+    true, // isExpanded = true
+    null,
+    "en"
+  );
+
+  assert(
+    expandedTimerCardHtml.includes('data-action="toggle-timer"') &&
+      expandedTimerCardHtml.includes('data-action="open-focus-timer"') &&
+      expandedTimerCardHtml.includes('data-action="open-detail"'),
+    "[Issue #535 AC-2] Expanded timer card drawer contains streamlined action buttons (Start, Focus, Details)"
+  );
+  assert(
+    !expandedTimerCardHtml.includes('id="card-timer-ticker-'),
+    "[Issue #535 AC-2] Expanded drawer eliminates redundant inline static ticker text"
+  );
+
+  // 3. Focus Timer Modal Dial is clean and uncluttered
+  const focusModalHtml535 =
+    timerSandbox535.HabitTodayView.renderFocusTimerModal(
+      timerSandbox535.HabitApp.store,
+      timerHabit535.id,
+      "remaining",
+      false,
+      "en"
+    );
+
+  assert(
+    focusModalHtml535.includes('id="focus-modal-timer-digits"') &&
+      focusModalHtml535.includes('id="focus-modal-sub-ticker"'),
+    "[Issue #535 AC-3] Focus Timer modal dial contains clean single digits and sub-ticker"
+  );
+
+  // 4. Reactive DOM update does not duplicate target duration
+  const testSubTickerEl = getTimerEl535("card-sub-ticker-h-timer-test-535");
+  testSubTickerEl.textContent = "00:00";
+
+  timerSandbox535.HabitApp.updateTimerDom(
+    timerHabit535.id,
+    60,
+    timerHabit535.targetValue
+  );
+  assert(
+    testSubTickerEl.textContent.includes("01p 00g") ||
+      testSubTickerEl.textContent.includes("01m 00s") ||
+      testSubTickerEl.textContent.includes("01:00") ||
+      testSubTickerEl.textContent.includes("1m"),
+    "[Issue #535 AC-4] updateTimerDom updates card-sub-ticker cleanly without appending extra target suffixes"
+  );
 }
 
 runUITests()
