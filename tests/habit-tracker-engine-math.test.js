@@ -876,6 +876,88 @@ try {
       );
     }
   }
+
+  // ==========================================
+  // [ADR-0009] Zero-Streak Freeze Token Invariance & Global Consistency Math
+  // ==========================================
+  console.log("\n--- [ADR-0009] Zero-Streak Freeze & Global Consistency ---");
+
+  // Inactive habit with available freeze tokens must NEVER consume tokens to fake a streak
+  const inactiveHabit = {
+    id: "h-inactive",
+    name: "Inactive Habit",
+    type: "binary",
+    targetValue: 1,
+    scheduleType: "daily",
+    startDate: "2026-09-01",
+  };
+
+  const zeroStats = engine.calculateStreakAndConsistency(
+    inactiveHabit,
+    {}, // empty logs
+    2,
+    [],
+    "2026-09-16"
+  );
+  assertEqual(
+    zeroStats.currentStreak,
+    0,
+    "[ADR-0009] Inactive habit has 0 current streak"
+  );
+  assertEqual(
+    zeroStats.bestStreak,
+    0,
+    "[ADR-0009] Inactive habit has 0 best streak (no phantom freeze token consumption)"
+  );
+  assertEqual(
+    zeroStats.freezeTokensUsed,
+    0,
+    "[ADR-0009] Zero freeze tokens used when streak is 0"
+  );
+
+  // Global aggregate consistency score calculation
+  const habitA = {
+    id: "h-a",
+    scheduleType: "daily",
+    startDate: "2026-09-01",
+    targetValue: 1,
+  };
+  const habitB = {
+    id: "h-b",
+    scheduleType: "daily",
+    startDate: "2026-09-01",
+    targetValue: 1,
+  };
+  const testLogsMap = {
+    "h-a_2026-09-16": { id: "h-a_2026-09-16", value: 1, completed: true },
+    "h-b_2026-09-16": { id: "h-b_2026-09-16", value: 0, completed: false },
+  };
+
+  // On 1 day window: 1 out of 2 completed = 50%
+  const score1d = engine.calculateOverallConsistencyScore(
+    [habitA, habitB],
+    testLogsMap,
+    1,
+    "2026-09-16"
+  );
+  assertEqual(
+    score1d,
+    50,
+    "[ADR-0009] 1-day consistency score is 50% (1/2 scheduled completed)"
+  );
+
+  // When 0 habits scheduled: returns 0%
+  const scoreEmpty = engine.calculateOverallConsistencyScore(
+    [],
+    {},
+    30,
+    "2026-09-16"
+  );
+  assertEqual(
+    scoreEmpty,
+    0,
+    "[ADR-0009] Consistency score is 0% when 0 habits scheduled"
+  );
 } catch (err) {
   console.error("❌ Exception during Engine Math test execution:", err);
   process.exit(1);

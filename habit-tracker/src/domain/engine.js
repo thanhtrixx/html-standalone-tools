@@ -573,14 +573,14 @@
 
       if (prog.isCompleted) {
         currentStreak++;
-      } else if (tokensLeft > 0) {
-        // Apply freeze token
+      } else if (tokensLeft > 0 && currentStreak > 0) {
+        // Apply freeze token only to preserve an active streak
         tokensLeft--;
         tokensUsed++;
         frozenDates.push(curDateStr);
         currentStreak++;
       } else {
-        // Missed day with no freeze tokens -> streak breaks here
+        // Missed day with no freeze tokens or streak was 0 -> streak breaks
         break;
       }
     }
@@ -608,7 +608,8 @@
       if (prog.isCompleted) {
         tempStreak++;
         if (tempStreak > bestStreak) bestStreak = tempStreak;
-      } else if (tempTokens > 0) {
+      } else if (tempTokens > 0 && tempStreak > 0) {
+        // Apply freeze token only if there is an existing streak to preserve
         tempTokens--;
         tempStreak++;
         if (tempStreak > bestStreak) bestStreak = tempStreak;
@@ -961,6 +962,42 @@
     });
   }
 
+  /**
+   * Calculates overall aggregate scheduled consistency percentage across all habits over a window
+   */
+  function calculateOverallConsistencyScore(
+    habits,
+    logsMap = {},
+    daysBack = 30,
+    refDate = new Date(),
+    vacationRanges = []
+  ) {
+    if (!Array.isArray(habits) || habits.length === 0) return 0;
+    const refStr = toDateString(refDate);
+    let totalScheduled = 0;
+    let totalCompleted = 0;
+
+    for (let i = 0; i < daysBack; i++) {
+      const dStr = shiftDateString(refStr, -i);
+      for (const h of habits) {
+        if (!h.archived && isScheduledDate(h, dStr, vacationRanges)) {
+          totalScheduled++;
+          const log =
+            logsMap[`${h.id}_${dStr}`] ||
+            (logsMap[h.id] && logsMap[h.id][dStr]) ||
+            logsMap[dStr];
+          const prog = calculateHabitProgress(h, log);
+          if (prog.isCompleted) {
+            totalCompleted++;
+          }
+        }
+      }
+    }
+
+    if (totalScheduled === 0) return 0;
+    return Math.round((totalCompleted / totalScheduled) * 100);
+  }
+
   const engineExports = {
     HABIT_TYPES,
     ROUTINES,
@@ -975,6 +1012,7 @@
     shiftDateString,
     isScheduledDate,
     calculateStreakAndConsistency,
+    calculateOverallConsistencyScore,
     calculateRoutineProgress,
     calculateDailyProgress,
     getHeatmapLevel,
