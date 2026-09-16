@@ -244,8 +244,8 @@
 
     const kits = engine.STARTER_KITS || [];
 
-    // Progress Dots
-    const stepIndicators = [1, 2, 3]
+    // Progress Dots (4 Steps)
+    const stepIndicators = [1, 2, 3, 4]
       .map((s) => {
         const isActive = s === step;
         const isDone = s < step;
@@ -261,8 +261,8 @@
               ${isDone ? "✓" : s}
             </div>
             ${
-              s < 3
-                ? `<div class="w-8 sm:w-12 h-0.5 rounded-full ${
+              s < 4
+                ? `<div class="w-6 sm:w-10 h-0.5 rounded-full ${
                     s < step
                       ? "bg-emerald-500"
                       : "bg-slate-200 dark:bg-slate-800"
@@ -277,7 +277,71 @@
     let stepContentHtml = "";
 
     if (step === 1) {
-      // Step 1: 4 Life Pillars
+      // Step 1: Language Selection
+      const isVi = lang === "vi";
+      stepContentHtml = `
+        <div class="space-y-4">
+          <div class="text-center sm:text-left mb-2">
+            <h3 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("wizard_step_lang_title", {}, lang)}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${i18n.t("wizard_step_lang_desc", {}, lang)}</p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+            <!-- Vietnamese option -->
+            <div
+              data-action="wizard-select-lang"
+              data-lang="vi"
+              class="wizard-lang-option p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                isVi
+                  ? "bg-emerald-500/10 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md"
+                  : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600"
+              }"
+            >
+              <div class="flex items-center gap-3.5">
+                <span class="text-3xl select-none">🇻🇳</span>
+                <div>
+                  <h4 class="font-bold text-slate-900 dark:text-white text-sm">${i18n.t("wizard_lang_vi_title", {}, lang)}</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("wizard_lang_vi_desc", {}, lang)}</p>
+                </div>
+              </div>
+              <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                isVi
+                  ? "border-emerald-500 bg-emerald-500 text-slate-950 font-black text-xs"
+                  : "border-slate-400"
+              }">
+                ${isVi ? "✓" : ""}
+              </div>
+            </div>
+
+            <!-- English option -->
+            <div
+              data-action="wizard-select-lang"
+              data-lang="en"
+              class="wizard-lang-option p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                !isVi
+                  ? "bg-emerald-500/10 border-emerald-500 ring-2 ring-emerald-500/20 shadow-md"
+                  : "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600"
+              }"
+            >
+              <div class="flex items-center gap-3.5">
+                <span class="text-3xl select-none">🇺🇸</span>
+                <div>
+                  <h4 class="font-bold text-slate-900 dark:text-white text-sm">${i18n.t("wizard_lang_en_title", {}, lang)}</h4>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("wizard_lang_en_desc", {}, lang)}</p>
+                </div>
+              </div>
+              <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                !isVi
+                  ? "border-emerald-500 bg-emerald-500 text-slate-950 font-black text-xs"
+                  : "border-slate-400"
+              }">
+                ${!isVi ? "✓" : ""}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (step === 2) {
+      // Step 2: 4 Life Pillars
       const domainCards = domainMeta
         .map((dm) => {
           return `
@@ -303,8 +367,8 @@
           </div>
         </div>
       `;
-    } else if (step === 2) {
-      // Step 2: Starter Kits
+    } else if (step === 3) {
+      // Step 3: Starter Kits
       const kitCards = kits
         .map((kit) => {
           const isSelected = kit.id === selectedKitId;
@@ -365,7 +429,7 @@
         </div>
       `;
     } else {
-      // Step 3: Ready to Build Atomic Habits
+      // Step 4: Ready to Build Atomic Habits
       const chosenKit = kits.find((k) => k.id === selectedKitId) || kits[0];
       const kitTitle = chosenKit ? i18n.t(chosenKit.titleKey, {}, lang) : "";
       const habitItems = chosenKit
@@ -454,7 +518,7 @@
 
             <div class="flex items-center gap-2">
               ${
-                step < 3
+                step < 4
                   ? `<button
                       type="button"
                       data-action="wizard-next-step"

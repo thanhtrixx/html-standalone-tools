@@ -319,7 +319,14 @@
 
       // Identity Setup Wizard
       wizard_title: "Identity Setup Wizard",
-      wizard_subtitle: "Build your personal habit system in 3 simple steps",
+      wizard_subtitle: "Build your personal habit system in 4 simple steps",
+      wizard_step_lang_title: "Choose Your Language",
+      wizard_step_lang_desc:
+        "Select your preferred interface language. You can change this anytime in Settings.",
+      wizard_lang_vi_title: "Tiếng Việt",
+      wizard_lang_vi_desc: "Giao diện và tên thói quen tiếng Việt",
+      wizard_lang_en_title: "English",
+      wizard_lang_en_desc: "English interface and atomic habit kits",
       wizard_step_1_title: "Core Life Pillars",
       wizard_step_1_desc:
         "Ground your habits in 4 foundational domains: Health, Mind, Craft, and Discipline.",
@@ -664,7 +671,14 @@
       // Identity Setup Wizard
       wizard_title: "Hướng Dẫn Thiết Lập Bản Sắc",
       wizard_subtitle:
-        "Xây dựng hệ thống thói quen cá nhân trong 3 bước đơn giản",
+        "Xây dựng hệ thống thói quen cá nhân trong 4 bước đơn giản",
+      wizard_step_lang_title: "Chọn Ngôn Ngữ Hiển Thị",
+      wizard_step_lang_desc:
+        "Chọn ngôn ngữ hiển thị ưa thích của bạn. Bạn có thể thay đổi bất cứ lúc nào trong phần Cài đặt.",
+      wizard_lang_vi_title: "Tiếng Việt",
+      wizard_lang_vi_desc: "Giao diện và tên thói quen tiếng Việt",
+      wizard_lang_en_title: "English",
+      wizard_lang_en_desc: "English interface and atomic habit kits",
       wizard_step_1_title: "Trụ Cột Cuộc Sống",
       wizard_step_1_desc:
         "Neo giữ thói quen vào 4 lĩnh vực cốt lõi: Sức khỏe, Tâm trí, Sự nghiệp và Kỷ luật.",

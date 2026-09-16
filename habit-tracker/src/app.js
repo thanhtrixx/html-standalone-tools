@@ -1358,8 +1358,25 @@
         } else {
           openIdentityWizard(1);
         }
+      } else if (action === "wizard-select-lang") {
+        const selectedLang =
+          target.getAttribute("data-lang") ||
+          target.closest("[data-lang]")?.getAttribute("data-lang");
+        if (selectedLang && store) {
+          await store.updateSettings({ lang: selectedLang, language: selectedLang });
+          const langBtn = document.getElementById("lang-toggle-btn");
+          if (langBtn) {
+            langBtn.innerHTML = `<span class="leading-none select-none">${selectedLang === "vi" ? "🇻🇳" : "🇺🇸"}</span>`;
+            langBtn.title =
+              selectedLang === "vi"
+                ? "Ngôn ngữ: 🇻🇳 Tiếng Việt — Bấm để đổi sang 🇺🇸 English"
+                : "Language: 🇺🇸 English — Click to switch to 🇻🇳 Tiếng Việt";
+            langBtn.setAttribute("aria-label", langBtn.title);
+          }
+          renderWizardModal();
+        }
       } else if (action === "wizard-next-step") {
-        wizardCurrentStep = Math.min(3, wizardCurrentStep + 1);
+        wizardCurrentStep = Math.min(4, wizardCurrentStep + 1);
         renderWizardModal();
       } else if (action === "wizard-prev-step") {
         wizardCurrentStep = Math.max(1, wizardCurrentStep - 1);
