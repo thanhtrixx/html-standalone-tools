@@ -470,7 +470,10 @@
     const dateObj = new Date(y, m - 1, d);
     const dayOfWeek = dateObj.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
 
-    if (scheduleType === SCHEDULE_TYPES.SPECIFIC_DAYS) {
+    if (
+      scheduleType === SCHEDULE_TYPES.SPECIFIC_DAYS ||
+      scheduleType === "weekly"
+    ) {
       const days = habit.scheduleDays || [];
       return days.includes(dayOfWeek);
     }
