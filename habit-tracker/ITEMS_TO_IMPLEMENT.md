@@ -133,49 +133,48 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 1: Header Vertical Alignment & Badge Standardization (P0)
 
-- [ ] Standardize header container in `index.html` and `src/app.js`: brand logo box (`w-8 h-8` / 32px), title text, freeze token badge (`#freeze-tokens-count`), and language toggle (`#lang-toggle-btn`) all vertically centered with `h-8` (32px) touch targets.
-- [ ] Fix baseline alignment across text labels and emojis (`🇻🇳`, `🛡️`) with flex centering and normalized font metrics.
-- [ ] Eliminate top-header timer pill (`#header-active-timer-pill`) in favor of the floating island above dock.
+- [x] Standardize header container in `index.html` and `src/app.js`: brand logo box (`w-8 h-8` / 32px), title text, freeze token badge (`#freeze-tokens-count`), and language toggle (`#lang-toggle-btn`) all vertically centered with `h-8` (32px) touch targets.
+- [x] Fix baseline alignment across text labels and emojis (`🇻🇳`, `🛡️`) with flex centering and normalized font metrics.
+- [x] Eliminate top-header timer pill (`#header-active-timer-pill`) in favor of the floating island above dock.
 
 ### Slice 2: Insights Analytics Formulas, Data Corrections & Test Seams (P0)
 
-- [ ] Fix `calculateStreakAndConsistency` in `src/domain/engine.js`: ensure freeze tokens are never consumed when `currentStreak === 0` or `tempStreak === 0`, preventing false streaks on inactive habits.
-- [ ] Implement `calculateOverallConsistencyScore(habits, logs, daysBack, refDate)` in `src/domain/engine.js` calculating true global scheduled adherence across all habits.
-- [ ] Update `renderInsightsView` in `src/ui/insights-view.js` to use `calculateOverallConsistencyScore` for 30d and 90d metrics.
-- [ ] Fix missing i18n key `heatmap_subtitle` in `src/i18n/translations.js`.
-- [ ] Remove duplicate `<h2>` headers in `src/ui/identity-view.js` and `src/ui/manager-view.js`.
-- [ ] Fix date ribbon active item calculation in `tests/habit-tracker-ui-components.test.js` / `src/ui/today-view.js` to be independent of execution date.
+- [x] Fix `calculateStreakAndConsistency` in `src/domain/engine.js`: ensure freeze tokens are never consumed when `currentStreak === 0` or `tempStreak === 0`, preventing false streaks on inactive habits.
+- [x] Implement `calculateOverallConsistencyScore(habits, logs, daysBack, refDate)` in `src/domain/engine.js` calculating true global scheduled adherence across all habits.
+- [x] Update `renderInsightsView` in `src/ui/insights-view.js` to use `calculateOverallConsistencyScore` for 30d and 90d metrics.
+- [x] Fix missing i18n key `heatmap_subtitle` in `src/i18n/translations.js`.
+- [x] Remove duplicate `<h2>` headers in `src/ui/identity-view.js` and `src/ui/manager-view.js`.
+- [x] Fix date ribbon active item calculation in `tests/habit-tracker-ui-components.test.js` / `src/ui/today-view.js` to be independent of execution date.
 
 ### Slice 3: 4-Step Language-First Identity Setup Wizard (P1)
 
-- [ ] Refactor `renderIdentityWizardModal` in `src/ui/identity-view.js` into 4 distinct progressive steps:
+- [x] Refactor `renderIdentityWizardModal` in `src/ui/identity-view.js` into 4 distinct progressive steps:
   - Step 1: Language Selection (`🇻🇳 Tiếng Việt` vs `🇺🇸 English`) with immediate reactive UI translation and storage persistence.
   - Step 2: 4 Life Pillars introduction (`Health`, `Mind`, `Craft`, `Discipline`).
   - Step 3: Curated Starter Kits selection.
   - Step 4: Confirmation & 1-tap activation.
-- [ ] Update wizard stepper navigation indicators (1 to 4) and back/next footer buttons.
-- [ ] Add bilingual copy for all wizard step titles, descriptions, and language option cards in `src/i18n/translations.js`.
+- [x] Update wizard stepper navigation indicators (1 to 4) and back/next footer buttons.
+- [x] Add bilingual copy for all wizard step titles, descriptions, and language option cards in `src/i18n/translations.js`.
 
 ### Slice 4: Impeccable Timer UI/UX & Floating Dynamic Mini-Player (P1)
 
-- [ ] Update timer labels: change `Start Timer` / `Bắt đầu hẹn giờ` to `Start` / `Bắt đầu` (`Pause` / `Tạm dừng`) in `src/i18n/translations.js` and `src/ui/today-view.js`.
-- [ ] Declutter habit card timer interface: remove redundant subtitles, provide clean single ticker row in expanded drawer (`[ ▶ Start / ⏸ Pause ]`, `[ 🔄 Reset ]`, `12:00 / 20:00`, `[ 🎯 Focus Mode ]`, `[ Details ➔ ]`).
-- [ ] Implement Floating Dynamic Timer Island (`#floating-timer-island`) anchored above the bottom dock (`bottom-20` / `z-40`) in `index.html` and `src/app.js`:
+- [x] Update timer labels: change `Start Timer` / `Bắt đầu hẹn giờ` to `Start` / `Bắt đầu` (`Pause` / `Tạm dừng`) in `src/i18n/translations.js` and `src/ui/today-view.js`.
+- [x] Declutter habit card timer interface: remove redundant subtitles, provide clean single ticker row in expanded drawer (`[ ▶ Start / ⏸ Pause ]`, `[ 🔄 Reset ]`, `12:00 / 20:00`, `[ 🎯 Focus Mode ]`, `[ Details ➔ ]`).
+- [x] Implement Floating Dynamic Timer Island (`#floating-timer-island`) anchored above the bottom dock (`bottom-20` / `z-40`) in `index.html` and `src/app.js`:
   - Renders habit icon, name, live countdown ticker, mini progress track, and 1-tap Play/Pause toggle.
   - Tapping the island body opens the Focus Timer Modal.
   - Hidden when timer is stopped/idle; appears reactively on timer start.
 
 ### Slice 5: Automated Verification & Lightpanda Smoke Suite Gating (P0)
 
-- [ ] Add unit tests in `tests/habit-tracker-engine-math.test.js` verifying 0-streak freeze token resilience, best streak isolation, and 30d/90d aggregate consistency math.
-- [ ] Update `tests/habit-tracker-lightpanda-smoke.test.js` to verify header height standardization, 4-step wizard language selection, floating timer island reactivity, and Insights accuracy.
-- [ ] Verify 100% test pass on `npm run test:habit` and `npm run verify`.
+- [x] Add unit tests in `tests/habit-tracker-engine-math.test.js` verifying 0-streak freeze token resilience, best streak isolation, and 30d/90d aggregate consistency math.
+- [x] Update `tests/habit-tracker-lightpanda-smoke.test.js` to verify header height standardization, 4-step wizard language selection, floating timer island reactivity, and Insights accuracy.
+- [x] Verify 100% test pass on `npm run test:habit` and `npm run verify`.
 
 ---
 
 ## 🧪 Verification & DoD Gate
 
-- [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
-- [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
-- [ ] Outer repository gate clean: `npm run verify`.
-
+- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [x] Outer repository gate clean: `npm run verify`.

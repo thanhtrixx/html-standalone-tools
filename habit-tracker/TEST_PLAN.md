@@ -85,17 +85,16 @@ tests/
 
 ### 6. Header Alignment, Insights Accuracy & Floating Dynamic Island (ADR-0009)
 
-- [ ] **Header Height Harmony**:
+- [x] **Header Height Harmony**:
   - Logo (`w-8 h-8`), title text, freeze token badge (`#freeze-tokens-count`), and language switcher (`#lang-toggle-btn`) render with uniform height (`32px`) and vertically centered flex baselines.
-- [ ] **Insights Mathematical Integrity & Zero-Baseline Gating**:
+- [x] **Insights Mathematical Integrity & Zero-Baseline Gating**:
   - `calculateStreakAndConsistency` preserves `bestStreak: 0` and consumes 0 freeze tokens on empty history.
   - `calculateOverallConsistencyScore` returns exact percentage of scheduled habit completions across 30d/90d windows.
   - `renderInsightsView` renders localized `heatmap_subtitle` and zero duplicate titles.
-- [ ] **4-Step Language-First Identity Setup Wizard**:
+- [x] **4-Step Language-First Identity Setup Wizard**:
   - Step 1 renders language selection (`🇻🇳` / `🇺🇸`); selecting language reactively updates modal UI and persists to store.
   - Stepper indicators accurately reflect 4 steps with working back/next navigation.
-- [ ] **Timer Card Decluttering & Floating Dynamic Mini-Player**:
+- [x] **Timer Card Decluttering & Floating Dynamic Mini-Player**:
   - Button label uses `Start` / `Bắt đầu` and `Pause` / `Tạm dừng`.
   - Card drawer renders a clean single ticker row without duplicate numbers.
   - `#floating-timer-island` appears above bottom dock when timer is running and provides 1-tap play/pause and focus modal expansion across all tabs.
-
