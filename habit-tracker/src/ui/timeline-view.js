@@ -123,7 +123,7 @@
         <div
           class="absolute left-0 top-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-slate-50 dark:ring-slate-950 transition-all ${
             isAllDone
-              ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30"
+              ? "bg-emerald-500 text-emerald-950 shadow-md shadow-emerald-500/30 font-black"
               : "bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
           }"
           style="${isAllDone ? `background-color: ${meta.hex};` : ""}"
@@ -136,7 +136,7 @@
           <div>
             <h3 class="font-black text-slate-900 dark:text-white text-base leading-tight flex items-center gap-2">
               <span>${routineTitle}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium font-mono">${routineTime}</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-medium font-mono">${routineTime}</span>
             </h3>
           </div>
           <span class="text-xs font-mono font-bold tabular-nums px-2.5 py-0.5 rounded-full ${
@@ -216,7 +216,7 @@
             </div>
             <div class="text-right">
               <span class="text-2xl font-black font-mono tabular-nums text-emerald-500 dark:text-emerald-400">${dailyProgress.percentage}%</span>
-              <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${dailyProgress.completed}/${dailyProgress.total} ${i18n.t("done", {}, lang)}</span>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${dailyProgress.completed}/${dailyProgress.total} ${i18n.t("done", {}, lang)}</span>
             </div>
           </div>
 

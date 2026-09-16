@@ -282,7 +282,7 @@
               <button
                 type="button"
                 data-action="modal-next-stage"
-                class="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-md shadow-emerald-500/20 transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+                class="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black text-xs shadow-md shadow-emerald-500/20 transition active:scale-95 cursor-pointer flex items-center gap-1.5"
               >
                 <span>${i18n.t("modal_btn_next_stage", {}, lang)}</span>
               </button>
@@ -370,7 +370,7 @@
               </button>
               <button
                 type="submit"
-                class="py-2.5 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 transition active:scale-95 cursor-pointer"
+                class="py-2.5 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-black text-xs shadow-lg shadow-emerald-500/30 transition active:scale-95 cursor-pointer"
               >
                 ${isEdit ? i18n.t("save", {}, lang) : i18n.t("add_habit", {}, lang)}
               </button>
@@ -420,7 +420,7 @@
                 ? `<div class="flex flex-wrap gap-1 mt-1">${assignedRoutines
                     .map(
                       (r) =>
-                        `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">${i18n.t(`routine_${r}`, {}, lang)}</span>`
+                        `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">${i18n.t(`routine_${r}`, {}, lang)}</span>`
                     )
                     .join("")}</div>`
                 : "";

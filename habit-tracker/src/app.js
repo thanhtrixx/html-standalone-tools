@@ -482,7 +482,7 @@
 
       if (isActive) {
         btn.className =
-          "lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20";
+          "lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 bg-emerald-500 text-emerald-950 font-bold shadow-md shadow-emerald-500/20";
       } else {
         btn.className =
           "lens-tab-btn flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl transition-all duration-200 active:scale-95 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium";
@@ -630,6 +630,16 @@
       `;
     }
 
+    const isVi = lang === "vi";
+    const isDark = settings.theme !== "light";
+    const toggleActiveCls = "bg-emerald-600 text-white shadow-xs";
+    const toggleInactiveCls =
+      "bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300";
+    const viBtnCls = isVi ? toggleActiveCls : toggleInactiveCls;
+    const enBtnCls = !isVi ? toggleActiveCls : toggleInactiveCls;
+    const darkBtnCls = isDark ? toggleActiveCls : toggleInactiveCls;
+    const lightBtnCls = !isDark ? toggleActiveCls : toggleInactiveCls;
+
     const html = `
       <div class="settings-view max-w-lg mx-auto pb-24 px-1">
         <div class="mb-6">
@@ -644,16 +654,16 @@
           <div class="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-800/60">
             <span class="text-xs text-slate-700 dark:text-slate-300">${i18n.t("language_select", {}, lang)}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="window.HabitApp.switchLanguage('vi')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${lang === "vi" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">Tiếng Việt</button>
-              <button onclick="window.HabitApp.switchLanguage('en')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${lang === "en" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">English</button>
+              <button onclick="window.HabitApp.switchLanguage('vi')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${viBtnCls}">Tiếng Việt</button>
+              <button onclick="window.HabitApp.switchLanguage('en')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${enBtnCls}">English</button>
             </div>
           </div>
 
           <div class="flex items-center justify-between pt-3">
             <span class="text-xs text-slate-700 dark:text-slate-300">${i18n.t("theme_select", {}, lang)}</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme !== "light" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">🌙 ${i18n.t("theme_dark", {}, lang)}</button>
-              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${settings.theme === "light" ? "bg-emerald-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}">☀️ ${i18n.t("theme_light", {}, lang)}</button>
+              <button onclick="window.HabitApp.switchTheme('dark')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${darkBtnCls}">🌙 ${i18n.t("theme_dark", {}, lang)}</button>
+              <button onclick="window.HabitApp.switchTheme('light')" class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${lightBtnCls}">☀️ ${i18n.t("theme_light", {}, lang)}</button>
             </div>
           </div>
         </div>
@@ -719,7 +729,7 @@
                 <span class="text-lg">📁</span>
                 <div>
                   <h4 class="text-xs font-bold text-slate-900 dark:text-white">Google Drive Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-500 dark:text-slate-400">${isDriveConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400">${isDriveConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
@@ -730,7 +740,7 @@
                 <span class="text-lg">🐙</span>
                 <div>
                   <h4 class="text-xs font-bold text-slate-900 dark:text-white">GitHub Gist Cloud Backup</h4>
-                  <span class="text-[10px] text-slate-500 dark:text-slate-400">${isGistConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400">${isGistConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
@@ -757,7 +767,7 @@
                 id="btn-launch-wizard"
                 data-action="open-identity-wizard"
                 onclick="window.HabitApp.openIdentityWizard()"
-                class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold rounded-xl shadow-md shadow-emerald-500/20 active:scale-95 transition cursor-pointer whitespace-nowrap"
+                class="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 text-xs font-bold rounded-xl shadow-md shadow-emerald-500/20 active:scale-95 transition cursor-pointer whitespace-nowrap"
               >
                 ${i18n.t("open_identity_wizard", {}, lang)}
               </button>
@@ -809,7 +819,7 @@
               <span>🔄</span>
               <span>${i18n.t("check_updates_btn", {}, lang)}</span>
             </button>
-            <button onclick="window.HabitApp.purgeCacheAndReload()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-red-100 dark:hover:bg-red-950/60 hover:text-red-700 dark:hover:text-red-300 hover:border-red-300 dark:hover:border-red-800/60 border border-transparent active:scale-95 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold transition-all">
+            <button onclick="window.HabitApp.purgeCacheAndReload()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-rose-600 dark:hover:text-rose-400 active:scale-95 text-slate-700 dark:text-slate-300 rounded-2xl text-xs font-bold transition-all">
               <span>🧹</span>
               <span>${i18n.t("purge_cache_btn", {}, lang)}</span>
             </button>
@@ -2927,7 +2937,7 @@
       previewRoutines.innerHTML = routines
         .map(
           (r) =>
-            `<span class="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${i18n.t(`routine_${r}`, {}, lang)}</span>`
+            `<span class="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">${i18n.t(`routine_${r}`, {}, lang)}</span>`
         )
         .join("");
     }

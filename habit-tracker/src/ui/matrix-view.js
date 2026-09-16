@@ -36,7 +36,7 @@
       "bg-emerald-950 border-emerald-800 text-emerald-300",
       "bg-emerald-700 border-emerald-600 text-white",
       "bg-emerald-500 border-emerald-400 text-white",
-      "bg-emerald-400 border-emerald-300 text-slate-900",
+      "bg-emerald-400 border-emerald-300 text-emerald-950 font-bold",
     ];
 
     const cellsHtml = cells
@@ -70,7 +70,7 @@
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("heatmap_subtitle", {}, lang) || (lang === "vi" ? "Lưới hoạt động 52 tuần qua" : "52-week activity contribution grid")}</p>
           </div>
           <!-- Legend -->
-          <div class="flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+          <div class="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
             <span>${i18n.t("heatmap_less", {}, lang)}</span>
             <span class="w-2.5 h-2.5 rounded-xs bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700/50"></span>
             <span class="w-2.5 h-2.5 rounded-xs bg-emerald-950 border border-emerald-800"></span>
@@ -205,7 +205,7 @@
           <div class="milestone-badge p-4 rounded-2xl border ${cardStyle} flex flex-col items-center text-center transition-all">
             <span class="text-3xl mb-1.5">${badgeIcon}</span>
             <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-1">${title}</h4>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${b.threshold} ${i18n.t("streak_days_count", { count: b.threshold }, lang)}</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">${b.threshold} ${i18n.t("streak_days_count", { count: b.threshold }, lang)}</span>
             <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
               <div class="bg-gradient-to-r from-amber-400 to-emerald-400 h-full rounded-full" style="width: ${progPercent}%;"></div>
             </div>

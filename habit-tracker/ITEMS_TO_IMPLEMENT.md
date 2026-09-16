@@ -173,8 +173,36 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ---
 
+## ♿ WCAG AA Accessibility, Touch Targets & Codebase Distillation (ADR-0010)
+
+### Slice 1: WCAG AA Accessibility, Reduced Motion & Modal Focus Trap (P1)
+
+- [ ] Add `@media (prefers-reduced-motion: reduce)` in `index.html` to suppress confetti particle canvas bursts in favor of a subtle toast, pause `animate-ping` pulses on the running timer, and eliminate scale transforms.
+- [ ] Add `role="tablist"` to the bottom navigation dock and `role="tab"`, `aria-selected="true|false"`, `aria-controls="main-content"` to all tab buttons in `index.html`.
+- [ ] Add `role="checkbox"`, dynamic `aria-checked="true|false"`, and localized `aria-label` to habit completion buttons in `src/ui/today-view.js`.
+- [ ] Add `aria-expanded="true|false"` and `aria-controls="habit-drawer-${id}"` to habit card expand accordion triggers.
+- [ ] Implement centralized focus trap utility in `src/ui/components.js` (`trapFocus(modalEl)` / `releaseFocus()`), restoring focus on modal dismiss across all 6 modal/sheet surfaces.
+- [ ] Add unit and DOM tests in `tests/habit-tracker-ui-components.test.js` validating ARIA attributes, keyboard focus trapping, and reduced motion styles.
+
+### Slice 2: Mobile Touch Ergonomics & Micro-Typography Normalization (P2)
+
+- [ ] Ensure all interactive buttons (habit reorder arrows, card context triggers, accordion chevrons, date ribbon pills) enforce $\ge 44\times 44\text{px}$ hitboxes via `min-w-[44px] min-h-[44px]` containers or transparent padding.
+- [ ] Normalize all `text-[10px]` sub-caption font sizes across UI views (`today-view.js`, `insights-view.js`, `manager-view.js`, `identity-view.js`) to `text-[11px]` (micro ramp token per `DESIGN.md`) or `text-xs` (12px) with `tracking-wider`.
+- [ ] Verify typography and touch target assertions pass in `tests/habit-tracker-ui-components.test.js`.
+
+### Slice 3: Codebase Distillation & Theme Token Unification (P2/P3)
+
+- [ ] Verify all 52-week heatmap, consistency rate, and completion velocity analytics are fully contained in `src/ui/insights-view.js`.
+- [ ] Delete orphaned legacy view files `src/ui/timeline-view.js` and `src/ui/matrix-view.js`.
+- [ ] Remove legacy script imports (`timeline-view.js`, `matrix-view.js`) from `index.html` and router fallback branches from `src/app.js`.
+- [ ] Unify `index.html` body background to use `bg-[var(--bg-base)]` / `#0b0f19` obsidian token.
+- [ ] Re-run `.agent/skills/impeccable/scripts/impeccable detect` and verify 0 design detector errors/warnings.
+- [ ] Verify 100% test pass on `npm run test:habit` and `npm run verify`.
+
+---
+
 ## 🧪 Verification & DoD Gate
 
-- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
-- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
-- [x] Outer repository gate clean: `npm run verify`.
+- [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [ ] Outer repository gate clean: `npm run verify`.

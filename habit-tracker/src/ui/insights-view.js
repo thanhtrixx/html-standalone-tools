@@ -36,7 +36,7 @@
       "bg-emerald-950 border-emerald-800 text-emerald-300",
       "bg-emerald-700 border-emerald-600 text-white",
       "bg-emerald-500 border-emerald-400 text-white",
-      "bg-emerald-400 border-emerald-300 text-slate-900",
+      "bg-emerald-400 border-emerald-300 text-emerald-950 font-bold",
     ];
 
     const cellsHtml = cells
@@ -203,7 +203,7 @@
           <div class="milestone-badge p-4 rounded-2xl border ${cardStyle} flex flex-col items-center text-center">
             <span class="text-3xl mb-1.5">${badgeIcon}</span>
             <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-1">${title}</h4>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400">${b.threshold} ${i18n.t("streak_days_count", { count: b.threshold }, lang)}</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">${b.threshold} ${i18n.t("streak_days_count", { count: b.threshold }, lang)}</span>
             <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
               <div class="bg-amber-400 h-full rounded-full" style="width: ${progPercent}%;"></div>
             </div>

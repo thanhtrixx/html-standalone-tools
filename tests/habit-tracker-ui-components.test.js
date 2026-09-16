@@ -5255,9 +5255,10 @@ async function runUITests() {
   // Test 1: PWA Banner contrast and typography
   const rawIndexHtml = getHtmlContent();
   assert(
-    rawIndexHtml.includes("text-slate-950") &&
+    (rawIndexHtml.includes("text-emerald-950") ||
+      rawIndexHtml.includes("text-slate-950")) &&
       rawIndexHtml.includes("bg-emerald-500"),
-    "[Issue #504 AC-1] PWA update banner button uses high-contrast text-slate-950 on emerald-500"
+    "[Issue #504 AC-1] PWA update banner button uses high-contrast text on emerald-500"
   );
   assert(
     rawIndexHtml.includes("text-[11px]"),
