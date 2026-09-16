@@ -130,4 +130,3 @@ tests/
   - Checking `anytime` chip unchecks `morning`, `afternoon`, and `evening` chips.
   - Checking any of `morning`, `afternoon`, or `evening` chips unchecks `anytime` chip.
   - Selecting multiple circadian chips (e.g. `morning` + `evening`) preserves both selections.
-

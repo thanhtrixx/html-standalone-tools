@@ -99,6 +99,15 @@
           meta.hex
         );
 
+        const countText =
+          domainHabits.length === 1
+            ? i18n.t("domain_habits_count_singular", { count: 1 }, lang)
+            : i18n.t(
+                "domain_habits_count",
+                { count: domainHabits.length },
+                lang
+              );
+
         return `
           <div class="life-domain-card domain-card bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between transition-all hover:border-emerald-500/40" style="box-shadow: 0 4px 20px -2px ${meta.glow};">
             <div class="flex items-center gap-3.5">
@@ -108,7 +117,7 @@
               <div>
                 <h4 class="font-bold text-slate-900 dark:text-white text-base leading-snug">${title}</h4>
                 <div class="flex items-center gap-2 mt-1">
-                  <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">${domainHabits.length} thói quen</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">${countText}</span>
                   <span class="text-slate-300 dark:text-slate-700">&bull;</span>
                   <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">${rate}%</span>
                 </div>
@@ -126,8 +135,8 @@
       <div class="life-domains-section mb-6">
         <div class="mb-3 px-1 flex items-center justify-between">
           <div>
-            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">4 Trụ Cột Bản Sắc</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Cân bằng phát triển bản thân theo phương pháp Atomic Habits</p>
+            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("identity_pillars_title", {}, lang)}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("identity_pillars_subtitle", {}, lang)}</p>
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -143,6 +152,9 @@
   function renderStarterKitsSection(lang = "vi") {
     const kits = engine.STARTER_KITS || [];
     if (kits.length === 0) return "";
+
+    const prevLabel = i18n.t("carousel_prev_kits", {}, lang);
+    const nextLabel = i18n.t("carousel_next_kits", {}, lang);
 
     const cardsHtml = kits
       .map((kit) => {
@@ -195,8 +207,28 @@
             <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("starter_kits_title", {}, lang)}</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("starter_kits_subtitle", {}, lang)}</p>
           </div>
+          <div class="flex items-center gap-1.5">
+            <button
+              type="button"
+              id="starter-kits-prev-btn"
+              data-action="starter-kits-prev"
+              aria-label="${prevLabel}"
+              class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700/60"
+            >
+              <span class="text-sm font-bold leading-none">‹</span>
+            </button>
+            <button
+              type="button"
+              id="starter-kits-next-btn"
+              data-action="starter-kits-next"
+              aria-label="${nextLabel}"
+              class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center transition active:scale-95 cursor-pointer border border-slate-200 dark:border-slate-700/60"
+            >
+              <span class="text-sm font-bold leading-none">›</span>
+            </button>
+          </div>
         </div>
-        <div class="flex gap-3 overflow-x-auto pb-2.5 snap-x no-scrollbar">
+        <div id="starter-kits-carousel-container" class="flex gap-3 overflow-x-auto pb-2.5 snap-x snap-mandatory scroll-smooth no-scrollbar select-none cursor-grab active:cursor-grabbing" tabindex="0" aria-label="${i18n.t("starter_kits_title", {}, lang)}">
           ${cardsHtml}
         </div>
       </div>
@@ -436,70 +468,88 @@
         </div>
       `;
     } else {
-      // Step 4: Ready to Build Atomic Habits (Multi-Kit aggregation with numbered disambiguation)
+      // Step 4: Ready to Build Atomic Habits (Multi-Kit aggregation or Blank Slate)
       const selectedKits = kits.filter(
         (k) =>
           kitIds.includes(k.id) ||
           kitIds.includes(k.id.replace(/-/g, "_")) ||
           kitIds.includes(k.id.replace(/_/g, "-"))
       );
-      const chosenKits = selectedKits.length > 0 ? selectedKits : [kits[0]];
-      const kitTitles = chosenKits
-        .map((k) => i18n.t(k.titleKey, {}, lang))
-        .join(", ");
 
-      const nameCounts = {};
-      const aggregatedHabits = [];
-      for (const k of chosenKits) {
-        for (const h of k.habits) {
-          let baseName =
-            lang === "vi" && h.nameVi ? h.nameVi : h.nameEn || h.name;
-          nameCounts[baseName] = (nameCounts[baseName] || 0) + 1;
-          const disambiguatedName =
-            nameCounts[baseName] > 1
-              ? `${baseName} (${nameCounts[baseName]})`
-              : baseName;
-          aggregatedHabits.push({
-            ...h,
-            displayName: disambiguatedName,
-          });
+      if (selectedKits.length === 0) {
+        stepContentHtml = `
+          <div class="space-y-4">
+            <div class="text-center mb-2">
+              <div class="text-4xl mb-2">✨</div>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("wizard_step_4_blank_title", {}, lang)}</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">${i18n.t("wizard_step_4_blank_desc", {}, lang)}</p>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-6 text-center">
+              <span class="text-3xl mb-2 block">📝</span>
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">${i18n.t("wizard_step_4_blank_hint_title", {}, lang)}</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">${i18n.t("wizard_step_4_blank_hint_desc", {}, lang)}</p>
+            </div>
+          </div>
+        `;
+      } else {
+        const kitTitles = selectedKits
+          .map((k) => i18n.t(k.titleKey, {}, lang))
+          .join(", ");
+
+        const nameCounts = {};
+        const aggregatedHabits = [];
+        for (const k of selectedKits) {
+          for (const h of k.habits) {
+            let baseName =
+              lang === "vi" && h.nameVi ? h.nameVi : h.nameEn || h.name;
+            nameCounts[baseName] = (nameCounts[baseName] || 0) + 1;
+            const disambiguatedName =
+              nameCounts[baseName] > 1
+                ? `${baseName} (${nameCounts[baseName]})`
+                : baseName;
+            aggregatedHabits.push({
+              ...h,
+              displayName: disambiguatedName,
+            });
+          }
         }
-      }
 
-      const habitItems = aggregatedHabits
-        .map((h) => {
-          return `
-            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60">
-              <span class="text-2xl">${h.icon || "🎯"}</span>
-              <div class="flex-1 min-w-0">
-                <h5 class="font-bold text-slate-900 dark:text-white text-sm truncate">${h.displayName}</h5>
-                <span class="text-xs text-slate-500 dark:text-slate-400">${i18n.t(`routine_${h.routine || "morning"}`, {}, lang)} &bull; ${i18n.t(`domain_${h.domain || "health"}`, {}, lang)}</span>
+        const habitItems = aggregatedHabits
+          .map((h) => {
+            return `
+              <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60">
+                <span class="text-2xl">${h.icon || "🎯"}</span>
+                <div class="flex-1 min-w-0">
+                  <h5 class="font-bold text-slate-900 dark:text-white text-sm truncate">${h.displayName}</h5>
+                  <span class="text-xs text-slate-500 dark:text-slate-400">${i18n.t(`routine_${h.routine || "morning"}`, {}, lang)} &bull; ${i18n.t(`domain_${h.domain || "health"}`, {}, lang)}</span>
+                </div>
+                <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Ready</span>
               </div>
-              <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Ready</span>
-            </div>
-          `;
-        })
-        .join("");
+            `;
+          })
+          .join("");
 
-      stepContentHtml = `
-        <div class="space-y-4">
-          <div class="text-center mb-2">
-            <div class="text-4xl mb-2">🚀</div>
-            <h3 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("wizard_step_3_title", {}, lang)}</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">${i18n.t("wizard_step_3_desc", {}, lang)}</p>
-          </div>
+        stepContentHtml = `
+          <div class="space-y-4">
+            <div class="text-center mb-2">
+              <div class="text-4xl mb-2">🚀</div>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("wizard_step_3_title", {}, lang)}</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">${i18n.t("wizard_step_3_desc", {}, lang)}</p>
+            </div>
 
-          <div class="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Selected Starter Pack${chosenKits.length > 1 ? "s" : ""}:</span>
-              <span class="text-xs font-bold text-slate-900 dark:text-white">${kitTitles}</span>
-            </div>
-            <div class="space-y-2 mt-3 max-h-[36vh] overflow-y-auto pr-1">
-              ${habitItems}
+            <div class="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Selected Starter Pack${selectedKits.length > 1 ? "s" : ""}:</span>
+                <span class="text-xs font-bold text-slate-900 dark:text-white">${kitTitles}</span>
+              </div>
+              <div class="space-y-2 mt-3 max-h-[36vh] overflow-y-auto pr-1">
+                ${habitItems}
+              </div>
             </div>
           </div>
-        </div>
-      `;
+        `;
+      }
     }
 
     return `

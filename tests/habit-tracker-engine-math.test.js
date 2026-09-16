@@ -843,20 +843,20 @@ try {
 
   const kitIds = engine.STARTER_KITS.map((k) => k.id);
   assert(
-    kitIds.includes("morning_mastery"),
-    "[Issue #475 AC-2] Includes morning_mastery starter kit"
+    kitIds.includes("morning-mastery") || kitIds.includes("morning_mastery"),
+    "[Issue #475 AC-2] Includes morning-mastery starter kit"
   );
   assert(
-    kitIds.includes("deep_focus_flow"),
-    "[Issue #475 AC-2] Includes deep_focus_flow starter kit"
+    kitIds.includes("deep-focus-flow") || kitIds.includes("deep_focus_flow"),
+    "[Issue #475 AC-2] Includes deep-focus-flow starter kit"
   );
   assert(
-    kitIds.includes("health_vitality"),
-    "[Issue #475 AC-2] Includes health_vitality starter kit"
+    kitIds.includes("health-vitality") || kitIds.includes("health_vitality"),
+    "[Issue #475 AC-2] Includes health-vitality starter kit"
   );
   assert(
-    kitIds.includes("zen_mindfulness"),
-    "[Issue #475 AC-2] Includes zen_mindfulness starter kit"
+    kitIds.includes("zen-mindfulness") || kitIds.includes("zen_mindfulness"),
+    "[Issue #475 AC-2] Includes zen-mindfulness starter kit"
   );
 
   for (const kit of engine.STARTER_KITS) {

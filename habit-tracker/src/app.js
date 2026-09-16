@@ -437,6 +437,13 @@
       langToggleBtn.title = titleText;
       langToggleBtn.setAttribute("aria-label", titleText);
     }
+
+    const pwaTitle = document.getElementById("pwa-update-title");
+    const pwaDesc = document.getElementById("pwa-update-desc");
+    const pwaBtn = document.getElementById("pwa-update-btn");
+    if (pwaTitle) pwaTitle.textContent = i18n.t("sw_update_title", {}, lang);
+    if (pwaDesc) pwaDesc.textContent = i18n.t("sw_update_desc", {}, lang);
+    if (pwaBtn) pwaBtn.textContent = i18n.t("sw_update_btn", {}, lang);
   }
 
   /**
@@ -1057,19 +1064,76 @@
           const todayStr = engine.toDateString(new Date());
           store.setActiveDate(todayStr);
         }
+      } else if (
+        document.activeElement &&
+        document.activeElement.id === "starter-kits-carousel-container"
+      ) {
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          document.activeElement.scrollBy({ left: -280, behavior: "smooth" });
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          document.activeElement.scrollBy({ left: 280, behavior: "smooth" });
+        }
       }
     });
 
-    // Dismiss heatmap popover on outside click
-    document.addEventListener("click", (e) => {
-      const popover = document.getElementById("heatmap-cell-popover");
-      if (!popover || popover.classList.contains("hidden")) return;
-      const clickedCell = e.target.closest(".heatmap-cell");
-      const clickedPopover = e.target.closest("#heatmap-cell-popover");
-      if (!clickedCell && !clickedPopover) {
-        popover.classList.add("hidden");
+    // Horizontal Drag-to-Scroll for Starter Kits Carousel
+    let isDraggingCarousel = false;
+    let carouselStartX = 0;
+    let carouselScrollLeft = 0;
+    let carouselMoved = false;
+
+    document.addEventListener("mousedown", (e) => {
+      const carousel = e.target.closest("#starter-kits-carousel-container");
+      if (!carousel) return;
+      isDraggingCarousel = true;
+      carouselMoved = false;
+      carouselStartX = e.pageX - carousel.offsetLeft;
+      carouselScrollLeft = carousel.scrollLeft;
+    });
+
+    document.addEventListener("mousemove", (e) => {
+      if (!isDraggingCarousel) return;
+      const carousel = document.getElementById(
+        "starter-kits-carousel-container"
+      );
+      if (!carousel) return;
+      const x = e.pageX - carousel.offsetLeft;
+      const walk = x - carouselStartX;
+      if (Math.abs(walk) > 5) {
+        carouselMoved = true;
+        carousel.scrollLeft = carouselScrollLeft - walk;
       }
     });
+
+    document.addEventListener("mouseup", () => {
+      isDraggingCarousel = false;
+    });
+
+    // Dismiss heatmap popover on outside click
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (
+          carouselMoved &&
+          e.target.closest("#starter-kits-carousel-container")
+        ) {
+          e.stopPropagation();
+          e.preventDefault();
+          carouselMoved = false;
+        }
+
+        const popover = document.getElementById("heatmap-cell-popover");
+        if (!popover || popover.classList.contains("hidden")) return;
+        const clickedCell = e.target.closest(".heatmap-cell");
+        const clickedPopover = e.target.closest("#heatmap-cell-popover");
+        if (!clickedCell && !clickedPopover) {
+          popover.classList.add("hidden");
+        }
+      },
+      true
+    );
 
     // Form submit interception
     document.addEventListener("submit", async (e) => {
@@ -1331,6 +1395,20 @@
             renderApp();
           }
         }
+      } else if (action === "starter-kits-prev") {
+        const carousel = document.getElementById(
+          "starter-kits-carousel-container"
+        );
+        if (carousel) {
+          carousel.scrollBy({ left: -280, behavior: "smooth" });
+        }
+      } else if (action === "starter-kits-next") {
+        const carousel = document.getElementById(
+          "starter-kits-carousel-container"
+        );
+        if (carousel) {
+          carousel.scrollBy({ left: 280, behavior: "smooth" });
+        }
       } else if (action === "apply-starter-kit") {
         const kitId = target.getAttribute("data-kit-id");
         if (kitId) {
@@ -1385,15 +1463,16 @@
           target.getAttribute("data-kit-id") ||
           target.closest("[data-kit-id]")?.getAttribute("data-kit-id");
         if (kitId) {
-          const idx = wizardSelectedKitIds.indexOf(kitId);
+          const normalized = kitId.replace(/_/g, "-");
+          const idx = wizardSelectedKitIds.findIndex(
+            (id) => id === kitId || id.replace(/_/g, "-") === normalized
+          );
           if (idx >= 0) {
-            if (wizardSelectedKitIds.length > 1) {
-              wizardSelectedKitIds.splice(idx, 1);
-            }
+            wizardSelectedKitIds.splice(idx, 1);
           } else {
-            wizardSelectedKitIds.push(kitId);
+            wizardSelectedKitIds.push(normalized);
           }
-          wizardSelectedKitId = wizardSelectedKitIds[0] || kitId;
+          wizardSelectedKitId = wizardSelectedKitIds[0] || "";
           renderWizardModal();
         }
       } else if (action === "wizard-skip") {
@@ -1405,12 +1484,12 @@
           closeIdentityWizard();
         }
       } else if (action === "wizard-finish") {
-        let kitIds = wizardSelectedKitIds;
+        let kitIds = wizardSelectedKitIds || [];
         try {
           const rawIds = target.getAttribute("data-kit-ids");
           if (rawIds) {
             const parsed = JSON.parse(rawIds);
-            if (Array.isArray(parsed) && parsed.length > 0) {
+            if (Array.isArray(parsed)) {
               kitIds = parsed;
             }
           }
@@ -1465,8 +1544,41 @@
       const target = e.target;
       if (!target) return;
 
-      // Routine chip toggle styling
+      // Routine chip toggle styling & mutual exclusivity (Anytime vs Morning/Afternoon/Evening)
       if (target.name === "routines") {
+        const value = target.value;
+        const routineContainer =
+          target.closest("#modal-routine-chips") || document;
+        const allRoutineInputs = routineContainer.querySelectorAll(
+          'input[name="routines"]'
+        );
+
+        if (value === "anytime" && target.checked) {
+          // Uncheck all circadian chips
+          allRoutineInputs.forEach((inp) => {
+            if (inp.value !== "anytime") {
+              inp.checked = false;
+              const lbl = inp.closest("label.routine-chip");
+              if (lbl) {
+                lbl.className =
+                  "routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300";
+              }
+            }
+          });
+        } else if (value !== "anytime" && target.checked) {
+          // Uncheck anytime chip
+          allRoutineInputs.forEach((inp) => {
+            if (inp.value === "anytime") {
+              inp.checked = false;
+              const lbl = inp.closest("label.routine-chip");
+              if (lbl) {
+                lbl.className =
+                  "routine-chip flex items-center justify-center gap-1.5 p-2 rounded-xl border cursor-pointer text-xs transition select-none bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300";
+              }
+            }
+          });
+        }
+
         const label = target.closest("label.routine-chip");
         if (label) {
           if (target.checked) {
@@ -3077,7 +3189,9 @@
     const name = nameEl ? nameEl.value.trim() : "";
 
     if (!name) {
-      showToast("Vui lòng nhập tên thói quen", "error");
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      showToast(i18n.t("toast_habit_name_required", {}, lang), "error");
       return;
     }
 

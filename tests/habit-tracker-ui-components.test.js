@@ -6432,6 +6432,88 @@ async function runUITests() {
       testSubTickerEl.textContent.includes("1m"),
     "[Issue #535 AC-4] updateTimerDom updates card-sub-ticker cleanly without appending extra target suffixes"
   );
+
+  // ==========================================
+  // [Issue #545] Starter Kits Carousel Chevron Navigation & Drag Ergonomics
+  // ==========================================
+  console.log(
+    "\n--- [Issue #545] Starter Kits Carousel Chevron Navigation & Drag Ergonomics ---"
+  );
+
+  const starterKitsHtml545 =
+    timerSandbox535.HabitIdentityView.renderStarterKitsSection("en");
+  assert(
+    starterKitsHtml545.includes('id="starter-kits-prev-btn"') &&
+      starterKitsHtml545.includes('id="starter-kits-next-btn"'),
+    "[Issue #545 AC-1] Starter Kits section contains accessible left and right chevron navigation buttons"
+  );
+  assert(
+    starterKitsHtml545.includes('data-action="starter-kits-prev"') &&
+      starterKitsHtml545.includes('data-action="starter-kits-next"'),
+    "[Issue #545 AC-2] Carousel buttons contain correct data-action attributes for smooth scrolling"
+  );
+  assert(
+    starterKitsHtml545.includes('id="starter-kits-carousel-container"'),
+    "[Issue #545 AC-3] Carousel container renders with #starter-kits-carousel-container ID"
+  );
+  assert(
+    starterKitsHtml545.includes("snap-x") &&
+      starterKitsHtml545.includes("overflow-x-auto"),
+    "[Issue #545 AC-4] Carousel container enforces horizontal scroll and snap points"
+  );
+
+  // ==========================================
+  // [Issue #546] Identity Setup Wizard Kit ID Normalization & Unrestricted Uncheck
+  // ==========================================
+  console.log(
+    "\n--- [Issue #546] Identity Setup Wizard Kit ID Normalization & Unrestricted Uncheck ---"
+  );
+
+  // 1. Step 3 renders with morning-mastery checked
+  const wizardStep3Checked =
+    timerSandbox535.HabitIdentityView.renderIdentityWizardModal(
+      3,
+      ["morning-mastery"],
+      "en"
+    );
+  assert(
+    wizardStep3Checked.includes('data-kit-id="morning-mastery"'),
+    "[Issue #546 AC-1] Step 3 uses normalized kebab-case kit ID morning-mastery"
+  );
+
+  // 2. Step 3 renders cleanly when 0 kits are selected (unrestricted uncheck)
+  const wizardStep3Unchecked =
+    timerSandbox535.HabitIdentityView.renderIdentityWizardModal(3, [], "en");
+  assert(
+    wizardStep3Unchecked.includes('data-kit-id="morning-mastery"'),
+    "[Issue #546 AC-2] Step 3 renders all kit cards even with 0 kits selected"
+  );
+
+  // 3. Step 4 renders Blank Slate when 0 kits are selected
+  const wizardStep4Blank =
+    timerSandbox535.HabitIdentityView.renderIdentityWizardModal(4, [], "en");
+  assert(
+    wizardStep4Blank.includes("Start with a Blank Slate") ||
+      wizardStep4Blank.includes("wizard_step_4_blank_title"),
+    "[Issue #546 AC-3] Step 4 renders Blank Slate summary when 0 kits are selected"
+  );
+
+  // ==========================================
+  // [Issue #548] Time-of-Day Routine Selection Mutual Exclusivity
+  // ==========================================
+  console.log(
+    "\n--- [Issue #548] Time-of-Day Routine Selection Mutual Exclusivity ---"
+  );
+
+  const addEditModalHtml548 =
+    timerSandbox535.HabitManagerView.renderHabitEditModal(null, "en");
+  assert(
+    addEditModalHtml548.includes('value="anytime"') &&
+      addEditModalHtml548.includes('value="morning"') &&
+      addEditModalHtml548.includes('value="afternoon"') &&
+      addEditModalHtml548.includes('value="evening"'),
+    "[Issue #548 AC-1] Routine selection renders morning, afternoon, evening, and anytime chips"
+  );
 }
 
 runUITests()
