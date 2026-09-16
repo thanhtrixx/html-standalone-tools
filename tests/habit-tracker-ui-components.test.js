@@ -3820,41 +3820,54 @@ async function runUITests() {
   wizardSandbox.cancelAnimationFrame = () => {};
   await wizardSandbox.HabitApp.init();
 
-  // 1. Step 1 HTML rendering: 4 Life Pillars
+  // 1. Step 1 HTML rendering: Language Selection
   const step1Html = identityView.renderIdentityWizardModal(
     1,
     "morning-mastery",
     "vi"
   );
   assert(
-    step1Html.includes("Trụ Cột Cuộc Sống") ||
-      step1Html.includes("Sức khỏe") ||
-      step1Html.includes("Tâm trí"),
-    "[Issue #495 AC-1] Wizard Step 1 introduces foundational life domains"
+    step1Html.includes("wizard-select-lang") &&
+      step1Html.includes("Tiếng Việt") &&
+      step1Html.includes("English"),
+    "[ADR-0009 / Issue #495 AC-1] Wizard Step 1 introduces prominent language selection"
   );
 
-  // 2. Step 2 HTML rendering: Curated Starter Kits
+  // 2. Step 2 HTML rendering: 4 Life Pillars
   const step2Html = identityView.renderIdentityWizardModal(
     2,
     "morning-mastery",
     "vi"
   );
   assert(
-    step2Html.includes("Gói Khởi Động") ||
-      step2Html.includes("morning-mastery") ||
-      step2Html.includes("Khởi đầu tỉnh thức"),
-    "[Issue #495 AC-2] Wizard Step 2 presents curated 1-Click Starter Kits"
+    step2Html.includes("Trụ Cột Cuộc Sống") ||
+      step2Html.includes("Sức khỏe") ||
+      step2Html.includes("Tâm trí"),
+    "[Issue #495 AC-1] Wizard Step 2 introduces foundational life domains"
   );
 
-  // 3. Step 3 HTML rendering: System Confirmation
+  // 3. Step 3 HTML rendering: Curated Starter Kits
   const step3Html = identityView.renderIdentityWizardModal(
     3,
     "morning-mastery",
     "vi"
   );
   assert(
-    step3Html.includes("Sẵn Sàng") || step3Html.includes("Bắt đầu Hôm nay"),
-    "[Issue #495 AC-2] Wizard Step 3 confirms habit pack selection"
+    step3Html.includes("Gói Khởi Động") ||
+      step3Html.includes("morning-mastery") ||
+      step3Html.includes("Khởi đầu tỉnh thức"),
+    "[Issue #495 AC-2] Wizard Step 3 presents curated 1-Click Starter Kits"
+  );
+
+  // 4. Step 4 HTML rendering: System Confirmation
+  const step4Html = identityView.renderIdentityWizardModal(
+    4,
+    "morning-mastery",
+    "vi"
+  );
+  assert(
+    step4Html.includes("Sẵn Sàng") || step4Html.includes("Bắt đầu Hôm nay"),
+    "[Issue #495 AC-2] Wizard Step 4 confirms habit pack selection"
   );
 
   // 4. Modal Open & Close Flow
