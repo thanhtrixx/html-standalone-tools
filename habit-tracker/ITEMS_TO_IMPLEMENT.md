@@ -197,6 +197,39 @@ This document specifies the technical requirements and vertical slice backlog fo
 - [ ] Remove legacy script imports (`timeline-view.js`, `matrix-view.js`) from `index.html` and router fallback branches from `src/app.js`.
 - [ ] Unify `index.html` body background to use `bg-[var(--bg-base)]` / `#0b0f19` obsidian token.
 - [ ] Re-run `.agent/skills/impeccable/scripts/impeccable detect` and verify 0 design detector errors/warnings.
+---
+
+## 🎯 Header Alignment, Multi-Kit Wizard, Adherence Invariants & Timer IA (ADR-0011)
+
+### Slice 1: Header Vertical Alignment & Dead-Code Purge (P1)
+
+- [ ] Standardize top header bar in `index.html`: `h-14` (56px) flex container with `items-center justify-between`.
+- [ ] Standardize brand logo container (`w-8 h-8`), title text, freeze token badge (`#freeze-tokens-count`), and language toggle (`#lang-toggle-btn`) with `h-8` (32px) height and `inline-flex items-center justify-center leading-none`.
+- [ ] Purge all deprecated `#header-active-timer-pill` references in `src/app.js`.
+
+### Slice 2: Multi-Select 1-Click Starter Kits in Setup Wizard (P1)
+
+- [ ] Refactor Step 3 in `src/ui/identity-view.js` to support multi-select toggle cards (checkbox style) tracking `selectedKitIds` array.
+- [ ] Update Step 4 review to aggregate habits across all selected packs, applying numbered suffixes (e.g. `Read 15m (1)`, `Read 15m (2)`) for colliding habit names.
+- [ ] Implement `store.applyStarterKits(kitIds, lang)` in `src/state/store.js` and handle atomic batch creation in `src/app.js`.
+
+### Slice 3: Invariant Start-Date Scheduling & Weekday Adherence Accuracy (P0)
+
+- [ ] Update `isScheduledDate` in `src/domain/engine.js`: enforce `dateStr >= (habit.startDate || habit.createdAt)` so historical dates before habit inception are strictly unscheduled.
+- [ ] Update `calculateWeekdayAdherence` in `src/domain/engine.js` to bound scheduled counts to the habit's active lifetime, eliminating the 8% calculation bug.
+- [ ] Apply inception date invariant across `calculateRoutineAdherence` and `calculateOverallConsistencyScore`.
+- [ ] Update `src/ui/insights-view.js` to handle weekdays with 0 scheduled occurrences with subtle empty indicator.
+
+### Slice 4: Streamlined Timer Display Architecture & Duplication Elimination (P1)
+
+- [ ] Fix card sub-ticker text interpolation in `src/ui/today-view.js` and `src/app.js` to eliminate `"00:05 / 20m / 20m"` duplicate string output.
+- [ ] Streamline habit card expanded drawer: remove redundant static text ticker; feature clean action buttons `[ ▶ Start / ⏸ Pause ]`, `[ 🔄 Reset ]`, `[ 🎯 Focus Mode ]`, `[ Details ➔ ]`.
+- [ ] Clean up Focus Timer modal dial subtitle target labels.
+
+### Slice 5: Mathematical Invariants & Multi-Kit Setup Verification (P0)
+
+- [ ] Add unit tests in `tests/habit-tracker-engine-math.test.js` validating start-date scheduling invariants, 100% adherence on newly created habits, and 0-scheduled weekday handling.
+- [ ] Add UI/DOM tests in `tests/habit-tracker-ui-components.test.js` validating multi-kit selection, kit habit disambiguation, header alignment metrics, and clean timer DOM tickers.
 - [ ] Verify 100% test pass on `npm run test:habit` and `npm run verify`.
 
 ---
@@ -206,3 +239,4 @@ This document specifies the technical requirements and vertical slice backlog fo
 - [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
 - [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
 - [ ] Outer repository gate clean: `npm run verify`.
+

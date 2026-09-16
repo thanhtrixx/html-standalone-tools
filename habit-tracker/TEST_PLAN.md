@@ -83,17 +83,20 @@ tests/
   - Top header is free of the subtitle `Obsidian Glow • Offline-First`.
   - `#habit-edit-modal-overlay` has `z-index >= 60` and displays above `#detail-sheet-overlay` (`z-50`) without z-index collisions.
 
-### 7. WCAG AA Accessibility, Touch Targets & Codebase Distillation (ADR-0010)
+### 8. Header Alignment, Multi-Kit Wizard, Adherence Invariants & Timer IA (ADR-0011)
 
-- [ ] **WCAG AA Accessibility & Focus Trapping**:
-  - `@media (prefers-reduced-motion: reduce)` disables `animate-ping`, stops confetti canvas particle generation, and replaces celebratory bursts with static notifications.
-  - Bottom navigation dock enforces `role="tablist"` with `role="tab"` and `aria-selected` states.
-  - 1-Tap habit checkboxes enforce `role="checkbox"` with `aria-checked="true|false"`.
-  - Expandable habit card drawers declare `aria-expanded` and `aria-controls`.
-  - Centralized focus trap (`trapFocus` / `releaseFocus`) traps Tab cycling within modal boundaries and restores trigger focus on Escape/close.
-- [ ] **Touch Target & Typography Conformance**:
-  - All interactive buttons (reorder arrows, context menu triggers, chevrons, date pills) measure $\ge 44\times 44\text{px}$.
-  - Micro-typography uses documented `DESIGN.md` ramp (`micro: 11px`, `label: 12px`), with zero `text-[10px]` classes.
-- [ ] **Codebase Distillation**:
-  - Legacy view files `timeline-view.js` and `matrix-view.js` are eliminated without regressions.
-  - `.agent/skills/impeccable/scripts/impeccable detect` passes cleanly.
+- [ ] **Mathematical Invariant & Adherence Accuracy (`tests/habit-tracker-engine-math.test.js`)**:
+  - `isScheduledDate` returns `false` for any dates preceding `habit.startDate || habit.createdAt`.
+  - Newly created habits with 100% completions on day one evaluate to 100% adherence in `calculateWeekdayAdherence` (eliminating the 8% bug).
+  - Weekdays with 0 scheduled occurrences return 0% adherence without skewing overall window metrics.
+  - `calculateRoutineAdherence` and `calculateOverallConsistencyScore` respect `habit.startDate || habit.createdAt`.
+- [ ] **Multi-Kit Wizard & Starter Packs (`tests/habit-tracker-ui-components.test.js`)**:
+  - Step 3 allows multi-selecting multiple starter kits (toggling checkboxes).
+  - Step 4 previews all aggregated habits from selected packs and applies numbered disambiguation (e.g. `Read 15m (1)`, `Read 15m (2)`) for duplicate names.
+  - `store.applyStarterKits` atomically instantiates all habits across selected kits.
+- [ ] **Header Alignment & Timer IA Cleanliness (`tests/habit-tracker-ui-components.test.js`)**:
+  - Top header container enforces `h-14` (56px) flex container and `h-8` (32px) height constraint on all interactive buttons.
+  - No stale DOM lookups to `#header-active-timer-pill`.
+  - Habit card sub-ticker text interpolation renders exactly `05:00 / 20m` without duplicate `/ 20m` suffixing.
+  - Card expanded drawer renders clean action buttons without redundant text readouts.
+
