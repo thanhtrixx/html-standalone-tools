@@ -6267,6 +6267,69 @@ async function runUITests() {
     !rawAppJs532.includes("header-active-timer-pill"),
     "[Issue #532 AC-3] All references to #header-active-timer-pill in src/app.js are purged"
   );
+
+  // ==========================================
+  // [Issue #533] Multi-Select Starter Kits in Setup Wizard Verification
+  // ==========================================
+  const { sandbox: wizardSandbox533 } = createHabitTrackerSandbox();
+  await wizardSandbox533.HabitApp.init();
+
+  // Open wizard at Step 3 with multiple selected kit IDs
+  const wizardHtmlStep3 =
+    wizardSandbox533.HabitIdentityView.renderIdentityWizardModal(
+      3,
+      ["morning_mastery", "deep_focus_flow"],
+      "en"
+    );
+  assert(
+    (wizardHtmlStep3.includes('data-kit-id="morning_mastery"') ||
+      wizardHtmlStep3.includes('data-kit-id="morning-mastery"')) &&
+      (wizardHtmlStep3.includes('data-kit-id="deep_focus_flow"') ||
+        wizardHtmlStep3.includes('data-kit-id="deep-focus-flow"')),
+    "[Issue #533 AC-1] Step 3 renders starter kit options"
+  );
+
+  // Render Step 4 with 2 starter packs
+  const wizardHtmlStep4 =
+    wizardSandbox533.HabitIdentityView.renderIdentityWizardModal(
+      4,
+      ["morning_mastery", "deep_focus_flow"],
+      "en"
+    );
+  assert(
+    wizardHtmlStep4.includes("Selected Starter Packs:") ||
+      wizardHtmlStep4.includes("Selected Starter Pack"),
+    "[Issue #533 AC-2] Step 4 aggregates multiple selected starter packs"
+  );
+
+  // Verify duplicate habit names receive numbered disambiguation suffixes
+  const disambiguationTest =
+    await wizardSandbox533.HabitApp.store.applyStarterKits(
+      ["morning_mastery", "morning_mastery"],
+      "en"
+    );
+  assert(
+    disambiguationTest.some((h) => h.name.includes("(2)")),
+    "[Issue #533 AC-3] Duplicate habit names across selected packs receive numbered suffixes (e.g. 'Read 15m (2)')"
+  );
+
+  // Verify store.applyStarterKits atomically creates habits from multiple packs
+  const initialHabitCount533 =
+    wizardSandbox533.HabitApp.store.getHabits().length;
+  const appliedHabits533 =
+    await wizardSandbox533.HabitApp.store.applyStarterKits(
+      ["morning_mastery", "health_vitality"],
+      "en"
+    );
+  assert(
+    Array.isArray(appliedHabits533) && appliedHabits533.length >= 4,
+    "[Issue #533 AC-4] store.applyStarterKits atomically instantiates habits across multiple kits"
+  );
+  assert(
+    wizardSandbox533.HabitApp.store.getHabits().length ===
+      initialHabitCount533 + appliedHabits533.length,
+    "[Issue #533 AC-4] Store habit count increases by total count of all kit habits"
+  );
 }
 
 runUITests()

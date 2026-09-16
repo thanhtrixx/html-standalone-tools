@@ -208,9 +208,13 @@
    */
   function renderIdentityWizardModal(
     step = 1,
-    selectedKitId = "morning-mastery",
+    selectedKitId = ["morning-mastery"],
     lang = "vi"
   ) {
+    const kitIds = Array.isArray(selectedKitId)
+      ? selectedKitId
+      : [selectedKitId || "morning-mastery"];
+
     const domainMeta = [
       {
         key: "health",
@@ -368,10 +372,13 @@
         </div>
       `;
     } else if (step === 3) {
-      // Step 3: Starter Kits
+      // Step 3: Starter Kits Multi-Select
       const kitCards = kits
         .map((kit) => {
-          const isSelected = kit.id === selectedKitId;
+          const isSelected =
+            kitIds.includes(kit.id) ||
+            kitIds.includes(kit.id.replace(/-/g, "_")) ||
+            kitIds.includes(kit.id.replace(/_/g, "-"));
           const title = i18n.t(kit.titleKey, {}, lang);
           const desc = i18n.t(kit.descKey, {}, lang);
           const habitPills = kit.habits
@@ -429,27 +436,50 @@
         </div>
       `;
     } else {
-      // Step 4: Ready to Build Atomic Habits
-      const chosenKit = kits.find((k) => k.id === selectedKitId) || kits[0];
-      const kitTitle = chosenKit ? i18n.t(chosenKit.titleKey, {}, lang) : "";
-      const habitItems = chosenKit
-        ? chosenKit.habits
-            .map((h) => {
-              const hName =
-                lang === "vi" && h.nameVi ? h.nameVi : h.nameEn || h.name;
-              return `
-                <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60">
-                  <span class="text-2xl">${h.icon || "🎯"}</span>
-                  <div class="flex-1 min-w-0">
-                    <h5 class="font-bold text-slate-900 dark:text-white text-sm truncate">${hName}</h5>
-                    <span class="text-xs text-slate-500 dark:text-slate-400">${i18n.t(`routine_${h.routine || "morning"}`, {}, lang)} &bull; ${i18n.t(`domain_${h.domain || "health"}`, {}, lang)}</span>
-                  </div>
-                  <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Ready</span>
-                </div>
-              `;
-            })
-            .join("")
-        : "";
+      // Step 4: Ready to Build Atomic Habits (Multi-Kit aggregation with numbered disambiguation)
+      const selectedKits = kits.filter(
+        (k) =>
+          kitIds.includes(k.id) ||
+          kitIds.includes(k.id.replace(/-/g, "_")) ||
+          kitIds.includes(k.id.replace(/_/g, "-"))
+      );
+      const chosenKits = selectedKits.length > 0 ? selectedKits : [kits[0]];
+      const kitTitles = chosenKits
+        .map((k) => i18n.t(k.titleKey, {}, lang))
+        .join(", ");
+
+      const nameCounts = {};
+      const aggregatedHabits = [];
+      for (const k of chosenKits) {
+        for (const h of k.habits) {
+          let baseName =
+            lang === "vi" && h.nameVi ? h.nameVi : h.nameEn || h.name;
+          nameCounts[baseName] = (nameCounts[baseName] || 0) + 1;
+          const disambiguatedName =
+            nameCounts[baseName] > 1
+              ? `${baseName} (${nameCounts[baseName]})`
+              : baseName;
+          aggregatedHabits.push({
+            ...h,
+            displayName: disambiguatedName,
+          });
+        }
+      }
+
+      const habitItems = aggregatedHabits
+        .map((h) => {
+          return `
+            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60">
+              <span class="text-2xl">${h.icon || "🎯"}</span>
+              <div class="flex-1 min-w-0">
+                <h5 class="font-bold text-slate-900 dark:text-white text-sm truncate">${h.displayName}</h5>
+                <span class="text-xs text-slate-500 dark:text-slate-400">${i18n.t(`routine_${h.routine || "morning"}`, {}, lang)} &bull; ${i18n.t(`domain_${h.domain || "health"}`, {}, lang)}</span>
+              </div>
+              <span class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">Ready</span>
+            </div>
+          `;
+        })
+        .join("");
 
       stepContentHtml = `
         <div class="space-y-4">
@@ -461,10 +491,10 @@
 
           <div class="bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Selected Starter Pack:</span>
-              <span class="text-xs font-bold text-slate-900 dark:text-white">${kitTitle}</span>
+              <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Selected Starter Pack${chosenKits.length > 1 ? "s" : ""}:</span>
+              <span class="text-xs font-bold text-slate-900 dark:text-white">${kitTitles}</span>
             </div>
-            <div class="space-y-2 mt-3">
+            <div class="space-y-2 mt-3 max-h-[36vh] overflow-y-auto pr-1">
               ${habitItems}
             </div>
           </div>
@@ -529,7 +559,8 @@
                   : `<button
                       type="button"
                       data-action="wizard-finish"
-                      data-kit-id="${selectedKitId}"
+                      data-kit-ids='${JSON.stringify(kitIds)}'
+                      data-kit-id="${kitIds[0] || "morning-mastery"}"
                       class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-emerald-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/30 transition cursor-pointer flex items-center gap-1.5"
                     >
                       <span>${i18n.t("wizard_btn_finish", {}, lang)}</span>
