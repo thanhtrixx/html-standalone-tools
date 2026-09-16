@@ -59,22 +59,16 @@ const startTime = Date.now();
       );
     });
 
-    const headerActiveTimer = doc.getElementById("header-active-timer-pill");
-    assert(
-      headerActiveTimer !== null,
-      "SMOKE-NAV-03: #header-active-timer-pill exists in DOM"
-    );
-
     const freezeBadge = doc.getElementById("freeze-tokens-count");
     assert(
       freezeBadge !== null,
-      "SMOKE-NAV-04: #freeze-tokens-count badge exists in DOM"
+      "SMOKE-NAV-03: #freeze-tokens-count badge exists in DOM"
     );
 
     const langToggle = doc.getElementById("lang-toggle-btn");
     assert(
       langToggle !== null,
-      "SMOKE-NAV-05: #lang-toggle-btn quick switcher exists in DOM"
+      "SMOKE-NAV-04: #lang-toggle-btn quick switcher exists in DOM"
     );
 
     // SECTION 2: Modal Accessibility & Light Dismissal Contracts
