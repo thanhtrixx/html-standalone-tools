@@ -152,7 +152,7 @@
           .map((h) => {
             const hName =
               lang === "vi" && h.nameVi ? h.nameVi : h.nameEn || h.name;
-            return `<span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium border border-slate-200 dark:border-slate-700/40">${h.icon || "🎯"} ${hName}</span>`;
+            return `<span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium border border-slate-200 dark:border-slate-700/40">${h.icon || "🎯"} ${hName}</span>`;
           })
           .join("");
 
@@ -164,7 +164,7 @@
                   <span class="text-2xl">${kit.icon}</span>
                   <div>
                     <h4 class="font-black text-slate-900 dark:text-white text-sm leading-tight">${title}</h4>
-                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider font-mono">${kit.habits.length} Habits</span>
+                    <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider font-mono">${kit.habits.length} Habits</span>
                   </div>
                 </div>
               </div>
@@ -178,7 +178,7 @@
               type="button"
               data-action="apply-starter-kit"
               data-kit-id="${kit.id}"
-              class="w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              class="w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-emerald-950 font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <span>⚡</span>
               <span>${i18n.t("apply_starter_kit", {}, lang)}</span>
@@ -253,7 +253,7 @@
           <div class="flex items-center gap-1.5">
             <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
               isActive
-                ? "bg-emerald-500 text-slate-950 ring-4 ring-emerald-500/20 scale-110"
+                ? "bg-emerald-500 text-emerald-950 font-black ring-4 ring-emerald-500/20 scale-110"
                 : isDone
                   ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
@@ -305,7 +305,7 @@
               </div>
               <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
                 isVi
-                  ? "border-emerald-500 bg-emerald-500 text-slate-950 font-black text-xs"
+                  ? "border-emerald-500 bg-emerald-500 text-emerald-950 font-black text-xs"
                   : "border-slate-400"
               }">
                 ${isVi ? "✓" : ""}
@@ -331,7 +331,7 @@
               </div>
               <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
                 !isVi
-                  ? "border-emerald-500 bg-emerald-500 text-slate-950 font-black text-xs"
+                  ? "border-emerald-500 bg-emerald-500 text-emerald-950 font-black text-xs"
                   : "border-slate-400"
               }">
                 ${!isVi ? "✓" : ""}
@@ -378,7 +378,7 @@
             .map((h) => {
               const hName =
                 lang === "vi" && h.nameVi ? h.nameVi : h.nameEn || h.name;
-              return `<span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">${h.icon || "🎯"} ${hName}</span>`;
+              return `<span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">${h.icon || "🎯"} ${hName}</span>`;
             })
             .join("");
 
@@ -397,12 +397,12 @@
                   <span class="text-2xl">${kit.icon}</span>
                   <div>
                     <h4 class="font-bold text-slate-900 dark:text-white text-sm">${title}</h4>
-                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-bold uppercase">${kit.habits.length} Habits</span>
+                    <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono font-bold uppercase">${kit.habits.length} Habits</span>
                   </div>
                 </div>
                 <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                   isSelected
-                    ? "border-emerald-500 bg-emerald-500 text-slate-950 font-bold text-xs"
+                    ? "border-emerald-500 bg-emerald-500 text-emerald-950 font-bold text-xs"
                     : "border-slate-400"
                 }">
                   ${isSelected ? "✓" : ""}
@@ -478,7 +478,7 @@
           <!-- Wizard Header -->
           <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-100 dark:border-slate-800">
             <div>
-              <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-mono">Atomic System</span>
+              <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider font-mono">Atomic System</span>
               <h2 id="wizard-modal-title" class="text-lg font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("wizard_title", {}, lang)}</h2>
             </div>
             <button
@@ -522,7 +522,7 @@
                   ? `<button
                       type="button"
                       data-action="wizard-next-step"
-                      class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition cursor-pointer flex items-center gap-1.5"
+                      class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-emerald-950 font-bold text-xs rounded-xl shadow-md shadow-emerald-500/20 transition cursor-pointer flex items-center gap-1.5"
                     >
                       <span>${i18n.t("wizard_btn_next", {}, lang)}</span>
                     </button>`
@@ -530,7 +530,7 @@
                       type="button"
                       data-action="wizard-finish"
                       data-kit-id="${selectedKitId}"
-                      class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/30 transition cursor-pointer flex items-center gap-1.5"
+                      class="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-emerald-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/30 transition cursor-pointer flex items-center gap-1.5"
                     >
                       <span>${i18n.t("wizard_btn_finish", {}, lang)}</span>
                     </button>`
@@ -584,7 +584,7 @@
           <button
             type="button"
             data-action="open-add-habit"
-            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
+            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
           >
             + ${i18n.t("add_habit", {}, lang)}
           </button>

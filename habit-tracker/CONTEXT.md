@@ -17,6 +17,7 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0007-obsidian-glow-visual-polish-keyboard-ergonomics-and-ia-decluttering.md`](./docs/adr/0007-obsidian-glow-visual-polish-keyboard-ergonomics-and-ia-decluttering.md)
 - [`docs/adr/0008-focus-timer-modal-resilient-worker-empty-state-wizard-and-layering.md`](./docs/adr/0008-focus-timer-modal-resilient-worker-empty-state-wizard-and-layering.md)
 - [`docs/adr/0009-header-alignment-insights-accuracy-language-wizard-and-floating-timer.md`](./docs/adr/0009-header-alignment-insights-accuracy-language-wizard-and-floating-timer.md)
+- [`docs/adr/0010-wcag-accessibility-focus-traps-touch-targets-and-codebase-distillation.md`](./docs/adr/0010-wcag-accessibility-focus-traps-touch-targets-and-codebase-distillation.md)
 
 ---
 
@@ -104,6 +105,10 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **Clean 4-Tab Bottom Dock**: Ergonomic thumb access to `Today`, `Insights`, `Habits`, and `Settings` without floating button obstructions.
 - **Dual Empty-State Gateway**: Both `Today` and `Habits` tabs offer prominent dual CTAs when empty: Primary `✨ Identity Setup Wizard` and Secondary `+ Add Habit`.
 - **Post-Wipe Auto-Onboarding**: Factory Wipe automatically routes to Today and presents the Identity Setup Wizard modal.
-- **Modal Stacking Hierarchy**: Enforces strict z-index layering (`Detail Sheet` at `z-50`, `Edit Modal` at `z-60`, `Focus Timer` at `z-60`) ensuring nested actions render properly without clipping.
+- **Modal Stacking & Focus Trapping**: Strict z-index layering (`Detail Sheet` at `z-50`, `Edit Modal` at `z-60`, `Focus Timer` at `z-60`) with centralized focus trapping (`trapFocus` / `releaseFocus`) cycling Tab/Shift+Tab and restoring trigger focus upon Escape or close.
+- **Motion Sensitivity Compliance**: `@media (prefers-reduced-motion: reduce)` suppresses full-screen particle canvas bursts in favor of a subtle toast, pauses running timer ping pulses, and disables scale transitions.
+- **Mobile Touch Targets**: All interactive controls (checkboxes, dock items, reorder arrows, context menu buttons, date ribbon pills) guarantee minimum 44×44px hitboxes.
+- **Typography Ramp Adherence**: Strict adherence to `DESIGN.md` ramp (`micro: 11px`, `label: 12px`); arbitrary `text-[10px]` classes are strictly prohibited.
 - **Local-First Zero-Backend Persistence**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
 - **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage.
+  _Avoid_: Un-trapped modals, timeline view, matrix view, sub-11px text, unpadded <44px icon buttons.

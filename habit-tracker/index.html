@@ -110,12 +110,47 @@
         -webkit-tap-highlight-color: transparent;
       }
 
+      /* Custom Themed Scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.3);
+        border-radius: 9999px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(16, 185, 129, 0.5);
+      }
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+      }
+
       .no-scrollbar::-webkit-scrollbar {
         display: none;
       }
       .no-scrollbar {
         -ms-overflow-style: none;
         scrollbar-width: none;
+      }
+
+      input,
+      textarea,
+      select {
+        caret-color: #10b981;
+      }
+
+      a {
+        text-underline-offset: 3px;
+      }
+
+      :focus-visible {
+        outline: 2px solid rgba(16, 185, 129, 0.6);
+        outline-offset: 2px;
       }
 
       /* Native App Bottom Dock Safe Inset */
@@ -225,7 +260,7 @@
                 </span>
                 <span
                   id="floating-timer-pulse"
-                  class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"
+                  class="inline-block w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-xs shadow-emerald-400/50"
                 ></span>
               </div>
               <div class="flex items-center gap-2 mt-0.5">
@@ -254,7 +289,7 @@
               type="button"
               data-action="toggle-timer"
               id="floating-timer-play-btn"
-              class="w-9 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center justify-center text-sm font-black shadow-md shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer"
+              class="w-9 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-emerald-950 flex items-center justify-center text-sm font-black shadow-md shadow-emerald-500/25 active:scale-95 transition-all cursor-pointer"
               aria-label="Pause"
               title="Play / Pause"
             >
@@ -432,7 +467,7 @@
         </div>
         <button
           onclick="window.HabitApp.applyPwaUpdate()"
-          class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg transition-colors whitespace-nowrap active:scale-95 cursor-pointer"
+          class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 text-xs font-bold rounded-xl shadow-lg transition-colors whitespace-nowrap active:scale-95 cursor-pointer"
         >
           Cập nhật
         </button>

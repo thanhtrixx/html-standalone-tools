@@ -56,7 +56,7 @@
           : false;
 
         const activeClasses = isSelected
-          ? "date-pill-active bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400"
+          ? "date-pill-active bg-emerald-500 text-emerald-950 font-bold shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400"
           : "bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 border border-slate-300 dark:border-slate-700/60 shadow-xs";
 
         const dotIndicator = isAllDone
@@ -290,7 +290,7 @@
                     ? "text-emerald-600 dark:text-emerald-400"
                     : "text-slate-900 dark:text-white"
               }">${durationFormatted}</span>
-              <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">/ ${targetDuration}</span>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400 font-mono">/ ${targetDuration}</span>
             </div>
           </div>
 
@@ -330,7 +330,7 @@
 
     const noteIndicator =
       logEntry && logEntry.notes
-        ? `<span class="inline-flex items-center text-[10px] text-slate-500 dark:text-slate-400 mt-0.5"><span class="mr-1">📝</span>${logEntry.notes.slice(
+        ? `<span class="inline-flex items-center text-[11px] text-slate-500 dark:text-slate-400 mt-0.5"><span class="mr-1">📝</span>${logEntry.notes.slice(
             0,
             24
           )}${logEntry.notes.length > 24 ? "..." : ""}</span>`

@@ -345,7 +345,7 @@
         <div class="mb-5">
           <div class="flex items-center justify-between mb-2">
             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">${i18n.t("mini_heatmap_365", {}, lang)}</h4>
-            <span class="text-[10px] text-slate-400">${i18n.formatDate(selectedDate, lang, "full")}</span>
+            <span class="text-[11px] text-slate-400">${i18n.formatDate(selectedDate, lang, "full")}</span>
           </div>
           ${miniHeatmapHtml}
         </div>
