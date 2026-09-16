@@ -446,7 +446,13 @@
     const dateStr = toDateString(dateInput);
     if (!dateStr) return false;
 
-    if (habit.startDate && dateStr < toDateString(habit.startDate)) {
+    const inceptionDate = habit.startDate
+      ? toDateString(habit.startDate)
+      : habit.createdAt
+        ? toDateString(habit.createdAt)
+        : null;
+
+    if (inceptionDate && dateStr < inceptionDate) {
       return false;
     }
 
@@ -574,11 +580,28 @@
       if (prog.isCompleted) {
         currentStreak++;
       } else if (tokensLeft > 0 && currentStreak > 0) {
-        // Apply freeze token only to preserve an active streak
-        tokensLeft--;
-        tokensUsed++;
-        frozenDates.push(curDateStr);
-        currentStreak++;
+        // Apply freeze token only to bridge an active streak to prior completions
+        let hasPriorCompletion = false;
+        for (let j = i + 1; j < 365; j++) {
+          const pastDateStr = shiftDateString(refDateStr, -j);
+          if (earliestBound && pastDateStr < earliestBound) break;
+          if (
+            isScheduledDate(habit, pastDateStr, vacationRanges) &&
+            calculateHabitProgress(habit, logsMap[pastDateStr]).isCompleted
+          ) {
+            hasPriorCompletion = true;
+            break;
+          }
+        }
+
+        if (hasPriorCompletion) {
+          tokensLeft--;
+          tokensUsed++;
+          frozenDates.push(curDateStr);
+          currentStreak++;
+        } else {
+          break;
+        }
       } else {
         // Missed day with no freeze tokens or streak was 0 -> streak breaks
         break;

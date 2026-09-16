@@ -366,6 +366,7 @@
         color: "cyan",
         icon: "💧",
         reminderTime: "14:00",
+        createdAt: "2026-01-01",
       },
       {
         id: "h-meditate",
@@ -377,6 +378,7 @@
         color: "indigo",
         icon: "🧘",
         reminderTime: "07:00",
+        createdAt: "2026-01-01",
       },
       {
         id: "h-read",
@@ -389,6 +391,7 @@
         color: "amber",
         icon: "📖",
         reminderTime: "21:00",
+        createdAt: "2026-01-01",
       },
     ];
 

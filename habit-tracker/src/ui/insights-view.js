@@ -109,12 +109,17 @@
     const barsHtml = weekdayStats
       .map((stat, idx) => {
         const rate = stat.rate || 0;
+        const hasScheduled = stat.scheduled > 0;
         const name = dayNames[stat.dayOfWeek] || dayNames[idx];
+        const displayLabel = hasScheduled ? `${rate}%` : "--";
+        const barHeight = hasScheduled ? rate : 0;
+        const barColor = hasScheduled ? "bg-emerald-500" : "bg-transparent";
+
         return `
           <div class="flex-1 flex flex-col items-center gap-2">
-            <span class="text-[11px] font-bold tabular-nums font-mono text-slate-700 dark:text-slate-300">${rate}%</span>
+            <span class="text-[11px] font-bold tabular-nums font-mono ${hasScheduled ? "text-slate-700 dark:text-slate-300" : "text-slate-400 dark:text-slate-600"}">${displayLabel}</span>
             <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-24 flex items-end p-0.5">
-              <div class="w-full bg-emerald-500 rounded-full transition-all duration-500" style="height: ${rate}%;"></div>
+              <div class="w-full ${barColor} rounded-full transition-all duration-500" style="height: ${barHeight}%;"></div>
             </div>
             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">${name}</span>
           </div>
