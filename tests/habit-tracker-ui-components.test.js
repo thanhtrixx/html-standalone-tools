@@ -128,7 +128,7 @@ async function runUITests() {
     icon: "📖",
   });
 
-  const selectedDate = "2026-09-12";
+  const selectedDate = engine.toDateString(new Date());
   store.setActiveDate(selectedDate);
 
   // ==========================================
@@ -138,7 +138,7 @@ async function runUITests() {
 
   const ribbonHtml = renderDateRibbon(selectedDate, store, "vi");
   assert(
-    ribbonHtml.includes('data-date="2026-09-12"'),
+    ribbonHtml.includes(`data-date="${selectedDate}"`),
     "[AC-1] Date ribbon renders active date item"
   );
   assert(
@@ -250,14 +250,14 @@ async function runUITests() {
   // Interactive Action Testing in Store
   await store.logHabit("h-water", selectedDate, 1000);
   assertEqual(
-    store.state.logs["h-water_2026-09-12"].value,
+    store.state.logs[`h-water_${selectedDate}`].value,
     1000,
     "[AC-3] Logging progress updates state immediately"
   );
 
   await store.toggleHabit("h-meditate", selectedDate);
   assertEqual(
-    store.state.logs["h-meditate_2026-09-12"].completed,
+    store.state.logs[`h-meditate_${selectedDate}`].completed,
     true,
     "[AC-3] 1-tap toggle marks binary habit completed"
   );
@@ -280,7 +280,7 @@ async function runUITests() {
   // Trigger completion
   await store.logHabit("h-meditate", selectedDate, 1);
   assert(
-    store.state.logs["h-meditate_2026-09-12"].completed,
+    store.state.logs[`h-meditate_${selectedDate}`].completed,
     "[AC-4] Swipe right gesture completes habit"
   );
 
@@ -448,7 +448,7 @@ async function runUITests() {
     "Drank infused lemon water."
   );
   assertEqual(
-    store.state.logs["h-water_2026-09-12"].notes,
+    store.state.logs[`h-water_${selectedDate}`].notes,
     "Drank infused lemon water.",
     "[Issue #416 AC-4] Reflection note saved to log entry"
   );
@@ -517,7 +517,7 @@ async function runUITests() {
     "[Issue #417 AC-1] Rendered heatmap uses 7-row calendar grid"
   );
   assert(
-    renderedHeatmap.includes('data-date="2026-09-12"'),
+    renderedHeatmap.includes(`data-date="${selectedDate}"`),
     "[Issue #417 AC-1] Active date is mapped as a cell in the heatmap"
   );
 
@@ -866,7 +866,7 @@ async function runUITests() {
   await store.updateNotes("h-meditate", selectedDate, noteContent);
 
   assertEqual(
-    store.state.logs["h-meditate_2026-09-12"].notes,
+    store.state.logs[`h-meditate_${selectedDate}`].notes,
     noteContent,
     "[Issue #425 AC-3] [AC-3] Submitting note updates note in state"
   );
@@ -898,7 +898,7 @@ async function runUITests() {
     "🌟 Ngày thứ 5 liên tiếp!\n- Tập trung cao độ\n- Không bị phân tâm";
   await store.updateNotes("h-reading", selectedDate, multilineNote);
   assertEqual(
-    store.state.logs["h-reading_2026-09-12"].notes,
+    store.state.logs[`h-reading_${selectedDate}`].notes,
     multilineNote,
     "[Issue #425 AC-3] [AC-3] Multiline reflection note with emojis saves cleanly to state"
   );

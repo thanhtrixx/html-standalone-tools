@@ -384,7 +384,12 @@
   /**
    * Renders the Manager Catalog View
    */
-  function renderManagerView(store, containerElement, lang = "vi") {
+  function renderManagerView(
+    store,
+    containerElement,
+    lang = "vi",
+    showHeader = true
+  ) {
     if (!store) return "";
     const habits = store.getHabits(true); // Include archived
 
@@ -577,8 +582,8 @@
       `
         : "";
 
-    const html = `
-      <div class="manager-view max-w-lg mx-auto pb-24">
+    const headerHtml = showHeader
+      ? `
         <div class="flex items-center justify-between mb-6 px-1">
           <div>
             <h2 class="text-2xl font-black text-slate-900 dark:text-white">${i18n.t("manager_tab", {}, lang)}</h2>
@@ -587,12 +592,17 @@
           <button
             type="button"
             data-action="open-add-habit"
-            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition active:scale-95"
+            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-emerald-500/25 transition active:scale-95 cursor-pointer"
           >
             + ${i18n.t("add_habit", {}, lang)}
           </button>
         </div>
+      `
+      : "";
 
+    const html = `
+      <div class="manager-view max-w-lg mx-auto pb-24">
+        ${headerHtml}
         <div class="routine-manager-groups">
           ${emptyStateHtml}
           ${routineSectionsHtml}

@@ -140,6 +140,7 @@
 
       // Insights & Heatmap View
       yearly_heatmap_title: "52-Week Contribution Heatmap",
+      heatmap_subtitle: "52-week activity and daily adherence momentum",
       weekday_adherence_title: "Day of Week Consistency",
       routine_adherence_title: "Routine Cluster Adherence",
       milestones_title: "Streak Milestone Badges",
@@ -483,6 +484,7 @@
 
       // Insights & Heatmap View
       yearly_heatmap_title: "Biểu đồ đóng góp 52 tuần",
+      heatmap_subtitle: "Mức độ kiên trì và hoạt động hàng ngày trong 52 tuần",
       weekday_adherence_title: "Độ kiên trì theo ngày trong tuần",
       routine_adherence_title: "Tỷ lệ hoàn thành theo khung giờ",
       milestones_title: "Huy hiệu cột mốc chuỗi",

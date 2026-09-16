@@ -65,7 +65,10 @@
     return `
       <div class="heatmap-container bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-base font-bold text-slate-900 dark:text-white">${i18n.t("yearly_heatmap_title", {}, lang)}</h3>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">${i18n.t("yearly_heatmap_title", {}, lang)}</h3>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("heatmap_subtitle", {}, lang)}</p>
+          </div>
           <!-- Legend -->
           <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
             <span>${i18n.t("heatmap_less", {}, lang)}</span>
@@ -248,13 +251,25 @@
       totalAllCompletions += st.totalCompletions;
     }
 
-    const overallStreak = engine.calculateStreakAndConsistency(
-      habits[0] || { scheduleType: "daily" },
-      logs,
-      settings.freezeTokens || 2,
-      settings.vacationRanges || [],
-      activeDate
-    );
+    const consistencyScore30d = engine.calculateOverallConsistencyScore
+      ? engine.calculateOverallConsistencyScore(
+          habits,
+          logs,
+          30,
+          activeDate,
+          settings.vacationRanges || []
+        )
+      : 0;
+
+    const consistencyScore90d = engine.calculateOverallConsistencyScore
+      ? engine.calculateOverallConsistencyScore(
+          habits,
+          logs,
+          90,
+          activeDate,
+          settings.vacationRanges || []
+        )
+      : 0;
 
     // 2. Heatmap data
     const heatmapCells = engine.computeHeatmapData(
@@ -308,8 +323,8 @@
 
           <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">
             <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 block">${i18n.t("consistency_score", {}, lang)}</span>
-            <span class="text-3xl font-black tabular-nums font-mono text-emerald-500 dark:text-emerald-400 mt-1 block">${overallStreak.consistencyScore30d}%</span>
-            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">90d: ${overallStreak.consistencyScore90d}%</span>
+            <span class="text-3xl font-black tabular-nums font-mono text-emerald-500 dark:text-emerald-400 mt-1 block">${consistencyScore30d}%</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">90d: ${consistencyScore90d}%</span>
           </div>
 
           <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-4 shadow-xl">

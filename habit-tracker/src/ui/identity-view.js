@@ -503,7 +503,7 @@
       (typeof require !== "undefined" ? require("./manager-view.js") : null);
 
     if (mgr && typeof mgr.renderManagerView === "function") {
-      managerHtml = mgr.renderManagerView(store, null, lang);
+      managerHtml = mgr.renderManagerView(store, null, lang, false);
     }
 
     const isCatalog = activeSubView === "catalog";
