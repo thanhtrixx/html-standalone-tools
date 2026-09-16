@@ -45,11 +45,6 @@
       ? require("./ui/today-view.js")
       : global.HabitTodayView;
 
-  const timelineView =
-    typeof require !== "undefined"
-      ? require("./ui/timeline-view.js")
-      : global.HabitTimelineView;
-
   const managerView =
     typeof require !== "undefined"
       ? require("./ui/manager-view.js")
@@ -69,11 +64,6 @@
     typeof require !== "undefined"
       ? require("./ui/insights-view.js")
       : global.HabitInsightsView;
-
-  const matrixView =
-    typeof require !== "undefined"
-      ? require("./ui/matrix-view.js")
-      : global.HabitMatrixView;
 
   const notifications =
     typeof require !== "undefined"
@@ -467,9 +457,7 @@
     // Mapping between activeTab and lens ID
     const tabToLensMap = {
       today: "today",
-      timeline: "timeline",
-      matrix: "matrix",
-      insights: "matrix",
+      insights: "insights",
       identity: "identity",
       manager: "identity",
     };
@@ -556,14 +544,8 @@
     if (activeTab === "today") {
       todayView.renderTodayDashboard(store, container, lang);
       bindHabitCardGestures();
-    } else if (activeTab === "timeline") {
-      timelineView.renderTimelineView(store, container, lang);
-      bindHabitCardGestures();
     } else if (activeTab === "insights" || activeTab === "matrix") {
-      const renderFn =
-        (matrixView && matrixView.renderMatrixView) ||
-        (insightsView && insightsView.renderInsightsView);
-      renderFn(store, container, lang);
+      insightsView.renderInsightsView(store, container, lang);
       bindHeatmapInteractions();
     } else if (activeTab === "manager" || activeTab === "identity") {
       if (

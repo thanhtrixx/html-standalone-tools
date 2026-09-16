@@ -1668,11 +1668,12 @@ async function runUITests() {
   );
   const bodyAttrs = bodyTagMatch ? bodyTagMatch[1] : "";
   assert(
-    bodyAttrs.includes("dark:bg-slate-950") &&
-      (bodyAttrs.includes("bg-slate-50") ||
-        bodyAttrs.includes("bg-slate-100") ||
-        bodyAttrs.includes("bg-white")),
-    "[Issue #429 AC-1] <body> tag supports dual-theme styling with light background and dark:bg-slate-950"
+    bodyAttrs.includes("bg-[var(--bg-base)]") ||
+      (bodyAttrs.includes("dark:bg-slate-950") &&
+        (bodyAttrs.includes("bg-slate-50") ||
+          bodyAttrs.includes("bg-slate-100") ||
+          bodyAttrs.includes("bg-white"))),
+    "[Issue #429 AC-1] <body> tag supports dual-theme styling with light background and dark:bg-slate-950 / obsidian tokens"
   );
   assert(
     bodyAttrs.includes("dark:text-slate-100") &&
@@ -5095,62 +5096,46 @@ async function runUITests() {
   );
 
   // ----------------------------------------------------
-  // Issue #478: Timeline & Routines Lens Verification
+  // Issue #529: Distill Legacy Views & Unified Obsidian Theme Tokens Verification
   // ----------------------------------------------------
-  const { sandbox: timelineSandbox } = createHabitTrackerSandbox();
-  await timelineSandbox.HabitApp.init();
+  const { sandbox: insightsSandbox } = createHabitTrackerSandbox();
+  await insightsSandbox.HabitApp.init();
 
-  // Switch to timeline lens
-  timelineSandbox.HabitApp.switchTab("timeline");
-  const mainContentEl = timelineSandbox.document.getElementById("main-content");
+  // Switch to insights tab
+  insightsSandbox.HabitApp.switchTab("insights");
+  const insightsMainContentEl =
+    insightsSandbox.document.getElementById("main-content");
   assert(
-    mainContentEl && mainContentEl.innerHTML.includes("timeline-view"),
-    "[Issue #478 AC-1] Switching to timeline lens renders .timeline-view container"
+    insightsMainContentEl &&
+      insightsMainContentEl.innerHTML.includes("insights-view"),
+    "[Issue #529 AC-1] Switching to insights tab renders unified .insights-view container"
   );
   assert(
-    mainContentEl && mainContentEl.innerHTML.includes("timeline-stream"),
-    "[Issue #478 AC-2] Timeline view renders circadian time-block stream"
+    insightsMainContentEl &&
+      insightsMainContentEl.innerHTML.includes("heatmap-container"),
+    "[Issue #529 AC-1] Insights view renders 52-week activity heatmap"
   );
   assert(
-    mainContentEl &&
-      (mainContentEl.innerHTML.includes('data-routine="morning"') ||
-        mainContentEl.innerHTML.includes('data-routine="afternoon"')),
-    "[Issue #478 AC-3] Timeline view partitions scheduled habits by routine anchors"
+    insightsMainContentEl &&
+      insightsMainContentEl.innerHTML.includes("milestone-badge"),
+    "[Issue #529 AC-1] Insights view renders streak milestone badges"
+  );
+  assert(
+    insightsMainContentEl &&
+      (insightsMainContentEl.innerHTML.includes("Độ kiên trì theo ngày") ||
+        insightsMainContentEl.innerHTML.includes("Day of Week Consistency") ||
+        insightsMainContentEl.innerHTML.includes("Tỷ lệ thực hiện theo ngày")),
+    "[Issue #529 AC-1] Insights view renders 0-baseline day-of-week adherence chart"
   );
 
-  // Switch via switchLens
-  timelineSandbox.HabitApp.switchLens("timeline");
+  // Verify legacy view files do not exist and are not loaded
   assert(
-    mainContentEl && mainContentEl.innerHTML.includes("timeline-block"),
-    "[Issue #478 AC-4] switchLens('timeline') successfully activates and renders timeline stream"
-  );
-
-  // ----------------------------------------------------
-  // Issue #479: Matrix & Analytics Lens Verification
-  // ----------------------------------------------------
-  const { sandbox: matrixSandbox } = createHabitTrackerSandbox();
-  await matrixSandbox.HabitApp.init();
-
-  // Switch to matrix lens
-  matrixSandbox.HabitApp.switchLens("matrix");
-  const matrixContentEl = matrixSandbox.document.getElementById("main-content");
-  assert(
-    matrixContentEl && matrixContentEl.innerHTML.includes("matrix-view"),
-    "[Issue #479 AC-1] Switching to matrix lens renders .matrix-view container"
+    typeof insightsSandbox.HabitTimelineView === "undefined",
+    "[Issue #529 AC-2] HabitTimelineView is not exposed on global"
   );
   assert(
-    matrixContentEl && matrixContentEl.innerHTML.includes("heatmap-container"),
-    "[Issue #479 AC-1] Matrix view renders 52-week activity heatmap"
-  );
-  assert(
-    matrixContentEl && matrixContentEl.innerHTML.includes("milestone-badge"),
-    "[Issue #479 AC-4] Matrix view renders streak milestone badges"
-  );
-  assert(
-    matrixContentEl &&
-      (matrixContentEl.innerHTML.includes("Độ kiên trì theo ngày") ||
-        matrixContentEl.innerHTML.includes("Day of Week Consistency")),
-    "[Issue #479 AC-3] Matrix view renders 0-baseline day-of-week adherence chart"
+    typeof insightsSandbox.HabitMatrixView === "undefined",
+    "[Issue #529 AC-2] HabitMatrixView is not exposed on global"
   );
 
   // ----------------------------------------------------
