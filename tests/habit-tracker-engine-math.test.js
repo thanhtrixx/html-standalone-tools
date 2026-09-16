@@ -1075,6 +1075,88 @@ try {
     100,
     "[Issue #534 AC-4] calculateOverallConsistencyScore evaluates to 100% for day-one completion without pre-inception penalties"
   );
+
+  // ==========================================
+  // [Issue #536] Mathematical Invariants & Multi-Kit Setup Verification
+  // ==========================================
+  // 1. Custom weekly schedule starting mid-week
+  const habit536Mwf = {
+    id: "h-mwf-536",
+    scheduleType: "weekly",
+    scheduleDays: [1, 3, 5], // Mon, Wed, Fri
+    startDate: "2026-09-09", // Wednesday
+  };
+
+  // Dates before start date return false
+  assertEqual(
+    engine.isScheduledDate(habit536Mwf, "2026-09-07"), // Mon before Wed
+    false,
+    "[Issue #536 AC-1] MWF habit before startDate is strictly unscheduled"
+  );
+  assertEqual(
+    engine.isScheduledDate(habit536Mwf, "2026-09-09"), // Wed startDate
+    true,
+    "[Issue #536 AC-1] MWF habit on startDate is scheduled"
+  );
+  assertEqual(
+    engine.isScheduledDate(habit536Mwf, "2026-09-10"), // Thu
+    false,
+    "[Issue #536 AC-1] MWF habit on Thu is not scheduled"
+  );
+  assertEqual(
+    engine.isScheduledDate(habit536Mwf, "2026-09-11"), // Fri
+    true,
+    "[Issue #536 AC-1] MWF habit on Fri is scheduled"
+  );
+
+  // 2. Zero-scheduled weekdays return rate: 0 and scheduled: 0 with clean math
+  const weekdayStats536 = engine.calculateWeekdayAdherence(
+    [habit536Mwf],
+    {},
+    90,
+    "2026-09-11"
+  );
+  const tuesdayStat = weekdayStats536.find((s) => s.dayOfWeek === 2);
+  assertEqual(
+    tuesdayStat.scheduled,
+    0,
+    "[Issue #536 AC-1] Unscheduled Tuesday has 0 scheduled count"
+  );
+  assertEqual(
+    tuesdayStat.rate,
+    0,
+    "[Issue #536 AC-1] Unscheduled Tuesday evaluates to 0% rate without NaN"
+  );
+
+  // 3. Mixed multi-habit adherence aggregation
+  const habit536Daily = {
+    id: "h-daily-536",
+    scheduleType: "daily",
+    createdAt: "2026-09-10",
+  };
+  const multiLogs536 = {
+    "h-mwf-536_2026-09-09": { completed: true, value: 1 },
+    "h-mwf-536_2026-09-11": { completed: true, value: 1 },
+    "h-daily-536_2026-09-10": { completed: true, value: 1 },
+    "h-daily-536_2026-09-11": { completed: true, value: 1 },
+  };
+  const aggregatedStats = engine.calculateWeekdayAdherence(
+    [habit536Mwf, habit536Daily],
+    multiLogs536,
+    90,
+    "2026-09-11"
+  );
+  const fridayStat = aggregatedStats.find((s) => s.dayOfWeek === 5);
+  assertEqual(
+    fridayStat.scheduled,
+    2,
+    "[Issue #536 AC-1] Friday scheduled across both active habits (1 MWF + 1 Daily)"
+  );
+  assertEqual(
+    fridayStat.rate,
+    100,
+    "[Issue #536 AC-1] Friday 100% completion across both habits yields 100% adherence"
+  );
 } catch (err) {
   console.error("❌ Exception during Engine Math test execution:", err);
   process.exit(1);
