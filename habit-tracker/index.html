@@ -185,16 +185,18 @@
   >
     <!-- Top Header Bar -->
     <header
-      class="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 py-3 safe-top shadow-xs"
+      class="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800/80 px-4 h-14 flex items-center justify-between safe-top shadow-xs"
     >
-      <div class="max-w-lg mx-auto flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
+      <div
+        class="max-w-lg mx-auto w-full flex items-center justify-between h-full"
+      >
+        <div class="flex items-center gap-2.5 h-8">
           <div
-            class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/25 font-bold text-base ring-1 ring-white/20 shrink-0"
+            class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 inline-flex items-center justify-center text-white shadow-md shadow-emerald-500/25 font-bold text-base ring-1 ring-white/20 shrink-0 leading-none"
           >
             🔥
           </div>
-          <div class="flex items-center">
+          <div class="flex items-center h-8">
             <h1
               class="text-sm font-black text-slate-900 dark:text-white tracking-tight leading-none flex items-center"
             >
@@ -203,12 +205,12 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 h-8">
           <!-- Freeze Token Counter Badge -->
           <button
             type="button"
             onclick="window.HabitApp.switchTab('settings')"
-            class="h-8 px-2.5 inline-flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors shadow-xs tabular-nums font-mono cursor-pointer"
+            class="h-8 px-2.5 inline-flex items-center justify-center gap-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors shadow-xs tabular-nums font-mono leading-none cursor-pointer"
             title="Streak Freeze Tokens"
             aria-label="Streak Freeze Tokens"
           >

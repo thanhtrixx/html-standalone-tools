@@ -1688,11 +1688,10 @@
   }
 
   /**
-   * Updates ambient running timer pills in header, dock, and floating dynamic island
+   * Updates ambient running timer dynamic island and dock pill
    */
   function updateAmbientTimerPill() {
     const floatingIsland = document.getElementById("floating-timer-island");
-    const headerPill = document.getElementById("header-active-timer-pill");
     const dockPill = document.getElementById("dock-active-timer-pill");
 
     if (!runningTimerHabitId || !store) {
@@ -1700,7 +1699,6 @@
         floatingIsland.classList.add("hidden", "translate-y-4", "opacity-0");
         floatingIsland.classList.remove("translate-y-0", "opacity-100");
       }
-      if (headerPill) headerPill.classList.add("hidden");
       if (dockPill) dockPill.classList.add("hidden");
       return;
     }
@@ -1764,12 +1762,6 @@
     const s = String(totalSecs % 60).padStart(2, "0");
     const tickerStr = `${m}:${s}`;
 
-    if (headerPill) {
-      headerPill.classList.remove("hidden");
-      headerPill.className =
-        "items-center gap-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-sm tabular-nums font-mono animate-pulse cursor-pointer hover:bg-emerald-500/20 flex";
-      headerPill.innerHTML = `<span>${icon}</span> <span class="tabular-nums font-mono max-w-[100px] truncate hidden sm:inline">${name}</span> <span id="header-timer-ticker" class="tabular-nums font-mono font-bold">${tickerStr}</span>`;
-    }
     if (dockPill) {
       dockPill.classList.remove("hidden");
       dockPill.className =
