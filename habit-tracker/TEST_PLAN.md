@@ -161,7 +161,7 @@ tests/
   - Simulating a cold boot with an existing unpaused `habit_active_timer_session` restores `runningTimerHabitId`, calculates exact timestamp delta `Math.floor((Date.now() - session.startedAt) / 1000)`, and resumes live ticking.
   - 12-Hour Safety Cap: Sessions older than 12 hours (43,200s) are automatically capped at 12 hours and marked finalized.
   - Midnight rollover: Restored sessions attribute elapsed seconds to `session.date` without date fragmentation.
-- [ ] **Wake-Up Celebration & UI Presentation (`tests/habit-tracker-ui-components.test.js`)**:
+- [x] **Wake-Up Celebration & UI Presentation (`tests/habit-tracker-ui-components.test.js`)**:
   - If habit target was crossed during screen-off sleep, triggers celebration chime (`playTimerCompletionSound`), confetti, and completion toast.
   - Cold app launch with active restored session automatically opens the immersive Focus Timer Modal (`#focus-timer-modal-overlay`).
   - Floating Dynamic Island (`#floating-timer-island`) and Dock Active Pill (`#dock-active-timer-pill`) immediately reflect the restored time and running state.
