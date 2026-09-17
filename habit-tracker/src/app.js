@@ -1132,19 +1132,24 @@
           <!-- Data Portability Exports -->
           <div class="pt-2 border-t border-slate-200 dark:border-slate-800/60">
             <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">${i18n.t("export_import_title", {}, lang)}</span>
-            <div class="grid grid-cols-3 gap-2">
-              <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
+            <div class="grid grid-cols-4 gap-2">
+              <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export JSON">
                 <span>📥</span>
                 <span class="truncate">JSON</span>
               </button>
-              <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
+              <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export CSV">
                 <span>📊</span>
                 <span class="truncate">CSV</span>
               </button>
-              <label class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all">
+              <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import JSON">
                 <span>📤</span>
-                <span class="truncate">Import</span>
+                <span class="truncate">+JSON</span>
                 <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
+              </label>
+              <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import CSV">
+                <span>📑</span>
+                <span class="truncate">+CSV</span>
+                <input type="file" id="import-csv-input" accept=".csv,text/csv" class="hidden" onchange="window.HabitApp.importDataCSV(event)" />
               </label>
             </div>
           </div>
@@ -4285,6 +4290,41 @@
         if (event.target) event.target.value = "";
         notify(
           i18n.t("toast_import_error", { message: err.message }, lang),
+          "error"
+        );
+      }
+    },
+
+    async importDataCSV(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      try {
+        const text = await file.text();
+        const res = exportImport.parseHabitCsv(text);
+        if (!res.valid) {
+          notify(
+            i18n.t(
+              "toast_csv_import_error",
+              { message: res.error || (res.errors && res.errors.join(", ")) },
+              lang
+            ),
+            "error"
+          );
+          if (event.target) event.target.value = "";
+          return;
+        }
+        pendingImportData = res.data;
+        selectedImportStrategy = "merge";
+        if (event.target) event.target.value = "";
+        HabitApp.openImportPreviewModal();
+      } catch (err) {
+        if (event.target) event.target.value = "";
+        notify(
+          i18n.t("toast_csv_import_error", { message: err.message }, lang),
           "error"
         );
       }

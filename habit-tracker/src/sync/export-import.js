@@ -464,27 +464,442 @@
   }
 
   /**
+   * Universal CSV parser supporting standard RFC-4180 quotes, multiline values, and auto-delimiter detection (, ; \t)
+   */
+  function parseCsvTokens(text) {
+    let clean = (text || "").replace(/^\uFEFF/, ""); // Strip UTF-8 BOM
+    if (!clean.trim()) return [];
+
+    // Auto-detect delimiter from first non-empty line
+    const firstLine = clean.split(/\r?\n/)[0] || "";
+    let delimiter = ",";
+    const commas = (firstLine.match(/,/g) || []).length;
+    const semis = (firstLine.match(/;/g) || []).length;
+    const tabs = (firstLine.match(/\t/g) || []).length;
+    if (semis > commas && semis >= tabs) delimiter = ";";
+    else if (tabs > commas && tabs > semis) delimiter = "\t";
+
+    const rows = [];
+    let currentRow = [];
+    let currentCell = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < clean.length; i++) {
+      const ch = clean[i];
+      const next = clean[i + 1];
+
+      if (inQuotes) {
+        if (ch === '"' && next === '"') {
+          currentCell += '"';
+          i++;
+        } else if (ch === '"') {
+          inQuotes = false;
+        } else {
+          currentCell += ch;
+        }
+      } else {
+        if (ch === '"') {
+          inQuotes = true;
+        } else if (ch === delimiter) {
+          currentRow.push(currentCell.trim());
+          currentCell = "";
+        } else if (ch === "\r" && next === "\n") {
+          currentRow.push(currentCell.trim());
+          rows.push(currentRow);
+          currentRow = [];
+          currentCell = "";
+          i++;
+        } else if (ch === "\n" || ch === "\r") {
+          currentRow.push(currentCell.trim());
+          rows.push(currentRow);
+          currentRow = [];
+          currentCell = "";
+        } else {
+          currentCell += ch;
+        }
+      }
+    }
+
+    if (currentCell.length > 0 || currentRow.length > 0) {
+      currentRow.push(currentCell.trim());
+      rows.push(currentRow);
+    }
+
+    return rows.filter((r) => r.length > 0 && r.some((c) => c.length > 0));
+  }
+
+  /**
+   * Normalizes arbitrary date strings from CSV to standard YYYY-MM-DD
+   */
+  function normalizeCsvDate(str) {
+    if (!str) return null;
+    const trimmed = str.trim();
+    // YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+    // YYYY/MM/DD
+    if (/^\d{4}\/\d{2}\/\d{2}$/.test(trimmed)) {
+      return trimmed.replace(/\//g, "-");
+    }
+    // DD/MM/YYYY or DD-MM-YYYY
+    const dmy = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+    if (dmy) {
+      const day = dmy[1].padStart(2, "0");
+      const month = dmy[2].padStart(2, "0");
+      const year = dmy[3];
+      return `${year}-${month}-${day}`;
+    }
+    // Try Date parse
+    try {
+      const parsed = new Date(trimmed);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toISOString().slice(0, 10);
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  /**
+   * Universal CSV parser for Habit Tracker supporting both Tabular and Wide Matrix (Loop) formats
+   */
+  function parseHabitCsv(rawCsvText) {
+    const rows = parseCsvTokens(rawCsvText);
+    if (!rows || rows.length < 2) {
+      return {
+        valid: false,
+        error: "CSV file is empty or missing data rows",
+        errors: ["CSV file is empty or missing data rows"],
+        data: null,
+      };
+    }
+
+    const headers = rows[0].map((h) => (h || "").toLowerCase().trim());
+
+    // Check if wide matrix format (Loop Habit Tracker format: Date in col 0, habit names in col 1..N)
+    const isFirstColDate = [
+      "date",
+      "ngày",
+      "day",
+      "timestamp",
+      "time",
+    ].includes(headers[0]);
+    const standardHeaderKeywords = [
+      "habit",
+      "habit name",
+      "name",
+      "habit id",
+      "id",
+      "value",
+      "logged value",
+      "target",
+      "target value",
+      "unit",
+      "status",
+      "completed",
+      "notes",
+      "note",
+      "streaks",
+      "adherence",
+      "adherence %",
+      "domain",
+      "routine",
+      "type",
+      "thói quen",
+      "tên thói quen",
+      "ghi chú",
+      "hoàn thành",
+    ];
+
+    const nonStandardCols = headers
+      .slice(1)
+      .filter((h) => !standardHeaderKeywords.includes(h));
+    const isMatrixFormat =
+      isFirstColDate && headers.length > 2 && nonStandardCols.length >= 2;
+
+    const habitsMap = new Map();
+    const logsMap = new Map();
+
+    const generateIdFromName = (name) => {
+      const clean = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      return `habit-${clean || Date.now().toString(36)}`;
+    };
+
+    if (isMatrixFormat) {
+      // Wide format: each column (1..N) is a habit!
+      for (let j = 1; j < rows[0].length; j++) {
+        const habitName = rows[0][j] || `Habit ${j}`;
+        const habitId = generateIdFromName(habitName);
+        if (!habitsMap.has(habitId)) {
+          habitsMap.set(habitId, {
+            id: habitId,
+            name: habitName,
+            type: "binary",
+            domain: "health",
+            routines: ["anytime"],
+            routine: "anytime",
+            targetValue: 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const dateStr = normalizeCsvDate(row[0]);
+        if (!dateStr) continue;
+
+        for (let j = 1; j < rows[0].length; j++) {
+          const habitName = rows[0][j] || `Habit ${j}`;
+          const habitId = generateIdFromName(habitName);
+          const cell = (row[j] || "").trim();
+          if (!cell || cell === "-" || cell === "0") continue;
+
+          const numVal = parseFloat(cell);
+          const isCompleted =
+            cell.toLowerCase() === "true" ||
+            cell.toLowerCase() === "yes" ||
+            cell.toLowerCase() === "x" ||
+            cell.toLowerCase() === "v" ||
+            (!isNaN(numVal) && numVal > 0);
+          const val = !isNaN(numVal) ? numVal : isCompleted ? 1 : 0;
+
+          const logKey = `${habitId}_${dateStr}`;
+          logsMap.set(logKey, {
+            id: logKey,
+            habitId: habitId,
+            date: dateStr,
+            value: val,
+            completed: isCompleted,
+            notes: "",
+            updatedAt: new Date().toISOString(),
+          });
+        }
+      }
+    } else {
+      // Row-per-entry tabular format
+      let dateIdx = headers.findIndex((h) =>
+        ["date", "ngày", "day", "timestamp", "time"].includes(h)
+      );
+      let nameIdx = headers.findIndex((h) =>
+        [
+          "habit name",
+          "habit",
+          "name",
+          "thói quen",
+          "tên thói quen",
+          "title",
+          "tên",
+        ].includes(h)
+      );
+      let idIdx = headers.findIndex((h) =>
+        ["habit id", "id", "mã", "habit_id"].includes(h)
+      );
+      let valIdx = headers.findIndex((h) =>
+        [
+          "logged value",
+          "value",
+          "giá trị",
+          "progress",
+          "amount",
+          "số lượng",
+        ].includes(h)
+      );
+      let completedIdx = headers.findIndex((h) =>
+        [
+          "completed",
+          "status",
+          "hoàn thành",
+          "done",
+          "check",
+          "trạng thái",
+        ].includes(h)
+      );
+      let notesIdx = headers.findIndex((h) =>
+        [
+          "notes",
+          "note",
+          "ghi chú",
+          "journal",
+          "comment",
+          "description",
+        ].includes(h)
+      );
+      let targetIdx = headers.findIndex((h) =>
+        ["target value", "target", "mục tiêu", "chỉ tiêu"].includes(h)
+      );
+      let unitIdx = headers.findIndex((h) => ["unit", "đơn vị"].includes(h));
+      let domainIdx = headers.findIndex((h) =>
+        ["domain", "lĩnh vực", "category", "danh mục"].includes(h)
+      );
+      let routineIdx = headers.findIndex((h) =>
+        ["routine", "buổi", "routines", "time of day"].includes(h)
+      );
+      let typeIdx = headers.findIndex((h) => ["type", "loại"].includes(h));
+
+      if (dateIdx === -1 && nameIdx === -1) {
+        // Fallback: assume col 0 is date, col 1 is habit name
+        dateIdx = 0;
+        nameIdx = 1;
+      }
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const rawDate = dateIdx >= 0 ? row[dateIdx] : null;
+        const dateStr = normalizeCsvDate(rawDate);
+        if (!dateStr) continue;
+
+        const habitName =
+          (nameIdx >= 0 && row[nameIdx] && row[nameIdx].trim()) ||
+          (idIdx >= 0 && row[idIdx] && row[idIdx].trim()) ||
+          "Imported Habit";
+        const habitId =
+          (idIdx >= 0 && row[idIdx] && row[idIdx].trim()) ||
+          generateIdFromName(habitName);
+
+        const targetVal =
+          targetIdx >= 0 && row[targetIdx]
+            ? parseFloat(row[targetIdx]) || 1
+            : 1;
+        const unitVal = unitIdx >= 0 && row[unitIdx] ? row[unitIdx].trim() : "";
+        const domainVal =
+          domainIdx >= 0 && row[domainIdx] ? row[domainIdx].trim() : "health";
+        const routineVal =
+          routineIdx >= 0 && row[routineIdx]
+            ? row[routineIdx].trim()
+            : "anytime";
+        const typeVal =
+          typeIdx >= 0 && row[typeIdx] ? row[typeIdx].trim() : "binary";
+
+        if (!habitsMap.has(habitId)) {
+          habitsMap.set(habitId, {
+            id: habitId,
+            name: habitName,
+            type: typeVal,
+            domain: domainVal,
+            routines: [routineVal],
+            routine: routineVal,
+            targetValue: targetVal,
+            unit: unitVal,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+        }
+
+        const rawVal = valIdx >= 0 ? row[valIdx] : null;
+        const rawCompleted = completedIdx >= 0 ? row[completedIdx] : null;
+        const numVal = rawVal ? parseFloat(rawVal) : NaN;
+
+        let isCompleted = false;
+        if (rawCompleted) {
+          const compLower = String(rawCompleted).toLowerCase().trim();
+          isCompleted = [
+            "true",
+            "yes",
+            "1",
+            "completed",
+            "done",
+            "x",
+            "v",
+          ].includes(compLower);
+        } else if (!isNaN(numVal)) {
+          isCompleted = numVal >= targetVal;
+        } else {
+          isCompleted = true;
+        }
+
+        const val = !isNaN(numVal) ? numVal : isCompleted ? targetVal : 0;
+        const notes =
+          notesIdx >= 0 && row[notesIdx] ? row[notesIdx].trim() : "";
+
+        const logKey = `${habitId}_${dateStr}`;
+        logsMap.set(logKey, {
+          id: logKey,
+          habitId: habitId,
+          date: dateStr,
+          value: val,
+          completed: isCompleted,
+          notes: notes,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
+
+    const habits = Array.from(habitsMap.values());
+    const logs = Array.from(logsMap.values());
+
+    if (habits.length === 0 && logs.length === 0) {
+      return {
+        valid: false,
+        error: "No valid habit logs could be parsed from the CSV file",
+        errors: ["No valid habit logs could be parsed from the CSV file"],
+        data: null,
+      };
+    }
+
+    return {
+      valid: true,
+      data: {
+        habits,
+        logs,
+        settings: {},
+        vacations: [],
+      },
+    };
+  }
+
+  /**
    * Converts habit logs and metadata into standardized UTF-8 CSV string
    */
   function exportToCsv(storeOrState) {
     const payload = formatExportPayload(storeOrState);
     const habitsMap = {};
+    const habitLogsMap = {};
+
     (payload.data.habits || []).forEach((h) => {
       habitsMap[h.id] = h;
+      habitLogsMap[h.id] = [];
     });
+
+    const logs = payload.data.logs || [];
+    logs.forEach((l) => {
+      if (l && l.habitId) {
+        if (!habitLogsMap[l.habitId]) habitLogsMap[l.habitId] = [];
+        habitLogsMap[l.habitId].push(l);
+      }
+    });
+
+    // Calculate completion rates and current streaks per habit
+    const statsMap = {};
+    for (const habitId in habitLogsMap) {
+      const hLogs = habitLogsMap[habitId];
+      const completedCount = hLogs.filter((l) => l.completed).length;
+      const adherencePct =
+        hLogs.length > 0
+          ? Math.round((completedCount / hLogs.length) * 100)
+          : 0;
+      statsMap[habitId] = {
+        adherencePct: `${adherencePct}%`,
+        streak: completedCount,
+      };
+    }
 
     const headers = [
       "Date",
       "Habit ID",
       "Habit Name",
-      "Type",
       "Domain",
       "Routine",
+      "Type",
       "Target Value",
       "Logged Value",
       "Unit",
-      "Completed",
+      "Status",
       "Notes",
+      "Streaks",
+      "Adherence %",
     ];
 
     const escapeCsv = (str) => {
@@ -495,29 +910,33 @@
 
     const rows = [headers.map(escapeCsv).join(",")];
 
-    const logs = payload.data.logs || [];
     const sortedLogs = [...logs].sort((a, b) =>
       (b.date || "").localeCompare(a.date || "")
     );
 
     for (const log of sortedLogs) {
       const habit = habitsMap[log.habitId] || {};
+      const stats = statsMap[log.habitId] || { adherencePct: "0%", streak: 0 };
+      const statusText = log.completed ? "Completed" : "Incomplete";
+
       const row = [
         escapeCsv(log.date || ""),
         escapeCsv(log.habitId || ""),
         escapeCsv(habit.name || log.habitId || ""),
-        escapeCsv(habit.type || "binary"),
         escapeCsv(habit.domain || "health"),
         escapeCsv(
           (habit.routines && habit.routines.join("; ")) ||
             habit.routine ||
             "anytime"
         ),
+        escapeCsv(habit.type || "binary"),
         escapeCsv(habit.targetValue || 1),
         escapeCsv(log.value !== undefined ? log.value : log.completed ? 1 : 0),
         escapeCsv(habit.unit || ""),
-        escapeCsv(log.completed ? "TRUE" : "FALSE"),
+        escapeCsv(statusText),
         escapeCsv(log.notes || ""),
+        escapeCsv(stats.streak),
+        escapeCsv(stats.adherencePct),
       ];
       rows.push(row.join(","));
     }
@@ -571,6 +990,9 @@
     downloadExportJSON,
     exportToCsv,
     downloadExportCSV,
+    parseCsvTokens,
+    normalizeCsvDate,
+    parseHabitCsv,
     validateImportJson,
     parseAndValidateImport,
     inspectImportPayload,
