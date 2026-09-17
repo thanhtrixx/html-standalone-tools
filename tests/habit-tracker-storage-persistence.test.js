@@ -1111,6 +1111,137 @@ async function runStorageTests() {
     null,
     "[Issue #575 AC-4] Imported habit from aborted import is gone after rollback"
   );
+
+  // ==========================================
+  // [Issue #576 / ADR-0015 Slice 5] Full-Spectrum CSV Portability & Universal Importer
+  // ==========================================
+  console.log(
+    "--- [Issue #576] Full-Spectrum CSV Portability & Universal Habit Log Importer ---"
+  );
+
+  // 1. Rich CSV Export formatting with full metadata, streaks, and adherence
+  const testExportState = {
+    habits: [
+      {
+        id: "h-running",
+        name: "Morning Run",
+        domain: "health",
+        routines: ["morning"],
+        routine: "morning",
+        type: "numeric",
+        targetValue: 5,
+        unit: "km",
+      },
+    ],
+    logs: [
+      {
+        id: "h-running_2026-09-15",
+        habitId: "h-running",
+        date: "2026-09-15",
+        value: 5,
+        completed: true,
+        notes: "Great run in the park!",
+      },
+      {
+        id: "h-running_2026-09-16",
+        habitId: "h-running",
+        date: "2026-09-16",
+        value: 0,
+        completed: false,
+        notes: "Rest day",
+      },
+    ],
+  };
+
+  const generatedCsv = exportImport.exportToCsv(testExportState);
+  assert(
+    generatedCsv.includes(
+      '"Date","Habit ID","Habit Name","Domain","Routine","Type","Target Value","Logged Value","Unit","Status","Notes","Streaks","Adherence %"'
+    ),
+    "[Issue #576 AC-1] Exported CSV includes full metadata headers and consistency metrics"
+  );
+  assert(
+    generatedCsv.includes('"Morning Run"') &&
+      generatedCsv.includes('"5"') &&
+      generatedCsv.includes('"km"'),
+    "[Issue #576 AC-1] Exported CSV contains habit metadata and unit"
+  );
+  assert(
+    generatedCsv.includes('"Completed"') &&
+      generatedCsv.includes('"Incomplete"'),
+    "[Issue #576 AC-1] Exported CSV contains human-readable status values"
+  );
+
+  // 2. CSV Parser auto-detects delimiters (semicolon vs comma) and RFC-4180 quotes
+  const semicolonCsv = `Date;Habit Name;Logged Value;Status;Notes\n2026-09-10;Read Book;30;Completed;"Read chapter 1, 2"`;
+  const parsedSemicolon = exportImport.parseHabitCsv(semicolonCsv);
+  assertEqual(
+    parsedSemicolon.valid,
+    true,
+    "[Issue #576 AC-2] Successfully parses semicolon-delimited CSV"
+  );
+  assertEqual(
+    parsedSemicolon.data.habits.length,
+    1,
+    "[Issue #576 AC-2] Identifies 1 habit from semicolon CSV"
+  );
+  assertEqual(
+    parsedSemicolon.data.logs.length,
+    1,
+    "[Issue #576 AC-2] Identifies 1 log entry from semicolon CSV"
+  );
+  assertEqual(
+    parsedSemicolon.data.logs[0].notes,
+    "Read chapter 1, 2",
+    "[Issue #576 AC-2] Correctly preserves commas inside quoted note field"
+  );
+
+  // 3. Wide Matrix / Loop Habit Tracker CSV format
+  const loopCsv = `Date,Meditation,Morning Walk,Read Book\n2026-09-01,1,1,15\n2026-09-02,0,1,20\n2026-09-03,1,0,0`;
+  const parsedLoop = exportImport.parseHabitCsv(loopCsv);
+  assertEqual(
+    parsedLoop.valid,
+    true,
+    "[Issue #576 AC-3] Successfully parses Loop Habit Tracker matrix CSV format"
+  );
+  assertEqual(
+    parsedLoop.data.habits.length,
+    3,
+    "[Issue #576 AC-3] Created 3 distinct habits from matrix column headers"
+  );
+  // Total non-zero entries: 3 + 2 + 1 = 6 logs
+  assertEqual(
+    parsedLoop.data.logs.length,
+    6,
+    "[Issue #576 AC-3] Created 6 check-in logs across dates from matrix cells"
+  );
+
+  // 4. Ingest parsed CSV into HabitStore additively
+  const csvStoreStorage = createMockStorage();
+  const csvStore = new HabitStore({
+    storage: storageModule.createStorageAdapter({
+      fallbackStorage: csvStoreStorage,
+      forceFallback: true,
+    }),
+  });
+  await csvStore.init();
+
+  const mergedFromCsv = await exportImport.mergeHabitStates(
+    csvStore.state,
+    parsedLoop.data,
+    "merge"
+  );
+  await csvStore.replaceState(mergedFromCsv);
+
+  assertEqual(
+    csvStore.getHabits().length,
+    3,
+    "[Issue #576 AC-4] Stores ingested CSV habits into reactive database without schema corruption"
+  );
+  assert(
+    csvStore.getHabits().some((h) => h.name === "Meditation"),
+    "[Issue #576 AC-4] Stored Meditation habit is accessible in store"
+  );
 }
 
 runStorageTests()
