@@ -20,6 +20,7 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0010-wcag-accessibility-focus-traps-touch-targets-and-codebase-distillation.md`](./docs/adr/0010-wcag-accessibility-focus-traps-touch-targets-and-codebase-distillation.md)
 - [`docs/adr/0011-header-alignment-multi-kit-wizard-adherence-accuracy-and-timer-ia.md`](./docs/adr/0011-header-alignment-multi-kit-wizard-adherence-accuracy-and-timer-ia.md)
 - [`docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md`](./docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md)
+- [`docs/adr/0013-streamlined-habits-ia-vertical-kits-drag-reorder-timer-format-and-screen-fit.md`](./docs/adr/0013-streamlined-habits-ia-vertical-kits-drag-reorder-timer-format-and-screen-fit.md)
 
 ---
 
@@ -29,11 +30,11 @@ For architectural decision history and UI/UX evolution, refer to:
 
 The application organizes daily execution, deep analytics, habit catalog management, and preferences into four primary tabs:
 
-- **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day horizontal date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with inline expandability.
-- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring a 52-week GitHub-style contribution heatmap, global aggregate consistency scores (30d/90d), 0-baseline day-of-week adherence charts, streak milestone records, and completion velocity.
-- **Habits Catalog & Identity (`habits`)**: Comprehensive personal habit catalog management (Add, Edit, Reorder, Archive, Delete) with integrated **Identity System & Life Pillars** (Health, Mind, Craft, Discipline) and Curated Starter Kits.
+- **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day responsive full-viewport date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with routine-scoped inline expandability.
+- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring **4 Core Life Pillars** (Health, Mind, Craft, Discipline) with adherence rings, 52-week GitHub-style contribution heatmap, global aggregate consistency scores (30d/90d), 0-baseline day-of-week adherence charts, streak milestone records, and completion velocity.
+- **Habits Catalog & Manager (`habits`)**: Comprehensive personal habit catalog management (Add, Edit, Drag-and-Drop Reorder, Archive, Delete) and an integrated vertical catalog of **8 Curated Starter Kits**.
 - **Settings & Data Vault (`settings`)**: Configuration hub for streak freeze tokens, vacation pause mode, bilingual language switching (VI/EN), dark/light theme toggle, and 1-click JSON backup/restore & CSV export.
-  _Avoid_: Sub-header bar, lens switcher, tab page, screen switch.
+  _Avoid_: Sub-header bar, lens switcher, tab page, screen switch, subview switcher.
 
 ---
 
@@ -63,19 +64,24 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **4-Step Language-First Identity Setup Wizard**: A 4-step setup modal appearing on first run or empty state:
   - **Step 1: Language Selection**: Prominent interactive cards (`🇻🇳 Tiếng Việt` / `🇺🇸 English`) with immediate reactivity.
   - **Step 2: 4 Life Pillars**: Introduction to core domains (`Health`, `Mind`, `Craft`, `Discipline`).
-  - **Step 3: Multi-Select Starter Kits**: Multi-toggle kit selection cards supporting selecting 0 to 4 kits concurrently with normalized kebab-case IDs (`morning-mastery`, `deep-focus`, `health-vitality`, `zen-mindfulness`) and unrestricted unchecking.
+  - **Step 3: Multi-Select Starter Kits**: Multi-toggle kit selection cards supporting selecting 0 to 8 kits concurrently with normalized kebab-case IDs (`morning-mastery`, `deep-focus-flow`, `health-vitality`, `zen-mindfulness`, `fitness-strength`, `lifelong-learning`, `financial-discipline`, `sleep-recovery`) and unrestricted unchecking.
   - **Step 4: Confirmation & Launch**: Habit preview aggregating all selected packs (with automatic numbered disambiguation for identical habit names across kits, or custom blank slate option when 0 kits are chosen) and single-click atomic activation.
-- **Curated Starter Kits Carousel**: Pre-configured habit packs with horizontal snap scroll, desktop left/right chevron navigation buttons, and mouse drag-to-scroll physics:
+- **Curated Starter Kits Vertical Stack**: Full-width vertical cards stacked within the Habits catalog tab displaying all included habits, domain badges, and a 1-tap `⚡ Apply Kit` action:
   - **Morning Mastery**: Morning hydration, 10-min meditation, light stretching, daily planning.
   - **Deep Focus & Flow**: 45-min pomodoro session, zero social media block, reading 20 pages.
   - **Health & Vitality**: 2500ml water tracking, 30-min workout, 8 hours sleep schedule.
   - **Zen & Mindfulness**: Evening reflection journaling, gratitude log, digital sunset.
-    _Avoid_: Default templates, boilerplate habits, sample items.
+  - **Fitness & Strength**: 45-min strength training, 10,000 steps, post-workout stretch, 100g protein goal.
+  - **Lifelong Learning**: 20-min language practice, atomic note-taking, 20-min deep reading.
+  - **Financial Discipline**: Daily expense logging, zero impulse buys, weekly budget review.
+  - **Sleep & Recovery**: Warm wind-down bath, 30-min digital sunset, 8-hour sleep target.
+    _Avoid_: Default templates, boilerplate habits, sample items, horizontal carousel.
 
 ---
 
-### 4. Reactive Timer Architecture & Floating Dynamic Island
+### 4. Reactive Timer Architecture, Unified Clock Formatting & Dynamic Island
 
+- **Unified Timer Clock Standard**: Format is strictly `00:00` (MM:SS) when duration $\le 60$ minutes (3600 seconds), and `00:00:00` (HH:MM:SS) when duration $> 60$ minutes. Overtime displays prefix with `+` (e.g. `+02:15`, `+01:10:00`).
 - **Inline Web Worker & Fallback**: Executes timer ticks on a background thread with CSP-compliant `worker-src 'self' blob:;` policy and instantaneous fallback to `setInterval` if worker creation is blocked.
 - **Exact Timestamp Delta**: Calculates elapsed duration using `Math.floor((Date.now() - startedAt) / 1000)` ensuring 100% time accuracy across phone lock, app switching, and tab suspension.
 - **Hybrid Countdown with Overtime Logging**: Counts down from target duration (e.g. 20:00 ➔ 00:00). When target is reached, triggers completion chime and celebratory confetti, then continues counting up (+00:01, +00:02...) to record full overtime focus sessions.

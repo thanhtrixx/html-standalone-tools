@@ -29,7 +29,7 @@
       : global.HabitComponents;
 
   /**
-   * Renders 7-day horizontal scrollable Date Ribbon
+   * Renders 7-day horizontal scrollable Date Ribbon fitting 100% of mobile viewport
    */
   function renderDateRibbon(selectedDateInput, store, lang = "vi") {
     const selectedDate = engine.toDateString(selectedDateInput);
@@ -70,10 +70,10 @@
             type="button"
             data-action="select-date"
             data-date="${dStr}"
-            class="flex flex-col items-center justify-center min-w-[52px] h-[68px] rounded-2xl p-2 transition-all duration-200 cursor-pointer select-none ${activeClasses}"
+            class="flex flex-col items-center justify-center w-full min-w-0 h-[64px] sm:h-[68px] rounded-xl sm:rounded-2xl p-1 sm:p-2 transition-all duration-200 cursor-pointer select-none ${activeClasses}"
           >
-            <span class="text-[11px] uppercase tracking-wider opacity-80">${weekday}</span>
-            <span class="text-base font-semibold mt-0.5">${dayNumber}</span>
+            <span class="text-[10px] sm:text-[11px] uppercase tracking-wider opacity-80 truncate w-full text-center">${weekday}</span>
+            <span class="text-sm sm:text-base font-semibold mt-0.5">${dayNumber}</span>
             ${dotIndicator}
           </button>
         `;
@@ -81,25 +81,27 @@
       .join("");
 
     return `
-      <div class="date-ribbon flex items-center justify-between gap-2 overflow-x-auto py-2 px-1 no-scrollbar">
+      <div class="date-ribbon grid grid-cols-7 gap-1 sm:gap-2 w-full py-2 px-0 sm:px-1">
         ${itemsHtml}
       </div>
     `;
   }
 
-  // Track expanded cards
+  // Track expanded cards (by routineKey-habitId or habitId)
   const expandedHabits = new Set();
 
-  function toggleHabitExpanded(habitId) {
-    if (expandedHabits.has(habitId)) {
-      expandedHabits.delete(habitId);
+  function toggleHabitExpanded(habitId, routineKey = "") {
+    const key = routineKey ? `${routineKey}-${habitId}` : habitId;
+    if (expandedHabits.has(key)) {
+      expandedHabits.delete(key);
     } else {
-      expandedHabits.add(habitId);
+      expandedHabits.add(key);
     }
   }
 
-  function isHabitExpanded(habitId) {
-    return expandedHabits.has(habitId);
+  function isHabitExpanded(habitId, routineKey = "") {
+    const key = routineKey ? `${routineKey}-${habitId}` : habitId;
+    return expandedHabits.has(key) || expandedHabits.has(habitId);
   }
 
   /**
@@ -116,13 +118,35 @@
   function renderHabitCard(
     habit,
     logEntry = { value: 0, completed: false, notes: "" },
-    lang = "vi"
+    arg3 = "vi",
+    arg4 = "",
+    arg5 = false,
+    arg6 = null,
+    arg7 = "vi"
   ) {
     if (!habit) return "";
+
+    let lang = "vi";
+    let routineKey = "";
+    let forceExpanded = false;
+
+    if (typeof arg3 === "string") {
+      lang = arg3;
+      if (typeof arg4 === "string") {
+        routineKey = arg4;
+      }
+    } else if (typeof arg3 === "object" && arg3 !== null) {
+      forceExpanded = !!arg5;
+      lang =
+        typeof arg7 === "string"
+          ? arg7
+          : (arg3.getSettings && arg3.getSettings().language) || "vi";
+    }
 
     const prog = engine.calculateHabitProgress(habit, logEntry);
     const colorHex = getColorHex(habit.color);
     const isCompleted = prog.isCompleted;
+    const scopedId = routineKey ? `${routineKey}-${habit.id}` : `${habit.id}`;
 
     const isRunning =
       habit.type === engine.HABIT_TYPES.TIMER &&
@@ -130,7 +154,8 @@
       window.HabitApp &&
       window.HabitApp.runningTimerHabitId === habit.id;
 
-    const isExpanded = expandedHabits.has(habit.id) || isRunning;
+    const isExpanded =
+      forceExpanded || isHabitExpanded(habit.id, routineKey) || isRunning;
 
     const checkBg = isCompleted ? `style="background-color: ${colorHex};"` : "";
     const checkIcon = isCompleted ? "✓" : "";
@@ -178,7 +203,7 @@
       `;
 
       expandPanelHtml = `
-        <div id="habit-expand-${habit.id}" class="habit-expand-panel ${
+        <div id="habit-expand-${scopedId}" class="habit-expand-panel ${
           isExpanded ? "" : "hidden"
         } mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
           <div class="flex items-center gap-2">
@@ -237,13 +262,13 @@
               : "text-slate-600 dark:text-slate-300"
         }">
           <span>⏱️</span>
-          <span id="card-sub-ticker-${habit.id}" class="tabular-nums font-mono font-bold">${durationFormatted}</span>
+          <span id="card-sub-ticker-${scopedId}" data-card-sub-ticker="${habit.id}" class="card-sub-ticker tabular-nums font-mono font-bold">${durationFormatted}</span>
           <span class="text-slate-400 font-normal">/ ${targetDuration}</span>
         </div>
       `;
 
       expandPanelHtml = `
-        <div id="habit-expand-${habit.id}" class="habit-expand-panel ${
+        <div id="habit-expand-${scopedId}" class="habit-expand-panel ${
           isExpanded ? "" : "hidden"
         } mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3">
           <div class="flex items-center gap-2">
@@ -332,16 +357,17 @@
     const cardClickAction = hasExpandable ? "toggle-expand" : "open-detail";
 
     const expandChevron = hasExpandable
-      ? `<i class="text-xs not-italic text-slate-400 dark:text-slate-500 transition-transform duration-200 ${
+      ? `<i class="expand-chevron text-xs not-italic text-slate-400 dark:text-slate-500 transition-transform duration-200 ${
           isExpanded ? "rotate-180" : ""
-        }" id="chevron-${habit.id}">▾</i>`
+        }" id="chevron-${scopedId}">▾</i>`
       : "";
 
     return `
       <div
-        id="habit-card-${habit.id}"
-        data-habit-card="${habit.id}"
+        id="habit-card-${scopedId}"
+        data-habit-card="${scopedId}"
         data-habit-id="${habit.id}"
+        data-routine-slot="${routineKey}"
         class="habit-card relative overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-3.5 mb-3 border ${completedCardStyle} transition-all duration-300 shadow-md touch-pan-y"
       >
         <!-- Swipe reveal zone (Green check) -->
@@ -354,9 +380,10 @@
             class="flex items-center gap-3 cursor-pointer select-none flex-1 min-w-0"
             data-action="${cardClickAction}"
             data-habit-id="${habit.id}"
+            data-routine-slot="${routineKey}"
             ${
               hasExpandable
-                ? `role="button" aria-expanded="${isExpanded ? "true" : "false"}" aria-controls="habit-expand-${habit.id}"`
+                ? `role="button" aria-expanded="${isExpanded ? "true" : "false"}" aria-controls="habit-expand-${scopedId}"`
                 : ""
             }
           >
@@ -440,7 +467,7 @@
           completed: false,
           notes: "",
         };
-        return renderHabitCard(h, log, lang);
+        return renderHabitCard(h, log, lang, routineKey);
       })
       .join("");
 
