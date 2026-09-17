@@ -317,8 +317,41 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ---
 
+## ⏱️ Screen-Off Active Timer Session Persistence & Cold-Boot Reconciliation (ADR-0014)
+
+### Slice 1: Synchronous Active Session Snapshot & Page Lifecycle Persistence (P0) — #563
+
+- [ ] Implement `saveActiveTimerSession(session)` and `clearActiveTimerSession()` in `src/app.js` writing to `localStorage` (`habit_active_timer_session`).
+- [ ] Persist active session snapshot payload: `{ habitId, date, startedAt, baseValue, isRunning, lastSavedTimestamp, targetValue, timerDisplayMode, timerSoundEnabled }`.
+- [ ] Invoke synchronous save on timer start (`handleToggleTimer`), pause, reset, time adjust (`timer-adjust`), and 1-second ticker heartbeat.
+- [ ] Bind Page Lifecycle events: `visibilitychange` (`hidden` and `visible`), `pagehide`, `freeze`, `beforeunload`, `focus`.
+- [ ] Clear active session snapshot immediately on explicit pause, timer reset, or habit deletion.
+
+### Slice 2: Cold-Boot Time Reconciliation Engine & 12-Hour Safety Cap (P0) — #564
+
+- [ ] Implement `restoreActiveTimerSession()` in `src/app.js` executed during `initApp()` and `visibilitychange: visible`.
+- [ ] Reconcile elapsed duration using exact wall-clock timestamp delta: `Math.floor((Date.now() - session.startedAt) / 1000)`.
+- [ ] Enforce 12-Hour Safety Cap ($43,200\text{s}$): cap elapsed duration and finalize session if timestamp delta exceeds 12 hours.
+- [ ] Attribute elapsed seconds to originating session date (`session.date`), preserving circadian routine context across midnight boundaries.
+- [ ] Synchronously update in-memory store logs and commit to IndexedDB without race conditions.
+
+### Slice 3: Wake-Up Celebration, Focus Modal Auto-Open & Ambient Presentation (P1) — #565
+
+- [ ] Detect if habit target was crossed while the screen was suspended: trigger harmonic sine chime (`playTimerCompletionSound`), celebration confetti, and localized completion toast.
+- [ ] Automatically open the immersive Focus Timer Modal (`#focus-timer-modal-overlay`) with reactive dial and digits upon cold app launch if an active timer was running.
+- [ ] Re-hydrate Floating Dynamic Island (`#floating-timer-island`) and Dock Active Pill (`#dock-active-timer-pill`) with live countdown/overtime format.
+- [ ] Seamlessly restart the Web Worker / `setInterval` ticker for continuous live overtime tracking.
+
+### Slice 4: Automated Verification & Lifecycle Test Suite Gating (P0) — #566
+
+- [ ] Add unit & DOM component tests in `tests/habit-tracker-ui-components.test.js` asserting `localStorage` snapshot creation, cold-boot session restoration, 12-hour timeout capping, date rollover preservation, and wake-up celebration.
+- [ ] Verify 100% assertions pass on `npm run test:habit`.
+- [ ] Verify outer repository gate `npm run verify`.
+
+---
+
 ## 🧪 Verification & DoD Gate
 
-- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
-- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
-- [x] Outer repository gate clean: `npm run verify`.
+- [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [ ] Outer repository gate clean: `npm run verify`.

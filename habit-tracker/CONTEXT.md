@@ -21,6 +21,7 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0011-header-alignment-multi-kit-wizard-adherence-accuracy-and-timer-ia.md`](./docs/adr/0011-header-alignment-multi-kit-wizard-adherence-accuracy-and-timer-ia.md)
 - [`docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md`](./docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md)
 - [`docs/adr/0013-streamlined-habits-ia-vertical-kits-drag-reorder-timer-format-and-screen-fit.md`](./docs/adr/0013-streamlined-habits-ia-vertical-kits-drag-reorder-timer-format-and-screen-fit.md)
+- [`docs/adr/0014-screen-off-timer-session-persistence-and-cold-boot-reconciliation.md`](./docs/adr/0014-screen-off-timer-session-persistence-and-cold-boot-reconciliation.md)
 
 ---
 
@@ -84,6 +85,10 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **Unified Timer Clock Standard**: Format is strictly `00:00` (MM:SS) when duration $\le 60$ minutes (3600 seconds), and `00:00:00` (HH:MM:SS) when duration $> 60$ minutes. Overtime displays prefix with `+` (e.g. `+02:15`, `+01:10:00`).
 - **Inline Web Worker & Fallback**: Executes timer ticks on a background thread with CSP-compliant `worker-src 'self' blob:;` policy and instantaneous fallback to `setInterval` if worker creation is blocked.
 - **Exact Timestamp Delta**: Calculates elapsed duration using `Math.floor((Date.now() - startedAt) / 1000)` ensuring 100% time accuracy across phone lock, app switching, and tab suspension.
+- **Synchronous Active Session Snapshot (`habit_active_timer_session`)**: Writes active session metadata (`habitId`, `date`, `startedAt`, `baseValue`, `isRunning`, `lastSavedTimestamp`, `targetValue`, `timerDisplayMode`, `timerSoundEnabled`) synchronously to `localStorage` on start, pause, reset, adjuster delta, periodic ticker heartbeats, and on Page Lifecycle events (`visibilitychange`, `pagehide`, `freeze`, `beforeunload`).
+- **Cold-Boot Reconciliation & 12-Hour Safety Cap**: On app initialization (`initApp`) and screen wake (`visibilitychange: visible`), inspects `habit_active_timer_session`. If an unpaused session is found, reconciles elapsed duration using `Math.floor((Date.now() - startedAt) / 1000)`. Sessions older than 12 hours (43,200s) are safety-capped/finalized to prevent runaway durations from forgotten sessions.
+- **Originating Session Date Attribution**: Background and restored timer seconds are attributed strictly to the session's starting calendar date (`session.date`), preserving circadian routine context across midnight boundaries.
+- **Wake Celebration & Focus Modal Auto-Open**: If target was crossed during screen-off sleep, plays harmonic Web Audio chime, fires celebration toast/confetti, and auto-opens the Focus Timer Modal (`#focus-timer-modal-overlay`) alongside the ambient Floating Dynamic Island and Dock Pill.
 - **Hybrid Countdown with Overtime Logging**: Counts down from target duration (e.g. 20:00 ➔ 00:00). When target is reached, triggers completion chime and celebratory confetti, then continues counting up (+00:01, +00:02...) to record full overtime focus sessions.
 - **Floating Dynamic Timer Island (`#floating-timer-island`)**: An ergonomic floating island anchored above the bottom dock (`bottom-20` / `z-40`) visible across all tabs. Displays habit icon, habit name, live countdown, mini progress bar, and 1-tap Play/Pause toggle. Tapping opens the Focus Timer Modal.
 - **Immersive Focus Timer Modal**: A dedicated distraction-free modal (`#focus-timer-modal-overlay`) featuring a large circular SVG progress dial, remaining/elapsed time display, play/pause/reset controls, quick time steppers (`+1m`, `+5m`), and ambient domain glow.

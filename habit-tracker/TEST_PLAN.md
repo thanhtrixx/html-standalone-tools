@@ -149,3 +149,19 @@ tests/
   - Starter kits render in a full-width vertical stacked layout in Habits tab.
   - 4 Core Life Pillars render in Insights tab under "Identity Pillars & Domain Balance".
   - Habits sub-view switcher `#habits-subview-switcher` is removed.
+
+### 11. Screen-Off Active Timer Session Persistence & Cold-Boot Reconciliation (ADR-0014)
+
+- [ ] **Synchronous Session Snapshot & Page Lifecycle Hooks (`tests/habit-tracker-ui-components.test.js`)**:
+  - `saveActiveTimerSession` writes `{ habitId, date, startedAt, baseValue, isRunning, lastSavedTimestamp, targetValue, timerDisplayMode, timerSoundEnabled }` synchronously to `localStorage.getItem('habit_active_timer_session')`.
+  - Toggling timer, pausing, resetting, or clicking `+1m`/`+5m` adjusters immediately updates `localStorage`.
+  - Triggering `visibilitychange` (state = 'hidden'), `pagehide`, and `beforeunload` synchronously persists the latest session snapshot.
+  - Pausing or resetting the timer clears `habit_active_timer_session` from `localStorage`.
+- [ ] **Cold-Boot Restoration & Time Reconciliation (`tests/habit-tracker-ui-components.test.js`)**:
+  - Simulating a cold boot with an existing unpaused `habit_active_timer_session` restores `runningTimerHabitId`, calculates exact timestamp delta `Math.floor((Date.now() - session.startedAt) / 1000)`, and resumes live ticking.
+  - 12-Hour Safety Cap: Sessions older than 12 hours (43,200s) are automatically capped at 12 hours and marked finalized.
+  - Midnight rollover: Restored sessions attribute elapsed seconds to `session.date` without date fragmentation.
+- [ ] **Wake-Up Celebration & UI Presentation (`tests/habit-tracker-ui-components.test.js`)**:
+  - If habit target was crossed during screen-off sleep, triggers celebration chime (`playTimerCompletionSound`), confetti, and completion toast.
+  - Cold app launch with active restored session automatically opens the immersive Focus Timer Modal (`#focus-timer-modal-overlay`).
+  - Floating Dynamic Island (`#floating-timer-island`) and Dock Active Pill (`#dock-active-timer-pill`) immediately reflect the restored time and running state.
