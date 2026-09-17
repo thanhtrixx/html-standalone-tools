@@ -426,8 +426,22 @@
                 : "";
 
             return `
-              <div class="manager-habit-card bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-3.5 mb-3 flex items-center justify-between gap-3 shadow-md transition-all hover:border-emerald-500/40" data-habit-id="${h.id}">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div
+                class="manager-habit-card bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-3.5 mb-3 flex items-center justify-between gap-3 shadow-md transition-all hover:border-emerald-500/40 cursor-grab active:cursor-grabbing"
+                data-habit-id="${h.id}"
+                data-routine="${rKey}"
+                draggable="true"
+              >
+                <!-- Tactile Drag Grip Handle -->
+                <div
+                  class="drag-handle p-1.5 -ml-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 select-none shrink-0 cursor-grab"
+                  aria-label="${i18n.t("reorder_habit", {}, lang) || "Reorder habit"}"
+                  title="Drag to reorder"
+                >
+                  <span class="text-base font-mono leading-none">⠿</span>
+                </div>
+
+                <div class="flex items-center gap-3 flex-1 min-w-0 pointer-events-none">
                   <div class="w-1.5 h-10 rounded-full shrink-0" style="background-color: ${colorHex};"></div>
                   <span class="text-2xl shrink-0">${h.icon || "🎯"}</span>
                   <div class="min-w-0 flex-1">
@@ -437,33 +451,7 @@
                   </div>
                 </div>
 
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <!-- Reorder buttons with generous touch targets -->
-                  <button
-                    type="button"
-                    data-action="reorder-up"
-                    data-habit-id="${h.id}"
-                    data-routine="${rKey}"
-                    aria-label="${i18n.t("move_up", {}, lang) || "Move Up"}"
-                    class="p-2 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs border border-slate-200 dark:border-slate-700/60 transition ${isFirst ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}"
-                    ${isFirst ? 'disabled="disabled"' : ""}
-                    title="Move Up"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    type="button"
-                    data-action="reorder-down"
-                    data-habit-id="${h.id}"
-                    data-routine="${rKey}"
-                    aria-label="${i18n.t("move_down", {}, lang) || "Move Down"}"
-                    class="p-2 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 text-xs border border-slate-200 dark:border-slate-700/60 transition ${isLast ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}"
-                    ${isLast ? 'disabled="disabled"' : ""}
-                    title="Move Down"
-                  >
-                    ▼
-                  </button>
-                  
+                <div class="flex items-center gap-1.5 shrink-0 pointer-events-auto">
                   <!-- Primary Edit Button -->
                   <button
                     type="button"
