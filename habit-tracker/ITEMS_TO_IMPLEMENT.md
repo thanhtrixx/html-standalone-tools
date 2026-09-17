@@ -272,8 +272,54 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ---
 
+## 🚀 Streamlined Habits IA, Vertical Kits, Drag Reordering & Unified Timer Formats (ADR-0013)
+
+### Slice 1: Today Tab Weekday Screen Fit & Scoped Multi-Routine Expansion (P0)
+
+- [ ] Refactor 7-day Date Ribbon (`renderDateRibbon` in `src/ui/today-view.js`) into a responsive 7-column flex/grid container (`grid grid-cols-7 gap-1 sm:gap-2 w-full`) with fluid padding and typography so all 7 days fit 100% on any mobile viewport (360px+) without horizontal scrolling.
+- [ ] Scope habit card DOM elements by routine (e.g. `#habit-card-${routineKey}-${habit.id}`, `#habit-expand-${routineKey}-${habit.id}`, `#chevron-${routineKey}-${habit.id}`).
+- [ ] Update accordion expand/collapse event handlers in `src/app.js` to target `target.closest('.habit-card')`, isolating accordion expansion to the clicked routine slot.
+
+### Slice 2: Unified Timer Digital Clock Formatting (P0)
+
+- [ ] Implement `formatDurationClock(totalSeconds)` in `src/i18n/translations.js`:
+  - Returns `MM:SS` when `totalSeconds <= 3600` (e.g. `00:05`, `20:00`, `60:00`).
+  - Returns `HH:MM:SS` when `totalSeconds > 3600` (e.g. `01:05:00`).
+- [ ] Apply unified digital clock formatting across:
+  - Habit Card live ticker and sub-ticker (`05:20 / 20:00`).
+  - Focus Timer Modal central digits, dial indicators, and sub-tickers.
+  - Floating Dynamic Island ticker (`05:20 / 20:00`).
+  - Bottom dock timer pill (`05:20`).
+  - Detail Sheet and habit catalog listings.
+  - Overtime formatting (`+02:15` / `+01:10:00`).
+
+### Slice 3: Habits Catalog Drag-and-Drop Reordering (P1)
+
+- [ ] Remove `▲` (`reorder-up`) and `▼` (`reorder-down`) buttons from habit cards in `src/ui/manager-view.js`.
+- [ ] Add tactile grip handle `⠿` (`.drag-handle`) with `touch-action: none` and accessible semantics.
+- [ ] Implement HTML5 Drag & Drop for desktop and touch gesture drag reordering for mobile in `src/app.js` and `src/ui/manager-view.js`.
+- [ ] Implement `store.reorderHabit(routineKey, sourceIndex, targetIndex)` in `src/state/store.js` to atomically persist updated ordering to IndexedDB.
+
+### Slice 4: 8 Vertical Curated Starter Kits & Habits IA Streamlining (P1)
+
+- [ ] Remove horizontal carousel container, scroll buttons, and drag-to-scroll scripts from `src/ui/identity-view.js`.
+- [ ] Render Starter Kits as full-width vertical stacked cards displaying all included habits, domain badges, and a 1-tap `⚡ Apply Kit` action.
+- [ ] Expand `STARTER_KITS` in `src/domain/engine.js` from 4 to 8 curated packs (`morning-mastery`, `deep-focus-flow`, `health-vitality`, `zen-mindfulness`, `fitness-strength`, `lifelong-learning`, `financial-discipline`, `sleep-recovery`).
+- [ ] Add bilingual dictionary entries in `src/i18n/translations.js` for all 4 new starter kits.
+- [ ] Remove `#habits-subview-switcher` segmented switcher from `src/ui/identity-view.js` and unify Habits tab into a single page.
+
+### Slice 5: 4 Core Life Pillars Migration to Insights Tab & Verification Gate (P0)
+
+- [ ] Move `renderLifeDomainsSection` (4 Core Life Pillars: Health, Mind, Craft, Discipline with progress rings and habit counts) to `src/ui/insights-view.js` as an "Identity Pillars & Domain Balance" analytics section.
+- [ ] Update `tests/habit-tracker-ui-components.test.js` to assert Date Ribbon screen fit, scoped multi-routine expansion, drag-and-drop handles, vertical starter kits, and unified clock format (`00:00` / `00:00:00`).
+- [ ] Update `tests/habit-tracker-i18n.test.js` to assert 100% bilingual parity for the 4 new starter kits.
+- [ ] Verify 100% test pass on `npm run test:habit` and `npm run verify`.
+
+---
+
 ## 🧪 Verification & DoD Gate
 
 - [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
 - [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
 - [ ] Outer repository gate clean: `npm run verify`.
+

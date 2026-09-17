@@ -1222,8 +1222,26 @@
       } else if (action === "modal-prev-stage") {
         switchModalStage(1);
       } else if (action === "toggle-expand") {
+        const routineKey =
+          target.getAttribute("data-routine-slot") ||
+          target.getAttribute("data-routine") ||
+          "";
         if (todayView && typeof todayView.toggleHabitExpanded === "function") {
-          todayView.toggleHabitExpanded(habitId);
+          todayView.toggleHabitExpanded(habitId, routineKey);
+        }
+        const card = target.closest(".habit-card");
+        if (card) {
+          const panel = card.querySelector(".habit-expand-panel");
+          const chevron =
+            card.querySelector(".expand-chevron") ||
+            card.querySelector(`[id^="chevron-"]`);
+          if (panel) {
+            panel.classList.toggle("hidden");
+          }
+          if (chevron) {
+            chevron.classList.toggle("rotate-180");
+          }
+        } else {
           const panel = document.getElementById(`habit-expand-${habitId}`);
           const chevron = document.getElementById(`chevron-${habitId}`);
           if (panel) {
@@ -2021,11 +2039,13 @@
       cardTicker.textContent = durationFormatted;
     }
 
-    // 4. Card header sub-progress
-    const cardSubTicker = document.getElementById(`card-sub-ticker-${habitId}`);
-    if (cardSubTicker) {
-      cardSubTicker.textContent = durationFormatted;
-    }
+    // 4. Card header sub-progress (update all instances across routines)
+    const cardSubTickers = document.querySelectorAll(
+      `[data-card-sub-ticker="${habitId}"], #card-sub-ticker-${habitId}`
+    );
+    cardSubTickers.forEach((el) => {
+      el.textContent = durationFormatted;
+    });
 
     // 5. Detail sheet ticker
     const detailTicker = document.getElementById(

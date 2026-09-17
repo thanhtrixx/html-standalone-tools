@@ -6499,20 +6499,91 @@ async function runUITests() {
   );
 
   // ==========================================
-  // [Issue #548] Time-of-Day Routine Selection Mutual Exclusivity
+  // [Issue #552] Today Tab Date Ribbon Screen Fit & Multi-Routine Scoped Expansion
   // ==========================================
   console.log(
-    "\n--- [Issue #548] Time-of-Day Routine Selection Mutual Exclusivity ---"
+    "\n--- [Issue #552] Today Tab Date Ribbon Screen Fit & Multi-Routine Scoped Expansion ---"
   );
 
-  const addEditModalHtml548 =
-    timerSandbox535.HabitManagerView.renderHabitEditModal(null, "en");
+  const { sandbox: ribbonFitSandbox } = createHabitTrackerSandbox();
+  ribbonFitSandbox.requestAnimationFrame = (fn) => fn();
+  ribbonFitSandbox.cancelAnimationFrame = () => {};
+  await ribbonFitSandbox.HabitApp.init();
+  const ribbonHtml552 = ribbonFitSandbox.HabitTodayView.renderDateRibbon(
+    "2026-09-17",
+    ribbonFitSandbox.HabitApp.store,
+    "vi"
+  );
+
   assert(
-    addEditModalHtml548.includes('value="anytime"') &&
-      addEditModalHtml548.includes('value="morning"') &&
-      addEditModalHtml548.includes('value="afternoon"') &&
-      addEditModalHtml548.includes('value="evening"'),
-    "[Issue #548 AC-1] Routine selection renders morning, afternoon, evening, and anytime chips"
+    ribbonHtml552.includes("grid-cols-7") &&
+      ribbonHtml552.includes("w-full") &&
+      !ribbonHtml552.includes("overflow-x-auto"),
+    "[Issue #552 AC-1] Date ribbon renders with 7-column responsive grid container fitting full viewport width"
+  );
+
+  // Test multi-routine scoped expansion
+  const multiHabit552 = {
+    id: "h-multi-routine-552",
+    name: "Dual Routine Stretch",
+    type: "numeric",
+    targetValue: 10,
+    unit: "mins",
+    step: 5,
+    routines: ["morning", "evening"],
+    scheduleType: "daily",
+    color: "emerald",
+    icon: "🧘",
+  };
+  await ribbonFitSandbox.HabitApp.store.addHabit(multiHabit552);
+
+  const todayContainer552 =
+    ribbonFitSandbox.document.getElementById("main-content");
+  ribbonFitSandbox.HabitTodayView.renderTodayDashboard(
+    ribbonFitSandbox.HabitApp.store,
+    todayContainer552,
+    "vi"
+  );
+
+  // Assert both routine sections have scoped IDs
+  const morningCard = todayContainer552.querySelector(
+    "#habit-card-morning-h-multi-routine-552"
+  );
+  const eveningCard = todayContainer552.querySelector(
+    "#habit-card-evening-h-multi-routine-552"
+  );
+
+  assert(
+    !!morningCard,
+    "[Issue #552 AC-2] Morning routine renders habit card with scoped morning ID"
+  );
+  assert(
+    !!eveningCard,
+    "[Issue #552 AC-2] Evening routine renders habit card with scoped evening ID"
+  );
+
+  // Morning drawer initially hidden
+  const morningDrawer = morningCard.querySelector(".habit-expand-panel");
+  const eveningDrawer = eveningCard.querySelector(".habit-expand-panel");
+  assert(
+    morningDrawer.classList.contains("hidden") &&
+      eveningDrawer.classList.contains("hidden"),
+    "[Issue #552 AC-3] Both drawers start collapsed"
+  );
+
+  // Trigger expand on Evening card only
+  const eveningTrigger = eveningCard.querySelector(
+    '[data-action="toggle-expand"]'
+  );
+  eveningTrigger.click();
+
+  assert(
+    !eveningDrawer.classList.contains("hidden"),
+    "[Issue #552 AC-4] Clicking Evening card expands Evening drawer"
+  );
+  assert(
+    morningDrawer.classList.contains("hidden"),
+    "[Issue #552 AC-4] Morning drawer remains collapsed when Evening card is expanded"
   );
 }
 
