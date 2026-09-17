@@ -152,7 +152,7 @@ tests/
 
 ### 11. Screen-Off Active Timer Session Persistence & Cold-Boot Reconciliation (ADR-0014)
 
-- [ ] **Synchronous Session Snapshot & Page Lifecycle Hooks (`tests/habit-tracker-ui-components.test.js`)**:
+- [x] **Synchronous Session Snapshot & Page Lifecycle Hooks (`tests/habit-tracker-ui-components.test.js`)**:
   - `saveActiveTimerSession` writes `{ habitId, date, startedAt, baseValue, isRunning, lastSavedTimestamp, targetValue, timerDisplayMode, timerSoundEnabled }` synchronously to `localStorage.getItem('habit_active_timer_session')`.
   - Toggling timer, pausing, resetting, or clicking `+1m`/`+5m` adjusters immediately updates `localStorage`.
   - Triggering `visibilitychange` (state = 'hidden'), `pagehide`, and `beforeunload` synchronously persists the latest session snapshot.
