@@ -329,11 +329,11 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 2: Cold-Boot Time Reconciliation Engine & 12-Hour Safety Cap (P0) — #564
 
-- [ ] Implement `restoreActiveTimerSession()` in `src/app.js` executed during `initApp()` and `visibilitychange: visible`.
-- [ ] Reconcile elapsed duration using exact wall-clock timestamp delta: `Math.floor((Date.now() - session.startedAt) / 1000)`.
-- [ ] Enforce 12-Hour Safety Cap ($43,200\text{s}$): cap elapsed duration and finalize session if timestamp delta exceeds 12 hours.
-- [ ] Attribute elapsed seconds to originating session date (`session.date`), preserving circadian routine context across midnight boundaries.
-- [ ] Synchronously update in-memory store logs and commit to IndexedDB without race conditions.
+- [x] Implement `restoreActiveTimerSession()` in `src/app.js` executed during `initApp()` and `visibilitychange: visible`.
+- [x] Reconcile elapsed duration using exact wall-clock timestamp delta: `Math.floor((Date.now() - session.startedAt) / 1000)`.
+- [x] Enforce 12-Hour Safety Cap ($43,200\text{s}$): cap elapsed duration and finalize session if timestamp delta exceeds 12 hours.
+- [x] Attribute elapsed seconds to originating session date (`session.date`), preserving circadian routine context across midnight boundaries.
+- [x] Synchronously update in-memory store logs and commit to IndexedDB without race conditions.
 
 ### Slice 3: Wake-Up Celebration, Focus Modal Auto-Open & Ambient Presentation (P1) — #565
 

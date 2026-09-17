@@ -157,7 +157,7 @@ tests/
   - Toggling timer, pausing, resetting, or clicking `+1m`/`+5m` adjusters immediately updates `localStorage`.
   - Triggering `visibilitychange` (state = 'hidden'), `pagehide`, and `beforeunload` synchronously persists the latest session snapshot.
   - Pausing or resetting the timer clears `habit_active_timer_session` from `localStorage`.
-- [ ] **Cold-Boot Restoration & Time Reconciliation (`tests/habit-tracker-ui-components.test.js`)**:
+- [x] **Cold-Boot Restoration & Time Reconciliation (`tests/habit-tracker-ui-components.test.js`)**:
   - Simulating a cold boot with an existing unpaused `habit_active_timer_session` restores `runningTimerHabitId`, calculates exact timestamp delta `Math.floor((Date.now() - session.startedAt) / 1000)`, and resumes live ticking.
   - 12-Hour Safety Cap: Sessions older than 12 hours (43,200s) are automatically capped at 12 hours and marked finalized.
   - Midnight rollover: Restored sessions attribute elapsed seconds to `session.date` without date fragmentation.
