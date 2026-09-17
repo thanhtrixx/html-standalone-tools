@@ -837,26 +837,42 @@ try {
   );
 
   assert(
-    Array.isArray(engine.STARTER_KITS) && engine.STARTER_KITS.length === 4,
-    "[Issue #475 AC-2] Exactly 4 starter kits defined"
+    Array.isArray(engine.STARTER_KITS) && engine.STARTER_KITS.length === 8,
+    "[Issue #555 AC-2] Exactly 8 curated starter kits defined"
   );
 
   const kitIds = engine.STARTER_KITS.map((k) => k.id);
   assert(
     kitIds.includes("morning-mastery") || kitIds.includes("morning_mastery"),
-    "[Issue #475 AC-2] Includes morning-mastery starter kit"
+    "[Issue #555 AC-2] Includes morning-mastery starter kit"
   );
   assert(
     kitIds.includes("deep-focus-flow") || kitIds.includes("deep_focus_flow"),
-    "[Issue #475 AC-2] Includes deep-focus-flow starter kit"
+    "[Issue #555 AC-2] Includes deep-focus-flow starter kit"
   );
   assert(
     kitIds.includes("health-vitality") || kitIds.includes("health_vitality"),
-    "[Issue #475 AC-2] Includes health-vitality starter kit"
+    "[Issue #555 AC-2] Includes health-vitality starter kit"
   );
   assert(
     kitIds.includes("zen-mindfulness") || kitIds.includes("zen_mindfulness"),
-    "[Issue #475 AC-2] Includes zen-mindfulness starter kit"
+    "[Issue #555 AC-2] Includes zen-mindfulness starter kit"
+  );
+  assert(
+    kitIds.includes("fitness-strength"),
+    "[Issue #555 AC-2] Includes fitness-strength starter kit"
+  );
+  assert(
+    kitIds.includes("lifelong-learning"),
+    "[Issue #555 AC-2] Includes lifelong-learning starter kit"
+  );
+  assert(
+    kitIds.includes("financial-discipline"),
+    "[Issue #555 AC-2] Includes financial-discipline starter kit"
+  );
+  assert(
+    kitIds.includes("sleep-recovery"),
+    "[Issue #555 AC-2] Includes sleep-recovery starter kit"
   );
 
   for (const kit of engine.STARTER_KITS) {
