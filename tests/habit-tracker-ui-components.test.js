@@ -1083,16 +1083,20 @@ async function runUITests() {
   await reorderStore.addHabit(rMorning2);
   await reorderStore.addHabit(rMorning3);
 
-  // Verify Manager View renders ▲ up reorder button for items
+  // Verify Manager View renders draggable habit cards with tactile grip handle
   const managerHtmlBefore = renderManagerView(reorderStore, null, "vi");
   assert(
-    managerHtmlBefore.includes('data-action="reorder-up"') &&
+    managerHtmlBefore.includes('draggable="true"') &&
       managerHtmlBefore.includes('data-habit-id="h-reorder-m2"'),
-    "[Issue #427 AC-1] [AC-1] Manager view renders reorder-up button with target habit id"
+    "[Issue #427 AC-1] [AC-1] Manager view renders draggable habit card with target habit id"
   );
   assert(
     managerHtmlBefore.includes('data-routine="morning"'),
-    "[Issue #427 AC-1] [AC-1] Manager view encodes routine cluster on reorder buttons"
+    "[Issue #427 AC-1] [AC-1] Manager view encodes routine cluster on habit card"
+  );
+  assert(
+    managerHtmlBefore.includes('class="drag-handle'),
+    "[Issue #427 AC-1] [AC-1] Manager view renders tactile grip handle"
   );
 
   // [AC-1] Swap 2nd habit (h-reorder-m2) UP with 1st habit (h-reorder-m1)
@@ -1260,20 +1264,16 @@ async function runUITests() {
   await reorderStore.addHabit(rEvening2);
   await reorderStore.addHabit(rEvening3);
 
-  // Verify Manager View renders ▼ down reorder button for items
+  // Verify Manager View renders draggable habit cards for evening routine
   const managerEveningHtml = renderManagerView(reorderStore, null, "vi");
   assert(
-    managerEveningHtml.includes('data-action="reorder-down"') &&
+    managerEveningHtml.includes('draggable="true"') &&
       managerEveningHtml.includes('data-habit-id="h-reorder-eve1"'),
-    "[Issue #427 AC-2] [AC-2] Manager view renders reorder-down button with habit ID"
+    "[Issue #427 AC-2] [AC-2] Manager view renders draggable card with habit ID"
   );
 
-  // [AC-2] Move 1st habit (h-reorder-eve1) DOWN with 2nd habit (h-reorder-eve2)
-  await reorderStore.reorderHabits("evening", [
-    "h-reorder-eve2",
-    "h-reorder-eve1",
-    "h-reorder-eve3",
-  ]);
+  // [AC-2] Move 1st habit (h-reorder-eve1) DOWN after 2nd habit (h-reorder-eve2)
+  await reorderStore.reorderHabit("evening", "h-reorder-eve1", "h-reorder-eve2", true);
 
   const eveningAfterDown1 = reorderStore
     .getHabits()
@@ -5373,14 +5373,15 @@ async function runUITests() {
 
   const firstCard = managerCards[0];
   const editBtn = firstCard.querySelector('[data-action="edit-habit"]');
+  const dragHandle = firstCard.querySelector('.drag-handle');
   const upBtn = firstCard.querySelector('[data-action="reorder-up"]');
   const downBtn = firstCard.querySelector('[data-action="reorder-down"]');
   const moreMenuBtn = firstCard.querySelector(
     '[data-action="toggle-card-menu"]'
   );
   assert(
-    !!editBtn && !!upBtn && !!downBtn && !!moreMenuBtn,
-    "[Issue #504 AC-3] Manager card consolidates primary edit, reorder, and 3-dot context menu"
+    !!editBtn && !!dragHandle && !upBtn && !downBtn && !!moreMenuBtn,
+    "[Issue #504 AC-3] Manager card consolidates primary edit, drag handle, and 3-dot context menu"
   );
 
   // ----------------------------------------------------
@@ -6630,6 +6631,133 @@ async function runUITests() {
   assert(
     modalHtml553.includes("30:00"),
     "[Issue #553 AC-3] Focus timer modal displays target '30:00' in digital clock format"
+  );
+
+  // ==========================================
+  // [Issue #554] Habits Catalog Drag & Drop Reordering
+  // ==========================================
+  console.log(
+    "\n--- [Issue #554] Habits Catalog Drag & Drop Reordering ---"
+  );
+
+  const { sandbox: dragSandbox } = createHabitTrackerSandbox();
+  dragSandbox.requestAnimationFrame = (fn) => fn();
+  dragSandbox.cancelAnimationFrame = () => {};
+  await dragSandbox.HabitApp.init();
+  const dragStore = dragSandbox.HabitApp.store;
+  await dragStore.addHabit({
+    id: "h-drag-1",
+    name: "Morning Habit 1",
+    type: "boolean",
+    routine: "morning",
+    order: 0,
+  });
+  await dragStore.addHabit({
+    id: "h-drag-2",
+    name: "Morning Habit 2",
+    type: "boolean",
+    routine: "morning",
+    order: 1,
+  });
+  await dragStore.addHabit({
+    id: "h-drag-3",
+    name: "Morning Habit 3",
+    type: "boolean",
+    routine: "morning",
+    order: 2,
+  });
+
+  const managerContainer554 = dragSandbox.document.createElement("div");
+  dragSandbox.HabitManagerView.renderManagerView(
+    dragStore,
+    managerContainer554,
+    "vi"
+  );
+
+  const cards554 = managerContainer554.querySelectorAll(".manager-habit-card");
+  assertEqual(
+    cards554.length >= 3,
+    true,
+    "[Issue #554 AC-1] Manager view renders habit cards"
+  );
+
+  // AC-1: Verify NO discrete up/down buttons exist
+  const upBtns554 = managerContainer554.querySelectorAll('[data-action="reorder-up"]');
+  const downBtns554 = managerContainer554.querySelectorAll('[data-action="reorder-down"]');
+  assertEqual(
+    upBtns554.length,
+    0,
+    "[Issue #554 AC-1] Discrete reorder-up buttons are completely removed"
+  );
+  assertEqual(
+    downBtns554.length,
+    0,
+    "[Issue #554 AC-1] Discrete reorder-down buttons are completely removed"
+  );
+
+  // AC-2: Verify drag handle and draggable attribute
+  const firstDragCard = cards554[0];
+  assertEqual(
+    firstDragCard.getAttribute("draggable"),
+    "true",
+    "[Issue #554 AC-2] Habit card has draggable='true'"
+  );
+  assertEqual(
+    firstDragCard.getAttribute("data-routine"),
+    "morning",
+    "[Issue #554 AC-2] Habit card has data-routine attribute"
+  );
+  const gripHandle554 = firstDragCard.querySelector(".drag-handle");
+  assert(
+    !!gripHandle554 && gripHandle554.textContent.includes("⠿"),
+    "[Issue #554 AC-2] Habit card renders tactile grip handle ⠿ (.drag-handle)"
+  );
+
+  // AC-3 & AC-4: store.reorderHabit moves habit and updates persistence atomically
+  // Move h-drag-3 before h-drag-1
+  await dragStore.reorderHabit("morning", "h-drag-3", "h-drag-1", false);
+  const morningOrdered1 = dragStore
+    .getHabits()
+    .filter((h) => h.routine === "morning" && !h.archived && h.id.startsWith("h-drag-"))
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    morningOrdered1[0].id,
+    "h-drag-3",
+    "[Issue #554 AC-3] h-drag-3 moved to index 0 (before h-drag-1)"
+  );
+  assertEqual(
+    morningOrdered1[1].id,
+    "h-drag-1",
+    "[Issue #554 AC-3] h-drag-1 moved to index 1"
+  );
+  assertEqual(
+    morningOrdered1[2].id,
+    "h-drag-2",
+    "[Issue #554 AC-3] h-drag-2 remains at index 2"
+  );
+
+  // Move h-drag-3 after h-drag-2
+  await dragStore.reorderHabit("morning", "h-drag-3", "h-drag-2", true);
+  const morningOrdered2 = dragStore
+    .getHabits()
+    .filter((h) => h.routine === "morning" && !h.archived && h.id.startsWith("h-drag-"))
+    .sort((a, b) => a.order - b.order);
+
+  assertEqual(
+    morningOrdered2[0].id,
+    "h-drag-1",
+    "[Issue #554 AC-4] h-drag-1 is at index 0"
+  );
+  assertEqual(
+    morningOrdered2[1].id,
+    "h-drag-2",
+    "[Issue #554 AC-4] h-drag-2 is at index 1"
+  );
+  assertEqual(
+    morningOrdered2[2].id,
+    "h-drag-3",
+    "[Issue #554 AC-4] h-drag-3 moved to index 2 (after h-drag-2)"
   );
 }
 

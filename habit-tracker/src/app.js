@@ -1111,6 +1111,195 @@
       isDraggingCarousel = false;
     });
 
+    // Drag & Drop Reordering for Manager Habit Cards (Desktop)
+    let draggedHabitId = null;
+    let draggedRoutine = null;
+    let dragOverHabitId = null;
+    let dragInsertAfter = false;
+
+    document.addEventListener("dragstart", (e) => {
+      const card = e.target.closest(".manager-habit-card");
+      if (!card) return;
+      draggedHabitId = card.getAttribute("data-habit-id");
+      draggedRoutine = card.getAttribute("data-routine");
+      if (e.dataTransfer) {
+        try {
+          e.dataTransfer.setData("text/plain", draggedHabitId || "");
+          e.dataTransfer.effectAllowed = "move";
+        } catch (_err) {
+          // Ignore in headless test envs
+        }
+      }
+      card.classList.add("opacity-40", "scale-[0.98]");
+    });
+
+    document.addEventListener("dragover", (e) => {
+      const card = e.target.closest(".manager-habit-card");
+      if (!card || !draggedHabitId) return;
+      const targetRoutine = card.getAttribute("data-routine");
+      if (targetRoutine !== draggedRoutine) return;
+
+      e.preventDefault();
+      if (e.dataTransfer) {
+        try {
+          e.dataTransfer.dropEffect = "move";
+        } catch (_err) {
+          // Ignore in headless test envs
+        }
+      }
+
+      const rect = card.getBoundingClientRect ? card.getBoundingClientRect() : { top: 0, height: 40 };
+      const midY = rect.top + rect.height / 2;
+      const targetId = card.getAttribute("data-habit-id");
+      dragOverHabitId = targetId;
+      dragInsertAfter = e.clientY > midY;
+
+      // Reset indicators on all cards
+      document.querySelectorAll(".manager-habit-card").forEach((c) => {
+        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500");
+      });
+
+      if (targetId !== draggedHabitId) {
+        if (dragInsertAfter) {
+          card.classList.add("border-b-2", "!border-emerald-500");
+        } else {
+          card.classList.add("border-t-2", "!border-emerald-500");
+        }
+      }
+    });
+
+    document.addEventListener("dragleave", (e) => {
+      const card = e.target.closest(".manager-habit-card");
+      if (card && e.relatedTarget && card.contains && !card.contains(e.relatedTarget)) {
+        card.classList.remove("border-t-2", "border-b-2", "!border-emerald-500");
+      }
+    });
+
+    document.addEventListener("drop", async (e) => {
+      const card = e.target.closest(".manager-habit-card");
+      if (!card || !draggedHabitId || !draggedRoutine) return;
+      e.preventDefault();
+
+      const targetId = card.getAttribute("data-habit-id");
+      const targetRoutine = card.getAttribute("data-routine");
+
+      document.querySelectorAll(".manager-habit-card").forEach((c) => {
+        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-40", "scale-[0.98]");
+      });
+
+      if (targetRoutine === draggedRoutine && targetId && targetId !== draggedHabitId) {
+        await store.reorderHabit(draggedRoutine, draggedHabitId, targetId, dragInsertAfter);
+        renderActiveTab();
+      }
+
+      draggedHabitId = null;
+      draggedRoutine = null;
+      dragOverHabitId = null;
+    });
+
+    document.addEventListener("dragend", () => {
+      document.querySelectorAll(".manager-habit-card").forEach((c) => {
+        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-40", "scale-[0.98]");
+      });
+      draggedHabitId = null;
+      draggedRoutine = null;
+      dragOverHabitId = null;
+    });
+
+    // Touch Drag Reordering for Mobile Devices
+    let touchDragCard = null;
+    let touchDraggedHabitId = null;
+    let touchDraggedRoutine = null;
+    let touchLastTargetId = null;
+    let touchInsertAfter = false;
+
+    document.addEventListener("touchstart", (e) => {
+      const handle = e.target.closest(".drag-handle");
+      if (!handle) return;
+      const card = handle.closest(".manager-habit-card");
+      if (!card) return;
+
+      touchDragCard = card;
+      touchDraggedHabitId = card.getAttribute("data-habit-id");
+      touchDraggedRoutine = card.getAttribute("data-routine");
+      card.classList.add("opacity-50", "scale-[0.98]", "shadow-lg");
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    }, { passive: true });
+
+    document.addEventListener("touchmove", (e) => {
+      if (!touchDragCard || !touchDraggedHabitId) return;
+      const touch = e.touches && e.touches[0];
+      if (!touch) return;
+
+      const elementUnder = document.elementFromPoint ? document.elementFromPoint(touch.clientX, touch.clientY) : null;
+      const targetCard = elementUnder ? elementUnder.closest(".manager-habit-card") : null;
+
+      document.querySelectorAll(".manager-habit-card").forEach((c) => {
+        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500");
+      });
+
+      if (targetCard && targetCard.getAttribute("data-routine") === touchDraggedRoutine) {
+        const targetId = targetCard.getAttribute("data-habit-id");
+        touchLastTargetId = targetId;
+        const rect = targetCard.getBoundingClientRect ? targetCard.getBoundingClientRect() : { top: 0, height: 40 };
+        const midY = rect.top + rect.height / 2;
+        touchInsertAfter = touch.clientY > midY;
+
+        if (targetId !== touchDraggedHabitId) {
+          if (touchInsertAfter) {
+            targetCard.classList.add("border-b-2", "!border-emerald-500");
+          } else {
+            targetCard.classList.add("border-t-2", "!border-emerald-500");
+          }
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener("touchend", async () => {
+      if (!touchDragCard) return;
+
+      document.querySelectorAll(".manager-habit-card").forEach((c) => {
+        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-50", "scale-[0.98]", "shadow-lg");
+      });
+
+      if (
+        touchDraggedRoutine &&
+        touchDraggedHabitId &&
+        touchLastTargetId &&
+        touchLastTargetId !== touchDraggedHabitId
+      ) {
+        await store.reorderHabit(
+          touchDraggedRoutine,
+          touchDraggedHabitId,
+          touchLastTargetId,
+          touchInsertAfter
+        );
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          navigator.vibrate(15);
+        }
+        renderActiveTab();
+      }
+
+      touchDragCard = null;
+      touchDraggedHabitId = null;
+      touchDraggedRoutine = null;
+      touchLastTargetId = null;
+    });
+
+    document.addEventListener("touchcancel", () => {
+      if (touchDragCard) {
+        document.querySelectorAll(".manager-habit-card").forEach((c) => {
+          c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-50", "scale-[0.98]", "shadow-lg");
+        });
+        touchDragCard = null;
+        touchDraggedHabitId = null;
+        touchDraggedRoutine = null;
+        touchLastTargetId = null;
+      }
+    });
+
     // Dismiss heatmap popover on outside click
     document.addEventListener(
       "click",
@@ -3691,8 +3880,19 @@
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_habit_restored", {}, lang), "success");
     },
-    handleReorderHabit: async (habitId, routine, direction) => {
-      if (!store || !habitId) return;
+    handleReorderHabit: async (arg1, arg2, arg3, arg4) => {
+      if (!store) return;
+      if (typeof arg3 === "boolean" || (arg3 && arg3 !== "up" && arg3 !== "down")) {
+        // signature: (routineKey, sourceId, targetId, insertAfter)
+        await store.reorderHabit(arg1, arg2, arg3, arg4 ?? false);
+        renderActiveTab();
+        return;
+      }
+      // signature: (habitId, routine, direction)
+      const habitId = arg1;
+      const routine = arg2;
+      const direction = arg3;
+      if (!habitId) return;
       const targetRoutine =
         routine ||
         (store.getHabit(habitId)

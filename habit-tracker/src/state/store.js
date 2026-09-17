@@ -262,6 +262,28 @@
       return this.updateHabit(id, { archived: false });
     }
 
+    async reorderHabit(routineKey, sourceId, targetId, insertAfter = false) {
+      if (!sourceId || !targetId || sourceId === targetId) return;
+      const routineHabits = this.state.habits
+        .filter(
+          (h) =>
+            !h.archived && engine.getHabitRoutines(h).includes(routineKey)
+        )
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+      const ids = routineHabits.map((h) => h.id);
+      const sourceIndex = ids.indexOf(sourceId);
+      const targetIndex = ids.indexOf(targetId);
+      if (sourceIndex === -1 || targetIndex === -1) return;
+
+      ids.splice(sourceIndex, 1);
+      const newTargetIndex = ids.indexOf(targetId);
+      const insertIndex = insertAfter ? newTargetIndex + 1 : newTargetIndex;
+      ids.splice(insertIndex, 0, sourceId);
+
+      return this.reorderHabits(routineKey, ids);
+    }
+
     async reorderHabits(routine, orderedIds) {
       if (!Array.isArray(orderedIds)) return;
       for (let index = 0; index < orderedIds.length; index++) {
