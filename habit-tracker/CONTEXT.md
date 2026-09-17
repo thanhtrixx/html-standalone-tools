@@ -161,5 +161,4 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **Rolling Local Vault Snapshots (Last 5 Versions)**:
   - Automatically captures snapshot restore points in IndexedDB before destructive or external operations (Cloud Sync pull, File Import, Factory Wipe).
   - Dedicated "Local Snapshot History" drawer in Settings tab displaying timestamp, trigger reason, habit/log counts, and 1-tap `[ ↩️ Rollback ]`.
-  _Avoid_: Silent overwrites, unencrypted passwords in localStorage, polling loops, hardcoded plain token URLs, un-tombstoned deletions.
-
+    _Avoid_: Silent overwrites, unencrypted passwords in localStorage, polling loops, hardcoded plain token URLs, un-tombstoned deletions.
