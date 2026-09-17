@@ -6585,6 +6585,52 @@ async function runUITests() {
     morningDrawer.classList.contains("hidden"),
     "[Issue #552 AC-4] Morning drawer remains collapsed when Evening card is expanded"
   );
+
+  // ==========================================
+  // [Issue #553] Unified Digital Clock Timer Format in Today & Focus Modal
+  // ==========================================
+  console.log(
+    "\n--- [Issue #553] Unified Digital Clock Timer Format in Today & Focus Modal ---"
+  );
+
+  const timerClockHabit553 = {
+    id: "h-timer-553",
+    name: "Focus Session",
+    type: "timer",
+    targetValue: 1800, // 30m -> 30:00
+    routine: "morning",
+    scheduleType: "daily",
+    color: "cyan",
+    icon: "⏱️",
+  };
+  await ribbonFitSandbox.HabitApp.store.addHabit(timerClockHabit553);
+  ribbonFitSandbox.HabitTodayView.renderTodayDashboard(
+    ribbonFitSandbox.HabitApp.store,
+    todayContainer552,
+    "vi"
+  );
+
+  const subTicker553 = todayContainer552.querySelector(
+    '[data-card-sub-ticker="h-timer-553"]'
+  );
+  assert(
+    !!subTicker553 && subTicker553.textContent.includes("00:00"),
+    "[Issue #553 AC-2] Card sub-ticker displays '00:00' digital clock format"
+  );
+
+  // Render Focus Timer Modal
+  const modalHtml553 = ribbonFitSandbox.HabitTodayView.renderFocusTimerModal(
+    ribbonFitSandbox.HabitApp.store,
+    "h-timer-553",
+    false,
+    "remaining",
+    true,
+    "vi"
+  );
+  assert(
+    modalHtml553.includes("30:00"),
+    "[Issue #553 AC-3] Focus timer modal displays target '30:00' in digital clock format"
+  );
 }
 
 runUITests()

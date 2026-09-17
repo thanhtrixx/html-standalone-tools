@@ -815,19 +815,35 @@
   }
 
   /**
-   * Formats duration in seconds to string (e.g. 30m 00s or 30p 00g)
+   * Formats duration in seconds to unified digital clock format:
+   * - 00:00 (MM:SS) if totalSeconds <= 3600 (60 mins)
+   * - 00:00:00 (HH:MM:SS) if totalSeconds > 3600
+   * - Optional prefix for overtime (+00:01, +01:05:00)
+   */
+  function formatDurationClock(totalSeconds, prefix = "") {
+    const sec = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    const prefixStr = typeof prefix === "string" ? prefix : "";
+
+    if (sec > 3600) {
+      const hStr = String(h).padStart(2, "0");
+      const mStr = String(m).padStart(2, "0");
+      const sStr = String(s).padStart(2, "0");
+      return `${prefixStr}${hStr}:${mStr}:${sStr}`;
+    }
+
+    const mStr = String(Math.floor(sec / 60)).padStart(2, "0");
+    const sStr = String(s).padStart(2, "0");
+    return `${prefixStr}${mStr}:${sStr}`;
+  }
+
+  /**
+   * Formats duration to unified digital clock format across all locales (e.g. 00:00 or 00:00:00)
    */
   function formatDuration(totalSeconds, lang = "vi") {
-    const sec = Math.max(0, Math.floor(Number(totalSeconds) || 0));
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    const mStr = String(m).padStart(2, "0");
-    const sStr = String(s).padStart(2, "0");
-
-    if (lang === "en") {
-      return `${mStr}m ${sStr}s`;
-    }
-    return `${mStr}p ${sStr}g`;
+    return formatDurationClock(totalSeconds);
   }
 
   const i18nExports = {
@@ -837,6 +853,7 @@
     formatPercent,
     formatDate,
     formatDuration,
+    formatDurationClock,
   };
 
   if (typeof module !== "undefined" && module.exports) {

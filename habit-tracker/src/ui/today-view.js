@@ -684,19 +684,19 @@
     let modeLabel = "";
 
     if (isCompleted) {
-      const m = String(Math.floor(overtimeSecs / 60)).padStart(2, "0");
-      const s = String(overtimeSecs % 60).padStart(2, "0");
-      displayTimeStr = `+${m}:${s}`;
+      displayTimeStr = i18n.formatDurationClock
+        ? i18n.formatDurationClock(overtimeSecs, "+")
+        : `+${String(Math.floor(overtimeSecs / 60)).padStart(2, "0")}:${String(overtimeSecs % 60).padStart(2, "0")}`;
       modeLabel = i18n.t("focus_timer_overtime", {}, lang);
     } else if (timerDisplayMode === "elapsed") {
-      const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
-      const s = String(currentSecs % 60).padStart(2, "0");
-      displayTimeStr = `${m}:${s}`;
+      displayTimeStr = i18n.formatDurationClock
+        ? i18n.formatDurationClock(currentSecs)
+        : `${String(Math.floor(currentSecs / 60)).padStart(2, "0")}:${String(currentSecs % 60).padStart(2, "0")}`;
       modeLabel = i18n.t("focus_timer_elapsed", {}, lang);
     } else {
-      const m = String(Math.floor(remainingSecs / 60)).padStart(2, "0");
-      const s = String(remainingSecs % 60).padStart(2, "0");
-      displayTimeStr = `${m}:${s}`;
+      displayTimeStr = i18n.formatDurationClock
+        ? i18n.formatDurationClock(remainingSecs)
+        : `${String(Math.floor(remainingSecs / 60)).padStart(2, "0")}:${String(remainingSecs % 60).padStart(2, "0")}`;
       modeLabel = i18n.t("focus_timer_remaining", {}, lang);
     }
 
