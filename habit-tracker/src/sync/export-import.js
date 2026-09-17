@@ -186,6 +186,86 @@
   }
 
   /**
+   * Inspects incoming import data against current state, producing diff statistics
+   */
+  function inspectImportPayload(incomingData, currentState) {
+    const incoming =
+      incomingData && incomingData.data
+        ? incomingData.data
+        : incomingData || {};
+    const base = currentState || {
+      habits: {},
+      logs: {},
+      settings: {},
+      vacations: [],
+    };
+
+    const incomingHabits = Array.isArray(incoming.habits)
+      ? incoming.habits
+      : incoming.habits && typeof incoming.habits === "object"
+        ? Object.values(incoming.habits)
+        : [];
+    const incomingLogs = Array.isArray(incoming.logs)
+      ? incoming.logs
+      : incoming.logs && typeof incoming.logs === "object"
+        ? Object.values(incoming.logs)
+        : [];
+    const incomingSettings = incoming.settings || {};
+    const incomingVacations = Array.isArray(incoming.vacations)
+      ? incoming.vacations
+      : Array.isArray(incoming.vacationRanges)
+        ? incoming.vacationRanges
+        : [];
+
+    const localHabitsMap = new Map();
+    if (Array.isArray(base.habits)) {
+      base.habits.forEach((h) => {
+        if (h && h.id) localHabitsMap.set(h.id, h);
+      });
+    } else if (base.habits && typeof base.habits === "object") {
+      Object.values(base.habits).forEach((h) => {
+        if (h && h.id) localHabitsMap.set(h.id, h);
+      });
+    }
+
+    let newHabitsCount = 0;
+    let updatedHabitsCount = 0;
+    incomingHabits.forEach((h) => {
+      if (h && h.id && localHabitsMap.has(h.id)) {
+        updatedHabitsCount++;
+      } else {
+        newHabitsCount++;
+      }
+    });
+
+    // Calculate date span
+    let minDate = null;
+    let maxDate = null;
+    incomingLogs.forEach((l) => {
+      if (l && l.date) {
+        if (!minDate || l.date < minDate) minDate = l.date;
+        if (!maxDate || l.date > maxDate) maxDate = l.date;
+      }
+    });
+
+    const localLogsCount = Array.isArray(base.logs)
+      ? base.logs.length
+      : Object.keys(base.logs || {}).length;
+
+    return {
+      incomingHabitsCount: incomingHabits.length,
+      newHabitsCount,
+      updatedHabitsCount,
+      incomingLogsCount: incomingLogs.length,
+      dateSpan: minDate && maxDate ? { minDate, maxDate } : null,
+      incomingVacationsCount: incomingVacations.length,
+      settingsCount: Object.keys(incomingSettings).length,
+      localHabitsCount: localHabitsMap.size,
+      localLogsCount,
+    };
+  }
+
+  /**
    * Merges imported data into current reactive state or storage adapter
    */
   async function mergeHabitStates(currentState, importedData, mode = "merge") {
@@ -209,16 +289,27 @@
       const nextHabits = {};
       const nextLogs = {};
       const nextSettings = { ...(incoming.settings || {}) };
-      const nextVacations = [...(incoming.vacations || [])];
+      const nextVacations = [
+        ...(incoming.vacations || incoming.vacationRanges || []),
+      ];
 
       if (Array.isArray(incoming.habits)) {
         incoming.habits.forEach((h) => {
+          if (h && h.id) nextHabits[h.id] = h;
+        });
+      } else if (incoming.habits && typeof incoming.habits === "object") {
+        Object.values(incoming.habits).forEach((h) => {
           if (h && h.id) nextHabits[h.id] = h;
         });
       }
 
       if (Array.isArray(incoming.logs)) {
         incoming.logs.forEach((l) => {
+          const key = l.id || `${l.habitId}_${l.date}`;
+          if (key) nextLogs[key] = l;
+        });
+      } else if (incoming.logs && typeof incoming.logs === "object") {
+        Object.values(incoming.logs).forEach((l) => {
           const key = l.id || `${l.habitId}_${l.date}`;
           if (key) nextLogs[key] = l;
         });
@@ -233,16 +324,53 @@
     }
 
     // Merge mode
-    const mergedHabits = { ...base.habits };
-    const mergedLogs = { ...base.logs };
+    const baseHabitsMap = {};
+    if (Array.isArray(base.habits)) {
+      base.habits.forEach((h) => {
+        if (h && h.id) baseHabitsMap[h.id] = h;
+      });
+    } else if (base.habits && typeof base.habits === "object") {
+      Object.values(base.habits).forEach((h) => {
+        if (h && h.id) baseHabitsMap[h.id] = h;
+      });
+    }
+
+    const baseLogsMap = {};
+    if (Array.isArray(base.logs)) {
+      base.logs.forEach((l) => {
+        if (l) {
+          const key = l.id || `${l.habitId}_${l.date}`;
+          if (key) baseLogsMap[key] = l;
+        }
+      });
+    } else if (base.logs && typeof base.logs === "object") {
+      Object.keys(base.logs).forEach((k) => {
+        const l = base.logs[k];
+        if (l) {
+          const key = l.id || `${l.habitId}_${l.date}` || k;
+          baseLogsMap[key] = l;
+        }
+      });
+    }
+
+    const mergedHabits = { ...baseHabitsMap };
+    const mergedLogs = { ...baseLogsMap };
     const mergedSettings = {
       ...(base.settings || {}),
       ...(incoming.settings || {}),
     };
-    const mergedVacations = [...(base.vacations || [])];
+    const mergedVacations = Array.isArray(base.vacations)
+      ? [...base.vacations]
+      : Array.isArray(base.settings && base.settings.vacationRanges)
+        ? [...base.settings.vacationRanges]
+        : [];
 
     if (Array.isArray(incoming.habits)) {
       incoming.habits.forEach((h) => {
+        if (h && h.id) mergedHabits[h.id] = h;
+      });
+    } else if (incoming.habits && typeof incoming.habits === "object") {
+      Object.values(incoming.habits).forEach((h) => {
         if (h && h.id) mergedHabits[h.id] = h;
       });
     }
@@ -252,15 +380,24 @@
         const key = l.id || `${l.habitId}_${l.date}`;
         if (key) mergedLogs[key] = l;
       });
-    }
-
-    if (Array.isArray(incoming.vacations)) {
-      incoming.vacations.forEach((v) => {
-        if (v && v.id && !mergedVacations.some((mv) => mv.id === v.id)) {
-          mergedVacations.push(v);
-        }
+    } else if (incoming.logs && typeof incoming.logs === "object") {
+      Object.values(incoming.logs).forEach((l) => {
+        const key = l.id || `${l.habitId}_${l.date}`;
+        if (key) mergedLogs[key] = l;
       });
     }
+
+    const incomingVacationsList = Array.isArray(incoming.vacations)
+      ? incoming.vacations
+      : Array.isArray(incoming.vacationRanges)
+        ? incoming.vacationRanges
+        : [];
+
+    incomingVacationsList.forEach((v) => {
+      if (v && v.id && !mergedVacations.some((mv) => mv.id === v.id)) {
+        mergedVacations.push(v);
+      }
+    });
 
     return {
       habits: mergedHabits,
@@ -436,6 +573,7 @@
     downloadExportCSV,
     validateImportJson,
     parseAndValidateImport,
+    inspectImportPayload,
     mergeHabitStates,
     importFromJson,
   };

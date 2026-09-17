@@ -221,13 +221,15 @@
         return settings._deleted;
       },
 
-      async clearAll() {
+      async clearAll(preserveSnapshots = false) {
         inMemory[STORES.HABITS] = [];
         inMemory[STORES.LOGS] = [];
         inMemory[STORES.SETTINGS] = {};
         inMemory[STORES.ROUTINES] = [];
         inMemory[STORES.VACATIONS] = [];
-        inMemory[STORES.SNAPSHOTS] = [];
+        if (!preserveSnapshots) {
+          inMemory[STORES.SNAPSHOTS] = [];
+        }
         if (storage) {
           try {
             storage.removeItem(STORES.HABITS);
@@ -235,7 +237,9 @@
             storage.removeItem(STORES.SETTINGS);
             storage.removeItem(STORES.ROUTINES);
             storage.removeItem(STORES.VACATIONS);
-            storage.removeItem(STORES.SNAPSHOTS);
+            if (!preserveSnapshots) {
+              storage.removeItem(STORES.SNAPSHOTS);
+            }
           } catch (e) {}
         }
         return true;
@@ -618,26 +622,21 @@
         return dict;
       },
 
-      async clearAll() {
+      async clearAll(preserveSnapshots = false) {
         const db = await openDb();
+        const storeNames = [
+          STORES.HABITS,
+          STORES.LOGS,
+          STORES.SETTINGS,
+          STORES.ROUTINES,
+          STORES.VACATIONS,
+        ];
+        if (!preserveSnapshots) {
+          storeNames.push(STORES.SNAPSHOTS);
+        }
         return new Promise((resolve, reject) => {
-          const tx = db.transaction(
-            [
-              STORES.HABITS,
-              STORES.LOGS,
-              STORES.SETTINGS,
-              STORES.ROUTINES,
-              STORES.VACATIONS,
-              STORES.SNAPSHOTS,
-            ],
-            "readwrite"
-          );
-          tx.objectStore(STORES.HABITS).clear();
-          tx.objectStore(STORES.LOGS).clear();
-          tx.objectStore(STORES.SETTINGS).clear();
-          tx.objectStore(STORES.ROUTINES).clear();
-          tx.objectStore(STORES.VACATIONS).clear();
-          tx.objectStore(STORES.SNAPSHOTS).clear();
+          const tx = db.transaction(storeNames, "readwrite");
+          storeNames.forEach((s) => tx.objectStore(s).clear());
           tx.oncomplete = () => resolve(true);
           tx.onerror = () => reject(tx.error);
         });
