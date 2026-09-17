@@ -242,6 +242,29 @@
       toast_gist_disconnected: "Disconnected from GitHub Gist.",
       toast_drive_connected: "Connected to Google Drive successfully!",
       toast_drive_disconnected: "Disconnected from Google Drive.",
+      vault_encryption_title: "Zero-Knowledge Vault Encryption",
+      vault_encryption_desc:
+        "Encrypt cloud backups and exports with AES-GCM-256 before upload",
+      vault_encrypt_toggle: "Encrypt with Passphrase",
+      vault_status_unlocked: "Vault Unlocked (Session Active)",
+      vault_status_locked: "Vault Locked (Passphrase Required)",
+      vault_unlock_title: "Unlock Encrypted Habit Vault",
+      vault_unlock_desc:
+        "Your remote cloud state is protected with zero-knowledge AES-GCM-256 encryption. Enter your secret passphrase to decrypt and sync.",
+      vault_passphrase_label: "Secret Vault Passphrase",
+      vault_passphrase_placeholder: "Enter your encryption passphrase",
+      vault_unlock_btn: "Unlock Vault",
+      vault_lock_btn: "Lock Vault",
+      vault_setup_title: "Set Vault Passphrase",
+      vault_setup_desc:
+        "Choose a strong secret passphrase. If lost, your encrypted remote backup cannot be recovered.",
+      vault_error_wrong_pass: "Incorrect passphrase. Decryption failed.",
+      vault_error_locked:
+        "Encrypted vault is locked. Passphrase required to sync.",
+      toast_vault_unlocked: "Vault unlocked successfully for this session!",
+      toast_vault_locked: "Vault locked. Ephemeral key cleared from memory.",
+      toast_vault_encryption_enabled: "Vault encryption enabled!",
+      toast_vault_encryption_disabled: "Vault encryption disabled.",
 
       // System Toasts & Dialogs
       toast_backup_exported: "Backup JSON file exported successfully!",
@@ -652,6 +675,28 @@
       toast_gist_disconnected: "Đã ngắt kết nối GitHub Gist.",
       toast_drive_connected: "Đã kết nối Google Drive thành công!",
       toast_drive_disconnected: "Đã ngắt kết nối Google Drive.",
+      vault_encryption_title: "Mã hóa Vault Zero-Knowledge",
+      vault_encryption_desc:
+        "Mã hóa bản sao lưu và xuất dữ liệu bằng AES-GCM-256 trước khi tải lên",
+      vault_encrypt_toggle: "Mã hóa bằng mật khẩu",
+      vault_status_unlocked: "Đã mở khóa (Phiên đang hoạt động)",
+      vault_status_locked: "Đã khóa (Yêu cầu mật khẩu)",
+      vault_unlock_title: "Mở khóa Vault thói quen",
+      vault_unlock_desc:
+        "Dữ liệu đám mây của bạn được bảo vệ bằng mã hóa AES-GCM-256 zero-knowledge. Nhập mật khẩu bí mật để giải mã và đồng bộ.",
+      vault_passphrase_label: "Mật khẩu Vault bí mật",
+      vault_passphrase_placeholder: "Nhập mật khẩu mã hóa của bạn",
+      vault_unlock_btn: "Mở khóa Vault",
+      vault_lock_btn: "Khóa Vault",
+      vault_setup_title: "Thiết lập mật khẩu Vault",
+      vault_setup_desc:
+        "Chọn mật khẩu an toàn. Nếu quên, dữ liệu đám mây đã mã hóa sẽ không thể khôi phục.",
+      vault_error_wrong_pass: "Mật khẩu không chính xác. Giải mã thất bại.",
+      vault_error_locked: "Vault đang bị khóa. Cần nhập mật khẩu để đồng bộ.",
+      toast_vault_unlocked: "Đã mở khóa Vault thành công cho phiên này!",
+      toast_vault_locked: "Đã khóa Vault. Khóa tạm thời đã xóa khỏi bộ nhớ.",
+      toast_vault_encryption_enabled: "Đã bật chế độ mã hóa Vault!",
+      toast_vault_encryption_disabled: "Đã tắt chế độ mã hóa Vault.",
 
       // System Toasts & Dialogs
       toast_backup_exported: "Đã xuất tệp sao lưu JSON thành công!",

@@ -620,6 +620,200 @@ async function runCloudSyncTests() {
       manager.lastSyncTimestamp,
       "[Slice 2] Persists last_sync_timestamp to storage"
     );
+
+    // ==========================================
+    // [ADR-0015 Slice 3] Zero-Knowledge Vault Encryption & Lock Lifecycle Tests
+    // ==========================================
+    console.log(
+      "--- [ADR-0015 Slice 3] Zero-Knowledge Vault Encryption & Lock Lifecycle ---"
+    );
+
+    const cryptoModule = require("../habit-tracker/src/sync/cloud-backup.js");
+
+    // 1. Configure Encrypted Manager with real WebCrypto AES-GCM-256
+    const encStorageSettings = {};
+    const encMockStorage = {
+      async getAllSettings() {
+        return { ...encStorageSettings };
+      },
+      async putSetting(k, v) {
+        encStorageSettings[k] = v;
+      },
+    };
+
+    const encStore = {
+      state: sampleState,
+      storage: encMockStorage,
+      async createSnapshot(d) {
+        return { id: "snap-enc", description: d };
+      },
+      async replaceState(s) {
+        this.state = s;
+      },
+    };
+
+    const encManager = new CloudSyncManager({
+      store: encStore,
+      storage: encMockStorage,
+      merge3,
+      crypto: cryptoModule,
+      debounceDelayMs: 50,
+    });
+
+    await encManager.init();
+    await encManager.setGitHubConfig(
+      "ghp_validtoken",
+      "7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c"
+    );
+
+    // 2. Enable Vault Encryption with Passphrase
+    await encManager.setEncryptionEnabled(true, "my-super-secret-vault-key");
+    const encStatus = encManager.getStatus();
+    assertEqual(
+      encStatus.encryptionEnabled,
+      true,
+      "[Slice 3] Encryption enabled flag is set"
+    );
+    assertEqual(
+      encStatus.isVaultUnlocked,
+      true,
+      "[Slice 3] Vault is unlocked with active session passphrase"
+    );
+    assertEqual(
+      encStatus.isVaultLocked,
+      false,
+      "[Slice 3] Vault is not locked"
+    );
+    assertEqual(
+      encMockStorage.sessionPassphrase,
+      undefined,
+      "[Slice 3] Ephemeral passphrase is NEVER persisted to storage adapter"
+    );
+
+    // 3. Sync uploads encrypted ciphertext envelope
+    let capturedUpload = null;
+    const fetchWithUploadCapture = async (url, options = {}) => {
+      const urlStr = String(url);
+      if (options.method === "PATCH" && options.body) {
+        capturedUpload = JSON.parse(options.body);
+      }
+      return {
+        status: 200,
+        ok: true,
+        json: async () => ({ id: "gist-id", files: {} }),
+      };
+    };
+    global.fetch = fetchWithUploadCapture;
+
+    const encSyncRes = await encManager.sync();
+    assertEqual(
+      encSyncRes.success,
+      true,
+      "[Slice 3] Encrypted cloud sync executes successfully"
+    );
+    assert(capturedUpload, "[Slice 3] Intercepted payload transmission");
+    const sentFile =
+      capturedUpload.files &&
+      capturedUpload.files["atomic_habit_tracker_backup.json"];
+    assert(sentFile, "[Slice 3] Encrypted file uploaded to Gist");
+    const parsedSentContent = JSON.parse(sentFile.content);
+    assert(
+      parsedSentContent.ciphertext,
+      "[Slice 3] Uploaded payload contains AES-GCM-256 ciphertext"
+    );
+    assert(
+      parsedSentContent.salt && parsedSentContent.iv,
+      "[Slice 3] Uploaded payload contains salt and IV"
+    );
+    assertEqual(
+      parsedSentContent.algorithm,
+      "AES-GCM-256",
+      "[Slice 3] Envelope specifies AES-GCM-256"
+    );
+
+    // 4. Lock Vault (clear ephemeral session key)
+    encManager.clearSessionPassphrase();
+    const lockedStatus = encManager.getStatus();
+    assertEqual(
+      lockedStatus.isVaultUnlocked,
+      false,
+      "[Slice 3] Locking vault clears session key"
+    );
+    assertEqual(
+      lockedStatus.isVaultLocked,
+      true,
+      "[Slice 3] Vault status reports locked"
+    );
+    assertEqual(
+      lockedStatus.statusBadge,
+      "locked",
+      "[Slice 3] Status badge shows locked"
+    );
+
+    // 5. Syncing while locked fails safely with ENCRYPTED_VAULT_LOCKED
+    const lockedSyncRes = await encManager.sync();
+    assertEqual(
+      lockedSyncRes.success,
+      false,
+      "[Slice 3] Syncing locked vault fails safely"
+    );
+    assertEqual(
+      lockedSyncRes.error,
+      "ENCRYPTED_VAULT_LOCKED",
+      "[Slice 3] Returns ENCRYPTED_VAULT_LOCKED error without corrupting state"
+    );
+
+    // 6. Supplying incorrect passphrase fails safely
+    global.fetch = async (url, options = {}) => {
+      const urlStr = String(url);
+      if (urlStr.includes("api.github.com/gists/")) {
+        return {
+          status: 200,
+          ok: true,
+          json: async () => ({
+            id: "7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c",
+            updated_at: new Date().toISOString(),
+            files: {
+              "atomic_habit_tracker_backup.json": {
+                content: JSON.stringify(parsedSentContent),
+              },
+            },
+          }),
+        };
+      }
+      return { status: 200, ok: true, json: async () => ({}) };
+    };
+
+    const wrongPassRes = await encManager.sync("wrong-password-999");
+    assertEqual(
+      wrongPassRes.success,
+      false,
+      "[Slice 3] Sync with incorrect passphrase is rejected"
+    );
+    assertEqual(
+      wrongPassRes.error,
+      "INVALID_VAULT_PASSPHRASE",
+      "[Slice 3] Returns INVALID_VAULT_PASSPHRASE error"
+    );
+
+    // 7. Supplying correct passphrase unlocks and decrypts payload
+    const correctPassRes = await encManager.sync("my-super-secret-vault-key");
+    assertEqual(
+      correctPassRes.success,
+      true,
+      "[Slice 3] Sync with correct passphrase succeeds"
+    );
+    const unlockedStatus = encManager.getStatus();
+    assertEqual(
+      unlockedStatus.isVaultUnlocked,
+      true,
+      "[Slice 3] Unlocks vault session"
+    );
+    assertEqual(
+      unlockedStatus.isVaultLocked,
+      false,
+      "[Slice 3] Clears locked flag"
+    );
   } finally {
     global.fetch = originalFetch;
   }

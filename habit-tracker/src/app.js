@@ -100,6 +100,7 @@
   let timerDisplayMode = "remaining"; // 'remaining' | 'elapsed'
   let timerSoundEnabled = true;
   let cloudSyncManager = null;
+  let vaultUnlockPendingCallback = null;
 
   const ACTIVE_TIMER_STORAGE_KEY = "habit_active_timer_session";
 
@@ -1067,6 +1068,65 @@
             </button>
           </div>
 
+          <!-- Zero-Knowledge Vault Encryption -->
+          <div class="pt-3 pb-2 border-t border-slate-200 dark:border-slate-800/60 mb-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-sm">🔒</span>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">${i18n.t("vault_encryption_title", {}, lang)}</h4>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400 block">${i18n.t("vault_encryption_desc", {}, lang)}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                id="btn-toggle-vault-encryption"
+                onclick="window.HabitApp.toggleVaultEncryption()"
+                class="px-3 py-1 rounded-xl text-xs font-bold transition-colors cursor-pointer ${syncStatus.encryptionEnabled ? "bg-emerald-600 text-white shadow-xs" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}"
+              >
+                ${syncStatus.encryptionEnabled ? (lang === "vi" ? "Bật" : "ON") : lang === "vi" ? "Tắt" : "OFF"}
+              </button>
+            </div>
+
+            ${
+              syncStatus.encryptionEnabled
+                ? `
+              <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/40 mt-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs">${syncStatus.isVaultUnlocked ? "🔓" : "🔒"}</span>
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                    ${syncStatus.isVaultUnlocked ? i18n.t("vault_status_unlocked", {}, lang) : i18n.t("vault_status_locked", {}, lang)}
+                  </span>
+                </div>
+                ${
+                  syncStatus.isVaultUnlocked
+                    ? `
+                  <button
+                    type="button"
+                    id="btn-vault-lock"
+                    onclick="window.HabitApp.lockVault()"
+                    class="px-2.5 py-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg transition cursor-pointer"
+                  >
+                    🔒 ${i18n.t("vault_lock_btn", {}, lang)}
+                  </button>
+                `
+                    : `
+                  <button
+                    type="button"
+                    id="btn-vault-unlock"
+                    onclick="window.HabitApp.openVaultUnlockModal()"
+                    class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg shadow-sm transition cursor-pointer"
+                  >
+                    🔓 ${i18n.t("vault_unlock_btn", {}, lang)}
+                  </button>
+                `
+                }
+              </div>
+            `
+                : ""
+            }
+          </div>
+
           <!-- Data Portability Exports -->
           <div class="pt-2 border-t border-slate-200 dark:border-slate-800/60">
             <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">${i18n.t("export_import_title", {}, lang)}</span>
@@ -1344,10 +1404,20 @@
         const driveModal = document.getElementById(
           "drive-config-modal-overlay"
         );
+        const vaultUnlockModal = document.getElementById(
+          "vault-unlock-modal-overlay"
+        );
         const popover = document.getElementById("heatmap-cell-popover");
 
         if (popover && !popover.classList.contains("hidden")) {
           popover.classList.add("hidden");
+        }
+        if (
+          vaultUnlockModal &&
+          !vaultUnlockModal.classList.contains("hidden")
+        ) {
+          closeVaultUnlockModal();
+          return;
         }
         if (gistModal && !gistModal.classList.contains("hidden")) {
           closeGistModal();
@@ -4447,6 +4517,191 @@
       }
     },
 
+    openVaultUnlockModal(mode = "unlock", pendingCallback = null) {
+      vaultUnlockPendingCallback = pendingCallback;
+      const overlay = document.getElementById("vault-unlock-modal-overlay");
+      const container = document.getElementById("vault-unlock-container");
+      if (!overlay || !container) return;
+
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+
+      const isSetup = mode === "setup";
+      const titleText = isSetup
+        ? i18n.t("vault_setup_title", {}, lang)
+        : i18n.t("vault_unlock_title", {}, lang);
+      const descText = isSetup
+        ? i18n.t("vault_setup_desc", {}, lang)
+        : i18n.t("vault_unlock_desc", {}, lang);
+      const btnText = isSetup
+        ? lang === "vi"
+          ? "Lưu mật khẩu"
+          : "Save Passphrase"
+        : i18n.t("vault_unlock_btn", {}, lang);
+
+      container.innerHTML = `
+        <div id="vault-unlock-card" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">${isSetup ? "🛡️" : "🔒"}</span>
+              <div>
+                <h3 id="vault-unlock-title" class="text-base font-black text-slate-900 dark:text-white">${titleText}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">AES-GCM-256 + PBKDF2</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closeVaultUnlockModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${descText}</p>
+
+          <form id="vault-unlock-form" onsubmit="event.preventDefault(); window.HabitApp.submitVaultUnlock('${mode}');" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1" for="vault-passphrase-input">${i18n.t("vault_passphrase_label", {}, lang)}</label>
+              <div class="relative flex items-center">
+                <input
+                  type="password"
+                  id="vault-passphrase-input"
+                  placeholder="${i18n.t("vault_passphrase_placeholder", {}, lang)}"
+                  autocomplete="current-password"
+                  class="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition"
+                  required
+                />
+                <button
+                  type="button"
+                  id="btn-toggle-pass-visibility"
+                  onclick="window.HabitApp.toggleVaultPassphraseVisibility()"
+                  class="absolute right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-sm cursor-pointer"
+                  title="Toggle Visibility"
+                >
+                  👁️
+                </button>
+              </div>
+            </div>
+
+            <div id="vault-unlock-error" class="hidden p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 rounded-xl text-xs text-red-600 dark:text-red-400 font-semibold"></div>
+
+            <div class="pt-2 flex items-center gap-2">
+              <button
+                type="button"
+                onclick="window.HabitApp.closeVaultUnlockModal()"
+                class="flex-1 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl active:scale-95 transition cursor-pointer"
+              >
+                ${i18n.t("delete_cancel_btn", {}, lang)}
+              </button>
+              <button
+                type="submit"
+                id="btn-submit-vault-unlock"
+                class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/20 active:scale-95 transition cursor-pointer"
+              >
+                ${btnText}
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+      const passInput = document.getElementById("vault-passphrase-input");
+      if (passInput) {
+        setTimeout(() => passInput.focus(), 50);
+      }
+    },
+
+    closeVaultUnlockModal() {
+      const overlay = document.getElementById("vault-unlock-modal-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      vaultUnlockPendingCallback = null;
+    },
+
+    toggleVaultPassphraseVisibility() {
+      const input = document.getElementById("vault-passphrase-input");
+      if (!input) return;
+      input.type = input.type === "password" ? "text" : "password";
+    },
+
+    async submitVaultUnlock(mode = "unlock") {
+      const input = document.getElementById("vault-passphrase-input");
+      const errorEl = document.getElementById("vault-unlock-error");
+      const cardEl = document.getElementById("vault-unlock-card");
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      const passphrase = input ? input.value.trim() : "";
+      if (!passphrase) return;
+
+      if (mode === "setup") {
+        if (cloudSyncManager) {
+          await cloudSyncManager.setEncryptionEnabled(true, passphrase);
+        }
+        HabitApp.closeVaultUnlockModal();
+        notify(i18n.t("toast_vault_encryption_enabled", {}, lang), "success");
+        renderActiveTab();
+        if (cloudSyncManager && cloudSyncManager.activeProvider !== "none") {
+          cloudSyncManager.sync().catch(() => {});
+        }
+        return;
+      }
+
+      if (cloudSyncManager) {
+        cloudSyncManager.setSessionPassphrase(passphrase);
+        const res = await cloudSyncManager.sync(passphrase);
+        if (res && res.success) {
+          const cb = vaultUnlockPendingCallback;
+          HabitApp.closeVaultUnlockModal();
+          notify(i18n.t("toast_vault_unlocked", {}, lang), "success");
+          renderActiveTab();
+          if (typeof cb === "function") {
+            cb();
+          }
+        } else {
+          if (errorEl) {
+            errorEl.textContent = i18n.t("vault_error_wrong_pass", {}, lang);
+            errorEl.classList.remove("hidden");
+          }
+          if (cardEl) {
+            cardEl.classList.remove("animate-shake");
+            void cardEl.offsetWidth; // Trigger reflow
+            cardEl.classList.add("animate-shake");
+          }
+          if (input) input.focus();
+        }
+      }
+    },
+
+    lockVault() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (cloudSyncManager) {
+        cloudSyncManager.clearSessionPassphrase();
+        notify(i18n.t("toast_vault_locked", {}, lang), "info");
+        renderActiveTab();
+      }
+    },
+
+    async toggleVaultEncryption() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (!cloudSyncManager) return;
+      if (cloudSyncManager.encryptionEnabled) {
+        await cloudSyncManager.setEncryptionEnabled(false);
+        notify(i18n.t("toast_vault_encryption_disabled", {}, lang), "info");
+        renderActiveTab();
+        if (cloudSyncManager.activeProvider !== "none") {
+          cloudSyncManager.sync().catch(() => {});
+        }
+      } else {
+        HabitApp.openVaultUnlockModal("setup");
+      }
+    },
+
     async syncCloudNow() {
       const lang =
         (store && store.getSettings() && store.getSettings().language) || "vi";
@@ -4458,11 +4713,22 @@
         return;
       }
 
+      if (cloudSyncManager.isVaultLocked) {
+        HabitApp.openVaultUnlockModal("unlock", () => {
+          HabitApp.syncCloudNow();
+        });
+        return;
+      }
+
       notify(i18n.t("cloud_syncing", {}, lang), "info");
       renderActiveTab();
       const res = await cloudSyncManager.sync();
       if (res && res.success) {
         notify(i18n.t("toast_sync_success", {}, lang), "success");
+      } else if (res && res.error === "ENCRYPTED_VAULT_LOCKED") {
+        HabitApp.openVaultUnlockModal("unlock", () => {
+          HabitApp.syncCloudNow();
+        });
       } else {
         notify(
           i18n.t(
