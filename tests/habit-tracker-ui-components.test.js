@@ -7187,6 +7187,109 @@ async function runUITests() {
     modalDigits && modalDigits.textContent.includes("+"),
     `[Issue #565 AC-4] Focus Timer digits render overtime with + prefix (got: ${modalDigits ? modalDigits.textContent : null})`
   );
+
+  // ==========================================
+  // [Issue #566] PWA Lifecycle & Screen-Off Timer Restoration Automated Test Verification
+  // ==========================================
+  console.log(
+    "\n--- [Issue #566] PWA Lifecycle & Screen-Off Timer Restoration Automated Test Verification ---"
+  );
+
+  // 1. Habit deletion while active timer is running cleans up localStorage & in-memory timer
+  const { sandbox: deleteTimerSandbox } = createHabitTrackerSandbox();
+  await deleteTimerSandbox.HabitApp.init();
+  await deleteTimerSandbox.HabitApp.handleToggleTimer("h-read");
+  assert(
+    deleteTimerSandbox.localStorage.getItem("habit_active_timer_session") !==
+      null,
+    "[Issue #566 AC-1] Timer is running and recorded in localStorage before delete"
+  );
+
+  deleteTimerSandbox.HabitApp.promptDeleteHabit("h-read");
+  await deleteTimerSandbox.HabitApp.confirmDeleteHabit();
+  assert(
+    deleteTimerSandbox.localStorage.getItem("habit_active_timer_session") ===
+      null,
+    "[Issue #566 AC-1] Habit deletion immediately cleans up active timer session from localStorage"
+  );
+  assert(
+    deleteTimerSandbox.HabitApp.runningTimerHabitId === null,
+    "[Issue #566 AC-1] Habit deletion clears runningTimerHabitId"
+  );
+
+  // 2. Factory Wipe while timer is running cleans up localStorage & in-memory timer
+  const { sandbox: wipeTimerSandbox } = createHabitTrackerSandbox();
+  await wipeTimerSandbox.HabitApp.init();
+  await wipeTimerSandbox.HabitApp.handleToggleTimer("h-read");
+  assert(
+    wipeTimerSandbox.localStorage.getItem("habit_active_timer_session") !==
+      null,
+    "[Issue #566 AC-2] Timer is running and recorded in localStorage before wipe"
+  );
+
+  await wipeTimerSandbox.HabitApp.confirmFactoryWipe();
+  assert(
+    wipeTimerSandbox.localStorage.getItem("habit_active_timer_session") ===
+      null,
+    "[Issue #566 AC-2] Factory wipe immediately cleans up active timer session from localStorage"
+  );
+  assert(
+    wipeTimerSandbox.HabitApp.runningTimerHabitId === null,
+    "[Issue #566 AC-2] Factory wipe clears runningTimerHabitId"
+  );
+
+  // 3. Stored session referencing deleted/missing habit is safely purged on cold boot
+  const { sandbox: missingHabitSandbox } = createHabitTrackerSandbox();
+  const orphanSession = {
+    habitId: "non-existent-habit-id",
+    date: "2026-09-17",
+    startedAt: Date.now() - 60000,
+    baseValue: 0,
+    isRunning: true,
+    lastSavedTimestamp: Date.now(),
+    targetValue: 1200,
+    timerDisplayMode: "remaining",
+    timerSoundEnabled: true,
+  };
+  missingHabitSandbox.localStorage.setItem(
+    "habit_active_timer_session",
+    JSON.stringify(orphanSession)
+  );
+
+  await missingHabitSandbox.HabitApp.init();
+  assert(
+    missingHabitSandbox.localStorage.getItem("habit_active_timer_session") ===
+      null,
+    "[Issue #566 AC-3] Session referencing non-existent habit is purged on restore"
+  );
+  assert(
+    missingHabitSandbox.HabitApp.runningTimerHabitId === null,
+    "[Issue #566 AC-3] No active timer set for non-existent habit"
+  );
+
+  // 4. Paused session (isRunning === false) is not restored as running
+  const { sandbox: pausedSandbox } = createHabitTrackerSandbox();
+  const pausedSession = {
+    habitId: "h-read",
+    date: "2026-09-17",
+    startedAt: Date.now() - 60000,
+    baseValue: 50,
+    isRunning: false,
+    lastSavedTimestamp: Date.now(),
+    targetValue: 1200,
+    timerDisplayMode: "remaining",
+    timerSoundEnabled: true,
+  };
+  pausedSandbox.localStorage.setItem(
+    "habit_active_timer_session",
+    JSON.stringify(pausedSession)
+  );
+
+  await pausedSandbox.HabitApp.init();
+  assert(
+    pausedSandbox.HabitApp.runningTimerHabitId === null,
+    "[Issue #566 AC-4] Paused session is not started as running timer on cold launch"
+  );
 }
 
 runUITests()

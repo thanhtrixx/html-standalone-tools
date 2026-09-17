@@ -344,14 +344,14 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 4: Automated Verification & Lifecycle Test Suite Gating (P0) — #566
 
-- [ ] Add unit & DOM component tests in `tests/habit-tracker-ui-components.test.js` asserting `localStorage` snapshot creation, cold-boot session restoration, 12-hour timeout capping, date rollover preservation, and wake-up celebration.
-- [ ] Verify 100% assertions pass on `npm run test:habit`.
-- [ ] Verify outer repository gate `npm run verify`.
+- [x] Add unit & DOM component tests in `tests/habit-tracker-ui-components.test.js` asserting `localStorage` snapshot creation, cold-boot session restoration, 12-hour timeout capping, date rollover preservation, and wake-up celebration.
+- [x] Verify 100% assertions pass on `npm run test:habit`.
+- [x] Verify outer repository gate `npm run verify`.
 
 ---
 
 ## 🧪 Verification & DoD Gate
 
-- [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
-- [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
-- [ ] Outer repository gate clean: `npm run verify`.
+- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [x] Outer repository gate clean: `npm run verify`.
