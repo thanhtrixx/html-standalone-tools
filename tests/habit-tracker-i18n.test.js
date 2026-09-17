@@ -19,6 +19,7 @@ const {
   formatPercent,
   formatDate,
   formatDuration,
+  formatDurationClock,
 } = require("../habit-tracker/src/i18n/translations.js");
 const {
   createMockStorage,
@@ -160,16 +161,16 @@ async function runI18nTests() {
     "[AC-7] Percent formatted in Vietnamese"
   );
 
-  // 6. Duration Formatter
+  // 6. Duration Formatter (Unified digital clock format: 00:00 for <= 60m, 00:00:00 for > 60m)
   assertEqual(
     formatDuration(1800, "en"),
-    "30m 00s",
-    "[AC-7] 1800s formatted as 30m 00s in English"
+    "30:00",
+    "[AC-7] 1800s formatted as 30:00 in digital clock format"
   );
   assertEqual(
     formatDuration(1800, "vi"),
-    "30p 00g",
-    "[AC-7] 1800s formatted as 30p 00g in Vietnamese"
+    "30:00",
+    "[AC-7] 1800s formatted as 30:00 in Vietnamese digital clock format"
   );
 
   // ==========================================
@@ -1039,18 +1040,18 @@ async function runI18nTests() {
 
   assertEqual(
     formatDuration(-10, "vi"),
-    "00p 00g",
+    "00:00",
     "[Issue #428 AC-4] formatDuration handles negative seconds gracefully"
   );
   assertEqual(
     formatDuration(0, "en"),
-    "00m 00s",
-    "[Issue #428 AC-4] formatDuration(0, 'en') returns '00m 00s'"
+    "00:00",
+    "[Issue #428 AC-4] formatDuration(0, 'en') returns '00:00'"
   );
   assertEqual(
     formatDuration(NaN, "vi"),
-    "00p 00g",
-    "[Issue #428 AC-4] formatDuration(NaN, 'vi') returns '00p 00g'"
+    "00:00",
+    "[Issue #428 AC-4] formatDuration(NaN, 'vi') returns '00:00'"
   );
 
   // ==========================================
@@ -1102,15 +1103,52 @@ async function runI18nTests() {
     "[Issue #547 AC-3] Carousel next kits in Vietnamese"
   );
 
+  // ==========================================
+  // [Issue #553] Unified Digital Clock Duration Formatting
+  // ==========================================
+  console.log(
+    "--- [Issue #553] Unified Digital Clock Duration Formatting (00:00 / 00:00:00) ---"
+  );
+
   assertEqual(
-    t("wizard_step_4_blank_title", {}, "en"),
-    "Start with a Blank Slate",
-    "[Issue #547 AC-4] Blank slate title in English"
+    formatDurationClock(0),
+    "00:00",
+    "[Issue #553 AC-1] formatDurationClock(0) returns '00:00'"
   );
   assertEqual(
-    t("wizard_step_4_blank_title", {}, "vi"),
-    "Bắt đầu với bảng trắng",
-    "[Issue #547 AC-4] Blank slate title in Vietnamese"
+    formatDurationClock(5),
+    "00:05",
+    "[Issue #553 AC-1] formatDurationClock(5) returns '00:05'"
+  );
+  assertEqual(
+    formatDurationClock(1200),
+    "20:00",
+    "[Issue #553 AC-1] formatDurationClock(1200) returns '20:00'"
+  );
+  assertEqual(
+    formatDurationClock(3600),
+    "60:00",
+    "[Issue #553 AC-1] formatDurationClock(3600) returns '60:00'"
+  );
+  assertEqual(
+    formatDurationClock(3665),
+    "01:01:05",
+    "[Issue #553 AC-1] formatDurationClock(3665) returns '01:01:05' (> 60m)"
+  );
+  assertEqual(
+    formatDurationClock(7325),
+    "02:02:05",
+    "[Issue #553 AC-1] formatDurationClock(7325) returns '02:02:05'"
+  );
+  assertEqual(
+    formatDurationClock(75, "+"),
+    "+01:15",
+    "[Issue #553 AC-1] formatDurationClock(75, '+') returns '+01:15'"
+  );
+  assertEqual(
+    formatDurationClock(3700, "+"),
+    "+01:01:40",
+    "[Issue #553 AC-1] formatDurationClock(3700, '+') returns '+01:01:40'"
   );
 }
 

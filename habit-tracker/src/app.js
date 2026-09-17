@@ -1919,9 +1919,9 @@
       }
     }
 
-    const m = String(Math.floor(totalSecs / 60)).padStart(2, "0");
-    const s = String(totalSecs % 60).padStart(2, "0");
-    const tickerStr = `${m}:${s}`;
+    const tickerStr = i18n.formatDurationClock
+      ? i18n.formatDurationClock(totalSecs)
+      : `${String(Math.floor(totalSecs / 60)).padStart(2, "0")}:${String(totalSecs % 60).padStart(2, "0")}`;
 
     if (dockPill) {
       dockPill.classList.remove("hidden");
@@ -1988,9 +1988,9 @@
     const remainingSecs = Math.max(0, targetSecs - currentSecs);
     const overtimeSecs = Math.max(0, currentSecs - targetSecs);
 
-    const m = String(Math.floor(currentSecs / 60)).padStart(2, "0");
-    const s = String(currentSecs % 60).padStart(2, "0");
-    const tickerStr = `${m}:${s}`;
+    const tickerStr = i18n.formatDurationClock
+      ? i18n.formatDurationClock(currentSecs)
+      : `${String(Math.floor(currentSecs / 60)).padStart(2, "0")}:${String(currentSecs % 60).padStart(2, "0")}`;
 
     // 0. Floating Dynamic Timer Island
     const floatingTicker = document.getElementById("floating-timer-ticker");
@@ -2066,17 +2066,17 @@
       let displayTimeStr = "";
       let modeLabel = "";
       if (currentSecs >= targetSecs && targetSecs > 0) {
-        const om = String(Math.floor(overtimeSecs / 60)).padStart(2, "0");
-        const os = String(overtimeSecs % 60).padStart(2, "0");
-        displayTimeStr = `+${om}:${os}`;
+        displayTimeStr = i18n.formatDurationClock
+          ? i18n.formatDurationClock(overtimeSecs, "+")
+          : `+${String(Math.floor(overtimeSecs / 60)).padStart(2, "0")}:${String(overtimeSecs % 60).padStart(2, "0")}`;
         modeLabel = i18n.t("focus_timer_overtime", {}, lang);
       } else if (timerDisplayMode === "elapsed") {
         displayTimeStr = tickerStr;
         modeLabel = i18n.t("focus_timer_elapsed", {}, lang);
       } else {
-        const rm = String(Math.floor(remainingSecs / 60)).padStart(2, "0");
-        const rs = String(remainingSecs % 60).padStart(2, "0");
-        displayTimeStr = `${rm}:${rs}`;
+        displayTimeStr = i18n.formatDurationClock
+          ? i18n.formatDurationClock(remainingSecs)
+          : `${String(Math.floor(remainingSecs / 60)).padStart(2, "0")}:${String(remainingSecs % 60).padStart(2, "0")}`;
         modeLabel = i18n.t("focus_timer_remaining", {}, lang);
       }
 
