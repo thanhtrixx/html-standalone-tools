@@ -1128,39 +1128,89 @@
                 : ""
             }
           </div>
+        </div>
 
-          <!-- Data Portability Exports -->
-          <div class="pt-2 border-t border-slate-200 dark:border-slate-800/60">
-            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">${i18n.t("export_import_title", {}, lang)}</span>
-            <div class="grid grid-cols-4 gap-2">
-              <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export JSON">
-                <span>📥</span>
-                <span class="truncate">JSON</span>
-              </button>
-              <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export CSV">
-                <span>📊</span>
-                <span class="truncate">CSV</span>
-              </button>
-              <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import JSON">
-                <span>📤</span>
-                <span class="truncate">+JSON</span>
-                <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
-              </label>
-              <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import CSV">
-                <span>📑</span>
-                <span class="truncate">+CSV</span>
-                <input type="file" id="import-csv-input" accept=".csv,text/csv" class="hidden" onchange="window.HabitApp.importDataCSV(event)" />
-              </label>
-            </div>
+        <!-- Card 2: Data Portability & File Exchange -->
+        <div id="settings-data-portability" class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
+          <div class="mb-3">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">📦 ${i18n.t("data_portability_card_title", {}, lang)}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("data_portability_card_desc", {}, lang)}</p>
+          </div>
+
+          <div class="grid grid-cols-4 gap-2">
+            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export JSON">
+              <span>📥</span>
+              <span class="truncate">JSON</span>
+            </button>
+            <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export CSV">
+              <span>📊</span>
+              <span class="truncate">CSV</span>
+            </button>
+            <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import JSON">
+              <span>📤</span>
+              <span class="truncate">+JSON</span>
+              <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
+            </label>
+            <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import CSV">
+              <span>📑</span>
+              <span class="truncate">+CSV</span>
+              <input type="file" id="import-csv-input" accept=".csv,text/csv" class="hidden" onchange="window.HabitApp.importDataCSV(event)" />
+            </label>
           </div>
         </div>
 
-        <!-- Data Hygiene & Vault Reset Card -->
-        <div id="settings-data-vault" class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">🧹 ${i18n.t("data_vault_title", {}, lang)}</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">${i18n.t("data_vault_desc", {}, lang)}</p>
+        <!-- Card 3: Local Data Vault & Safety Snapshots History -->
+        <div id="settings-data-vault" class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl space-y-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">🛡️ ${i18n.t("data_vault_title", {}, lang)}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("data_vault_desc", {}, lang)}</p>
+          </div>
 
-          <div class="space-y-3">
+          <!-- Storage Statistics -->
+          <div class="grid grid-cols-3 gap-2">
+            <div class="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-center">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">${i18n.t("import_stat_habits", {}, lang)}</span>
+              <span class="text-base font-black text-slate-900 dark:text-white mt-0.5 block">${(store && store.getHabits && store.getHabits().length) || 0}</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-center">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">${i18n.t("import_stat_logs", {}, lang)}</span>
+              <span class="text-base font-black text-slate-900 dark:text-white mt-0.5 block">${(store && store.state && store.state.logs && (Array.isArray(store.state.logs) ? store.state.logs.length : Object.keys(store.state.logs).length)) || 0}</span>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-800/60 p-2.5 rounded-2xl border border-slate-200/60 dark:border-slate-800 text-center">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">${i18n.t("vacation_pause_mode", {}, lang) || "Pause"}</span>
+              <span class="text-base font-black text-slate-900 dark:text-white mt-0.5 block">${(store && store.state && store.state.settings && store.state.settings.vacationRanges && store.state.settings.vacationRanges.length) || 0}</span>
+            </div>
+          </div>
+
+          <!-- Rolling Snapshots History Section -->
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800/60">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <span>📸</span>
+                  <span>${i18n.t("snapshot_history_title", {}, lang)}</span>
+                </h4>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400">${i18n.t("snapshot_history_desc", {}, lang)}</p>
+              </div>
+              <button
+                type="button"
+                id="btn-create-snapshot"
+                data-action="create-snapshot"
+                onclick="window.HabitApp.createManualSnapshot()"
+                class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-bold rounded-xl transition cursor-pointer active:scale-95 border border-slate-200 dark:border-slate-700/60 shrink-0"
+              >
+                + ${i18n.t("create_snapshot_btn", {}, lang)}
+              </button>
+            </div>
+            <div id="snapshots-history-list" class="space-y-2 mt-2">
+              <div class="p-3 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/60 dark:border-slate-800 animate-pulse">
+                <p class="text-[11px] text-slate-400">Loading snapshots...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Starter Kits & Identity Wizard -->
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-800/60 space-y-2.5">
             <div class="flex items-center justify-between p-3 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-2xl border border-emerald-500/30 gap-3">
               <div>
                 <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -1236,6 +1286,84 @@
     `;
 
     container.innerHTML = html;
+
+    // Asynchronously fetch rolling snapshots and populate #snapshots-history-list
+    if (store && typeof store.getSnapshots === "function") {
+      store
+        .getSnapshots()
+        .then((snapshots) => {
+          const listEl = document.getElementById("snapshots-history-list");
+          if (listEl) {
+            listEl.innerHTML = renderSnapshotsListHtml(snapshots, lang);
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  function renderSnapshotsListHtml(snapshots, lang = "vi") {
+    if (!snapshots || snapshots.length === 0) {
+      return `
+        <div class="p-3 text-center bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">${i18n.t("no_snapshots_yet", {}, lang)}</p>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="space-y-2">
+        ${snapshots
+          .slice(0, 5)
+          .map((s) => {
+            const timeStr = formatRelativeTime(s.timestamp, lang);
+            const habitCount =
+              s.data && Array.isArray(s.data.habits)
+                ? s.data.habits.length
+                : s.data && s.data.habits
+                  ? Object.keys(s.data.habits).length
+                  : 0;
+            const logCount =
+              s.data && typeof s.data.logs === "object"
+                ? Array.isArray(s.data.logs)
+                  ? s.data.logs.length
+                  : Object.keys(s.data.logs).length
+                : 0;
+
+            let reasonBadge = "";
+            if (s.reason === "pre_import_backup") {
+              reasonBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60">${i18n.t("snap_reason_import", {}, lang)}</span>`;
+            } else if (s.reason === "pre_sync") {
+              reasonBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 border border-sky-200 dark:border-sky-800/60">${i18n.t("snap_reason_sync", {}, lang)}</span>`;
+            } else {
+              reasonBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">${i18n.t("snap_reason_manual", {}, lang)}</span>`;
+            }
+
+            return `
+            <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 gap-2">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  ${reasonBadge}
+                  <span class="text-xs font-semibold text-slate-800 dark:text-slate-200">${timeStr}</span>
+                </div>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  ${habitCount} ${i18n.t("import_stat_habits", {}, lang)} • ${logCount} ${i18n.t("import_stat_logs", {}, lang)}
+                </p>
+              </div>
+              <button
+                type="button"
+                data-action="restore-snapshot"
+                data-snapshot-id="${s.id}"
+                onclick="window.HabitApp.restoreSnapshotFromHistory('${s.id}')"
+                class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold rounded-xl transition cursor-pointer shrink-0 active:scale-95 border border-indigo-200 dark:border-indigo-800/50"
+              >
+                ↩️ ${i18n.t("snapshot_restore_btn", {}, lang)}
+              </button>
+            </div>
+          `;
+          })
+          .join("")}
+      </div>
+    `;
   }
 
   /**
@@ -4953,6 +5081,38 @@
         );
       }
       renderActiveTab();
+    },
+
+    async createManualSnapshot() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      if (!store) return;
+      try {
+        await store.createSnapshot("manual");
+        notify(i18n.t("toast_snapshot_created", {}, lang), "success");
+        renderActiveTab();
+      } catch (e) {
+        notify(e.message, "error");
+      }
+    },
+
+    async restoreSnapshotFromHistory(snapshotId) {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      if (!store) return;
+      try {
+        // Automatically save an emergency pre-restore undo snapshot before restoring
+        await store.createSnapshot("pre_restore_undo");
+        await store.restoreSnapshot(snapshotId);
+        notify(i18n.t("toast_snapshot_restored", {}, lang), "success");
+        renderActiveTab();
+      } catch (e) {
+        notify(e.message, "error");
+      }
     },
 
     promptDriveBackup() {

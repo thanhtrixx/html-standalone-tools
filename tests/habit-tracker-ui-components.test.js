@@ -7290,6 +7290,50 @@ async function runUITests() {
     pausedSandbox.HabitApp.runningTimerHabitId === null,
     "[Issue #566 AC-4] Paused session is not started as running timer on cold launch"
   );
+
+  // ==========================================
+  // [Issue #577] Settings IA 3-Card Layout & Local Snapshot History Tests
+  // ==========================================
+  console.log(
+    "\n--- [Issue #577] Settings IA 3-Card Layout & Local Snapshot History ---"
+  );
+
+  const { sandbox: settingsSandbox, getOrCreateElement: getSettingsEl } =
+    createHabitTrackerSandbox();
+  settingsSandbox.requestAnimationFrame = (fn) => fn();
+  settingsSandbox.cancelAnimationFrame = () => {};
+  await settingsSandbox.HabitApp.init();
+
+  // Navigate to settings tab
+  settingsSandbox.HabitApp.switchTab("settings");
+
+  const mainContainer = getSettingsEl("main-content");
+  assert(
+    mainContainer.innerHTML.includes('id="settings-data-portability"'),
+    "[Issue #577 AC-1] Settings tab renders Data Portability & File Exchange card"
+  );
+  assert(
+    mainContainer.innerHTML.includes('id="settings-data-vault"'),
+    "[Issue #577 AC-1] Settings tab renders Local Data Vault & Safety History card"
+  );
+  assert(
+    mainContainer.innerHTML.includes('id="btn-export-json"') &&
+      mainContainer.innerHTML.includes('id="btn-export-csv"') &&
+      mainContainer.innerHTML.includes('id="import-json-input"') &&
+      mainContainer.innerHTML.includes('id="import-csv-input"'),
+    "[Issue #577 AC-1] Data Portability card includes 4-action grid for JSON and CSV exchange"
+  );
+  assert(
+    mainContainer.innerHTML.includes('id="btn-create-snapshot"'),
+    "[Issue #577 AC-2] Local Data Vault card includes Create Safety Snapshot action"
+  );
+
+  // Test manual snapshot creation through HabitApp
+  await settingsSandbox.HabitApp.createManualSnapshot();
+  assert(
+    typeof settingsSandbox.HabitApp.restoreSnapshotFromHistory === "function",
+    "[Issue #577 AC-2] HabitApp exposes restoreSnapshotFromHistory method"
+  );
 }
 
 runUITests()
