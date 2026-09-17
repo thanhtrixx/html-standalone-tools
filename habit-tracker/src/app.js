@@ -2947,6 +2947,18 @@
 
     overlay.innerHTML = `<div id="focus-timer-modal-container" class="w-full max-w-md my-auto">${modalHtml}</div>`;
     overlay.classList.remove("hidden");
+    const targetDate =
+      runningTimerHabitId === habitId
+        ? runningTimerDate || store.getActiveDate()
+        : store.getActiveDate();
+    const currentLog = (store.state &&
+      store.state.logs &&
+      store.state.logs[`${habitId}_${targetDate}`]) || { value: 0 };
+    const currentSecs =
+      runningTimerHabitId === habitId
+        ? runningTimerBaseValue + runningTimerTickCount
+        : currentLog.value || 0;
+    updateTimerDom(habitId, currentSecs, habit.targetValue);
     if (components && typeof components.trapFocus === "function") {
       components.trapFocus(overlay, { onEscape: closeFocusTimerModal });
     }

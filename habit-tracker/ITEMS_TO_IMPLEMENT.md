@@ -337,10 +337,10 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 3: Wake-Up Celebration, Focus Modal Auto-Open & Ambient Presentation (P1) — #565
 
-- [ ] Detect if habit target was crossed while the screen was suspended: trigger harmonic sine chime (`playTimerCompletionSound`), celebration confetti, and localized completion toast.
-- [ ] Automatically open the immersive Focus Timer Modal (`#focus-timer-modal-overlay`) with reactive dial and digits upon cold app launch if an active timer was running.
-- [ ] Re-hydrate Floating Dynamic Island (`#floating-timer-island`) and Dock Active Pill (`#dock-active-timer-pill`) with live countdown/overtime format.
-- [ ] Seamlessly restart the Web Worker / `setInterval` ticker for continuous live overtime tracking.
+- [x] Detect if habit target was crossed while the screen was suspended: trigger harmonic sine chime (`playTimerCompletionSound`), celebration confetti, and localized completion toast.
+- [x] Automatically open the immersive Focus Timer Modal (`#focus-timer-modal-overlay`) with reactive dial and digits upon cold app launch if an active timer was running.
+- [x] Re-hydrate Floating Dynamic Island (`#floating-timer-island`) and Dock Active Pill (`#dock-active-timer-pill`) with live countdown/overtime format.
+- [x] Seamlessly restart the Web Worker / `setInterval` ticker for continuous live overtime tracking.
 
 ### Slice 4: Automated Verification & Lifecycle Test Suite Gating (P0) — #566
 

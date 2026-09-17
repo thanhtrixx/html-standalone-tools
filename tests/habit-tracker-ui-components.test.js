@@ -7108,6 +7108,85 @@ async function runUITests() {
     corruptSandbox.HabitApp.runningTimerHabitId === null,
     "[Issue #564 AC-4] Corrupted JSON session is ignored gracefully without errors"
   );
+
+  // ==========================================
+  // [Issue #565] Wake-Up Target Celebration, Focus Modal Auto-Open & Ambient Presentation
+  // ==========================================
+  console.log(
+    "\n--- [Issue #565] Wake-Up Target Celebration, Focus Modal Auto-Open & Ambient Presentation ---"
+  );
+
+  // 1. Cold boot auto-opens Focus Timer Modal and hydrates ambient island
+  const { sandbox: wakeSandbox } = createHabitTrackerSandbox();
+  const wakeStartTime = Date.now() - 1300 * 1000; // 1300s (target 1200s crossed by 100s overtime)
+  const wakeSession = {
+    habitId: "h-read",
+    date: "2026-09-17",
+    startedAt: wakeStartTime,
+    baseValue: 0,
+    isRunning: true,
+    lastSavedTimestamp: wakeStartTime + 5000,
+    targetValue: 1200,
+    timerDisplayMode: "remaining",
+    timerSoundEnabled: true,
+  };
+  wakeSandbox.localStorage.setItem(
+    "habit_active_timer_session",
+    JSON.stringify(wakeSession)
+  );
+
+  let celebrationConfettiTriggered = false;
+  wakeSandbox.HabitTodayView.triggerVictoryConfetti = () => {
+    celebrationConfettiTriggered = true;
+  };
+
+  await wakeSandbox.HabitApp.init();
+
+  // Assert Focus Modal auto-opened on cold launch
+  assertEqual(
+    wakeSandbox.HabitApp.activeFocusModalHabitId,
+    "h-read",
+    "[Issue #565 AC-1] Cold launch auto-opens Focus Timer Modal for active habit"
+  );
+  const focusOverlay = wakeSandbox.document.getElementById(
+    "focus-timer-modal-overlay"
+  );
+  assert(
+    focusOverlay && !focusOverlay.classList.contains("hidden"),
+    "[Issue #565 AC-1] Focus Timer Modal overlay is visible"
+  );
+
+  // Assert celebration confetti and target completion crossed
+  assert(
+    celebrationConfettiTriggered,
+    "[Issue #565 AC-2] Target completion confetti is triggered on wake"
+  );
+
+  // Assert Floating Dynamic Timer Island is active and reflects overtime
+  const floatingIsland = wakeSandbox.document.getElementById(
+    "floating-timer-island"
+  );
+  assert(
+    floatingIsland && !floatingIsland.classList.contains("hidden"),
+    "[Issue #565 AC-3] Floating Dynamic Island is visible and hydrated"
+  );
+
+  const dockPill = wakeSandbox.document.getElementById(
+    "dock-active-timer-pill"
+  );
+  assert(
+    dockPill && !dockPill.classList.contains("hidden"),
+    "[Issue #565 AC-3] Dock Active Timer Pill is visible and hydrated"
+  );
+
+  // Modal digits display overtime (+01:40)
+  const modalDigits = wakeSandbox.document.getElementById(
+    "focus-modal-timer-digits"
+  );
+  assert(
+    modalDigits && modalDigits.textContent.includes("+"),
+    `[Issue #565 AC-4] Focus Timer digits render overtime with + prefix (got: ${modalDigits ? modalDigits.textContent : null})`
+  );
 }
 
 runUITests()
