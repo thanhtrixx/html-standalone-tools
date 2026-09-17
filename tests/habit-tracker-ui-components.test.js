@@ -1273,7 +1273,12 @@ async function runUITests() {
   );
 
   // [AC-2] Move 1st habit (h-reorder-eve1) DOWN after 2nd habit (h-reorder-eve2)
-  await reorderStore.reorderHabit("evening", "h-reorder-eve1", "h-reorder-eve2", true);
+  await reorderStore.reorderHabit(
+    "evening",
+    "h-reorder-eve1",
+    "h-reorder-eve2",
+    true
+  );
 
   const eveningAfterDown1 = reorderStore
     .getHabits()
@@ -5152,11 +5157,12 @@ async function runUITests() {
     identityContentEl && identityContentEl.innerHTML.includes("identity-view"),
     "[Issue #480 AC-1] Switching to identity lens renders .identity-view container"
   );
-  const lifeDomainsHtml = identitySandbox.HabitIdentityView.renderLifeDomainsSection(
-    identitySandbox.HabitApp.store.getHabits(true),
-    identitySandbox.HabitApp.store.state.logs,
-    "vi"
-  );
+  const lifeDomainsHtml =
+    identitySandbox.HabitIdentityView.renderLifeDomainsSection(
+      identitySandbox.HabitApp.store.getHabits(true),
+      identitySandbox.HabitApp.store.state.logs,
+      "vi"
+    );
   assert(
     lifeDomainsHtml.includes("life-domain-card"),
     "[Issue #480 AC-1] renderLifeDomainsSection renders Life Domain cards with neon glow"
@@ -5346,7 +5352,7 @@ async function runUITests() {
 
   const firstCard = managerCards[0];
   const editBtn = firstCard.querySelector('[data-action="edit-habit"]');
-  const dragHandle = firstCard.querySelector('.drag-handle');
+  const dragHandle = firstCard.querySelector(".drag-handle");
   const upBtn = firstCard.querySelector('[data-action="reorder-up"]');
   const downBtn = firstCard.querySelector('[data-action="reorder-down"]');
   const moreMenuBtn = firstCard.querySelector(
@@ -6604,9 +6610,7 @@ async function runUITests() {
   // ==========================================
   // [Issue #554] Habits Catalog Drag & Drop Reordering
   // ==========================================
-  console.log(
-    "\n--- [Issue #554] Habits Catalog Drag & Drop Reordering ---"
-  );
+  console.log("\n--- [Issue #554] Habits Catalog Drag & Drop Reordering ---");
 
   const { sandbox: dragSandbox } = createHabitTrackerSandbox();
   dragSandbox.requestAnimationFrame = (fn) => fn();
@@ -6650,8 +6654,12 @@ async function runUITests() {
   );
 
   // AC-1: Verify NO discrete up/down buttons exist
-  const upBtns554 = managerContainer554.querySelectorAll('[data-action="reorder-up"]');
-  const downBtns554 = managerContainer554.querySelectorAll('[data-action="reorder-down"]');
+  const upBtns554 = managerContainer554.querySelectorAll(
+    '[data-action="reorder-up"]'
+  );
+  const downBtns554 = managerContainer554.querySelectorAll(
+    '[data-action="reorder-down"]'
+  );
   assertEqual(
     upBtns554.length,
     0,
@@ -6686,7 +6694,10 @@ async function runUITests() {
   await dragStore.reorderHabit("morning", "h-drag-3", "h-drag-1", false);
   const morningOrdered1 = dragStore
     .getHabits()
-    .filter((h) => h.routine === "morning" && !h.archived && h.id.startsWith("h-drag-"))
+    .filter(
+      (h) =>
+        h.routine === "morning" && !h.archived && h.id.startsWith("h-drag-")
+    )
     .sort((a, b) => a.order - b.order);
 
   assertEqual(
@@ -6709,7 +6720,10 @@ async function runUITests() {
   await dragStore.reorderHabit("morning", "h-drag-3", "h-drag-2", true);
   const morningOrdered2 = dragStore
     .getHabits()
-    .filter((h) => h.routine === "morning" && !h.archived && h.id.startsWith("h-drag-"))
+    .filter(
+      (h) =>
+        h.routine === "morning" && !h.archived && h.id.startsWith("h-drag-")
+    )
     .sort((a, b) => a.order - b.order);
 
   assertEqual(
@@ -6738,12 +6752,11 @@ async function runUITests() {
   const { sandbox: kitsSandbox555 } = createHabitTrackerSandbox();
   await kitsSandbox555.HabitApp.init();
 
-  const habitsTabHtml555 =
-    kitsSandbox555.HabitIdentityView.renderIdentityView(
-      kitsSandbox555.HabitApp.store,
-      null,
-      "vi"
-    );
+  const habitsTabHtml555 = kitsSandbox555.HabitIdentityView.renderIdentityView(
+    kitsSandbox555.HabitApp.store,
+    null,
+    "vi"
+  );
 
   // AC-4: Sub-view switcher eliminated
   assert(
@@ -6815,12 +6828,46 @@ async function runUITests() {
   );
 
   // AC-5: 1-tap Apply Kit activates all habits
-  const countBeforeApply = kitsSandbox555.HabitApp.store.getHabits(false).length;
+  const countBeforeApply =
+    kitsSandbox555.HabitApp.store.getHabits(false).length;
   await kitsSandbox555.HabitApp.applyStarterKit("fitness-strength");
   const countAfterApply = kitsSandbox555.HabitApp.store.getHabits(false).length;
   assert(
     countAfterApply >= countBeforeApply + 3,
     "[Issue #555 AC-5] 1-tap Apply Kit successfully activates all habits from fitness-strength pack"
+  );
+
+  // ==========================================
+  // [Issue #556] 4 Core Life Pillars Migration to Insights Tab
+  // ==========================================
+  console.log(
+    "\n--- [Issue #556] 4 Core Life Pillars Migration to Insights Tab ---"
+  );
+
+  const insightsTabHtml556 =
+    kitsSandbox555.HabitInsightsView.renderInsightsView(
+      kitsSandbox555.HabitApp.store,
+      null,
+      "vi"
+    );
+
+  assert(
+    insightsTabHtml556.includes("life-domains-section") &&
+      insightsTabHtml556.includes("life-domain-card"),
+    "[Issue #556 AC-1] 4 Core Life Pillars render in the Insights tab"
+  );
+  assert(
+    insightsTabHtml556.includes("Sức khỏe & Sinh lực") &&
+      insightsTabHtml556.includes("Tâm trí & Trí tuệ") &&
+      insightsTabHtml556.includes("Tập trung & Sự nghiệp") &&
+      insightsTabHtml556.includes("Kỷ luật & Nề nếp"),
+    "[Issue #556 AC-1] Insights tab renders all 4 life pillars in Vietnamese"
+  );
+
+  // Verify Life Pillars are removed from Habits tab
+  assert(
+    !habitsTabHtml555.includes("life-domains-section"),
+    "[Issue #556 AC-2] Life Pillars section is removed from Habits tab"
   );
 }
 
