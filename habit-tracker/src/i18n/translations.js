@@ -65,6 +65,18 @@
       starter_zen_mindfulness_title: "Zen & Mindfulness",
       starter_zen_mindfulness_desc:
         "Gratitude journal, nature walk, and digital sunset.",
+      starter_fitness_strength_title: "Fitness & Strength",
+      starter_fitness_strength_desc:
+        "Strength training, 100g daily protein, and 10,000 active steps.",
+      starter_lifelong_learning_title: "Lifelong Learning",
+      starter_lifelong_learning_desc:
+        "30-min skill practice, daily knowledge notes, and educational podcasts.",
+      starter_financial_discipline_title: "Financial Discipline",
+      starter_financial_discipline_desc:
+        "Log daily expenses, avoid impulse purchases, and review savings goals.",
+      starter_sleep_recovery_title: "Sleep & Recovery",
+      starter_sleep_recovery_desc:
+        "8-hour restorative sleep, warm evening relaxation, and zero late caffeine.",
       apply_starter_kit: "Activate Kit",
       starter_kit_applied_toast: "Starter kit activated successfully!",
 
@@ -432,6 +444,18 @@
       starter_zen_mindfulness_title: "Tĩnh tâm & An lạc",
       starter_zen_mindfulness_desc:
         "Nhật ký biết ơn, đi bộ thư giãn và tắt màn hình buổi tối.",
+      starter_fitness_strength_title: "Thể hình & Sức mạnh",
+      starter_fitness_strength_desc:
+        "Tập luyện sức mạnh, bổ sung protein và duy trì 10.000 bước chân.",
+      starter_lifelong_learning_title: "Học tập & Tri thức",
+      starter_lifelong_learning_desc:
+        "Rèn luyện kỹ năng mới, đúc kết kiến thức và nghe podcast giáo dục.",
+      starter_financial_discipline_title: "Quản lý Tài chính",
+      starter_financial_discipline_desc:
+        "Ghi chép chi tiêu, kiềm chế mua sắm bốc đồng và kiểm tra quỹ tiết kiệm.",
+      starter_sleep_recovery_title: "Giấc ngủ & Phục hồi",
+      starter_sleep_recovery_desc:
+        "Ngủ đủ 8 tiếng, ngâm chân thư giãn và cắt giảm caffeine sau 14h.",
       apply_starter_kit: "Kích hoạt gói",
       starter_kit_applied_toast: "Đã kích hoạt gói thói quen thành công!",
 

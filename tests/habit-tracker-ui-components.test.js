@@ -5152,10 +5152,14 @@ async function runUITests() {
     identityContentEl && identityContentEl.innerHTML.includes("identity-view"),
     "[Issue #480 AC-1] Switching to identity lens renders .identity-view container"
   );
+  const lifeDomainsHtml = identitySandbox.HabitIdentityView.renderLifeDomainsSection(
+    identitySandbox.HabitApp.store.getHabits(true),
+    identitySandbox.HabitApp.store.state.logs,
+    "vi"
+  );
   assert(
-    identityContentEl &&
-      identityContentEl.innerHTML.includes("life-domain-card"),
-    "[Issue #480 AC-1] Identity view renders Life Domain cards with neon glow"
+    lifeDomainsHtml.includes("life-domain-card"),
+    "[Issue #480 AC-1] renderLifeDomainsSection renders Life Domain cards with neon glow"
   );
   assert(
     identityContentEl &&
@@ -5317,50 +5321,19 @@ async function runUITests() {
     "[Issue #504 AC-3] Active tab is manager/habits"
   );
 
-  const subviewSwitcher = polishSandbox.document.getElementById(
-    "habits-subview-switcher"
-  );
-  assert(
-    !!subviewSwitcher,
-    "[Issue #504 AC-3] Habits tab renders segmented subview switcher"
-  );
-
   const catalogSubView = polishSandbox.document.getElementById(
     "habits-catalog-subview"
   );
-  const identitySubView = polishSandbox.document.getElementById(
-    "habits-identity-subview"
-  );
   assert(
-    !!catalogSubView && !!identitySubView,
-    "[Issue #504 AC-3] Habits tab provides isolated catalog and identity subviews"
+    !!catalogSubView,
+    "[Issue #504 AC-3] Habits tab renders habits catalog container"
   );
-  assert(
-    !catalogSubView.classList.contains("hidden"),
-    "[Issue #504 AC-3] Default subview is catalog"
-  );
-
-  // Switch to identity subview
-  polishSandbox.HabitApp.switchHabitsSubView("identity");
-  assertEqual(
-    polishSandbox.HabitApp.habitsSubView,
-    "identity",
-    "[Issue #504 AC-3] Successfully switched to identity & starter kits subview"
-  );
-  const starterCarousel = polishSandbox.document.querySelector(
+  const starterSection = polishSandbox.document.querySelector(
     ".starter-kits-section"
   );
   assert(
-    !!starterCarousel,
-    "[Issue #504 AC-3] Identity subview renders Starter Kits section"
-  );
-
-  // Switch back to catalog subview
-  polishSandbox.HabitApp.switchHabitsSubView("catalog");
-  assertEqual(
-    polishSandbox.HabitApp.habitsSubView,
-    "catalog",
-    "[Issue #504 AC-3] Successfully switched back to catalog subview"
+    !!starterSection,
+    "[Issue #504 AC-3] Habits tab renders integrated Starter Kits section"
   );
 
   const managerCards = polishSandbox.document.querySelectorAll(
@@ -6435,32 +6408,27 @@ async function runUITests() {
   );
 
   // ==========================================
-  // [Issue #545] Starter Kits Carousel Chevron Navigation & Drag Ergonomics
+  // [Issue #545 / #555] Starter Kits Vertical Stack Layout
   // ==========================================
   console.log(
-    "\n--- [Issue #545] Starter Kits Carousel Chevron Navigation & Drag Ergonomics ---"
+    "\n--- [Issue #545 / #555] Starter Kits Vertical Stack Layout ---"
   );
 
   const starterKitsHtml545 =
     timerSandbox535.HabitIdentityView.renderStarterKitsSection("en");
   assert(
-    starterKitsHtml545.includes('id="starter-kits-prev-btn"') &&
-      starterKitsHtml545.includes('id="starter-kits-next-btn"'),
-    "[Issue #545 AC-1] Starter Kits section contains accessible left and right chevron navigation buttons"
+    !starterKitsHtml545.includes('id="starter-kits-prev-btn"') &&
+      !starterKitsHtml545.includes('id="starter-kits-next-btn"'),
+    "[Issue #555 AC-1] Starter Kits section removes horizontal carousel < / > buttons"
   );
   assert(
-    starterKitsHtml545.includes('data-action="starter-kits-prev"') &&
-      starterKitsHtml545.includes('data-action="starter-kits-next"'),
-    "[Issue #545 AC-2] Carousel buttons contain correct data-action attributes for smooth scrolling"
+    !starterKitsHtml545.includes('id="starter-kits-carousel-container"'),
+    "[Issue #555 AC-1] Horizontal carousel container ID is removed"
   );
   assert(
-    starterKitsHtml545.includes('id="starter-kits-carousel-container"'),
-    "[Issue #545 AC-3] Carousel container renders with #starter-kits-carousel-container ID"
-  );
-  assert(
-    starterKitsHtml545.includes("snap-x") &&
-      starterKitsHtml545.includes("overflow-x-auto"),
-    "[Issue #545 AC-4] Carousel container enforces horizontal scroll and snap points"
+    starterKitsHtml545.includes("starter-kit-card") &&
+      starterKitsHtml545.includes("flex flex-col"),
+    "[Issue #555 AC-1] Starter Kits render in a vertical stacked layout"
   );
 
   // ==========================================
@@ -6758,6 +6726,101 @@ async function runUITests() {
     morningOrdered2[2].id,
     "h-drag-3",
     "[Issue #554 AC-4] h-drag-3 moved to index 2 (after h-drag-2)"
+  );
+
+  // ==========================================
+  // [Issue #555] 8 Vertical Curated Starter Kits & Single-View Habits Tab
+  // ==========================================
+  console.log(
+    "\n--- [Issue #555] 8 Vertical Curated Starter Kits & Single-View Habits Tab ---"
+  );
+
+  const { sandbox: kitsSandbox555 } = createHabitTrackerSandbox();
+  await kitsSandbox555.HabitApp.init();
+
+  const habitsTabHtml555 =
+    kitsSandbox555.HabitIdentityView.renderIdentityView(
+      kitsSandbox555.HabitApp.store,
+      null,
+      "vi"
+    );
+
+  // AC-4: Sub-view switcher eliminated
+  assert(
+    !habitsTabHtml555.includes('id="habits-subview-switcher"'),
+    "[Issue #555 AC-4] Sub-view switcher #habits-subview-switcher is eliminated from Habits tab"
+  );
+  assert(
+    habitsTabHtml555.includes('id="habits-catalog-subview"') &&
+      habitsTabHtml555.includes("starter-kits-section"),
+    "[Issue #555 AC-4] Habits tab unifies catalog and vertical starter kits in a single view"
+  );
+
+  // AC-1: Vertical stacked layout without carousel
+  const verticalKitsViHtml =
+    kitsSandbox555.HabitIdentityView.renderStarterKitsSection("vi");
+  const verticalKitsEnHtml =
+    kitsSandbox555.HabitIdentityView.renderStarterKitsSection("en");
+
+  assert(
+    !verticalKitsViHtml.includes('id="starter-kits-prev-btn"') &&
+      !verticalKitsViHtml.includes('id="starter-kits-next-btn"') &&
+      !verticalKitsViHtml.includes('id="starter-kits-carousel-container"'),
+    "[Issue #555 AC-1] Horizontal carousel controls and container are completely removed"
+  );
+
+  // AC-2 & AC-3: All 8 kits rendered with 100% bilingual parity
+  const expectedKitIds = [
+    "morning-mastery",
+    "deep-focus-flow",
+    "health-vitality",
+    "zen-mindfulness",
+    "fitness-strength",
+    "lifelong-learning",
+    "financial-discipline",
+    "sleep-recovery",
+  ];
+
+  for (const kId of expectedKitIds) {
+    assert(
+      verticalKitsViHtml.includes(`data-kit-id="${kId}"`),
+      `[Issue #555 AC-2] Rendered vertical kits include kit ID: ${kId} in VI`
+    );
+    assert(
+      verticalKitsEnHtml.includes(`data-kit-id="${kId}"`),
+      `[Issue #555 AC-2] Rendered vertical kits include kit ID: ${kId} in EN`
+    );
+  }
+
+  // Bilingual name checks
+  assert(
+    verticalKitsViHtml.includes("Thể hình & Sức mạnh") &&
+      verticalKitsEnHtml.includes("Fitness & Strength"),
+    "[Issue #555 AC-3] Fitness & Strength has bilingual titles"
+  );
+  assert(
+    verticalKitsViHtml.includes("Học tập & Tri thức") &&
+      verticalKitsEnHtml.includes("Lifelong Learning"),
+    "[Issue #555 AC-3] Lifelong Learning has bilingual titles"
+  );
+  assert(
+    verticalKitsViHtml.includes("Quản lý Tài chính") &&
+      verticalKitsEnHtml.includes("Financial Discipline"),
+    "[Issue #555 AC-3] Financial Discipline has bilingual titles"
+  );
+  assert(
+    verticalKitsViHtml.includes("Giấc ngủ & Phục hồi") &&
+      verticalKitsEnHtml.includes("Sleep & Recovery"),
+    "[Issue #555 AC-3] Sleep & Recovery has bilingual titles"
+  );
+
+  // AC-5: 1-tap Apply Kit activates all habits
+  const countBeforeApply = kitsSandbox555.HabitApp.store.getHabits(false).length;
+  await kitsSandbox555.HabitApp.applyStarterKit("fitness-strength");
+  const countAfterApply = kitsSandbox555.HabitApp.store.getHabits(false).length;
+  assert(
+    countAfterApply >= countBeforeApply + 3,
+    "[Issue #555 AC-5] 1-tap Apply Kit successfully activates all habits from fitness-strength pack"
   );
 }
 
