@@ -1148,7 +1148,9 @@
         }
       }
 
-      const rect = card.getBoundingClientRect ? card.getBoundingClientRect() : { top: 0, height: 40 };
+      const rect = card.getBoundingClientRect
+        ? card.getBoundingClientRect()
+        : { top: 0, height: 40 };
       const midY = rect.top + rect.height / 2;
       const targetId = card.getAttribute("data-habit-id");
       dragOverHabitId = targetId;
@@ -1170,8 +1172,17 @@
 
     document.addEventListener("dragleave", (e) => {
       const card = e.target.closest(".manager-habit-card");
-      if (card && e.relatedTarget && card.contains && !card.contains(e.relatedTarget)) {
-        card.classList.remove("border-t-2", "border-b-2", "!border-emerald-500");
+      if (
+        card &&
+        e.relatedTarget &&
+        card.contains &&
+        !card.contains(e.relatedTarget)
+      ) {
+        card.classList.remove(
+          "border-t-2",
+          "border-b-2",
+          "!border-emerald-500"
+        );
       }
     });
 
@@ -1184,11 +1195,26 @@
       const targetRoutine = card.getAttribute("data-routine");
 
       document.querySelectorAll(".manager-habit-card").forEach((c) => {
-        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-40", "scale-[0.98]");
+        c.classList.remove(
+          "border-t-2",
+          "border-b-2",
+          "!border-emerald-500",
+          "opacity-40",
+          "scale-[0.98]"
+        );
       });
 
-      if (targetRoutine === draggedRoutine && targetId && targetId !== draggedHabitId) {
-        await store.reorderHabit(draggedRoutine, draggedHabitId, targetId, dragInsertAfter);
+      if (
+        targetRoutine === draggedRoutine &&
+        targetId &&
+        targetId !== draggedHabitId
+      ) {
+        await store.reorderHabit(
+          draggedRoutine,
+          draggedHabitId,
+          targetId,
+          dragInsertAfter
+        );
         renderActiveTab();
       }
 
@@ -1199,7 +1225,13 @@
 
     document.addEventListener("dragend", () => {
       document.querySelectorAll(".manager-habit-card").forEach((c) => {
-        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-40", "scale-[0.98]");
+        c.classList.remove(
+          "border-t-2",
+          "border-b-2",
+          "!border-emerald-500",
+          "opacity-40",
+          "scale-[0.98]"
+        );
       });
       draggedHabitId = null;
       draggedRoutine = null;
@@ -1213,55 +1245,79 @@
     let touchLastTargetId = null;
     let touchInsertAfter = false;
 
-    document.addEventListener("touchstart", (e) => {
-      const handle = e.target.closest(".drag-handle");
-      if (!handle) return;
-      const card = handle.closest(".manager-habit-card");
-      if (!card) return;
+    document.addEventListener(
+      "touchstart",
+      (e) => {
+        const handle = e.target.closest(".drag-handle");
+        if (!handle) return;
+        const card = handle.closest(".manager-habit-card");
+        if (!card) return;
 
-      touchDragCard = card;
-      touchDraggedHabitId = card.getAttribute("data-habit-id");
-      touchDraggedRoutine = card.getAttribute("data-routine");
-      card.classList.add("opacity-50", "scale-[0.98]", "shadow-lg");
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        navigator.vibrate(10);
-      }
-    }, { passive: true });
+        touchDragCard = card;
+        touchDraggedHabitId = card.getAttribute("data-habit-id");
+        touchDraggedRoutine = card.getAttribute("data-routine");
+        card.classList.add("opacity-50", "scale-[0.98]", "shadow-lg");
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          navigator.vibrate(10);
+        }
+      },
+      { passive: true }
+    );
 
-    document.addEventListener("touchmove", (e) => {
-      if (!touchDragCard || !touchDraggedHabitId) return;
-      const touch = e.touches && e.touches[0];
-      if (!touch) return;
+    document.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!touchDragCard || !touchDraggedHabitId) return;
+        const touch = e.touches && e.touches[0];
+        if (!touch) return;
 
-      const elementUnder = document.elementFromPoint ? document.elementFromPoint(touch.clientX, touch.clientY) : null;
-      const targetCard = elementUnder ? elementUnder.closest(".manager-habit-card") : null;
+        const elementUnder = document.elementFromPoint
+          ? document.elementFromPoint(touch.clientX, touch.clientY)
+          : null;
+        const targetCard = elementUnder
+          ? elementUnder.closest(".manager-habit-card")
+          : null;
 
-      document.querySelectorAll(".manager-habit-card").forEach((c) => {
-        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500");
-      });
+        document.querySelectorAll(".manager-habit-card").forEach((c) => {
+          c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500");
+        });
 
-      if (targetCard && targetCard.getAttribute("data-routine") === touchDraggedRoutine) {
-        const targetId = targetCard.getAttribute("data-habit-id");
-        touchLastTargetId = targetId;
-        const rect = targetCard.getBoundingClientRect ? targetCard.getBoundingClientRect() : { top: 0, height: 40 };
-        const midY = rect.top + rect.height / 2;
-        touchInsertAfter = touch.clientY > midY;
+        if (
+          targetCard &&
+          targetCard.getAttribute("data-routine") === touchDraggedRoutine
+        ) {
+          const targetId = targetCard.getAttribute("data-habit-id");
+          touchLastTargetId = targetId;
+          const rect = targetCard.getBoundingClientRect
+            ? targetCard.getBoundingClientRect()
+            : { top: 0, height: 40 };
+          const midY = rect.top + rect.height / 2;
+          touchInsertAfter = touch.clientY > midY;
 
-        if (targetId !== touchDraggedHabitId) {
-          if (touchInsertAfter) {
-            targetCard.classList.add("border-b-2", "!border-emerald-500");
-          } else {
-            targetCard.classList.add("border-t-2", "!border-emerald-500");
+          if (targetId !== touchDraggedHabitId) {
+            if (touchInsertAfter) {
+              targetCard.classList.add("border-b-2", "!border-emerald-500");
+            } else {
+              targetCard.classList.add("border-t-2", "!border-emerald-500");
+            }
           }
         }
-      }
-    }, { passive: true });
+      },
+      { passive: true }
+    );
 
     document.addEventListener("touchend", async () => {
       if (!touchDragCard) return;
 
       document.querySelectorAll(".manager-habit-card").forEach((c) => {
-        c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-50", "scale-[0.98]", "shadow-lg");
+        c.classList.remove(
+          "border-t-2",
+          "border-b-2",
+          "!border-emerald-500",
+          "opacity-50",
+          "scale-[0.98]",
+          "shadow-lg"
+        );
       });
 
       if (
@@ -1291,7 +1347,14 @@
     document.addEventListener("touchcancel", () => {
       if (touchDragCard) {
         document.querySelectorAll(".manager-habit-card").forEach((c) => {
-          c.classList.remove("border-t-2", "border-b-2", "!border-emerald-500", "opacity-50", "scale-[0.98]", "shadow-lg");
+          c.classList.remove(
+            "border-t-2",
+            "border-b-2",
+            "!border-emerald-500",
+            "opacity-50",
+            "scale-[0.98]",
+            "shadow-lg"
+          );
         });
         touchDragCard = null;
         touchDraggedHabitId = null;
@@ -3882,7 +3945,10 @@
     },
     handleReorderHabit: async (arg1, arg2, arg3, arg4) => {
       if (!store) return;
-      if (typeof arg3 === "boolean" || (arg3 && arg3 !== "up" && arg3 !== "down")) {
+      if (
+        typeof arg3 === "boolean" ||
+        (arg3 && arg3 !== "up" && arg3 !== "down")
+      ) {
         // signature: (routineKey, sourceId, targetId, insertAfter)
         await store.reorderHabit(arg1, arg2, arg3, arg4 ?? false);
         renderActiveTab();

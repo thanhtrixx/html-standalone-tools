@@ -126,27 +126,26 @@ tests/
   - Zero hardcoded Vietnamese strings across `identity-view.js` and `index.html`.
   - PWA update banner dynamically displays English and Vietnamese text upon language switch.
   - Complete parity between `en` and `vi` translation dictionary keys.
-- [ ] **Routine Assignment Mutual Exclusivity (`tests/habit-tracker-ui-components.test.js`)**:
+- [x] **Routine Assignment Mutual Exclusivity (`tests/habit-tracker-ui-components.test.js`)**:
   - Checking `anytime` chip unchecks `morning`, `afternoon`, and `evening` chips.
   - Checking any of `morning`, `afternoon`, or `evening` chips unchecks `anytime` chip.
   - Selecting multiple circadian chips (e.g. `morning` + `evening`) preserves both selections.
 
 ### 10. Streamlined Habits IA, Vertical Kits, Drag Reorder & Unified Timer Formats (ADR-0013)
 
-- [ ] **Date Ribbon Screen Fit & Routine-Scoped Expansion (`tests/habit-tracker-ui-components.test.js`)**:
+- [x] **Date Ribbon Screen Fit & Routine-Scoped Expansion (`tests/habit-tracker-ui-components.test.js`)**:
   - Date Ribbon renders inside a 7-column responsive container (`grid-cols-7` or full flex) fitting 100% within 360px+ screen width without horizontal scrollbars.
   - Expanding a multi-routine habit card in Evening section only expands that specific Evening card drawer without affecting the Morning card.
   - Event listeners correctly resolve `.habit-card` DOM element via proximity traversal.
-- [ ] **Unified Timer Digital Clock Formatting (`tests/habit-tracker-i18n.test.js` & `tests/habit-tracker-ui-components.test.js`)**:
+- [x] **Unified Timer Digital Clock Formatting (`tests/habit-tracker-i18n.test.js` & `tests/habit-tracker-ui-components.test.js`)**:
   - `formatDurationClock(totalSeconds)` returns `00:00` (MM:SS) for durations $\le 3600$s and `00:00:00` (HH:MM:SS) for durations $> 3600$s.
   - Card tickers, Focus Timer digits, Dynamic Island, dock pill, and detail sheet reflect unified clock formatting.
-  - Overtime sessions format with leading `+` (`+02:15` / `+01:10:00`).
-- [ ] **Habits Catalog Drag-and-Drop Reordering (`tests/habit-tracker-ui-components.test.js`)**:
+  - Overtime formatting formats with leading `+` (`+02:15` / `+01:10:00`).
+- [x] **Habits Catalog Drag-and-Drop Reordering (`tests/habit-tracker-ui-components.test.js`)**:
   - Habit cards in Manager view render tactile grip handle `⠿` (`.drag-handle`) and omit discrete Up/Down buttons.
   - `store.reorderHabit` re-indexes habit list in memory and updates persistence atomically.
-- [ ] **8 Vertical Curated Starter Kits & Life Pillars in Insights (`tests/habit-tracker-ui-components.test.js` & `tests/habit-tracker-i18n.test.js`)**:
+- [x] **8 Vertical Curated Starter Kits & Life Pillars in Insights (`tests/habit-tracker-ui-components.test.js` & `tests/habit-tracker-i18n.test.js`)**:
   - `STARTER_KITS` contains 8 curated packs with 100% bilingual `en`/`vi` key parity.
   - Starter kits render in a full-width vertical stacked layout in Habits tab.
   - 4 Core Life Pillars render in Insights tab under "Identity Pillars & Domain Balance".
   - Habits sub-view switcher `#habits-subview-switcher` is removed.
-

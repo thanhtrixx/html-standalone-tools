@@ -28,6 +28,120 @@
       : global.HabitComponents;
 
   /**
+   * Renders Life Domain Hub Cards (Health, Mind, Craft, Discipline)
+   */
+  function renderLifeDomainsSection(habits = [], logs = {}, lang = "vi") {
+    const domainKeys = ["health", "mind", "craft", "discipline"];
+    const domainMeta = {
+      health: {
+        titleKey: "domain_health",
+        icon: "🌿",
+        color: "emerald",
+        hex: "#10b981",
+        glow: "rgba(16, 185, 129, 0.25)",
+      },
+      mind: {
+        titleKey: "domain_mind",
+        icon: "🧠",
+        color: "violet",
+        hex: "#8b5cf6",
+        glow: "rgba(139, 92, 246, 0.25)",
+      },
+      craft: {
+        titleKey: "domain_craft",
+        icon: "💻",
+        color: "cyan",
+        hex: "#06b6d4",
+        glow: "rgba(6, 182, 212, 0.25)",
+      },
+      discipline: {
+        titleKey: "domain_discipline",
+        icon: "⚡",
+        color: "amber",
+        hex: "#f59e0b",
+        glow: "rgba(245, 158, 11, 0.25)",
+      },
+    };
+
+    const cardsHtml = domainKeys
+      .map((dKey) => {
+        const meta = domainMeta[dKey];
+        const domainHabits = habits.filter(
+          (h) => (h.domain || "health") === dKey && !h.archived
+        );
+        const title = i18n.t(meta.titleKey, {}, lang);
+
+        let totalCompletions = 0;
+        let totalScheduled = 0;
+        domainHabits.forEach((h) => {
+          for (const k in logs) {
+            if (logs[k].habitId === h.id) {
+              totalScheduled++;
+              if (logs[k].completed) totalCompletions++;
+            }
+          }
+        });
+
+        const rate =
+          totalScheduled > 0
+            ? Math.round((totalCompletions / totalScheduled) * 100)
+            : 0;
+
+        const ringHtml = components.renderSvgProgressRing(
+          22,
+          3.5,
+          rate,
+          meta.hex
+        );
+
+        const countText =
+          domainHabits.length === 1
+            ? i18n.t("domain_habits_count_singular", { count: 1 }, lang)
+            : i18n.t(
+                "domain_habits_count",
+                { count: domainHabits.length },
+                lang
+              );
+
+        return `
+          <div class="life-domain-card domain-card bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between transition-all hover:border-emerald-500/40" style="box-shadow: 0 4px 20px -2px ${meta.glow};">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 shrink-0">
+                ${meta.icon}
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-900 dark:text-white text-base leading-snug">${title}</h4>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">${countText}</span>
+                  <span class="text-slate-300 dark:text-slate-700">&bull;</span>
+                  <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">${rate}%</span>
+                </div>
+              </div>
+            </div>
+            <div class="shrink-0 flex items-center justify-center">
+              ${ringHtml}
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    return `
+      <div class="life-domains-section mb-6">
+        <div class="mb-3 px-1 flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">${i18n.t("identity_pillars_title", {}, lang)}</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("identity_pillars_subtitle", {}, lang)}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          ${cardsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
    * Renders 52-Week Contribution Heatmap Grid HTML
    */
   function renderYearlyHeatmapGrid(cells = [], lang = "vi") {
@@ -305,6 +419,9 @@
       totalAllCompletions
     );
 
+    // 5. Life Domains & Identity Pillars
+    const domainsHtml = renderLifeDomainsSection(habits, logs, lang);
+
     // Render components
     const heatmapHtml = renderYearlyHeatmapGrid(heatmapCells, lang);
     const weekdayHtml = renderWeekdayChart(weekdayStats, lang);
@@ -345,6 +462,9 @@
           </div>
         </div>
 
+        <!-- Identity Pillars & Life Domains Balance -->
+        ${domainsHtml}
+
         <!-- 52-Week Heatmap -->
         ${heatmapHtml}
 
@@ -365,6 +485,7 @@
   }
 
   const insightsExports = {
+    renderLifeDomainsSection,
     renderYearlyHeatmapGrid,
     renderWeekdayChart,
     renderRoutineAdherence,

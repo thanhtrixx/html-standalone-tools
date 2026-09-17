@@ -40,21 +40,25 @@ Following hands-on user feedback on the `Today` and `Habits` tabs of the `habit-
 ## Considered Options & Decision Outcome
 
 ### Decision 1: Date Ribbon Mobile Viewport Fit (Today Tab)
+
 - **Outcome**:
   - Replace fixed min-width buttons with a responsive 7-column flex/grid container (`grid grid-cols-7 gap-1 sm:gap-2 w-full`) with fluid padding and responsive typography (`text-[10px] sm:text-[11px]` for weekday label, `text-sm sm:text-base` for day number).
   - All 7 days fit 100% within 360px+ screen widths without horizontal scrollbars.
 
 ### Decision 2: Multi-Routine Scoped Card Expansion (Today Tab)
+
 - **Outcome**:
   - Scope all habit card DOM elements by routine (e.g. `#habit-card-${routineKey}-${habit.id}`, `#habit-expand-${routineKey}-${habit.id}`, `#chevron-${routineKey}-${habit.id}`).
   - Resolve click actions using event delegation and DOM proximity (`target.closest('.habit-card')`), isolating expansion to the clicked routine instance.
 
 ### Decision 3: Unified Timer Format Standard (`00:00` vs `00:00:00`)
+
 - **Outcome**:
   - Implement a standardized formatter `formatDurationClock(totalSeconds)` returning `MM:SS` when $\le 3600$s and `HH:MM:SS` when $> 3600$s.
   - Apply consistently across Habit Card tickers, Focus Timer Modal dial and subtitles, Floating Dynamic Island ticker, Bottom Dock mini-pill, Detail Sheet, and overtime tracking (`+MM:SS` / `+HH:MM:SS`).
 
 ### Decision 4: Habits Catalog Drag-and-Drop Reordering (Habits Tab)
+
 - **Outcome**:
   - Remove `▲` and `▼` reordering buttons from habit cards in Manager view.
   - Add a visual grip handle `⠿` (`.drag-handle`) with `touch-action: none`.
@@ -62,6 +66,7 @@ Following hands-on user feedback on the `Today` and `Habits` tabs of the `habit-
   - Persist updated habit ordering atomically to `store` and IndexedDB.
 
 ### Decision 5: Curated Starter Kits Vertical Expansion & Catalog Growth
+
 - **Outcome**:
   - Eliminate the horizontal carousel container and `<` / `>` navigation buttons.
   - Render Starter Kits as full-width vertical stacked cards displaying all included habits, domain badges, and a 1-tap `⚡ Apply Kit` CTA.
@@ -76,6 +81,7 @@ Following hands-on user feedback on the `Today` and `Habits` tabs of the `habit-
     8. `sleep-recovery` (Sleep & Recovery)
 
 ### Decision 6: Move 4 Life Pillars to Insights Tab & Unify Habits Tab
+
 - **Outcome**:
   - Relocate the `4 Core Life Pillars` (Health, Mind, Craft, Discipline) with adherence rings and habit counts to the `Insights` tab under an "Identity Pillars & Domain Balance" section.
   - Remove the segmented sub-view switcher (`#habits-subview-switcher`) from the `Habits` tab.

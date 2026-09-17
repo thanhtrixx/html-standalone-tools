@@ -266,8 +266,7 @@
       if (!sourceId || !targetId || sourceId === targetId) return;
       const routineHabits = this.state.habits
         .filter(
-          (h) =>
-            !h.archived && engine.getHabitRoutines(h).includes(routineKey)
+          (h) => !h.archived && engine.getHabitRoutines(h).includes(routineKey)
         )
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
