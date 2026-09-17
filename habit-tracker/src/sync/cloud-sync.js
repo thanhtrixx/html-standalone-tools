@@ -374,6 +374,11 @@
       this.debounceTimer = null;
       this.debounceDelayMs = options.debounceDelayMs || 5000;
 
+      // Zero-Knowledge Client-Side Vault Encryption (Ephemeral Session Cache)
+      this.encryptionEnabled = options.encryptionEnabled || false;
+      this.sessionPassphrase = null;
+      this.isVaultLocked = false;
+
       this.listeners = new Set();
     }
 
@@ -406,6 +411,11 @@
       this.googleClientId = settings.google_client_id || null;
       this.autoSyncEnabled = settings.auto_sync_enabled !== false;
       this.lastSyncTimestamp = settings.last_sync_timestamp || null;
+      this.encryptionEnabled = settings.encryption_enabled === true;
+
+      if (this.encryptionEnabled && !this.sessionPassphrase) {
+        this.isVaultLocked = true;
+      }
 
       this.notify("init", this.getStatus());
       return this.getStatus();
@@ -420,6 +430,8 @@
         badge = "offline";
       } else if (this.isSyncing) {
         badge = "syncing";
+      } else if (this.isVaultLocked) {
+        badge = "locked";
       } else if (this.lastError) {
         badge = "error";
       } else if (
@@ -443,7 +455,38 @@
         statusBadge: badge,
         autoSync: this.autoSyncEnabled,
         githubGistId: this.githubGistId,
+        encryptionEnabled: this.encryptionEnabled,
+        isVaultUnlocked: Boolean(this.sessionPassphrase),
+        isVaultLocked: this.isVaultLocked,
       };
+    }
+
+    setSessionPassphrase(passphrase) {
+      this.sessionPassphrase = passphrase ? String(passphrase).trim() : null;
+      this.isVaultLocked = false;
+      this.notify("vault_unlocked", this.getStatus());
+    }
+
+    clearSessionPassphrase() {
+      this.sessionPassphrase = null;
+      this.isVaultLocked = this.encryptionEnabled;
+      this.notify("vault_locked", this.getStatus());
+    }
+
+    async setEncryptionEnabled(enabled, passphrase = null) {
+      this.encryptionEnabled = Boolean(enabled);
+      if (passphrase) {
+        this.setSessionPassphrase(passphrase);
+      } else if (!this.encryptionEnabled) {
+        this.clearSessionPassphrase();
+      }
+      if (this.storage) {
+        await this.storage.putSetting(
+          "encryption_enabled",
+          this.encryptionEnabled
+        );
+      }
+      this.notify("config_changed", this.getStatus());
     }
 
     async setGitHubConfig(token, gistId = null) {
@@ -521,6 +564,13 @@
       if (this.activeProvider === "none")
         return { success: false, error: "No active cloud sync provider" };
 
+      const effectivePassphrase =
+        passphrase !== null && passphrase !== undefined
+          ? typeof passphrase === "string"
+            ? passphrase.trim()
+            : passphrase
+          : this.sessionPassphrase;
+
       this.isSyncing = true;
       this.lastError = null;
       this.lastSyncStatus = "syncing";
@@ -553,8 +603,21 @@
               remotePayload = res.content;
             } catch (fetchErr) {
               // If gist is not found, fallback to creating a new one
-              const localCloudPayload =
+              let localCloudPayload =
                 this.merge3.createCloudPayload(currentState);
+              if (
+                (this.encryptionEnabled || effectivePassphrase) &&
+                this.crypto
+              ) {
+                if (!effectivePassphrase) {
+                  this.isVaultLocked = true;
+                  throw new Error("ENCRYPTED_VAULT_LOCKED");
+                }
+                localCloudPayload = await this.crypto.encryptPayload(
+                  localCloudPayload,
+                  effectivePassphrase
+                );
+              }
               const created = await GitHubGistAPI.createGist(
                 this.githubToken,
                 localCloudPayload
@@ -568,8 +631,21 @@
               remotePayload = null;
             }
           } else {
-            const localCloudPayload =
+            let localCloudPayload =
               this.merge3.createCloudPayload(currentState);
+            if (
+              (this.encryptionEnabled || effectivePassphrase) &&
+              this.crypto
+            ) {
+              if (!effectivePassphrase) {
+                this.isVaultLocked = true;
+                throw new Error("ENCRYPTED_VAULT_LOCKED");
+              }
+              localCloudPayload = await this.crypto.encryptPayload(
+                localCloudPayload,
+                effectivePassphrase
+              );
+            }
             const created = await GitHubGistAPI.createGist(
               this.githubToken,
               localCloudPayload
@@ -586,9 +662,21 @@
           if (!this.googleAccessToken)
             throw new Error("Google Drive Access Token is required");
 
+          let localCloudPayload = this.merge3.createCloudPayload(currentState);
+          if ((this.encryptionEnabled || effectivePassphrase) && this.crypto) {
+            if (!effectivePassphrase) {
+              this.isVaultLocked = true;
+              throw new Error("ENCRYPTED_VAULT_LOCKED");
+            }
+            localCloudPayload = await this.crypto.encryptPayload(
+              localCloudPayload,
+              effectivePassphrase
+            );
+          }
+
           const fileRes = await GoogleDriveAPI.findOrCreateAppDataFile(
             this.googleAccessToken,
-            this.merge3.createCloudPayload(currentState)
+            localCloudPayload
           );
           if (fileRes.exists && fileRes.data) {
             remotePayload = fileRes.data;
@@ -602,15 +690,30 @@
           typeof remotePayload === "object" &&
           remotePayload.ciphertext
         ) {
-          if (!passphrase) {
-            throw new Error(
-              "Encrypted vault detected. Passphrase required to sync."
-            );
+          this.encryptionEnabled = true;
+          if (this.storage) {
+            await this.storage.putSetting("encryption_enabled", true);
           }
-          remoteState = await this.crypto.decryptPayload(
-            remotePayload,
-            passphrase
-          );
+
+          if (!effectivePassphrase) {
+            this.isVaultLocked = true;
+            this.lastSyncStatus = "locked";
+            this.notify("vault_locked", this.getStatus());
+            throw new Error("ENCRYPTED_VAULT_LOCKED");
+          }
+
+          try {
+            remoteState = await this.crypto.decryptPayload(
+              remotePayload,
+              effectivePassphrase
+            );
+            this.sessionPassphrase = effectivePassphrase;
+            this.isVaultLocked = false;
+          } catch (decryptErr) {
+            this.isVaultLocked = true;
+            this.notify("vault_locked", this.getStatus());
+            throw new Error("INVALID_VAULT_PASSPHRASE");
+          }
         }
 
         // 4. Merge Remote and Local States Deterministically
@@ -624,10 +727,14 @@
 
         // 5. Upload Merged Payload
         let uploadPayload = this.merge3.createCloudPayload(mergedState);
-        if (passphrase && this.crypto) {
+        if ((this.encryptionEnabled || effectivePassphrase) && this.crypto) {
+          if (!effectivePassphrase) {
+            this.isVaultLocked = true;
+            throw new Error("ENCRYPTED_VAULT_LOCKED");
+          }
           uploadPayload = await this.crypto.encryptPayload(
             uploadPayload,
-            passphrase
+            effectivePassphrase
           );
         }
 
@@ -675,7 +782,12 @@
         };
       } catch (err) {
         this.lastError = err.message || "Cloud sync failed";
-        this.lastSyncStatus = "error";
+        this.lastSyncStatus =
+          err.message === "ENCRYPTED_VAULT_LOCKED"
+            ? "locked"
+            : err.message === "INVALID_VAULT_PASSPHRASE"
+              ? "invalid_passphrase"
+              : "error";
         this.notify("sync_error", { success: false, error: this.lastError });
         return { success: false, error: this.lastError };
       } finally {
