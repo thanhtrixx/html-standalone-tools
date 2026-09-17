@@ -95,6 +95,70 @@
   let timerDisplayMode = "remaining"; // 'remaining' | 'elapsed'
   let timerSoundEnabled = true;
 
+  const ACTIVE_TIMER_STORAGE_KEY = "habit_active_timer_session";
+
+  /**
+   * Saves active running timer session snapshot to localStorage synchronously
+   */
+  function saveActiveTimerSession(sessionData = null) {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return;
+      if (sessionData) {
+        window.localStorage.setItem(
+          ACTIVE_TIMER_STORAGE_KEY,
+          JSON.stringify(sessionData)
+        );
+        return;
+      }
+      if (!runningTimerHabitId || !runningTimerStartedAt || !store) {
+        clearActiveTimerSession();
+        return;
+      }
+      const habit = store.getHabit(runningTimerHabitId);
+      const targetDate = runningTimerDate || store.getActiveDate();
+      const payload = {
+        habitId: runningTimerHabitId,
+        date: targetDate,
+        startedAt: runningTimerStartedAt,
+        baseValue: runningTimerBaseValue,
+        isRunning: true,
+        lastSavedTimestamp: Date.now(),
+        targetValue: habit ? habit.targetValue : 1200,
+        timerDisplayMode: timerDisplayMode || "remaining",
+        timerSoundEnabled: timerSoundEnabled !== false,
+      };
+      window.localStorage.setItem(
+        ACTIVE_TIMER_STORAGE_KEY,
+        JSON.stringify(payload)
+      );
+    } catch (_) {}
+  }
+
+  /**
+   * Clears active timer session snapshot from localStorage synchronously
+   */
+  function clearActiveTimerSession() {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.removeItem(ACTIVE_TIMER_STORAGE_KEY);
+      }
+    } catch (_) {}
+  }
+
+  /**
+   * Gets active timer session snapshot from localStorage safely
+   */
+  function getActiveTimerSession() {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return null;
+      const raw = window.localStorage.getItem(ACTIVE_TIMER_STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /**
    * Pushes history state for navigation
    */
@@ -1927,6 +1991,7 @@
         }
       } else {
         if (runningTimerHabitId) {
+          saveActiveTimerSession();
           await flushRunningTimerToStorage();
         }
       }
@@ -1938,11 +2003,21 @@
     });
     window.addEventListener("pagehide", () => {
       if (runningTimerHabitId) {
+        saveActiveTimerSession();
         flushRunningTimerToStorage();
       }
     });
+    if (typeof document !== "undefined") {
+      document.addEventListener("freeze", () => {
+        if (runningTimerHabitId) {
+          saveActiveTimerSession();
+          flushRunningTimerToStorage();
+        }
+      });
+    }
     window.addEventListener("beforeunload", () => {
       if (runningTimerHabitId) {
+        saveActiveTimerSession();
         flushRunningTimerToStorage();
       }
     });
@@ -2411,6 +2486,7 @@
       };
     }
     lastTimerPersistedAt = now;
+    saveActiveTimerSession();
     try {
       await store.logHabit(runningTimerHabitId, targetDate, totalSecs);
     } catch (_) {}
@@ -2521,6 +2597,7 @@
 
     // Reactive DOM update across UI components
     updateTimerDom(runningTimerHabitId, nextSeconds, habit.targetValue);
+    saveActiveTimerSession();
 
     // Throttled IndexedDB persistence: flush every 10 seconds
     if (now - lastTimerPersistedAt >= 10000) {
@@ -2610,6 +2687,7 @@
       // Stop Timer - immediate persistence
       await flushRunningTimerToStorage();
       stopTimerTicker();
+      clearActiveTimerSession();
       runningTimerHabitId = null;
       runningTimerDate = null;
       runningTimerStartedAt = null;
@@ -2631,6 +2709,7 @@
     if (runningTimerHabitId) {
       await flushRunningTimerToStorage();
       stopTimerTicker();
+      clearActiveTimerSession();
       const prevHabitId = runningTimerHabitId;
       runningTimerHabitId = null;
       runningTimerDate = null;
@@ -2664,6 +2743,7 @@
     runningTimerTickCount = 0;
     hasTriggeredCelebrationForRun = currentLog.value >= habit.targetValue;
     lastTimerPersistedAt = Date.now();
+    saveActiveTimerSession();
 
     updateAmbientTimerPill();
     startTimerTicker();
@@ -2683,6 +2763,7 @@
 
     if (runningTimerHabitId === habitId) {
       stopTimerTicker();
+      clearActiveTimerSession();
       runningTimerHabitId = null;
       runningTimerDate = null;
       runningTimerStartedAt = null;
@@ -2755,6 +2836,9 @@
   function toggleTimerDisplayMode() {
     timerDisplayMode =
       timerDisplayMode === "remaining" ? "elapsed" : "remaining";
+    if (runningTimerHabitId) {
+      saveActiveTimerSession();
+    }
     if (activeFocusModalHabitId && store) {
       const habit = store.getHabit(activeFocusModalHabitId);
       if (habit) {
@@ -2778,6 +2862,9 @@
    */
   function toggleTimerSound() {
     timerSoundEnabled = !timerSoundEnabled;
+    if (runningTimerHabitId) {
+      saveActiveTimerSession();
+    }
     const lang =
       (store && store.getSettings() && store.getSettings().language) || "vi";
     const soundBtn = document.querySelector(
@@ -2803,7 +2890,7 @@
   async function handleTimerAdjust(habitId, deltaSeconds) {
     if (!store || !habitId) return;
     const habit = store.getHabit(habitId);
-    if (!habit || habit.type !== "duration") return;
+    if (!habit || (habit.type !== "duration" && habit.type !== "timer")) return;
 
     const targetDate =
       runningTimerHabitId === habitId
@@ -2812,6 +2899,7 @@
 
     if (runningTimerHabitId === habitId) {
       runningTimerBaseValue = Math.max(0, runningTimerBaseValue + deltaSeconds);
+      saveActiveTimerSession();
       await syncRunningTimer(false);
     } else {
       const currentLog = (store.state &&
@@ -3120,8 +3208,12 @@
     if (!store) return;
     if (runningTimerHabitId) {
       stopTimerTicker();
+      clearActiveTimerSession();
       runningTimerHabitId = null;
       runningTimerDate = null;
+      runningTimerStartedAt = null;
+      runningTimerBaseValue = 0;
+      runningTimerTickCount = 0;
       updateAmbientTimerPill();
     }
 
@@ -3178,10 +3270,13 @@
     };
 
     if (runningTimerHabitId === habitId) {
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = null;
+      stopTimerTicker();
+      clearActiveTimerSession();
       runningTimerHabitId = null;
       runningTimerDate = null;
+      runningTimerStartedAt = null;
+      runningTimerBaseValue = 0;
+      runningTimerTickCount = 0;
       updateAmbientTimerPill();
     }
 
@@ -4036,6 +4131,10 @@
       habitsSubView = subview;
       renderActiveTab();
     },
+    ACTIVE_TIMER_STORAGE_KEY,
+    saveActiveTimerSession,
+    clearActiveTimerSession,
+    getActiveTimerSession,
     switchModalStage,
     handlePopState,
     setupTabSwipeGestures,

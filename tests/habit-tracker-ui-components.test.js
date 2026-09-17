@@ -6869,6 +6869,120 @@ async function runUITests() {
     !habitsTabHtml555.includes("life-domains-section"),
     "[Issue #556 AC-2] Life Pillars section is removed from Habits tab"
   );
+
+  // ==========================================
+  // [Issue #563] Synchronous localStorage Active Timer Session Snapshot & Lifecycle Persistence
+  // ==========================================
+  console.log(
+    "\n--- [Issue #563] Synchronous localStorage Active Timer Session Snapshot & Lifecycle Persistence ---"
+  );
+
+  const { sandbox: snapshotSandbox } = createHabitTrackerSandbox();
+  await snapshotSandbox.HabitApp.init();
+
+  const app563 = snapshotSandbox.HabitApp;
+  const storageKey =
+    app563.ACTIVE_TIMER_STORAGE_KEY || "habit_active_timer_session";
+
+  // Check initial state: no active timer session stored
+  assert(
+    snapshotSandbox.localStorage.getItem(storageKey) === null,
+    "[Issue #563 AC-1] Initially localStorage has no active timer session"
+  );
+
+  // Start timer for 'h-read'
+  await app563.handleToggleTimer("h-read");
+  const rawSaved1 = snapshotSandbox.localStorage.getItem(storageKey);
+  assert(
+    rawSaved1 !== null,
+    "[Issue #563 AC-2] Starting timer immediately writes snapshot to localStorage"
+  );
+
+  const parsed1 = JSON.parse(rawSaved1);
+  assertEqual(
+    parsed1.habitId,
+    "h-read",
+    "[Issue #563 AC-2] Active session has habitId 'h-read'"
+  );
+  assertEqual(
+    parsed1.isRunning,
+    true,
+    "[Issue #563 AC-2] Active session isRunning is true"
+  );
+  assert(
+    typeof parsed1.startedAt === "number" && parsed1.startedAt > 0,
+    "[Issue #563 AC-2] Active session records numeric startedAt timestamp"
+  );
+  assertEqual(
+    parsed1.timerDisplayMode,
+    "remaining",
+    "[Issue #563 AC-2] Active session records default timerDisplayMode"
+  );
+
+  // Time adjuster +60s updates baseValue & active session
+  await app563.handleTimerAdjust("h-read", 60);
+  const parsedAdjust = JSON.parse(
+    snapshotSandbox.localStorage.getItem(storageKey)
+  );
+  assertEqual(
+    parsedAdjust.baseValue,
+    60,
+    "[Issue #563 AC-3] Adjusting timer (+60s) immediately updates baseValue in localStorage"
+  );
+
+  // Toggling display mode updates snapshot
+  app563.toggleTimerDisplayMode();
+  const parsedMode = JSON.parse(
+    snapshotSandbox.localStorage.getItem(storageKey)
+  );
+  assertEqual(
+    parsedMode.timerDisplayMode,
+    "elapsed",
+    "[Issue #563 AC-4] Toggling timerDisplayMode updates localStorage snapshot"
+  );
+
+  // Toggling sound updates snapshot
+  app563.toggleTimerSound();
+  const parsedSound = JSON.parse(
+    snapshotSandbox.localStorage.getItem(storageKey)
+  );
+  assertEqual(
+    parsedSound.timerSoundEnabled,
+    false,
+    "[Issue #563 AC-4] Toggling timerSoundEnabled updates localStorage snapshot"
+  );
+
+  // Visibilitychange (hidden) executes synchronous snapshot save
+  parsedSound.lastSavedTimestamp = 1;
+  snapshotSandbox.localStorage.setItem(storageKey, JSON.stringify(parsedSound));
+  snapshotSandbox.document.visibilityState = "hidden";
+  snapshotSandbox.document.dispatchEvent({ type: "visibilitychange" });
+  const parsedHidden = JSON.parse(
+    snapshotSandbox.localStorage.getItem(storageKey)
+  );
+  assert(
+    parsedHidden.lastSavedTimestamp > 1,
+    "[Issue #563 AC-5] visibilitychange (hidden) triggers synchronous saveActiveTimerSession"
+  );
+
+  // Stopping / pausing timer clears localStorage
+  await app563.handleToggleTimer("h-read");
+  assert(
+    snapshotSandbox.localStorage.getItem(storageKey) === null,
+    "[Issue #563 AC-6] Stopping/pausing timer clears active timer session from localStorage"
+  );
+
+  // Restarting and resetting timer clears localStorage
+  await app563.handleToggleTimer("h-read");
+  assert(
+    snapshotSandbox.localStorage.getItem(storageKey) !== null,
+    "[Issue #563 AC-7] Restarting timer re-creates active timer session"
+  );
+  await app563.handleResetTimer("h-read");
+  assert(
+    snapshotSandbox.localStorage.getItem(storageKey) === null,
+    "[Issue #563 AC-7] Resetting timer clears active timer session from localStorage"
+  );
 }
 
 runUITests()

@@ -321,11 +321,11 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 1: Synchronous Active Session Snapshot & Page Lifecycle Persistence (P0) — #563
 
-- [ ] Implement `saveActiveTimerSession(session)` and `clearActiveTimerSession()` in `src/app.js` writing to `localStorage` (`habit_active_timer_session`).
-- [ ] Persist active session snapshot payload: `{ habitId, date, startedAt, baseValue, isRunning, lastSavedTimestamp, targetValue, timerDisplayMode, timerSoundEnabled }`.
-- [ ] Invoke synchronous save on timer start (`handleToggleTimer`), pause, reset, time adjust (`timer-adjust`), and 1-second ticker heartbeat.
-- [ ] Bind Page Lifecycle events: `visibilitychange` (`hidden` and `visible`), `pagehide`, `freeze`, `beforeunload`, `focus`.
-- [ ] Clear active session snapshot immediately on explicit pause, timer reset, or habit deletion.
+- [x] Implement `saveActiveTimerSession(session)` and `clearActiveTimerSession()` in `src/app.js` writing to `localStorage` (`habit_active_timer_session`).
+- [x] Persist active session snapshot payload: `{ habitId, date, startedAt, baseValue, isRunning, lastSavedTimestamp, targetValue, timerDisplayMode, timerSoundEnabled }`.
+- [x] Invoke synchronous save on timer start (`handleToggleTimer`), pause, reset, time adjust (`timer-adjust`), and 1-second ticker heartbeat.
+- [x] Bind Page Lifecycle events: `visibilitychange` (`hidden` and `visible`), `pagehide`, `freeze`, `beforeunload`, `focus`.
+- [x] Clear active session snapshot immediately on explicit pause, timer reset, or habit deletion.
 
 ### Slice 2: Cold-Boot Time Reconciliation Engine & 12-Hour Safety Cap (P0) — #564
 
