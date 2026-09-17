@@ -22,6 +22,7 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md`](./docs/adr/0012-starter-kit-carousel-wizard-uncheck-i18n-parity-and-routine-exclusivity.md)
 - [`docs/adr/0013-streamlined-habits-ia-vertical-kits-drag-reorder-timer-format-and-screen-fit.md`](./docs/adr/0013-streamlined-habits-ia-vertical-kits-drag-reorder-timer-format-and-screen-fit.md)
 - [`docs/adr/0014-screen-off-timer-session-persistence-and-cold-boot-reconciliation.md`](./docs/adr/0014-screen-off-timer-session-persistence-and-cold-boot-reconciliation.md)
+- [`docs/adr/0015-cloud-sync-deterministic-3way-merge-encrypted-vault-and-data-portability.md`](./docs/adr/0015-cloud-sync-deterministic-3way-merge-encrypted-vault-and-data-portability.md)
 
 ---
 
@@ -34,7 +35,7 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day responsive full-viewport date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with routine-scoped inline expandability.
 - **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring **4 Core Life Pillars** (Health, Mind, Craft, Discipline) with adherence rings, 52-week GitHub-style contribution heatmap, global aggregate consistency scores (30d/90d), 0-baseline day-of-week adherence charts, streak milestone records, and completion velocity.
 - **Habits Catalog & Manager (`habits`)**: Comprehensive personal habit catalog management (Add, Edit, Drag-and-Drop Reorder, Archive, Delete) and an integrated vertical catalog of **8 Curated Starter Kits**.
-- **Settings & Data Vault (`settings`)**: Configuration hub for streak freeze tokens, vacation pause mode, bilingual language switching (VI/EN), dark/light theme toggle, and 1-click JSON backup/restore & CSV export.
+- **Settings & Data Vault (`settings`)**: Configuration hub for streak freeze tokens, vacation pause mode, bilingual language switching (VI/EN), dark/light theme toggle, **Cloud Sync Hub** (GitHub Gist & Google Drive AppData), **Data Portability** (Interactive JSON Import/Export with AES-GCM-256 encryption, Rich UTF-8 BOM CSV Export & Universal CSV Importer), and **Local Vault Snapshots & Safety Rollback** (rolling last 5 restore points).
   _Avoid_: Sub-header bar, lens switcher, tab page, screen switch, subview switcher.
 
 ---
@@ -127,3 +128,38 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **Local-First Zero-Backend Persistence**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
 - **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage.
   _Avoid_: Un-trapped modals, timeline view, matrix view, sub-11px text, unpadded <44px icon buttons.
+
+---
+
+### 7. Cloud Synchronization, Deterministic 3-Way Merge & Data Portability Hub
+
+- **Dual-Provider Cloud Sync Hub (`#cloud-sync-hub`)**: Multi-device synchronization supporting:
+  - **GitHub Gist**: GitHub Personal Access Token (PAT with `gist` scope) stored securely in client-side IndexedDB, supporting private gists, auto-gist creation, and token revocation.
+  - **Google Drive AppData**: Google OAuth 2.0 Client ID integration saving encrypted or plaintext backups into the application's isolated hidden AppData folder.
+  - **Connection Diagnostics**: Live status badges (`🟢 Connected & Synced`, `🟡 Syncing...`, `🔴 Connection Error`, `⚪ Offline`), relative sync timestamps ("Synced 2m ago"), and 1-tap `[ 🔄 Sync Now ]` manual trigger with tactile rotation.
+- **Calm Debounced Auto-Sync & Lifecycle Resilience**:
+  - Automatically triggers sync on app startup (`initApp`), device reconnection (`online`), and tab focus (`visibilitychange: visible`).
+  - Mutations (habit creation, checkbox check-offs, stepper adjustments, timer session flushes) trigger a **5-second debounced background sync** to prevent API rate-limiting.
+  - Exponential backoff retry on HTTP 429/403 rate-limit responses.
+- **Deterministic 3-Way Merge with Tombstones & Additive Log Union**:
+  - **Entity Modification Timestamps (`updatedAt`)**: Synchronizes habit metadata and user settings via Last-Write-Wins (LWW) per entity.
+  - **Deletion Tombstones (`deleted: true`, `deletedAt`)**: Explicitly tracks deleted habits to propagate deletions across devices rather than resurrecting stale records.
+  - **Additive Daily Log Unions**: Daily logs are merged commutatively across calendar dates without data loss. If competing values exist for the exact same habit on the same date, the maximum progress/latest timestamp is safely preserved.
+  - **Pre-Merge Safety Snapshot**: Captures a local snapshot before every remote merge pull, guaranteeing 1-click local rollback.
+- **Client-Side Zero-Knowledge Encryption (WebCrypto AES-GCM-256 + PBKDF2)**:
+  - Optional user-defined vault passphrase encryption for both Cloud Sync (Gist/Drive) and JSON exports.
+  - Derives 256-bit AES key via PBKDF2 with 100,000 iterations of SHA-256, random 16-byte cryptographic salt, and 12-byte IV.
+  - **Ephemeral In-Memory Key Caching**: Derived `CryptoKey` is held strictly in browser session memory during active execution and never written to plain storage.
+  - **Modal Vault Unlock**: Prompts with an ergonomic unlock dialog upon discovering encrypted payloads on cold boot or new devices.
+- **Interactive JSON Import Inspection & Safety Restoration**:
+  - Modal inspection showing parsed habit count, log date ranges, settings, and detected changes.
+  - **Strategy Selector**: `[ 🔄 Merge & Combine (Safe Additive) ]` vs `[ ⚠️ Replace Entire Database (Clean Restore) ]`.
+  - Automatic **Pre-Import Safety Snapshot** captured in local history before applying changes.
+- **Full-Spectrum CSV Portability & Universal Importer**:
+  - **Analysis-Ready CSV Export**: Formatted with UTF-8 BOM (`\uFEFF`) containing Date, Habit ID, Name, Domain, Routine, Type, Target Value, Logged Value, Unit, Status, Notes, Streaks, and Adherence %.
+  - **Universal Habit Log CSV Importer**: Intelligent header auto-detection supporting standard spreadsheets and exports from Loop Habit Tracker, Everyday, and Habitify, with column mapping and dry-run preview before committing.
+- **Rolling Local Vault Snapshots (Last 5 Versions)**:
+  - Automatically captures snapshot restore points in IndexedDB before destructive or external operations (Cloud Sync pull, File Import, Factory Wipe).
+  - Dedicated "Local Snapshot History" drawer in Settings tab displaying timestamp, trigger reason, habit/log counts, and 1-tap `[ ↩️ Rollback ]`.
+  _Avoid_: Silent overwrites, unencrypted passwords in localStorage, polling loops, hardcoded plain token URLs, un-tombstoned deletions.
+

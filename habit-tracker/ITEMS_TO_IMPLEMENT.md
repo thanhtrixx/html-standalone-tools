@@ -350,8 +350,58 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ---
 
+## ☁️ Cloud Sync, Deterministic 3-Way Merge, Encrypted Vault & Data Portability (ADR-0015)
+
+### Slice 1: Deterministic 3-Way Merge Engine, Entity Timestamps & Deletion Tombstones (P0)
+
+- [ ] Implement deterministic 3-way merge algorithm in `src/sync/merge3.js` comparing base, local, and remote states.
+- [ ] Track entity `updatedAt` timestamps for Last-Write-Wins (LWW) resolution on habit metadata and settings.
+- [ ] Implement deletion tombstones (`{ id, deleted: true, deletedAt }`) in `src/sync/tombstones.js` and storage adapters so deletions propagate across sync nodes.
+- [ ] Implement commutative additive daily log union: merges distinct dates and preserves maximum progress / latest timestamp on colliding same-day logs.
+- [ ] Add unit test suite in `tests/habit-tracker-cloud-sync.test.js` covering 3-way merge matrix (concurrent edits, tombstones, same-day log conflicts, vacation ranges).
+
+### Slice 2: GitHub Gist & Google Drive Cloud Sync Connectors with Calm Debounce & Status Diagnostics (P0)
+
+- [ ] Implement GitHub Gist API connector (PAT validation, secret gist creation/fetching/updating, rate-limit resilience with backoff) in `src/sync/cloud-sync.js`.
+- [ ] Implement Google Drive AppData connector (GIS OAuth 2.0 Client ID integration, `appDataFolder` multipart upload/download).
+- [ ] Implement calm sync engine: 5s debounce on mutations, automatic sync on `initApp`, `online`, and `visibilitychange: visible`.
+- [ ] Wire manual `[ 🔄 Sync Now ]` button with rotating animation and dynamic status badges (`🟢 Connected`, `🟡 Syncing`, `🔴 Error`, `⚪ Offline`).
+- [ ] Add unit tests verifying Gist/Drive API payload generation, HTTP error handling, and debounce logic in `tests/habit-tracker-cloud-sync.test.js`.
+
+### Slice 3: Zero-Knowledge Client-Side Vault Encryption (AES-GCM-256) & Ephemeral Key Management (P1)
+
+- [ ] Integrate WebCrypto AES-GCM-256 + PBKDF2 (100k iterations) with cloud sync payloads and JSON exports when passphrase toggle is enabled.
+- [ ] Manage derived `CryptoKey` in ephemeral in-memory session cache (never stored in plain `localStorage`).
+- [ ] Implement ergonomic "Unlock Encrypted Vault" modal (`#vault-unlock-modal-overlay`) with instant password verification and shake animation on invalid passphrase.
+- [ ] Add unit tests verifying encryption roundtrip, wrong password rejection, and session key lifecycle in `tests/habit-tracker-cloud-sync.test.js`.
+
+### Slice 4: Interactive JSON Import Inspection Modal, Strategy Selector & Auto Safety Snapshot (P1)
+
+- [ ] Create interactive Import Preview Modal (`#import-preview-modal-overlay`) when JSON / `.enc.json` file is chosen.
+- [ ] Display parsed summary: total habits to add/update, log count, date ranges, settings changes, and encrypted status.
+- [ ] Implement strategy selector: `[ 🔄 Merge & Combine (Safe Additive) ]` vs `[ ⚠️ Replace Entire Database (Clean Restore) ]`.
+- [ ] Automatically save a **Pre-Import Safety Snapshot** in IndexedDB before mutating state.
+- [ ] Add unit tests asserting schema parsing, strategy application, and snapshot creation in `tests/habit-tracker-storage-persistence.test.js`.
+
+### Slice 5: Full-Spectrum CSV Portability & Universal Habit Log Importer (P1)
+
+- [ ] Upgrade CSV export with UTF-8 BOM (`\uFEFF`), rich habit metadata, target values, logged values, completion status, notes, streaks, and adherence percentages.
+- [ ] Implement universal CSV importer parsing external tracker formats (Loop Habit Tracker, Everyday, Habitify, custom spreadsheets) with auto-detection of delimiters (`,` vs `;`) and headers (`date`, `habit`, `value`, `notes`).
+- [ ] Implement column mapping preview and dry-run merge into database.
+- [ ] Add unit tests asserting CSV export format with BOM and successful ingestion across external CSV schemas in `tests/habit-tracker-storage-persistence.test.js`.
+
+### Slice 6: Settings IA Overhaul, Local Vault Snapshots History & End-to-End Verification Gate (P0)
+
+- [ ] Restructure Settings tab into the Obsidian Glow 3-card architecture (Cloud Sync Hub, Data Portability, Local Data Vault & Safety History).
+- [ ] Implement rolling snapshot manager storing last 5 restore points with reason, timestamp, and 1-tap `[ ↩️ Rollback ]`.
+- [ ] Update `tests/habit-tracker-ui-components.test.js` and `tests/habit-tracker-i18n.test.js` asserting Settings card structure, snapshot rollback, and bilingual parity.
+- [ ] Verify 100% test pass on `npm run test:habit` and outer gate `npm run verify`.
+
+---
+
 ## 🧪 Verification & DoD Gate
 
-- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
-- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
-- [x] Outer repository gate clean: `npm run verify`.
+- [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [ ] Outer repository gate clean: `npm run verify`.
+

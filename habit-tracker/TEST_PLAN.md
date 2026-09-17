@@ -165,3 +165,33 @@ tests/
   - If habit target was crossed during screen-off sleep, triggers celebration chime (`playTimerCompletionSound`), confetti, and completion toast.
   - Cold app launch with active restored session automatically opens the immersive Focus Timer Modal (`#focus-timer-modal-overlay`).
   - Floating Dynamic Island (`#floating-timer-island`) and Dock Active Pill (`#dock-active-timer-pill`) immediately reflect the restored time and running state.
+
+### 12. Cloud Sync, Deterministic 3-Way Merge, Encrypted Vault & Data Portability (ADR-0015)
+
+- [ ] **Deterministic 3-Way Merge & Deletion Tombstones (`tests/habit-tracker-cloud-sync.test.js`)**:
+  - `merge3` correctly performs Last-Write-Wins on conflicting habit properties and settings based on `updatedAt`.
+  - Deletion tombstones (`deleted: true`, `deletedAt`) propagate across local and remote states without resurrected entities.
+  - Daily habit logs are merged additively across calendar dates without dropping records.
+  - Concurrent same-day log collisions preserve the maximum completed progress / latest timestamp.
+  - Pre-merge snapshot is safely saved to IndexedDB before applying remote mutations.
+- [ ] **Cloud Sync Connectors & Calm Sync Engine (`tests/habit-tracker-cloud-sync.test.js`)**:
+  - GitHub Gist API: Formats valid Gist payloads, handles PAT validation, creates new private gists, and updates existing gists.
+  - Google Drive AppData: Formats valid multipart AppData uploads and downloads.
+  - Calm sync debouncer triggers 5 seconds after mutation and handles rapid bursts cleanly.
+  - Rate limiting (HTTP 429/403) triggers exponential backoff without crashing the application.
+  - Live status indicator reflects `connected`, `syncing`, `error`, and `offline` states.
+- [ ] **Zero-Knowledge Client-Side Encryption (`tests/habit-tracker-cloud-sync.test.js`)**:
+  - AES-GCM-256 + PBKDF2 encrypts and decrypts state payloads faithfully.
+  - Invalid passphrase throws descriptive error safely without corrupting stored data.
+  - Ephemeral session key cache isolates `CryptoKey` in memory and prevents `localStorage` key leakage.
+- [ ] **Interactive JSON Import Inspection & Safety Snapshots (`tests/habit-tracker-storage-persistence.test.js`)**:
+  - Validates schema, parses habit/log counts and date ranges, and opens the preview modal.
+  - Applies `Merge` strategy additively and `Replace` strategy cleanly after database reset.
+  - Automatically captures a pre-import rollback snapshot in the `snapshots` store.
+- [ ] **Full-Spectrum CSV Portability & Universal Importer (`tests/habit-tracker-storage-persistence.test.js`)**:
+  - Generates valid UTF-8 BOM CSV containing full habit metadata, logs, notes, streaks, and adherence percentages.
+  - Ingests external CSV formats (Loop, Everyday, Habitify, spreadsheets) with delimiter auto-detection and column mapping.
+- [ ] **Settings IA Overhaul & Snapshot History (`tests/habit-tracker-ui-components.test.js`)**:
+  - Renders 3-card Settings layout (Cloud Sync, Data Portability, Local Data Vault).
+  - Rolling snapshot drawer lists last 5 snapshots and performs 1-click restore cleanly.
+
