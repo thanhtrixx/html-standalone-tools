@@ -511,6 +511,10 @@
       return snap;
     }
 
+    async saveSnapshot(reason = "manual") {
+      return await this.createSnapshot(reason);
+    }
+
     async getSnapshots() {
       if (this.storage.getSnapshots) {
         return await this.storage.getSnapshots();
@@ -594,9 +598,9 @@
         this.state._deleted || { habits: {}, vacations: {} };
       this.state._deleted = nextDeleted;
 
-      // Persist to storage
+      // Persist to storage (preserving historical snapshots)
       if (typeof this.storage.clearAll === "function") {
-        await this.storage.clearAll();
+        await this.storage.clearAll(true);
       }
 
       for (const h of nextHabits) {

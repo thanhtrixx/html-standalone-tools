@@ -890,6 +890,227 @@ async function runStorageTests() {
     starterStore.getHabits().length >= 4,
     "[Issue #475 AC-3] Store contains created starter habits"
   );
+
+  // ==========================================
+  // [Issue #575 / ADR-0015 Slice 4] Interactive Import Inspection & Safety Snapshot
+  // ==========================================
+  console.log(
+    "--- [Issue #575] Interactive Import Inspection, Strategy Selector & Safety Snapshot ---"
+  );
+
+  const importInspectStorage = createMockStorage();
+  const importInspectStore = new HabitStore({
+    storage: storageModule.createStorageAdapter({
+      fallbackStorage: importInspectStorage,
+      forceFallback: true,
+    }),
+  });
+  await importInspectStore.init();
+
+  // Seed baseline habits and logs
+  const baseHabitA = {
+    id: "h-base-1",
+    name: "Base Habit 1",
+    type: "binary",
+    targetValue: 1,
+    routines: ["morning"],
+    routine: "morning",
+    createdAt: "2026-09-01T00:00:00.000Z",
+    updatedAt: "2026-09-01T00:00:00.000Z",
+  };
+  const baseHabitB = {
+    id: "h-base-2",
+    name: "Base Habit 2",
+    type: "numeric",
+    targetValue: 2000,
+    unit: "ml",
+    routines: ["afternoon"],
+    routine: "afternoon",
+    createdAt: "2026-09-01T00:00:00.000Z",
+    updatedAt: "2026-09-01T00:00:00.000Z",
+  };
+  await importInspectStore.addHabit(baseHabitA);
+  await importInspectStore.addHabit(baseHabitB);
+  await importInspectStore.logHabit(
+    "h-base-1",
+    "2026-09-10",
+    1,
+    true,
+    "Note 1"
+  );
+
+  // Incoming backup payload
+  const incomingBackupPayload = {
+    app: "atomic-habit-tracker",
+    version: "1.0.0",
+    exportedAt: "2026-09-17T12:00:00.000Z",
+    data: {
+      habits: [
+        {
+          id: "h-base-1",
+          name: "Base Habit 1 (Updated Remotely)",
+          type: "binary",
+          targetValue: 1,
+          routines: ["morning"],
+          routine: "morning",
+          createdAt: "2026-09-01T00:00:00.000Z",
+          updatedAt: "2026-09-15T00:00:00.000Z",
+        },
+        {
+          id: "h-incoming-3",
+          name: "New Imported Habit",
+          type: "binary",
+          targetValue: 1,
+          routines: ["evening"],
+          routine: "evening",
+          createdAt: "2026-09-12T00:00:00.000Z",
+          updatedAt: "2026-09-12T00:00:00.000Z",
+        },
+      ],
+      logs: [
+        {
+          id: "h-base-1_2026-09-10",
+          habitId: "h-base-1",
+          date: "2026-09-10",
+          value: 1,
+          completed: true,
+          notes: "Updated note",
+        },
+        {
+          id: "h-incoming-3_2026-09-15",
+          habitId: "h-incoming-3",
+          date: "2026-09-15",
+          value: 1,
+          completed: true,
+        },
+        {
+          id: "h-incoming-3_2026-09-16",
+          habitId: "h-incoming-3",
+          date: "2026-09-16",
+          value: 1,
+          completed: true,
+        },
+      ],
+      settings: {
+        theme: "dark",
+        language: "en",
+      },
+      vacations: [],
+    },
+  };
+
+  // 1. inspectImportPayload calculates diff correctly
+  const diffResult = exportImport.inspectImportPayload(
+    incomingBackupPayload,
+    importInspectStore.state
+  );
+  assertEqual(
+    diffResult.incomingHabitsCount,
+    2,
+    "[Issue #575 AC-1] Accurately reports total incoming habits count"
+  );
+  assertEqual(
+    diffResult.newHabitsCount,
+    1,
+    "[Issue #575 AC-1] Accurately reports new habits count"
+  );
+  assertEqual(
+    diffResult.updatedHabitsCount,
+    1,
+    "[Issue #575 AC-1] Accurately reports updated existing habits count"
+  );
+  assertEqual(
+    diffResult.incomingLogsCount,
+    3,
+    "[Issue #575 AC-1] Accurately reports incoming logs count"
+  );
+  assertEqual(
+    diffResult.dateSpan.minDate,
+    "2026-09-10",
+    "[Issue #575 AC-1] Accurately reports minDate in date span"
+  );
+  assertEqual(
+    diffResult.dateSpan.maxDate,
+    "2026-09-16",
+    "[Issue #575 AC-1] Accurately reports maxDate in date span"
+  );
+
+  // 2. Pre-import snapshot is automatically captured
+  const preSnapshot =
+    await importInspectStore.saveSnapshot("pre_import_backup");
+  assert(
+    preSnapshot && preSnapshot.id,
+    "[Issue #575 AC-4] Captures pre-import safety snapshot before mutating state"
+  );
+  const snapshotsList = await importInspectStore.getSnapshots();
+  assert(
+    snapshotsList.some((s) => s.reason === "pre_import_backup"),
+    "[Issue #575 AC-4] Pre-import snapshot exists in IndexedDB snapshots store"
+  );
+
+  // 3. Test "Merge & Combine" strategy
+  const mergedState = await exportImport.mergeHabitStates(
+    importInspectStore.state,
+    incomingBackupPayload,
+    "merge"
+  );
+  await importInspectStore.replaceState(mergedState);
+
+  // Verifies additive merge: original h-base-2 is preserved, h-incoming-3 is added, h-base-1 is merged
+  assertEqual(
+    importInspectStore.getHabits().length,
+    3,
+    "[Issue #575 AC-2] Merge preserves existing records additively (3 total habits)"
+  );
+  assert(
+    importInspectStore.getHabit("h-base-2") !== undefined,
+    "[Issue #575 AC-2] Original untouched habit remains intact"
+  );
+  assert(
+    importInspectStore.getHabit("h-incoming-3") !== undefined,
+    "[Issue #575 AC-2] Newly imported habit is present"
+  );
+
+  // 4. Test "Replace Entire Database" strategy
+  const replaceState = await exportImport.mergeHabitStates(
+    importInspectStore.state,
+    incomingBackupPayload,
+    "replace"
+  );
+  await importInspectStore.replaceState(replaceState);
+
+  // Verifies replace wipes existing h-base-2 and loads only backup habits
+  assertEqual(
+    importInspectStore.getHabits().length,
+    2,
+    "[Issue #575 AC-3] Replace strategy wipes old state and leaves exactly 2 backup habits"
+  );
+  assertEqual(
+    importInspectStore.getHabit("h-base-2"),
+    null,
+    "[Issue #575 AC-3] Habit not present in backup is cleanly removed"
+  );
+  assert(
+    importInspectStore.getHabit("h-incoming-3") !== null,
+    "[Issue #575 AC-3] Incoming habit is loaded"
+  );
+
+  // 5. Test Rollback to Safety Snapshot
+  await importInspectStore.restoreSnapshot(preSnapshot.id);
+  assertEqual(
+    importInspectStore.getHabits().length,
+    2,
+    "[Issue #575 AC-4] Restoring pre-import snapshot returns habit count to original 2"
+  );
+  assert(
+    importInspectStore.getHabit("h-base-2") !== null,
+    "[Issue #575 AC-4] Original habit restored from snapshot"
+  );
+  assertEqual(
+    importInspectStore.getHabit("h-incoming-3"),
+    null,
+    "[Issue #575 AC-4] Imported habit from aborted import is gone after rollback"
+  );
 }
 
 runStorageTests()

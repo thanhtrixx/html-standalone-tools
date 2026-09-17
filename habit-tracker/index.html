@@ -520,6 +520,20 @@
       <div id="vault-unlock-container" class="w-full max-w-md my-auto"></div>
     </div>
 
+    <!-- ==================== INTERACTIVE IMPORT PREVIEW MODAL OVERLAY ==================== -->
+    <div
+      id="import-preview-modal-overlay"
+      class="fixed inset-0 z-[70] bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="import-preview-title"
+      onclick="
+        if (event.target === this) window.HabitApp.closeImportPreviewModal();
+      "
+    >
+      <div id="import-preview-container" class="w-full max-w-lg my-auto"></div>
+    </div>
+
     <!-- ==================== 100% VICTORY CONFETTI CANVAS ==================== -->
     <canvas
       id="confetti-canvas"

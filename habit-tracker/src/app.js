@@ -101,6 +101,8 @@
   let timerSoundEnabled = true;
   let cloudSyncManager = null;
   let vaultUnlockPendingCallback = null;
+  let pendingImportData = null;
+  let selectedImportStrategy = "merge";
 
   const ACTIVE_TIMER_STORAGE_KEY = "habit_active_timer_session";
 
@@ -4272,15 +4274,174 @@
             ),
             "error"
           );
+          if (event.target) event.target.value = "";
           return;
         }
-        const merged = exportImport.mergeHabitStates(
-          store.state,
-          res.data,
-          "merge"
+        pendingImportData = res.data;
+        selectedImportStrategy = "merge";
+        if (event.target) event.target.value = "";
+        HabitApp.openImportPreviewModal();
+      } catch (err) {
+        if (event.target) event.target.value = "";
+        notify(
+          i18n.t("toast_import_error", { message: err.message }, lang),
+          "error"
         );
-        await store.replaceState(merged);
+      }
+    },
+
+    openImportPreviewModal() {
+      if (!pendingImportData) return;
+      const overlay = document.getElementById("import-preview-modal-overlay");
+      const container = document.getElementById("import-preview-container");
+      if (!overlay || !container) return;
+
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+
+      const diff = exportImport.inspectImportPayload(
+        pendingImportData,
+        store && store.state
+      );
+
+      const dateSpanText = diff.dateSpan
+        ? `${diff.dateSpan.minDate} → ${diff.dateSpan.maxDate}`
+        : i18n.t("import_no_date_span", {}, lang);
+
+      container.innerHTML = `
+        <div id="import-preview-card" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+          <!-- Header -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">📥</span>
+              <div>
+                <h3 id="import-preview-title" class="text-base font-black text-slate-900 dark:text-white">${i18n.t("import_preview_title", {}, lang)}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("import_preview_desc", {}, lang)}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closeImportPreviewModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <!-- Diff Stat Grid -->
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+              <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">${i18n.t("import_stat_habits", {}, lang)}</span>
+              <div class="flex items-baseline gap-1.5 mt-0.5">
+                <span class="text-lg font-black text-slate-900 dark:text-white">${diff.incomingHabitsCount}</span>
+                <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">(${diff.newHabitsCount} ${i18n.t("import_stat_new", {}, lang)}, ${diff.updatedHabitsCount} ${i18n.t("import_stat_existing", {}, lang)})</span>
+              </div>
+            </div>
+            <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+              <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">${i18n.t("import_stat_logs", {}, lang)}</span>
+              <div class="flex items-baseline gap-1.5 mt-0.5">
+                <span class="text-lg font-black text-slate-900 dark:text-white">${diff.incomingLogsCount}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+            <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">${i18n.t("import_stat_date_range", {}, lang)}</span>
+            <span class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5 block">${dateSpanText}</span>
+          </div>
+
+          <!-- Strategy Selection -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block">${i18n.t("import_strategy_title", {}, lang)}</label>
+            <div class="space-y-2">
+              <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition ${selectedImportStrategy === "merge" ? "border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30" : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"}" onclick="window.HabitApp.selectImportStrategy('merge')">
+                <input type="radio" name="import-strategy" value="merge" ${selectedImportStrategy === "merge" ? "checked" : ""} class="mt-0.5 text-indigo-600 focus:ring-indigo-500" />
+                <div>
+                  <div class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>🔄</span> ${i18n.t("import_strategy_merge_title", {}, lang)}
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">${i18n.t("import_strategy_merge_desc", {}, lang)}</p>
+                </div>
+              </label>
+              <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition ${selectedImportStrategy === "replace" ? "border-amber-500 bg-amber-50/50 dark:bg-amber-950/30" : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"}" onclick="window.HabitApp.selectImportStrategy('replace')">
+                <input type="radio" name="import-strategy" value="replace" ${selectedImportStrategy === "replace" ? "checked" : ""} class="mt-0.5 text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>⚠️</span> ${i18n.t("import_strategy_replace_title", {}, lang)}
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">${i18n.t("import_strategy_replace_desc", {}, lang)}</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Safety Snapshot Notice -->
+          <div class="p-3 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/60 flex items-center gap-2.5">
+            <span class="text-lg">🛡️</span>
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">${i18n.t("import_snapshot_notice", {}, lang)}</p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex items-center gap-3 pt-1">
+            <button
+              type="button"
+              onclick="window.HabitApp.closeImportPreviewModal()"
+              class="flex-1 py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-xs transition cursor-pointer"
+            >
+              ${i18n.t("import_cancel_btn", {}, lang)}
+            </button>
+            <button
+              type="button"
+              id="confirm-import-btn"
+              onclick="window.HabitApp.confirmImport()"
+              class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold rounded-2xl text-xs shadow-lg shadow-indigo-500/25 transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>📥</span> ${i18n.t("import_confirm_btn", {}, lang)}
+            </button>
+          </div>
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+    },
+
+    closeImportPreviewModal() {
+      const overlay = document.getElementById("import-preview-modal-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      pendingImportData = null;
+    },
+
+    selectImportStrategy(strategy) {
+      selectedImportStrategy = strategy;
+      HabitApp.openImportPreviewModal();
+    },
+
+    async confirmImport() {
+      if (!pendingImportData) return;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      try {
+        // 1. Automatically capture pre-import safety rollback snapshot
+        if (store && typeof store.saveSnapshot === "function") {
+          await store.saveSnapshot("pre_import_backup");
+        }
+
+        // 2. Perform merge or replace
+        const nextState = await exportImport.mergeHabitStates(
+          store.state,
+          pendingImportData,
+          selectedImportStrategy
+        );
+
+        if (store && typeof store.replaceState === "function") {
+          await store.replaceState(nextState);
+        }
+
+        HabitApp.closeImportPreviewModal();
         notify(i18n.t("toast_import_success", {}, lang), "success");
+        renderActiveTab();
+
+        // 3. Schedule calm cloud auto-sync if connected
+        if (cloudSyncManager && cloudSyncManager.activeProvider !== "none") {
+          cloudSyncManager.scheduleDebouncedSync();
+        }
       } catch (err) {
         notify(
           i18n.t("toast_import_error", { message: err.message }, lang),
@@ -5014,6 +5175,12 @@
     setupTabSwipeGestures,
     get cloudSyncManager() {
       return cloudSyncManager;
+    },
+    get pendingImportData() {
+      return pendingImportData;
+    },
+    get selectedImportStrategy() {
+      return selectedImportStrategy;
     },
     formatRelativeTime,
   };

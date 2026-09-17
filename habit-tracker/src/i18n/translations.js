@@ -212,6 +212,27 @@
       import_merge: "Merge with Existing",
       import_replace: "Replace All",
       import_success: "Data imported successfully!",
+      import_preview_title: "Import Data Preview",
+      import_preview_desc:
+        "Review backup file content and select import strategy below.",
+      import_stat_habits: "Habits",
+      import_stat_logs: "Check-in Logs",
+      import_stat_date_range: "Date Span",
+      import_stat_settings: "Settings",
+      import_stat_new: "new",
+      import_stat_existing: "existing",
+      import_strategy_title: "Select Import Strategy",
+      import_strategy_merge_title: "Merge & Combine (Safe Additive)",
+      import_strategy_merge_desc:
+        "Combines habits and logs additively. No existing records will be deleted.",
+      import_strategy_replace_title: "Replace Entire Database (Clean Restore)",
+      import_strategy_replace_desc:
+        "Wipes all current data and restores the exact state from this backup.",
+      import_snapshot_notice:
+        "🛡️ A rollback safety snapshot will be automatically created before importing.",
+      import_confirm_btn: "Confirm & Import Data",
+      import_cancel_btn: "Cancel",
+      import_no_date_span: "No logs recorded",
       export_success: "JSON backup downloaded",
       cloud_sync_now: "Sync Now",
       cloud_syncing: "Syncing...",
@@ -644,6 +665,28 @@
       import_merge: "Gộp với dữ liệu cũ",
       import_replace: "Ghi đè tất cả",
       import_success: "Nhập dữ liệu thành công!",
+      import_preview_title: "Xem trước dữ liệu nhập",
+      import_preview_desc:
+        "Kiểm tra nội dung tệp sao lưu và chọn phương thức nhập bên dưới.",
+      import_stat_habits: "Thói quen",
+      import_stat_logs: "Nhật ký điểm danh",
+      import_stat_date_range: "Khoảng thời gian",
+      import_stat_settings: "Cài đặt",
+      import_stat_new: "mới",
+      import_stat_existing: "đã có",
+      import_strategy_title: "Chọn phương thức nhập",
+      import_strategy_merge_title:
+        "Gộp dữ liệu (An toàn, giữ nguyên dữ liệu cũ)",
+      import_strategy_merge_desc:
+        "Bổ sung thói quen và nhật ký vào dữ liệu hiện có. Không xóa dữ liệu cũ.",
+      import_strategy_replace_title: "Ghi đè toàn bộ (Khôi phục nguyên trạng)",
+      import_strategy_replace_desc:
+        "Xóa dữ liệu hiện tại và khôi phục chính xác trạng thái từ tệp sao lưu này.",
+      import_snapshot_notice:
+        "🛡️ Bản sao lưu an toàn sẽ tự động được tạo trước khi nhập để có thể hoàn tác.",
+      import_confirm_btn: "Xác nhận & Nhập dữ liệu",
+      import_cancel_btn: "Hủy",
+      import_no_date_span: "Chưa có nhật ký",
       export_success: "Đã tải về bản sao lưu JSON",
       cloud_sync_now: "Đồng bộ ngay",
       cloud_syncing: "Đang đồng bộ...",
