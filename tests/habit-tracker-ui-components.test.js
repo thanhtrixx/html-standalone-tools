@@ -6983,6 +6983,131 @@ async function runUITests() {
     snapshotSandbox.localStorage.getItem(storageKey) === null,
     "[Issue #563 AC-7] Resetting timer clears active timer session from localStorage"
   );
+
+  // ==========================================
+  // [Issue #564] Cold-Boot Time Reconciliation Engine, 12-Hour Safety Cap & Date Rollover
+  // ==========================================
+  console.log(
+    "\n--- [Issue #564] Cold-Boot Time Reconciliation Engine, 12-Hour Safety Cap & Date Rollover ---"
+  );
+
+  // 1. Cold boot restoration with active session
+  const { sandbox: coldBootSandbox } = createHabitTrackerSandbox();
+  const fakeStartTime = Date.now() - 300 * 1000; // 300s (5m) ago
+  const activeSessionMock = {
+    habitId: "h-read",
+    date: "2026-09-17",
+    startedAt: fakeStartTime,
+    baseValue: 100,
+    isRunning: true,
+    lastSavedTimestamp: fakeStartTime + 10000,
+    targetValue: 1200,
+    timerDisplayMode: "remaining",
+    timerSoundEnabled: true,
+  };
+  coldBootSandbox.localStorage.setItem(
+    "habit_active_timer_session",
+    JSON.stringify(activeSessionMock)
+  );
+
+  // Initialize app (simulates cold boot)
+  await coldBootSandbox.HabitApp.init();
+
+  const app564 = coldBootSandbox.HabitApp;
+  const store564 = app564.store;
+
+  assertEqual(
+    app564.runningTimerHabitId,
+    "h-read",
+    "[Issue #564 AC-1] Cold boot restores runningTimerHabitId"
+  );
+  assertEqual(
+    app564.runningTimerStartedAt,
+    fakeStartTime,
+    "[Issue #564 AC-1] Cold boot restores runningTimerStartedAt"
+  );
+
+  // Check log value reconciled with ~300s elapsed + 100s baseValue = ~400s
+  const restoredLog = store564.state.logs["h-read_2026-09-17"];
+  assert(
+    restoredLog && restoredLog.value >= 400 && restoredLog.value <= 405,
+    `[Issue #564 AC-1] Cold boot reconciles elapsed timestamp delta (expected ~400s, got ${restoredLog ? restoredLog.value : null})`
+  );
+
+  // 2. Date Rollover: Attribution to originating session date across midnight boundary
+  const { sandbox: midnightSandbox } = createHabitTrackerSandbox();
+  const midnightStartTime = Date.now() - 600 * 1000; // 10 mins ago
+  const midnightSession = {
+    habitId: "h-read",
+    date: "2026-09-16", // Yesterday
+    startedAt: midnightStartTime,
+    baseValue: 200,
+    isRunning: true,
+    lastSavedTimestamp: midnightStartTime,
+    targetValue: 1200,
+    timerDisplayMode: "remaining",
+    timerSoundEnabled: true,
+  };
+  midnightSandbox.localStorage.setItem(
+    "habit_active_timer_session",
+    JSON.stringify(midnightSession)
+  );
+  await midnightSandbox.HabitApp.init();
+
+  const midnightLog =
+    midnightSandbox.HabitApp.store.state.logs["h-read_2026-09-16"];
+  assert(
+    midnightLog && midnightLog.value >= 800 && midnightLog.value <= 805,
+    `[Issue #564 AC-2] Seconds are attributed to session.date (yesterday) without splitting (got ${midnightLog ? midnightLog.value : null})`
+  );
+
+  // 3. 12-Hour Stale Session Safety Cap (> 43200s)
+  const { sandbox: staleSandbox } = createHabitTrackerSandbox();
+  const staleStartTime = Date.now() - 15 * 3600 * 1000; // 15 hours ago
+  const staleSession = {
+    habitId: "h-read",
+    date: "2026-09-17",
+    startedAt: staleStartTime,
+    baseValue: 0,
+    isRunning: true,
+    lastSavedTimestamp: staleStartTime,
+    targetValue: 1200,
+    timerDisplayMode: "remaining",
+    timerSoundEnabled: true,
+  };
+  staleSandbox.localStorage.setItem(
+    "habit_active_timer_session",
+    JSON.stringify(staleSession)
+  );
+  await staleSandbox.HabitApp.init();
+
+  // Active session should be cleared and capped at 43200s (12h)
+  assert(
+    staleSandbox.localStorage.getItem("habit_active_timer_session") === null,
+    "[Issue #564 AC-3] Stale session (>12h) is cleared from localStorage"
+  );
+  assert(
+    staleSandbox.HabitApp.runningTimerHabitId === null,
+    "[Issue #564 AC-3] Stale session does not leave runningTimerHabitId active"
+  );
+  const staleLog = staleSandbox.HabitApp.store.state.logs["h-read_2026-09-17"];
+  assertEqual(
+    staleLog.value,
+    43200,
+    "[Issue #564 AC-3] Stale session log is capped at exactly 12 hours (43200s)"
+  );
+
+  // 4. Corrupted JSON resilience
+  const { sandbox: corruptSandbox } = createHabitTrackerSandbox();
+  corruptSandbox.localStorage.setItem(
+    "habit_active_timer_session",
+    "{invalid json"
+  );
+  await corruptSandbox.HabitApp.init();
+  assert(
+    corruptSandbox.HabitApp.runningTimerHabitId === null,
+    "[Issue #564 AC-4] Corrupted JSON session is ignored gracefully without errors"
+  );
 }
 
 runUITests()

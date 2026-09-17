@@ -307,6 +307,8 @@
       timer_pause: "Pause",
       timer_resume: "Resume",
       toast_timer_reset: "Timer reset to 0",
+      toast_timer_session_expired:
+        "Timer session reached maximum 12-hour limit and was saved",
       minutes_unit: "mins",
       focus_timer_title: "Focus Session",
       focus_timer_remaining: "Remaining",
@@ -687,6 +689,8 @@
       timer_pause: "Tạm dừng",
       timer_resume: "Tiếp tục",
       toast_timer_reset: "Đã đặt lại thời gian về 0",
+      toast_timer_session_expired:
+        "Phiên hẹn giờ đã đạt giới hạn 12 giờ và được lưu lại",
       minutes_unit: "phút",
       focus_timer_title: "Phiên Tập Trung",
       focus_timer_remaining: "Thời gian còn lại",

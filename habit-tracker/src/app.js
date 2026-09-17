@@ -159,6 +159,137 @@
     }
   }
 
+  const MAX_ACTIVE_TIMER_SESSION_SECONDS = 12 * 3600; // 12-hour safety cap
+
+  /**
+   * Reconciles and restores active timer session from localStorage on cold boot or screen wake
+   */
+  async function restoreActiveTimerSession(options = {}) {
+    if (!store) return null;
+    const session = getActiveTimerSession();
+    if (
+      !session ||
+      !session.habitId ||
+      !session.startedAt ||
+      session.isRunning !== true
+    ) {
+      return null;
+    }
+
+    const habit = store.getHabit(session.habitId);
+    if (!habit || habit.archived) {
+      clearActiveTimerSession();
+      return null;
+    }
+
+    const now = Date.now();
+    const elapsedSeconds = Math.max(
+      0,
+      Math.floor((now - Number(session.startedAt)) / 1000)
+    );
+
+    // 12-Hour Stale Session Safety Cap: prevent runaway duration if abandoned
+    if (elapsedSeconds > MAX_ACTIVE_TIMER_SESSION_SECONDS) {
+      const cappedTotal =
+        (Number(session.baseValue) || 0) + MAX_ACTIVE_TIMER_SESSION_SECONDS;
+      const targetDate = session.date || store.getActiveDate();
+      try {
+        await store.logHabit(session.habitId, targetDate, cappedTotal);
+      } catch (_) {}
+      clearActiveTimerSession();
+      runningTimerHabitId = null;
+      runningTimerDate = null;
+      runningTimerStartedAt = null;
+      runningTimerBaseValue = 0;
+      runningTimerTickCount = 0;
+      updateAmbientTimerPill();
+      renderActiveTab();
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      showToast(
+        i18n.t("toast_timer_session_expired", {}, lang) ||
+          "Focus timer session capped at 12 hours",
+        "info"
+      );
+      return { expired: true, cappedTotal };
+    }
+
+    const targetDate = session.date || store.getActiveDate();
+    const baseValue = Number(session.baseValue) || 0;
+    const totalSecs = baseValue + elapsedSeconds;
+    const targetValue = habit.targetValue || 1200;
+    const isCompleted = totalSecs >= targetValue;
+    const crossedTargetInSleep = isCompleted && baseValue < targetValue;
+
+    // Hydrate in-memory state
+    runningTimerHabitId = session.habitId;
+    runningTimerDate = targetDate;
+    runningTimerStartedAt = session.startedAt;
+    runningTimerBaseValue = baseValue;
+    runningTimerTickCount = elapsedSeconds;
+    timerDisplayMode = session.timerDisplayMode || "remaining";
+    timerSoundEnabled = session.timerSoundEnabled !== false;
+    hasTriggeredCelebrationForRun = isCompleted;
+    lastTimerPersistedAt = now;
+
+    // Update in-memory log cache
+    if (store.state && store.state.logs) {
+      const existing =
+        store.state.logs[`${session.habitId}_${targetDate}`] || {};
+      store.state.logs[`${session.habitId}_${targetDate}`] = {
+        ...existing,
+        id: `${session.habitId}_${targetDate}`,
+        habitId: session.habitId,
+        date: targetDate,
+        value: totalSecs,
+        completed: isCompleted,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+
+    // Persist to storage
+    try {
+      await store.logHabit(session.habitId, targetDate, totalSecs);
+    } catch (_) {}
+
+    // Save updated heartbeat
+    saveActiveTimerSession();
+
+    // Start background ticker
+    startTimerTicker();
+    updateAmbientTimerPill();
+    renderActiveTab();
+    refreshDetailSheetIfOpen(session.habitId, targetDate);
+
+    // Target crossed celebration
+    if (crossedTargetInSleep) {
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      showToast(
+        `🎉 ${i18n.t("timer_completed", {}, lang)} (${habit.name})`,
+        "success"
+      );
+      if (timerSoundEnabled) {
+        playTimerCompletionSound();
+      }
+      if (todayView && typeof todayView.triggerVictoryConfetti === "function") {
+        todayView.triggerVictoryConfetti();
+      }
+    }
+
+    // Auto open focus modal on cold boot if requested/configured
+    if (options.isColdBoot) {
+      openFocusTimerModal(session.habitId);
+    }
+
+    return {
+      restored: true,
+      habitId: session.habitId,
+      totalSecs,
+      crossedTargetInSleep,
+    };
+  }
+
   /**
    * Pushes history state for navigation
    */
@@ -403,6 +534,9 @@
     renderApp();
     setupEventListeners();
     setupPwaServiceWorker();
+
+    // Reconcile and restore active running timer session if present
+    await restoreActiveTimerSession({ isColdBoot: true });
 
     // Schedule local notifications if permitted
     if (notifications && notifications.scheduleHabitReminders) {
@@ -1988,6 +2122,8 @@
         if (runningTimerHabitId) {
           await requestWakeLock();
           syncRunningTimer();
+        } else {
+          await restoreActiveTimerSession();
         }
       } else {
         if (runningTimerHabitId) {
@@ -1999,6 +2135,8 @@
     window.addEventListener("focus", () => {
       if (runningTimerHabitId) {
         syncRunningTimer();
+      } else {
+        restoreActiveTimerSession();
       }
     });
     window.addEventListener("pagehide", () => {
@@ -4132,9 +4270,11 @@
       renderActiveTab();
     },
     ACTIVE_TIMER_STORAGE_KEY,
+    MAX_ACTIVE_TIMER_SESSION_SECONDS,
     saveActiveTimerSession,
     clearActiveTimerSession,
     getActiveTimerSession,
+    restoreActiveTimerSession,
     switchModalStage,
     handlePopState,
     setupTabSwipeGestures,
