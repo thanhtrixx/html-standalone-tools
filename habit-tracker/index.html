@@ -464,6 +464,30 @@
       <div id="identity-wizard-container" class="w-full max-w-xl my-auto"></div>
     </div>
 
+    <!-- ==================== GITHUB GIST CONFIG MODAL OVERLAY ==================== -->
+    <div
+      id="gist-config-modal-overlay"
+      class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="gist-modal-title"
+      onclick="if (event.target === this) window.HabitApp.closeGistModal();"
+    >
+      <div id="gist-config-container" class="w-full max-w-md my-auto"></div>
+    </div>
+
+    <!-- ==================== GOOGLE DRIVE CONFIG MODAL OVERLAY ==================== -->
+    <div
+      id="drive-config-modal-overlay"
+      class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drive-modal-title"
+      onclick="if (event.target === this) window.HabitApp.closeDriveModal();"
+    >
+      <div id="drive-config-container" class="w-full max-w-md my-auto"></div>
+    </div>
+
     <!-- ==================== 100% VICTORY CONFETTI CANVAS ==================== -->
     <canvas
       id="confetti-canvas"
@@ -520,6 +544,7 @@
     <script src="src/state/store.js"></script>
     <script src="src/sync/export-import.js"></script>
     <script src="src/sync/cloud-backup.js"></script>
+    <script src="src/sync/cloud-sync.js"></script>
     <script src="src/pwa/notifications.js"></script>
     <script src="src/ui/components.js"></script>
     <script src="src/ui/today-view.js"></script>

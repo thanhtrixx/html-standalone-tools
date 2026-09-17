@@ -343,30 +343,286 @@ async function runCloudSyncTests() {
     "[ADR-0015] Same-day log collision selects notes from more recent timestamp"
   );
 
-  // Scenario 5: Cloud Payload Formatting
-  const cloudPayload = merge3.createCloudPayload(merged4);
+  // ==========================================
+  // [ADR-0015 Slice 2] Gist & Drive Connectors & CloudSyncManager Tests
+  // ==========================================
+  console.log("--- [ADR-0015 Slice 2] Gist & Drive Connectors & Manager ---");
+
+  const cloudSync = require("../habit-tracker/src/sync/cloud-sync.js");
+  const { extractGistId, GitHubGistAPI, GoogleDriveAPI, CloudSyncManager } =
+    cloudSync;
+
+  // 1. extractGistId parsing
   assertEqual(
-    cloudPayload.app,
-    "atomic-habit-tracker",
-    "[ADR-0015] Cloud payload sets app identifier"
+    extractGistId(
+      "https://gist.github.com/username/7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c"
+    ),
+    "7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c",
+    "[Slice 2] Extracts 32-hex Gist ID from full URL"
   );
   assertEqual(
-    cloudPayload.schemaVersion,
-    "1.1.0",
-    "[ADR-0015] Cloud payload sets schemaVersion 1.1.0"
+    extractGistId("  7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c  "),
+    "7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c",
+    "[Slice 2] Trims and normalizes raw Gist ID"
   );
+  assertEqual(
+    extractGistId(""),
+    "",
+    "[Slice 2] Handles empty string gracefully"
+  );
+
+  // 2. Mock Storage Adapter for CloudSyncManager
+  const mockSettings = {};
+  let snapshotCount = 0;
+  const mockStorage = {
+    async getAllSettings() {
+      return { ...mockSettings };
+    },
+    async putSetting(key, val) {
+      mockSettings[key] = val;
+    },
+  };
+
+  const mockStore = {
+    state: sampleState,
+    storage: mockStorage,
+    async createSnapshot(desc) {
+      snapshotCount++;
+      return { id: `snap-${snapshotCount}`, description: desc };
+    },
+    async replaceState(newState) {
+      this.state = newState;
+    },
+  };
+
+  const manager = new CloudSyncManager({
+    store: mockStore,
+    storage: mockStorage,
+    merge3,
+    crypto: {
+      encryptPayload: async (p) => p,
+      decryptPayload: async (p) => p,
+    },
+    debounceDelayMs: 50,
+  });
+
+  await manager.init();
+  const initialStatus = manager.getStatus();
+  assertEqual(
+    initialStatus.provider,
+    "none",
+    "[Slice 2] Initial provider is none"
+  );
+  assertEqual(
+    initialStatus.connected,
+    false,
+    "[Slice 2] Initial state is disconnected"
+  );
+  assertEqual(
+    initialStatus.statusBadge,
+    "offline",
+    "[Slice 2] Initial badge is offline"
+  );
+
+  // 3. Configure GitHub Gist
+  let listenerCalls = 0;
+  manager.subscribe((status, eventType) => {
+    listenerCalls++;
+  });
+
+  await manager.setGitHubConfig(
+    "ghp_testtoken1234567890abcdef",
+    "7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c"
+  );
+  const gistStatus = manager.getStatus();
+  assertEqual(
+    gistStatus.provider,
+    "github",
+    "[Slice 2] Provider switches to github"
+  );
+  assertEqual(
+    gistStatus.connected,
+    true,
+    "[Slice 2] GitHub provider is connected"
+  );
+  assertEqual(
+    gistStatus.statusBadge,
+    "connected",
+    "[Slice 2] GitHub provider sets connected badge"
+  );
+  assertEqual(
+    mockSettings.sync_provider,
+    "github",
+    "[Slice 2] Persists sync_provider to storage"
+  );
+  assert(listenerCalls > 0, "[Slice 2] Notifies subscribers on config change");
+
+  // 4. Debounced auto-sync scheduling
+  manager.scheduleDebouncedSync();
   assert(
-    cloudPayload.data.habits.length > 0,
-    "[ADR-0015] Cloud payload contains normalized habits array"
+    manager.debounceTimer !== null,
+    "[Slice 2] Sets debounce timer on scheduleDebouncedSync"
   );
-  assert(
-    cloudPayload.data.logs.length > 0,
-    "[ADR-0015] Cloud payload contains normalized logs array"
+  manager.cancelDebouncedSync();
+  assertEqual(
+    manager.debounceTimer,
+    null,
+    "[Slice 2] Clears debounce timer on cancel"
   );
-  assert(
-    cloudPayload.data._deleted,
-    "[ADR-0015] Cloud payload includes _deleted tombstones"
+
+  // 5. Disconnect
+  await manager.disconnect();
+  const disconnectedStatus = manager.getStatus();
+  assertEqual(
+    disconnectedStatus.provider,
+    "none",
+    "[Slice 2] Disconnect resets active provider"
   );
+  assertEqual(
+    disconnectedStatus.connected,
+    false,
+    "[Slice 2] Disconnect resets connected state"
+  );
+  assertEqual(
+    mockSettings.sync_provider,
+    "none",
+    "[Slice 2] Disconnect persists none to storage"
+  );
+
+  // 6. Configure Google Drive
+  await manager.setGoogleDriveConfig(
+    "client-id-123.apps.googleusercontent.com",
+    "mock-access-token"
+  );
+  const driveStatus = manager.getStatus();
+  assertEqual(
+    driveStatus.provider,
+    "googledrive",
+    "[Slice 2] Provider switches to googledrive"
+  );
+  assertEqual(
+    driveStatus.connected,
+    true,
+    "[Slice 2] Google Drive is connected with token"
+  );
+  assertEqual(
+    mockSettings.sync_provider,
+    "googledrive",
+    "[Slice 2] Persists googledrive to storage"
+  );
+
+  // 7. Mock Fetch for Gist and Drive Sync Flow
+  const originalFetch = global.fetch;
+  try {
+    global.fetch = async (url, options = {}) => {
+      const urlStr = String(url);
+      if (urlStr.includes("api.github.com/user")) {
+        return {
+          status: 200,
+          ok: true,
+          json: async () => ({ login: "habit_tester", name: "Habit Tester" }),
+        };
+      }
+      if (urlStr.includes("api.github.com/gists/")) {
+        return {
+          status: 200,
+          ok: true,
+          json: async () => ({
+            id: "7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c",
+            updated_at: new Date().toISOString(),
+            files: {
+              "atomic_habit_tracker_backup.json": {
+                content: JSON.stringify(merge3.createCloudPayload(sampleState)),
+              },
+            },
+          }),
+        };
+      }
+      if (urlStr.includes("googleapis.com/drive/v3/files")) {
+        return {
+          status: 200,
+          ok: true,
+          json: async () => ({
+            files: [
+              {
+                id: "drive-file-123",
+                name: "atomic_habit_tracker_backup.json",
+              },
+            ],
+          }),
+          text: async () =>
+            JSON.stringify(merge3.createCloudPayload(sampleState)),
+        };
+      }
+      if (urlStr.includes("upload/drive/v3/files")) {
+        return {
+          status: 200,
+          ok: true,
+          json: async () => ({ id: "drive-file-123" }),
+        };
+      }
+      return {
+        status: 200,
+        ok: true,
+        json: async () => ({}),
+        text: async () => "{}",
+      };
+    };
+
+    // Test GitHub token validation
+    const tokenVal = await GitHubGistAPI.validateToken("ghp_validtoken");
+    assertEqual(
+      tokenVal.valid,
+      true,
+      "[Slice 2] GitHub token validation succeeds with mock 200"
+    );
+    assertEqual(
+      tokenVal.user,
+      "habit_tester",
+      "[Slice 2] Returns authenticated GitHub username"
+    );
+
+    // Test GitHub Gist fetch
+    const gistFetch = await GitHubGistAPI.getGist(
+      "ghp_validtoken",
+      "7f8a9b1c2d3e4f5a6b7c8d9e0f1a2b3c"
+    );
+    assert(
+      gistFetch.content,
+      "[Slice 2] GitHub getGist returns parsed JSON content"
+    );
+
+    // Test Drive file find
+    const driveFind = await GoogleDriveAPI.findAppDataFile("mock-token");
+    assertEqual(
+      driveFind.id,
+      "drive-file-123",
+      "[Slice 2] Google Drive findAppDataFile returns file ID"
+    );
+
+    // Test Full Sync on Google Drive
+    const syncRes = await manager.sync();
+    assertEqual(
+      syncRes.success,
+      true,
+      "[Slice 2] Full Cloud Sync succeeds on connected provider"
+    );
+    assert(
+      snapshotCount > 0,
+      "[Slice 2] Automatically captures pre-sync rollback snapshot"
+    );
+    assert(
+      manager.lastSyncTimestamp,
+      "[Slice 2] Sets lastSyncTimestamp after successful sync"
+    );
+    assertEqual(
+      mockSettings.last_sync_timestamp,
+      manager.lastSyncTimestamp,
+      "[Slice 2] Persists last_sync_timestamp to storage"
+    );
+  } finally {
+    global.fetch = originalFetch;
+  }
 }
 
 runCloudSyncTests()

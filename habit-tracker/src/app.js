@@ -35,6 +35,11 @@
       ? require("./sync/cloud-backup.js")
       : global.HabitCloud;
 
+  const cloudSyncModule =
+    typeof require !== "undefined"
+      ? require("./sync/cloud-sync.js")
+      : global.HabitCloudSync;
+
   const components =
     typeof require !== "undefined"
       ? require("./ui/components.js")
@@ -94,6 +99,7 @@
   let activeFocusModalHabitId = null;
   let timerDisplayMode = "remaining"; // 'remaining' | 'elapsed'
   let timerSoundEnabled = true;
+  let cloudSyncManager = null;
 
   const ACTIVE_TIMER_STORAGE_KEY = "habit_active_timer_session";
 
@@ -545,6 +551,48 @@
         settings.language
       );
     }
+
+    // Dual-Provider Cloud Synchronization Hub Initialization
+    if (cloudSyncModule && cloudSyncModule.CloudSyncManager) {
+      cloudSyncManager = new cloudSyncModule.CloudSyncManager({
+        store,
+        storage,
+        merge3:
+          typeof require !== "undefined"
+            ? require("./sync/merge3.js")
+            : global.HabitMerge3,
+        crypto:
+          typeof require !== "undefined"
+            ? require("./sync/cloud-backup.js")
+            : global.HabitCloud,
+        debounceDelayMs: 5000,
+      });
+      await cloudSyncManager.init();
+
+      cloudSyncManager.subscribe(() => {
+        if (activeTab === "settings") {
+          renderActiveTab();
+        }
+      });
+
+      // Calm debounced auto-sync on store mutations
+      store.subscribe(() => {
+        if (
+          cloudSyncManager &&
+          cloudSyncManager.autoSyncEnabled &&
+          cloudSyncManager.activeProvider !== "none"
+        ) {
+          cloudSyncManager.scheduleDebouncedSync();
+        }
+      });
+
+      // Background sync on boot if already connected
+      if (cloudSyncManager.activeProvider !== "none") {
+        cloudSyncManager.sync().catch((err) => {
+          console.warn("[CloudSync] Initial boot sync failed:", err);
+        });
+      }
+    }
   }
 
   /**
@@ -776,16 +824,64 @@
   }
 
   /**
+   * Formats ISO timestamp to human-friendly relative time
+   */
+  function formatRelativeTime(isoString, lang = "vi") {
+    if (!isoString) return lang === "vi" ? "Chưa đồng bộ" : "Never";
+    const date = new Date(isoString);
+    if (isNaN(date.getTime())) return lang === "vi" ? "Chưa đồng bộ" : "Never";
+    const diffMs = Date.now() - date.getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHr = Math.floor(diffMin / 60);
+
+    if (diffSec < 30) return i18n.t("cloud_synced_just_now", {}, lang);
+    if (diffMin < 60)
+      return i18n.t("cloud_synced_ago", { time: `${diffMin}m` }, lang);
+    if (diffHr < 24)
+      return i18n.t("cloud_synced_ago", { time: `${diffHr}h` }, lang);
+    return date.toLocaleDateString(lang === "vi" ? "vi-VN" : "en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  /**
    * Renders Settings Tab HTML
    */
   function renderSettingsTab(container, lang = "vi") {
     const settings = store.getSettings();
-    const isDriveConnected = !!(
-      settings.cloudSync && settings.cloudSync.googleDriveToken
-    );
-    const isGistConnected = !!(
-      settings.cloudSync && settings.cloudSync.gistToken
-    );
+    const syncStatus = cloudSyncManager
+      ? cloudSyncManager.getStatus()
+      : {
+          provider: "none",
+          connected: false,
+          syncing: false,
+          lastSync: null,
+          statusBadge: "offline",
+          autoSync: true,
+        };
+
+    const isDriveConnected =
+      syncStatus.provider === "googledrive" && syncStatus.connected;
+    const isGistConnected =
+      syncStatus.provider === "github" && syncStatus.connected;
+
+    let statusBadgeHtml = "";
+    if (syncStatus.syncing) {
+      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 font-bold border border-sky-300 dark:border-sky-800/50"><span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span> ${i18n.t("cloud_syncing", {}, lang)}</span>`;
+    } else if (syncStatus.error) {
+      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold border border-red-300 dark:border-red-800/50">🔴 ${lang === "vi" ? "Lỗi đồng bộ" : "Sync Error"}</span>`;
+    } else if (syncStatus.connected) {
+      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-300 dark:border-emerald-800/50">🟢 ${i18n.t("cloud_connected", {}, lang)}</span>`;
+    } else {
+      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold border border-slate-200 dark:border-slate-700">⚪ ${i18n.t("cloud_not_connected", {}, lang)}</span>`;
+    }
+
+    const relativeSyncTime = formatRelativeTime(syncStatus.lastSync, lang);
+    const isAutoSyncOn = syncStatus.autoSync !== false;
 
     const notifPermission =
       notifications && notifications.getPermission
@@ -896,46 +992,99 @@
 
         <!-- Data Backup & Cloud Sync Card -->
         <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-5 shadow-sm dark:shadow-xl">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3">☁️ ${i18n.t("cloud_backup_title", {}, lang)} & ${i18n.t("export_import_title", {}, lang)}</h3>
-
-          <div class="grid grid-cols-3 gap-2 mb-4">
-            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
-              <span>📥</span>
-              <span class="truncate">JSON</span>
-            </button>
-            <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
-              <span>📊</span>
-              <span class="truncate">CSV</span>
-            </button>
-            <label class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all">
-              <span>📤</span>
-              <span class="truncate">Import</span>
-              <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
-            </label>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">☁️ ${i18n.t("cloud_backup_title", {}, lang)}</h3>
+            ${statusBadgeHtml}
           </div>
 
-          <div class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800/60">
-            <button onclick="window.HabitApp.promptDriveBackup()" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/40 text-left transition-all">
-              <div class="flex items-center gap-2.5">
-                <span class="text-lg">📁</span>
-                <div>
-                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">Google Drive Cloud Backup</h4>
-                  <span class="text-[11px] text-slate-500 dark:text-slate-400">${isDriveConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
-                </div>
-              </div>
-              <span class="text-xs text-slate-400">⚙️</span>
+          <!-- Live Sync Status & Manual Sync Action -->
+          <div class="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/40 mb-3">
+            <div>
+              <span class="text-xs font-bold text-slate-900 dark:text-white block">
+                ${syncStatus.provider === "github" ? "GitHub Gist" : syncStatus.provider === "googledrive" ? "Google Drive" : lang === "vi" ? "Chưa chọn dịch vụ" : "No Cloud Provider"}
+              </span>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">🕒 ${relativeSyncTime}</p>
+            </div>
+            <button
+              type="button"
+              id="btn-cloud-sync-now"
+              onclick="window.HabitApp.syncCloudNow()"
+              class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <span class="${syncStatus.syncing ? "animate-spin inline-block" : ""}">🔄</span>
+              <span>${i18n.t("cloud_sync_now", {}, lang)}</span>
             </button>
+          </div>
 
-            <button onclick="window.HabitApp.promptGistBackup()" class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/40 text-left transition-all">
+          <!-- Auto-Sync Toggle -->
+          <div class="flex items-center justify-between py-2.5 px-1 border-b border-slate-200 dark:border-slate-800/60 mb-3">
+            <div>
+              <span class="text-xs text-slate-800 dark:text-slate-300 block font-semibold">${i18n.t("cloud_auto_sync", {}, lang)}</span>
+              <span class="text-[11px] text-slate-500 dark:text-slate-400">${lang === "vi" ? "Tự động đồng bộ sau 5 giây khi có thay đổi" : "Debounced 5s auto-sync on habit updates"}</span>
+            </div>
+            <button
+              type="button"
+              id="btn-toggle-auto-sync"
+              onclick="window.HabitApp.toggleAutoSync()"
+              class="px-3 py-1 rounded-xl text-xs font-bold transition-colors ${isAutoSyncOn ? "bg-emerald-600 text-white shadow-xs" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"}"
+            >
+              ${isAutoSyncOn ? (lang === "vi" ? "Bật" : "ON") : lang === "vi" ? "Tắt" : "OFF"}
+            </button>
+          </div>
+
+          <!-- Dual-Provider Connectors -->
+          <div class="space-y-2 mb-4">
+            <button
+              type="button"
+              id="btn-open-gist-modal"
+              onclick="window.HabitApp.openGistModal()"
+              class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/40 text-left transition-all cursor-pointer"
+            >
               <div class="flex items-center gap-2.5">
                 <span class="text-lg">🐙</span>
                 <div>
-                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">GitHub Gist Cloud Backup</h4>
-                  <span class="text-[11px] text-slate-500 dark:text-slate-400">${isGistConnected ? i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_not_connected", {}, lang)}</span>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">${i18n.t("cloud_gist_title", {}, lang)}</h4>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400">${isGistConnected ? "🟢 " + i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_gist_desc", {}, lang)}</span>
                 </div>
               </div>
               <span class="text-xs text-slate-400">⚙️</span>
             </button>
+
+            <button
+              type="button"
+              id="btn-open-drive-modal"
+              onclick="window.HabitApp.openDriveModal()"
+              class="w-full flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700/40 text-left transition-all cursor-pointer"
+            >
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">📁</span>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">${i18n.t("cloud_drive_title", {}, lang)}</h4>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400">${isDriveConnected ? "🟢 " + i18n.t("cloud_connected", {}, lang) : i18n.t("cloud_drive_desc", {}, lang)}</span>
+                </div>
+              </div>
+              <span class="text-xs text-slate-400">⚙️</span>
+            </button>
+          </div>
+
+          <!-- Data Portability Exports -->
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-800/60">
+            <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">${i18n.t("export_import_title", {}, lang)}</span>
+            <div class="grid grid-cols-3 gap-2">
+              <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
+                <span>📥</span>
+                <span class="truncate">JSON</span>
+              </button>
+              <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer">
+                <span>📊</span>
+                <span class="truncate">CSV</span>
+              </button>
+              <label class="flex items-center justify-center gap-1 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all">
+                <span>📤</span>
+                <span class="truncate">Import</span>
+                <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
+              </label>
+            </div>
           </div>
         </div>
 
@@ -1191,10 +1340,22 @@
         const wizardModal = document.getElementById(
           "identity-wizard-modal-overlay"
         );
+        const gistModal = document.getElementById("gist-config-modal-overlay");
+        const driveModal = document.getElementById(
+          "drive-config-modal-overlay"
+        );
         const popover = document.getElementById("heatmap-cell-popover");
 
         if (popover && !popover.classList.contains("hidden")) {
           popover.classList.add("hidden");
+        }
+        if (gistModal && !gistModal.classList.contains("hidden")) {
+          closeGistModal();
+          return;
+        }
+        if (driveModal && !driveModal.classList.contains("hidden")) {
+          closeDriveModal();
+          return;
         }
         if (focusModal && !focusModal.classList.contains("hidden")) {
           closeFocusTimerModal();
@@ -2165,6 +2326,28 @@
     if (typeof window !== "undefined" && window.addEventListener) {
       window.addEventListener("popstate", (e) => {
         handlePopState(e);
+      });
+      window.addEventListener("online", () => {
+        if (
+          cloudSyncManager &&
+          cloudSyncManager.activeProvider !== "none" &&
+          cloudSyncManager.autoSyncEnabled
+        ) {
+          cloudSyncManager.sync().catch(() => {});
+        }
+      });
+    }
+
+    if (typeof document !== "undefined" && document.addEventListener) {
+      document.addEventListener("visibilitychange", () => {
+        if (
+          document.visibilityState === "visible" &&
+          cloudSyncManager &&
+          cloudSyncManager.activeProvider !== "none" &&
+          cloudSyncManager.autoSyncEnabled
+        ) {
+          cloudSyncManager.sync().catch(() => {});
+        }
       });
     }
   }
@@ -4035,19 +4218,292 @@
         );
       }
     },
+    openGistModal() {
+      const overlay = document.getElementById("gist-config-modal-overlay");
+      const container = document.getElementById("gist-config-container");
+      if (!overlay || !container) return;
+
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const status = cloudSyncManager
+        ? cloudSyncManager.getStatus()
+        : { connected: false };
+      const currentToken = cloudSyncManager
+        ? cloudSyncManager.githubToken || ""
+        : "";
+      const currentGistId = cloudSyncManager
+        ? cloudSyncManager.githubGistId || ""
+        : "";
+
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">🐙</span>
+              <div>
+                <h3 id="gist-modal-title" class="text-base font-black text-slate-900 dark:text-white">${i18n.t("gist_modal_title", {}, lang)}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${status.connected && status.provider === "github" ? "🟢 " + i18n.t("cloud_connected", {}, lang) : "⚪ " + i18n.t("cloud_not_connected", {}, lang)}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closeGistModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${i18n.t("gist_modal_desc", {}, lang)}</p>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1" for="gist-token-input">${i18n.t("gist_token_label", {}, lang)}</label>
+              <input type="password" id="gist-token-input" value="${currentToken}" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1" for="gist-id-input">${i18n.t("gist_id_label", {}, lang)}</label>
+              <input type="text" id="gist-id-input" value="${currentGistId}" placeholder="32-hex characters (e.g. 7f8a9c...)" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition" />
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center gap-2">
+            <button type="button" id="btn-gist-test" onclick="window.HabitApp.testGistConnection()" class="flex-1 py-2.5 px-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl active:scale-95 transition cursor-pointer">
+              🔍 ${i18n.t("gist_test_btn", {}, lang)}
+            </button>
+            <button type="button" id="btn-gist-save" onclick="window.HabitApp.saveGistConfig()" class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/20 active:scale-95 transition cursor-pointer">
+              💾 ${i18n.t("gist_save_btn", {}, lang)}
+            </button>
+          </div>
+
+          ${
+            status.connected && status.provider === "github"
+              ? `<button type="button" id="btn-gist-disconnect" onclick="window.HabitApp.disconnectGist()" class="w-full py-2 px-3 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold rounded-xl transition text-center cursor-pointer">
+                  ⚠️ ${i18n.t("gist_disconnect_btn", {}, lang)}
+                </button>`
+              : ""
+          }
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+    },
+
+    closeGistModal() {
+      const overlay = document.getElementById("gist-config-modal-overlay");
+      if (overlay) overlay.classList.add("hidden");
+    },
+
+    async testGistConnection() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      const input = document.getElementById("gist-token-input");
+      const token = input ? input.value.trim() : "";
+
+      if (!token) {
+        notify(i18n.t("toast_gist_pat_required", {}, lang), "warning");
+        return;
+      }
+
+      notify("Connecting to GitHub...", "info");
+      const res = await cloudSyncModule.GitHubGistAPI.validateToken(token);
+      if (res.valid) {
+        notify(`GitHub Connected: @${res.user}`, "success");
+      } else {
+        notify(`GitHub Token Error: ${res.error || "Invalid token"}`, "error");
+      }
+    },
+
+    async saveGistConfig() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      const tokenInput = document.getElementById("gist-token-input");
+      const gistIdInput = document.getElementById("gist-id-input");
+
+      const token = tokenInput ? tokenInput.value.trim() : "";
+      const gistId = gistIdInput ? gistIdInput.value.trim() : "";
+
+      if (!token) {
+        notify(i18n.t("toast_gist_pat_required", {}, lang), "warning");
+        return;
+      }
+
+      if (cloudSyncManager) {
+        await cloudSyncManager.setGitHubConfig(token, gistId || null);
+        HabitApp.closeGistModal();
+        notify(i18n.t("toast_gist_connected", {}, lang), "success");
+        renderActiveTab();
+        cloudSyncManager.sync().catch((err) => {
+          console.warn("[CloudSync] Initial sync after connect failed:", err);
+        });
+      }
+    },
+
+    async disconnectGist() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (cloudSyncManager) {
+        await cloudSyncManager.disconnect();
+        HabitApp.closeGistModal();
+        notify(i18n.t("toast_gist_disconnected", {}, lang), "info");
+        renderActiveTab();
+      }
+    },
+
+    openDriveModal() {
+      const overlay = document.getElementById("drive-config-modal-overlay");
+      const container = document.getElementById("drive-config-container");
+      if (!overlay || !container) return;
+
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const status = cloudSyncManager
+        ? cloudSyncManager.getStatus()
+        : { connected: false };
+      const currentClientId = cloudSyncManager
+        ? cloudSyncManager.googleClientId || ""
+        : "";
+
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">📁</span>
+              <div>
+                <h3 id="drive-modal-title" class="text-base font-black text-slate-900 dark:text-white">${i18n.t("drive_modal_title", {}, lang)}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${status.connected && status.provider === "googledrive" ? "🟢 " + i18n.t("cloud_connected", {}, lang) : "⚪ " + i18n.t("cloud_not_connected", {}, lang)}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closeDriveModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${i18n.t("drive_modal_desc", {}, lang)}</p>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1" for="drive-client-id-input">${i18n.t("drive_client_id_label", {}, lang)}</label>
+              <input type="text" id="drive-client-id-input" value="${currentClientId}" placeholder="xxxx-xxxx.apps.googleusercontent.com" class="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 rounded-xl text-xs font-mono text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:outline-hidden transition" />
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center gap-2">
+            <button type="button" id="btn-drive-connect" onclick="window.HabitApp.saveDriveConfig()" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-emerald-600/20 active:scale-95 transition cursor-pointer">
+              🚀 ${i18n.t("drive_connect_btn", {}, lang)}
+            </button>
+          </div>
+
+          ${
+            status.connected && status.provider === "googledrive"
+              ? `<button type="button" id="btn-drive-disconnect" onclick="window.HabitApp.disconnectDrive()" class="w-full py-2 px-3 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-semibold rounded-xl transition text-center cursor-pointer">
+                  ⚠️ ${i18n.t("drive_disconnect_btn", {}, lang)}
+                </button>`
+              : ""
+          }
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+    },
+
+    closeDriveModal() {
+      const overlay = document.getElementById("drive-config-modal-overlay");
+      if (overlay) overlay.classList.add("hidden");
+    },
+
+    async saveDriveConfig() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      const input = document.getElementById("drive-client-id-input");
+      const clientId = input ? input.value.trim() : "";
+
+      if (!clientId) {
+        notify(i18n.t("toast_drive_auth_required", {}, lang), "warning");
+        return;
+      }
+
+      if (cloudSyncManager) {
+        await cloudSyncManager.setGoogleDriveConfig(clientId);
+        HabitApp.closeDriveModal();
+        notify(i18n.t("toast_drive_connected", {}, lang), "success");
+        renderActiveTab();
+      }
+    },
+
+    async disconnectDrive() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (cloudSyncManager) {
+        await cloudSyncManager.disconnect();
+        HabitApp.closeDriveModal();
+        notify(i18n.t("toast_drive_disconnected", {}, lang), "info");
+        renderActiveTab();
+      }
+    },
+
+    async syncCloudNow() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (!cloudSyncManager || cloudSyncManager.activeProvider === "none") {
+        HabitApp.openGistModal();
+        return;
+      }
+
+      notify(i18n.t("cloud_syncing", {}, lang), "info");
+      renderActiveTab();
+      const res = await cloudSyncManager.sync();
+      if (res && res.success) {
+        notify(i18n.t("toast_sync_success", {}, lang), "success");
+      } else {
+        notify(
+          i18n.t(
+            "toast_sync_error",
+            { message: res ? res.error : "Unknown" },
+            lang
+          ),
+          "error"
+        );
+      }
+      renderActiveTab();
+    },
+
+    async toggleAutoSync() {
+      if (!cloudSyncManager) return;
+      cloudSyncManager.autoSyncEnabled = !cloudSyncManager.autoSyncEnabled;
+      if (store && store.storage) {
+        await store.storage.putSetting(
+          "auto_sync_enabled",
+          cloudSyncManager.autoSyncEnabled
+        );
+      }
+      renderActiveTab();
+    },
+
     promptDriveBackup() {
       const lang =
         (store && store.getSettings() && store.getSettings().language) || "vi";
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_drive_auth_required", {}, lang), "info");
+      HabitApp.openDriveModal();
     },
+
     promptGistBackup() {
       const lang =
         (store && store.getSettings() && store.getSettings().language) || "vi";
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
       notify(i18n.t("toast_gist_pat_required", {}, lang), "info");
+      HabitApp.openGistModal();
     },
     checkForUpdates() {
       const lang =
@@ -4290,6 +4746,10 @@
     switchModalStage,
     handlePopState,
     setupTabSwipeGestures,
+    get cloudSyncManager() {
+      return cloudSyncManager;
+    },
+    formatRelativeTime,
   };
 
   global.HabitApp = HabitApp;
