@@ -11,7 +11,7 @@
   "use strict";
 
   const DB_NAME = "habit_tracker_db";
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
 
   const STORES = {
     HABITS: "habits",
@@ -19,6 +19,7 @@
     SETTINGS: "settings",
     ROUTINES: "routines",
     VACATIONS: "vacations",
+    SNAPSHOTS: "snapshots",
   };
 
   /**
@@ -154,11 +155,15 @@
 
       async putVacation(vacation) {
         const vacations = readJson(STORES.VACATIONS, []);
-        const idx = vacations.findIndex((v) => v.id === vacation.id);
-        if (idx >= 0) vacations[idx] = vacation;
-        else vacations.push(vacation);
+        const normalized = {
+          ...vacation,
+          updatedAt: vacation.updatedAt || new Date().toISOString(),
+        };
+        const idx = vacations.findIndex((v) => v.id === normalized.id);
+        if (idx >= 0) vacations[idx] = normalized;
+        else vacations.push(normalized);
         writeJson(STORES.VACATIONS, vacations);
-        return vacation;
+        return normalized;
       },
 
       async deleteVacation(id) {
@@ -170,12 +175,59 @@
         return true;
       },
 
+      async getSnapshots() {
+        const list = readJson(STORES.SNAPSHOTS, []);
+        return list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      },
+
+      async putSnapshot(snapshot) {
+        const list = readJson(STORES.SNAPSHOTS, []);
+        const id = snapshot.id || `snap-${Date.now()}`;
+        const item = {
+          ...snapshot,
+          id,
+          timestamp: snapshot.timestamp || Date.now(),
+        };
+        const filtered = list.filter((s) => s.id !== id);
+        filtered.unshift(item);
+        const capped = filtered.slice(0, 5);
+        writeJson(STORES.SNAPSHOTS, capped);
+        return item;
+      },
+
+      async deleteSnapshot(id) {
+        const list = readJson(STORES.SNAPSHOTS, []);
+        writeJson(
+          STORES.SNAPSHOTS,
+          list.filter((s) => s.id !== id)
+        );
+        return true;
+      },
+
+      async clearSnapshots() {
+        writeJson(STORES.SNAPSHOTS, []);
+        return true;
+      },
+
+      async getDeletedTombstones() {
+        const settings = readJson(STORES.SETTINGS, {});
+        return settings._deleted || { habits: {}, vacations: {} };
+      },
+
+      async putDeletedTombstones(deletedDict) {
+        const settings = readJson(STORES.SETTINGS, {});
+        settings._deleted = deletedDict || { habits: {}, vacations: {} };
+        writeJson(STORES.SETTINGS, settings);
+        return settings._deleted;
+      },
+
       async clearAll() {
         inMemory[STORES.HABITS] = [];
         inMemory[STORES.LOGS] = [];
         inMemory[STORES.SETTINGS] = {};
         inMemory[STORES.ROUTINES] = [];
         inMemory[STORES.VACATIONS] = [];
+        inMemory[STORES.SNAPSHOTS] = [];
         if (storage) {
           try {
             storage.removeItem(STORES.HABITS);
@@ -183,6 +235,7 @@
             storage.removeItem(STORES.SETTINGS);
             storage.removeItem(STORES.ROUTINES);
             storage.removeItem(STORES.VACATIONS);
+            storage.removeItem(STORES.SNAPSHOTS);
           } catch (e) {}
         }
         return true;
@@ -280,6 +333,9 @@
           }
           if (!db.objectStoreNames.contains(STORES.VACATIONS)) {
             db.createObjectStore(STORES.VACATIONS, { keyPath: "id" });
+          }
+          if (!db.objectStoreNames.contains(STORES.SNAPSHOTS)) {
+            db.createObjectStore(STORES.SNAPSHOTS, { keyPath: "id" });
           }
         };
 
@@ -487,6 +543,81 @@
         });
       },
 
+      async getSnapshots() {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORES.SNAPSHOTS, "readonly");
+          const req = tx.objectStore(STORES.SNAPSHOTS).getAll();
+          req.onsuccess = () => {
+            const list = req.result || [];
+            list.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+            resolve(list);
+          };
+          req.onerror = () => reject(req.error);
+        });
+      },
+
+      async putSnapshot(snapshot) {
+        const db = await openDb();
+        const id = snapshot.id || `snap-${Date.now()}`;
+        const item = {
+          ...snapshot,
+          id,
+          timestamp: snapshot.timestamp || Date.now(),
+        };
+
+        const list = await this.getSnapshots();
+        const filtered = list.filter((s) => s.id !== id);
+        filtered.unshift(item);
+
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORES.SNAPSHOTS, "readwrite");
+          const store = tx.objectStore(STORES.SNAPSHOTS);
+          store.put(item);
+
+          // Prune excess snapshots older than top 5
+          if (filtered.length > 5) {
+            for (let i = 5; i < filtered.length; i++) {
+              store.delete(filtered[i].id);
+            }
+          }
+
+          tx.oncomplete = () => resolve(item);
+          tx.onerror = () => reject(tx.error);
+        });
+      },
+
+      async deleteSnapshot(id) {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORES.SNAPSHOTS, "readwrite");
+          const req = tx.objectStore(STORES.SNAPSHOTS).delete(id);
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => reject(req.error);
+        });
+      },
+
+      async clearSnapshots() {
+        const db = await openDb();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(STORES.SNAPSHOTS, "readwrite");
+          const req = tx.objectStore(STORES.SNAPSHOTS).clear();
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => reject(req.error);
+        });
+      },
+
+      async getDeletedTombstones() {
+        const val = await this.getSetting("_deleted");
+        return val || { habits: {}, vacations: {} };
+      },
+
+      async putDeletedTombstones(deletedDict) {
+        const dict = deletedDict || { habits: {}, vacations: {} };
+        await this.putSetting("_deleted", dict);
+        return dict;
+      },
+
       async clearAll() {
         const db = await openDb();
         return new Promise((resolve, reject) => {
@@ -497,6 +628,7 @@
               STORES.SETTINGS,
               STORES.ROUTINES,
               STORES.VACATIONS,
+              STORES.SNAPSHOTS,
             ],
             "readwrite"
           );
@@ -505,6 +637,7 @@
           tx.objectStore(STORES.SETTINGS).clear();
           tx.objectStore(STORES.ROUTINES).clear();
           tx.objectStore(STORES.VACATIONS).clear();
+          tx.objectStore(STORES.SNAPSHOTS).clear();
           tx.oncomplete = () => resolve(true);
           tx.onerror = () => reject(tx.error);
         });

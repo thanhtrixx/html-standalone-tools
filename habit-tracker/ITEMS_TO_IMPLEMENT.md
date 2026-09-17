@@ -354,11 +354,11 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 1: Deterministic 3-Way Merge Engine, Entity Timestamps & Deletion Tombstones (P0)
 
-- [ ] Implement deterministic 3-way merge algorithm in `src/sync/merge3.js` comparing base, local, and remote states.
-- [ ] Track entity `updatedAt` timestamps for Last-Write-Wins (LWW) resolution on habit metadata and settings.
-- [ ] Implement deletion tombstones (`{ id, deleted: true, deletedAt }`) in `src/sync/tombstones.js` and storage adapters so deletions propagate across sync nodes.
-- [ ] Implement commutative additive daily log union: merges distinct dates and preserves maximum progress / latest timestamp on colliding same-day logs.
-- [ ] Add unit test suite in `tests/habit-tracker-cloud-sync.test.js` covering 3-way merge matrix (concurrent edits, tombstones, same-day log conflicts, vacation ranges).
+- [x] Implement deterministic 3-way merge algorithm in `src/sync/merge3.js` comparing base, local, and remote states.
+- [x] Track entity `updatedAt` timestamps for Last-Write-Wins (LWW) resolution on habit metadata and settings.
+- [x] Implement deletion tombstones (`{ id, deleted: true, deletedAt }`) in `src/sync/tombstones.js` and storage adapters so deletions propagate across sync nodes.
+- [x] Implement commutative additive daily log union: merges distinct dates and preserves maximum progress / latest timestamp on colliding same-day logs.
+- [x] Add unit test suite in `tests/habit-tracker-cloud-sync.test.js` covering 3-way merge matrix (concurrent edits, tombstones, same-day log conflicts, vacation ranges).
 
 ### Slice 2: GitHub Gist & Google Drive Cloud Sync Connectors with Calm Debounce & Status Diagnostics (P0)
 
@@ -404,4 +404,3 @@ This document specifies the technical requirements and vertical slice backlog fo
 - [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
 - [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
 - [ ] Outer repository gate clean: `npm run verify`.
-

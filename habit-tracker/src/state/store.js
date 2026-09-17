@@ -18,6 +18,11 @@
       ? require("../storage/indexeddb.js")
       : global.HabitStorage;
 
+  const tombstones =
+    typeof require !== "undefined"
+      ? require("../sync/tombstones.js")
+      : global.HabitTombstones;
+
   class HabitStore {
     constructor(options = {}) {
       this.storage = options.storage || storageModule.createStorageAdapter();
@@ -34,6 +39,7 @@
           vacationRanges: [],
           ...options.initialSettings,
         },
+        _deleted: { habits: {}, vacations: {} },
         activeDate: engine.toDateString(new Date()),
       };
     }
@@ -99,6 +105,14 @@
         this.state.settings.vacationRanges = vacations;
       }
 
+      // Load tombstones
+      if (this.storage.getDeletedTombstones) {
+        this.state._deleted = (await this.storage.getDeletedTombstones()) || {
+          habits: {},
+          vacations: {},
+        };
+      }
+
       this.notify("init", this.state);
       return this.state;
     }
@@ -140,6 +154,7 @@
           ? habitData.routines
           : [habitData.routine || engine.ROUTINES.ANYTIME];
 
+      const nowIso = new Date().toISOString();
       const newHabit = {
         id:
           habitData.id ||
@@ -160,12 +175,20 @@
         reminderTime: habitData.reminderTime || null,
         archived: false,
         isPaused: false,
-        createdAt: habitData.createdAt || engine.toDateString(new Date()),
+        createdAt: habitData.createdAt || nowIso,
+        updatedAt: habitData.updatedAt || nowIso,
         order:
           habitData.order !== undefined
             ? habitData.order
             : this.state.habits.length,
       };
+
+      if (tombstones && tombstones.touchEntity) {
+        tombstones.touchEntity(newHabit, this.state._deleted);
+        if (this.storage.putDeletedTombstones) {
+          await this.storage.putDeletedTombstones(this.state._deleted);
+        }
+      }
 
       await this.storage.putHabit(newHabit);
       this.state.habits.push(newHabit);
@@ -231,7 +254,15 @@
       const updated = {
         ...this.state.habits[idx],
         ...normalizedUpdates,
+        updatedAt: new Date().toISOString(),
       };
+
+      if (tombstones && tombstones.touchEntity) {
+        tombstones.touchEntity(updated, this.state._deleted);
+        if (this.storage.putDeletedTombstones) {
+          await this.storage.putDeletedTombstones(this.state._deleted);
+        }
+      }
 
       await this.storage.putHabit(updated);
       this.state.habits[idx] = updated;
@@ -242,6 +273,13 @@
     async deleteHabit(id) {
       await this.storage.deleteHabit(id);
       this.state.habits = this.state.habits.filter((h) => h.id !== id);
+
+      if (tombstones && tombstones.recordDeletedHabit) {
+        tombstones.recordDeletedHabit(id, this.state._deleted);
+        if (this.storage.putDeletedTombstones) {
+          await this.storage.putDeletedTombstones(this.state._deleted);
+        }
+      }
 
       // Clean in-memory logs
       for (const key in this.state.logs) {
@@ -325,6 +363,7 @@
         completed: prog.isCompleted,
         notes: notes !== null ? notes : existingLog.notes || "",
         timestamp: Date.now(),
+        updatedAt: new Date().toISOString(),
       };
 
       await this.storage.putLog(logEntry);
@@ -413,13 +452,23 @@
     }
 
     async addVacationRange(range) {
+      const nowIso = new Date().toISOString();
       const vac = {
         id: range.id || `vac-${Date.now()}`,
         startDate: engine.toDateString(range.startDate),
         endDate: engine.toDateString(range.endDate || range.startDate),
         reason: range.reason || "Vacation / Sick Pause",
         active: range.active !== false,
+        createdAt: range.createdAt || nowIso,
+        updatedAt: range.updatedAt || nowIso,
       };
+
+      if (tombstones && tombstones.touchEntity) {
+        tombstones.touchEntity(vac, this.state._deleted);
+        if (this.storage.putDeletedTombstones) {
+          await this.storage.putDeletedTombstones(this.state._deleted);
+        }
+      }
 
       await this.storage.putVacation(vac);
       const vacations = await this.storage.getVacations();
@@ -430,10 +479,57 @@
 
     async deleteVacationRange(id) {
       await this.storage.deleteVacation(id);
+      if (tombstones && tombstones.recordDeletedVacation) {
+        tombstones.recordDeletedVacation(id, this.state._deleted);
+        if (this.storage.putDeletedTombstones) {
+          await this.storage.putDeletedTombstones(this.state._deleted);
+        }
+      }
       const vacations = await this.storage.getVacations();
       this.state.settings.vacationRanges = vacations;
       this.notify("vacation_deleted", id);
       return true;
+    }
+
+    async createSnapshot(reason = "manual") {
+      const snap = {
+        id: `snap-${Date.now()}`,
+        timestamp: Date.now(),
+        reason,
+        data: {
+          habits: [...this.state.habits],
+          logs: { ...this.state.logs },
+          settings: { ...this.state.settings },
+          vacations: [...(this.state.settings.vacationRanges || [])],
+          _deleted: { ...(this.state._deleted || {}) },
+        },
+      };
+      if (this.storage.putSnapshot) {
+        await this.storage.putSnapshot(snap);
+      }
+      this.notify("snapshot_created", snap);
+      return snap;
+    }
+
+    async getSnapshots() {
+      if (this.storage.getSnapshots) {
+        return await this.storage.getSnapshots();
+      }
+      return [];
+    }
+
+    async restoreSnapshot(snapshotOrId) {
+      let snap = snapshotOrId;
+      if (typeof snapshotOrId === "string") {
+        const list = await this.getSnapshots();
+        snap = list.find((s) => s.id === snapshotOrId);
+      }
+      if (!snap || !snap.data) {
+        throw new Error("Snapshot not found or invalid");
+      }
+      await this.replaceState(snap.data);
+      this.notify("snapshot_restored", snap);
+      return this.state;
     }
 
     async replaceState(newState) {
@@ -454,6 +550,8 @@
         if (!h.routine) {
           h.routine = h.routines[0];
         }
+        if (!h.createdAt) h.createdAt = new Date().toISOString();
+        if (!h.updatedAt) h.updatedAt = new Date().toISOString();
       }
 
       // Normalize logs
@@ -461,13 +559,21 @@
       if (Array.isArray(newState.logs)) {
         for (const log of newState.logs) {
           const key = log.id || `${log.habitId}_${log.date}`;
-          nextLogs[key] = log;
+          nextLogs[key] = {
+            ...log,
+            id: key,
+            updatedAt: log.updatedAt || new Date().toISOString(),
+          };
         }
       } else if (newState.logs && typeof newState.logs === "object") {
         for (const key in newState.logs) {
           const log = newState.logs[key];
           const logKey = log.id || `${log.habitId}_${log.date}` || key;
-          nextLogs[logKey] = log;
+          nextLogs[logKey] = {
+            ...log,
+            id: logKey,
+            updatedAt: log.updatedAt || new Date().toISOString(),
+          };
         }
       }
 
@@ -483,6 +589,10 @@
           ? newState.vacationRanges
           : [];
       nextSettings.vacationRanges = nextVacations;
+
+      const nextDeleted = newState._deleted ||
+        this.state._deleted || { habits: {}, vacations: {} };
+      this.state._deleted = nextDeleted;
 
       // Persist to storage
       if (typeof this.storage.clearAll === "function") {
@@ -502,6 +612,9 @@
       }
       for (const v of nextVacations) {
         await this.storage.putVacation(v);
+      }
+      if (this.storage.putDeletedTombstones) {
+        await this.storage.putDeletedTombstones(nextDeleted);
       }
 
       this.state.habits = nextHabits;

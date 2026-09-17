@@ -168,7 +168,7 @@ tests/
 
 ### 12. Cloud Sync, Deterministic 3-Way Merge, Encrypted Vault & Data Portability (ADR-0015)
 
-- [ ] **Deterministic 3-Way Merge & Deletion Tombstones (`tests/habit-tracker-cloud-sync.test.js`)**:
+- [x] **Deterministic 3-Way Merge & Deletion Tombstones (`tests/habit-tracker-cloud-sync.test.js`)**:
   - `merge3` correctly performs Last-Write-Wins on conflicting habit properties and settings based on `updatedAt`.
   - Deletion tombstones (`deleted: true`, `deletedAt`) propagate across local and remote states without resurrected entities.
   - Daily habit logs are merged additively across calendar dates without dropping records.
@@ -194,4 +194,3 @@ tests/
 - [ ] **Settings IA Overhaul & Snapshot History (`tests/habit-tracker-ui-components.test.js`)**:
   - Renders 3-card Settings layout (Cloud Sync, Data Portability, Local Data Vault).
   - Rolling snapshot drawer lists last 5 snapshots and performs 1-click restore cleanly.
-
