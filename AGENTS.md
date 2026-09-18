@@ -1,5 +1,17 @@
 # AGENTS.md
 
+## 🚨 MANDATORY: Pre-Flight Change Classification Gate (BEFORE RUNNING ANY TEST/VERIFY COMMAND)
+
+Every agent MUST classify changes using `git status` before executing ANY test command:
+
+| Tier                            | File Scope                                                                 | Permitted Local Verification                            | Strictly Prohibited Actions                                                           | Flow                                                     |
+| :------------------------------ | :------------------------------------------------------------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------ | :------------------------------------------------------- |
+| **Tier 0 — Zero Ceremony**      | All files match `*.md`, `docs/**`, `AGENTS.md`, `.agents/**`               | `npm run format:check` or `npm run format` only         | ❌ **STRICTLY PROHIBITED**: Running `npm run verify`, unit test suites, or E2E tests. | Format $\to$ Branch $\to$ Commit $\to$ PR $\to$ CI Gate. |
+| **Tier 1 — Scoped Lightweight** | Changes isolated to single `<tool>/`                                       | `npm run test:<tool>` only (e.g. `npm run test:habit`)  | ❌ **PROHIBITED**: Running full `npm run verify` in inner loops.                      | Scoped Tests $\to$ PR $\to$ CI Gate.                     |
+| **Tier 2 — Full Ceremony**      | Cross-cutting features, `scripts/`, CI workflows, final production release | Scoped inner loop + `npm run verify` at PR/release gate | ❌ **PROHIBITED**: Skipping dual review or AC matrix.                                 | Full WoW ceremony.                                       |
+
+---
+
 ## Agent skills
 
 ### Issue tracker

@@ -57,6 +57,8 @@
     "test:e2e:summary": "./scripts/run.sh scripts/e2e-summary.js",
     "test:e2e-summary": "./scripts/run.sh tests/e2e-summary.test.js",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:docs": "prettier --check .",
     "lint:check": "prettier --check .",
     "pack:release": "./scripts/run.sh scripts/pack-release.js"
   },
