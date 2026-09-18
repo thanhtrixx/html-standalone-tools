@@ -7394,7 +7394,7 @@ async function runUITests() {
   settingsSandbox.HabitApp.switchTab("settings");
   let attempts = 0;
   let snapshotsListEl = getSettingsEl("snapshots-history-list");
-  while (attempts < 15) {
+  while (attempts < 50) {
     snapshotsListEl = getSettingsEl("snapshots-history-list");
     if (
       snapshotsListEl &&

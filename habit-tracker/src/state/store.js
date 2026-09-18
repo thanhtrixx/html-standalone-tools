@@ -34,6 +34,7 @@
         settings: {
           theme: "dark",
           lang: "vi",
+          language: "vi",
           freezeTokens: 2,
           remindersEnabled: true,
           vacationRanges: [],
@@ -97,6 +98,11 @@
           ...this.state.settings,
           ...settingsMap,
         };
+        if (this.state.settings.lang && !this.state.settings.language) {
+          this.state.settings.language = this.state.settings.lang;
+        } else if (this.state.settings.language && !this.state.settings.lang) {
+          this.state.settings.lang = this.state.settings.language;
+        }
       }
 
       // Load vacations
@@ -439,13 +445,20 @@
     }
 
     async updateSettings(partial) {
+      const normalized = { ...partial };
+      if (normalized.lang && !normalized.language) {
+        normalized.language = normalized.lang;
+      } else if (normalized.language && !normalized.lang) {
+        normalized.lang = normalized.language;
+      }
+
       this.state.settings = {
         ...this.state.settings,
-        ...partial,
+        ...normalized,
       };
 
-      for (const k in partial) {
-        await this.storage.putSetting(k, partial[k]);
+      for (const k in normalized) {
+        await this.storage.putSetting(k, normalized[k]);
       }
 
       this.notify("settings_updated", this.state.settings);
@@ -493,9 +506,10 @@
     }
 
     async createSnapshot(reason = "manual") {
+      const now = Date.now();
       const snap = {
-        id: `snap-${Date.now()}`,
-        timestamp: Date.now(),
+        id: `snap-${now}-${Math.random().toString(36).slice(2, 7)}`,
+        timestamp: now,
         reason,
         data: {
           habits: [...this.state.habits],
@@ -695,6 +709,7 @@
 
       const defaultSettings = {
         theme: "dark",
+        lang: "vi",
         language: "vi",
         freezeTokens: 2,
         remindersEnabled: true,
@@ -719,6 +734,7 @@
 
       const defaultSettings = {
         theme: "dark",
+        lang: "vi",
         language: "vi",
         freezeTokens: 2,
         remindersEnabled: true,
