@@ -1255,6 +1255,50 @@ async function runStorageTests() {
     "[Issue #587 AC-3] Identifies encrypted payload flag"
   );
 
+  // Real HabitCloud encrypted backup payload with atomic-habit-tracker-encrypted-backup app ID
+  const cloudCrypto = require("../habit-tracker/src/sync/cloud-backup.js");
+  const liveEncryptedPayload = await cloudCrypto.encryptPayload(
+    { habits: [{ id: "h1", name: "Encrypted Habit" }], logs: [], settings: {} },
+    "SecretPass123"
+  );
+  const parsedLiveEncrypted = exportImport.parseAndValidateImport(
+    JSON.stringify(liveEncryptedPayload)
+  );
+  assertEqual(
+    parsedLiveEncrypted.valid,
+    true,
+    "[Issue #587 AC-3] Accepts atomic-habit-tracker-encrypted-backup payload from HabitCloud"
+  );
+  assertEqual(
+    parsedLiveEncrypted.isEncrypted,
+    true,
+    "[Issue #587 AC-3] Identifies live encrypted envelope"
+  );
+
+  // Encrypted download & copy payload formatting
+  const formattedEncrypted =
+    exportImport.formatExportPayload(liveEncryptedPayload);
+  assertEqual(
+    formattedEncrypted.app,
+    "atomic-habit-tracker-encrypted-backup",
+    "[Issue #587 AC-3] formatExportPayload preserves encrypted payload envelope"
+  );
+
+  // Missing required crypto fields rejection
+  const corruptCryptoEnvelope = {
+    app: "atomic-habit-tracker-encrypted-backup",
+    ciphertext: "abc",
+    // missing salt & iv
+  };
+  const parsedCorruptCrypto = exportImport.parseAndValidateImport(
+    JSON.stringify(corruptCryptoEnvelope)
+  );
+  assertEqual(
+    parsedCorruptCrypto.valid,
+    false,
+    "[Issue #587 AC-3] Rejects encrypted envelope missing salt/iv"
+  );
+
   // Incompatible / Corrupt JSON handling
   const corruptedJson = "{ not a valid json";
   const parsedCorrupt = exportImport.parseAndValidateImport(corruptedJson);

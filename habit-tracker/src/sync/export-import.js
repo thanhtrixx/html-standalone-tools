@@ -11,6 +11,7 @@
   "use strict";
 
   const APP_IDENTIFIER = "atomic-habit-tracker";
+  const ENCRYPTED_BACKUP_IDENTIFIER = "atomic-habit-tracker-encrypted-backup";
   const SCHEMA_VERSION = "1.0.0";
 
   /**
@@ -40,7 +41,21 @@
   /**
    * Formats in-memory or store state to standardized JSON export payload
    */
-  function formatExportPayload(input) {
+  function formatExportPayload(input, options = {}) {
+    // If input is already an encrypted payload envelope
+    if (
+      input &&
+      typeof input === "object" &&
+      (input.ciphertext ||
+        input.encrypted === true ||
+        input.app === ENCRYPTED_BACKUP_IDENTIFIER)
+    ) {
+      return input;
+    }
+    if (options && options.encryptedPayload) {
+      return options.encryptedPayload;
+    }
+
     let habits = [];
     let logs = [];
     let settings = {};
@@ -94,12 +109,24 @@
   /**
    * Triggers browser download of standardized JSON backup file
    */
-  function downloadExportJSON(storeOrState, customFilename = null) {
-    const payload = formatExportPayload(storeOrState);
+  function downloadExportJSON(
+    storeOrState,
+    customFilename = null,
+    options = {}
+  ) {
+    const payload = formatExportPayload(storeOrState, options);
     const jsonString = JSON.stringify(payload, null, 2);
     const dateStr = new Date().toISOString().slice(0, 10);
-    const filename =
-      customFilename || `atomic-habit-tracker-backup-${dateStr}.json`;
+    const isEncrypted = Boolean(
+      payload &&
+      (payload.ciphertext ||
+        payload.encrypted === true ||
+        payload.app === ENCRYPTED_BACKUP_IDENTIFIER)
+    );
+    const defaultName = isEncrypted
+      ? `atomic-habit-tracker-encrypted-backup-${dateStr}.enc.json`
+      : `atomic-habit-tracker-backup-${dateStr}.json`;
+    const filename = customFilename || options.filename || defaultName;
 
     if (typeof document !== "undefined" && typeof Blob !== "undefined") {
       const blob = new Blob([jsonString], {
@@ -135,7 +162,7 @@
    * If navigator.clipboard is unavailable or rejected, returns fallback payload with json string.
    */
   async function copyJsonToClipboard(storeOrState, options = {}) {
-    const payload = formatExportPayload(storeOrState);
+    const payload = formatExportPayload(storeOrState, options);
     const jsonString = JSON.stringify(
       payload,
       null,
@@ -239,17 +266,22 @@
       };
     }
 
-    if (payload.app !== APP_IDENTIFIER) {
-      const err = `Incompatible app identifier. Expected '${APP_IDENTIFIER}', got '${payload.app}'`;
-      return {
-        valid: false,
-        error: err,
-        errors: [err],
-      };
-    }
-
     // Check if encrypted envelope
-    if (payload.encrypted === true || payload.ciphertext) {
+    const isEncryptedPayload =
+      payload.encrypted === true ||
+      Boolean(payload.ciphertext) ||
+      payload.app === ENCRYPTED_BACKUP_IDENTIFIER;
+
+    if (isEncryptedPayload) {
+      if (
+        payload.app &&
+        payload.app !== APP_IDENTIFIER &&
+        payload.app !== ENCRYPTED_BACKUP_IDENTIFIER
+      ) {
+        const err = `Incompatible app identifier. Expected '${APP_IDENTIFIER}' or '${ENCRYPTED_BACKUP_IDENTIFIER}', got '${payload.app}'`;
+        return { valid: false, error: err, errors: [err], isEncrypted: true };
+      }
+
       if (!payload.ciphertext || !payload.iv || !payload.salt) {
         const err =
           "Encrypted backup missing required cryptography fields (ciphertext, iv, salt)";
@@ -258,11 +290,23 @@
       return { valid: true, payload, isEncrypted: true };
     }
 
+    // Plaintext backup validation
+    if (payload.app !== APP_IDENTIFIER) {
+      const err = `Incompatible app identifier. Expected '${APP_IDENTIFIER}', got '${payload.app}'`;
+      return {
+        valid: false,
+        error: err,
+        errors: [err],
+        isEncrypted: false,
+      };
+    }
+
     if (!payload.data || typeof payload.data !== "object") {
       return {
         valid: false,
         error: "Missing 'data' container in payload",
         errors: ["Missing 'data' container in payload"],
+        isEncrypted: false,
       };
     }
 
@@ -271,6 +315,7 @@
         valid: false,
         error: "'data.habits' must be an array",
         errors: ["'data.habits' must be an array"],
+        isEncrypted: false,
       };
     }
 
@@ -587,6 +632,7 @@
 
   const exportImportExports = {
     APP_IDENTIFIER,
+    ENCRYPTED_BACKUP_IDENTIFIER,
     SCHEMA_VERSION,
     exportToJson,
     formatExportPayload,

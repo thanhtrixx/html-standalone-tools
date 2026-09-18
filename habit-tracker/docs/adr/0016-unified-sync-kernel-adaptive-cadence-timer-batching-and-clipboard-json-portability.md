@@ -47,9 +47,10 @@ Following the initial cloud synchronization and data portability design in ADR-0
 ### Decision 4: 1-Click Clipboard JSON Portability & Full CSV Decommissioning
 
 - **Outcome**:
-  - **1-Click Copy JSON**: `[ 📋 Copy JSON to Clipboard ]` writes the backup payload to clipboard via `navigator.clipboard.writeText` with instant toast feedback. When clipboard permission is blocked or unsupported, automatically opens a fallback modal with pre-selected JSON text.
-  - **Interactive Paste & Inspect JSON**: `[ 📥 Paste JSON ]` opens an inspection modal with direct clipboard paste / textarea input, schema validation, diff statistics (new vs updated habits, log date spans), strategy selector (`[ 🔄 Merge & Combine ]` vs `[ ⚠️ Replace Database ]`), and automated pre-import safety rollback snapshot.
-  - **Encrypted / Decrypted Export Choice**: When vault encryption is active, users can choose whether to copy/export encrypted ciphertext or decrypted plaintext JSON.
+  - **1-Click Copy JSON**: `[ 📋 Copy JSON to Clipboard ]` writes the backup payload to clipboard via `navigator.clipboard.writeText` with instant toast feedback. When clipboard permission is blocked or unsupported, automatically opens a fallback modal (`#clipboard-fallback-modal-overlay`) with pre-selected JSON text and full WCAG focus trapping.
+  - **Interactive Paste & Inspect JSON**: `[ 📥 Paste JSON ]` opens an inspection modal (`#paste-json-modal-overlay`) with direct clipboard paste / textarea input, schema validation, diff statistics (new vs updated habits, log date spans), strategy selector (`[ 🔄 Merge & Combine ]` vs `[ ⚠️ Replace Database ]`), and automated pre-import safety rollback snapshot.
+  - **Encrypted Import Passphrase Unlock Dialog**: When importing an encrypted backup (`atomic-habit-tracker-encrypted-backup`), presents a dedicated `#import-decrypt-modal-overlay` prompt. Decrypts client-side using `HabitCloud.decryptPayload` (AES-GCM-256 + PBKDF2) and seamlessly transitions into the inspection preview upon correct passphrase entry.
+  - **Encrypted / Decrypted Export Choice Modal**: When vault encryption is active (`cloudSyncManager.encryptionEnabled === true`), clicking Copy or Export presents a lightweight choice modal (`#export-format-modal-overlay`): `[ 🔒 Encrypted Vault JSON ]` vs `[ 📄 Plaintext JSON ]`. When encryption is disabled, triggers immediate 1-click export.
   - **CSV Decommissioning**: Fully remove all CSV export/import buttons, `exportToCsv`, `downloadExportCSV`, and `parseHabitCsv` functions, shedding ~450 lines of dead code and eliminating schema divergence.
 
 ### Decision 5: Canonical Blueprint Architecture for Unified Sync

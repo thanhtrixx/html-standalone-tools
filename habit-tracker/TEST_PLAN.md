@@ -40,8 +40,7 @@ tests/
   - Seeds 4 curated starter packs (_Morning Mastery_, _Deep Focus_, _Vitality_, _Zen_).
 - [x] **Data Vault JSON Backup & Safe Restore**:
   - `replaceState()` successfully restores complete state and updates in-memory cache without throwing exceptions.
-- [x] **CSV Export**:
-  - Produces valid UTF-8 formatted CSV rows with headers and habit log records.
+  - Formats valid JSON payloads with standardized metadata (`app: 'atomic-habit-tracker'`).
 
 ### 3. UI Components, 4-Tab Navigation & Checkbox-First Modality (`tests/habit-tracker-ui-components.test.js`)
 
@@ -190,12 +189,15 @@ tests/
   - Computes deterministic payload hash of normalized state; skips cloud upload when local and remote hashes match.
   - Scales idle background polling from 1m to 3m, 5m, and caps at 15m; resets to 1m upon user interaction or visibility wake.
   - Exponential error backoff on HTTP 429/403/5xx ($5\text{s} \to 15\text{s} \to 30\text{s} \to 60\text{s} \to 5\text{m}$).
-- [ ] **1-Click Clipboard JSON Portability & Zero CSV (`tests/habit-tracker-storage-persistence.test.js`)**:
+- [ ] **1-Click Clipboard JSON Portability & Encrypted Exchange (`tests/habit-tracker-storage-persistence.test.js`)**:
   - `copyJsonToClipboard` writes valid JSON backup payload to clipboard with toast feedback and modal textarea fallback.
   - `pasteAndInspectJson` validates schema, computes diff statistics, supports Merge vs Replace strategy, and creates pre-import safety rollback snapshot.
-  - Supports choice of encrypted vault payload vs plaintext JSON when vault encryption is active.
+  - `validateImportJson` properly validates both plaintext and encrypted payloads (`atomic-habit-tracker-encrypted-backup`).
+  - Encrypted import triggers dedicated Passphrase Unlock Dialog (`#import-decrypt-modal`) and decrypts via AES-GCM-256 before preview.
+  - Format selector modal (`#export-format-modal`) presents Encrypted Vault vs Plaintext JSON choice when vault encryption is active.
   - CSV export and import functions (`exportToCsv`, `downloadExportCSV`, `parseHabitCsv`) and UI buttons are completely removed.
 - [ ] **Settings UI Diagnostics & Local Vault Snapshots (`tests/habit-tracker-ui-components.test.js`)**:
   - Renders 3-card Settings layout (Cloud Sync Hub, Data Portability, Local Vault Snapshots).
   - Status badges dynamically display `connected`, `syncing`, `error`, and `offline` states.
   - Rolling snapshot drawer displays last 5 restore points with 1-click rollback.
+  - Data portability modals (`#paste-json-modal-overlay`, `#clipboard-fallback-modal-overlay`, `#import-preview-modal-overlay`, `#import-decrypt-modal-overlay`, `#export-format-modal-overlay`) enforce WCAG 2.1 focus trapping and Escape dismissal.

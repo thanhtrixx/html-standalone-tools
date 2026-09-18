@@ -32,7 +32,7 @@ Unlike conventional habit trackers that enforce punitive all-or-nothing streak r
 - **Multi-Modal Logging:** Checkbox-first cards supporting Binary check-off, Quantitative Numeric Counters with inline +/- steppers, and Duration Timers with sub-second reactivity.
 - **Resilient Timer Engine:** Background-accurate elapsed timestamp deltas (`Math.floor((Date.now() - startedAt) / 1000)`), inline Web Worker with `setInterval` fallback, screen wake lock, Web Audio completion chime, and overtime tracking.
 - **Anti-Guilt Mathematical Models:** Active consecutive streaks with freeze token protection (2 tokens per 30-day rolling window), rolling consistency percentages, and 0-baseline day-of-week metrics.
-- **Local-First Data Vault:** IndexedDB persistence (`habit_tracker_db`) with silent migration and localStorage fallback, 1-click JSON backup/restore, and CSV export.
+- **Local-First Data Vault:** IndexedDB persistence (`habit_tracker_db`) with silent migration and localStorage fallback, 1-click Clipboard & File JSON data portability (Zero-Knowledge AES-GCM-256 vault encryption option), and automated safety rollback snapshots.
 - **Bilingual Parity:** 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage across all UI labels, empty states, and onboarding flows.
 
 ## Brand Commitments

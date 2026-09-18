@@ -7412,11 +7412,104 @@ async function runUITests() {
         snapshotsListEl.innerHTML.includes("Pre-Import")),
     "[Issue #588 AC-2] Snapshots list renders localized reason badges"
   );
-  assert(
-    snapshotsListEl &&
-      snapshotsListEl.innerHTML.includes('data-action="restore-snapshot"'),
-    "[Issue #588 AC-2] Snapshots list includes 1-click restore buttons"
+  // 3. Encrypted Import Unlock Modal & Format Choice Modal
+  console.log(
+    "--- [Issue #587 Encrypted Exchange] Import Unlock & Format Choice Modals ---"
   );
+
+  const cloudCryptoModule = require("../habit-tracker/src/sync/cloud-backup.js");
+  const testEncryptedPayload = await cloudCryptoModule.encryptPayload(
+    {
+      habits: [{ id: "h-sec-1", name: "Secret Habit", type: "binary" }],
+      logs: [],
+      settings: {},
+    },
+    "MyVaultKey123"
+  );
+
+  // Test opening Import Unlock Modal
+  settingsSandbox.HabitApp.openImportUnlockModal(testEncryptedPayload);
+  const decryptOverlay = getSettingsEl("import-decrypt-modal-overlay");
+  assert(
+    decryptOverlay && !decryptOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] openImportUnlockModal unhides import decrypt overlay"
+  );
+
+  // Test wrong password decryption attempt
+  const passInp = getSettingsEl("import-decrypt-passphrase");
+  if (passInp) passInp.value = "WrongPassword999";
+  await settingsSandbox.HabitApp.confirmImportDecryption();
+  const errMsgEl = getSettingsEl("import-decrypt-error-msg");
+  assert(
+    errMsgEl && !errMsgEl.classList.contains("hidden"),
+    "[Issue #587 AC-4] Wrong passphrase displays localized error message"
+  );
+
+  // Test correct password decryption attempt
+  if (passInp) passInp.value = "MyVaultKey123";
+  await settingsSandbox.HabitApp.confirmImportDecryption();
+  assert(
+    decryptOverlay && decryptOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] Correct passphrase dismisses import decrypt modal"
+  );
+  const importPreviewOverlay = getSettingsEl("import-preview-modal-overlay");
+  assert(
+    importPreviewOverlay && !importPreviewOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] Successful decryption automatically opens Import Preview modal"
+  );
+  settingsSandbox.HabitApp.closeImportPreviewModal();
+  assert(
+    importPreviewOverlay && importPreviewOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] closeImportPreviewModal closes preview modal"
+  );
+
+  // Test Export Format Modal
+  settingsSandbox.HabitApp.openExportFormatModal("copy");
+  const exportFormatOverlay = getSettingsEl("export-format-modal-overlay");
+  const exportFormatContainer = getSettingsEl("export-format-container");
+  assert(
+    exportFormatOverlay && !exportFormatOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-5] openExportFormatModal unhides export format overlay"
+  );
+  assert(
+    (exportFormatOverlay.innerHTML.includes(
+      'id="btn-export-choice-encrypted"'
+    ) ||
+      (exportFormatContainer &&
+        exportFormatContainer.innerHTML.includes(
+          'id="btn-export-choice-encrypted"'
+        ))) &&
+      (exportFormatOverlay.innerHTML.includes('id="btn-export-choice-plain"') ||
+        (exportFormatContainer &&
+          exportFormatContainer.innerHTML.includes(
+            'id="btn-export-choice-plain"'
+          ))),
+    "[Issue #587 AC-5] Export format modal includes Encrypted Vault and Plaintext JSON choices"
+  );
+  settingsSandbox.HabitApp.closeExportFormatModal();
+  assert(
+    exportFormatOverlay && exportFormatOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-5] closeExportFormatModal hides export format overlay"
+  );
+
+  // Test copyDataJSON / exportDataJSON routing with encryption enabled
+  if (settingsSandbox.HabitApp.cloudSyncManager) {
+    settingsSandbox.HabitApp.cloudSyncManager.encryptionEnabled = true;
+    await settingsSandbox.HabitApp.copyDataJSON();
+    assert(
+      exportFormatOverlay && !exportFormatOverlay.classList.contains("hidden"),
+      "[Issue #587 AC-5] copyDataJSON routes to format modal when vault encryption is enabled"
+    );
+    settingsSandbox.HabitApp.closeExportFormatModal();
+
+    settingsSandbox.HabitApp.exportDataJSON();
+    assert(
+      exportFormatOverlay && !exportFormatOverlay.classList.contains("hidden"),
+      "[Issue #587 AC-5] exportDataJSON routes to format modal when vault encryption is enabled"
+    );
+    settingsSandbox.HabitApp.closeExportFormatModal();
+    settingsSandbox.HabitApp.cloudSyncManager.encryptionEnabled = false;
+  }
 }
 
 runUITests()

@@ -251,6 +251,27 @@
       data_portability_card_title: "Data Portability & File Exchange",
       data_portability_card_desc:
         "1-click Clipboard copy/paste and lossless JSON file backup",
+      import_decrypt_modal_title: "Unlock Encrypted Backup",
+      import_decrypt_modal_desc:
+        "This backup is protected with Zero-Knowledge AES-GCM-256 encryption. Enter your secret passphrase to decrypt and inspect.",
+      import_decrypt_passphrase_placeholder: "Enter backup passphrase",
+      import_decrypt_btn: "Decrypt & Inspect",
+      import_decrypt_wrong_pass: "Incorrect passphrase. Decryption failed.",
+      export_format_modal_title: "Choose Export Format",
+      export_format_modal_desc:
+        "Zero-Knowledge Vault Encryption is active. Choose your export format:",
+      export_format_encrypted_title: "Encrypted Vault JSON (AES-GCM-256)",
+      export_format_encrypted_desc:
+        "Zero-knowledge ciphertext protected by your secret passphrase.",
+      export_format_plain_title: "Plaintext JSON (Decrypted)",
+      export_format_plain_desc:
+        "Standard unencrypted JSON readable by any device or tool.",
+      btn_copy_encrypted_json: "Copy Encrypted Vault",
+      btn_copy_plain_json: "Copy Plaintext JSON",
+      btn_download_encrypted_json: "Save Encrypted Vault File",
+      btn_download_plain_json: "Save Plaintext JSON File",
+      toast_encrypted_json_copied: "Encrypted Vault JSON copied to clipboard!",
+      toast_encrypted_backup_exported: "Encrypted Vault backup file saved!",
       snapshot_history_title: "Safety Snapshot History",
       snapshot_history_desc:
         "Rolling automated and manual snapshots for 1-click database rollback",
@@ -734,9 +755,32 @@
       import_confirm_btn: "Xác nhận & Nhập dữ liệu",
       import_cancel_btn: "Hủy",
       import_no_date_span: "Chưa có nhật ký",
-      data_portability_card_title: "Xuất & Nhập dữ liệu",
+      data_portability_card_title: "Dữ liệu & Xuất nhập",
       data_portability_card_desc:
-        "Sao chép/dán JSON 1 chạm qua bộ nhớ tạm hoặc sao lưu tệp JSON không mất mát dữ liệu",
+        "Sao chép/dán qua bộ nhớ tạm 1-chạm và sao lưu tệp JSON không mất dữ liệu",
+      import_decrypt_modal_title: "Mở khóa bản sao lưu mã hóa",
+      import_decrypt_modal_desc:
+        "Bản sao lưu này được bảo vệ bằng mã hóa AES-GCM-256 Zero-Knowledge. Nhập mật khẩu bí mật của bạn để giải mã và xem trước.",
+      import_decrypt_passphrase_placeholder: "Nhập mật khẩu mã hóa bản sao lưu",
+      import_decrypt_btn: "Giải mã & Xem trước",
+      import_decrypt_wrong_pass: "Mật khẩu không chính xác. Giải mã thất bại.",
+      export_format_modal_title: "Chọn định dạng xuất",
+      export_format_modal_desc:
+        "Chế độ mã hóa Vault đang hoạt động. Chọn định dạng bạn muốn xuất dữ liệu:",
+      export_format_encrypted_title: "JSON Vault Mã Hóa (AES-GCM-256)",
+      export_format_encrypted_desc:
+        "Bản mã zero-knowledge an toàn tuyệt đối được bảo vệ bằng mật khẩu.",
+      export_format_plain_title: "JSON Văn Bản Thuần (Đã giải mã)",
+      export_format_plain_desc:
+        "JSON tiêu chuẩn chưa mã hóa, có thể đọc và chỉnh sửa linh hoạt.",
+      btn_copy_encrypted_json: "Sao chép Vault mã hóa",
+      btn_copy_plain_json: "Sao chép JSON thường",
+      btn_download_encrypted_json: "Lưu tệp Vault mã hóa",
+      btn_download_plain_json: "Lưu tệp JSON thường",
+      toast_encrypted_json_copied:
+        "Đã sao chép JSON Vault mã hóa vào bộ nhớ tạm!",
+      toast_encrypted_backup_exported:
+        "Đã lưu tệp sao lưu Vault mã hóa thành công!",
       snapshot_history_title: "Lịch sử điểm khôi phục an toàn",
       snapshot_history_desc:
         "Các điểm sao lưu tự động và thủ công để hoàn tác 1 chạm khi cần",

@@ -372,12 +372,14 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 3: 1-Click Clipboard JSON Portability & Full CSV Decommissioning (P1)
 
-- [x] Implement `[ 📋 Copy JSON to Clipboard ]` with `navigator.clipboard.writeText` and fallback textarea modal for restricted mobile webviews.
-- [x] Implement `[ 📥 Paste JSON ]` modal with direct clipboard paste / textarea input, schema validation, diff preview (habits count, log date span), strategy toggle (`Merge` vs `Replace`), and automated pre-import safety rollback snapshot.
-- [x] Support format choice when vault encryption is active (encrypted vault payload vs decrypted plaintext).
+- [x] Implement `[ 📋 Copy JSON to Clipboard ]` with `navigator.clipboard.writeText` and fallback textarea modal (`#clipboard-fallback-modal-overlay`) with WCAG focus trapping.
+- [x] Implement `[ 📥 Paste JSON ]` modal (`#paste-json-modal-overlay`) with direct clipboard paste / textarea input, schema validation, diff preview, strategy toggle (`Merge` vs `Replace`), and automated pre-import safety rollback snapshot.
+- [x] Implement dedicated Encrypted Import Passphrase Unlock Dialog (`#import-decrypt-modal-overlay`) supporting client-side AES-GCM-256 decryption before preview.
+- [x] Support format choice modal (`#export-format-modal-overlay`) when vault encryption is active (`[ 🔒 Encrypted Vault ]` vs `[ 📄 Plaintext JSON ]`).
+- [x] Fix `validateImportJson` schema validation to support `atomic-habit-tracker-encrypted-backup` payloads.
 - [x] Completely remove CSV export and import buttons from `index.html` and `src/app.js`.
 - [x] Remove `exportToCsv`, `downloadExportCSV`, and `parseHabitCsv` from `src/sync/export-import.js` and clean up obsolete translation keys.
-- [x] Add unit tests verifying clipboard copy/paste schemas, fallback mechanics, and strategy application in `tests/habit-tracker-storage-persistence.test.js`.
+- [x] Add unit & integration tests verifying clipboard copy/paste schemas, encrypted import unlock, format choice, fallback mechanics, and strategy application in `tests/habit-tracker-storage-persistence.test.js` and `tests/habit-tracker-ui-components.test.js`.
 
 ### Slice 4: Settings Hub Diagnostics & Local Vault Safety Snapshots (P1)
 

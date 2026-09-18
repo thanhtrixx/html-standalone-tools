@@ -566,6 +566,34 @@
       ></div>
     </div>
 
+    <!-- ==================== ENCRYPTED IMPORT DECRYPT MODAL OVERLAY ==================== -->
+    <div
+      id="import-decrypt-modal-overlay"
+      class="fixed inset-0 z-[75] bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="import-decrypt-title"
+      onclick="
+        if (event.target === this) window.HabitApp.closeImportDecryptModal();
+      "
+    >
+      <div id="import-decrypt-container" class="w-full max-w-md my-auto"></div>
+    </div>
+
+    <!-- ==================== EXPORT FORMAT CHOICE MODAL OVERLAY ==================== -->
+    <div
+      id="export-format-modal-overlay"
+      class="fixed inset-0 z-[70] bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="export-format-title"
+      onclick="
+        if (event.target === this) window.HabitApp.closeExportFormatModal();
+      "
+    >
+      <div id="export-format-container" class="w-full max-w-md my-auto"></div>
+    </div>
+
     <!-- ==================== 100% VICTORY CONFETTI CANVAS ==================== -->
     <canvas
       id="confetti-canvas"

@@ -473,6 +473,14 @@ function createHabitTrackerSandbox(options = {}) {
     "identity-wizard-modal-overlay",
     "header-active-timer-pill",
     "dock-active-timer-pill",
+    "gist-config-modal-overlay",
+    "drive-config-modal-overlay",
+    "vault-unlock-modal-overlay",
+    "import-preview-modal-overlay",
+    "paste-json-modal-overlay",
+    "clipboard-fallback-modal-overlay",
+    "import-decrypt-modal-overlay",
+    "export-format-modal-overlay",
   ]);
 
   function getOrCreateElement(id) {
@@ -684,9 +692,18 @@ function createHabitTrackerSandbox(options = {}) {
     crypto: {
       randomUUID: () => "habit-" + Math.random().toString(36).slice(2, 9),
       getRandomValues: (buf) => {
+        if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+          return crypto.getRandomValues(buf);
+        }
         for (let i = 0; i < buf.length; i++) buf[i] = (i * 17) % 256;
         return buf;
       },
+      subtle:
+        typeof crypto !== "undefined" && crypto.subtle
+          ? crypto.subtle
+          : require("crypto").webcrypto
+            ? require("crypto").webcrypto.subtle
+            : undefined,
     },
     btoa: (str) => Buffer.from(str, "binary").toString("base64"),
     atob: (b64) => Buffer.from(b64, "base64").toString("binary"),
