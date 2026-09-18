@@ -430,14 +430,11 @@
                 ${pillarBadge}
                 ${expandChevron}
               </div>
-              <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                <span>${engine
-                  .getHabitRoutines(habit)
-                  .map((r) => i18n.t(`routine_${r}`, {}, lang))
-                  .join(", ")}</span>
-                ${progressSubtitle ? `&bull; ${progressSubtitle}` : ""}
-              </div>
-              ${noteIndicator}
+              ${
+                progressSubtitle || noteIndicator
+                  ? `<div class="flex items-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400 mt-0.5">${progressSubtitle}${noteIndicator}</div>`
+                  : ""
+              }
             </div>
           </div>
 
