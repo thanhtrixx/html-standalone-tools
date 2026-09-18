@@ -32,10 +32,15 @@
       domain_mind: "Mind & Wisdom",
       domain_discipline: "Daily Discipline",
       domain_all: "All Domains",
+      domain_label: "Core Life Pillar",
+      domain_select_hint: "Categorize into one of 4 foundational domains",
 
       // Starter Kits
       starter_kits_title: "Curated Starter Kits",
       starter_kits_subtitle: "Activate a proven habit system in 1 tap",
+      browse_starter_kits: "Browse Starter Kits",
+      browse_starter_kits_desc: "Adopt a proven habit pack",
+      browse_all_starter_kits: "Browse All Starter Kits",
       carousel_prev_kits: "Previous starter kits",
       carousel_next_kits: "Next starter kits",
       identity_pillars_title: "4 Core Life Pillars",
@@ -43,6 +48,25 @@
         "Balance personal growth using the Atomic Habits framework",
       domain_habits_count: "{count} habits",
       domain_habits_count_singular: "1 habit",
+
+      // Timeframe Lenses & Search
+      timeframe_30d: "30 Days",
+      timeframe_90d: "90 Days",
+      timeframe_52w: "52 Weeks",
+      timeframe_label: "Timeframe",
+      search_habits_placeholder: "Search habits...",
+      collapse_routine: "Collapse routine",
+      expand_routine: "Expand routine",
+
+      // Streak & Momentum Audit
+      streak_audit_title: "Streak & Momentum Audit",
+      streak_audit_desc:
+        "Protection and consistency records across calendar history",
+      freeze_protected_days: "{count} freeze protected days",
+      freeze_protected_badge: "{count} freeze used",
+      schedule_cadence_label: "Schedule Cadence",
+      anti_guilt_streak_note:
+        "Rest days and freeze-protected busy days preserve your momentum without guilt.",
       sw_update_title: "New Version Available",
       sw_update_desc: "Click update to apply the latest improvements.",
       sw_update_btn: "Update",
@@ -537,10 +561,15 @@
       domain_mind: "Tâm trí & Trí tuệ",
       domain_discipline: "Kỷ luật & Nề nếp",
       domain_all: "Tất cả",
+      domain_label: "Trụ Cột Bản Sắc",
+      domain_select_hint: "Phân loại vào 1 trong 4 trụ cột phát triển",
 
       // Starter Kits
       starter_kits_title: "Gói thói quen khởi động",
       starter_kits_subtitle: "Kích hoạt hệ thống thói quen chỉ với 1 chạm",
+      browse_starter_kits: "Khám phá gói mẫu",
+      browse_starter_kits_desc: "Áp dụng hệ thống thói quen có sẵn",
+      browse_all_starter_kits: "Xem toàn bộ gói thói quen mẫu",
       carousel_prev_kits: "Xem gói trước",
       carousel_next_kits: "Xem gói tiếp theo",
       identity_pillars_title: "4 Trụ Cột Bản Sắc",
@@ -548,6 +577,24 @@
         "Cân bằng phát triển bản thân theo phương pháp Atomic Habits",
       domain_habits_count: "{count} thói quen",
       domain_habits_count_singular: "1 thói quen",
+
+      // Timeframe Lenses & Search
+      timeframe_30d: "30 Ngày",
+      timeframe_90d: "90 Ngày",
+      timeframe_52w: "52 Tuần",
+      timeframe_label: "Khoảng thời gian",
+      search_habits_placeholder: "Tìm kiếm thói quen...",
+      collapse_routine: "Thu gọn",
+      expand_routine: "Mở rộng",
+
+      // Streak & Momentum Audit
+      streak_audit_title: "Kiểm định Chuỗi & Đà quán tính",
+      streak_audit_desc: "Lịch sử bảo vệ chuỗi và độ bền bỉ theo thời gian",
+      freeze_protected_days: "{count} ngày dùng khiên đóng băng",
+      freeze_protected_badge: "{count} khiên đã dùng",
+      schedule_cadence_label: "Tần suất thực hiện",
+      anti_guilt_streak_note:
+        "Ngày nghỉ theo lịch và ngày dùng khiên bảo vệ giúp giữ vững đà mà không gây áp lực.",
       sw_update_title: "Phiên bản mới đã sẵn sàng",
       sw_update_desc: "Nhấn cập nhật để áp dụng phiên bản mới nhất.",
       sw_update_btn: "Cập nhật",

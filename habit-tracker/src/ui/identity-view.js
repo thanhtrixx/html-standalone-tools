@@ -602,6 +602,28 @@
   }
 
   /**
+   * Renders Curated 1-Click Starter Kits inside a dedicated Discovery Modal
+   */
+  function renderStarterKitsModal(lang = "vi") {
+    const cardsHtml = renderStarterKitsSection(lang);
+
+    return `
+      <div class="modal-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl text-slate-900 dark:text-white" role="dialog" aria-modal="true" aria-labelledby="starter-kits-modal-title">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-4">
+          <div>
+            <h3 id="starter-kits-modal-title" class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>📚</span> ${i18n.t("starter_kits_title", {}, lang)}
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("starter_kits_subtitle", {}, lang)}</p>
+          </div>
+          <button type="button" data-action="close-starter-kits-modal" aria-label="${i18n.t("close", {}, lang)}" class="text-slate-400 hover:text-slate-600 dark:hover:text-white text-2xl leading-none">&times;</button>
+        </div>
+        ${cardsHtml}
+      </div>
+    `;
+  }
+
+  /**
    * Renders the complete Identity & Life Domains View inside Habits Catalog
    */
   function renderIdentityView(
@@ -611,7 +633,8 @@
     _activeSubView = "catalog"
   ) {
     if (!store) return "";
-    const starterKitsHtml = renderStarterKitsSection(lang);
+    const habits = store.getHabits(true);
+    const hasAnyHabits = habits.length > 0;
 
     // Reuse manager catalog for habit CRUD & reordering
     let managerHtml = "";
@@ -625,49 +648,109 @@
       managerHtml = mgr.renderManagerView(store, null, lang, false);
     }
 
-    const html = `
-      <div class="identity-view max-w-lg mx-auto pb-24">
-        <!-- Habits Catalog Header -->
-        <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-5 mb-4 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between">
-          <div>
-            <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">${i18n.t("app_title", {}, lang)}</span>
-            <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">${i18n.t("habits_tab", {}, lang)}</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${i18n.t("app_tagline", {}, lang)}</p>
-          </div>
-          <button
-            type="button"
-            data-action="open-add-habit"
-            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
-          >
-            + ${i18n.t("add_habit", {}, lang)}
-          </button>
-        </div>
+    let html = "";
+    if (hasAnyHabits) {
+      html = `
+        <div class="identity-view max-w-lg mx-auto pb-24">
+          <!-- Habits Catalog Header -->
+          <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-5 mb-4 border border-slate-200 dark:border-slate-800/80 shadow-md">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">${i18n.t("app_title", {}, lang)}</span>
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">${i18n.t("habits_tab", {}, lang)}</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-action="open-starter-kits-modal"
+                  class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700/60 transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+                  title="${i18n.t("browse_starter_kits", {}, lang)}"
+                >
+                  <span>📚</span>
+                  <span class="hidden sm:inline">${i18n.t("browse_starter_kits", {}, lang)}</span>
+                </button>
+                <button
+                  type="button"
+                  data-action="open-add-habit"
+                  class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
+                >
+                  + ${i18n.t("add_habit", {}, lang)}
+                </button>
+              </div>
+            </div>
 
-        <!-- Habits Catalog & Routine Management -->
-        <div id="habits-catalog-subview" class="mb-6">
-          ${managerHtml}
-        </div>
-
-        <!-- Launch Setup Wizard Quick Banner -->
-        <button
-          type="button"
-          data-action="open-identity-wizard"
-          class="w-full mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-between text-left transition-all hover:border-emerald-500/60 shadow-sm cursor-pointer"
-        >
-          <div class="flex items-center gap-3">
-            <span class="text-2xl p-2 rounded-xl bg-emerald-500/20 text-emerald-500">✨</span>
-            <div>
-              <span class="font-bold text-slate-900 dark:text-white text-sm block">${i18n.t("wizard_title", {}, lang)}</span>
-              <span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">${i18n.t("wizard_subtitle", {}, lang)}</span>
+            <!-- Instant Search Input -->
+            <div class="relative">
+              <input
+                type="text"
+                id="habit-catalog-search"
+                placeholder="${i18n.t("search_habits_placeholder", {}, lang)}"
+                class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-3 pl-8 text-xs text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              >
+              <span class="absolute left-2.5 top-2.5 text-xs text-slate-400">🔍</span>
             </div>
           </div>
-          <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-500/10 dark:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/30">➔</span>
-        </button>
 
-        <!-- Curated 1-Click Starter Kits (Vertical Stack) -->
-        ${starterKitsHtml}
-      </div>
-    `;
+          <!-- Habits Catalog & Routine Management -->
+          <div id="habits-catalog-subview" class="mb-6">
+            ${managerHtml}
+          </div>
+
+          <!-- Subtle Footer Action to Browse Starter Kits -->
+          <div class="mt-8 text-center">
+            <button
+              type="button"
+              data-action="open-starter-kits-modal"
+              class="inline-flex items-center gap-2 py-2.5 px-5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 shadow-sm transition active:scale-95 cursor-pointer"
+            >
+              <span>📚</span>
+              <span>${i18n.t("browse_all_starter_kits", {}, lang)}</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      // Empty State: Render Full Onboarding Wizard Banner + Vertical Starter Kits
+      const starterKitsHtml = renderStarterKitsSection(lang);
+      html = `
+        <div class="identity-view max-w-lg mx-auto pb-24">
+          <!-- Habits Catalog Header -->
+          <div class="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-5 mb-4 border border-slate-200 dark:border-slate-800/80 shadow-md flex items-center justify-between">
+            <div>
+              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">${i18n.t("app_title", {}, lang)}</span>
+              <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">${i18n.t("habits_tab", {}, lang)}</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">${i18n.t("app_tagline", {}, lang)}</p>
+            </div>
+            <button
+              type="button"
+              data-action="open-add-habit"
+              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
+            >
+              + ${i18n.t("add_habit", {}, lang)}
+            </button>
+          </div>
+
+          <!-- Launch Setup Wizard Quick Banner -->
+          <button
+            type="button"
+            data-action="open-identity-wizard"
+            class="w-full mb-6 p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-cyan-500/10 border border-emerald-500/30 flex items-center justify-between text-left transition-all hover:border-emerald-500/60 shadow-sm cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-2xl p-2 rounded-xl bg-emerald-500/20 text-emerald-500">✨</span>
+              <div>
+                <span class="font-bold text-slate-900 dark:text-white text-sm block">${i18n.t("wizard_title", {}, lang)}</span>
+                <span class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">${i18n.t("wizard_subtitle", {}, lang)}</span>
+              </div>
+            </div>
+            <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-500/10 dark:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/30">➔</span>
+          </button>
+
+          <!-- Curated 1-Click Starter Kits (Vertical Stack) -->
+          ${starterKitsHtml}
+        </div>
+      `;
+    }
 
     if (containerElement) {
       containerElement.innerHTML = html;
@@ -679,14 +762,15 @@
   const identityExports = {
     renderLifeDomainsSection,
     renderStarterKitsSection,
+    renderStarterKitsModal,
     renderIdentityWizardModal,
     renderIdentityView,
     renderManagerView: renderIdentityView,
   };
 
+  global.HabitIdentityView = identityExports;
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = identityExports;
-  } else {
-    global.HabitIdentityView = identityExports;
   }
 })(typeof window !== "undefined" ? window : globalThis);

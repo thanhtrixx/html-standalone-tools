@@ -2364,7 +2364,7 @@ async function runUITests() {
     "vi"
   );
   const numericCounterMatch432 = numericCardHtml432.match(
-    /<span[^>]*class="([^"]*)"[^>]*>[\s\S]*?(?:500\s*\/\s*2[.,]500|500\s*\/\s*2500)[\s\S]*?<\/span>/i
+    /<span[^>]*class="([^"]*)"[^>]*>[^<]*?(?:500\s*\/\s*2[.,]500|500\s*\/\s*2500)[\s\S]*?<\/span>/i
   );
   assert(
     numericCounterMatch432 !== null,
@@ -2389,7 +2389,7 @@ async function runUITests() {
     "vi"
   );
   const timerTickerMatch432 = timerCardHtml432.match(
-    /<span[^>]*class="([^"]*)"[^>]*>[\s\S]*?(?:\d+p\s*\d+g|\d+m\s*\d+s|\d+:\d+)[\s\S]*?<\/span>/i
+    /<span[^>]*class="([^"]*)"[^>]*>[^<]*?(?:\d+p\s*\d+g|\d+m\s*\d+s|\d+:\d+)[\s\S]*?<\/span>/i
   );
   assert(
     timerTickerMatch432 !== null,
@@ -3898,7 +3898,8 @@ async function runUITests() {
   assert(
     habitsViewHtml.includes("life-domain-card") ||
       habitsViewHtml.includes("starter-kit-card") ||
-      habitsViewHtml.includes("open-identity-wizard"),
+      habitsViewHtml.includes("open-identity-wizard") ||
+      habitsViewHtml.includes("open-starter-kits-modal"),
     "[Issue #495 AC-3] Habits tab embeds life domain alignment and starter kit activation triggers"
   );
 
@@ -5169,8 +5170,9 @@ async function runUITests() {
   );
   assert(
     identityContentEl &&
-      identityContentEl.innerHTML.includes("starter-kit-card"),
-    "[Issue #480 AC-2] Identity view renders 1-Click Starter Kit cards"
+      (identityContentEl.innerHTML.includes("starter-kit-card") ||
+        identityContentEl.innerHTML.includes("open-starter-kits-modal")),
+    "[Issue #480 AC-2] Identity view renders 1-Click Starter Kit cards or discovery trigger"
   );
 
   // Apply Starter Kit
@@ -5337,11 +5339,11 @@ async function runUITests() {
     "[Issue #504 AC-3] Habits tab renders habits catalog container"
   );
   const starterSection = polishSandbox.document.querySelector(
-    ".starter-kits-section"
+    '.starter-kits-section, [data-action="open-starter-kits-modal"]'
   );
   assert(
     !!starterSection,
-    "[Issue #504 AC-3] Habits tab renders integrated Starter Kits section"
+    "[Issue #504 AC-3] Habits tab renders integrated Starter Kits trigger or section"
   );
 
   const managerCards = polishSandbox.document.querySelectorAll(
@@ -6767,8 +6769,9 @@ async function runUITests() {
   );
   assert(
     habitsTabHtml555.includes('id="habits-catalog-subview"') &&
-      habitsTabHtml555.includes("starter-kits-section"),
-    "[Issue #555 AC-4] Habits tab unifies catalog and vertical starter kits in a single view"
+      (habitsTabHtml555.includes("starter-kits-section") ||
+        habitsTabHtml555.includes("open-starter-kits-modal")),
+    "[Issue #555 AC-4] Habits tab integrates catalog and starter kits discovery"
   );
 
   // AC-1: Vertical stacked layout without carousel
@@ -7510,6 +7513,212 @@ async function runUITests() {
     settingsSandbox.HabitApp.closeExportFormatModal();
     settingsSandbox.HabitApp.cloudSyncManager.encryptionEnabled = false;
   }
+
+  // =========================================================================
+  // ISSUE #593: Core Life Pillar Assignment in Habit Creation & Manager UI
+  // =========================================================================
+  console.log("\n--- Testing Issue #593: Core Life Pillar Assignment ---");
+
+  const { sandbox: pillarSandbox } = createHabitTrackerSandbox();
+  await pillarSandbox.HabitApp.init();
+
+  // AC-1: Stage 1 renders 4-choice segmented Life Pillar selector
+  pillarSandbox.HabitApp.openAddHabitModal();
+  const pillarModalContainer = pillarSandbox.document.getElementById(
+    "habit-modal-container"
+  );
+  assert(
+    pillarModalContainer &&
+      pillarModalContainer.innerHTML.includes('id="segmented-domain-picker"'),
+    "[Issue #593 AC-1] Habit edit modal renders segmented Life Pillar selector"
+  );
+  assert(
+    pillarModalContainer &&
+      pillarModalContainer.innerHTML.includes('value="health"') &&
+      pillarModalContainer.innerHTML.includes('value="craft"') &&
+      pillarModalContainer.innerHTML.includes('value="mind"') &&
+      pillarModalContainer.innerHTML.includes('value="discipline"'),
+    "[Issue #593 AC-1] Segmented Life Pillar selector includes Health, Craft, Mind, and Discipline options"
+  );
+
+  // AC-2: Live preview card domain pill
+  const previewDomainBadge = pillarSandbox.document.getElementById(
+    "preview-domain-badge"
+  );
+  assert(
+    !!previewDomainBadge,
+    "[Issue #593 AC-2] Habit creation modal includes live preview domain pill"
+  );
+
+  // AC-3: Custom habit submission with chosen domain (e.g., 'discipline') persists correctly
+  await pillarSandbox.HabitApp.store.addHabit({
+    name: "Cold Shower Protocol",
+    type: "binary",
+    routine: "morning",
+    domain: "discipline",
+    color: "amber",
+    icon: "⚡",
+  });
+  const addedHabit = pillarSandbox.HabitApp.store
+    .getHabits()
+    .find((h) => h.name === "Cold Shower Protocol");
+  assert(
+    addedHabit && addedHabit.domain === "discipline",
+    "[Issue #593 AC-3] Custom habit persists selected pillar domain ('discipline') without default overwrite"
+  );
+
+  // AC-4: Habit cards in Today view and Manager view render pillar badge
+  pillarSandbox.HabitApp.switchTab("today");
+  const todayHtml =
+    pillarSandbox.document.getElementById("main-content").innerHTML;
+  assert(
+    todayHtml.includes("Kỷ luật") || todayHtml.includes("Discipline"),
+    "[Issue #593 AC-4] Today habit card renders localized pillar badge"
+  );
+  pillarSandbox.HabitApp.switchTab("manager");
+  const managerHtml =
+    pillarSandbox.document.getElementById("main-content").innerHTML;
+  assert(
+    managerHtml.includes("Kỷ luật") || managerHtml.includes("Discipline"),
+    "[Issue #593 AC-4] Manager habit card renders localized pillar badge"
+  );
+
+  // =========================================================================
+  // ISSUE #594: 52-Week Heatmap Touch Isolation, Timeframe Lenses & Auto-Scroll
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #594: Heatmap Touch Isolation & Timeframe Lenses ---"
+  );
+
+  const { sandbox: heatmapSandbox } = createHabitTrackerSandbox();
+  await heatmapSandbox.HabitApp.init();
+
+  // AC-1: Touch Isolation skipSelectors in setupTabSwipeGestures
+  heatmapSandbox.HabitApp.switchTab("insights");
+  const insightsHtml =
+    heatmapSandbox.document.getElementById("main-content").innerHTML;
+  assert(
+    insightsHtml.includes('id="insights-heatmap-scroll"'),
+    "[Issue #594 AC-1] Insights view contains touch-isolated #insights-heatmap-scroll container"
+  );
+
+  // AC-3: Timeframe lens selector toggling (30d, 90d, 52w)
+  assert(
+    insightsHtml.includes('data-timeframe="30d"') &&
+      insightsHtml.includes('data-timeframe="90d"') &&
+      insightsHtml.includes('data-timeframe="52w"'),
+    "[Issue #594 AC-3] Insights view renders 30d, 90d, and 52w timeframe lens selector"
+  );
+  assertEqual(
+    heatmapSandbox.HabitApp.insightsTimeframe,
+    "52w",
+    "[Issue #594 AC-3] Default heatmap timeframe lens is 52w"
+  );
+  heatmapSandbox.HabitApp.setInsightsTimeframe("30d");
+  assertEqual(
+    heatmapSandbox.HabitApp.insightsTimeframe,
+    "30d",
+    "[Issue #594 AC-3] Switching timeframe lens to 30d updates insightsTimeframe state"
+  );
+
+  // AC-4: Weekday labels (Mon, Wed, Fri) and month labels
+  assert(
+    insightsHtml.includes("T2") || insightsHtml.includes("Mon"),
+    "[Issue #594 AC-4] Heatmap grid displays localized weekday labels"
+  );
+
+  // =========================================================================
+  // ISSUE #595: Habits Tab IA Decluttering & Discovery Modal
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #595: Habits Tab IA Decluttering & Discovery Modal ---"
+  );
+
+  const { sandbox: iaSandbox } = createHabitTrackerSandbox();
+  await iaSandbox.HabitApp.init();
+  iaSandbox.HabitApp.switchTab("manager");
+
+  // AC-1: Streamlined header with search input and Browse Starter Kits button
+  const habitsHeaderHtml =
+    iaSandbox.document.getElementById("main-content").innerHTML;
+  assert(
+    habitsHeaderHtml.includes('id="habit-catalog-search"'),
+    "[Issue #595 AC-1] Habits tab renders instant catalog search input"
+  );
+  assert(
+    habitsHeaderHtml.includes('data-action="open-starter-kits-modal"'),
+    "[Issue #595 AC-1] Habits tab renders Browse Starter Kits discovery modal button"
+  );
+
+  // AC-2: Discovery Modal open and close
+  iaSandbox.HabitApp.openStarterKitsModal();
+  const starterModalOverlay = iaSandbox.document.getElementById(
+    "starter-kits-modal-overlay"
+  );
+  assert(
+    starterModalOverlay && !starterModalOverlay.classList.contains("hidden"),
+    "[Issue #595 AC-2] openStarterKitsModal unhides #starter-kits-modal-overlay"
+  );
+  iaSandbox.HabitApp.closeStarterKitsModal();
+  assert(
+    starterModalOverlay && starterModalOverlay.classList.contains("hidden"),
+    "[Issue #595 AC-2] closeStarterKitsModal hides #starter-kits-modal-overlay"
+  );
+
+  // AC-3: Collapsible Routine Accordions in Manager view
+  assert(
+    habitsHeaderHtml.includes("routine-accordion") &&
+      habitsHeaderHtml.includes("routine-accordion-chevron"),
+    "[Issue #595 AC-3] Manager view renders collapsible routine accordions with chevron indicators"
+  );
+
+  // AC-4: Empty state onboarding wizard and starter kits
+  await iaSandbox.HabitApp.store.factoryWipe();
+  iaSandbox.HabitApp.switchTab("manager");
+  const emptyManagerHtml =
+    iaSandbox.document.getElementById("main-content").innerHTML;
+  assert(
+    emptyManagerHtml.includes("open-identity-wizard") &&
+      emptyManagerHtml.includes("starter-kit-card"),
+    "[Issue #595 AC-4] Empty state renders setup wizard banner and vertical starter kits stack"
+  );
+
+  // =========================================================================
+  // ISSUE #596: Streak & Momentum Audit Breakdown in Detail Sheet
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #596: Streak & Momentum Audit Breakdown ---"
+  );
+
+  const { sandbox: auditSandbox } = createHabitTrackerSandbox();
+  await auditSandbox.HabitApp.init();
+  const testHabit = auditSandbox.HabitApp.store.getHabits()[0];
+  auditSandbox.HabitApp.handleOpenDetailSheet(testHabit.id);
+
+  const auditDetailContainer = auditSandbox.document.getElementById(
+    "detail-sheet-container"
+  );
+  assert(
+    auditDetailContainer &&
+      (auditDetailContainer.innerHTML.includes("Kiểm định Chuỗi") ||
+        auditDetailContainer.innerHTML.includes("Streak & Momentum Audit") ||
+        auditDetailContainer.innerHTML.includes("Streak Audit")),
+    "[Issue #596 AC-1] Detail sheet renders Streak & Momentum Audit breakdown card"
+  );
+  assert(
+    auditDetailContainer &&
+      (auditDetailContainer.innerHTML.includes("khiên") ||
+        auditDetailContainer.innerHTML.includes("freeze")),
+    "[Issue #596 AC-2] Streak Audit displays freeze protected token breakdown"
+  );
+  assert(
+    auditDetailContainer &&
+      (auditDetailContainer.innerHTML.includes("áp lực") ||
+        auditDetailContainer.innerHTML.includes("momentum") ||
+        auditDetailContainer.innerHTML.includes("guilt")),
+    "[Issue #596 AC-3] Streak Audit displays anti-guilt philosophy note"
+  );
+  auditSandbox.HabitApp.closeDetailSheet();
 }
 
 runUITests()

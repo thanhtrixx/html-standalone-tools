@@ -92,6 +92,7 @@
   let wizardCurrentStep = 1;
   let wizardSelectedKitIds = ["morning-mastery"];
   let wizardSelectedKitId = "morning-mastery";
+  let insightsTimeframe = "52w";
   let pendingDeleteHabitId = null;
   let habitsSubView = "catalog"; // 'catalog' | 'identity'
   let swipeStartX = 0;
@@ -426,10 +427,14 @@
         if (!e.touches || !e.touches[0]) return;
         const target = e.target;
 
-        // Skip if touch starts on habit cards, date ribbon, form inputs, buttons, sliders, or overlays
+        // Skip if touch starts on habit cards, date ribbon, heatmap scroll zone, form inputs, buttons, sliders, or overlays
         const skipSelectors = [
           ".habit-card",
           "#date-ribbon",
+          ".heatmap-container",
+          ".heatmap-cell",
+          ".overflow-x-auto",
+          "#insights-heatmap-scroll",
           "input",
           "textarea",
           "select",
@@ -439,6 +444,8 @@
           "#detail-sheet-overlay",
           "#delete-confirm-modal-overlay",
           "#focus-timer-modal-overlay",
+          "#starter-kits-modal-overlay",
+          "#identity-wizard-modal-overlay",
         ];
         const isExcluded = skipSelectors.some(
           (sel) => target && target.closest && target.closest(sel)
@@ -841,7 +848,12 @@
       todayView.renderTodayDashboard(store, container, lang);
       bindHabitCardGestures();
     } else if (activeTab === "insights" || activeTab === "matrix") {
-      insightsView.renderInsightsView(store, container, lang);
+      insightsView.renderInsightsView(
+        store,
+        container,
+        lang,
+        insightsTimeframe
+      );
       bindHeatmapInteractions();
     } else if (activeTab === "manager" || activeTab === "identity") {
       if (
@@ -1412,6 +1424,13 @@
    * Binds interactive cell tap/hover popover for insights heatmap
    */
   function bindHeatmapInteractions() {
+    const scrollContainer =
+      document.getElementById("insights-heatmap-scroll") ||
+      document.querySelector(".heatmap-container .overflow-x-auto");
+    if (scrollContainer) {
+      scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+    }
+
     const cells = document.querySelectorAll(".heatmap-cell");
     const popover = document.getElementById("heatmap-cell-popover");
     if (!cells || !popover) return;
@@ -1428,11 +1447,11 @@
         const dateFormatted = i18n.formatDate(date, lang, "full");
 
         popover.innerHTML = `
-          <div class="flex items-center justify-between font-bold text-white mb-1">
+          <div class="flex items-center justify-between font-bold text-slate-900 dark:text-white mb-1">
             <span>📅 ${dateFormatted}</span>
-            <span class="text-emerald-400">${rate}%</span>
+            <span class="text-emerald-500 font-mono">${rate}%</span>
           </div>
-          <p class="text-slate-400">${completed}/${scheduled} ${i18n.t("completed", {}, lang)}</p>
+          <p class="text-slate-600 dark:text-slate-400">${completed}/${scheduled} ${i18n.t("completed", {}, lang)}</p>
         `;
         popover.classList.remove("hidden");
       });
@@ -1577,6 +1596,9 @@
         const wizardModal = document.getElementById(
           "identity-wizard-modal-overlay"
         );
+        const starterKitsModal = document.getElementById(
+          "starter-kits-modal-overlay"
+        );
         const gistModal = document.getElementById("gist-config-modal-overlay");
         const driveModal = document.getElementById(
           "drive-config-modal-overlay"
@@ -1594,6 +1616,13 @@
           !vaultUnlockModal.classList.contains("hidden")
         ) {
           closeVaultUnlockModal();
+          return;
+        }
+        if (
+          starterKitsModal &&
+          !starterKitsModal.classList.contains("hidden")
+        ) {
+          closeStarterKitsModal();
           return;
         }
         if (gistModal && !gistModal.classList.contains("hidden")) {
@@ -2401,10 +2430,27 @@
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
         await app.exportDataJSON();
+      } else if (action === "open-starter-kits-modal") {
+        handleOpenStarterKitsModal();
+      } else if (action === "close-starter-kits-modal") {
+        closeStarterKitsModal();
+      } else if (action === "switch-heatmap-timeframe") {
+        const timeframe = target.getAttribute("data-timeframe") || "52w";
+        insightsTimeframe = timeframe;
+        renderActiveTab();
+      } else if (action === "toggle-routine-accordion") {
+        const routineKey = target.getAttribute("data-routine");
+        const accordion = target.closest(".routine-accordion");
+        if (accordion) {
+          const content = accordion.querySelector(".routine-accordion-content");
+          const chevron = accordion.querySelector(".routine-accordion-chevron");
+          if (content) content.classList.toggle("hidden");
+          if (chevron) chevron.classList.toggle("rotate-180");
+        }
       }
     });
 
-    // Delegated input listener for modal live preview
+    // Delegated input listener for modal live preview & search filter
     document.addEventListener("input", (e) => {
       const target = e.target;
       if (!target) return;
@@ -2417,12 +2463,47 @@
       ) {
         updateHabitModalPreview();
       }
+      if (target.id === "habit-catalog-search") {
+        const query = (target.value || "").toLowerCase().trim();
+        const cards = document.querySelectorAll(".manager-habit-card");
+        cards.forEach((card) => {
+          const name = (
+            card.getAttribute("data-habit-name") ||
+            card.textContent ||
+            ""
+          ).toLowerCase();
+          const domain = (
+            card.getAttribute("data-habit-domain") || ""
+          ).toLowerCase();
+          const matches =
+            !query || name.includes(query) || domain.includes(query);
+          card.classList.toggle("hidden", !matches);
+        });
+      }
     });
 
     // Delegated change listener for form components
     document.addEventListener("change", (e) => {
       const target = e.target;
       if (!target) return;
+
+      // Domain picker change & segmented styling
+      if (target.name === "domain") {
+        const segmentedLabels = document.querySelectorAll(
+          "#segmented-domain-picker .segmented-domain-option"
+        );
+        segmentedLabels.forEach((lbl) => {
+          const radio = lbl.querySelector('input[type="radio"]');
+          if (radio && radio.checked) {
+            lbl.className =
+              "segmented-domain-option flex items-center justify-center gap-1 py-1.5 px-1 rounded-xl cursor-pointer text-xs font-bold transition select-none bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600";
+          } else {
+            lbl.className =
+              "segmented-domain-option flex items-center justify-center gap-1 py-1.5 px-1 rounded-xl cursor-pointer text-xs font-bold transition select-none text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+          }
+        });
+        updateHabitModalPreview();
+      }
 
       // Routine chip toggle styling & mutual exclusivity (Anytime vs Morning/Afternoon/Evening)
       if (target.name === "routines") {
@@ -4041,6 +4122,43 @@
       }
     }
 
+    const domainInput = document.querySelector('input[name="domain"]:checked');
+    const domain = (domainInput && domainInput.value) || "health";
+
+    const domainMetaMap = {
+      health: {
+        icon: "🌿",
+        key: "domain_health",
+        badgeStyle:
+          "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      },
+      craft: {
+        icon: "⚡",
+        key: "domain_craft",
+        badgeStyle:
+          "border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+      },
+      mind: {
+        icon: "🔮",
+        key: "domain_mind",
+        badgeStyle:
+          "border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400",
+      },
+      discipline: {
+        icon: "🔥",
+        key: "domain_discipline",
+        badgeStyle:
+          "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      },
+    };
+    const dMeta = domainMetaMap[domain] || domainMetaMap.health;
+
+    const previewDomainBadge = document.getElementById("preview-domain-badge");
+    if (previewDomainBadge) {
+      previewDomainBadge.className = `px-1.5 py-0.5 rounded text-[10px] font-bold border ${dMeta.badgeStyle}`;
+      previewDomainBadge.textContent = `${dMeta.icon} ${i18n.t(dMeta.key, {}, lang)}`;
+    }
+
     const previewRoutines = document.getElementById("preview-routines");
     if (previewRoutines) {
       previewRoutines.innerHTML = routines
@@ -4082,6 +4200,40 @@
       components.releaseFocus();
     }
     const modalOverlay = document.getElementById("habit-edit-modal-overlay");
+    if (modalOverlay) {
+      modalOverlay.classList.add("hidden");
+    }
+  }
+
+  /**
+   * Opens Starter Kits Discovery Modal
+   */
+  function handleOpenStarterKitsModal() {
+    const modalContainer = document.getElementById(
+      "starter-kits-modal-container"
+    );
+    if (!modalContainer) return;
+
+    const lang = store.getSettings().language || "vi";
+    modalContainer.innerHTML = identityView.renderStarterKitsModal(lang);
+
+    const modalOverlay = document.getElementById("starter-kits-modal-overlay");
+    if (modalOverlay) {
+      modalOverlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(modalOverlay, { onEscape: closeStarterKitsModal });
+      }
+    }
+  }
+
+  /**
+   * Closes Starter Kits Discovery Modal
+   */
+  function closeStarterKitsModal() {
+    if (components && typeof components.releaseFocus === "function") {
+      components.releaseFocus();
+    }
+    const modalOverlay = document.getElementById("starter-kits-modal-overlay");
     if (modalOverlay) {
       modalOverlay.classList.add("hidden");
     }
@@ -4168,6 +4320,12 @@
       document.getElementById("modal-target-unit");
     const unit = unitEl ? unitEl.value.trim() : isTimer ? "mins" : "";
 
+    const domainEl =
+      (form && form.querySelector('input[name="domain"]:checked')) ||
+      (form && form.querySelector('input[name="modal-domain"]:checked')) ||
+      document.getElementById("modal-habit-domain");
+    const domain = domainEl ? domainEl.value : "health";
+
     const stepEl =
       (form && form.querySelector('[name="step"]')) ||
       document.getElementById("modal-step");
@@ -4223,6 +4381,7 @@
     const habitData = {
       id: habitId || `h-${Date.now()}`,
       name: name,
+      domain: domain,
       type: type,
       targetValue: targetValue,
       unit: unit,
@@ -5975,6 +6134,16 @@
       return pendingExportAction;
     },
     formatRelativeTime,
+    handleOpenStarterKitsModal,
+    openStarterKitsModal: handleOpenStarterKitsModal,
+    closeStarterKitsModal,
+    get insightsTimeframe() {
+      return insightsTimeframe;
+    },
+    setInsightsTimeframe: (tf) => {
+      insightsTimeframe = tf;
+      renderActiveTab();
+    },
   };
 
   global.HabitApp = HabitApp;

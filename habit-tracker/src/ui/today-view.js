@@ -362,12 +362,43 @@
         }" id="chevron-${scopedId}">▾</i>`
       : "";
 
+    const domainMetaMap = {
+      health: {
+        icon: "🌿",
+        key: "domain_health",
+        textClass:
+          "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+      },
+      craft: {
+        icon: "⚡",
+        key: "domain_craft",
+        textClass:
+          "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+      },
+      mind: {
+        icon: "🔮",
+        key: "domain_mind",
+        textClass:
+          "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/30",
+      },
+      discipline: {
+        icon: "🔥",
+        key: "domain_discipline",
+        textClass:
+          "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30",
+      },
+    };
+    const habitDomain = habit.domain || "health";
+    const dMeta = domainMetaMap[habitDomain] || domainMetaMap.health;
+    const pillarBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${dMeta.textClass}">${dMeta.icon} ${i18n.t(dMeta.key, {}, lang)}</span>`;
+
     return `
       <div
         id="habit-card-${scopedId}"
         data-habit-card="${scopedId}"
         data-habit-id="${habit.id}"
         data-routine-slot="${routineKey}"
+        data-domain="${habitDomain}"
         class="habit-card relative overflow-hidden bg-white dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-3.5 mb-3 border ${completedCardStyle} transition-all duration-300 shadow-md touch-pan-y"
       >
         <!-- Swipe reveal zone (Green check) -->
@@ -390,12 +421,13 @@
             <div class="w-1.5 h-10 rounded-full shrink-0" style="background-color: ${colorHex};"></div>
             <div class="text-2xl shrink-0">${habit.icon || "🎯"}</div>
             <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
                 <h4 class="font-semibold text-slate-900 dark:text-white text-sm truncate ${
                   isCompleted
                     ? "line-through text-slate-400 dark:text-slate-500"
                     : ""
                 }">${habit.name}</h4>
+                ${pillarBadge}
                 ${expandChevron}
               </div>
               <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -869,9 +901,9 @@
     isHabitExpanded,
   };
 
+  global.HabitTodayView = todayExports;
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = todayExports;
-  } else {
-    global.HabitTodayView = todayExports;
   }
 })(typeof window !== "undefined" ? window : globalThis);

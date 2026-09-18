@@ -222,4 +222,3 @@ tests/
   - Habit Detail Sheet renders Streak Audit card with Current Streak, Best Streak record, freeze tokens utilized, and schedule cadence.
 - [ ] **Bilingual Parity (`tests/habit-tracker-i18n.test.js`)**:
   - 100% Vietnamese and English dictionary parity for domain selectors, timeframe filters, routine accordions, and streak audit strings.
-
