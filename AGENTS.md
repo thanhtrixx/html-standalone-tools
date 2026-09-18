@@ -16,7 +16,7 @@ Token-first three-tier change classification (Tier 0 Zero-Ceremony / Tier 1 Scop
 
 ### Token Economics & Subagent Strategy
 
-Two-tier delegation threshold, scoped inner-loop test runner gates, and fan-in digest compression (≤ 300–400 words). See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.
+Two-tier delegation threshold, scoped inner-loop test runner gates (`npm run test:<tool>`), surgical file edits (`replace_file_content`), targeted line-slice inspection (`grep_search` / `StartLine`), compact E2E digests (`scripts/e2e-summary.js`), living backlog archiving (`docs/deprecated/`), and fan-in digest compression (≤ 300–400 words). See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md` and `docs/agents/ways-of-working.md`.
 
 ### Dual-Phase Tool Lifecycle & Scoped Quality
 
