@@ -264,9 +264,109 @@ const startTime = Date.now();
       );
     }
 
-    // SECTION 6: Sub-Second Execution Benchmark
+    // SECTION 6: PWA Multi-Density Assets, iOS Splash Screens & Open Graph WebP
+    console.log(
+      "--- Section 6: PWA Multi-Density Assets, Splash Screens & Open Graph WebP ---"
+    );
+
+    const fs = require("fs");
+    const path = require("path");
+    const habitTrackerDir = path.join(__dirname, "..", "habit-tracker");
+
+    // 1. Mobile meta tags
+    assert(
+      rawHtml.includes(
+        '<meta name="mobile-web-app-capable" content="yes" />'
+      ) ||
+        rawHtml.includes('<meta name="mobile-web-app-capable" content="yes">'),
+      'SMOKE-PWA-01: <meta name="mobile-web-app-capable" content="yes"> exists in index.html'
+    );
+    assert(
+      rawHtml.includes(
+        '<meta name="apple-mobile-web-app-capable" content="yes" />'
+      ) ||
+        rawHtml.includes(
+          '<meta name="apple-mobile-web-app-capable" content="yes">'
+        ),
+      'SMOKE-PWA-02: <meta name="apple-mobile-web-app-capable" content="yes"> exists in index.html'
+    );
+
+    // 2. 14 iOS startup splash screen links
+    const splashMatches = [
+      ...rawHtml.matchAll(
+        /<link\s+[^>]*rel=["']apple-touch-startup-image["'][^>]*href=["']([^"']+)["'][^>]*\/?>/gi
+      ),
+    ];
+    assert(
+      splashMatches.length === 14,
+      `SMOKE-PWA-03: Found 14 iOS splash screen link tags (Actual: ${splashMatches.length})`
+    );
+
+    for (const match of splashMatches) {
+      const relHref = match[1];
+      const splashPath = path.resolve(habitTrackerDir, relHref);
+      assert(
+        fs.existsSync(splashPath) && fs.statSync(splashPath).size > 1000,
+        `SMOKE-PWA-04: iOS splash screen '${relHref}' exists on disk with non-zero size`
+      );
+    }
+
+    // 3. Web manifest and multi-density icons
+    const manifestPath = path.join(habitTrackerDir, "manifest.webmanifest");
+    assert(
+      fs.existsSync(manifestPath),
+      "SMOKE-PWA-05: manifest.webmanifest exists at tool root"
+    );
+
+    const manifestData = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    assert(
+      Array.isArray(manifestData.icons) && manifestData.icons.length >= 14,
+      `SMOKE-PWA-06: Manifest contains ${manifestData.icons.length} icon descriptors`
+    );
+
+    const maskableIcons = manifestData.icons.filter(
+      (icon) => icon.purpose === "maskable"
+    );
+    assert(
+      maskableIcons.length >= 2,
+      `SMOKE-PWA-07: Manifest specifies maskable icon entries (Count: ${maskableIcons.length})`
+    );
+
+    for (const icon of manifestData.icons) {
+      const iconPath = path.resolve(habitTrackerDir, icon.src);
+      assert(
+        fs.existsSync(iconPath) && fs.statSync(iconPath).size > 100,
+        `SMOKE-PWA-08: Manifest icon '${icon.src}' exists on disk with non-zero byte size`
+      );
+    }
+
+    // 4. Open Graph and Twitter Card tags
+    assert(
+      rawHtml.includes("https://trile.dev/tools/habit-tracker/og-image.webp"),
+      "SMOKE-OG-01: Open Graph / Twitter image points to og-image.webp"
+    );
+    assert(
+      rawHtml.includes('content="image/webp"'),
+      "SMOKE-OG-02: og:image:type is image/webp"
+    );
+    assert(
+      rawHtml.includes('content="2752"') && rawHtml.includes('content="1536"'),
+      "SMOKE-OG-03: og:image dimensions are 2752x1536"
+    );
+    assert(
+      rawHtml.includes('content="summary_large_image"'),
+      "SMOKE-OG-04: twitter:card is summary_large_image"
+    );
+
+    const ogImgPath = path.join(habitTrackerDir, "og-image.webp");
+    assert(
+      fs.existsSync(ogImgPath) && fs.statSync(ogImgPath).size > 10000,
+      "SMOKE-OG-05: High-resolution og-image.webp exists on disk"
+    );
+
+    // SECTION 7: Sub-Second Execution Benchmark
     const durationMs = Date.now() - startTime;
-    console.log(`--- Section 6: Execution Benchmark (${durationMs}ms) ---`);
+    console.log(`--- Section 7: Execution Benchmark (${durationMs}ms) ---`);
     assert(
       durationMs < 1000,
       `SMOKE-PERF-01: Entire smoke suite completes in < 1000ms (Actual: ${durationMs}ms)`
