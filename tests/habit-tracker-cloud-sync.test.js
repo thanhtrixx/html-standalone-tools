@@ -892,6 +892,176 @@ async function runCloudSyncTests() {
       1,
       "[AC-3] Timer state boundary immediately schedules debounced sync"
     );
+
+    // ==========================================
+    // [ADR-0016 Slice 2 / Issue #586] Dirty Hashing & Adaptive Idle Cadence with Error Backoff
+    // ==========================================
+    console.log(
+      "\n--- [ADR-0016 Slice 2] Dirty Hashing & Adaptive Idle Cadence with Error Backoff ---"
+    );
+
+    const {
+      computeStateHash,
+    } = require("../habit-tracker/src/sync/cloud-sync.js");
+
+    // 1. Hash computation is deterministic across unordered keys
+    const stateA = {
+      habits: [
+        { id: "h2", name: "Read" },
+        { id: "h1", name: "Exercise" },
+      ],
+      logs: {
+        "h1_2026-09-18": { id: "h1_2026-09-18", value: 1 },
+        "h2_2026-09-18": { id: "h2_2026-09-18", value: 20 },
+      },
+      settings: { theme: "dark", lang: "vi" },
+    };
+
+    const stateB = {
+      habits: [
+        { id: "h1", name: "Exercise" },
+        { id: "h2", name: "Read" },
+      ],
+      logs: {
+        "h2_2026-09-18": { id: "h2_2026-09-18", value: 20 },
+        "h1_2026-09-18": { id: "h1_2026-09-18", value: 1 },
+      },
+      settings: { lang: "vi", theme: "dark" },
+    };
+
+    const hashA = computeStateHash(stateA);
+    const hashB = computeStateHash(stateB);
+    assert(hashA && hashA.length > 0, "[AC-1] State hash is computed");
+    assertEqual(
+      hashA,
+      hashB,
+      "[AC-1] State hash is deterministic regardless of key order"
+    );
+
+    // Different state yields different hash
+    const stateC = { ...stateA, settings: { theme: "light", lang: "vi" } };
+    const hashC = computeStateHash(stateC);
+    assert(
+      hashA !== hashC,
+      "[AC-1] Divergent state produces different hash fingerprint"
+    );
+
+    // 2. Adaptive Idle Cadence Progression
+    const idleManager = new CloudSyncManager({
+      store: mockStore,
+      idleCadenceSteps: [50, 100, 200, 400], // Fast intervals for testing
+    });
+    idleManager.activeProvider = "github";
+    idleManager.githubToken = "token";
+    idleManager.githubGistId = "gist";
+
+    assertEqual(
+      idleManager.idleStepIndex,
+      0,
+      "[AC-2] Initial idle step index starts at 0 (1 min)"
+    );
+    assertEqual(
+      idleManager.getCurrentIdleDelay(),
+      50,
+      "[AC-2] Starts with first idle cadence step"
+    );
+
+    idleManager.advanceIdleCadence();
+    assertEqual(
+      idleManager.idleStepIndex,
+      1,
+      "[AC-2] Idle step index advances to 1 (3 min)"
+    );
+    assertEqual(
+      idleManager.getCurrentIdleDelay(),
+      100,
+      "[AC-2] Second idle cadence step"
+    );
+
+    idleManager.advanceIdleCadence();
+    idleManager.advanceIdleCadence();
+    assertEqual(
+      idleManager.idleStepIndex,
+      3,
+      "[AC-2] Reaches maximum idle step index (15 min cap)"
+    );
+    idleManager.advanceIdleCadence(); // Cap check
+    assertEqual(
+      idleManager.idleStepIndex,
+      3,
+      "[AC-2] Maximum idle step index is capped"
+    );
+
+    // 3. Reset Idle Cadence upon User Interaction
+    idleManager.resetIdleCadence();
+    assertEqual(
+      idleManager.idleStepIndex,
+      0,
+      "[AC-3] User interaction resets idle cadence back to step 0 (1 min)"
+    );
+
+    // 4. Exponential Error Backoff Progression
+    const errorManager = new CloudSyncManager({
+      store: mockStore,
+      errorBackoffSteps: [20, 50, 100, 200, 500],
+    });
+
+    assertEqual(
+      errorManager.consecutiveErrorCount,
+      0,
+      "[AC-4] Initial consecutive error count is 0"
+    );
+    assertEqual(
+      errorManager.getCurrentErrorBackoffDelay(),
+      20,
+      "[AC-4] Initial error backoff is step 0 (5s)"
+    );
+
+    errorManager.recordSyncError(new Error("HTTP 429 Too Many Requests"));
+    assertEqual(
+      errorManager.consecutiveErrorCount,
+      1,
+      "[AC-4] Records error count 1"
+    );
+    assertEqual(
+      errorManager.getCurrentErrorBackoffDelay(),
+      50,
+      "[AC-4] Backs off to step 1 (15s)"
+    );
+    assertEqual(
+      errorManager.lastError,
+      "HTTP 429 Too Many Requests",
+      "[AC-4] Records last error message"
+    );
+
+    errorManager.recordSyncError(new Error("HTTP 429 Too Many Requests"));
+    assertEqual(
+      errorManager.consecutiveErrorCount,
+      2,
+      "[AC-4] Records error count 2"
+    );
+    assertEqual(
+      errorManager.getCurrentErrorBackoffDelay(),
+      100,
+      "[AC-4] Backs off to step 2 (30s)"
+    );
+
+    errorManager.recordSyncSuccess();
+    assertEqual(
+      errorManager.consecutiveErrorCount,
+      0,
+      "[AC-4] Sync success resets consecutive error count to 0"
+    );
+    assertEqual(
+      errorManager.lastError,
+      null,
+      "[AC-4] Sync success clears last error"
+    );
+
+    // Clean up test manager timers
+    timerSyncManager.cancelDebouncedSync();
+    idleManager.stopIdlePolling();
+    errorManager.stopIdlePolling();
   } finally {
     global.fetch = originalFetch;
   }

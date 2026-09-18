@@ -590,6 +590,39 @@
         }
       });
 
+      // Adaptive Idle Cadence & Activity Wake
+      if (typeof window !== "undefined") {
+        ["click", "keydown", "touchstart"].forEach((evt) => {
+          window.addEventListener(
+            evt,
+            () => {
+              if (cloudSyncManager) cloudSyncManager.resetIdleCadence();
+            },
+            { passive: true }
+          );
+        });
+
+        if (typeof document !== "undefined") {
+          document.addEventListener("visibilitychange", () => {
+            if (
+              document.visibilityState === "visible" &&
+              cloudSyncManager &&
+              cloudSyncManager.activeProvider !== "none"
+            ) {
+              cloudSyncManager.resetIdleCadence();
+            }
+          });
+        }
+
+        window.addEventListener("online", () => {
+          if (cloudSyncManager && cloudSyncManager.activeProvider !== "none") {
+            cloudSyncManager.resetIdleCadence();
+          }
+        });
+
+        cloudSyncManager.scheduleNextIdlePoll();
+      }
+
       // Background sync on boot if already connected
       if (cloudSyncManager.activeProvider !== "none") {
         cloudSyncManager.sync().catch((err) => {

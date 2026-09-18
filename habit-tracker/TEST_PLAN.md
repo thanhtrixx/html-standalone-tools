@@ -186,7 +186,7 @@ tests/
   - Cloud sync suppresses outgoing network requests during continuous timer ticking until 5 minutes (300s) have accumulated.
   - State boundary transitions (Timer Start, Pause, Reset, 100% Target Completed, App Wake/Init) trigger immediate 5s debounced sync.
   - Non-timer mutations (checkbox toggles, habit edits) continue using standard 5s debounce.
-- [ ] **Dirty State Checksum & Adaptive Idle Cadence ("Increase Mechanism") (`tests/habit-tracker-cloud-sync.test.js`)**:
+- [x] **Dirty State Checksum & Adaptive Idle Cadence ("Increase Mechanism") (`tests/habit-tracker-cloud-sync.test.js`)**:
   - Computes deterministic payload hash of normalized state; skips cloud upload when local and remote hashes match.
   - Scales idle background polling from 1m to 3m, 5m, and caps at 15m; resets to 1m upon user interaction or visibility wake.
   - Exponential error backoff on HTTP 429/403/5xx ($5\text{s} \to 15\text{s} \to 30\text{s} \to 60\text{s} \to 5\text{m}$).

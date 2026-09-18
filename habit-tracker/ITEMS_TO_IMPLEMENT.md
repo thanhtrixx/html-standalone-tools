@@ -364,11 +364,11 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 2: Change-Only Dirty State Hashing & Adaptive Idle Cadence with Error Backoff (P0)
 
-- [ ] Implement deterministic state checksum/hash engine in `src/sync/cloud-sync.js` to fingerprint normalized state.
-- [ ] Implement change-only guard: skip outgoing cloud PUT/PATCH when `localHash === lastSyncedRemoteHash` and dirty flag is false.
-- [ ] Implement Adaptive Idle Remote Cadence ("Increase Mechanism"): scale background poll interval $1\text{m} \to 3\text{m} \to 5\text{m} \to 15\text{m}$ during idle periods; reset to 1m on user interaction or visibility change.
-- [ ] Implement Exponential Error Backoff on HTTP 429/403/5xx ($5\text{s} \to 15\text{s} \to 30\text{s} \to 60\text{s} \to 5\text{m}$) with ambient non-blocking warning badge.
-- [ ] Add unit tests verifying dirty hash detection, idle interval stepping, and exponential error backoff in `tests/habit-tracker-cloud-sync.test.js`.
+- [x] Implement deterministic state checksum/hash engine in `src/sync/cloud-sync.js` to fingerprint normalized state.
+- [x] Implement change-only guard: skip outgoing cloud PUT/PATCH when `localHash === lastSyncedRemoteHash` and dirty flag is false.
+- [x] Implement Adaptive Idle Remote Cadence ("Increase Mechanism"): scale background poll interval $1\text{m} \to 3\text{m} \to 5\text{m} \to 15\text{m}$ during idle periods; reset to 1m on user interaction or visibility change.
+- [x] Implement Exponential Error Backoff on HTTP 429/403/5xx ($5\text{s} \to 15\text{s} \to 30\text{s} \to 60\text{s} \to 5\text{m}$) with ambient non-blocking warning badge.
+- [x] Add unit tests verifying dirty hash detection, idle interval stepping, and exponential error backoff in `tests/habit-tracker-cloud-sync.test.js`.
 
 ### Slice 3: 1-Click Clipboard JSON Portability & Full CSV Decommissioning (P1)
 

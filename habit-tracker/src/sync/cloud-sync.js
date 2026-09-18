@@ -22,6 +22,106 @@
     "Atomic Habit & Routine Tracker Encrypted Vault";
 
   /**
+   * Deterministic 32-bit FNV-1a state checksum / hash engine
+   */
+  function computeStateHash(payloadOrState) {
+    if (!payloadOrState) return "00000000";
+    let target = payloadOrState;
+    if (target.data) target = target.data;
+    if (target.state) target = target.state;
+
+    // Normalize habits
+    const rawHabits = Array.isArray(target.habits)
+      ? target.habits
+      : target.habits && typeof target.habits === "object"
+        ? Object.values(target.habits)
+        : [];
+    const normalizedHabits = [...rawHabits]
+      .filter(Boolean)
+      .sort((a, b) => String(a.id || "").localeCompare(String(b.id || "")))
+      .map((h) => ({
+        id: h.id,
+        name: h.name,
+        type: h.type,
+        targetValue: h.targetValue,
+        unit: h.unit,
+        step: h.step,
+        routines: h.routines || (h.routine ? [h.routine] : []),
+        domain: h.domain,
+        scheduleType: h.scheduleType,
+        scheduleDays: h.scheduleDays,
+        intervalDays: h.intervalDays,
+        color: h.color,
+        icon: h.icon,
+        archived: Boolean(h.archived),
+        order: h.order ?? 0,
+        updatedAt: h.updatedAt || "",
+      }));
+
+    // Normalize logs
+    const rawLogs = Array.isArray(target.logs)
+      ? target.logs
+      : target.logs && typeof target.logs === "object"
+        ? Object.values(target.logs)
+        : [];
+    const normalizedLogs = [...rawLogs]
+      .filter(Boolean)
+      .sort((a, b) => {
+        const keyA = a.id || `${a.habitId}_${a.date}`;
+        const keyB = b.id || `${b.habitId}_${b.date}`;
+        return keyA.localeCompare(keyB);
+      })
+      .map((l) => ({
+        id: l.id || `${l.habitId}_${l.date}`,
+        habitId: l.habitId,
+        date: l.date,
+        value: Number(l.value) || 0,
+        completed: Boolean(l.completed),
+        notes: l.notes || "",
+        updatedAt: l.updatedAt || "",
+      }));
+
+    // Normalize settings
+    const rawSettings = target.settings || {};
+    const sortedSettings = {};
+    Object.keys(rawSettings)
+      .sort()
+      .forEach((k) => {
+        sortedSettings[k] = rawSettings[k];
+      });
+
+    // Normalize vacations
+    const rawVacations = Array.isArray(target.vacations)
+      ? target.vacations
+      : Array.isArray(target.vacationRanges)
+        ? target.vacationRanges
+        : [];
+    const normalizedVacations = [...rawVacations]
+      .filter(Boolean)
+      .sort((a, b) => String(a.id || "").localeCompare(String(b.id || "")));
+
+    // Normalize tombstones
+    const deleted = target._deleted || { habits: {}, vacations: {} };
+
+    const canonicalString = JSON.stringify({
+      habits: normalizedHabits,
+      logs: normalizedLogs,
+      settings: sortedSettings,
+      vacations: normalizedVacations,
+      deleted,
+    });
+
+    // FNV-1a 32-bit hash
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < canonicalString.length; i++) {
+      hash ^= canonicalString.charCodeAt(i);
+      hash +=
+        (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    }
+    return (hash >>> 0).toString(16).padStart(8, "0");
+  }
+
+  /**
    * Extracts a 32-character hexadecimal Gist ID from a raw string or full GitHub Gist URL
    */
   function extractGistId(input) {
@@ -377,6 +477,32 @@
       this.lastTimerSyncTimestamp = 0;
       this.timerBatchTimer = null;
 
+      // Change-Only Dirty State Tracking
+      this.lastSyncedHash = null;
+      this.isDirty = false;
+
+      // Adaptive Idle Cadence ("Increase Mechanism": 1m -> 3m -> 5m -> 15m)
+      this.idleCadenceSteps = options.idleCadenceSteps || [
+        60 * 1000,
+        180 * 1000,
+        300 * 1000,
+        900 * 1000,
+      ];
+      this.idleStepIndex = 0;
+      this.idlePollTimer = null;
+
+      // Exponential Error Backoff (5s -> 15s -> 30s -> 60s -> 5m)
+      this.errorBackoffSteps = options.errorBackoffSteps || [
+        5 * 1000,
+        15 * 1000,
+        30 * 1000,
+        60 * 1000,
+        300 * 1000,
+      ];
+      this.consecutiveErrorCount = 0;
+      this.errorBackoffTimer = null;
+      this.nextRetryTimestamp = null;
+
       // Zero-Knowledge Client-Side Vault Encryption (Ephemeral Session Cache)
       this.encryptionEnabled = options.encryptionEnabled || false;
       this.sessionPassphrase = null;
@@ -461,6 +587,10 @@
         encryptionEnabled: this.encryptionEnabled,
         isVaultUnlocked: Boolean(this.sessionPassphrase),
         isVaultLocked: this.isVaultLocked,
+        isDirty: this.isDirty,
+        idleStepIndex: this.idleStepIndex,
+        consecutiveErrors: this.consecutiveErrorCount,
+        nextRetryTimestamp: this.nextRetryTimestamp,
       };
     }
 
@@ -542,9 +672,95 @@
       this.notify("disconnected", this.getStatus());
     }
 
+    markDirty() {
+      this.isDirty = true;
+    }
+
+    getCurrentIdleDelay() {
+      const idx = Math.min(
+        this.idleStepIndex,
+        this.idleCadenceSteps.length - 1
+      );
+      return this.idleCadenceSteps[idx] || 900000;
+    }
+
+    advanceIdleCadence() {
+      if (this.idleStepIndex < this.idleCadenceSteps.length - 1) {
+        this.idleStepIndex++;
+      }
+    }
+
+    resetIdleCadence() {
+      this.idleStepIndex = 0;
+      if (this.idlePollTimer) {
+        clearTimeout(this.idlePollTimer);
+        this.idlePollTimer = null;
+      }
+      if (this.autoSyncEnabled && this.activeProvider !== "none") {
+        this.scheduleNextIdlePoll();
+      }
+    }
+
+    scheduleNextIdlePoll() {
+      if (!this.autoSyncEnabled || this.activeProvider === "none") return;
+      if (this.idlePollTimer) {
+        clearTimeout(this.idlePollTimer);
+      }
+      const delay = this.getCurrentIdleDelay();
+      this.idlePollTimer = setTimeout(() => {
+        this.idlePollTimer = null;
+        this.advanceIdleCadence();
+        this.sync().finally(() => {
+          this.scheduleNextIdlePoll();
+        });
+      }, delay);
+    }
+
+    stopIdlePolling() {
+      if (this.idlePollTimer) {
+        clearTimeout(this.idlePollTimer);
+        this.idlePollTimer = null;
+      }
+    }
+
+    getCurrentErrorBackoffDelay() {
+      const idx = Math.min(
+        this.consecutiveErrorCount,
+        this.errorBackoffSteps.length - 1
+      );
+      return this.errorBackoffSteps[idx] || 300000;
+    }
+
+    recordSyncError(err) {
+      this.consecutiveErrorCount++;
+      this.lastError = (err && err.message) || String(err) || "Sync error";
+      this.lastSyncStatus =
+        this.lastError === "ENCRYPTED_VAULT_LOCKED"
+          ? "locked"
+          : this.lastError === "INVALID_VAULT_PASSPHRASE"
+            ? "invalid_passphrase"
+            : "error";
+      const delay = this.getCurrentErrorBackoffDelay();
+      this.nextRetryTimestamp = Date.now() + delay;
+      this.notify("sync_error", {
+        success: false,
+        error: this.lastError,
+        nextRetryInMs: delay,
+        consecutiveErrors: this.consecutiveErrorCount,
+      });
+    }
+
+    recordSyncSuccess() {
+      this.consecutiveErrorCount = 0;
+      this.lastError = null;
+      this.lastSyncStatus = "success";
+      this.nextRetryTimestamp = null;
+    }
+
     scheduleDebouncedSync(options = {}) {
       if (!this.autoSyncEnabled || this.activeProvider === "none") return;
 
+      this.markDirty();
       const isTimerTick = Boolean(options && options.isTimerTick);
       const isBoundary = Boolean(options && options.boundary);
 
@@ -637,6 +853,7 @@
         }
 
         const currentState = this.store ? this.store.state : null;
+        const localHash = computeStateHash(currentState);
         let remotePayload = null;
 
         // 2. Fetch Remote State
@@ -766,7 +983,37 @@
           }
         }
 
-        // 4. Merge Remote and Local States Deterministically
+        // 4. Dirty State Hashing & No-Op Bypass
+        if (remoteState) {
+          const remoteHash = computeStateHash(remoteState);
+          if (
+            localHash === remoteHash &&
+            !this.isDirty &&
+            this.lastSyncedHash === localHash
+          ) {
+            this.lastSyncTimestamp = new Date().toISOString();
+            this.recordSyncSuccess();
+            if (this.storage) {
+              await this.storage.putSetting(
+                "last_sync_timestamp",
+                this.lastSyncTimestamp
+              );
+            }
+            this.notify("sync_completed", {
+              success: true,
+              noop: true,
+              timestamp: this.lastSyncTimestamp,
+            });
+            return {
+              success: true,
+              noop: true,
+              timestamp: this.lastSyncTimestamp,
+              mergedState: currentState,
+            };
+          }
+        }
+
+        // 5. Merge Remote and Local States Deterministically
         let mergedState = currentState;
         if (remoteState && this.merge3) {
           mergedState = this.merge3.mergeCloudState(currentState, remoteState);
@@ -775,7 +1022,8 @@
           }
         }
 
-        // 5. Upload Merged Payload
+        // 6. Upload Merged Payload
+        const mergedHash = computeStateHash(mergedState);
         let uploadPayload = this.merge3.createCloudPayload(mergedState);
         if ((this.encryptionEnabled || effectivePassphrase) && this.crypto) {
           if (!effectivePassphrase) {
@@ -811,8 +1059,9 @@
         }
 
         this.lastSyncTimestamp = new Date().toISOString();
-        this.lastSyncStatus = "success";
-        this.lastError = null;
+        this.lastSyncedHash = mergedHash;
+        this.isDirty = false;
+        this.recordSyncSuccess();
 
         if (this.storage) {
           await this.storage.putSetting(
@@ -831,14 +1080,7 @@
           mergedState,
         };
       } catch (err) {
-        this.lastError = err.message || "Cloud sync failed";
-        this.lastSyncStatus =
-          err.message === "ENCRYPTED_VAULT_LOCKED"
-            ? "locked"
-            : err.message === "INVALID_VAULT_PASSPHRASE"
-              ? "invalid_passphrase"
-              : "error";
-        this.notify("sync_error", { success: false, error: this.lastError });
+        this.recordSyncError(err);
         return { success: false, error: this.lastError };
       } finally {
         this.isSyncing = false;
@@ -848,6 +1090,7 @@
 
   const cloudSyncExports = {
     extractGistId,
+    computeStateHash,
     GitHubGistAPI,
     GoogleDriveAPI,
     CloudSyncManager,
