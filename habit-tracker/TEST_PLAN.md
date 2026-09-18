@@ -196,8 +196,29 @@ tests/
   - Encrypted import triggers dedicated Passphrase Unlock Dialog (`#import-decrypt-modal`) and decrypts via AES-GCM-256 before preview.
   - Format selector modal (`#export-format-modal`) presents Encrypted Vault vs Plaintext JSON choice when vault encryption is active.
   - CSV export and import functions (`exportToCsv`, `downloadExportCSV`, `parseHabitCsv`) and UI buttons are completely removed.
-- [ ] **Settings UI Diagnostics & Local Vault Snapshots (`tests/habit-tracker-ui-components.test.js`)**:
+- [x] **Settings UI Diagnostics & Local Vault Snapshots (`tests/habit-tracker-ui-components.test.js`)**:
   - Renders 3-card Settings layout (Cloud Sync Hub, Data Portability, Local Vault Snapshots).
   - Status badges dynamically display `connected`, `syncing`, `error`, and `offline` states.
   - Rolling snapshot drawer displays last 5 restore points with 1-click rollback.
   - Data portability modals (`#paste-json-modal-overlay`, `#clipboard-fallback-modal-overlay`, `#import-preview-modal-overlay`, `#import-decrypt-modal-overlay`, `#export-format-modal-overlay`) enforce WCAG 2.1 focus trapping and Escape dismissal.
+
+### 14. Core Life Pillars, Heatmap Ergonomics, Habits IA Decluttering & Streak Transparency (ADR-0017)
+
+- [ ] **Core Life Pillars Assignment & Card Badging (`tests/habit-tracker-ui-components.test.js`)**:
+  - `renderHabitEditModal` renders 4-Pillar selector (`health`, `craft`, `mind`, `discipline`) in Stage 1 with active selection state.
+  - Saving habit from modal persists chosen `domain` to IndexedDB store.
+  - Habit cards on Today board and Habits catalog render domain badge with corresponding glow color class.
+  - Habit Detail Sheet displays the assigned Life Pillar.
+- [ ] **52-Week Contribution Heatmap Touch Isolation & Lenses (`tests/habit-tracker-ui-components.test.js`)**:
+  - `setupTabSwipeGestures` excludes `.heatmap-container`, `.overflow-x-auto`, and `.heatmap-cell` from triggering horizontal tab switching.
+  - Heatmap viewport initializes with `scrollLeft = scrollWidth` (auto-scrolled to current week and today).
+  - `renderYearlyHeatmapGrid` includes Month Timeline headers (Jan–Dec) and Weekday labels (Mon, Wed, Fri).
+  - Timeframe selector filters heatmap cells dynamically across `30d`, `90d`, and `52w`.
+- [ ] **Habits Tab Decluttering, Collapsible Routines & Starter Kits Modal (`tests/habit-tracker-ui-components.test.js`)**:
+  - Habits catalog renders clean routine sections with accordion toggle state and count badges.
+  - Starter kits render inside `#starter-kits-modal-overlay` opened via `[ 📚 Browse Starter Kits ]`.
+  - Empty state displays full Identity Setup Wizard and Starter Kits; non-empty state displays streamlined catalog.
+- [ ] **Streak Audit Breakdown (`tests/habit-tracker-ui-components.test.js` & `tests/habit-tracker-engine.test.js`)**:
+  - Habit Detail Sheet renders Streak Audit card with Current Streak, Best Streak record, freeze tokens utilized, and schedule cadence.
+- [ ] **Bilingual Parity (`tests/habit-tracker-i18n.test.js`)**:
+  - 100% Vietnamese and English dictionary parity for domain selectors, timeframe filters, routine accordions, and streak audit strings.

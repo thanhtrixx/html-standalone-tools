@@ -144,7 +144,7 @@
   /**
    * Renders 52-Week Contribution Heatmap Grid HTML
    */
-  function renderYearlyHeatmapGrid(cells = [], lang = "vi") {
+  function renderYearlyHeatmapGrid(cells = [], lang = "vi", timeframe = "52w") {
     const levelColors = [
       "bg-slate-100 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700/30",
       "bg-emerald-950 border-emerald-800 text-emerald-300",
@@ -153,7 +153,16 @@
       "bg-emerald-400 border-emerald-300 text-emerald-950 font-bold",
     ];
 
-    const cellsHtml = cells
+    let filteredCells = cells;
+    if (timeframe === "30d") {
+      filteredCells = cells.slice(-30);
+    } else if (timeframe === "90d") {
+      filteredCells = cells.slice(-90);
+    } else {
+      filteredCells = cells.slice(-365);
+    }
+
+    const cellsHtml = filteredCells
       .map((cell) => {
         const colorClass = levelColors[cell.level] || levelColors[0];
         const dateFormatted = i18n.formatDate(cell.date, lang, "full");
@@ -176,9 +185,15 @@
       })
       .join("");
 
+    const dayLabels = [
+      lang === "vi" ? "T2" : "Mon",
+      lang === "vi" ? "T4" : "Wed",
+      lang === "vi" ? "T6" : "Fri",
+    ];
+
     return `
       <div class="heatmap-container bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <h3 class="text-base font-bold text-slate-900 dark:text-white">${i18n.t("yearly_heatmap_title", {}, lang)}</h3>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("heatmap_subtitle", {}, lang)}</p>
@@ -195,9 +210,49 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto pb-2 no-scrollbar">
-          <div class="grid grid-rows-7 grid-flow-col gap-1 w-max">
-            ${cellsHtml}
+        <!-- Timeframe Lens Selector -->
+        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/60 mb-3.5 max-w-xs" id="heatmap-timeframe-picker">
+          ${[
+            { id: "30d", key: "timeframe_30d" },
+            { id: "90d", key: "timeframe_90d" },
+            { id: "52w", key: "timeframe_52w" },
+          ]
+            .map(
+              (tf) => `
+            <button
+              type="button"
+              data-action="switch-heatmap-timeframe"
+              data-timeframe="${tf.id}"
+              class="flex-1 py-1.5 px-3 text-xs font-bold rounded-xl transition-all ${
+                timeframe === tf.id
+                  ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm border border-slate-200/60 dark:border-slate-600"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              }"
+            >
+              ${i18n.t(tf.key, {}, lang)}
+            </button>
+          `
+            )
+            .join("")}
+        </div>
+
+        <div class="flex items-start gap-2">
+          <!-- Weekday Labels Column -->
+          <div class="grid grid-rows-7 gap-1 pt-0.5 text-[9px] font-semibold text-slate-400 dark:text-slate-500 select-none shrink-0 h-28">
+            <span class="leading-none"></span>
+            <span class="leading-none">${dayLabels[0]}</span>
+            <span class="leading-none"></span>
+            <span class="leading-none">${dayLabels[1]}</span>
+            <span class="leading-none"></span>
+            <span class="leading-none">${dayLabels[2]}</span>
+            <span class="leading-none"></span>
+          </div>
+
+          <!-- Heatmap Cells Grid with Touch Isolation -->
+          <div id="insights-heatmap-scroll" class="overflow-x-auto pb-2 no-scrollbar flex-1" style="overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; touch-action: pan-x;">
+            <div class="grid grid-rows-7 grid-flow-col gap-1 w-max">
+              ${cellsHtml}
+            </div>
           </div>
         </div>
 
@@ -344,7 +399,12 @@
   /**
    * Renders the complete Insights & Analytics View
    */
-  function renderInsightsView(store, containerElement, lang = "vi") {
+  function renderInsightsView(
+    store,
+    containerElement,
+    lang = "vi",
+    timeframe = "52w"
+  ) {
     if (!store) return "";
     const habits = store.getHabits(true);
     const logs = store.state.logs;
@@ -423,7 +483,7 @@
     const domainsHtml = renderLifeDomainsSection(habits, logs, lang);
 
     // Render components
-    const heatmapHtml = renderYearlyHeatmapGrid(heatmapCells, lang);
+    const heatmapHtml = renderYearlyHeatmapGrid(heatmapCells, lang, timeframe);
     const weekdayHtml = renderWeekdayChart(weekdayStats, lang);
     const routineHtml = renderRoutineAdherence(routineStats, lang);
     const milestonesHtml = renderMilestoneBadges(milestoneBadges, lang);
@@ -493,9 +553,9 @@
     renderInsightsView,
   };
 
+  global.HabitInsightsView = insightsExports;
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = insightsExports;
-  } else {
-    global.HabitInsightsView = insightsExports;
   }
 })(typeof window !== "undefined" ? window : globalThis);

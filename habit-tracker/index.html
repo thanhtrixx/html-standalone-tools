@@ -468,6 +468,23 @@
       <div id="focus-timer-container" class="w-full max-w-md my-auto"></div>
     </div>
 
+    <!-- ==================== STARTER KITS DISCOVERY MODAL OVERLAY ==================== -->
+    <div
+      id="starter-kits-modal-overlay"
+      class="fixed inset-0 z-[60] bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="starter-kits-modal-title"
+      onclick="
+        if (event.target === this) window.HabitApp.closeStarterKitsModal();
+      "
+    >
+      <div
+        id="starter-kits-modal-container"
+        class="w-full max-w-lg my-auto"
+      ></div>
+    </div>
+
     <!-- ==================== IDENTITY SETUP WIZARD MODAL OVERLAY ==================== -->
     <div
       id="identity-wizard-modal-overlay"

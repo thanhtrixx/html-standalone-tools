@@ -60,6 +60,7 @@
     const assignedRoutines = habit
       ? engine.getHabitRoutines(habit)
       : ["morning"];
+    const domain = habit ? habit.domain || "health" : "health";
     const routine = assignedRoutines[0] || "morning";
     const scheduleType = habit ? habit.scheduleType || "daily" : "daily";
     const scheduleDays = habit
@@ -69,6 +70,48 @@
     const color = habit ? habit.color || "emerald" : "emerald";
     const icon = habit ? habit.icon || "🎯" : "🎯";
     const reminderTime = habit ? habit.reminderTime || "" : "";
+
+    const domainMeta = [
+      {
+        id: "health",
+        icon: "🌿",
+        key: "domain_health",
+        activeBorder:
+          "border-emerald-500 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 ring-1 ring-emerald-500/30",
+        badgeStyle:
+          "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      },
+      {
+        id: "craft",
+        icon: "⚡",
+        key: "domain_craft",
+        activeBorder:
+          "border-cyan-500 text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 ring-1 ring-cyan-500/30",
+        badgeStyle:
+          "border-cyan-500/30 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+      },
+      {
+        id: "mind",
+        icon: "🔮",
+        key: "domain_mind",
+        activeBorder:
+          "border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-500/10 ring-1 ring-purple-500/30",
+        badgeStyle:
+          "border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400",
+      },
+      {
+        id: "discipline",
+        icon: "🔥",
+        key: "domain_discipline",
+        activeBorder:
+          "border-amber-500 text-amber-600 dark:text-amber-400 bg-amber-500/10 ring-1 ring-amber-500/30",
+        badgeStyle:
+          "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      },
+    ];
+
+    const currentDomainMeta =
+      domainMeta.find((d) => d.id === domain) || domainMeta[0];
 
     const colorPillsHtml = engine.HABIT_COLORS.map((c) => {
       const isSelected = c.id === color;
@@ -176,6 +219,9 @@
                   ${name || (lang === "vi" ? "Tên thói quen mới" : "New habit name")}
                 </h4>
                 <div class="flex items-center gap-2 mt-0.5">
+                  <span id="preview-domain-badge" class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${currentDomainMeta.badgeStyle}">
+                    ${currentDomainMeta.icon} ${i18n.t(currentDomainMeta.key, {}, lang)}
+                  </span>
                   <span id="preview-type-target" class="text-xs text-slate-500 dark:text-slate-400 truncate">
                     ${type === "binary" ? i18n.t("type_binary", {}, lang) : `${displayTargetValue} ${unit || (type === "timer" ? i18n.t("minutes_unit", {}, lang) : "")}`}
                   </span>
@@ -228,6 +274,29 @@
                   required
                   class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl py-2.5 px-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 >
+              </div>
+            </div>
+
+            <!-- Core Life Pillar Selector -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1.5">${i18n.t("domain_label", {}, lang)}</label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="segmented-domain-picker">
+                ${domainMeta
+                  .map((d) => {
+                    const isSelected = domain === d.id;
+                    return `
+                    <label class="segmented-domain-option flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl border cursor-pointer text-xs font-semibold transition select-none ${
+                      isSelected
+                        ? `${d.activeBorder} shadow-sm font-bold`
+                        : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    }">
+                      <input type="radio" name="domain" value="${d.id}" class="sr-only" ${isSelected ? "checked" : ""}>
+                      <span>${d.icon}</span>
+                      <span class="truncate">${i18n.t(d.key, {}, lang)}</span>
+                    </label>
+                  `;
+                  })
+                  .join("")}
               </div>
             </div>
 
@@ -425,11 +494,42 @@
                     .join("")}</div>`
                 : "";
 
+            const domainMetaMap = {
+              health: {
+                icon: "🌿",
+                key: "domain_health",
+                textClass:
+                  "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+              },
+              craft: {
+                icon: "⚡",
+                key: "domain_craft",
+                textClass:
+                  "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+              },
+              mind: {
+                icon: "🔮",
+                key: "domain_mind",
+                textClass:
+                  "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/30",
+              },
+              discipline: {
+                icon: "🔥",
+                key: "domain_discipline",
+                textClass:
+                  "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30",
+              },
+            };
+            const habitDomain = h.domain || "health";
+            const dMeta = domainMetaMap[habitDomain] || domainMetaMap.health;
+            const pillarBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${dMeta.textClass}">${dMeta.icon} ${i18n.t(dMeta.key, {}, lang)}</span>`;
+
             return `
               <div
                 class="manager-habit-card bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-3.5 mb-3 flex items-center justify-between gap-3 shadow-md transition-all hover:border-emerald-500/40 cursor-grab active:cursor-grabbing"
                 data-habit-id="${h.id}"
                 data-routine="${rKey}"
+                data-domain="${habitDomain}"
                 draggable="true"
               >
                 <!-- Tactile Drag Grip Handle -->
@@ -445,7 +545,10 @@
                   <div class="w-1.5 h-10 rounded-full shrink-0" style="background-color: ${colorHex};"></div>
                   <span class="text-2xl shrink-0">${h.icon || "🎯"}</span>
                   <div class="min-w-0 flex-1">
-                    <h4 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base truncate">${h.name}</h4>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <h4 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base truncate">${h.name}</h4>
+                      ${pillarBadge}
+                    </div>
                     <span class="text-xs text-slate-500 dark:text-slate-400">${i18n.t(`type_${h.type || "binary"}`, {}, lang)}</span>
                     ${routineBadges}
                   </div>
@@ -481,7 +584,6 @@
                         type="button"
                         data-action="archive-habit"
                         data-habit-id="${h.id}"
-                        aria-label="${i18n.t("archive_habit", {}, lang)}"
                         class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-2 cursor-pointer"
                       >
                         <span>📦</span>
@@ -506,9 +608,21 @@
           .join("");
 
         return `
-          <div class="mb-6">
-            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 px-1">${i18n.t(`routine_${rKey}`, {}, lang)}</h3>
-            <div>${itemsHtml}</div>
+          <div class="mb-6 routine-accordion" data-routine-accordion="${rKey}">
+            <button
+              type="button"
+              data-action="toggle-routine-accordion"
+              data-routine="${rKey}"
+              class="w-full flex items-center justify-between mb-2 px-1 text-left cursor-pointer group select-none"
+              aria-expanded="true"
+            >
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">${i18n.t(`routine_${rKey}`, {}, lang)}</h3>
+                <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700/60">${routineHabits.length}</span>
+              </div>
+              <span class="routine-accordion-chevron text-xs text-slate-400 dark:text-slate-500 transition-transform duration-200">▾</span>
+            </button>
+            <div class="routine-accordion-content">${itemsHtml}</div>
           </div>
         `;
       })
@@ -611,9 +725,9 @@
     renderManagerView,
   };
 
+  global.HabitManagerView = managerExports;
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = managerExports;
-  } else {
-    global.HabitManagerView = managerExports;
   }
 })(typeof window !== "undefined" ? window : globalThis);

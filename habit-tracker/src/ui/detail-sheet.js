@@ -268,15 +268,68 @@
       })
       .join("");
 
+    const domainMetaMap = {
+      health: {
+        icon: "🌿",
+        key: "domain_health",
+        textClass:
+          "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+      },
+      craft: {
+        icon: "⚡",
+        key: "domain_craft",
+        textClass:
+          "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+      },
+      mind: {
+        icon: "🔮",
+        key: "domain_mind",
+        textClass:
+          "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/30",
+      },
+      discipline: {
+        icon: "🔥",
+        key: "domain_discipline",
+        textClass:
+          "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30",
+      },
+    };
+    const habitDomain = habit.domain || "health";
+    const dMeta = domainMetaMap[habitDomain] || domainMetaMap.health;
+    const pillarBadge = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border ${dMeta.textClass}">${dMeta.icon} ${i18n.t(dMeta.key, {}, lang)}</span>`;
+
+    let cadenceStr = i18n.t("freq_daily", {}, lang);
+    if (habit.scheduleType === "specific_days") {
+      const dayKeys = [
+        "day_sun",
+        "day_mon",
+        "day_tue",
+        "day_wed",
+        "day_thu",
+        "day_fri",
+        "day_sat",
+      ];
+      const days = (habit.scheduleDays || [])
+        .map((d) => i18n.t(dayKeys[d], {}, lang))
+        .join(", ");
+      cadenceStr = `${i18n.t("freq_specific_days", {}, lang)} (${days})`;
+    } else if (habit.scheduleType === "interval") {
+      cadenceStr = `${i18n.t("freq_interval", {}, lang)} (${habit.intervalDays || 1}d)`;
+    }
+
     const html = `
-      <div class="sheet-card bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 shadow-2xl text-slate-900 dark:text-white" role="dialog" aria-modal="true" aria-labelledby="detail-sheet-title">
-        <!-- Header with Edit & Archive Actions -->
-        <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800">
-          <div class="flex items-center gap-3">
-            <div class="w-2 h-10 rounded-full" style="background-color: ${colorHex};"></div>
-            <span class="text-3xl">${habit.icon || "🎯"}</span>
-            <div>
-              <h3 id="detail-sheet-title" class="text-xl font-bold text-slate-900 dark:text-white">${habit.name}</h3>
+      <div class="detail-sheet-card bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl text-slate-900 dark:text-white" role="dialog" aria-modal="true" aria-labelledby="detail-sheet-title">
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-md" style="background-color: ${colorHex};">
+              <span>${habit.icon || "🎯"}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 id="detail-sheet-title" class="text-lg font-bold text-slate-900 dark:text-white truncate">${habit.name}</h3>
+                ${pillarBadge}
+              </div>
               <span class="text-xs text-slate-500 dark:text-slate-400">${engine
                 .getHabitRoutines(habit)
                 .map((r) => i18n.t(`routine_${r}`, {}, lang))
@@ -341,6 +394,27 @@
           </div>
         </div>
 
+        <!-- Streak & Momentum Audit Breakdown -->
+        <div class="mb-5 bg-slate-50 dark:bg-slate-800/40 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700/40">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <span>🛡️</span> ${i18n.t("streak_audit_title", {}, lang)}
+            </h4>
+            <span class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono">${cadenceStr}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 mb-2">
+            <div class="p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${i18n.t("freeze_protected_badge", { count: streakStats.freezeTokensUsed || 0 }, lang)}</span>
+              <span class="font-bold text-slate-900 dark:text-white mt-0.5 block">${i18n.t("freeze_protected_days", { count: (streakStats.frozenDates && streakStats.frozenDates.length) || 0 }, lang)}</span>
+            </div>
+            <div class="p-2 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/40">
+              <span class="text-[10px] text-slate-500 dark:text-slate-400 block">${i18n.t("schedule_cadence_label", {}, lang)}</span>
+              <span class="font-bold text-slate-900 dark:text-white mt-0.5 block truncate">${cadenceStr}</span>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 italic leading-snug">${i18n.t("anti_guilt_streak_note", {}, lang)}</p>
+        </div>
+
         <!-- 365-Day Mini Heatmap (Clickable) -->
         <div class="mb-5">
           <div class="flex items-center justify-between mb-2">
@@ -392,9 +466,9 @@
     renderDetailSheet,
   };
 
+  global.HabitDetailSheet = detailExports;
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = detailExports;
-  } else {
-    global.HabitDetailSheet = detailExports;
   }
 })(typeof window !== "undefined" ? window : globalThis);
