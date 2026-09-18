@@ -52,6 +52,9 @@ const COMPANION_ASSETS = [
   "favicon.png",
   "apple-touch-icon.png",
   "og-image.png",
+  "og-image.webp",
+  "icons",
+  "splash",
 ];
 
 const MINIFY_OPTIONS = {
@@ -423,14 +426,26 @@ async function buildCompanionAssets(
     const toolDistAsset = path.join(toolDistDir, assetName);
     const rootDistAsset = path.join(rootDistDir, assetName);
 
+    const isDir = fs.statSync(srcAsset).isDirectory();
+    if (isDir) {
+      fs.cpSync(srcAsset, toolDistAsset, { recursive: true });
+      fs.cpSync(srcAsset, rootDistAsset, { recursive: true });
+      processedFiles.push(toolDistAsset, rootDistAsset);
+      continue;
+    }
+
     if (assetName === "sw.js" || assetName === "service-worker.js") {
       let swContent = fs.readFileSync(srcAsset, "utf8");
 
       // Inject version into CACHE_NAME if version discovered
       if (version) {
+        const cachePrefix =
+          tool.name === "smart-buy-list-price-tracker"
+            ? "smart-buy-list"
+            : tool.name;
         swContent = swContent.replace(
           /const\s+CACHE_NAME\s*=\s*["'][^"']+["'];?/,
-          `const CACHE_NAME = "smart-buy-list-v${version}";`
+          `const CACHE_NAME = "${cachePrefix}-v${version}";`
         );
         // Synchronize source file if needed
         try {
@@ -679,7 +694,11 @@ function syncToolToExternal(tool, destDir) {
     const assetToCopy = fs.existsSync(distAsset) ? distAsset : srcAsset;
     if (fs.existsSync(assetToCopy)) {
       const destAsset = path.join(targetDir, assetName);
-      fs.copyFileSync(assetToCopy, destAsset);
+      if (fs.statSync(assetToCopy).isDirectory()) {
+        fs.cpSync(assetToCopy, destAsset, { recursive: true });
+      } else {
+        fs.copyFileSync(assetToCopy, destAsset);
+      }
       syncedFiles.push(destAsset);
     }
   }

@@ -1,14 +1,15 @@
-const CACHE_NAME = "smart-buy-list-v1.0.0";
+const CACHE_NAME = "habit-tracker-v1.0.0";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./manifest.json",
   "./icon.svg",
-  "./icon-180.png",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./og-image.png",
+  "./favicon.png",
+  "./icons/icon-192x192.png",
+  "./icons/icon-512x512.png",
+  "./icons/icon-192x192-maskable.png",
+  "./icons/icon-512x512-maskable.png",
 ];
 
 self.addEventListener("install", (event) => {
