@@ -25,6 +25,8 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0015-cloud-sync-deterministic-3way-merge-encrypted-vault-and-data-portability.md`](./docs/adr/0015-cloud-sync-deterministic-3way-merge-encrypted-vault-and-data-portability.md)
 - [`docs/adr/0016-unified-sync-kernel-adaptive-cadence-timer-batching-and-clipboard-json-portability.md`](./docs/adr/0016-unified-sync-kernel-adaptive-cadence-timer-batching-and-clipboard-json-portability.md)
 - [`docs/adr/0017-core-pillars-heatmap-ergonomics-and-habits-ia-decluttering.md`](./docs/adr/0017-core-pillars-heatmap-ergonomics-and-habits-ia-decluttering.md)
+- [`docs/adr/0018-pwa-asset-architecture-modern-meta-tags-and-social-media-card.md`](./docs/adr/0018-pwa-asset-architecture-modern-meta-tags-and-social-media-card.md)
+- [`docs/adr/0019-contribution-heatmap-github-months-ia-refinement-and-consistent-actions.md`](./docs/adr/0019-contribution-heatmap-github-months-ia-refinement-and-consistent-actions.md)
 
 ---
 
@@ -34,11 +36,11 @@ For architectural decision history and UI/UX evolution, refer to:
 
 The application organizes daily execution, deep analytics, habit catalog management, and preferences into four primary tabs:
 
-- **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day responsive full-viewport date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with routine-scoped inline expandability.
-- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring **4 Core Life Pillars** (Health, Mind, Craft, Discipline) with adherence rings, 52-week GitHub-style contribution heatmap with touch gesture isolation and auto-scroll to present, global aggregate consistency scores (30d/90d), 0-baseline day-of-week adherence charts, streak milestone records, and completion velocity.
-- **Habits Catalog & Manager (`habits`)**: Streamlined personal habit catalog management (Add, Edit, Drag-and-Drop Reorder, Archive, Delete, Collapsible Routines) with dedicated Discovery Modal for **8 Curated Starter Kits** and Empty-State Identity Setup Wizard.
+- **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day responsive full-viewport date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with decluttered subtitles (displaying only numerical/timer progress and notes, omitting redundant routine tags) and routine-scoped inline expandability.
+- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring **4 Core Life Pillars** (Health, Mind, Craft, Discipline) with adherence rings, 0-baseline **Day of Week Consistency** charts, GitHub-style **Contribution Heatmap** with localized month reference headers (`Jan`, `Feb`, ... / `Thg 1`, `Thg 2`, ...), centered timeframe lens selector (`30d` / `90d` / `52w`), touch gesture isolation, auto-scroll to present, global aggregate consistency scores (30d/90d), streak milestone records, and completion velocity.
+- **Habits Catalog & Manager (`habits`)**: Streamlined personal habit catalog management (Add, Edit, Drag-and-Drop Reorder, Archive, Delete, Collapsible Routines) with standardized header actions (`[ 📚 Starter Kits ]` with responsive text, `[ ➕ Add Habit ]` icon + text), dedicated Discovery Modal for **8 Curated Starter Kits** (with zero redundant footer buttons), and Empty-State Identity Setup Wizard.
 - **Settings & Data Vault (`settings`)**: Configuration hub for streak freeze tokens, vacation pause mode, bilingual language switching (VI/EN), dark/light theme toggle, **Cloud Sync Hub** (GitHub Gist & Google Drive AppData with Unified Sync Kernel), **Data Portability** (1-Click Clipboard JSON Copy/Paste, Interactive JSON Import/Export with AES-GCM-256 encryption option), and **Local Vault Snapshots & Safety Rollback** (rolling last 5 restore points).
-  _Avoid_: Sub-header bar, lens switcher, tab page, screen switch, subview switcher, CSV export/import buttons.
+  _Avoid_: Sub-header bar, lens switcher, tab page, screen switch, subview switcher, CSV export/import buttons, repeating routine tags in Today card subtitles.
 
 ---
 
@@ -128,8 +130,10 @@ The application organizes daily execution, deep analytics, habit catalog managem
 - **Mobile Touch Targets**: All interactive controls (checkboxes, dock items, reorder arrows, context menu buttons, date ribbon pills) guarantee minimum 44×44px hitboxes.
 - **Typography Ramp Adherence**: Strict adherence to `DESIGN.md` ramp (`micro: 11px`, `label: 12px`); arbitrary `text-[10px]` classes are strictly prohibited.
 - **Local-First Zero-Backend Persistence**: 100% offline client-side storage in IndexedDB (`habit_tracker_db`) with fallback to localStorage.
+- **PWA Asset & Native Mobile Standard**: Multi-density icon packaging (`icons/icon-16x16.png` through `512x512.png` plus standard and maskable variants), 14 device-specific iOS startup splash screens (`splash/`), SVG vector favicon, and dual modern PWA meta tags (`<meta name="mobile-web-app-capable" content="yes" />` + `<meta name="apple-mobile-web-app-capable" content="yes" />`).
+- **Social Media Open Graph & Twitter Card**: High-resolution WebP social preview card (`og-image.webp`, $2752 \times 1536$) with explicit MIME type (`image/webp`) and comprehensive metadata (`og:image`, `og:image:width`, `og:image:height`, `og:locale`, `twitter:card="summary_large_image"`).
 - **Bilingual Parity**: 100% Vietnamese (`vi`) and English (`en`) dictionary translation coverage.
-  _Avoid_: Un-trapped modals, timeline view, matrix view, sub-11px text, unpadded <44px icon buttons.
+  _Avoid_: Un-trapped modals, timeline view, matrix view, sub-11px text, unpadded <44px icon buttons, absolute `/icons` root paths in sub-directory deployments, deprecated standalone meta tags without standard `mobile-web-app-capable`.
 
 ---
 

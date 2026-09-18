@@ -41,7 +41,17 @@ In multi-agent autonomous engineering environments, uncalibrated ceremonies, ful
 - **`Active Feature Development`** (Velocity): Backlog expansion, rapid domain iteration. `feat:` commits default to Tier 1; scoped unit suites suffice for inner loop.
 - **`Hardened Stable`** (Quality & Zero-Regression): Completed backlogs, production releases. `feat:` commits require Tier 2; `fix:/refactor:` require tool-scoped E2E verification.
 
-### 5. Repository 5 Quality Invariants
+### 5. Repository-Wide Token Economics Invariants
+
+To eliminate context degradation and token burn across all autonomous agent sessions, the following operational invariants are strictly enforced:
+
+1. **Inner-Loop Scoped Runners**: Subagents and orchestrators in the inner loop must strictly execute `npm run test:<tool>` (e.g. `npm run test:habit`). Full `npm run verify` is strictly forbidden in inner loops and reserved solely for orchestrator PR/Release gates.
+2. **Targeted File Inspection & Grep-First**: Prohibit full-file reads on files $> 200$ lines. Use `grep_search` and `find_by_name` first, then inspect specific line ranges with `StartLine`/`EndLine` slices.
+3. **Surgical File Edits**: Mandatory use of `replace_file_content` for code modifications. Overwriting entire files via `write_to_file` for incremental changes is prohibited.
+4. **Compact E2E Test Digests**: Multi-device and browser tests must execute via compact summaries (`node scripts/e2e-summary.js`), outputting ~100 tokens. Detailed failure logs/traces are loaded lazily only when assertions fail.
+5. **Living Backlog Lifecycle & History Archiving**: Tool `ITEMS_TO_IMPLEMENT.md` files must remain lean ($\le 120$ lines) containing only active capabilities and current roadmaps. Completed slices must be archived to `docs/deprecated/ITEMS_TO_IMPLEMENT_HISTORY.md`. Sessions must scope context to active issues rather than loading historical backlogs.
+
+### 6. Repository 5 Quality Invariants
 
 All code must uphold:
 
@@ -55,5 +65,5 @@ All code must uphold:
 
 ## Consequences
 
-- **Positive**: Drastically reduced session token burn (~60–80% savings on routine tasks), zero port collisions during testing, sharp focus on deliverable ROI.
-- **Trade-off**: Requires strict categorization discipline and adherence to structured summary limits.
+- **Positive**: Drastically reduced session token burn (~60–80% savings across tasks), eliminated context pollution from terminal/file bloat, zero port collisions during testing, sharp focus on deliverable ROI.
+- **Trade-off**: Requires strict categorization discipline, targeted file reading, and systematic archiving of completed roadmaps.

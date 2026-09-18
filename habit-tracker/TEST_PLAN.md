@@ -222,3 +222,43 @@ tests/
   - Habit Detail Sheet renders Streak Audit card with Current Streak, Best Streak record, freeze tokens utilized, and schedule cadence.
 - [ ] **Bilingual Parity (`tests/habit-tracker-i18n.test.js`)**:
   - 100% Vietnamese and English dictionary parity for domain selectors, timeframe filters, routine accordions, and streak audit strings.
+
+### 15. PWA Asset Packaging, Modern Meta Tags & Social Media Open Graph (ADR-0018)
+
+- [ ] **PWA Asset Integrity & Web Manifest (`tests/habit-tracker-lightpanda-smoke.test.js` & `tests/build.test.js`)**:
+  - Web manifest (`manifest.webmanifest`) parses as valid JSON with `start_url="./index.html"`, `theme_color="#020617"`, and valid icon array.
+  - Standard PNG icons (`icons/icon-16x16.png` through `512x512.png`) and maskable icons (`icon-192x192-maskable.png`, `icon-512x512-maskable.png`) exist on disk and resolve with valid file sizes.
+  - All 14 iOS startup splash screens exist in `habit-tracker/splash/`.
+- [ ] **HTML Shell Standards & Deprecation Hygiene (`tests/habit-tracker-lightpanda-smoke.test.js`)**:
+  - `index.html` includes `<meta name="mobile-web-app-capable" content="yes" />` alongside `<meta name="apple-mobile-web-app-capable" content="yes" />`.
+  - All 14 iOS splash screen `<link rel="apple-touch-startup-image">` tags are present with valid media query conditions.
+  - Favicon links (`./favicon.png`, `./icons/icon-32x32.png`, `./icons/icon-16x16.png`, `./icons/icon-180x180.png`, `./icon.svg`) use valid relative paths.
+- [ ] **Open Graph & Twitter Social Card (`tests/habit-tracker-lightpanda-smoke.test.js`)**:
+  - `og:image` points to `https://trile.dev/tools/habit-tracker/og-image.webp`.
+  - `og:image:type` equals `image/webp`.
+  - `og:image:width` equals `2752` and `og:image:height` equals `1536`.
+  - `twitter:card` is set to `summary_large_image` and `twitter:image` points to `https://trile.dev/tools/habit-tracker/og-image.webp`.
+- [ ] **Service Worker & Build Pipeline Mirroring (`tests/build.test.js`)**:
+  - `scripts/build.js` dynamically stamps `CACHE_NAME = "habit-tracker-v${version}"` in `sw.js`.
+  - `scripts/build.js` recursively copies `icons/` and `splash/` folders, `og-image.webp`, and `favicon.png` into `habit-tracker/dist/` and `dist/habit-tracker/`.
+  - `npm run verify` runs 100% green across all linters, builds, and test suites.
+
+### 16. Contribution Heatmap GitHub Months, Insights Reordering & Action Consistency (ADR-0019)
+
+- [ ] **Today Tab Subtitle Decluttering (`tests/habit-tracker-ui-components.test.js`)**:
+  - `renderHabitCard` omits routine name string (e.g. `Morning`, `Evening`) from the subtitle across binary, numeric, and timer habits.
+  - Subtitle preserves numeric/timer progress (`1,200 / 2,000 ml`, `⏱️ 08:30 / 15:00`) and note preview snippet.
+  - Boolean habits without notes render no empty subtitle container.
+- [ ] **Contribution Heatmap GitHub Months & Centering (`tests/habit-tracker-ui-components.test.js`)**:
+  - Heatmap title is verified as "Contribution Heatmap" (`Contribution Heatmap` / `Biểu đồ đóng góp`).
+  - `#heatmap-timeframe-picker` includes `mx-auto` class to guarantee centered alignment.
+  - Heatmap grid renders top month header row (`Jan`, `Feb`, ... / `Thg 1`, `Thg 2`, ...) aligned with week columns for `30d`, `90d`, and `52w` timeframes.
+- [ ] **Insights Section Reordering (`tests/habit-tracker-ui-components.test.js`)**:
+  - `renderInsightsView` renders Day of Week Consistency (`renderWeekdayChart`) before the Contribution Heatmap (`renderYearlyHeatmapGrid`).
+- [ ] **Habits Tab Action Consistency & Footer Removal (`tests/habit-tracker-ui-components.test.js`)**:
+  - Bottom footer `[ 📚 Browse All Starter Kits ]` button is removed.
+  - Header `[ 📚 ]` button includes responsive localized text (`📚 Starter Kits` / `📚 Gói mẫu` on mobile, expanding to full title on `sm:`).
+  - Header Add Habit button uses icon + text `➕ Add Habit` (EN) / `➕ Thêm thói quen` (VI) with matching button ergonomics.
+- [ ] **Bilingual Parity & Full Verification Gate (`tests/habit-tracker-i18n.test.js`)**:
+  - 100% key parity for all updated/new translation keys in EN and VI dictionaries.
+  - `npm run test:habit` passes 100% and outer gate `npm run verify` passes with 0 failures.

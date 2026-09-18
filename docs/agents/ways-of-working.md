@@ -60,12 +60,15 @@ Current tool phases: See [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
 
 ---
 
-## Token Economics ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
+## Token Economics & Session Optimization ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
-- **Two-Tier Delegation**: Micro-fixes (< 5 lines) → orchestrator inline. Features/reviews → dedicated subagents.
-- **Fan-In Digests**: Subagent returns ≤ 300-400 word structured summaries. Raw logs forbidden.
-- **Scoped Test Runners**: Subagents use `npm run test:<tool>` only. Full `npm run verify` reserved for orchestrator at PR/release gates.
-- **E2E Aggregation**: Use `scripts/e2e-summary.js` for compact pass/fail output (~100 tokens). Fetch failure traces only on errors.
+- **Two-Tier Delegation**: Micro-fixes (< 5 lines) or doc updates → orchestrator inline. Complex engines/reviews → dedicated subagents.
+- **Inner-Loop Scoped Runners**: Subagents and inner loops must strictly run `npm run test:<tool>`. Prohibit running full `npm run verify` in inner loops.
+- **Targeted File Inspection**: Use `grep_search` and `find_by_name` first. Prohibit full-file dumps on files $> 200$ lines; use `StartLine`/`EndLine` slices.
+- **Surgical Edits**: Mandatory use of `replace_file_content` for edits. Prohibit `write_to_file` whole-file overwrites for incremental changes.
+- **Fan-In / Fan-Out Control**: Prune fan-out context to specific ACs and target files. Subagents must return dense structured digests ($\le 300\text{--}400$ words) without raw terminal dumps.
+- **Compact E2E Test Aggregation**: Use `scripts/e2e-summary.js` for compact pass/fail output (~100 tokens). Fetch failure traces lazily only on errors.
+- **Living Backlog & History Archiving**: Keep tool `ITEMS_TO_IMPLEMENT.md` under 120 lines by archiving completed slices to `docs/deprecated/ITEMS_TO_IMPLEMENT_HISTORY.md`. Sessions must focus on single active issues rather than whole backlog histories.
 
 ---
 
