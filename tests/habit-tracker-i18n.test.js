@@ -1150,6 +1150,57 @@ async function runI18nTests() {
     "+01:01:40",
     "[Issue #553 AC-1] formatDurationClock(3700, '+') returns '+01:01:40'"
   );
+
+  // ==========================================
+  // [Issue #609] ADR-0019 Heatmap, Header Actions & Lexicon Parity
+  // ==========================================
+  console.log(
+    "--- [Issue #609] ADR-0019 Heatmap, Header Actions & Lexicon Parity ---"
+  );
+
+  assertEqual(
+    t("yearly_heatmap_title", {}, "en"),
+    "Contribution Heatmap",
+    "[Issue #609 AC-2] English yearly heatmap title is 'Contribution Heatmap'"
+  );
+  assertEqual(
+    t("yearly_heatmap_title", {}, "vi"),
+    "Biểu đồ đóng góp",
+    "[Issue #609 AC-2] Vietnamese yearly heatmap title is 'Biểu đồ đóng góp'"
+  );
+
+  assertEqual(
+    t("starter_kits_short", {}, "en"),
+    "Starter Kits",
+    "[Issue #609 AC-2] English starter_kits_short is 'Starter Kits'"
+  );
+  assertEqual(
+    t("starter_kits_short", {}, "vi"),
+    "Gói mẫu",
+    "[Issue #609 AC-2] Vietnamese starter_kits_short is 'Gói mẫu'"
+  );
+
+  assertEqual(
+    t("starter_kits_full", {}, "en"),
+    "Browse Starter Kits",
+    "[Issue #609 AC-2] English starter_kits_full is 'Browse Starter Kits'"
+  );
+  assertEqual(
+    t("starter_kits_full", {}, "vi"),
+    "Gói thói quen mẫu",
+    "[Issue #609 AC-2] Vietnamese starter_kits_full is 'Gói thói quen mẫu'"
+  );
+
+  assertEqual(
+    t("browse_starter_kits_desc", {}, "en"),
+    "Adopt a proven habit pack",
+    "[Issue #609 AC-2] English browse_starter_kits_desc is 'Adopt a proven habit pack'"
+  );
+  assertEqual(
+    t("browse_starter_kits_desc", {}, "vi"),
+    "Áp dụng hệ thống thói quen có sẵn",
+    "[Issue #609 AC-2] Vietnamese browse_starter_kits_desc is 'Áp dụng hệ thống thói quen có sẵn'"
+  );
 }
 
 runI18nTests()

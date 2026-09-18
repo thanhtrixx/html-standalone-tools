@@ -7719,6 +7719,165 @@ async function runUITests() {
     "[Issue #596 AC-3] Streak Audit displays anti-guilt philosophy note"
   );
   auditSandbox.HabitApp.closeDetailSheet();
+
+  // =========================================================================
+  // ISSUE #605: Today Habit Subtitle Decluttering & Routine Label Removal
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #605: Today Habit Subtitle Decluttering ---"
+  );
+
+  const { sandbox: subtitleSandbox } = createHabitTrackerSandbox();
+  await subtitleSandbox.HabitApp.init();
+  subtitleSandbox.HabitApp.switchTab("today");
+
+  const todayMainContent =
+    subtitleSandbox.document.getElementById("main-content").innerHTML;
+
+  // AC-1: Habit card subtitles omit routine labels (Morning, Afternoon, Evening, Anytime / Buổi sáng, Buổi chiều, Buổi tối, Linh hoạt)
+  assert(
+    !todayMainContent.includes(
+      'text-xs text-slate-500 font-medium truncate">Buổi sáng'
+    ) &&
+      !todayMainContent.includes(
+        'text-xs text-slate-500 font-medium truncate">Morning'
+      ) &&
+      !todayMainContent.includes(
+        'text-xs text-slate-500 font-medium truncate">Buổi tối'
+      ) &&
+      !todayMainContent.includes(
+        'text-xs text-slate-500 font-medium truncate">Evening'
+      ),
+    "[Issue #605 AC-1] Habit card subtitles omit redundant routine cluster labels"
+  );
+
+  // AC-2: Habit card subtitles preserve numeric progress, timer info, and notes
+  const subtitleActiveDate = subtitleSandbox.HabitApp.store.getActiveDate();
+  await subtitleSandbox.HabitApp.store.addHabit({
+    id: "h-water-subtitle-test",
+    name: "Drink Clean Water",
+    type: "numeric",
+    targetValue: 2000,
+    unit: "ml",
+    stepValue: 250,
+    routine: "morning",
+    icon: "💧",
+    startDate: subtitleActiveDate,
+  });
+  await subtitleSandbox.HabitApp.store.updateNotes(
+    "h-water-subtitle-test",
+    subtitleActiveDate,
+    "Electrolyte water"
+  );
+  subtitleSandbox.HabitApp.switchTab("today");
+  const updatedTodayHtml =
+    subtitleSandbox.document.getElementById("main-content").innerHTML;
+  assert(
+    (updatedTodayHtml.includes("0 / 2.000") ||
+      updatedTodayHtml.includes("0 / 2,000") ||
+      updatedTodayHtml.includes("0 / 2000")) &&
+      updatedTodayHtml.includes("ml"),
+    "[Issue #605 AC-2] Habit card subtitles preserve numeric target progress"
+  );
+  assert(
+    updatedTodayHtml.includes("Electrolyte water"),
+    "[Issue #605 AC-2] Habit card subtitles display habit notes cleanly"
+  );
+
+  // =========================================================================
+  // ISSUE #606: Contribution Heatmap Title, Centering & Dynamic Month Headers
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #606: Contribution Heatmap Title, Centering & Month Headers ---"
+  );
+
+  const { sandbox: heatmapSliceSandbox } = createHabitTrackerSandbox();
+  await heatmapSliceSandbox.HabitApp.init();
+  heatmapSliceSandbox.HabitApp.switchTab("insights");
+  const insightsSliceHtml =
+    heatmapSliceSandbox.document.getElementById("main-content").innerHTML;
+
+  // AC-1: Localized title "Contribution Heatmap" (EN) / "Biểu đồ đóng góp" (VI)
+  assert(
+    insightsSliceHtml.includes("Biểu đồ đóng góp") ||
+      insightsSliceHtml.includes("Contribution Heatmap"),
+    "[Issue #606 AC-1] Insights view renders Contribution Heatmap title"
+  );
+
+  // AC-2: Timeframe selector contains mx-auto centering class
+  assert(
+    insightsSliceHtml.includes('id="heatmap-timeframe-picker"') &&
+      insightsSliceHtml.includes("mx-auto"),
+    "[Issue #606 AC-2] #heatmap-timeframe-picker contains mx-auto centering class"
+  );
+
+  // AC-3: Dynamic month headers render synchronized with week columns
+  assert(
+    insightsSliceHtml.includes("Thg ") ||
+      insightsSliceHtml.includes("Jan") ||
+      insightsSliceHtml.includes("Feb") ||
+      insightsSliceHtml.includes("Sep"),
+    "[Issue #606 AC-3] Heatmap grid renders localized month headers aligned with week columns"
+  );
+
+  // =========================================================================
+  // ISSUE #607: Insights Section Hierarchy Reordering
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #607: Insights Section Hierarchy Reordering ---"
+  );
+
+  // AC-1: Day of Week Consistency appears BEFORE Contribution Heatmap
+  const weekdaySectionIdx = insightsSliceHtml.indexOf(
+    TRANSLATIONS.vi.weekday_adherence_title
+  );
+  const heatmapSectionIdx = insightsSliceHtml.indexOf(
+    TRANSLATIONS.vi.yearly_heatmap_title
+  );
+  assert(
+    weekdaySectionIdx !== -1 && heatmapSectionIdx !== -1,
+    "[Issue #607 AC-1] Both Weekday Adherence and Heatmap sections exist in Insights view"
+  );
+  assert(
+    weekdaySectionIdx < heatmapSectionIdx,
+    "[Issue #607 AC-1] Day of Week Consistency section is placed directly before Contribution Heatmap"
+  );
+
+  // =========================================================================
+  // ISSUE #608: Habits Tab Header Action Consistency & Footer Removal
+  // =========================================================================
+  console.log(
+    "\n--- Testing Issue #608: Habits Tab Header Action Consistency & Footer Removal ---"
+  );
+
+  const { sandbox: managerActionSandbox } = createHabitTrackerSandbox();
+  await managerActionSandbox.HabitApp.init();
+  managerActionSandbox.HabitApp.switchTab("manager");
+  const managerActionHtml =
+    managerActionSandbox.document.getElementById("main-content").innerHTML;
+
+  // AC-1: Header action buttons include Starter Kits and Add Habit with consistent styling & icons
+  assert(
+    managerActionHtml.includes('data-action="open-starter-kits-modal"') &&
+      (managerActionHtml.includes("Gói mẫu") ||
+        managerActionHtml.includes("Starter Kits")),
+    "[Issue #608 AC-1] Habits tab header renders standardized Starter Kits action button"
+  );
+  assert(
+    managerActionHtml.includes('data-action="open-add-habit"') &&
+      (managerActionHtml.includes("➕") ||
+        managerActionHtml.includes("Thêm thói quen") ||
+        managerActionHtml.includes("Add Habit")),
+    "[Issue #608 AC-1] Habits tab header renders Add Habit button with ➕ icon"
+  );
+
+  // AC-2: Bottom Browse All Starter Kits footer CTA is removed
+  assert(
+    !managerActionHtml.includes("browse_all_starter_kits") &&
+      !managerActionHtml.includes("Khám phá toàn bộ gói mẫu") &&
+      !managerActionHtml.includes("Browse All Starter Kits"),
+    "[Issue #608 AC-2] Bottom starter kits CTA button is completely removed from Habits view"
+  );
 }
 
 runUITests()
