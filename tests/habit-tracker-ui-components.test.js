@@ -5188,14 +5188,16 @@ async function runUITests() {
   const { sandbox: vaultSandbox } = createHabitTrackerSandbox();
   await vaultSandbox.HabitApp.init();
 
-  // Test CSV export
+  // Test Clipboard JSON export
   const exportImportMod = require("../habit-tracker/src/sync/export-import.js");
-  const csvContent = exportImportMod.exportToCsv(vaultSandbox.HabitApp.store);
+  const clipboardRes = await exportImportMod.copyJsonToClipboard(
+    vaultSandbox.HabitApp.store
+  );
   assert(
-    typeof csvContent === "string" &&
-      csvContent.includes("Date") &&
-      csvContent.includes("Habit Name"),
-    "[Issue #481 AC-4] exportToCsv generates CSV headers and data records"
+    typeof clipboardRes.jsonString === "string" &&
+      clipboardRes.jsonString.includes('"app": "atomic-habit-tracker"') &&
+      clipboardRes.payload.data !== undefined,
+    "[Issue #481 AC-4] copyJsonToClipboard formats standard JSON backup payload"
   );
 
   // Test Data Vault replaceState restore
@@ -7317,12 +7319,46 @@ async function runUITests() {
     "[Issue #577 AC-1] Settings tab renders Local Data Vault & Safety History card"
   );
   assert(
-    mainContainer.innerHTML.includes('id="btn-export-json"') &&
-      mainContainer.innerHTML.includes('id="btn-export-csv"') &&
-      mainContainer.innerHTML.includes('id="import-json-input"') &&
-      mainContainer.innerHTML.includes('id="import-csv-input"'),
-    "[Issue #577 AC-1] Data Portability card includes 4-action grid for JSON and CSV exchange"
+    mainContainer.innerHTML.includes('id="btn-copy-json"') &&
+      mainContainer.innerHTML.includes('id="btn-paste-json"') &&
+      mainContainer.innerHTML.includes('id="btn-export-json"') &&
+      mainContainer.innerHTML.includes('id="import-json-input"'),
+    "[Issue #587 AC-1] Data Portability card includes 4-action grid for Clipboard and File JSON exchange"
   );
+  assert(
+    !mainContainer.innerHTML.includes('id="btn-export-csv"') &&
+      !mainContainer.innerHTML.includes('id="import-csv-input"'),
+    "[Issue #587 AC-5] Settings tab does not render deprecated CSV buttons"
+  );
+
+  // Test Paste JSON Modal opening and closing
+  settingsSandbox.HabitApp.openPasteJSONModal();
+  const pasteModalOverlay = getSettingsEl("paste-json-modal-overlay");
+  assert(
+    pasteModalOverlay && !pasteModalOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-2] openPasteJSONModal unhides paste modal overlay"
+  );
+  settingsSandbox.HabitApp.closePasteJSONModal();
+  assert(
+    pasteModalOverlay && pasteModalOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-2] closePasteJSONModal hides paste modal overlay"
+  );
+
+  // Test Clipboard Fallback Modal opening and closing
+  settingsSandbox.HabitApp.openClipboardFallbackModal(
+    '{"app":"atomic-habit-tracker"}'
+  );
+  const fallbackOverlay = getSettingsEl("clipboard-fallback-modal-overlay");
+  assert(
+    fallbackOverlay && !fallbackOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-1] openClipboardFallbackModal unhides fallback modal overlay"
+  );
+  settingsSandbox.HabitApp.closeClipboardFallbackModal();
+  assert(
+    fallbackOverlay && fallbackOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-1] closeClipboardFallbackModal hides fallback modal overlay"
+  );
+
   assert(
     mainContainer.innerHTML.includes('id="btn-create-snapshot"'),
     "[Issue #577 AC-2] Local Data Vault card includes Create Safety Snapshot action"
@@ -7334,6 +7370,146 @@ async function runUITests() {
     typeof settingsSandbox.HabitApp.restoreSnapshotFromHistory === "function",
     "[Issue #577 AC-2] HabitApp exposes restoreSnapshotFromHistory method"
   );
+
+  // ----------------------------------------------------
+  // [Issue #588 / ADR-0016 Slice 4] Settings UI Diagnostics & Local Vault Safety Snapshots
+  // ----------------------------------------------------
+  console.log(
+    "--- [Issue #588] Settings UI Diagnostics & Local Vault Safety Snapshots ---"
+  );
+
+  // 1. Cloud Sync Hub Diagnostics: Status Badge & 1-tap Sync
+  assert(
+    mainContainer.innerHTML.includes('id="btn-cloud-sync-now"'),
+    "[Issue #588 AC-1] Settings tab includes 1-tap Sync Now button"
+  );
+  assert(
+    mainContainer.innerHTML.includes('id="cloud-sync-status-badge"'),
+    "[Issue #588 AC-1] Settings tab includes live cloud sync status badge"
+  );
+
+  // 2. Rolling Snapshot Drawer & 1-Click Rollback
+  await settingsSandbox.HabitApp.store.saveSnapshot("pre_import_backup");
+  await settingsSandbox.HabitApp.store.saveSnapshot("manual");
+  settingsSandbox.HabitApp.switchTab("settings");
+  let attempts = 0;
+  let snapshotsListEl = getSettingsEl("snapshots-history-list");
+  while (attempts < 50) {
+    snapshotsListEl = getSettingsEl("snapshots-history-list");
+    if (
+      snapshotsListEl &&
+      snapshotsListEl.innerHTML.includes('data-action="restore-snapshot"')
+    ) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    attempts++;
+  }
+
+  assert(
+    snapshotsListEl &&
+      (snapshotsListEl.innerHTML.includes("Trước khi nhập") ||
+        snapshotsListEl.innerHTML.includes("Pre-Import")),
+    "[Issue #588 AC-2] Snapshots list renders localized reason badges"
+  );
+  // 3. Encrypted Import Unlock Modal & Format Choice Modal
+  console.log(
+    "--- [Issue #587 Encrypted Exchange] Import Unlock & Format Choice Modals ---"
+  );
+
+  const cloudCryptoModule = require("../habit-tracker/src/sync/cloud-backup.js");
+  const testEncryptedPayload = await cloudCryptoModule.encryptPayload(
+    {
+      habits: [{ id: "h-sec-1", name: "Secret Habit", type: "binary" }],
+      logs: [],
+      settings: {},
+    },
+    "MyVaultKey123"
+  );
+
+  // Test opening Import Unlock Modal
+  settingsSandbox.HabitApp.openImportUnlockModal(testEncryptedPayload);
+  const decryptOverlay = getSettingsEl("import-decrypt-modal-overlay");
+  assert(
+    decryptOverlay && !decryptOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] openImportUnlockModal unhides import decrypt overlay"
+  );
+
+  // Test wrong password decryption attempt
+  const passInp = getSettingsEl("import-decrypt-passphrase");
+  if (passInp) passInp.value = "WrongPassword999";
+  await settingsSandbox.HabitApp.confirmImportDecryption();
+  const errMsgEl = getSettingsEl("import-decrypt-error-msg");
+  assert(
+    errMsgEl && !errMsgEl.classList.contains("hidden"),
+    "[Issue #587 AC-4] Wrong passphrase displays localized error message"
+  );
+
+  // Test correct password decryption attempt
+  if (passInp) passInp.value = "MyVaultKey123";
+  await settingsSandbox.HabitApp.confirmImportDecryption();
+  assert(
+    decryptOverlay && decryptOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] Correct passphrase dismisses import decrypt modal"
+  );
+  const importPreviewOverlay = getSettingsEl("import-preview-modal-overlay");
+  assert(
+    importPreviewOverlay && !importPreviewOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] Successful decryption automatically opens Import Preview modal"
+  );
+  settingsSandbox.HabitApp.closeImportPreviewModal();
+  assert(
+    importPreviewOverlay && importPreviewOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-4] closeImportPreviewModal closes preview modal"
+  );
+
+  // Test Export Format Modal
+  settingsSandbox.HabitApp.openExportFormatModal("copy");
+  const exportFormatOverlay = getSettingsEl("export-format-modal-overlay");
+  const exportFormatContainer = getSettingsEl("export-format-container");
+  assert(
+    exportFormatOverlay && !exportFormatOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-5] openExportFormatModal unhides export format overlay"
+  );
+  assert(
+    (exportFormatOverlay.innerHTML.includes(
+      'id="btn-export-choice-encrypted"'
+    ) ||
+      (exportFormatContainer &&
+        exportFormatContainer.innerHTML.includes(
+          'id="btn-export-choice-encrypted"'
+        ))) &&
+      (exportFormatOverlay.innerHTML.includes('id="btn-export-choice-plain"') ||
+        (exportFormatContainer &&
+          exportFormatContainer.innerHTML.includes(
+            'id="btn-export-choice-plain"'
+          ))),
+    "[Issue #587 AC-5] Export format modal includes Encrypted Vault and Plaintext JSON choices"
+  );
+  settingsSandbox.HabitApp.closeExportFormatModal();
+  assert(
+    exportFormatOverlay && exportFormatOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-5] closeExportFormatModal hides export format overlay"
+  );
+
+  // Test copyDataJSON / exportDataJSON routing with encryption enabled
+  if (settingsSandbox.HabitApp.cloudSyncManager) {
+    settingsSandbox.HabitApp.cloudSyncManager.encryptionEnabled = true;
+    await settingsSandbox.HabitApp.copyDataJSON();
+    assert(
+      exportFormatOverlay && !exportFormatOverlay.classList.contains("hidden"),
+      "[Issue #587 AC-5] copyDataJSON routes to format modal when vault encryption is enabled"
+    );
+    settingsSandbox.HabitApp.closeExportFormatModal();
+
+    settingsSandbox.HabitApp.exportDataJSON();
+    assert(
+      exportFormatOverlay && !exportFormatOverlay.classList.contains("hidden"),
+      "[Issue #587 AC-5] exportDataJSON routes to format modal when vault encryption is enabled"
+    );
+    settingsSandbox.HabitApp.closeExportFormatModal();
+    settingsSandbox.HabitApp.cloudSyncManager.encryptionEnabled = false;
+  }
 }
 
 runUITests()

@@ -321,4 +321,59 @@ test.describe("Atomic Habit Tracker Multi-Device UI/UX Suite", () => {
       }
     }
   });
+
+  test("11. Cloud Sync Hub & Live Status Diagnostics", async ({ page }) => {
+    await setupPage(page);
+
+    // Switch to Settings tab
+    await page.click("button[data-tab='settings']");
+    await page.waitForTimeout(100);
+
+    // Cloud Sync Status Badge is visible
+    const statusBadge = page.locator("#cloud-sync-status-badge");
+    await expect(statusBadge).toBeVisible();
+
+    // Sync Now button is present and clickable
+    const syncNowBtn = page.locator("#btn-cloud-sync-now");
+    await expect(syncNowBtn).toBeVisible();
+
+    // Snapshots container is rendered
+    const snapshotsList = page.locator("#snapshots-history-list");
+    await expect(snapshotsList).toBeVisible();
+  });
+
+  test("12. Data Portability & Clipboard JSON Modal Dialogs", async ({
+    page,
+  }) => {
+    await setupPage(page);
+
+    // Switch to Settings tab
+    await page.click("button[data-tab='settings']");
+    await page.waitForTimeout(100);
+
+    // Copy JSON button exists
+    const copyJsonBtn = page.locator("#btn-copy-json");
+    await expect(copyJsonBtn).toBeVisible();
+
+    // Paste JSON button opens modal
+    const pasteJsonBtn = page.locator("#btn-paste-json");
+    await expect(pasteJsonBtn).toBeVisible();
+    await pasteJsonBtn.click();
+    await page.waitForTimeout(100);
+
+    const pasteModal = page.locator("#paste-json-modal-overlay");
+    await expect(pasteModal).toBeVisible();
+
+    // Verify textarea is available
+    const textarea = page.locator("#paste-json-input");
+    await expect(textarea).toBeVisible();
+
+    // Cancel / Close modal
+    const cancelBtn = page.locator("button:has-text('✕')").first();
+    if (await cancelBtn.isVisible()) {
+      await cancelBtn.click();
+      await page.waitForTimeout(100);
+      await expect(pasteModal).toBeHidden();
+    }
+  });
 });

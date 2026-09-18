@@ -103,6 +103,8 @@
   let vaultUnlockPendingCallback = null;
   let pendingImportData = null;
   let selectedImportStrategy = "merge";
+  let pendingEncryptedImportPayload = null;
+  let pendingExportAction = null; // 'copy' | 'download'
 
   const ACTIVE_TIMER_STORAGE_KEY = "habit_active_timer_session";
 
@@ -579,15 +581,49 @@
       });
 
       // Calm debounced auto-sync on store mutations
-      store.subscribe(() => {
+      store.subscribe((state, eventType, payload) => {
         if (
           cloudSyncManager &&
           cloudSyncManager.autoSyncEnabled &&
           cloudSyncManager.activeProvider !== "none"
         ) {
-          cloudSyncManager.scheduleDebouncedSync();
+          const isTimerTick = Boolean(payload && payload._isTimerTick);
+          cloudSyncManager.scheduleDebouncedSync({ isTimerTick });
         }
       });
+
+      // Adaptive Idle Cadence & Activity Wake
+      if (typeof window !== "undefined") {
+        ["click", "keydown", "touchstart"].forEach((evt) => {
+          window.addEventListener(
+            evt,
+            () => {
+              if (cloudSyncManager) cloudSyncManager.resetIdleCadence();
+            },
+            { passive: true }
+          );
+        });
+
+        if (typeof document !== "undefined") {
+          document.addEventListener("visibilitychange", () => {
+            if (
+              document.visibilityState === "visible" &&
+              cloudSyncManager &&
+              cloudSyncManager.activeProvider !== "none"
+            ) {
+              cloudSyncManager.resetIdleCadence();
+            }
+          });
+        }
+
+        window.addEventListener("online", () => {
+          if (cloudSyncManager && cloudSyncManager.activeProvider !== "none") {
+            cloudSyncManager.resetIdleCadence();
+          }
+        });
+
+        cloudSyncManager.scheduleNextIdlePoll();
+      }
 
       // Background sync on boot if already connected
       if (cloudSyncManager.activeProvider !== "none") {
@@ -874,13 +910,13 @@
 
     let statusBadgeHtml = "";
     if (syncStatus.syncing) {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 font-bold border border-sky-300 dark:border-sky-800/50"><span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span> ${i18n.t("cloud_syncing", {}, lang)}</span>`;
-    } else if (syncStatus.error) {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold border border-red-300 dark:border-red-800/50">🔴 ${lang === "vi" ? "Lỗi đồng bộ" : "Sync Error"}</span>`;
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-bold border border-amber-300 dark:border-amber-800/50"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> ${i18n.t("cloud_syncing", {}, lang)}</span>`;
+    } else if (syncStatus.error || syncStatus.lastSyncStatus === "error") {
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold border border-red-300 dark:border-red-800/50">🔴 ${i18n.t("cloud_sync_error", {}, lang)}</span>`;
     } else if (syncStatus.connected) {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-300 dark:border-emerald-800/50">🟢 ${i18n.t("cloud_connected", {}, lang)}</span>`;
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-300 dark:border-emerald-800/50">🟢 ${i18n.t("cloud_connected", {}, lang)}</span>`;
     } else {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold border border-slate-200 dark:border-slate-700">⚪ ${i18n.t("cloud_not_connected", {}, lang)}</span>`;
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold border border-slate-200 dark:border-slate-700">⚪ ${i18n.t("cloud_not_connected", {}, lang)}</span>`;
     }
 
     const relativeSyncTime = formatRelativeTime(syncStatus.lastSync, lang);
@@ -1137,24 +1173,30 @@
             <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("data_portability_card_desc", {}, lang)}</p>
           </div>
 
-          <div class="grid grid-cols-4 gap-2">
-            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export JSON">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <!-- 1. Copy JSON to Clipboard -->
+            <button id="btn-copy-json" data-action="copy-json" onclick="window.HabitApp.copyDataJSON()" class="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-cyan-600 dark:text-cyan-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Copy JSON to Clipboard">
+              <span>📋</span>
+              <span class="truncate">${i18n.t("btn_copy_json", {}, lang) || "Copy JSON"}</span>
+            </button>
+
+            <!-- 2. Paste JSON Modal -->
+            <button id="btn-paste-json" data-action="paste-json" onclick="window.HabitApp.openPasteJSONModal()" class="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Paste JSON">
               <span>📥</span>
-              <span class="truncate">JSON</span>
+              <span class="truncate">${i18n.t("btn_paste_json", {}, lang) || "Paste JSON"}</span>
             </button>
-            <button id="btn-export-csv" data-action="export-csv" onclick="window.HabitApp.exportDataCSV()" class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export CSV">
-              <span>📊</span>
-              <span class="truncate">CSV</span>
+
+            <!-- 3. Export File JSON -->
+            <button id="btn-export-json" data-action="export-json" onclick="window.HabitApp.exportDataJSON()" class="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 transition-all cursor-pointer" title="Export JSON File">
+              <span>💾</span>
+              <span class="truncate">${i18n.t("btn_export_file_json", {}, lang) || "Save File"}</span>
             </button>
-            <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import JSON">
-              <span>📤</span>
-              <span class="truncate">+JSON</span>
+
+            <!-- 4. Import File JSON -->
+            <label class="flex items-center justify-center gap-1.5 py-2.5 px-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Open JSON File">
+              <span>📂</span>
+              <span class="truncate">${i18n.t("btn_open_file_json", {}, lang) || "Open File"}</span>
               <input type="file" id="import-json-input" accept=".json" class="hidden" onchange="window.HabitApp.importDataJSON(event)" />
-            </label>
-            <label class="flex items-center justify-center gap-1 py-2.5 px-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 rounded-2xl text-[11px] font-bold text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700/50 cursor-pointer transition-all" title="Import CSV">
-              <span>📑</span>
-              <span class="truncate">+CSV</span>
-              <input type="file" id="import-csv-input" accept=".csv,text/csv" class="hidden" onchange="window.HabitApp.importDataCSV(event)" />
             </label>
           </div>
         </div>
@@ -2347,14 +2389,18 @@
         closeIdentityWizard();
         activeTab = "today";
         renderApp();
+      } else if (action === "copy-json") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        await app.copyDataJSON();
+      } else if (action === "paste-json") {
+        const app =
+          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
+        app.openPasteJSONModal();
       } else if (action === "export-json") {
         const app =
           (typeof window !== "undefined" && window.HabitApp) || HabitApp;
         await app.exportDataJSON();
-      } else if (action === "export-csv") {
-        const app =
-          (typeof window !== "undefined" && window.HabitApp) || HabitApp;
-        await app.exportDataCSV();
       }
     });
 
@@ -3129,7 +3175,9 @@
     if (now - lastTimerPersistedAt >= 10000) {
       lastTimerPersistedAt = now;
       store
-        .logHabit(runningTimerHabitId, targetDate, nextSeconds)
+        .logHabit(runningTimerHabitId, targetDate, nextSeconds, null, {
+          isTimerTick: true,
+        })
         .catch(() => {});
     }
 
@@ -4370,24 +4418,449 @@
         notify(i18n.t("toast_vacation_enabled", {}, lang), "info");
       }
     },
+    async copyDataJSON() {
+      if (!store) return;
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (cloudSyncManager && cloudSyncManager.encryptionEnabled) {
+        HabitApp.openExportFormatModal("copy");
+        return;
+      }
+
+      const res = await exportImport.copyJsonToClipboard(store.state);
+      if (res.success) {
+        notify(i18n.t("toast_json_copied", {}, lang), "success");
+      } else if (res.fallback) {
+        HabitApp.openClipboardFallbackModal(res.jsonString);
+      } else {
+        notify(
+          i18n.t(
+            "toast_clipboard_copy_error",
+            { message: res.error || "" },
+            lang
+          ),
+          "error"
+        );
+      }
+    },
+
+    openExportFormatModal(actionType = "copy") {
+      pendingExportAction = actionType;
+      const overlay = document.getElementById("export-format-modal-overlay");
+      const container = document.getElementById("export-format-container");
+      if (!overlay || !container) return;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+
+      const isCopy = actionType === "copy";
+      const encryptedBtnLabel = isCopy
+        ? i18n.t("btn_copy_encrypted_json", {}, lang)
+        : i18n.t("btn_download_encrypted_json", {}, lang);
+      const plainBtnLabel = isCopy
+        ? i18n.t("btn_copy_plain_json", {}, lang)
+        : i18n.t("btn_download_plain_json", {}, lang);
+
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📦</span>
+              <div>
+                <h3 id="export-format-title" class="text-base font-black text-slate-900 dark:text-white">${i18n.t("export_format_modal_title", {}, lang)}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("export_format_modal_desc", {}, lang)}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closeExportFormatModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <div class="space-y-2.5 pt-1">
+            <!-- Option 1: Encrypted Vault -->
+            <button
+              type="button"
+              id="btn-export-choice-encrypted"
+              onclick="window.HabitApp.confirmExportFormat('encrypted')"
+              class="w-full text-left p-3.5 rounded-2xl border border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100/60 dark:hover:bg-emerald-950/40 transition cursor-pointer flex items-start gap-3"
+            >
+              <span class="text-xl mt-0.5">🔒</span>
+              <div>
+                <div class="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                  ${encryptedBtnLabel}
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("export_format_encrypted_desc", {}, lang)}</p>
+              </div>
+            </button>
+
+            <!-- Option 2: Plaintext JSON -->
+            <button
+              type="button"
+              id="btn-export-choice-plain"
+              onclick="window.HabitApp.confirmExportFormat('plain')"
+              class="w-full text-left p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer flex items-start gap-3"
+            >
+              <span class="text-xl mt-0.5">📄</span>
+              <div>
+                <div class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  ${plainBtnLabel}
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${i18n.t("export_format_plain_desc", {}, lang)}</p>
+              </div>
+            </button>
+          </div>
+
+          <div class="pt-1">
+            <button
+              type="button"
+              onclick="window.HabitApp.closeExportFormatModal()"
+              class="w-full py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-xs transition cursor-pointer"
+            >
+              ${i18n.t("import_cancel_btn", {}, lang)}
+            </button>
+          </div>
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, {
+          onEscape: HabitApp.closeExportFormatModal,
+        });
+      }
+    },
+
+    closeExportFormatModal() {
+      const overlay = document.getElementById("export-format-modal-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      if (components && typeof components.releaseFocus === "function") {
+        components.releaseFocus(overlay);
+      }
+      pendingExportAction = null;
+    },
+
+    async confirmExportFormat(format) {
+      const action = pendingExportAction || "copy";
+      HabitApp.closeExportFormatModal();
+      if (!store) return;
+      const lang =
+        (store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (format === "encrypted") {
+        const cryptoModule =
+          (cloudSyncManager && cloudSyncManager.crypto) ||
+          (typeof HabitCloud !== "undefined" ? HabitCloud : null);
+        const sessionPass =
+          cloudSyncManager && cloudSyncManager.sessionPassphrase;
+
+        if (!cryptoModule || !sessionPass) {
+          notify(i18n.t("vault_error_locked", {}, lang), "error");
+          HabitApp.openVaultUnlockModal();
+          return;
+        }
+
+        try {
+          const encPayload = await cryptoModule.encryptPayload(
+            store.state,
+            sessionPass
+          );
+          if (action === "copy") {
+            const res = await exportImport.copyJsonToClipboard(encPayload);
+            if (res.success) {
+              notify(
+                i18n.t("toast_encrypted_json_copied", {}, lang),
+                "success"
+              );
+            } else if (res.fallback) {
+              HabitApp.openClipboardFallbackModal(res.jsonString);
+            } else {
+              notify(
+                i18n.t(
+                  "toast_clipboard_copy_error",
+                  { message: res.error || "" },
+                  lang
+                ),
+                "error"
+              );
+            }
+          } else {
+            exportImport.downloadExportJSON(encPayload);
+            notify(
+              i18n.t("toast_encrypted_backup_exported", {}, lang),
+              "success"
+            );
+          }
+        } catch (err) {
+          notify(
+            i18n.t(
+              "toast_clipboard_copy_error",
+              { message: err.message },
+              lang
+            ),
+            "error"
+          );
+        }
+      } else {
+        // Plaintext export
+        if (action === "copy") {
+          const res = await exportImport.copyJsonToClipboard(store.state);
+          if (res.success) {
+            notify(i18n.t("toast_json_copied", {}, lang), "success");
+          } else if (res.fallback) {
+            HabitApp.openClipboardFallbackModal(res.jsonString);
+          } else {
+            notify(
+              i18n.t(
+                "toast_clipboard_copy_error",
+                { message: res.error || "" },
+                lang
+              ),
+              "error"
+            );
+          }
+        } else {
+          exportImport.downloadExportJSON(store.state);
+          notify(i18n.t("toast_backup_exported", {}, lang), "success");
+        }
+      }
+    },
+
+    openClipboardFallbackModal(jsonString) {
+      const overlay = document.getElementById(
+        "clipboard-fallback-modal-overlay"
+      );
+      const container = document.getElementById("clipboard-fallback-container");
+      if (!overlay || !container) return;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📋</span>
+              <div>
+                <h3 id="clipboard-fallback-title" class="text-base font-black text-slate-900 dark:text-white">${i18n.t("copy_fallback_modal_title", {}, lang)}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("copy_fallback_modal_desc", {}, lang)}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closeClipboardFallbackModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <div>
+            <textarea
+              id="clipboard-fallback-textarea"
+              readonly
+              class="w-full h-48 p-3 text-xs font-mono bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none select-all"
+            >${(jsonString || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</textarea>
+          </div>
+
+          <div class="flex items-center gap-3 pt-1">
+            <button
+              type="button"
+              onclick="const ta = document.getElementById('clipboard-fallback-textarea'); if(ta){ if(typeof ta.focus === 'function') ta.focus(); if(typeof ta.select === 'function') ta.select(); }"
+              class="flex-1 py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-xs transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>🔍</span> ${i18n.t("copy_select_all_btn", {}, lang)}
+            </button>
+            <button
+              type="button"
+              onclick="window.HabitApp.closeClipboardFallbackModal()"
+              class="flex-1 py-2.5 px-4 bg-cyan-600 hover:bg-cyan-700 active:scale-98 text-white font-bold rounded-2xl text-xs shadow-lg shadow-cyan-500/25 transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>✓</span> ${i18n.t("copy_done_btn", {}, lang)}
+            </button>
+          </div>
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, {
+          onEscape: HabitApp.closeClipboardFallbackModal,
+        });
+      }
+      setTimeout(() => {
+        const ta = document.getElementById("clipboard-fallback-textarea");
+        if (ta) {
+          if (typeof ta.focus === "function") ta.focus();
+          if (typeof ta.select === "function") ta.select();
+        }
+      }, 50);
+    },
+
+    closeClipboardFallbackModal() {
+      const overlay = document.getElementById(
+        "clipboard-fallback-modal-overlay"
+      );
+      if (overlay) overlay.classList.add("hidden");
+      if (components && typeof components.releaseFocus === "function") {
+        components.releaseFocus(overlay);
+      }
+    },
+
+    openPasteJSONModal() {
+      const overlay = document.getElementById("paste-json-modal-overlay");
+      const container = document.getElementById("paste-json-container");
+      if (!overlay || !container) return;
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+
+      container.innerHTML = `
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">📥</span>
+              <div>
+                <h3 id="paste-json-title" class="text-base font-black text-slate-900 dark:text-white">${i18n.t("paste_json_modal_title", {}, lang)}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("paste_json_modal_desc", {}, lang)}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closePasteJSONModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <div class="flex justify-end">
+            <button
+              type="button"
+              id="btn-paste-from-clipboard"
+              onclick="window.HabitApp.handlePasteFromClipboard()"
+              class="py-1.5 px-3 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 font-bold rounded-xl text-xs transition cursor-pointer flex items-center gap-1"
+            >
+              <span>📋</span> ${i18n.t("paste_from_clipboard_btn", {}, lang)}
+            </button>
+          </div>
+
+          <div>
+            <textarea
+              id="paste-json-input"
+              placeholder="${i18n.t("paste_json_placeholder", {}, lang)}"
+              class="w-full h-44 p-3 text-xs font-mono bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center gap-3 pt-1">
+            <button
+              type="button"
+              onclick="window.HabitApp.closePasteJSONModal()"
+              class="flex-1 py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-xs transition cursor-pointer"
+            >
+              ${i18n.t("import_cancel_btn", {}, lang)}
+            </button>
+            <button
+              type="button"
+              id="btn-inspect-pasted-json"
+              onclick="window.HabitApp.handleInspectPastedJSON()"
+              class="flex-1 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-bold rounded-2xl text-xs shadow-lg shadow-indigo-500/25 transition cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <span>🔍</span> ${i18n.t("paste_json_inspect_btn", {}, lang)}
+            </button>
+          </div>
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, {
+          onEscape: HabitApp.closePasteJSONModal,
+        });
+      }
+      setTimeout(() => {
+        const ta = document.getElementById("paste-json-input");
+        if (ta) ta.focus();
+      }, 50);
+    },
+
+    closePasteJSONModal() {
+      const overlay = document.getElementById("paste-json-modal-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      if (components && typeof components.releaseFocus === "function") {
+        components.releaseFocus(overlay);
+      }
+    },
+
+    async handlePasteFromClipboard() {
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+      const res = await exportImport.readJsonFromClipboard();
+      if (res.success && res.text) {
+        const ta = document.getElementById("paste-json-input");
+        if (ta) {
+          ta.value = res.text;
+          ta.focus();
+        }
+      } else {
+        notify(
+          i18n.t(
+            "toast_clipboard_read_error",
+            { message: res.error || "Permission denied" },
+            lang
+          ),
+          "error"
+        );
+      }
+    },
+
+    handleInspectPastedJSON() {
+      const ta = document.getElementById("paste-json-input");
+      const text = (ta && ta.value) || "";
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+      const notify =
+        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (!text.trim()) {
+        notify(
+          i18n.t("toast_import_file_error", { errors: "Empty input" }, lang),
+          "error"
+        );
+        return;
+      }
+
+      const res = exportImport.parseAndValidateImport(text);
+      if (!res.valid) {
+        notify(
+          i18n.t(
+            "toast_import_file_error",
+            { errors: res.errors.join(", ") },
+            lang
+          ),
+          "error"
+        );
+        return;
+      }
+
+      HabitApp.closePasteJSONModal();
+
+      if (res.isEncrypted) {
+        HabitApp.openImportUnlockModal(res.payload);
+        return;
+      }
+
+      pendingImportData = res.data;
+      selectedImportStrategy = "merge";
+      HabitApp.openImportPreviewModal();
+    },
+
     exportDataJSON() {
       if (!store) return;
-      exportImport.downloadExportJSON(store.state);
       const lang =
         (store.getSettings() && store.getSettings().language) || "vi";
       const notify =
         (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
+
+      if (cloudSyncManager && cloudSyncManager.encryptionEnabled) {
+        HabitApp.openExportFormatModal("download");
+        return;
+      }
+
+      exportImport.downloadExportJSON(store.state);
       notify(i18n.t("toast_backup_exported", {}, lang), "success");
     },
-    exportDataCSV() {
-      if (!store) return;
-      exportImport.downloadExportCSV(store.state);
-      const lang =
-        (store.getSettings() && store.getSettings().language) || "vi";
-      const notify =
-        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
-      notify(i18n.t("toast_csv_exported", {}, lang), "success");
-    },
+
     async importDataJSON(event) {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
@@ -4410,9 +4883,16 @@
           if (event.target) event.target.value = "";
           return;
         }
+
+        if (event.target) event.target.value = "";
+
+        if (res.isEncrypted) {
+          HabitApp.openImportUnlockModal(res.payload);
+          return;
+        }
+
         pendingImportData = res.data;
         selectedImportStrategy = "merge";
-        if (event.target) event.target.value = "";
         HabitApp.openImportPreviewModal();
       } catch (err) {
         if (event.target) event.target.value = "";
@@ -4423,38 +4903,136 @@
       }
     },
 
-    async importDataCSV(event) {
-      const file = event.target.files && event.target.files[0];
-      if (!file) return;
+    openImportUnlockModal(encryptedEnvelope) {
+      pendingEncryptedImportPayload = encryptedEnvelope;
+      const overlay = document.getElementById("import-decrypt-modal-overlay");
+      const container = document.getElementById("import-decrypt-container");
+      if (!overlay || !container) return;
       const lang =
         (store && store.getSettings() && store.getSettings().language) || "vi";
-      const notify =
-        (typeof HabitApp !== "undefined" && HabitApp.showToast) || showToast;
-      try {
-        const text = await file.text();
-        const res = exportImport.parseHabitCsv(text);
-        if (!res.valid) {
-          notify(
-            i18n.t(
-              "toast_csv_import_error",
-              { message: res.error || (res.errors && res.errors.join(", ")) },
-              lang
-            ),
-            "error"
-          );
-          if (event.target) event.target.value = "";
-          return;
+
+      container.innerHTML = `
+        <div id="import-decrypt-card" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">🔐</span>
+              <div>
+                <h3 id="import-decrypt-title" class="text-base font-black text-slate-900 dark:text-white">${i18n.t("import_decrypt_modal_title", {}, lang)}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">${i18n.t("import_decrypt_modal_desc", {}, lang)}</p>
+              </div>
+            </div>
+            <button type="button" onclick="window.HabitApp.closeImportDecryptModal()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">✕</button>
+          </div>
+
+          <form onsubmit="event.preventDefault(); window.HabitApp.confirmImportDecryption();" class="space-y-4">
+            <div>
+              <label for="import-decrypt-passphrase" class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                ${i18n.t("vault_passphrase_label", {}, lang)}
+              </label>
+              <input
+                type="password"
+                id="import-decrypt-passphrase"
+                required
+                placeholder="${i18n.t("import_decrypt_passphrase_placeholder", {}, lang)}"
+                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+              <p id="import-decrypt-error-msg" class="text-[11px] text-rose-500 dark:text-rose-400 mt-1 hidden"></p>
+            </div>
+
+            <div class="flex items-center gap-3 pt-1">
+              <button
+                type="button"
+                onclick="window.HabitApp.closeImportDecryptModal()"
+                class="flex-1 py-2.5 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-2xl text-xs transition cursor-pointer"
+              >
+                ${i18n.t("import_cancel_btn", {}, lang)}
+              </button>
+              <button
+                type="submit"
+                id="btn-confirm-import-decrypt"
+                class="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold rounded-2xl text-xs shadow-lg shadow-emerald-500/25 transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>🔓</span> ${i18n.t("import_decrypt_btn", {}, lang)}
+              </button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, {
+          onEscape: HabitApp.closeImportDecryptModal,
+        });
+      }
+      setTimeout(() => {
+        const inp = document.getElementById("import-decrypt-passphrase");
+        if (inp) inp.focus();
+      }, 50);
+    },
+
+    closeImportDecryptModal() {
+      const overlay = document.getElementById("import-decrypt-modal-overlay");
+      if (overlay) overlay.classList.add("hidden");
+      if (components && typeof components.releaseFocus === "function") {
+        components.releaseFocus(overlay);
+      }
+      pendingEncryptedImportPayload = null;
+    },
+
+    async confirmImportDecryption() {
+      if (!pendingEncryptedImportPayload) return;
+      const inp = document.getElementById("import-decrypt-passphrase");
+      const passphrase = (inp && inp.value) || "";
+      const errEl = document.getElementById("import-decrypt-error-msg");
+      const cardEl = document.getElementById("import-decrypt-card");
+      const lang =
+        (store && store.getSettings() && store.getSettings().language) || "vi";
+
+      if (!passphrase.trim()) {
+        if (errEl) {
+          errEl.textContent = i18n.t("vault_passphrase_placeholder", {}, lang);
+          errEl.classList.remove("hidden");
         }
-        pendingImportData = res.data;
+        return;
+      }
+
+      const cryptoModule =
+        (cloudSyncManager && cloudSyncManager.crypto) ||
+        (typeof HabitCloud !== "undefined" ? HabitCloud : null);
+
+      if (!cryptoModule || typeof cryptoModule.decryptPayload !== "function") {
+        if (errEl) {
+          errEl.textContent = "Cryptography engine not available";
+          errEl.classList.remove("hidden");
+        }
+        return;
+      }
+
+      try {
+        const decrypted = await cryptoModule.decryptPayload(
+          pendingEncryptedImportPayload,
+          passphrase
+        );
+
+        let payloadData = decrypted;
+        if (decrypted && decrypted.data) {
+          payloadData = decrypted.data;
+        }
+
+        HabitApp.closeImportDecryptModal();
+        pendingImportData = payloadData;
         selectedImportStrategy = "merge";
-        if (event.target) event.target.value = "";
         HabitApp.openImportPreviewModal();
       } catch (err) {
-        if (event.target) event.target.value = "";
-        notify(
-          i18n.t("toast_csv_import_error", { message: err.message }, lang),
-          "error"
-        );
+        if (errEl) {
+          errEl.textContent = i18n.t("import_decrypt_wrong_pass", {}, lang);
+          errEl.classList.remove("hidden");
+        }
+        if (cardEl) {
+          cardEl.classList.add("animate-shake");
+          setTimeout(() => cardEl.classList.remove("animate-shake"), 500);
+        }
       }
     },
 
@@ -4565,11 +5143,19 @@
       `;
 
       overlay.classList.remove("hidden");
+      if (components && typeof components.trapFocus === "function") {
+        components.trapFocus(overlay, {
+          onEscape: HabitApp.closeImportPreviewModal,
+        });
+      }
     },
 
     closeImportPreviewModal() {
       const overlay = document.getElementById("import-preview-modal-overlay");
       if (overlay) overlay.classList.add("hidden");
+      if (components && typeof components.releaseFocus === "function") {
+        components.releaseFocus(overlay);
+      }
       pendingImportData = null;
     },
 
@@ -5381,6 +5967,12 @@
     },
     get selectedImportStrategy() {
       return selectedImportStrategy;
+    },
+    get pendingEncryptedImportPayload() {
+      return pendingEncryptedImportPayload;
+    },
+    get pendingExportAction() {
+      return pendingExportAction;
     },
     formatRelativeTime,
   };

@@ -182,7 +182,9 @@
 
       async putSnapshot(snapshot) {
         const list = readJson(STORES.SNAPSHOTS, []);
-        const id = snapshot.id || `snap-${Date.now()}`;
+        const id =
+          snapshot.id ||
+          `snap-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
         const item = {
           ...snapshot,
           id,
@@ -563,7 +565,9 @@
 
       async putSnapshot(snapshot) {
         const db = await openDb();
-        const id = snapshot.id || `snap-${Date.now()}`;
+        const id =
+          snapshot.id ||
+          `snap-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
         const item = {
           ...snapshot,
           id,

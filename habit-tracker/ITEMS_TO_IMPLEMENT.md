@@ -192,11 +192,11 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 3: Codebase Distillation & Theme Token Unification (P2/P3)
 
-- [ ] Verify all 52-week heatmap, consistency rate, and completion velocity analytics are fully contained in `src/ui/insights-view.js`.
-- [ ] Delete orphaned legacy view files `src/ui/timeline-view.js` and `src/ui/matrix-view.js`.
-- [ ] Remove legacy script imports (`timeline-view.js`, `matrix-view.js`) from `index.html` and router fallback branches from `src/app.js`.
-- [ ] Unify `index.html` body background to use `bg-[var(--bg-base)]` / `#0b0f19` obsidian token.
-- [ ] Re-run `.agent/skills/impeccable/scripts/impeccable detect` and verify 0 design detector errors/warnings.
+- [x] Verify all 52-week heatmap, consistency rate, and completion velocity analytics are fully contained in `src/ui/insights-view.js`.
+- [x] Delete orphaned legacy view files `src/ui/timeline-view.js` and `src/ui/matrix-view.js`.
+- [x] Remove legacy script imports (`timeline-view.js`, `matrix-view.js`) from `index.html` and router fallback branches from `src/app.js`.
+- [x] Unify `index.html` body background to use `bg-[var(--bg-base)]` / `#0b0f19` obsidian token.
+- [x] Re-run `.agent/skills/impeccable/scripts/impeccable detect` and verify 0 design detector errors/warnings.
 
 ---
 
@@ -204,34 +204,34 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 1: Header Vertical Alignment & Dead-Code Purge (P1)
 
-- [ ] Standardize top header bar in `index.html`: `h-14` (56px) flex container with `items-center justify-between`.
-- [ ] Standardize brand logo container (`w-8 h-8`), title text, freeze token badge (`#freeze-tokens-count`), and language toggle (`#lang-toggle-btn`) with `h-8` (32px) height and `inline-flex items-center justify-center leading-none`.
-- [ ] Purge all deprecated `#header-active-timer-pill` references in `src/app.js`.
+- [x] Standardize top header bar in `index.html`: `h-14` (56px) flex container with `items-center justify-between`.
+- [x] Standardize brand logo container (`w-8 h-8`), title text, freeze token badge (`#freeze-tokens-count`), and language toggle (`#lang-toggle-btn`) with `h-8` (32px) height and `inline-flex items-center justify-center leading-none`.
+- [x] Purge all deprecated `#header-active-timer-pill` references in `src/app.js`.
 
 ### Slice 2: Multi-Select 1-Click Starter Kits in Setup Wizard (P1)
 
-- [ ] Refactor Step 3 in `src/ui/identity-view.js` to support multi-select toggle cards (checkbox style) tracking `selectedKitIds` array.
-- [ ] Update Step 4 review to aggregate habits across all selected packs, applying numbered suffixes (e.g. `Read 15m (1)`, `Read 15m (2)`) for colliding habit names.
-- [ ] Implement `store.applyStarterKits(kitIds, lang)` in `src/state/store.js` and handle atomic batch creation in `src/app.js`.
+- [x] Refactor Step 3 in `src/ui/identity-view.js` to support multi-select toggle cards (checkbox style) tracking `selectedKitIds` array.
+- [x] Update Step 4 review to aggregate habits across all selected packs, applying numbered suffixes (e.g. `Read 15m (1)`, `Read 15m (2)`) for colliding habit names.
+- [x] Implement `store.applyStarterKits(kitIds, lang)` in `src/state/store.js` and handle atomic batch creation in `src/app.js`.
 
 ### Slice 3: Invariant Start-Date Scheduling & Weekday Adherence Accuracy (P0)
 
-- [ ] Update `isScheduledDate` in `src/domain/engine.js`: enforce `dateStr >= (habit.startDate || habit.createdAt)` so historical dates before habit inception are strictly unscheduled.
-- [ ] Update `calculateWeekdayAdherence` in `src/domain/engine.js` to bound scheduled counts to the habit's active lifetime, eliminating the 8% calculation bug.
-- [ ] Apply inception date invariant across `calculateRoutineAdherence` and `calculateOverallConsistencyScore`.
-- [ ] Update `src/ui/insights-view.js` to handle weekdays with 0 scheduled occurrences with subtle empty indicator.
+- [x] Update `isScheduledDate` in `src/domain/engine.js`: enforce `dateStr >= (habit.startDate || habit.createdAt)` so historical dates before habit inception are strictly unscheduled.
+- [x] Update `calculateWeekdayAdherence` in `src/domain/engine.js` to bound scheduled counts to the habit's active lifetime, eliminating the 8% calculation bug.
+- [x] Apply inception date invariant across `calculateRoutineAdherence` and `calculateOverallConsistencyScore`.
+- [x] Update `src/ui/insights-view.js` to handle weekdays with 0 scheduled occurrences with subtle empty indicator.
 
 ### Slice 4: Streamlined Timer Display Architecture & Duplication Elimination (P1)
 
-- [ ] Fix card sub-ticker text interpolation in `src/ui/today-view.js` and `src/app.js` to eliminate `"00:05 / 20m / 20m"` duplicate string output.
-- [ ] Streamline habit card expanded drawer: remove redundant static text ticker; feature clean action buttons `[ ▶ Start / ⏸ Pause ]`, `[ 🔄 Reset ]`, `[ 🎯 Focus Mode ]`, `[ Details ➔ ]`.
-- [ ] Clean up Focus Timer modal dial subtitle target labels.
+- [x] Fix card sub-ticker text interpolation in `src/ui/today-view.js` and `src/app.js` to eliminate `"00:05 / 20m / 20m"` duplicate string output.
+- [x] Streamline habit card expanded drawer: remove redundant static text ticker; feature clean action buttons `[ ▶ Start / ⏸ Pause ]`, `[ 🔄 Reset ]`, `[ 🎯 Focus Mode ]`, `[ Details ➔ ]`.
+- [x] Clean up Focus Timer modal dial subtitle target labels.
 
 ### Slice 5: Mathematical Invariants & Multi-Kit Setup Verification (P0)
 
-- [ ] Add unit tests in `tests/habit-tracker-engine-math.test.js` validating start-date scheduling invariants, 100% adherence on newly created habits, and 0-scheduled weekday handling.
-- [ ] Add UI/DOM tests in `tests/habit-tracker-ui-components.test.js` validating multi-kit selection, kit habit disambiguation, header alignment metrics, and clean timer DOM tickers.
-- [ ] Verify 100% test pass on `npm run test:habit` and `npm run verify`.
+- [x] Add unit tests in `tests/habit-tracker-engine-math.test.js` validating start-date scheduling invariants, 100% adherence on newly created habits, and 0-scheduled weekday handling.
+- [x] Add UI/DOM tests in `tests/habit-tracker-ui-components.test.js` validating multi-kit selection, kit habit disambiguation, header alignment metrics, and clean timer DOM tickers.
+- [x] Verify 100% test pass on `npm run test:habit` and `npm run verify`.
 
 ---
 
@@ -239,34 +239,34 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 1: Starter Kits Carousel Navigation & Drag Ergonomics (P1)
 
-- [ ] Add accessible Left / Right navigation chevron buttons (`#starter-kits-prev-btn`, `#starter-kits-next-btn`) with minimum 44×44px touch targets on the Starter Kits section in `src/ui/identity-view.js`.
-- [ ] Implement mouse drag-to-scroll interaction and keyboard left/right arrow navigation on the carousel container.
-- [ ] Preserve smooth CSS snap points (`snap-x snap-start`) and mobile touch swiping.
+- [x] Add accessible Left / Right navigation chevron buttons (`#starter-kits-prev-btn`, `#starter-kits-next-btn`) with minimum 44×44px touch targets on the Starter Kits section in `src/ui/identity-view.js`.
+- [x] Implement mouse drag-to-scroll interaction and keyboard left/right arrow navigation on the carousel container.
+- [x] Preserve smooth CSS snap points (`snap-x snap-start`) and mobile touch swiping.
 
 ### Slice 2: Wizard Step 3 Kit ID Normalization & Unrestricted Uncheck (P0)
 
-- [ ] Standardize starter kit IDs across `src/domain/engine.js`, `src/i18n/translations.js`, and `src/app.js` to kebab-case (`morning-mastery`, `deep-focus`, `health-vitality`, `zen-mindfulness`).
-- [ ] Remove restrictive length guard in `src/app.js` (`action === "wizard-select-kit"`) to allow unchecking any kit down to 0 selected kits.
-- [ ] Update Step 4 review to gracefully handle 0 selected kits with a blank slate message or prompt to add custom habits.
+- [x] Standardize starter kit IDs across `src/domain/engine.js`, `src/i18n/translations.js`, and `src/app.js` to kebab-case (`morning-mastery`, `deep-focus`, `health-vitality`, `zen-mindfulness`).
+- [x] Remove restrictive length guard in `src/app.js` (`action === "wizard-select-kit"`) to allow unchecking any kit down to 0 selected kits.
+- [x] Update Step 4 review to gracefully handle 0 selected kits with a blank slate message or prompt to add custom habits.
 
 ### Slice 3: Systematic i18n Audit & Hardcoded String Purge (P1)
 
-- [ ] Extract hardcoded strings in `src/ui/identity-view.js` (`"4 Trụ Cột Bản Sắc"`, `"Cân bằng phát triển bản thân theo phương pháp Atomic Habits"`, `"${domainHabits.length} thói quen"`) to `src/i18n/translations.js` (`identity_pillars_title`, `identity_pillars_subtitle`, `domain_habits_count`).
-- [ ] Localize PWA Service Worker update prompt in `index.html` dynamically upon render and language toggle (`sw_update_title`, `sw_update_desc`, `sw_update_btn`).
-- [ ] Localize toast error messages in `src/app.js` (`toast_habit_name_required`).
-- [ ] Add automated regression assertions in `tests/habit-tracker-i18n.test.js` checking 100% dictionary parity and absence of hardcoded text in UI templates.
+- [x] Extract hardcoded strings in `src/ui/identity-view.js` (`"4 Trụ Cột Bản Sắc"`, `"Cân bằng phát triển bản thân theo phương pháp Atomic Habits"`, `"${domainHabits.length} thói quen"`) to `src/i18n/translations.js` (`identity_pillars_title`, `identity_pillars_subtitle`, `domain_habits_count`).
+- [x] Localize PWA Service Worker update prompt in `index.html` dynamically upon render and language toggle (`sw_update_title`, `sw_update_desc`, `sw_update_btn`).
+- [x] Localize toast error messages in `src/app.js` (`toast_habit_name_required`).
+- [x] Add automated regression assertions in `tests/habit-tracker-i18n.test.js` checking 100% dictionary parity and absence of hardcoded text in UI templates.
 
 ### Slice 4: Routine Assignment Mutual Exclusivity (P1)
 
-- [ ] In `src/app.js` and `src/ui/manager-view.js`, enforce mutual exclusivity between `anytime` and circadian routine slots:
+- [x] In `src/app.js` and `src/ui/manager-view.js`, enforce mutual exclusivity between `anytime` and circadian routine slots:
   - Checking `anytime` unchecks `morning`, `afternoon`, and `evening`.
   - Checking any of `morning`, `afternoon`, or `evening` unchecks `anytime`.
   - Allow multi-selection among circadian slots (e.g. `morning` + `evening`).
-- [ ] Update habit creation / edit modal preview and form data parsing to reflect exclusive routine state.
+- [x] Update habit creation / edit modal preview and form data parsing to reflect exclusive routine state.
 
 ### Slice 5: Automated Verification & Regression Suite (P0)
 
-- [ ] Add unit and UI component tests in `tests/habit-tracker-ui-components.test.js` verifying carousel button navigation, drag physics classes, wizard unchecking down to 0 kits, and routine mutual exclusivity.
+- [x] Add unit and UI component tests in `tests/habit-tracker-ui-components.test.js` verifying carousel button navigation, drag physics classes, wizard unchecking down to 0 kits, and routine mutual exclusivity.
 - [x] Add i18n regression assertions in `tests/habit-tracker-i18n.test.js`.
 - [x] Verify 100% pass on `npm run test:habit` and `npm run verify`.
 
@@ -350,57 +350,46 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ---
 
-## ☁️ Cloud Sync, Deterministic 3-Way Merge, Encrypted Vault & Data Portability (ADR-0015)
+#---
 
-### Slice 1: Deterministic 3-Way Merge Engine, Entity Timestamps & Deletion Tombstones (P0)
+## ⚡ Unified Sync Kernel, Adaptive Cadence, Timer Batching & Clipboard JSON Portability (ADR-0016)
 
-- [x] Implement deterministic 3-way merge algorithm in `src/sync/merge3.js` comparing base, local, and remote states.
-- [x] Track entity `updatedAt` timestamps for Last-Write-Wins (LWW) resolution on habit metadata and settings.
-- [x] Implement deletion tombstones (`{ id, deleted: true, deletedAt }`) in `src/sync/tombstones.js` and storage adapters so deletions propagate across sync nodes.
-- [x] Implement commutative additive daily log union: merges distinct dates and preserves maximum progress / latest timestamp on colliding same-day logs.
-- [x] Add unit test suite in `tests/habit-tracker-cloud-sync.test.js` covering 3-way merge matrix (concurrent edits, tombstones, same-day log conflicts, vacation ranges).
+### Slice 1: Dual-Speed Cadence & 5-Minute Timer Cloud Batching (P0)
 
-### Slice 2: GitHub Gist & Google Drive Cloud Sync Connectors with Calm Debounce & Status Diagnostics (P0)
+- [x] Decouple local IndexedDB timer persistence (10s interval) from cloud synchronization.
+- [x] Implement 5-minute timer batch accumulator in `src/sync/cloud-sync.js` and `src/app.js` suppressing outgoing cloud sync during continuous running ticks.
+- [x] Trigger immediate 5s debounced cloud sync upon timer state transitions: Start, Pause, Reset, 100% Target Completed, and App Wake/Cold-Boot.
+- [x] Ensure non-timer mutations (checkboxes, counter adjustments, habit additions) continue to sync with 5-second debounce.
+- [x] Add unit tests verifying timer throttling and state boundary immediate sync in `tests/habit-tracker-cloud-sync.test.js`.
 
-- [ ] Implement GitHub Gist API connector (PAT validation, secret gist creation/fetching/updating, rate-limit resilience with backoff) in `src/sync/cloud-sync.js`.
-- [ ] Implement Google Drive AppData connector (GIS OAuth 2.0 Client ID integration, `appDataFolder` multipart upload/download).
-- [ ] Implement calm sync engine: 5s debounce on mutations, automatic sync on `initApp`, `online`, and `visibilitychange: visible`.
-- [ ] Wire manual `[ 🔄 Sync Now ]` button with rotating animation and dynamic status badges (`🟢 Connected`, `🟡 Syncing`, `🔴 Error`, `⚪ Offline`).
-- [ ] Add unit tests verifying Gist/Drive API payload generation, HTTP error handling, and debounce logic in `tests/habit-tracker-cloud-sync.test.js`.
+### Slice 2: Change-Only Dirty State Hashing & Adaptive Idle Cadence with Error Backoff (P0)
 
-### Slice 3: Zero-Knowledge Client-Side Vault Encryption (AES-GCM-256) & Ephemeral Key Management (P1)
+- [x] Implement deterministic state checksum/hash engine in `src/sync/cloud-sync.js` to fingerprint normalized state.
+- [x] Implement change-only guard: skip outgoing cloud PUT/PATCH when `localHash === lastSyncedRemoteHash` and dirty flag is false.
+- [x] Implement Adaptive Idle Remote Cadence ("Increase Mechanism"): scale background poll interval $1\text{m} \to 3\text{m} \to 5\text{m} \to 15\text{m}$ during idle periods; reset to 1m on user interaction or visibility change.
+- [x] Implement Exponential Error Backoff on HTTP 429/403/5xx ($5\text{s} \to 15\text{s} \to 30\text{s} \to 60\text{s} \to 5\text{m}$) with ambient non-blocking warning badge.
+- [x] Add unit tests verifying dirty hash detection, idle interval stepping, and exponential error backoff in `tests/habit-tracker-cloud-sync.test.js`.
 
-- [ ] Integrate WebCrypto AES-GCM-256 + PBKDF2 (100k iterations) with cloud sync payloads and JSON exports when passphrase toggle is enabled.
-- [ ] Manage derived `CryptoKey` in ephemeral in-memory session cache (never stored in plain `localStorage`).
-- [ ] Implement ergonomic "Unlock Encrypted Vault" modal (`#vault-unlock-modal-overlay`) with instant password verification and shake animation on invalid passphrase.
-- [ ] Add unit tests verifying encryption roundtrip, wrong password rejection, and session key lifecycle in `tests/habit-tracker-cloud-sync.test.js`.
+### Slice 3: 1-Click Clipboard JSON Portability & Full CSV Decommissioning (P1)
 
-### Slice 4: Interactive JSON Import Inspection Modal, Strategy Selector & Auto Safety Snapshot (P1)
+- [x] Implement `[ 📋 Copy JSON to Clipboard ]` with `navigator.clipboard.writeText` and fallback textarea modal (`#clipboard-fallback-modal-overlay`) with WCAG focus trapping.
+- [x] Implement `[ 📥 Paste JSON ]` modal (`#paste-json-modal-overlay`) with direct clipboard paste / textarea input, schema validation, diff preview, strategy toggle (`Merge` vs `Replace`), and automated pre-import safety rollback snapshot.
+- [x] Implement dedicated Encrypted Import Passphrase Unlock Dialog (`#import-decrypt-modal-overlay`) supporting client-side AES-GCM-256 decryption before preview.
+- [x] Support format choice modal (`#export-format-modal-overlay`) when vault encryption is active (`[ 🔒 Encrypted Vault ]` vs `[ 📄 Plaintext JSON ]`).
+- [x] Fix `validateImportJson` schema validation to support `atomic-habit-tracker-encrypted-backup` payloads.
+- [x] Completely remove CSV export and import buttons from `index.html` and `src/app.js`.
+- [x] Remove `exportToCsv`, `downloadExportCSV`, and `parseHabitCsv` from `src/sync/export-import.js` and clean up obsolete translation keys.
+- [x] Add unit & integration tests verifying clipboard copy/paste schemas, encrypted import unlock, format choice, fallback mechanics, and strategy application in `tests/habit-tracker-storage-persistence.test.js` and `tests/habit-tracker-ui-components.test.js`.
 
-- [ ] Create interactive Import Preview Modal (`#import-preview-modal-overlay`) when JSON / `.enc.json` file is chosen.
-- [ ] Display parsed summary: total habits to add/update, log count, date ranges, settings changes, and encrypted status.
-- [ ] Implement strategy selector: `[ 🔄 Merge & Combine (Safe Additive) ]` vs `[ ⚠️ Replace Entire Database (Clean Restore) ]`.
-- [ ] Automatically save a **Pre-Import Safety Snapshot** in IndexedDB before mutating state.
-- [ ] Add unit tests asserting schema parsing, strategy application, and snapshot creation in `tests/habit-tracker-storage-persistence.test.js`.
+### Slice 4: Settings Hub Diagnostics & Local Vault Safety Snapshots (P1)
 
-### Slice 5: Full-Spectrum CSV Portability & Universal Habit Log Importer (P1)
+- [x] Polish Cloud Sync Hub card in Settings tab with dynamic status indicators (`🟢 Connected`, `🟡 Syncing...`, `🔴 Error`, `⚪ Offline`), relative sync timestamps, and 1-tap `[ 🔄 Sync Now ]`.
+- [x] Polish Data Portability card with 1-click Clipboard Copy/Paste and File JSON Backup/Restore.
+- [x] Verify rolling local snapshot drawer (last 5 snapshots with 1-click rollback) operates seamlessly before sync pull, import, or wipe.
+- [x] Update `tests/habit-tracker-ui-components.test.js` and `tests/habit-tracker-i18n.test.js` asserting Settings layout, clipboard actions, and bilingual parity.
 
-- [ ] Upgrade CSV export with UTF-8 BOM (`\uFEFF`), rich habit metadata, target values, logged values, completion status, notes, streaks, and adherence percentages.
-- [ ] Implement universal CSV importer parsing external tracker formats (Loop Habit Tracker, Everyday, Habitify, custom spreadsheets) with auto-detection of delimiters (`,` vs `;`) and headers (`date`, `habit`, `value`, `notes`).
-- [ ] Implement column mapping preview and dry-run merge into database.
-- [ ] Add unit tests asserting CSV export format with BOM and successful ingestion across external CSV schemas in `tests/habit-tracker-storage-persistence.test.js`.
+### Slice 5: Verification & DoD Gate (P0)
 
-### Slice 6: Settings IA Overhaul, Local Vault Snapshots History & End-to-End Verification Gate (P0)
-
-- [ ] Restructure Settings tab into the Obsidian Glow 3-card architecture (Cloud Sync Hub, Data Portability, Local Data Vault & Safety History).
-- [ ] Implement rolling snapshot manager storing last 5 restore points with reason, timestamp, and 1-tap `[ ↩️ Rollback ]`.
-- [ ] Update `tests/habit-tracker-ui-components.test.js` and `tests/habit-tracker-i18n.test.js` asserting Settings card structure, snapshot rollback, and bilingual parity.
-- [ ] Verify 100% test pass on `npm run test:habit` and outer gate `npm run verify`.
-
----
-
-## 🧪 Verification & DoD Gate
-
-- [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
-- [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
-- [ ] Outer repository gate clean: `npm run verify`.
+- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [x] Outer repository gate clean: `npm run verify`.
