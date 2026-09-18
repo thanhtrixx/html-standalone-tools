@@ -24,6 +24,7 @@ For architectural decision history and UI/UX evolution, refer to:
 - [`docs/adr/0014-screen-off-timer-session-persistence-and-cold-boot-reconciliation.md`](./docs/adr/0014-screen-off-timer-session-persistence-and-cold-boot-reconciliation.md)
 - [`docs/adr/0015-cloud-sync-deterministic-3way-merge-encrypted-vault-and-data-portability.md`](./docs/adr/0015-cloud-sync-deterministic-3way-merge-encrypted-vault-and-data-portability.md)
 - [`docs/adr/0016-unified-sync-kernel-adaptive-cadence-timer-batching-and-clipboard-json-portability.md`](./docs/adr/0016-unified-sync-kernel-adaptive-cadence-timer-batching-and-clipboard-json-portability.md)
+- [`docs/adr/0017-core-pillars-heatmap-ergonomics-and-habits-ia-decluttering.md`](./docs/adr/0017-core-pillars-heatmap-ergonomics-and-habits-ia-decluttering.md)
 
 ---
 
@@ -34,8 +35,8 @@ For architectural decision history and UI/UX evolution, refer to:
 The application organizes daily execution, deep analytics, habit catalog management, and preferences into four primary tabs:
 
 - **Today Action Board (`today`)**: High-velocity daily execution board. Features a hero progress ring, 7-day responsive full-viewport date ribbon, domain filter pills, circadian routine sections, and clean checkbox-first habit cards with routine-scoped inline expandability.
-- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring **4 Core Life Pillars** (Health, Mind, Craft, Discipline) with adherence rings, 52-week GitHub-style contribution heatmap, global aggregate consistency scores (30d/90d), 0-baseline day-of-week adherence charts, streak milestone records, and completion velocity.
-- **Habits Catalog & Manager (`habits`)**: Comprehensive personal habit catalog management (Add, Edit, Drag-and-Drop Reorder, Archive, Delete) and an integrated vertical catalog of **8 Curated Starter Kits**.
+- **Insights & Analytics (`insights`)**: Quantitative analytics hub featuring **4 Core Life Pillars** (Health, Mind, Craft, Discipline) with adherence rings, 52-week GitHub-style contribution heatmap with touch gesture isolation and auto-scroll to present, global aggregate consistency scores (30d/90d), 0-baseline day-of-week adherence charts, streak milestone records, and completion velocity.
+- **Habits Catalog & Manager (`habits`)**: Streamlined personal habit catalog management (Add, Edit, Drag-and-Drop Reorder, Archive, Delete, Collapsible Routines) with dedicated Discovery Modal for **8 Curated Starter Kits** and Empty-State Identity Setup Wizard.
 - **Settings & Data Vault (`settings`)**: Configuration hub for streak freeze tokens, vacation pause mode, bilingual language switching (VI/EN), dark/light theme toggle, **Cloud Sync Hub** (GitHub Gist & Google Drive AppData with Unified Sync Kernel), **Data Portability** (1-Click Clipboard JSON Copy/Paste, Interactive JSON Import/Export with AES-GCM-256 encryption option), and **Local Vault Snapshots & Safety Rollback** (rolling last 5 restore points).
   _Avoid_: Sub-header bar, lens switcher, tab page, screen switch, subview switcher, CSV export/import buttons.
 

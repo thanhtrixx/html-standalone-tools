@@ -393,3 +393,45 @@ This document specifies the technical requirements and vertical slice backlog fo
 - [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
 - [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
 - [x] Outer repository gate clean: `npm run verify`.
+
+---
+
+## 🏛️ Core Life Pillars, Heatmap Ergonomics, Habits IA Decluttering & Streak Transparency (ADR-0017)
+
+### Slice 1: Core Life Pillar Assignment in Add/Edit Habit Modal & Habit Card Badging (P0)
+
+- [ ] Add 4-Pillar Segmented Selector (`🌿 Health`, `⚡ Craft`, `🔮 Mind`, `🔥 Discipline`) to Stage 1 of Add/Edit Habit Modal in `src/ui/manager-view.js`.
+- [ ] Persist `domain` in habit entity payload in `src/app.js` and `src/state/store.js`.
+- [ ] Render subtle Life Pillar badge with glowing accent color on Habit Cards in `src/ui/today-view.js` and `src/ui/manager-view.js`.
+- [ ] Add bilingual translations for domain selector labels and tooltips in `src/i18n/translations.js`.
+- [ ] Update habit detail sheet in `src/ui/detail-sheet.js` to render the assigned Life Pillar.
+
+### Slice 2: 52-Week Contribution Heatmap Touch Isolation, Present Auto-Scroll & Timeline Lenses (P0)
+
+- [ ] Add `.heatmap-container`, `.overflow-x-auto`, and `.heatmap-cell` to `skipSelectors` in `setupTabSwipeGestures()` in `src/app.js` to eliminate swipe tab conflicts.
+- [ ] Auto-scroll the heatmap horizontal viewport to `scrollLeft = scrollWidth` on initial render and tab switch to display current weeks and today.
+- [ ] Add Month Timeline header (Jan–Dec) and Day-of-Week labels (M, W, F) to `renderYearlyHeatmapGrid` in `src/ui/insights-view.js`.
+- [ ] Add Timeframe Lens Toggle (`Last 30 Days` / `Last 90 Days` / `Full 52 Weeks`) in `src/ui/insights-view.js` with dynamic grid filtering.
+- [ ] Enhance mobile tap-to-inspect popover with date, completion rate %, and completed habit breakdown.
+
+### Slice 3: Habits Tab IA Decluttering with Collapsible Routines & Starter Kits Discovery Modal (P1)
+
+- [ ] Streamline Habits tab in `src/ui/identity-view.js` and `src/ui/manager-view.js` to focus strictly on active routine management, search, and drag-and-drop reordering.
+- [ ] Implement Collapsible Routine Accordions (`🌅 Morning`, `☀️ Afternoon`, `🌙 Evening`, `🔄 Anytime`) with habit count badges.
+- [ ] Extract Curated Starter Kits into a dedicated Discovery Modal/Bottom Sheet (`#starter-kits-modal-overlay`) accessible via `[ 📚 Browse Starter Kits ]` button.
+- [ ] Render the Identity Setup Wizard banner prominently only on Empty State (`habits.length === 0`), and as a subtle top-right button when habits exist.
+
+### Slice 4: Streak Audit & Anti-Guilt Historical Transparency in Detail Sheet (P1)
+
+- [ ] Enhance Habit Detail Sheet in `src/ui/detail-sheet.js` with a comprehensive "Streak & Momentum Audit" section.
+- [ ] Display breakdown of Active Streak, Best Streak Record, Frozen Dates count, and Schedule Cadence.
+- [ ] Add localized explanation tooltip/copy explaining why streak was preserved on off-schedule and freeze-protected days.
+
+### Slice 5: Automated Test Suite & Multi-Device Verification Gate (P0)
+
+- [ ] Add unit tests in `tests/habit-tracker-ui-components.test.js` verifying Pillar selector rendering, domain persistence, and pillar badges.
+- [ ] Add tests in `tests/habit-tracker-ui-components.test.js` verifying heatmap touch isolation, auto-scroll logic, and timeframe filtering.
+- [ ] Add tests in `tests/habit-tracker-ui-components.test.js` verifying Habits tab decluttering, routine collapse, and Starter Kits modal.
+- [ ] Verify 100% bilingual parity across new translation keys in `tests/habit-tracker-i18n.test.js`.
+- [ ] Verify `npm run test:habit` and outer repository gate `npm run verify`.
+
