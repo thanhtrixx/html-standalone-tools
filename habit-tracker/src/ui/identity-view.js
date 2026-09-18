@@ -663,18 +663,20 @@
                 <button
                   type="button"
                   data-action="open-starter-kits-modal"
-                  class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700/60 transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+                  class="px-2.5 sm:px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-700/60 transition active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0"
                   title="${i18n.t("browse_starter_kits", {}, lang)}"
                 >
                   <span>📚</span>
-                  <span class="hidden sm:inline">${i18n.t("browse_starter_kits", {}, lang)}</span>
+                  <span class="sm:hidden">${i18n.t("starter_kits_short", {}, lang)}</span>
+                  <span class="hidden sm:inline">${i18n.t("starter_kits_full", {}, lang)}</span>
                 </button>
                 <button
                   type="button"
                   data-action="open-add-habit"
-                  class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
+                  class="px-3 sm:px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap"
                 >
-                  + ${i18n.t("add_habit", {}, lang)}
+                  <span>➕</span>
+                  <span>${i18n.t("add_habit", {}, lang)}</span>
                 </button>
               </div>
             </div>
@@ -695,18 +697,6 @@
           <div id="habits-catalog-subview" class="mb-6">
             ${managerHtml}
           </div>
-
-          <!-- Subtle Footer Action to Browse Starter Kits -->
-          <div class="mt-8 text-center">
-            <button
-              type="button"
-              data-action="open-starter-kits-modal"
-              class="inline-flex items-center gap-2 py-2.5 px-5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/60 shadow-sm transition active:scale-95 cursor-pointer"
-            >
-              <span>📚</span>
-              <span>${i18n.t("browse_all_starter_kits", {}, lang)}</span>
-            </button>
-          </div>
         </div>
       `;
     } else {
@@ -724,9 +714,10 @@
             <button
               type="button"
               data-action="open-add-habit"
-              class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
+              class="px-3 sm:px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-emerald-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap"
             >
-              + ${i18n.t("add_habit", {}, lang)}
+              <span>➕</span>
+              <span>${i18n.t("add_habit", {}, lang)}</span>
             </button>
           </div>
 
