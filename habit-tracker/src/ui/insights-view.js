@@ -191,6 +191,43 @@
       lang === "vi" ? "T6" : "Fri",
     ];
 
+    // Dynamic localized month headers aligned with week columns
+    const numCols = Math.ceil(filteredCells.length / 7);
+    const monthHeaders = [];
+    let lastMonth = null;
+    let lastColIdx = -999;
+
+    for (let c = 0; c < numCols; c++) {
+      const cellIndex = c * 7;
+      if (cellIndex < filteredCells.length) {
+        const cell = filteredCells[cellIndex];
+        const cellDate = new Date(cell.date + "T00:00:00");
+        const monthNum = cellDate.getMonth();
+        if (monthNum !== lastMonth) {
+          if (c - lastColIdx >= 3 || lastMonth === null) {
+            const label =
+              lang === "vi"
+                ? `Thg ${monthNum + 1}`
+                : cellDate.toLocaleDateString("en-US", { month: "short" });
+            monthHeaders.push({ colIdx: c, label });
+            lastMonth = monthNum;
+            lastColIdx = c;
+          }
+        }
+      }
+    }
+
+    const monthHeaderHtml = `
+      <div class="relative h-4 text-[10px] text-slate-400 dark:text-slate-500 font-medium mb-1 select-none pointer-events-none" style="width: ${Math.max(0, numCols * 16 - 4)}px;">
+        ${monthHeaders
+          .map(
+            (mh) =>
+              `<span class="absolute top-0 whitespace-nowrap" style="left: ${mh.colIdx * 16}px;">${mh.label}</span>`
+          )
+          .join("")}
+      </div>
+    `;
+
     return `
       <div class="heatmap-container bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-3xl p-5 mb-6 shadow-xl">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -211,7 +248,7 @@
         </div>
 
         <!-- Timeframe Lens Selector -->
-        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/60 mb-3.5 max-w-xs" id="heatmap-timeframe-picker">
+        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/60 mb-3.5 max-w-xs mx-auto" id="heatmap-timeframe-picker">
           ${[
             { id: "30d", key: "timeframe_30d" },
             { id: "90d", key: "timeframe_90d" },
@@ -238,7 +275,7 @@
 
         <div class="flex items-start gap-2">
           <!-- Weekday Labels Column -->
-          <div class="grid grid-rows-7 gap-1 pt-0.5 text-[9px] font-semibold text-slate-400 dark:text-slate-500 select-none shrink-0 h-28">
+          <div class="grid grid-rows-7 gap-1 pt-5 text-[9px] font-semibold text-slate-400 dark:text-slate-500 select-none shrink-0 h-33">
             <span class="leading-none"></span>
             <span class="leading-none">${dayLabels[0]}</span>
             <span class="leading-none"></span>
@@ -248,10 +285,13 @@
             <span class="leading-none"></span>
           </div>
 
-          <!-- Heatmap Cells Grid with Touch Isolation -->
+          <!-- Heatmap Cells Grid with Touch Isolation & Synchronized Month Headers -->
           <div id="insights-heatmap-scroll" class="overflow-x-auto pb-2 no-scrollbar flex-1" style="overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; touch-action: pan-x;">
-            <div class="grid grid-rows-7 grid-flow-col gap-1 w-max">
-              ${cellsHtml}
+            <div class="w-max">
+              ${monthHeaderHtml}
+              <div class="grid grid-rows-7 grid-flow-col gap-1">
+                ${cellsHtml}
+              </div>
             </div>
           </div>
         </div>

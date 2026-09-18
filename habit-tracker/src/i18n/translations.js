@@ -192,7 +192,7 @@
       habit_deleted: "Habit deleted",
 
       // Insights & Heatmap View
-      yearly_heatmap_title: "52-Week Contribution Heatmap",
+      yearly_heatmap_title: "Contribution Heatmap",
       heatmap_subtitle: "52-week activity and daily adherence momentum",
       weekday_adherence_title: "Day of Week Consistency",
       routine_adherence_title: "Routine Cluster Adherence",
@@ -721,7 +721,7 @@
       habit_deleted: "Đã xóa thói quen",
 
       // Insights & Heatmap View
-      yearly_heatmap_title: "Biểu đồ đóng góp 52 tuần",
+      yearly_heatmap_title: "Biểu đồ đóng góp",
       heatmap_subtitle: "Mức độ kiên trì và hoạt động hàng ngày trong 52 tuần",
       weekday_adherence_title: "Độ kiên trì theo ngày trong tuần",
       routine_adherence_title: "Tỷ lệ hoàn thành theo khung giờ",
