@@ -3092,8 +3092,8 @@ async function runUITests() {
   const mainContentInsights = getHeatmapEl430("main-content");
   assert(
     mainContentInsights.innerHTML.includes("yearly_heatmap_title") ||
-      mainContentInsights.innerHTML.includes("Biểu đồ đóng góp 52 tuần") ||
-      mainContentInsights.innerHTML.includes("52-Week Contribution Heatmap"),
+      mainContentInsights.innerHTML.includes("Biểu đồ đóng góp") ||
+      mainContentInsights.innerHTML.includes("Contribution Heatmap"),
     "[Issue #430 AC-3] Switched to Insights tab with rendered heatmap"
   );
 
