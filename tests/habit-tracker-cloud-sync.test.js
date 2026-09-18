@@ -814,6 +814,84 @@ async function runCloudSyncTests() {
       false,
       "[Slice 3] Clears locked flag"
     );
+
+    // ==========================================
+    // [ADR-0016 Slice 1 / Issue #585] Dual-Speed Cadence & 5-Minute Timer Batching
+    // ==========================================
+    console.log(
+      "\n--- [ADR-0016 Slice 1] Dual-Speed Cadence & 5-Minute Timer Batching ---"
+    );
+
+    let syncCalls = 0;
+    const mockStore = {
+      state: { habits: [{ id: "h1", name: "Deep Focus" }], logs: {} },
+      getHabit: (id) => ({ id, name: "Deep Focus", targetValue: 1200 }),
+    };
+
+    const timerSyncManager = new CloudSyncManager({
+      store: mockStore,
+      debounceDelayMs: 50,
+      timerBatchIntervalMs: 300, // 300ms in test simulates 5-minute interval
+    });
+    timerSyncManager.activeProvider = "github";
+    timerSyncManager.githubToken = "ghp_mock_token";
+    timerSyncManager.githubGistId = "mock_gist_id";
+
+    timerSyncManager.sync = async () => {
+      syncCalls++;
+      return { success: true, timestamp: new Date().toISOString() };
+    };
+
+    // 1. Regular mutation triggers standard debounce
+    syncCalls = 0;
+    timerSyncManager.scheduleDebouncedSync();
+    assertEqual(syncCalls, 0, "[AC-4] Debounce does not fire synchronously");
+    await new Promise((r) => setTimeout(r, 70));
+    assertEqual(
+      syncCalls,
+      1,
+      "[AC-4] Standard mutation fires debounced sync after delay"
+    );
+
+    // 2. Continuous timer tick does not fire standard debounce
+    syncCalls = 0;
+    timerSyncManager.lastTimerSyncTimestamp = Date.now();
+    timerSyncManager.scheduleDebouncedSync({ isTimerTick: true });
+    await new Promise((r) => setTimeout(r, 70));
+    assertEqual(
+      syncCalls,
+      0,
+      "[AC-1] Continuous timer tick does not trigger standard debounce sync"
+    );
+
+    // Repeated ticks within batch interval remain suppressed
+    for (let i = 0; i < 5; i++) {
+      timerSyncManager.scheduleDebouncedSync({ isTimerTick: true });
+    }
+    await new Promise((r) => setTimeout(r, 70));
+    assertEqual(
+      syncCalls,
+      0,
+      "[AC-1] Repeated continuous timer ticks remain throttled"
+    );
+
+    // 3. Batch interval expires -> timer batch sync fires
+    await new Promise((r) => setTimeout(r, 260));
+    assertEqual(
+      syncCalls,
+      1,
+      "[AC-2] Timer batch accumulator fires sync once batch interval expires"
+    );
+
+    // 4. Timer state boundary (Start, Pause, Reset, Complete, Wake) immediately schedules debounced sync
+    syncCalls = 0;
+    timerSyncManager.scheduleDebouncedSync({ boundary: true });
+    await new Promise((r) => setTimeout(r, 70));
+    assertEqual(
+      syncCalls,
+      1,
+      "[AC-3] Timer state boundary immediately schedules debounced sync"
+    );
   } finally {
     global.fetch = originalFetch;
   }

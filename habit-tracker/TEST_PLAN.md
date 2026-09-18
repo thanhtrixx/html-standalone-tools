@@ -166,7 +166,7 @@ tests/
   - Cold app launch with active restored session automatically opens the immersive Focus Timer Modal (`#focus-timer-modal-overlay`).
   - Floating Dynamic Island (`#floating-timer-island`) and Dock Active Pill (`#dock-active-timer-pill`) immediately reflect the restored time and running state.
 
-### 12. Cloud Sync, Deterministic 3-Way Merge, Encrypted Vault & Data Portability (ADR-0015)
+#### 12. Cloud Sync, Deterministic 3-Way Merge & Encrypted Vault (ADR-0015)
 
 - [x] **Deterministic 3-Way Merge & Deletion Tombstones (`tests/habit-tracker-cloud-sync.test.js`)**:
   - `merge3` correctly performs Last-Write-Wins on conflicting habit properties and settings based on `updatedAt`.
@@ -174,23 +174,28 @@ tests/
   - Daily habit logs are merged additively across calendar dates without dropping records.
   - Concurrent same-day log collisions preserve the maximum completed progress / latest timestamp.
   - Pre-merge snapshot is safely saved to IndexedDB before applying remote mutations.
-- [ ] **Cloud Sync Connectors & Calm Sync Engine (`tests/habit-tracker-cloud-sync.test.js`)**:
-  - GitHub Gist API: Formats valid Gist payloads, handles PAT validation, creates new private gists, and updates existing gists.
-  - Google Drive AppData: Formats valid multipart AppData uploads and downloads.
-  - Calm sync debouncer triggers 5 seconds after mutation and handles rapid bursts cleanly.
-  - Rate limiting (HTTP 429/403) triggers exponential backoff without crashing the application.
-  - Live status indicator reflects `connected`, `syncing`, `error`, and `offline` states.
-- [ ] **Zero-Knowledge Client-Side Encryption (`tests/habit-tracker-cloud-sync.test.js`)**:
+- [x] **Zero-Knowledge Client-Side Encryption (`tests/habit-tracker-cloud-sync.test.js`)**:
   - AES-GCM-256 + PBKDF2 encrypts and decrypts state payloads faithfully.
   - Invalid passphrase throws descriptive error safely without corrupting stored data.
   - Ephemeral session key cache isolates `CryptoKey` in memory and prevents `localStorage` key leakage.
-- [ ] **Interactive JSON Import Inspection & Safety Snapshots (`tests/habit-tracker-storage-persistence.test.js`)**:
-  - Validates schema, parses habit/log counts and date ranges, and opens the preview modal.
-  - Applies `Merge` strategy additively and `Replace` strategy cleanly after database reset.
-  - Automatically captures a pre-import rollback snapshot in the `snapshots` store.
-- [ ] **Full-Spectrum CSV Portability & Universal Importer (`tests/habit-tracker-storage-persistence.test.js`)**:
-  - Generates valid UTF-8 BOM CSV containing full habit metadata, logs, notes, streaks, and adherence percentages.
-  - Ingests external CSV formats (Loop, Everyday, Habitify, spreadsheets) with delimiter auto-detection and column mapping.
-- [ ] **Settings IA Overhaul & Snapshot History (`tests/habit-tracker-ui-components.test.js`)**:
-  - Renders 3-card Settings layout (Cloud Sync, Data Portability, Local Data Vault).
-  - Rolling snapshot drawer lists last 5 snapshots and performs 1-click restore cleanly.
+
+### 13. Unified Sync Kernel, Adaptive Cadence & Clipboard JSON Portability (ADR-0016)
+
+- [x] **Dual-Speed Cadence & 5-Minute Timer Batching (`tests/habit-tracker-cloud-sync.test.js`)**:
+  - Local persistence writes to IndexedDB every 10s during timer ticks.
+  - Cloud sync suppresses outgoing network requests during continuous timer ticking until 5 minutes (300s) have accumulated.
+  - State boundary transitions (Timer Start, Pause, Reset, 100% Target Completed, App Wake/Init) trigger immediate 5s debounced sync.
+  - Non-timer mutations (checkbox toggles, habit edits) continue using standard 5s debounce.
+- [ ] **Dirty State Checksum & Adaptive Idle Cadence ("Increase Mechanism") (`tests/habit-tracker-cloud-sync.test.js`)**:
+  - Computes deterministic payload hash of normalized state; skips cloud upload when local and remote hashes match.
+  - Scales idle background polling from 1m to 3m, 5m, and caps at 15m; resets to 1m upon user interaction or visibility wake.
+  - Exponential error backoff on HTTP 429/403/5xx ($5\text{s} \to 15\text{s} \to 30\text{s} \to 60\text{s} \to 5\text{m}$).
+- [ ] **1-Click Clipboard JSON Portability & Zero CSV (`tests/habit-tracker-storage-persistence.test.js`)**:
+  - `copyJsonToClipboard` writes valid JSON backup payload to clipboard with toast feedback and modal textarea fallback.
+  - `pasteAndInspectJson` validates schema, computes diff statistics, supports Merge vs Replace strategy, and creates pre-import safety rollback snapshot.
+  - Supports choice of encrypted vault payload vs plaintext JSON when vault encryption is active.
+  - CSV export and import functions (`exportToCsv`, `downloadExportCSV`, `parseHabitCsv`) and UI buttons are completely removed.
+- [ ] **Settings UI Diagnostics & Local Vault Snapshots (`tests/habit-tracker-ui-components.test.js`)**:
+  - Renders 3-card Settings layout (Cloud Sync Hub, Data Portability, Local Vault Snapshots).
+  - Status badges dynamically display `connected`, `syncing`, `error`, and `offline` states.
+  - Rolling snapshot drawer displays last 5 restore points with 1-click rollback.

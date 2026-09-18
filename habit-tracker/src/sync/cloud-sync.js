@@ -373,6 +373,9 @@
       this.autoSyncEnabled = true;
       this.debounceTimer = null;
       this.debounceDelayMs = options.debounceDelayMs || 5000;
+      this.timerBatchIntervalMs = options.timerBatchIntervalMs || 5 * 60 * 1000; // 5 minutes default
+      this.lastTimerSyncTimestamp = 0;
+      this.timerBatchTimer = null;
 
       // Zero-Knowledge Client-Side Vault Encryption (Ephemeral Session Cache)
       this.encryptionEnabled = options.encryptionEnabled || false;
@@ -539,8 +542,51 @@
       this.notify("disconnected", this.getStatus());
     }
 
-    scheduleDebouncedSync() {
+    scheduleDebouncedSync(options = {}) {
       if (!this.autoSyncEnabled || this.activeProvider === "none") return;
+
+      const isTimerTick = Boolean(options && options.isTimerTick);
+      const isBoundary = Boolean(options && options.boundary);
+
+      if (isTimerTick && !isBoundary) {
+        const now = Date.now();
+        if (this.lastTimerSyncTimestamp === 0) {
+          this.lastTimerSyncTimestamp = now;
+        }
+        const elapsed = now - this.lastTimerSyncTimestamp;
+
+        if (elapsed < this.timerBatchIntervalMs) {
+          if (!this.timerBatchTimer) {
+            const remaining = Math.max(0, this.timerBatchIntervalMs - elapsed);
+            this.timerBatchTimer = setTimeout(() => {
+              this.timerBatchTimer = null;
+              this.lastTimerSyncTimestamp = Date.now();
+              this.sync().catch((err) => {
+                console.warn(
+                  "[CloudSyncManager] Timer batch sync failed:",
+                  err
+                );
+              });
+            }, remaining);
+          }
+          return;
+        }
+
+        // Interval elapsed: reset batch timer and schedule immediate debounced sync
+        if (this.timerBatchTimer) {
+          clearTimeout(this.timerBatchTimer);
+          this.timerBatchTimer = null;
+        }
+        this.lastTimerSyncTimestamp = now;
+      } else {
+        // Standard mutation or timer boundary transition
+        if (this.timerBatchTimer) {
+          clearTimeout(this.timerBatchTimer);
+          this.timerBatchTimer = null;
+        }
+        this.lastTimerSyncTimestamp = Date.now();
+      }
+
       if (this.debounceTimer) {
         clearTimeout(this.debounceTimer);
       }
@@ -555,6 +601,10 @@
       if (this.debounceTimer) {
         clearTimeout(this.debounceTimer);
         this.debounceTimer = null;
+      }
+      if (this.timerBatchTimer) {
+        clearTimeout(this.timerBatchTimer);
+        this.timerBatchTimer = null;
       }
     }
 

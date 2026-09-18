@@ -579,13 +579,14 @@
       });
 
       // Calm debounced auto-sync on store mutations
-      store.subscribe(() => {
+      store.subscribe((state, eventType, payload) => {
         if (
           cloudSyncManager &&
           cloudSyncManager.autoSyncEnabled &&
           cloudSyncManager.activeProvider !== "none"
         ) {
-          cloudSyncManager.scheduleDebouncedSync();
+          const isTimerTick = Boolean(payload && payload._isTimerTick);
+          cloudSyncManager.scheduleDebouncedSync({ isTimerTick });
         }
       });
 
@@ -3129,7 +3130,9 @@
     if (now - lastTimerPersistedAt >= 10000) {
       lastTimerPersistedAt = now;
       store
-        .logHabit(runningTimerHabitId, targetDate, nextSeconds)
+        .logHabit(runningTimerHabitId, targetDate, nextSeconds, null, {
+          isTimerTick: true,
+        })
         .catch(() => {});
     }
 

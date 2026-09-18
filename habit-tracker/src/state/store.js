@@ -345,7 +345,7 @@
     }
 
     // Logging & Check-ins
-    async logHabit(habitId, dateInput, value, notes = null) {
+    async logHabit(habitId, dateInput, value, notes = null, options = {}) {
       const habit = this.getHabit(habitId);
       if (!habit) return null;
 
@@ -364,6 +364,7 @@
         notes: notes !== null ? notes : existingLog.notes || "",
         timestamp: Date.now(),
         updatedAt: new Date().toISOString(),
+        _isTimerTick: Boolean(options && options.isTimerTick),
       };
 
       await this.storage.putLog(logEntry);
