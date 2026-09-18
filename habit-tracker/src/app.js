@@ -908,13 +908,13 @@
 
     let statusBadgeHtml = "";
     if (syncStatus.syncing) {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-sky-100 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 font-bold border border-sky-300 dark:border-sky-800/50"><span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span> ${i18n.t("cloud_syncing", {}, lang)}</span>`;
-    } else if (syncStatus.error) {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold border border-red-300 dark:border-red-800/50">🔴 ${lang === "vi" ? "Lỗi đồng bộ" : "Sync Error"}</span>`;
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-bold border border-amber-300 dark:border-amber-800/50"><span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> ${i18n.t("cloud_syncing", {}, lang)}</span>`;
+    } else if (syncStatus.error || syncStatus.lastSyncStatus === "error") {
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-400 font-bold border border-red-300 dark:border-red-800/50">🔴 ${i18n.t("cloud_sync_error", {}, lang)}</span>`;
     } else if (syncStatus.connected) {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-300 dark:border-emerald-800/50">🟢 ${i18n.t("cloud_connected", {}, lang)}</span>`;
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-300 dark:border-emerald-800/50">🟢 ${i18n.t("cloud_connected", {}, lang)}</span>`;
     } else {
-      statusBadgeHtml = `<span class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold border border-slate-200 dark:border-slate-700">⚪ ${i18n.t("cloud_not_connected", {}, lang)}</span>`;
+      statusBadgeHtml = `<span id="cloud-sync-status-badge" class="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold border border-slate-200 dark:border-slate-700">⚪ ${i18n.t("cloud_not_connected", {}, lang)}</span>`;
     }
 
     const relativeSyncTime = formatRelativeTime(syncStatus.lastSync, lang);

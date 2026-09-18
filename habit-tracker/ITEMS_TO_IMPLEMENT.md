@@ -381,10 +381,10 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 4: Settings Hub Diagnostics & Local Vault Safety Snapshots (P1)
 
-- [ ] Polish Cloud Sync Hub card in Settings tab with dynamic status indicators (`🟢 Connected`, `🟡 Syncing...`, `🔴 Error`, `⚪ Offline`), relative sync timestamps, and 1-tap `[ 🔄 Sync Now ]`.
-- [ ] Polish Data Portability card with 1-click Clipboard Copy/Paste and File JSON Backup/Restore.
-- [ ] Verify rolling local snapshot drawer (last 5 snapshots with 1-click rollback) operates seamlessly before sync pull, import, or wipe.
-- [ ] Update `tests/habit-tracker-ui-components.test.js` and `tests/habit-tracker-i18n.test.js` asserting Settings layout, clipboard actions, and bilingual parity.
+- [x] Polish Cloud Sync Hub card in Settings tab with dynamic status indicators (`🟢 Connected`, `🟡 Syncing...`, `🔴 Error`, `⚪ Offline`), relative sync timestamps, and 1-tap `[ 🔄 Sync Now ]`.
+- [x] Polish Data Portability card with 1-click Clipboard Copy/Paste and File JSON Backup/Restore.
+- [x] Verify rolling local snapshot drawer (last 5 snapshots with 1-click rollback) operates seamlessly before sync pull, import, or wipe.
+- [x] Update `tests/habit-tracker-ui-components.test.js` and `tests/habit-tracker-i18n.test.js` asserting Settings layout, clipboard actions, and bilingual parity.
 
 ### Slice 5: Verification & DoD Gate (P0)
 

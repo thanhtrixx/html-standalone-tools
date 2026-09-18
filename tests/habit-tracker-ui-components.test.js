@@ -7370,6 +7370,53 @@ async function runUITests() {
     typeof settingsSandbox.HabitApp.restoreSnapshotFromHistory === "function",
     "[Issue #577 AC-2] HabitApp exposes restoreSnapshotFromHistory method"
   );
+
+  // ----------------------------------------------------
+  // [Issue #588 / ADR-0016 Slice 4] Settings UI Diagnostics & Local Vault Safety Snapshots
+  // ----------------------------------------------------
+  console.log(
+    "--- [Issue #588] Settings UI Diagnostics & Local Vault Safety Snapshots ---"
+  );
+
+  // 1. Cloud Sync Hub Diagnostics: Status Badge & 1-tap Sync
+  assert(
+    mainContainer.innerHTML.includes('id="btn-cloud-sync-now"'),
+    "[Issue #588 AC-1] Settings tab includes 1-tap Sync Now button"
+  );
+  assert(
+    mainContainer.innerHTML.includes('id="cloud-sync-status-badge"'),
+    "[Issue #588 AC-1] Settings tab includes live cloud sync status badge"
+  );
+
+  // 2. Rolling Snapshot Drawer & 1-Click Rollback
+  await settingsSandbox.HabitApp.store.saveSnapshot("pre_import_backup");
+  await settingsSandbox.HabitApp.store.saveSnapshot("manual");
+  settingsSandbox.HabitApp.switchTab("settings");
+  let attempts = 0;
+  let snapshotsListEl = getSettingsEl("snapshots-history-list");
+  while (attempts < 15) {
+    snapshotsListEl = getSettingsEl("snapshots-history-list");
+    if (
+      snapshotsListEl &&
+      snapshotsListEl.innerHTML.includes('data-action="restore-snapshot"')
+    ) {
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    attempts++;
+  }
+
+  assert(
+    snapshotsListEl &&
+      (snapshotsListEl.innerHTML.includes("Trước khi nhập") ||
+        snapshotsListEl.innerHTML.includes("Pre-Import")),
+    "[Issue #588 AC-2] Snapshots list renders localized reason badges"
+  );
+  assert(
+    snapshotsListEl &&
+      snapshotsListEl.innerHTML.includes('data-action="restore-snapshot"'),
+    "[Issue #588 AC-2] Snapshots list includes 1-click restore buttons"
+  );
 }
 
 runUITests()
