@@ -372,12 +372,12 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 3: 1-Click Clipboard JSON Portability & Full CSV Decommissioning (P1)
 
-- [ ] Implement `[ 📋 Copy JSON to Clipboard ]` with `navigator.clipboard.writeText` and fallback textarea modal for restricted mobile webviews.
-- [ ] Implement `[ 📥 Paste JSON ]` modal with direct clipboard paste / textarea input, schema validation, diff preview (habits count, log date span), strategy toggle (`Merge` vs `Replace`), and automated pre-import safety rollback snapshot.
-- [ ] Support format choice when vault encryption is active (encrypted vault payload vs decrypted plaintext).
-- [ ] Completely remove CSV export and import buttons from `index.html` and `src/app.js`.
-- [ ] Remove `exportToCsv`, `downloadExportCSV`, and `parseHabitCsv` from `src/sync/export-import.js` and clean up obsolete translation keys.
-- [ ] Add unit tests verifying clipboard copy/paste schemas, fallback mechanics, and strategy application in `tests/habit-tracker-storage-persistence.test.js`.
+- [x] Implement `[ 📋 Copy JSON to Clipboard ]` with `navigator.clipboard.writeText` and fallback textarea modal for restricted mobile webviews.
+- [x] Implement `[ 📥 Paste JSON ]` modal with direct clipboard paste / textarea input, schema validation, diff preview (habits count, log date span), strategy toggle (`Merge` vs `Replace`), and automated pre-import safety rollback snapshot.
+- [x] Support format choice when vault encryption is active (encrypted vault payload vs decrypted plaintext).
+- [x] Completely remove CSV export and import buttons from `index.html` and `src/app.js`.
+- [x] Remove `exportToCsv`, `downloadExportCSV`, and `parseHabitCsv` from `src/sync/export-import.js` and clean up obsolete translation keys.
+- [x] Add unit tests verifying clipboard copy/paste schemas, fallback mechanics, and strategy application in `tests/habit-tracker-storage-persistence.test.js`.
 
 ### Slice 4: Settings Hub Diagnostics & Local Vault Safety Snapshots (P1)
 

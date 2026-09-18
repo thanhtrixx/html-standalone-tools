@@ -5188,14 +5188,16 @@ async function runUITests() {
   const { sandbox: vaultSandbox } = createHabitTrackerSandbox();
   await vaultSandbox.HabitApp.init();
 
-  // Test CSV export
+  // Test Clipboard JSON export
   const exportImportMod = require("../habit-tracker/src/sync/export-import.js");
-  const csvContent = exportImportMod.exportToCsv(vaultSandbox.HabitApp.store);
+  const clipboardRes = await exportImportMod.copyJsonToClipboard(
+    vaultSandbox.HabitApp.store
+  );
   assert(
-    typeof csvContent === "string" &&
-      csvContent.includes("Date") &&
-      csvContent.includes("Habit Name"),
-    "[Issue #481 AC-4] exportToCsv generates CSV headers and data records"
+    typeof clipboardRes.jsonString === "string" &&
+      clipboardRes.jsonString.includes('"app": "atomic-habit-tracker"') &&
+      clipboardRes.payload.data !== undefined,
+    "[Issue #481 AC-4] copyJsonToClipboard formats standard JSON backup payload"
   );
 
   // Test Data Vault replaceState restore
@@ -7317,12 +7319,46 @@ async function runUITests() {
     "[Issue #577 AC-1] Settings tab renders Local Data Vault & Safety History card"
   );
   assert(
-    mainContainer.innerHTML.includes('id="btn-export-json"') &&
-      mainContainer.innerHTML.includes('id="btn-export-csv"') &&
-      mainContainer.innerHTML.includes('id="import-json-input"') &&
-      mainContainer.innerHTML.includes('id="import-csv-input"'),
-    "[Issue #577 AC-1] Data Portability card includes 4-action grid for JSON and CSV exchange"
+    mainContainer.innerHTML.includes('id="btn-copy-json"') &&
+      mainContainer.innerHTML.includes('id="btn-paste-json"') &&
+      mainContainer.innerHTML.includes('id="btn-export-json"') &&
+      mainContainer.innerHTML.includes('id="import-json-input"'),
+    "[Issue #587 AC-1] Data Portability card includes 4-action grid for Clipboard and File JSON exchange"
   );
+  assert(
+    !mainContainer.innerHTML.includes('id="btn-export-csv"') &&
+      !mainContainer.innerHTML.includes('id="import-csv-input"'),
+    "[Issue #587 AC-5] Settings tab does not render deprecated CSV buttons"
+  );
+
+  // Test Paste JSON Modal opening and closing
+  settingsSandbox.HabitApp.openPasteJSONModal();
+  const pasteModalOverlay = getSettingsEl("paste-json-modal-overlay");
+  assert(
+    pasteModalOverlay && !pasteModalOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-2] openPasteJSONModal unhides paste modal overlay"
+  );
+  settingsSandbox.HabitApp.closePasteJSONModal();
+  assert(
+    pasteModalOverlay && pasteModalOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-2] closePasteJSONModal hides paste modal overlay"
+  );
+
+  // Test Clipboard Fallback Modal opening and closing
+  settingsSandbox.HabitApp.openClipboardFallbackModal(
+    '{"app":"atomic-habit-tracker"}'
+  );
+  const fallbackOverlay = getSettingsEl("clipboard-fallback-modal-overlay");
+  assert(
+    fallbackOverlay && !fallbackOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-1] openClipboardFallbackModal unhides fallback modal overlay"
+  );
+  settingsSandbox.HabitApp.closeClipboardFallbackModal();
+  assert(
+    fallbackOverlay && fallbackOverlay.classList.contains("hidden"),
+    "[Issue #587 AC-1] closeClipboardFallbackModal hides fallback modal overlay"
+  );
+
   assert(
     mainContainer.innerHTML.includes('id="btn-create-snapshot"'),
     "[Issue #577 AC-2] Local Data Vault card includes Create Safety Snapshot action"

@@ -1113,134 +1113,214 @@ async function runStorageTests() {
   );
 
   // ==========================================
-  // [Issue #576 / ADR-0015 Slice 5] Full-Spectrum CSV Portability & Universal Importer
+  // [Issue #587 / ADR-0016 Slice 3] 1-Click Clipboard JSON Portability & Lossless JSON File Exchange
   // ==========================================
   console.log(
-    "--- [Issue #576] Full-Spectrum CSV Portability & Universal Habit Log Importer ---"
+    "--- [Issue #587] 1-Click Clipboard JSON Portability & Lossless JSON File Exchange ---"
   );
 
-  // 1. Rich CSV Export formatting with full metadata, streaks, and adherence
-  const testExportState = {
+  const testClipboardState = {
     habits: [
       {
-        id: "h-running",
-        name: "Morning Run",
-        domain: "health",
-        routines: ["morning"],
-        routine: "morning",
+        id: "h-reading",
+        name: "Read 20 Pages",
+        domain: "mind",
+        routines: ["evening"],
+        routine: "evening",
         type: "numeric",
-        targetValue: 5,
-        unit: "km",
+        targetValue: 20,
+        unit: "pages",
       },
     ],
     logs: [
       {
-        id: "h-running_2026-09-15",
-        habitId: "h-running",
-        date: "2026-09-15",
-        value: 5,
+        id: "h-reading_2026-09-18",
+        habitId: "h-reading",
+        date: "2026-09-18",
+        value: 20,
         completed: true,
-        notes: "Great run in the park!",
-      },
-      {
-        id: "h-running_2026-09-16",
-        habitId: "h-running",
-        date: "2026-09-16",
-        value: 0,
-        completed: false,
-        notes: "Rest day",
+        notes: "Atomic Habits chapter 3",
       },
     ],
+    settings: {
+      theme: "dark",
+      language: "vi",
+    },
+    vacations: [],
   };
 
-  const generatedCsv = exportImport.exportToCsv(testExportState);
+  // 1. copyJsonToClipboard payload serialization & fallback mechanics
+  const copyRes = await exportImport.copyJsonToClipboard(testClipboardState);
   assert(
-    generatedCsv.includes(
-      '"Date","Habit ID","Habit Name","Domain","Routine","Type","Target Value","Logged Value","Unit","Status","Notes","Streaks","Adherence %"'
-    ),
-    "[Issue #576 AC-1] Exported CSV includes full metadata headers and consistency metrics"
+    typeof copyRes.jsonString === "string" &&
+      copyRes.jsonString.includes('"app": "atomic-habit-tracker"') &&
+      copyRes.jsonString.includes('"Read 20 Pages"'),
+    "[Issue #587 AC-1] copyJsonToClipboard serializes complete database state"
   );
-  assert(
-    generatedCsv.includes('"Morning Run"') &&
-      generatedCsv.includes('"5"') &&
-      generatedCsv.includes('"km"'),
-    "[Issue #576 AC-1] Exported CSV contains habit metadata and unit"
-  );
-  assert(
-    generatedCsv.includes('"Completed"') &&
-      generatedCsv.includes('"Incomplete"'),
-    "[Issue #576 AC-1] Exported CSV contains human-readable status values"
+  assertEqual(
+    copyRes.payload.app,
+    "atomic-habit-tracker",
+    "[Issue #587 AC-1] Payload contains standard APP_IDENTIFIER"
   );
 
-  // 2. CSV Parser auto-detects delimiters (semicolon vs comma) and RFC-4180 quotes
-  const semicolonCsv = `Date;Habit Name;Logged Value;Status;Notes\n2026-09-10;Read Book;30;Completed;"Read chapter 1, 2"`;
-  const parsedSemicolon = exportImport.parseHabitCsv(semicolonCsv);
+  // 2. Mock clipboard writeText
+  const originalNavigatorDesc = Object.getOwnPropertyDescriptor(
+    global,
+    "navigator"
+  );
+  let clipboardWrittenText = null;
+  Object.defineProperty(global, "navigator", {
+    value: {
+      clipboard: {
+        writeText: async (str) => {
+          clipboardWrittenText = str;
+        },
+        readText: async () => {
+          return clipboardWrittenText;
+        },
+      },
+    },
+    configurable: true,
+    writable: true,
+  });
+
+  const copyWithMockRes =
+    await exportImport.copyJsonToClipboard(testClipboardState);
   assertEqual(
-    parsedSemicolon.valid,
+    copyWithMockRes.success,
     true,
-    "[Issue #576 AC-2] Successfully parses semicolon-delimited CSV"
+    "[Issue #587 AC-1] copyJsonToClipboard succeeds when navigator.clipboard is available"
   );
   assertEqual(
-    parsedSemicolon.data.habits.length,
-    1,
-    "[Issue #576 AC-2] Identifies 1 habit from semicolon CSV"
-  );
-  assertEqual(
-    parsedSemicolon.data.logs.length,
-    1,
-    "[Issue #576 AC-2] Identifies 1 log entry from semicolon CSV"
-  );
-  assertEqual(
-    parsedSemicolon.data.logs[0].notes,
-    "Read chapter 1, 2",
-    "[Issue #576 AC-2] Correctly preserves commas inside quoted note field"
+    clipboardWrittenText,
+    copyWithMockRes.jsonString,
+    "[Issue #587 AC-1] System clipboard receives serialized JSON payload"
   );
 
-  // 3. Wide Matrix / Loop Habit Tracker CSV format
-  const loopCsv = `Date,Meditation,Morning Walk,Read Book\n2026-09-01,1,1,15\n2026-09-02,0,1,20\n2026-09-03,1,0,0`;
-  const parsedLoop = exportImport.parseHabitCsv(loopCsv);
+  // 3. readJsonFromClipboard
+  const readRes = await exportImport.readJsonFromClipboard();
   assertEqual(
-    parsedLoop.valid,
+    readRes.success,
     true,
-    "[Issue #576 AC-3] Successfully parses Loop Habit Tracker matrix CSV format"
+    "[Issue #587 AC-2] readJsonFromClipboard reads text from clipboard"
   );
   assertEqual(
-    parsedLoop.data.habits.length,
-    3,
-    "[Issue #576 AC-3] Created 3 distinct habits from matrix column headers"
-  );
-  // Total non-zero entries: 3 + 2 + 1 = 6 logs
-  assertEqual(
-    parsedLoop.data.logs.length,
-    6,
-    "[Issue #576 AC-3] Created 6 check-in logs across dates from matrix cells"
+    readRes.text,
+    clipboardWrittenText,
+    "[Issue #587 AC-2] Clipboard read text matches written text"
   );
 
-  // 4. Ingest parsed CSV into HabitStore additively
-  const csvStoreStorage = createMockStorage();
-  const csvStore = new HabitStore({
+  // Restore navigator
+  if (originalNavigatorDesc) {
+    Object.defineProperty(global, "navigator", originalNavigatorDesc);
+  } else {
+    delete global.navigator;
+  }
+
+  // 4. Schema validation for plain JSON and Encrypted Envelopes
+  const validJsonPayload = copyRes.jsonString;
+  const parsedValid = exportImport.parseAndValidateImport(validJsonPayload);
+  assertEqual(
+    parsedValid.valid,
+    true,
+    "[Issue #587 AC-2] parseAndValidateImport accepts valid standard JSON export"
+  );
+  assertEqual(
+    parsedValid.data.habits.length,
+    1,
+    "[Issue #587 AC-2] Successfully extracts habits array"
+  );
+
+  // Encrypted Vault Payload Validation
+  const encryptedPayload = {
+    app: "atomic-habit-tracker",
+    version: "1.0.0",
+    encrypted: true,
+    salt: "mock-salt-base64",
+    iv: "mock-iv-base64",
+    ciphertext: "mock-ciphertext-base64",
+    tagLength: 128,
+  };
+  const parsedEncrypted = exportImport.parseAndValidateImport(
+    JSON.stringify(encryptedPayload)
+  );
+  assertEqual(
+    parsedEncrypted.valid,
+    true,
+    "[Issue #587 AC-3] parseAndValidateImport accepts encrypted vault payload"
+  );
+  assertEqual(
+    parsedEncrypted.isEncrypted,
+    true,
+    "[Issue #587 AC-3] Identifies encrypted payload flag"
+  );
+
+  // Incompatible / Corrupt JSON handling
+  const corruptedJson = "{ not a valid json";
+  const parsedCorrupt = exportImport.parseAndValidateImport(corruptedJson);
+  assertEqual(
+    parsedCorrupt.valid,
+    false,
+    "[Issue #587 AC-2] Rejects invalid JSON syntax"
+  );
+
+  const incompatibleApp = {
+    app: "other-foreign-app",
+    version: "1.0.0",
+    data: { habits: [] },
+  };
+  const parsedForeign = exportImport.parseAndValidateImport(
+    JSON.stringify(incompatibleApp)
+  );
+  assertEqual(
+    parsedForeign.valid,
+    false,
+    "[Issue #587 AC-2] Rejects incompatible app identifier"
+  );
+
+  // 5. Ingest parsed JSON into HabitStore with merge & replace strategies
+  const jsonStoreStorage = createMockStorage();
+  const jsonStore = new HabitStore({
     storage: storageModule.createStorageAdapter({
-      fallbackStorage: csvStoreStorage,
+      fallbackStorage: jsonStoreStorage,
       forceFallback: true,
     }),
   });
-  await csvStore.init();
+  await jsonStore.init();
 
-  const mergedFromCsv = await exportImport.mergeHabitStates(
-    csvStore.state,
-    parsedLoop.data,
+  const mergedClipboardState = await exportImport.mergeHabitStates(
+    jsonStore.state,
+    parsedValid.data,
     "merge"
   );
-  await csvStore.replaceState(mergedFromCsv);
+  await jsonStore.replaceState(mergedClipboardState);
 
   assertEqual(
-    csvStore.getHabits().length,
-    3,
-    "[Issue #576 AC-4] Stores ingested CSV habits into reactive database without schema corruption"
+    jsonStore.getHabits().length,
+    1,
+    "[Issue #587 AC-4] Merged JSON data persists into reactive database"
   );
-  assert(
-    csvStore.getHabits().some((h) => h.name === "Meditation"),
-    "[Issue #576 AC-4] Stored Meditation habit is accessible in store"
+  assertEqual(
+    jsonStore.getHabits()[0].name,
+    "Read 20 Pages",
+    "[Issue #587 AC-4] Habit record accessible in database"
+  );
+
+  // 6. Zero CSV Verification (Decommissioned)
+  assertEqual(
+    exportImport.exportToCsv,
+    undefined,
+    "[Issue #587 AC-5] exportToCsv is completely decommissioned"
+  );
+  assertEqual(
+    exportImport.parseHabitCsv,
+    undefined,
+    "[Issue #587 AC-5] parseHabitCsv is completely decommissioned"
+  );
+  assertEqual(
+    exportImport.downloadExportCSV,
+    undefined,
+    "[Issue #587 AC-5] downloadExportCSV is completely decommissioned"
   );
 }
 

@@ -200,8 +200,22 @@
       cloud_not_connected: "Not configured",
       export_import_title: "Export & Import Data",
       export_json_btn: "Export JSON File",
-      export_csv_btn: "Export CSV File",
       import_json_btn: "Import JSON File",
+      btn_copy_json: "Copy JSON",
+      btn_paste_json: "Paste JSON",
+      btn_export_file_json: "Save File",
+      btn_open_file_json: "Open File",
+      paste_json_modal_title: "Paste JSON Data",
+      paste_json_modal_desc:
+        "Paste your JSON backup payload from clipboard or text below.",
+      paste_from_clipboard_btn: "Paste from Clipboard",
+      paste_json_placeholder: "Paste JSON backup text here...",
+      paste_json_inspect_btn: "Inspect & Preview",
+      copy_fallback_modal_title: "Copy JSON Payload",
+      copy_fallback_modal_desc:
+        "Automatic clipboard write is restricted in this browser. Please select all and copy manually.",
+      copy_select_all_btn: "Select All",
+      copy_done_btn: "Done",
       check_updates_btn: "Check for Updates",
       purge_cache_btn: "Purge Cache & Reload",
       pwa_version: "PWA Version",
@@ -235,7 +249,7 @@
       import_no_date_span: "No logs recorded",
       data_portability_card_title: "Data Portability & File Exchange",
       data_portability_card_desc:
-        "Backup complete habit history to JSON or analysis-ready CSV spreadsheets",
+        "1-click Clipboard copy/paste and lossless JSON file backup",
       snapshot_history_title: "Safety Snapshot History",
       snapshot_history_desc:
         "Rolling automated and manual snapshots for 1-click database rollback",
@@ -304,7 +318,9 @@
 
       // System Toasts & Dialogs
       toast_backup_exported: "Backup JSON file exported successfully!",
-      toast_csv_exported: "CSV data exported successfully!",
+      toast_json_copied: "JSON backup copied to clipboard!",
+      toast_clipboard_read_error: "Clipboard read failed: {message}",
+      toast_clipboard_copy_error: "Clipboard copy failed: {message}",
       toast_habit_deleted: "Habit deleted successfully",
       toast_notes_saved: "Journal note saved successfully!",
       toast_habit_archived: "Habit archived successfully",
@@ -325,8 +341,6 @@
       toast_import_success: "Data imported successfully!",
       toast_import_file_error: "File error: {errors}",
       toast_import_error: "Import error: {message}",
-      toast_csv_import_success: "CSV data imported successfully!",
-      toast_csv_import_error: "CSV import error: {message}",
       undo: "Undo",
       undo_action: "Undo",
       move_up: "Move Up",
@@ -670,8 +684,22 @@
       cloud_not_connected: "Chưa thiết lập",
       export_import_title: "Xuất & Nhập dữ liệu",
       export_json_btn: "Xuất tệp JSON",
-      export_csv_btn: "Xuất tệp CSV",
       import_json_btn: "Nhập tệp JSON",
+      btn_copy_json: "Sao chép JSON",
+      btn_paste_json: "Dán JSON",
+      btn_export_file_json: "Lưu tệp",
+      btn_open_file_json: "Mở tệp",
+      paste_json_modal_title: "Dán dữ liệu JSON",
+      paste_json_modal_desc:
+        "Dán mã JSON sao lưu từ bộ nhớ tạm hoặc nhập văn bản bên dưới.",
+      paste_from_clipboard_btn: "Dán từ bộ nhớ tạm",
+      paste_json_placeholder: "Dán nội dung JSON sao lưu vào đây...",
+      paste_json_inspect_btn: "Kiểm tra & Xem trước",
+      copy_fallback_modal_title: "Sao chép mã JSON",
+      copy_fallback_modal_desc:
+        "Trình duyệt giới hạn ghi bộ nhớ tạm tự động. Vui lòng chọn tất cả và sao chép thủ công.",
+      copy_select_all_btn: "Chọn tất cả",
+      copy_done_btn: "Xong",
       check_updates_btn: "Kiểm tra bản cập nhật",
       purge_cache_btn: "Xóa bộ nhớ đệm & Tải lại",
       pwa_version: "Phiên bản PWA",
@@ -706,7 +734,7 @@
       import_no_date_span: "Chưa có nhật ký",
       data_portability_card_title: "Xuất & Nhập dữ liệu",
       data_portability_card_desc:
-        "Sao lưu toàn bộ lịch sử thói quen ra tệp JSON hoặc bảng tính CSV",
+        "Sao chép/dán JSON 1 chạm qua bộ nhớ tạm hoặc sao lưu tệp JSON không mất mát dữ liệu",
       snapshot_history_title: "Lịch sử điểm khôi phục an toàn",
       snapshot_history_desc:
         "Các điểm sao lưu tự động và thủ công để hoàn tác 1 chạm khi cần",
@@ -776,7 +804,10 @@
 
       // System Toasts & Dialogs
       toast_backup_exported: "Đã xuất tệp sao lưu JSON thành công!",
-      toast_csv_exported: "Đã xuất dữ liệu CSV thành công!",
+      toast_json_copied: "Đã sao chép dữ liệu JSON vào bộ nhớ tạm!",
+      toast_clipboard_read_error: "Không thể đọc bộ nhớ tạm: {message}",
+      toast_clipboard_copy_error:
+        "Không thể sao chép vào bộ nhớ tạm: {message}",
       toast_habit_deleted: "Đã xóa thói quen",
       toast_notes_saved: "Đã lưu ghi chú nhật ký!",
       toast_habit_archived: "Đã lưu trữ thói quen",
@@ -797,8 +828,6 @@
       toast_import_success: "Đã nhập dữ liệu thành công!",
       toast_import_file_error: "Lỗi tệp: {errors}",
       toast_import_error: "Lỗi nhập tệp: {message}",
-      toast_csv_import_success: "Đã nhập dữ liệu CSV thành công!",
-      toast_csv_import_error: "Lỗi nhập tệp CSV: {message}",
       undo: "Hoàn tác",
       undo_action: "Hoàn tác",
       move_up: "Di chuyển lên",
