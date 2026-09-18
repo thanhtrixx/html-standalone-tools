@@ -565,11 +565,13 @@
         <!-- Identity Pillars & Life Domains Balance -->
         ${domainsHtml}
 
-        <!-- 52-Week Heatmap -->
+        <!-- Day of Week Consistency -->
+        ${weekdayHtml}
+
+        <!-- Contribution Heatmap -->
         ${heatmapHtml}
 
-        <!-- Weekday & Routine Trends -->
-        ${weekdayHtml}
+        <!-- Routine Cluster Adherence -->
         ${routineHtml}
 
         <!-- Milestone Badges -->
