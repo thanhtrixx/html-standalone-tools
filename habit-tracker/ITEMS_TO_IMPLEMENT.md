@@ -388,6 +388,6 @@ This document specifies the technical requirements and vertical slice backlog fo
 
 ### Slice 5: Verification & DoD Gate (P0)
 
-- [ ] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
-- [ ] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
-- [ ] Outer repository gate clean: `npm run verify`.
+- [x] Scoped unit & UI component tests pass with 100% assertions: `npm run test:habit`.
+- [x] Multi-device Playwright E2E scenarios pass: `npm run test:e2e:habit`.
+- [x] Outer repository gate clean: `npm run verify`.
