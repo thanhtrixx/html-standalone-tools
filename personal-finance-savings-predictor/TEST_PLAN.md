@@ -66,7 +66,7 @@ bun run test:build    # or: npm run test:build (Compacted build pipeline & relea
 
 ## 🏗️ Automated Test Suites
 
-The repository features a high-performance, zero-dependency Node.js test framework with a unified test runner (`scripts/run-tests.js`) generating interactive HTML, structured JSON, and standard JUnit XML reports in `test-reports/`.
+The repository features a high-performance, zero-dependency Node.js test framework with a unified test runner (`scripts/run-tests.js`) generating interactive HTML and structured JSON reports in `test-reports/`.
 
 ```mermaid
 flowchart TD
@@ -78,7 +78,7 @@ flowchart TD
     Runner --> S4["4. Bilingual i18n Parity (tests/i18n.test.js)<br/>60 assertions"]
     Runner --> S5["5. Compacted Build Pipeline (tests/build.test.js)<br/>38 assertions"]
 
-    S1 & S2 & S3 & S4 & S5 --> Report["Multi-Format Reports<br/>• test-reports/index.html<br/>• test-reports/results.json<br/>• test-reports/junit.xml"]
+    S1 & S2 & S3 & S4 & S5 --> Report["Multi-Format Reports<br/>• test-reports/index.html<br/>• test-reports/results.json"]
 ```
 
 ### Suite 1: Pure Simulation Engine Math & Sweep Logic (`tests/simulation.test.js`)
