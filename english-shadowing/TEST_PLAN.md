@@ -1,32 +1,39 @@
-# Test Plan: English Shadowing Player
+# English Shadowing Player — Test Plan & Quality Verification Strategy
 
-> **Tool Directory:** `english-shadowing/`
-> **Lifecycle Phase:** `Active Feature Development`
+## 🎯 Scope & Objectives
 
----
-
-## 1. Test Architecture & Scope
-
-This test plan defines the automated verification suites for the English Shadowing Player. Tests ensure mathematical precision for timecode parsing, zero-delay audio playback logic, reliable state transitions, full bilingual parity, responsive UX across devices, Leitner SRS algorithm correctness, and audio recording fallbacks.
+Verify the Enhanced LRC parser, real-time Karaoke word synchronization engine, HTML5 audio playback pipeline with bundled MP3 assets, and integrated player card layout across unit, integration, and multi-device E2E levels.
 
 ---
 
-## 2. Test Suites Matrix
+## 🧪 Seam Test Matrix
 
-| Test File                                     | Focus Area                                                                                                                                                                            | Assertions Count Goal |
-| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------- |
-| `tests/english-shadowing-engine.test.js`      | SRT parsing, timestamp conversion (`HH:MM:SS,mmm` $\leftrightarrow$ seconds), active cue detection, sentence filtering, text tokenization, smart SRT sanitization, live timing nudges | $\ge 40$              |
-| `tests/english-shadowing-storage.test.js`     | Vocabulary status persistence, Leitner 5-box intervals and due dates calculation, scenario caching, export/import serialization                                                       | $\ge 20$              |
-| `tests/english-shadowing-i18n.test.js`        | Bilingual parity check, 100% dictionary key matching between EN and VI, missing interpolation parameter checks                                                                        | $\ge 80$              |
-| `tests/english-shadowing-ui.test.js`          | DOM structure, hotkey keydown routing, subtitle masking toggles, speed stepper logic, loop/continuous mode switching, mic recorder controls, streak hub                               | $\ge 35$              |
-| `tests/e2e/english-shadowing-devices.spec.js` | Playwright multi-device verification (Desktop, iPhone, Android), scenario selection, audio playback simulation, vocab drawer interactions, flashcard reviews                          | Full pass             |
+### 1. Pure Engine Math & LRC/SRT Parser Seams (`tests/english-shadowing-engine.test.js`)
 
----
+- `parseEnhancedLrc`: Validates intra-line word timestamp parsing (`<mm:ss.xx>`), dual-line translation matching, cue start/end extraction, and edge-case sanitization.
+- `exportToEnhancedLrc`: Validates 1-click serialization back to standard LRC format with intact word tags.
+- `calculateKaraokeWordIndex`: Validates instantaneous resolution of the active word token given `audio.currentTime` across varying playback speeds.
+- `legacySrtToLrc`: Validates lossless conversion from `.srt` to LRC with interpolated word boundaries.
 
-## 3. Key Invariants Checked
+### 2. Audio Engine & Persistence Seams (`tests/english-shadowing-storage.test.js`)
 
-1. **SRT Parsing & Sanitization Resilience:** Validates parsing of standard SRT files, stripping of speaker labels (`Speaker 1:`) and noise tags (`[Music]`), comma vs dot milliseconds, and dual English/Vietnamese line breaks.
-2. **Leitner SRS Date Mathematical Accuracy:** Validates that Box 1 $\to$ 1d, Box 2 $\to$ 3d, Box 3 $\to$ 7d, Box 4 $\to$ 14d, Box 5 $\to$ 30d, and Hard reset returns to Box 1 (1d).
-3. **Timing Nudge Invertibility:** Validates that nudging $+100\text{ms}$ then $-100\text{ms}$ maintains sub-millisecond precision.
-4. **Microphone & Audio Fallback Safety:** Validates graceful handling when `MediaRecorder` is mocked as unsupported or denied.
-5. **Bilingual Parity:** Ensures every UI element rendered has corresponding non-empty entries in both `en` and `vi` objects.
+- HTML5 Audio load state, play/pause transitions, sentence seek bounds, and error recovery.
+- Service Worker offline asset caching for `english-shadowing/audio/*.mp3`.
+- Leitner SRS 5-box deck operations and IndexedDB persistence.
+
+### 3. UI, Hotkeys & Karaoke Visual Seams (`tests/english-shadowing-ui.test.js`)
+
+- Integrated Player Card DOM hierarchy: `#transport-dock` position directly under `#subtitleStage`.
+- Karaoke active word pill DOM styling and class transitions.
+- Scrubber milestone markers and sentence jump triggers.
+- Word chip click handling during active playback.
+- Subtitle masking modes (Dual, English, Vietnamese, Blur) in karaoke mode.
+
+### 4. Bilingual i18n Parity (`tests/english-shadowing-i18n.test.js`)
+
+- 100% dictionary parity between `en` and `vi` tables for all new LRC and karaoke keys.
+
+### 5. Multi-Device Playwright E2E (`tests/e2e/english-shadowing-devices.spec.js`)
+
+- Android (Pixel 7), iPhone (14 Pro), iPad (Pro 11), and Desktop Chrome viewports.
+- Real-time karaoke word tracking, sentence replay (`R`), mic recording comparison, and collapsible transcript drawer.

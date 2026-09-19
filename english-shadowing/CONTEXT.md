@@ -2,7 +2,7 @@
 
 > **Lifecycle Phase:** `Active Feature Development` ([ADR-0003](../docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
-A standalone, mobile-first Progressive Web Application (PWA) designed for deliberate English shadowing, auditory muscle memory, dual-language subtitle synchronization (.srt), instant keyboard-driven sentence looping, 1-tap microphone self-comparison, 5-box Leitner spaced repetition (SRS), smart SRT sanitization with live timing nudges, and private zero-backend offline persistence.
+A standalone, mobile-first Progressive Web Application (PWA) designed for deliberate English shadowing, auditory muscle memory, real-time karaoke word-by-word subtitle synchronization, authentic audio playback (CDN/bundled), instant keyboard-driven sentence looping, 1-tap microphone self-comparison, 5-box Leitner spaced repetition (SRS), smart Enhanced LRC & SRT parsing with live timing nudges, and private zero-backend offline persistence.
 
 For Vietnamese domain vocabulary, copywriting standards, and bilingual translation dictionary, refer to [`I18N.md`](./I18N.md).
 For visual design tokens, typography scales, dark/light themes, and audio transport ergonomics, refer to [`DESIGN.md`](./DESIGN.md).
@@ -13,6 +13,7 @@ For architectural decision records, refer to:
 
 - [`docs/adr/0001-english-shadowing-pwa-architecture-and-data-model.md`](./docs/adr/0001-english-shadowing-pwa-architecture-and-data-model.md)
 - [`docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md`](./docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md)
+- [`docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md`](./docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md)
 
 ---
 
@@ -21,9 +22,14 @@ For architectural decision records, refer to:
 ### 1. The Core Shadowing Workflow & Modalities
 
 - **Shadowing**: A deliberate language learning technique where the learner listens to natural spoken audio and repeats (shadows) the speaker in real-time or sentence-by-sentence with minimal delay, mirroring pronunciation, cadence, connected speech, and intonation.
-  _Avoid_: Karaoke, dictation, transcription, lecturing.
-- **Scenario**: A curated or user-imported dialogue/monologue consisting of an audio track, metadata (title, category, CEFR level, accent, word count), and synchronized dual-language subtitle cues (`.srt`).
+  _Avoid_: Dictation, transcription, lecturing.
+- **Scenario**: A curated or user-imported dialogue/monologue consisting of an authentic audio track (`audioUrl` or uploaded media), metadata (title, category, CEFR level, accent, duration), and synchronized bilingual subtitle cues (`.lrc` or `.srt`).
   _Avoid_: Lesson, course, track, playlist item.
+- **Enhanced LRC & Karaoke Synchronizer**: A subtitle engine parsing Enhanced LRC format with intra-line word timestamp tags (`<mm:ss.xx>`), rendering active word-by-word visual highlight effects in sync with audio timecode.
+- **Karaoke Word State**:
+  - **Active Word**: Currently articulated word token rendered with a glowing accent pill and micro-scale animation.
+  - **Passed Word**: Articulated words in the current sentence rendered with high-contrast sharp white text.
+  - **Upcoming Word**: Unspoken words in the current sentence rendered with dimmed slate contrast (`text-slate-400`).
 - **Playback Modes**:
   - **Interactive Sentence Loop Mode (`loop`)**: The player plays a single sentence cue, reaches the timestamp boundary, and automatically pauses or enters a shadow repetition window. Provides instantaneous 1-tap/1-key replay (`R` / `Space`) to drill difficult sentences.
   - **Continuous Audio Flow Mode (`continuous`)**: The player streams audio naturally without auto-pausing, while maintaining millisecond-accurate auto-scrolling and visual focus on the active sentence.
@@ -37,8 +43,9 @@ For architectural decision records, refer to:
 
 ---
 
-### 2. Microphone Voice Recording & Intonation Self-Comparison
+### 2. Audio Engine & Voice Recording Self-Comparison
 
+- **HTML5 Audio Engine**: Resilient audio playback engine powered by HTML5 `<audio>` and Web Audio API, consuming high-fidelity local bundled or CDN-hosted audio files with sub-millisecond seek accuracy.
 - **Shadowing Recording Attempt**: An in-memory audio capture of the learner's spoken shadowing attempt recorded via `MediaRecorder` API with auto-detected browser MIME format (`audio/webm`, `audio/mp4`, `audio/aac`, `audio/wav`).
 - **Dual Waveform Visualizer**: Synchronized visual audio amplitude bars rendered on canvas comparing the Native Speaker's acoustic envelope against the Learner's recorded voice take.
 - **Auto-Comparative Sequence**: 1-tap automated playback flow (`[Play Native Speaker]` $\to$ `0.5s pause` $\to$ `[Play My Voice]`) engineered for instant auditory delta perception and pitch/cadence calibration.
@@ -46,20 +53,18 @@ For architectural decision records, refer to:
 
 ---
 
-### 3. Smart SRT Engine, Timing Nudges & Live Editor
+### 3. Integrated Player Card & Ergonomics
 
-- **Subtitle Cue**: A single timed unit parsed from an `.srt` stream, containing `index`, `startSeconds`, `endSeconds`, `rawEnglish`, `rawVietnamese`, and tokenized `words`.
-- **Smart SRT Sanitizer**: Automatic detection and stripping of speaker labels (`Speaker 1:`, `John: `) and sound effect annotations (`[Applause]`, `(Laughter)`), supporting single-line English and dual-line bilingual formats.
-- **Live Timing Nudge**: Micro-adjuster controls allowing users to nudge sentence start/end timestamps by $\pm 100\text{ms}$ while listening.
-- **Inline Subtitle Editor**: Direct in-app text editing for English lines and Vietnamese translations.
-- **1-Click SRT Export**: Instant generation and download of formatted `.srt` subtitle files reflecting all timing nudges and text corrections.
+- **Integrated Player Card**: A unified hero container enclosing the Subtitle Stage, Karaoke Visualizer, Waveform Comparison Deck, and Transport Controls directly underneath.
+- **Integrated Transport Dock**: Control panel placed directly below the Subtitle Stage containing Scrubber with Sentence Milestone markers, Play/Pause/Replay triggers, Speed selector (`0.75x` to `1.5x`), Loop mode toggle, and 1-tap Microphone recorder.
+- **Collapsible Transcript & Inline Editor**: Collapsible reference section situated below the Player Card, displaying the full scenario script with inline timing nudges and text edit capabilities.
 
 ---
 
 ### 4. Interactive Vocabulary & 5-Box Leitner Spaced Repetition (SRS)
 
 - **Interactive Word Chip**: Clickable word token within subtitle sentences that opens the contextual Word Inspector.
-- **Word Inspector**: Contextual inspector card displaying the word, phonetic IPA transcription, Vietnamese meaning, part of speech, audio pronunciation, and SRS mastery tier.
+- **Word Inspector**: Contextual inspector card displaying the word, phonetic IPA transcription, Vietnamese meaning, part of speech, dictionary audio pronunciation, and SRS mastery tier.
 - **5-Box Leitner Spaced Repetition Engine**:
   - **Box 1 (New / Hard)**: Review interval = **1 day**
   - **Box 2 (Learning - Early)**: Review interval = **3 days**
@@ -85,7 +90,8 @@ For architectural decision records, refer to:
 ## 🔒 Architectural Invariants
 
 1. **Zero-Backend Standalone Execution**: The application runs 100% in the user's browser with zero external server dependencies.
-2. **100% Bilingual Parity (VI & EN)**: Every label, button, modal, tooltip, and status message exists in both English and Vietnamese with zero missing translation keys.
-3. **Sub-millisecond Audio Reactivity**: Sentence jumping, audio looping, and time-syncing occur instantaneously with zero audible stutter or layout shift.
-4. **PWA Offline-First Integrity**: Works completely offline after initial asset caching via standard Service Worker and local storage engines.
-5. **Accessibility Floor**: WCAG 2.1 AA compliant color contrast, full keyboard navigability across all features, and accessible aria labels.
+2. **Authentic Audio Delivery**: All curated scenarios utilize real audio files (MP3/OGG/AAC) with zero synthetic Web Speech API SpeechSynthesis fallbacks for scenario playback.
+3. **100% Bilingual Parity (VI & EN)**: Every label, button, modal, tooltip, and status message exists in both English and Vietnamese with zero missing translation keys.
+4. **Sub-millisecond Audio Reactivity**: Sentence jumping, audio looping, and time-syncing occur instantaneously with zero audible stutter or layout shift.
+5. **PWA Offline-First Integrity**: Works completely offline after initial asset caching via standard Service Worker and local storage engines.
+6. **Accessibility Floor**: WCAG 2.1 AA compliant color contrast, full keyboard navigability across all features, and accessible aria labels.

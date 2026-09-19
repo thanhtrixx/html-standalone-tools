@@ -1,79 +1,39 @@
-# Implementation Backlog: English Shadowing Player
+# English Shadowing Player — Backlog & Roadmap
 
-> **Tool Directory:** `english-shadowing/`
-> **Lifecycle Phase:** `Active Feature Development`
+## 🎯 Milestone 2: Enhanced LRC Karaoke Engine, Real Audio Pipeline & Integrated Transport Dock
 
----
+### Epic: Enhanced LRC Karaoke Player, Audio Asset Engine & Integrated Transport Dock
 
-## 🎯 Phase 1: Core Foundation & Subtitle/Audio Engine
-
-- [x] Create standalone application shell (`index.html`) with inline Tailwind CSS and Lucide SVG icons.
-- [x] Implement robust `.srt` subtitle parser supporting timestamps (`HH:MM:SS,mmm`), line indexing, and bilingual format detection.
-- [x] Implement HTML5 Audio playback controller with sub-millisecond seek times and zero playback latency.
-- [x] Implement Dual Playback Modes: Interactive Sentence Loop Mode (auto-pauses at cue end) and Continuous Flow Mode.
-- [x] Implement live sentence synchronizer with auto-scroll and glow highlights on active sentence.
+- **Status:** In Progress (Phase 1 Ready for Breakdown)
 
 ---
 
-## 🎯 Phase 2: Tactile Ergonomics & Interactive Vocabulary System
+### Vertical Slices Breakdown
 
-- [x] Implement hotkey controller: `Space` (Play/Pause/Replay), `R`/`Up` (Replay Sentence), `Left`/`Right`/`A`/`D` (Skip), `[`/`]` (Speed), `1-4` (Subtitle Mode), `V` (Vocab Drawer), `?` (Cheat Sheet).
-- [x] Implement 4 Subtitle Masking Modes: Dual, English Only, Vietnamese Only, Blur/Blind Listening.
-- [x] Implement Interactive Word Chip tokenization across subtitle sentences.
-- [x] Implement Word Popover with IPA phonetic transcription, Vietnamese translation, pronunciation speaker, and 3-tier status selector.
-- [x] Implement persistent 3-tier color-coding in subtitle text (🟡 New, 🔵 Learning, 🟢 Mastered).
+#### Slice 1: Enhanced LRC Parser, Multi-Format Importer/Exporter & Timing Model
 
----
+- Implement `parseEnhancedLrc(text)` supporting intra-line timestamp tokens (`<mm:ss.xx>word`) and dual-language lines.
+- Implement backward-compatible `.srt` auto-converter and word-timing interpolator.
+- Implement 1-click Export to Enhanced LRC (`.lrc`) and standard `.srt`.
+- Unit test suite covering LRC timestamp parsing, word token boundaries, dual-language parsing, and format export.
 
-## 🎯 Phase 3: Catalog, Curated Scenarios & Custom Import
+#### Slice 2: HTML5 Audio Engine & Bundled Edge-TTS Scenario Audio Pipeline
 
-- [x] Build multi-facet Scenario Catalog with Category, CEFR Level, Accent, and Search filters.
-- [x] Bundle high-quality preloaded scenarios across Daily Conversations, Workplace & Tech, Travel, and Academic/IELTS topics.
-- [x] Implement Custom Scenario Importer allowing users to load custom audio files (`.mp3`, `.wav`, etc.) and `.srt` subtitle files.
-- [x] Implement sliding Vocabulary Drawer with search, status filters, pronunciation review, and flashcard practice mode.
-- [x] Implement Vocab JSON/CSV export and import for spaced repetition backups.
+- Remove legacy `SpeechSynthesis` mock playback for scenario audio.
+- Generate high-fidelity neural MP3 audio assets (`specialty-coffee.mp3`, `tech-standup.mp3`, `airport-security.mp3`, `academic-ai.mp3`) via Edge TTS.
+- Integrate HTML5 `<audio>` engine with sub-millisecond precision, playback rates (`0.75x` to `1.5x`), and Service Worker offline caching.
+- Unit and audio playback seam tests.
 
----
+#### Slice 3: Real-Time Karaoke Subtitle Renderer with Word-by-Word Glowing Pill
 
-## 🎯 Phase 4: PWA Offline Capabilities, Storage & Internationalization
+- Implement `requestAnimationFrame`-driven word-by-word karaoke tracking synchronized with `audio.currentTime`.
+- Style active words with glowing cyan accent pills, passed words with crisp white contrast, and upcoming words with dimmed slate text.
+- Maintain interactive word chip clicks for the Word Inspector without interrupting playback.
+- Subtitle masking modes (Dual, English, Vietnamese, Blur) integration with karaoke highlights.
 
-- [x] Create PWA Web App Manifest (`manifest.json`, `manifest.webmanifest`) and Service Worker (`sw.js`).
-- [x] Create high-craft SVG vector icon (`icon.svg`).
-- [x] Implement IndexedDB / `localStorage` persistence for scenarios, user vocabulary, and settings.
-- [x] Ensure 100% bilingual parity between English and Vietnamese.
-- [x] Verify WCAG 2.1 AA contrast compliance in Dark and Light themes.
+#### Slice 4: Integrated Player Card & Ergonomic Transport Dock Relocation
 
----
-
-## 🎯 Phase 5: Smart SRT Sanitization, Timing Nudges & 1-Click Export
-
-- [ ] Implement Smart SRT Sanitizer removing speaker labels (`Speaker 1:`) and noise tags (`[Music]`, `(Laughter)`).
-- [ ] Implement $\pm 100\text{ms}$ live timestamp nudge controls for start/end boundaries of active cue.
-- [ ] Implement inline text editing for English and Vietnamese subtitle lines.
-- [ ] Implement 1-click `[Export Updated SRT]` downloading modified `.srt` subtitle files.
-
----
-
-## 🎯 Phase 6: 1-Tap Voice Recording & Dual Comparison Flow
-
-- [ ] Implement `MediaRecorder` audio capture with cross-browser MIME format detection (`webm`/`mp4`/`aac`/`wav`).
-- [ ] Implement Canvas dual waveform visualizers (Native Speaker vs. Learner Voice).
-- [ ] Implement automated sequential playback (`[Play Native]` $\to$ `0.5s pause` $\to$ `[Play My Voice]`) with hotkey `M`.
-- [ ] Implement non-intrusive notification fallback if mic permissions are denied or unavailable.
-
----
-
-## 🎯 Phase 7: 5-Box Leitner Spaced Repetition (SRS) Engine
-
-- [ ] Implement 5-box Leitner scheduling engine with intervals (1d, 3d, 7d, 14d, 30d).
-- [ ] Add header review reminder badge indicating vocabulary items due today.
-- [ ] Implement 3-grade flashcard review actions (`[❌ Hard]`, `[⚡ Good]`, `[🌟 Mastered]`).
-- [ ] Add Anki CSV export package with phonetic IPA and Vietnamese meanings.
-
----
-
-## 🎯 Phase 8: Daily Shadowing Practice Hub & Motivation Tracking
-
-- [ ] Implement Daily Practice Dashboard banner with Streak Counter (🔥).
-- [ ] Implement daily shadowing practice minutes tracker against target goal (e.g. 15 min).
-- [ ] Implement total sentence repetition counter with celebratory completion animation.
+- Move `#transport-dock` directly below `#subtitleStage` inside a unified `#player-container` card.
+- Add interactive sentence milestone ticks along the audio scrubber for 1-click seeking.
+- Convert `#transcriptList` into a collapsible reference and inline editor drawer below the transport dock.
+- Full responsive mobile, tablet, and desktop layout testing via Lightpanda and Playwright E2E.
