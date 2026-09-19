@@ -766,13 +766,13 @@
         <!-- Centerpiece Subtitle Stage & Visual Waveforms -->
         <div
           id="subtitleStage"
-          class="flex-1 min-h-[260px] sm:min-h-[320px] bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-10 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden"
+          class="flex-1 min-h-[260px] sm:min-h-[320px] bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-10 pt-14 sm:pt-14 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden"
         >
           <!-- Active sentence position tracker & Timing Nudges -->
           <div
-            class="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-400"
+            class="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 pointer-events-auto">
               <span
                 class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
               ></span>
@@ -781,7 +781,7 @@
 
             <!-- Live Timing Nudge Controls -->
             <div
-              class="flex items-center gap-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800"
+              class="flex items-center gap-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 pointer-events-auto"
             >
               <span class="text-[10px] text-slate-500 uppercase">Nudge:</span>
               <button
