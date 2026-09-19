@@ -325,7 +325,6 @@ async function runTests() {
   const reportDir = path.join(__dirname, "..", "test-reports");
   const reportHtml = path.join(reportDir, "index.html");
   const reportJson = path.join(reportDir, "results.json");
-  const reportXml = path.join(reportDir, "junit.xml");
 
   if (fs.existsSync(reportHtml)) {
     assert(
@@ -337,12 +336,6 @@ async function runTests() {
     assert(
       fs.statSync(reportJson).size > 100,
       "test-reports/results.json structured report exists and is non-empty"
-    );
-  }
-  if (fs.existsSync(reportXml)) {
-    assert(
-      fs.statSync(reportXml).size > 100,
-      "test-reports/junit.xml JUnit XML report exists and is non-empty"
     );
   }
 

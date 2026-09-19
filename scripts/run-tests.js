@@ -7,8 +7,7 @@
  * outputs streaming terminal feedback, and generates:
  * 1. Interactive Standalone HTML Report: test-reports/index.html
  * 2. Structured JSON Report: test-reports/results.json
- * 3. Standard JUnit XML Report: test-reports/junit.xml
- * 4. GitHub Actions Step Summary: $GITHUB_STEP_SUMMARY (when running in CI)
+ * 3. GitHub Actions Step Summary: $GITHUB_STEP_SUMMARY (when running in CI)
  */
 
 const fs = require("fs");
@@ -181,15 +180,6 @@ const TEST_SUITES = [
     category: "Helpers",
   },
 ];
-
-function escapeXml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
 
 function escapeHtml(str) {
   return String(str)
@@ -666,34 +656,6 @@ function generateHtmlReport(reportData) {
 </html>`;
 }
 
-function generateJunitXml(reportData) {
-  const { summary, suites } = reportData;
-  const suiteXmls = suites
-    .map((suite) => {
-      const testcaseXmls = suite.tests
-        .map((t) => {
-          const failureXml =
-            t.status === "failed"
-              ? `<failure message="${escapeXml(t.error || "Assertion failed")}">${escapeXml(t.error || "")}</failure>`
-              : "";
-          return `    <testcase name="${escapeXml(t.name)}" classname="${escapeXml(suite.file)}" time="0.001">
-      ${failureXml}
-    </testcase>`;
-        })
-        .join("\n");
-
-      return `  <testsuite name="${escapeXml(suite.name)}" tests="${suite.total}" failures="${suite.failed}" errors="0" time="${(suite.durationMs / 1000).toFixed(3)}">
-${testcaseXmls}
-  </testsuite>`;
-    })
-    .join("\n");
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="HTML Standalone Tools" tests="${summary.total}" failures="${summary.failed}" time="${(summary.durationMs / 1000).toFixed(3)}">
-${suiteXmls}
-</testsuites>`;
-}
-
 function appendGithubStepSummary(reportData) {
   const summaryFile = process.env.GITHUB_STEP_SUMMARY;
   if (!summaryFile) return;
@@ -854,11 +816,7 @@ async function main() {
   const jsonReportPath = path.join(REPORTS_DIR, "results.json");
   fs.writeFileSync(jsonReportPath, JSON.stringify(reportData, null, 2), "utf8");
 
-  // 3. Write JUnit XML report
-  const junitXmlPath = path.join(REPORTS_DIR, "junit.xml");
-  fs.writeFileSync(junitXmlPath, generateJunitXml(reportData), "utf8");
-
-  // 4. Append GitHub Step Summary
+  // 3. Append GitHub Step Summary
   appendGithubStepSummary(reportData);
 
   console.log("\n==================================================");
@@ -870,7 +828,6 @@ async function main() {
   console.log(`   Report Artifacts: ${path.relative(ROOT_DIR, REPORTS_DIR)}/`);
   console.log(`     • ${path.basename(htmlReportPath)} (Interactive HTML)`);
   console.log(`     • ${path.basename(jsonReportPath)} (Structured JSON)`);
-  console.log(`     • ${path.basename(junitXmlPath)} (Standard JUnit XML)`);
   console.log("==================================================\n");
 
   if (!allSuccess) {
@@ -892,5 +849,4 @@ module.exports = {
   TEST_SUITES,
   runSuite,
   generateHtmlReport,
-  generateJunitXml,
 };

@@ -4,7 +4,7 @@
 
 ## Context
 
-Previously, tests were executed through a chained shell script in `package.json`, emitting plain unstructured terminal text. Developers and maintainers reviewing CI runs or testing locally had no visual test dashboard, no structured machine-readable test artifacts (JUnit XML / JSON), and no at-a-glance summary rendered within GitHub Actions workflows. Identifying failing assertions required manually reading through hundreds of lines of terminal output.
+Previously, tests were executed through a chained shell script in `package.json`, emitting plain unstructured terminal text. Developers and maintainers reviewing CI runs or testing locally had no visual test dashboard, no structured machine-readable test artifacts (JSON), and no at-a-glance summary rendered within GitHub Actions workflows. Identifying failing assertions required manually reading through hundreds of lines of terminal output.
 
 ## Decision
 
@@ -17,7 +17,6 @@ We have implemented a unified test execution and reporting engine (`scripts/run-
 2. **Multi-Format Report Generation**:
    - **Interactive Standalone HTML Report (`test-reports/index.html`)**: A self-contained, responsive HTML report featuring overall pass rates, duration metrics, suite summary cards, search filtering, and collapsible assertion tables.
    - **Structured JSON (`test-reports/results.json`)**: Full execution metadata, suite timings, and assertion results.
-   - **Standard JUnit XML (`test-reports/junit.xml`)**: Standardized XML for CI test report parsers.
    - **GitHub Actions Step Summary**: Automatically appends a markdown summary table to `$GITHUB_STEP_SUMMARY` during CI runs.
 
 3. **Workflow Artifact Archiving**:
@@ -30,4 +29,4 @@ We have implemented a unified test execution and reporting engine (`scripts/run-
 
 - **Immediate Visibility**: Tech leads and engineers get instant visual test summaries directly on the GitHub Actions summary page for every PR and merge.
 - **Diagnostic Efficiency**: Detailed standalone HTML reports allow rapid filtering and debugging of failed assertions.
-- **Audit & Compliance**: Machine-readable JSON and JUnit XML reports are preserved as downloadable workflow artifacts for every pipeline run.
+- **Audit & Compliance**: Machine-readable JSON and interactive HTML reports are preserved as downloadable workflow artifacts for every pipeline run.
