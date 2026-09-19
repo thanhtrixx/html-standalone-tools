@@ -1,14 +1,18 @@
 # AGENTS.md
 
+## ⚡ Runtime Preference: Bun for Maximum Speed
+
+Agents MUST prefer **`bun`** (`bun run <script>`, `bun test`) for all local command execution, inner loops, format checks, builds, and test suites for sub-second execution speeds. Use `npm` / `node` only as a secondary fallback if `bun` is unavailable in the environment.
+
 ## 🚨 MANDATORY: Pre-Flight Change Classification Gate (BEFORE RUNNING ANY TEST/VERIFY COMMAND)
 
 Every agent MUST classify changes using `git status` before executing ANY test command:
 
 | Tier                            | File Scope                                                                 | Permitted Local Verification                            | Strictly Prohibited Actions                                                           | Flow                                                     |
 | :------------------------------ | :------------------------------------------------------------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------ | :------------------------------------------------------- |
-| **Tier 0 — Zero Ceremony**      | All files match `*.md`, `docs/**`, `AGENTS.md`, `.agents/**`               | `npm run format:check` or `npm run format` only         | ❌ **STRICTLY PROHIBITED**: Running `npm run verify`, unit test suites, or E2E tests. | Format $\to$ Branch $\to$ Commit $\to$ PR $\to$ CI Gate. |
-| **Tier 1 — Scoped Lightweight** | Changes isolated to single `<tool>/`                                       | `npm run test:<tool>` only (e.g. `npm run test:habit`)  | ❌ **PROHIBITED**: Running full `npm run verify` in inner loops.                      | Scoped Tests $\to$ PR $\to$ CI Gate.                     |
-| **Tier 2 — Full Ceremony**      | Cross-cutting features, `scripts/`, CI workflows, final production release | Scoped inner loop + `npm run verify` at PR/release gate | ❌ **PROHIBITED**: Skipping dual review or AC matrix.                                 | Full WoW ceremony.                                       |
+| **Tier 0 — Zero Ceremony**      | All files match `*.md`, `docs/**`, `AGENTS.md`, `.agents/**`               | `bun run format:check` (or `npm run format:check`)      | ❌ **STRICTLY PROHIBITED**: Running `bun run verify`, unit test suites, or E2E tests. | Format $\to$ Branch $\to$ Commit $\to$ PR $\to$ CI Gate. |
+| **Tier 1 — Scoped Lightweight** | Changes isolated to single `<tool>/`                                       | `bun run test:<tool>` only (e.g. `bun run test:habit`)  | ❌ **PROHIBITED**: Running full `bun run verify` in inner loops.                      | Scoped Tests $\to$ PR $\to$ CI Gate.                     |
+| **Tier 2 — Full Ceremony**      | Cross-cutting features, `scripts/`, CI workflows, final production release | Scoped inner loop + `bun run verify` at PR/release gate | ❌ **PROHIBITED**: Skipping dual review or AC matrix.                                 | Full WoW ceremony.                                       |
 
 ---
 
@@ -28,11 +32,11 @@ Token-first three-tier change classification (Tier 0 Zero-Ceremony / Tier 1 Scop
 
 ### Token Economics & Subagent Strategy
 
-Two-tier delegation threshold, scoped inner-loop test runner gates (`npm run test:<tool>`), surgical file edits (`replace_file_content`), targeted line-slice inspection (`grep_search` / `StartLine`), compact E2E digests (`scripts/e2e-summary.js`), living backlog archiving (`docs/deprecated/`), and fan-in digest compression (≤ 300–400 words). See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md` and `docs/agents/ways-of-working.md`.
+Two-tier delegation threshold, scoped inner-loop test runner gates (`bun run test:<tool>`), surgical file edits (`replace_file_content`), targeted line-slice inspection (`grep_search` / `StartLine`), compact E2E digests (`scripts/e2e-summary.js`), living backlog archiving (`docs/deprecated/`), and fan-in digest compression (≤ 300–400 words). See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md` and `docs/agents/ways-of-working.md`.
 
 ### Dual-Phase Tool Lifecycle & Scoped Quality
 
-Active Feature Development (velocity) vs Hardened Stable (quality, zero regression), tool-scoped test suites (`npm run test:<tool>`), and graduation DoD. See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.
+Active Feature Development (velocity) vs Hardened Stable (quality, zero regression), tool-scoped test suites (`bun run test:<tool>`), and graduation DoD. See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.
 
 ### Domain docs
 
@@ -56,11 +60,11 @@ Mechanically audit Acceptance Criteria checkboxes and sign-off on release issues
 
 ### Inner-Loop Verification & Token Economics
 
-Sub-second, tool-scoped inner loop verification, grep-first file navigation, and scoped format checks. Strictly prohibits running full `npm run verify` during active code edits. See `.agents/skills/inner-loop-verification/SKILL.md`.
+Sub-second, tool-scoped inner loop verification, grep-first file navigation, and scoped format checks. Strictly prohibits running full `bun run verify` during active code edits. Prefer `bun run test:<tool>` for sub-second feedback. See `.agents/skills/inner-loop-verification/SKILL.md`.
 
 ### Token-Efficient E2E Testing
 
-Compact E2E test execution with summary aggregation (`npm run test:e2e:summary` or `npm run test:e2e:<tool>`), tool-scoped execution, and lazy log retrieval. Prohibits un-aggregated `playwright test` CLI runs. See `.agents/skills/e2e-token-efficient/SKILL.md`.
+Compact E2E test execution with summary aggregation (`bun run test:e2e:summary` or `bun run test:e2e:<tool>`), tool-scoped execution, and lazy log retrieval. Prohibits un-aggregated `playwright test` CLI runs. See `.agents/skills/e2e-token-efficient/SKILL.md`.
 
 ### Grep-First Navigation & Silent Bulk Operations
 

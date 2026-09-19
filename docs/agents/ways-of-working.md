@@ -4,6 +4,12 @@ Standard engineering workflow for human engineers and autonomous coding agents. 
 
 ---
 
+## Runtime Preference: Bun for Accelerated Execution
+
+Human engineers and AI agents MUST prefer **`bun`** (`bun run <script>`, `bun test`, `bunx`) for all local workflow execution, inner loops, format checks, builds, and test runs. Bun delivers sub-millisecond CLI startup and reduces inner loop latency by ~35–50%. Use `npm` / `node` only as a secondary fallback if `bun` is unavailable in the environment.
+
+---
+
 ## Three-Tier Change Classification
 
 Every change is automatically classified by file paths and commit prefix. Agents may **escalate** tier but never downgrade.
@@ -25,8 +31,8 @@ Every change is automatically classified by file paths and commit prefix. Agents
 **Rules**:
 
 - Orchestrator edits inline (no subagents for implementation)
-- Run scoped verification: `npm run test:<tool>` (inner loop)
-- Phase-aware E2E: Required for `Hardened Stable` tools (`npm run test:e2e:<tool>`), optional for `Active Feature Development` tools
+- Run scoped verification: `bun run test:<tool>` (inner loop, fallback: `npm run test:<tool>`)
+- Phase-aware E2E: Required for `Hardened Stable` tools (`bun run test:e2e:<tool>`), optional for `Active Feature Development` tools
 - PR body: Summary + `Closes #<n>` + brief AC checklist
 - Skip blind test generation and dual-axis review subagents
 
@@ -39,7 +45,7 @@ Every change is automatically classified by file paths and commit prefix. Agents
 **Rules**:
 
 - **Phase 1**: Grill requirements ([`grill-wow` skill](../../.agents/skills/grill-wow/SKILL.md)), update domain docs (`CONTEXT.md`, ADRs), decompose into vertical slices, publish GitHub Issues
-- **Phase 2**: Spawn Adversarial Test Hunter subagent ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md)) for blind seam tests. Inner loop: `npm run test:<tool>`. Outer gate: `npm run verify`
+- **Phase 2**: Spawn Adversarial Test Hunter subagent ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md)) for blind seam tests. Inner loop: `bun run test:<tool>`. Outer gate: `bun run verify`
 - **Phase 3**: Spawn dual-axis review subagents (Standards & 5 Invariants + Spec Conformance). PR body includes AC-to-Test Traceability Matrix
 - **Phase 4**: AC Verification subagent sign-off. Close issue with `gh issue close`
 
@@ -63,11 +69,11 @@ Current tool phases: See [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
 ## Token Economics & Session Optimization ([ADR-0003](../adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md))
 
 - **Two-Tier Delegation**: Micro-fixes (< 5 lines) or doc updates → orchestrator inline. Complex engines/reviews → dedicated subagents.
-- **Inner-Loop Scoped Runners**: Subagents and inner loops must strictly run `npm run test:<tool>`. Prohibit running full `npm run verify` in inner loops.
+- **Inner-Loop Scoped Runners**: Subagents and inner loops must strictly run `bun run test:<tool>`. Prohibit running full `bun run verify` in inner loops.
 - **Targeted File Inspection**: Use `grep_search` and `find_by_name` first. Prohibit full-file dumps on files $> 200$ lines; use `StartLine`/`EndLine` slices.
 - **Surgical Edits**: Mandatory use of `replace_file_content` for edits. Prohibit `write_to_file` whole-file overwrites for incremental changes.
 - **Fan-In / Fan-Out Control**: Prune fan-out context to specific ACs and target files. Subagents must return dense structured digests ($\le 300\text{--}400$ words) without raw terminal dumps.
-- **Compact E2E Test Aggregation**: Use `scripts/e2e-summary.js` for compact pass/fail output (~100 tokens). Fetch failure traces lazily only on errors.
+- **Compact E2E Test Aggregation**: Use `bun run test:e2e:summary` (or `scripts/e2e-summary.js`) for compact pass/fail output (~100 tokens). Fetch failure traces lazily only on errors.
 - **Living Backlog & History Archiving**: Keep tool `ITEMS_TO_IMPLEMENT.md` under 120 lines by archiving completed slices to `docs/deprecated/ITEMS_TO_IMPLEMENT_HISTORY.md`. Sessions must focus on single active issues rather than whole backlog histories.
 
 ---
@@ -97,15 +103,15 @@ The 5 repository invariants are defined in [ADR-0003](../adr/0003-ways-of-workin
 # Branching
 git checkout -b <type>/issue-<n>-<slug>
 
-# Inner loop (tool-scoped, sub-second)
-npm run test:<tool>          # e.g. npm run test:tracker
+# Inner loop (tool-scoped, sub-second with Bun)
+bun run test:<tool>          # e.g. bun run test:tracker (or: npm run test:tracker)
 
 # E2E (tool-scoped, compact output)
-npm run test:e2e:<tool>      # e.g. npm run test:e2e:habit
-node scripts/e2e-summary.js  # Compact pass/fail summary
+bun run test:e2e:<tool>      # e.g. bun run test:e2e:habit
+bun run test:e2e:summary     # Compact pass/fail summary
 
 # Outer gate (full verification)
-npm run verify
+bun run verify               # or: npm run verify
 
 # PR & merge
 gh pr create --title "<type>(tool): Description (#<n>)" --body "Closes #<n> ..."

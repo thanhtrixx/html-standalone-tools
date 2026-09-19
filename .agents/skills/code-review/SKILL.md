@@ -48,7 +48,7 @@ Every diff MUST comply with the following 5 invariants:
 
 1. **Zero Runtime Dependencies**: Source and deliverable single-file HTML have zero external unbundled npm runtime imports.
 2. **Silent Data Migration**: Browser storage changes (`localStorage` / IndexedDB) include backwards-compatible silent auto-migration with dedicated test coverage (`tests/*storage*.test.js`).
-3. **Bilingual Parity**: 100% dictionary key parity between Vietnamese (`vi`) and English (`en`) strings (`npm run test:i18n` or `npm run test:<tool>:i18n`).
+3. **Bilingual Parity**: 100% dictionary key parity between Vietnamese (`vi`) and English (`en`) strings (`bun run test:i18n` / `bun run test:<tool>:i18n`).
 4. **Dynamic SemVer & Zero-Drift Suites**: Never create version-named test files (e.g. `tests/*-vX-Y.test.js`). Append tests to permanent domain suites. Never hardcode SemVer strings in tests; assert version synchronization dynamically against `manifest.webmanifest`.
 5. **Zero Regression**: 100% test suites passing green (`bun run verify` / `npm run verify`).
 
