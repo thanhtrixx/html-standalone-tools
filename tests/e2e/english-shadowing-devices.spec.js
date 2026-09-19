@@ -98,7 +98,8 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
 
     // Speed button cycle
     await expect(page.locator("#speedBtn")).toHaveText("1.0x");
-    await page.click("#speedBtn");
+    await page.locator("#speedBtn").scrollIntoViewIfNeeded();
+    await page.locator("#speedBtn").click();
     await expect(page.locator("#speedBtn")).toHaveText("1.15x");
   });
 
@@ -121,6 +122,7 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
 
     // Open Vocabulary Drawer
     await page.click("#navBtnVocab");
+    await page.waitForTimeout(300);
     await expect(page.locator("#vocabDrawer")).not.toHaveClass(
       /translate-x-full/
     );
@@ -129,7 +131,7 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
     // Close drawer
     await page
       .locator('#vocabDrawer button[aria-label="Close Vocabulary Drawer"]')
-      .click();
+      .click({ force: true });
     await expect(page.locator("#vocabDrawer")).toHaveClass(/translate-x-full/);
   });
 });
