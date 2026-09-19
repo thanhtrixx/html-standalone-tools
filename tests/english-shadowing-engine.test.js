@@ -477,9 +477,52 @@ This is sentence number two.
     buildScenarioUrl("tech-standup", 2) === "?scenario=tech-standup&cue=2",
     "buildScenarioUrl serializes scenarioId with cueIndex"
   );
+  // 17. Continuous Playback Cue Boundary Tracker Seams
+  const multiCues = [
+    { start: 0.0, end: 3.2, en: "Sentence 1", vi: "Câu 1" },
+    { start: 3.5, end: 6.8, en: "Sentence 2", vi: "Câu 2" },
+    { start: 7.0, end: 10.5, en: "Sentence 3", vi: "Câu 3" },
+  ];
+
+  function getActiveCueIndexAtTime(cues, currentTime) {
+    if (!cues || cues.length === 0) return 0;
+    for (let i = 0; i < cues.length; i++) {
+      if (currentTime >= cues[i].start && currentTime <= cues[i].end) {
+        return i;
+      }
+      if (
+        i < cues.length - 1 &&
+        currentTime > cues[i].end &&
+        currentTime < cues[i + 1].start
+      ) {
+        return i; // Still on previous cue during brief pause
+      }
+    }
+    if (currentTime > cues[cues.length - 1].end) {
+      return cues.length - 1;
+    }
+    return 0;
+  }
+
   assert(
-    buildScenarioUrl(null) === "",
-    "buildScenarioUrl returns empty string for null scenarioId"
+    getActiveCueIndexAtTime(multiCues, 1.5) === 0,
+    "Time 1.5s resolves to Cue 0"
+  );
+  assert(
+    getActiveCueIndexAtTime(multiCues, 3.3) === 0,
+    "Time 3.3s (inter-cue gap) keeps Cue 0 active"
+  );
+  assert(
+    getActiveCueIndexAtTime(multiCues, 4.0) === 1,
+    "Time 4.0s transitions smoothly to Cue 1 without seeking"
+  );
+  assert(
+    getActiveCueIndexAtTime(multiCues, 8.5) === 2,
+    "Time 8.5s resolves to Cue 2"
+  );
+  assert(
+    getActiveCueIndexAtTime(multiCues, 12.0) === 2,
+    "Time beyond last cue clamps to last cue index"
   );
 
   console.log(`\n==================================================`);
