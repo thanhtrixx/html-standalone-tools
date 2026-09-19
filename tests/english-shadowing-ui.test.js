@@ -261,6 +261,44 @@ async function runTests() {
     htmlContent.includes("karaoke-word"),
     "Karaoke word class is referenced in subtitle renderer"
   );
+  assert(
+    htmlContent.includes('id="repeatPromptContainer"'),
+    "Repeat prompt container exists in DOM"
+  );
+  assert(
+    htmlContent.includes("function showRepeatPrompt"),
+    "showRepeatPrompt function definition exists"
+  );
+  assert(
+    htmlContent.includes("function hideRepeatPrompt"),
+    "hideRepeatPrompt function definition exists"
+  );
+
+  // 15. URL Scenario Deep-Linking & Toast Notifications
+  assert(
+    htmlContent.includes('id="toastContainer"'),
+    "Toast container element exists in DOM"
+  );
+  assert(
+    htmlContent.includes("function parseScenarioUrl"),
+    "parseScenarioUrl function definition exists"
+  );
+  assert(
+    htmlContent.includes("function buildScenarioUrl"),
+    "buildScenarioUrl function definition exists"
+  );
+  assert(
+    htmlContent.includes("function updateScenarioUrl"),
+    "updateScenarioUrl function definition exists"
+  );
+  assert(
+    htmlContent.includes("function showToast"),
+    "showToast function definition exists"
+  );
+  assert(
+    htmlContent.includes('window.addEventListener("popstate"'),
+    "popstate history event listener registered"
+  );
 
   console.log(`\n==================================================`);
   console.log(

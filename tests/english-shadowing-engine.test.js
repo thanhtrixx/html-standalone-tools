@@ -52,7 +52,10 @@ async function runTests() {
     window: {
       addEventListener: () => {},
       scrollTo: () => {},
+      location: { search: "", pathname: "/app/" },
     },
+    URLSearchParams,
+    URL,
   };
 
   vm.createContext(sandbox);
@@ -76,6 +79,8 @@ async function runTests() {
     globalThis.parseEnhancedLrc = typeof parseEnhancedLrc !== 'undefined' ? parseEnhancedLrc : function(){};
     globalThis.generateEnhancedLrcString = typeof generateEnhancedLrcString !== 'undefined' ? generateEnhancedLrcString : function(){};
     globalThis.calculateKaraokeWordIndex = typeof calculateKaraokeWordIndex !== 'undefined' ? calculateKaraokeWordIndex : function(){};
+    globalThis.parseScenarioUrl = typeof parseScenarioUrl !== 'undefined' ? parseScenarioUrl : function(){};
+    globalThis.buildScenarioUrl = typeof buildScenarioUrl !== 'undefined' ? buildScenarioUrl : function(){};
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
@@ -91,6 +96,8 @@ async function runTests() {
     parseEnhancedLrc,
     generateEnhancedLrcString,
     calculateKaraokeWordIndex,
+    parseScenarioUrl,
+    buildScenarioUrl,
     CURATED_SCENARIOS,
     BUILTIN_VOCAB_DB,
   } = sandbox;
@@ -418,6 +425,61 @@ This is sentence number two.
   assert(
     calculateKaraokeWordIndex([], 1.0) === 0,
     "Handles empty words array safely"
+  );
+
+  // 15. URL Scenario Deep-Linking Parser
+  assert(
+    typeof parseScenarioUrl === "function",
+    "parseScenarioUrl function exists"
+  );
+  assert(
+    parseScenarioUrl("?scenario=specialty-coffee").scenarioId ===
+      "specialty-coffee",
+    "parseScenarioUrl extracts ?scenario=specialty-coffee"
+  );
+  assert(
+    parseScenarioUrl("?id=tech-standup").scenarioId === "tech-standup",
+    "parseScenarioUrl extracts fallback ?id=tech-standup"
+  );
+  assert(
+    parseScenarioUrl("https://example.com/app/?scenario=airport-security&cue=3")
+      .scenarioId === "airport-security",
+    "parseScenarioUrl extracts scenario from full URL string"
+  );
+  assert(
+    parseScenarioUrl("https://example.com/app/?scenario=airport-security&cue=3")
+      .cueIndex === 3,
+    "parseScenarioUrl extracts cueIndex from full URL string"
+  );
+  assert(
+    parseScenarioUrl("?scenario=academic-ai&sentence=5").cueIndex === 5,
+    "parseScenarioUrl extracts sentence parameter alias"
+  );
+  assert(
+    parseScenarioUrl("").scenarioId === null,
+    "parseScenarioUrl handles empty query string gracefully"
+  );
+  assert(
+    parseScenarioUrl("?other=value").scenarioId === null,
+    "parseScenarioUrl handles unrelated query params"
+  );
+
+  // 16. URL Scenario Builder
+  assert(
+    typeof buildScenarioUrl === "function",
+    "buildScenarioUrl function exists"
+  );
+  assert(
+    buildScenarioUrl("specialty-coffee") === "?scenario=specialty-coffee",
+    "buildScenarioUrl serializes scenarioId correctly"
+  );
+  assert(
+    buildScenarioUrl("tech-standup", 2) === "?scenario=tech-standup&cue=2",
+    "buildScenarioUrl serializes scenarioId with cueIndex"
+  );
+  assert(
+    buildScenarioUrl(null) === "",
+    "buildScenarioUrl returns empty string for null scenarioId"
   );
 
   console.log(`\n==================================================`);
