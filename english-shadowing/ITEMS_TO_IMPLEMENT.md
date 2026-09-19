@@ -1,39 +1,50 @@
 # English Shadowing Player — Backlog & Roadmap
 
-## 🎯 Milestone 2: Enhanced LRC Karaoke Engine, Real Audio Pipeline & Integrated Transport Dock
+## 🎯 Milestone 3: App-Shell Layout, URL Scenario Deep-Linking, Default Continuous Mode & Insights Modal
 
-### Epic: Enhanced LRC Karaoke Player, Audio Asset Engine & Integrated Transport Dock
+### Epic: Application-First Shadowing Workspace & Deep-Linking Navigation
 
-- **Status:** In Progress (Phase 1 Ready for Breakdown)
+- **Status:** Phase 1 Ready for Implementation ([ADR-0004](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md))
 
 ---
 
 ### Vertical Slices Breakdown
 
-#### Slice 1: Enhanced LRC Parser, Multi-Format Importer/Exporter & Timing Model
+#### Slice 1: URL Scenario Deep-Linking & History State Engine
 
-- Implement `parseEnhancedLrc(text)` supporting intra-line timestamp tokens (`<mm:ss.xx>word`) and dual-language lines.
-- Implement backward-compatible `.srt` auto-converter and word-timing interpolator.
-- Implement 1-click Export to Enhanced LRC (`.lrc`) and standard `.srt`.
-- Unit test suite covering LRC timestamp parsing, word token boundaries, dual-language parsing, and format export.
+- [ ] Support `?scenario=<id>` query parameter on initial page load to automatically load scenario and enter Player view.
+- [ ] Implement two-way URL synchronization via `history.pushState` / `replaceState` on scenario selection and catalog return.
+- [ ] Add `popstate` event listener for seamless browser Back/Forward navigation.
+- [ ] Add fallback handling with friendly toast notification when an invalid scenario ID is supplied.
+- [ ] Automated unit & DOM seam tests covering URL parsing, routing transitions, and history events.
 
-#### Slice 2: HTML5 Audio Engine & Bundled Edge-TTS Scenario Audio Pipeline
+#### Slice 2: Continuous Flow Default & Recording UI Cleanup
 
-- Remove legacy `SpeechSynthesis` mock playback for scenario audio.
-- Generate high-fidelity neural MP3 audio assets (`specialty-coffee.mp3`, `tech-standup.mp3`, `airport-security.mp3`, `academic-ai.mp3`) via Edge TTS.
-- Integrate HTML5 `<audio>` engine with sub-millisecond precision, playback rates (`0.75x` to `1.5x`), and Service Worker offline caching.
-- Unit and audio playback seam tests.
+- [ ] Set default `state.playbackMode` to `"continuous"`.
+- [ ] Persist user playback mode selection in `localStorage` (`shadowing_playback_mode`).
+- [ ] Temporarily remove/hide `waveformComparisonBox`, `btnDockRecord`, `btnRecordPrompt`, and `[M]` hotkey from active player stage.
+- [ ] Ensure seamless auto-advancing audio playback between sentence cues without pause in continuous mode.
+- [ ] Automated unit & storage seam tests for playback mode defaults and persistence.
 
-#### Slice 3: Real-Time Karaoke Subtitle Renderer with Word-by-Word Glowing Pill
+#### Slice 3: Dedicated Insights & Reports Modal & Header Motivation Indicators
 
-- Implement `requestAnimationFrame`-driven word-by-word karaoke tracking synchronized with `audio.currentTime`.
-- Style active words with glowing cyan accent pills, passed words with crisp white contrast, and upcoming words with dimmed slate text.
-- Maintain interactive word chip clicks for the Word Inspector without interrupting playback.
-- Subtitle masking modes (Dual, English, Vietnamese, Blur) integration with karaoke highlights.
+- [ ] Remove wide `#dailyHubSection` banner from the main container.
+- [ ] Add `📊 Insights` button to top navigation bar with bilingual labels.
+- [ ] Create dedicated Insights modal displaying Streak counter 🔥, 15m Daily Practice Goal progress, Sentences Shadowed counters, and 5-Box SRS vocabulary mastery distribution.
+- [ ] Add compact header indicator badges (`🔥 Streak`, `📚 Due Count`) for glanceable daily motivation.
+- [ ] 100% bilingual parity across English and Vietnamese translation dictionaries (`I18N.md`).
 
-#### Slice 4: Integrated Player Card & Ergonomic Transport Dock Relocation
+#### Slice 4: App-Shell Layout, Central Transcript Feed & Pinned Bottom Player Dock
 
-- Move `#transport-dock` directly below `#subtitleStage` inside a unified `#player-container` card.
-- Add interactive sentence milestone ticks along the audio scrubber for 1-click seeking.
-- Convert `#transcriptList` into a collapsible reference and inline editor drawer below the transport dock.
-- Full responsive mobile, tablet, and desktop layout testing via Lightpanda and Playwright E2E.
+- [ ] Restructure DOM to fixed App Shell layout (`h-screen overflow-hidden flex flex-col`).
+- [ ] Position `#subtitleStage` as prominent centerpiece hero card in upper central stage.
+- [ ] Embed `#transcriptCard` in central workspace with default expanded state, bilingual cues, and smooth auto-scroll to active sentence.
+- [ ] Pin `#player-container` transport dock fixed at the bottom edge with scrubber, milestone markers, primary controls, speed pill, and mode switch.
+- [ ] Multi-device E2E and visual tests verifying desktop, tablet, and mobile responsiveness.
+
+---
+
+## 🏁 Completed Milestones
+
+- ✅ **Milestone 1**: Standalone PWA Architecture, Leitner SRS & Smart SRT Engine ([ADR-0001](./docs/adr/0001-english-shadowing-pwa-architecture-and-data-model.md), [ADR-0002](./docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md))
+- ✅ **Milestone 2**: Enhanced LRC Karaoke Engine, Neural Audio Pipeline & Integrated Transport Dock ([ADR-0003](./docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md))

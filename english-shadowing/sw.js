@@ -46,25 +46,29 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  const request = event.request;
+  if (request.method !== "GET" || !request.url.startsWith("http")) return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request)
+      return fetch(request)
         .then((networkResponse) => {
           if (
             !networkResponse ||
             networkResponse.status !== 200 ||
-            networkResponse.type !== "basic"
+            (networkResponse.type !== "basic" &&
+              networkResponse.type !== "cors")
           ) {
             return networkResponse;
           }
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+            if (request.url.startsWith("http")) {
+              cache.put(request, responseToCache).catch(() => {});
+            }
           });
           return networkResponse;
         })

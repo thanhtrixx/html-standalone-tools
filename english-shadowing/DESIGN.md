@@ -34,33 +34,35 @@ The English Shadowing Player employs a focused, high-contrast deliberate practic
 
 ## 📐 Layout Architecture & Ergonomics
 
-### Integrated Player Card Container Flow
+### App Shell & Pinned Transport Dock Flow
 
 ```text
 ┌──────────────────────────────────────────────────────────┐
-│  Navigation & Top Meta (Title, CEFR Badge, Mask Modes)   │
+│  Top Navigation (Logo, Scenarios, Player, Insights, Vocab)│
 ├──────────────────────────────────────────────────────────┤
-│  Integrated Player Card (#player-container)              │
+│  Player Top Meta Bar (Title, CEFR Badge, Masking Modes)  │
+├──────────────────────────────────────────────────────────┤
+│  Central Scrollable Workspace (flex-1 overflow-y-auto)   │
 │  ┌────────────────────────────────────────────────────┐  │
-│  │ Subtitle Stage (#subtitleStage)                    │  │
+│  │ Hero Subtitle Stage (#subtitleStage)               │  │
 │  │  • Sentence Tracker & Timing Nudge Overlay         │  │
 │  │  • Active English Sentence with Karaoke Glow Pill  │  │
 │  │  • Active Vietnamese Translation Subtitle          │  │
-│  │  • Dual Waveform Comparison Visualizer             │  │
-│  ├────────────────────────────────────────────────────┤  │
-│  │ Integrated Transport Dock (#transport-dock)        │  │
-│  │  • Audio Scrubber with Sentence Milestone Marks    │  │
-│  │  • Time Labels (Current / Duration)                │  │
-│  │  • Mode Switch (Loop / Continuous)                 │  │
-│  │  • Speed Selector (0.75x, 0.9x, 1.0x, 1.25x, 1.5x) │  │
-│  │  • Replay [R], Nav [A/D], Play/Pause [Space]       │  │
-│  │  • 1-Tap Mic Record [M] & Vocab Quick Trigger      │  │
+│  └────────────────────────────────────────────────────┘  │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ Middle Transcript Card (#transcriptCard)          │  │
+│  │  • Auto-scrolling active sentence centering        │  │
+│  │  • Sentence Jump Pips & Inline Text Corrections    │  │
+│  │  • Export Enhanced LRC & SRT                       │  │
 │  └────────────────────────────────────────────────────┘  │
 ├──────────────────────────────────────────────────────────┤
-│  Collapsible Transcript & Inline Editor (#transcriptCard)│
-│  • Scrollable Script List                             │
-│  • Sentence Jump Pips & Inline Text Corrections       │
-│  • Export Enhanced LRC & SRT                          │
+│  Pinned Bottom Transport Dock (#player-container)        │
+│  • Audio Scrubber with Sentence Milestone Marks          │
+│  • Time Labels (Current / Duration)                      │
+│  • Continuous Flow Mode (Default) / Loop Mode Switch     │
+│  • Speed Selector (0.75x, 0.9x, 1.0x, 1.25x, 1.5x)       │
+│  • Primary Controls: Replay [R], Nav [A/D], Play [Space] │
+│  • Vocabulary Quick Drawer Trigger [V]                   │
 └──────────────────────────────────────────────────────────┘
 ```
 

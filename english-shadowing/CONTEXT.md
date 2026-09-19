@@ -14,6 +14,7 @@ For architectural decision records, refer to:
 - [`docs/adr/0001-english-shadowing-pwa-architecture-and-data-model.md`](./docs/adr/0001-english-shadowing-pwa-architecture-and-data-model.md)
 - [`docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md`](./docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md)
 - [`docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md`](./docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md)
+- [`docs/adr/0004-app-shell-url-routing-and-insights-reports.md`](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md)
 
 ---
 
@@ -25,15 +26,16 @@ For architectural decision records, refer to:
   _Avoid_: Dictation, transcription, lecturing.
 - **Scenario**: A curated or user-imported dialogue/monologue consisting of an authentic audio track (`audioUrl` or uploaded media), metadata (title, category, CEFR level, accent, duration), and synchronized bilingual subtitle cues (`.lrc` or `.srt`).
   _Avoid_: Lesson, course, track, playlist item.
+- **Scenario Deep Route**: Direct URL query link (`?scenario=<id>`) allowing instantaneous scenario loading and bookmarking with two-way browser history synchronization (`pushState`/`replaceState`/`popstate`).
 - **Enhanced LRC & Karaoke Synchronizer**: A subtitle engine parsing Enhanced LRC format with intra-line word timestamp tags (`<mm:ss.xx>`), rendering active word-by-word visual highlight effects in sync with audio timecode.
 - **Karaoke Word State**:
   - **Active Word**: Currently articulated word token rendered with a glowing accent pill and micro-scale animation.
   - **Passed Word**: Articulated words in the current sentence rendered with high-contrast sharp white text.
   - **Upcoming Word**: Unspoken words in the current sentence rendered with dimmed slate contrast (`text-slate-400`).
 - **Playback Modes**:
-  - **Interactive Sentence Loop Mode (`loop`)**: The player plays a single sentence cue, reaches the timestamp boundary, and automatically pauses or enters a shadow repetition window. Provides instantaneous 1-tap/1-key replay (`R` / `Space`) to drill difficult sentences.
-  - **Continuous Audio Flow Mode (`continuous`)**: The player streams audio naturally without auto-pausing, while maintaining millisecond-accurate auto-scrolling and visual focus on the active sentence.
+  - **Continuous Audio Flow Mode (`continuous`)**: The default playback mode streaming audio naturally without auto-pausing, while maintaining millisecond-accurate auto-scrolling and visual focus on the active sentence.
     _Avoid_: Auto-stop mode, podcast mode, loop all.
+  - **Interactive Sentence Loop Mode (`loop`)**: The player plays a single sentence cue, reaches the timestamp boundary, and automatically pauses. Provides instantaneous 1-tap/1-key replay (`R` / `Space`) to drill difficult sentences.
 - **Subtitle Masking Modes**:
   - **Dual (`both`)**: Primary English subtitle on top with secondary Vietnamese translation below.
   - **English Only (`primary`)**: Hides the translation to focus on target language reading.
@@ -43,21 +45,18 @@ For architectural decision records, refer to:
 
 ---
 
-### 2. Audio Engine & Voice Recording Self-Comparison
+### 2. Audio Engine & Precision Transport
 
 - **HTML5 Audio Engine**: Resilient audio playback engine powered by HTML5 `<audio>` and Web Audio API, consuming high-fidelity local bundled or CDN-hosted audio files with sub-millisecond seek accuracy.
-- **Shadowing Recording Attempt**: An in-memory audio capture of the learner's spoken shadowing attempt recorded via `MediaRecorder` API with auto-detected browser MIME format (`audio/webm`, `audio/mp4`, `audio/aac`, `audio/wav`).
-- **Dual Waveform Visualizer**: Synchronized visual audio amplitude bars rendered on canvas comparing the Native Speaker's acoustic envelope against the Learner's recorded voice take.
-- **Auto-Comparative Sequence**: 1-tap automated playback flow (`[Play Native Speaker]` $\to$ `0.5s pause` $\to$ `[Play My Voice]`) engineered for instant auditory delta perception and pitch/cadence calibration.
-- **Mic Permission Fallback**: Non-intrusive notification handling if microphone hardware is unavailable or permissions are dismissed, preserving core playback features without app interruption.
+- **Pinned Bottom Transport Dock**: Ergonomic transport deck fixed at the bottom of the viewport containing Scrubber with Sentence Milestone markers, Play/Pause/Replay triggers, Speed selector (`0.75x` to `1.5x`), Loop/Continuous toggle, and Vocab launcher.
 
 ---
 
-### 3. Integrated Player Card & Ergonomics
+### 3. Application-First Workspace Architecture
 
-- **Integrated Player Card**: A unified hero container enclosing the Subtitle Stage, Karaoke Visualizer, Waveform Comparison Deck, and Transport Controls directly underneath.
-- **Integrated Transport Dock**: Control panel placed directly below the Subtitle Stage containing Scrubber with Sentence Milestone markers, Play/Pause/Replay triggers, Speed selector (`0.75x` to `1.5x`), Loop mode toggle, and 1-tap Microphone recorder.
-- **Collapsible Transcript & Inline Editor**: Collapsible reference section situated below the Player Card, displaying the full scenario script with inline timing nudges and text edit capabilities.
+- **App Shell Architecture**: Full-viewport responsive application (`h-screen overflow-hidden flex flex-col`) maximizing practice focus.
+- **Centerpiece Subtitle Stage**: The hero visual component featuring large, high-contrast active English sentences with word-by-word karaoke glow, Vietnamese translation line, and live timing nudge controls.
+- **Middle Transcript Feed**: Scrollable bilingual script panel positioned in the central workspace between the Subtitle Stage and the Pinned Bottom Dock, supporting automatic smooth centering to the active sentence and 1-tap seeking.
 
 ---
 
@@ -77,13 +76,14 @@ For architectural decision records, refer to:
 
 ---
 
-### 5. Unified Daily Practice Hub & Motivation Tracking
+### 5. Practice Insights & Progress Reports
 
-- **Daily Practice Hub**: Sticky header dashboard tracking:
+- **Insights & Reports Modal**: Dedicated analytical modal triggered from the top navigation bar, tracking:
   - 🔥 **Daily Streak Counter**: Consecutive calendar days with active practice.
-  - ⏱️ **Daily Shadowing Minutes Goal**: Progress ring tracking practice minutes against target (e.g. 15 min/day).
+  - ⏱️ **Daily Practice Goal Progress**: Ring/progress meter tracking practice minutes against daily target (e.g. 15 min/day).
   - 🗣️ **Sentences Shadowed Count**: Total count of unique sentences repeated.
-  - 📚 **Due Vocabulary Review Count**: Real-time SRS review backlog.
+  - 📦 **SRS Vocabulary Mastery Distribution**: Box 1 through Box 5 inventory.
+- **Header Motivation Indicators**: Compact glanceable badges in the header bar (`🔥 Streak`, `📚 Due Count`) maintaining daily motivation without viewport clutter.
 
 ---
 
