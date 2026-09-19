@@ -3014,7 +3014,11 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
       }
 
       function updateScenarioUrl(scenarioId, push = true) {
-        if (typeof window === "undefined" || !window.history || !window.location)
+        if (
+          typeof window === "undefined" ||
+          !window.history ||
+          !window.location
+        )
           return;
         const currentPath = window.location.pathname;
         const searchString = scenarioId ? buildScenarioUrl(scenarioId) : "";
@@ -3041,8 +3045,8 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           type === "error"
             ? "bg-rose-900/90 text-rose-200 border-rose-700/60"
             : type === "success"
-            ? "bg-emerald-900/90 text-emerald-200 border-emerald-700/60"
-            : "bg-slate-900/95 text-cyan-200 border-slate-700";
+              ? "bg-emerald-900/90 text-emerald-200 border-emerald-700/60"
+              : "bg-slate-900/95 text-cyan-200 border-slate-700";
 
         toast.className = `pointer-events-auto px-4 py-2.5 rounded-xl border ${bgClass} shadow-2xl text-xs sm:text-sm font-medium flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-2 backdrop-blur max-w-full`;
         toast.textContent = message;
@@ -3333,7 +3337,11 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         if (found) selectScenario(found, true, updateUrl);
       }
 
-      function selectScenario(scenario, autoSwitchView = true, updateUrl = true) {
+      function selectScenario(
+        scenario,
+        autoSwitchView = true,
+        updateUrl = true
+      ) {
         state.activeScenario = scenario;
         state.activeCues = scenario.lrcContent
           ? parseEnhancedLrc(scenario.lrcContent)
