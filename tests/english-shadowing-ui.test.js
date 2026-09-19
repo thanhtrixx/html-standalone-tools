@@ -79,7 +79,23 @@ async function runTests() {
     htmlContent.includes('onclick="navigateSentence(1)"'),
     "Next sentence button exists"
   );
-  assert(htmlContent.includes('id="speedBtn"'), "Speed stepper button exists");
+  assert(htmlContent.includes('id="speedBtn"'), "Speed selector button exists");
+  assert(
+    htmlContent.includes('id="speedPopover"'),
+    "Speed selection popover element exists in transport dock"
+  );
+  assert(
+    htmlContent.includes('onclick="toggleSpeedPopover(event)"'),
+    "Toggle speed popover click handler exists"
+  );
+  assert(
+    htmlContent.includes("function setPlaybackSpeed"),
+    "setPlaybackSpeed function exists"
+  );
+  assert(
+    htmlContent.includes("function stepPlaybackSpeed"),
+    "stepPlaybackSpeed function exists"
+  );
   assert(
     htmlContent.includes('id="modeLoopBtn"'),
     "Sentence Loop mode button exists"
