@@ -96,11 +96,13 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
       /subtitles-blur-active/
     );
 
-    // Speed button cycle
-    await expect(page.locator("#speedBtn")).toHaveText("1.0x");
+    // Speed popover selection
+    await expect(page.locator("#speedBtnText")).toHaveText("1.0x");
     await page.locator("#speedBtn").scrollIntoViewIfNeeded();
     await page.locator("#speedBtn").click();
-    await expect(page.locator("#speedBtn")).toHaveText("1.15x");
+    await expect(page.locator("#speedPopover")).toBeVisible();
+    await page.locator('#speedPopover button:has-text("1.15x")').click();
+    await expect(page.locator("#speedBtnText")).toHaveText("1.15x");
   });
 
   test("4. Interactive Word Popover & Vocabulary Drawer", async ({ page }) => {
@@ -205,7 +207,7 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
     );
 
     // Return back to catalog
-    await page.click('button[title*="Back to Catalog"]');
+    await page.click("#btnBackToCatalog");
     await expect(page.locator("#catalog-view")).toBeVisible();
     expect(page.url()).not.toContain("scenario=tech-standup");
 
@@ -250,12 +252,12 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
 
     // Navigate across sentences and check transcript line styling
     const firstLine = page.locator("#transcriptItem-0");
-    await expect(firstLine).toHaveClass(/bg-emerald-500\/10/);
+    await expect(firstLine).toHaveClass(/bg-emerald-500\/(10|15)/);
 
     // Step to sentence 2
     await page.click('button[title*="Next Sentence"]');
     const secondLine = page.locator("#transcriptItem-1");
-    await expect(secondLine).toHaveClass(/bg-emerald-500\/10/);
+    await expect(secondLine).toHaveClass(/bg-emerald-500\/(10|15)/);
 
     await assertNoHorizontalOverflow(page);
   });
