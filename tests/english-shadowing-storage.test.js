@@ -284,6 +284,40 @@ async function runTests() {
     "logPracticeSeconds increments seconds to 150s"
   );
 
+  // 13. Service Worker Asset Cache Verification
+  const swPath = path.join(__dirname, "..", "english-shadowing", "sw.js");
+  assert(fs.existsSync(swPath), "Service Worker file sw.js exists");
+  const swContent = fs.readFileSync(swPath, "utf8");
+  assert(
+    swContent.includes("./audio/specialty-coffee.mp3") &&
+      swContent.includes("./audio/tech-standup.mp3") &&
+      swContent.includes("./audio/airport-security.mp3") &&
+      swContent.includes("./audio/academic-ai-future.mp3"),
+    "Service Worker caches all 4 curated scenario MP3 audio assets"
+  );
+  assert(
+    swContent.includes("./audio/specialty-coffee.lrc") &&
+      swContent.includes("./audio/tech-standup.lrc"),
+    "Service Worker caches Enhanced LRC subtitle files"
+  );
+
+  // 14. Audio Assets On Disk
+  const audioDir = path.join(__dirname, "..", "english-shadowing", "audio");
+  assert(fs.existsSync(audioDir), "english-shadowing/audio directory exists");
+  const mp3Files = [
+    "specialty-coffee.mp3",
+    "tech-standup.mp3",
+    "airport-security.mp3",
+    "academic-ai-future.mp3",
+  ];
+  mp3Files.forEach((file) => {
+    const filePath = path.join(audioDir, file);
+    assert(
+      fs.existsSync(filePath) && fs.statSync(filePath).size > 10000,
+      `Scenario audio ${file} exists on disk with non-zero audio bytes (${fs.existsSync(filePath) ? fs.statSync(filePath).size : 0} bytes)`
+    );
+  });
+
   console.log(`\n==================================================`);
   console.log(
     `📊 Storage Tests Completed: ${passCount} Passed, ${failCount} Failed`

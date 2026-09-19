@@ -134,4 +134,55 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
       .click({ force: true });
     await expect(page.locator("#vocabDrawer")).toHaveClass(/translate-x-full/);
   });
+
+  test("5. Real-time Karaoke Word Tokens & Audio Playback Flow", async ({
+    page,
+  }) => {
+    await setupPage(page);
+    await page.locator("#scenarioCardsGrid button").first().click();
+
+    // Verify karaoke word tokens exist
+    const karaokeWords = page.locator("#activeEnglishSubtitle .karaoke-word");
+    await expect(karaokeWords).toHaveCount(10);
+
+    // Verify HTML5 Audio element exists
+    const audioElement = page.locator("#playerAudio");
+    await expect(audioElement).toHaveCount(1);
+
+    // Verify audio scrubber milestones exist
+    const milestones = page.locator("#scrubberMilestones > div");
+    await expect(milestones).toHaveCount(7);
+
+    // Toggle play/pause
+    await page.click("#mainPlayPauseBtn");
+    await page.waitForTimeout(300);
+    await page.click("#mainPlayPauseBtn");
+
+    await assertNoHorizontalOverflow(page);
+  });
+
+  test("6. Integrated Player Card & Collapsible Transcript Drawer", async ({
+    page,
+  }) => {
+    await setupPage(page);
+    await page.locator("#scenarioCardsGrid button").first().click();
+
+    // Verify Integrated Player Card exists
+    await expect(page.locator("#player-container")).toBeVisible();
+    await expect(page.locator("#transport-dock")).toBeVisible();
+
+    // Verify Transcript Card exists
+    await expect(page.locator("#transcriptCard")).toBeVisible();
+    await expect(page.locator("#transcriptDrawerContent")).toBeVisible();
+
+    // Toggle Collapse Transcript Drawer
+    await page.click("#transcriptCard > div:first-child");
+    await expect(page.locator("#transcriptDrawerContent")).toBeHidden();
+
+    // Expand Transcript Drawer again
+    await page.click("#transcriptCard > div:first-child");
+    await expect(page.locator("#transcriptDrawerContent")).toBeVisible();
+
+    await assertNoHorizontalOverflow(page);
+  });
 });

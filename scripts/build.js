@@ -55,6 +55,7 @@ const COMPANION_ASSETS = [
   "og-image.webp",
   "icons",
   "splash",
+  "audio",
 ];
 
 const MINIFY_OPTIONS = {

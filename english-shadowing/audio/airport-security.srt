@@ -1,0 +1,34 @@
+1
+00:00:00,000 --> 00:00:05,100
+Good afternoon, sir. May I please see your passport and boarding pass?
+Chào buổi chiều quý khách. Tôi có thể xem hộ chiếu và thẻ lên máy bay được không?
+
+2
+00:00:05,500 --> 00:00:11,140
+Certainly, here you go. I have one suitcase to check in today.
+Chắc chắn rồi, của cô đây. Hôm nay tôi có một chiếc vali cần ký gửi.
+
+3
+00:00:11,540 --> 00:00:16,100
+Please place your luggage on the scale to ensure it meets the weight allowance.
+Xin vui lòng đặt hành lý lên cân để kiểm tra xem có vượt quá trọng lượng cho phép không.
+
+4
+00:00:16,500 --> 00:00:21,590
+It weighs exactly eighteen kilograms, which is well within your baggage limit.
+Nó nặng đúng mười tám ký, hoàn toàn nằm trong hạn mức hành lý của quý khách.
+
+5
+00:00:21,990 --> 00:00:27,950
+When heading through security, please ensure all laptops and liquids are placed in separate bins.
+Khi đi qua cổng an ninh, xin lưu ý để toàn bộ máy tính xách tay và chất lỏng vào khay riêng.
+
+6
+00:00:28,350 --> 00:00:33,190
+Understood. Could you tell me which gate this flight departs from?
+Tôi hiểu rồi. Cô có thể cho tôi biết chuyến bay này khởi hành ở cửa nào không?
+
+7
+00:00:33,590 --> 00:00:38,970
+You will be boarding at Gate B24. Have a wonderful and safe flight!
+Quý khách sẽ lên máy bay ở Cửa B24. Chúc quý khách có một chuyến bay an toàn và vui vẻ!

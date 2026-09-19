@@ -212,6 +212,56 @@ async function runTests() {
     "Export SRT button exists"
   );
 
+  // 11. Integrated Player Card & Layout Flow
+  assert(
+    htmlContent.includes('id="player-container"'),
+    "Integrated Player Card container exists"
+  );
+  const playerContainerIdx = htmlContent.indexOf('id="player-container"');
+  const subtitleStageIdx = htmlContent.indexOf('id="subtitleStage"');
+  const transportDockIdx = htmlContent.indexOf('id="transport-dock"');
+  const transcriptCardIdx = htmlContent.indexOf('id="transcriptCard"');
+  assert(
+    playerContainerIdx < subtitleStageIdx &&
+      subtitleStageIdx < transportDockIdx &&
+      transportDockIdx < transcriptCardIdx,
+    "Layout hierarchy: player-container -> subtitleStage -> transport-dock -> transcriptCard"
+  );
+
+  // 12. Audio Element & Scrubber Milestones
+  assert(
+    htmlContent.includes('id="playerAudio"'),
+    "HTML5 playerAudio element exists in DOM"
+  );
+  assert(
+    htmlContent.includes('id="scrubberMilestones"'),
+    "Audio scrubber milestone marks container exists"
+  );
+
+  // 13. Collapsible Transcript Drawer
+  assert(
+    htmlContent.includes('id="transcriptCard"'),
+    "Collapsible transcript card exists"
+  );
+  assert(
+    htmlContent.includes('onclick="toggleTranscriptDrawer()"'),
+    "Transcript drawer toggle trigger exists"
+  );
+  assert(
+    htmlContent.includes('id="btnToggleTranscript"'),
+    "Transcript drawer toggle button exists"
+  );
+
+  // 14. Export Enhanced LRC & Karaoke Visual Tokens
+  assert(
+    htmlContent.includes('onclick="exportCurrentScenarioLrc()"'),
+    "Export Enhanced LRC button exists"
+  );
+  assert(
+    htmlContent.includes("karaoke-word"),
+    "Karaoke word class is referenced in subtitle renderer"
+  );
+
   console.log(`\n==================================================`);
   console.log(
     `📊 UI Tests Completed: ${passCount} Passed, ${failCount} Failed`
