@@ -835,20 +835,15 @@
               </div>
             </div>
 
-            <!-- Loop Mode Shadowing Repetition & Recording Prompt -->
+            <!-- Loop Mode Shadowing Repetition Prompt -->
             <div
               id="repeatPromptContainer"
-              class="hidden mb-4 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-3 shadow-lg"
+              class="hidden mb-4 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-2 shadow-lg"
             >
+              <span
+                class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
+              ></span>
               <span data-i18n="repeatPrompt">Now Shadow: Repeat out loud!</span>
-              <button
-                id="btnRecordPrompt"
-                onclick="toggleMicRecording()"
-                class="px-2.5 py-1 rounded-full bg-red-500 hover:bg-red-400 text-white text-xs font-bold flex items-center gap-1 shadow-md transition-all active:scale-95"
-              >
-                <span class="w-2 h-2 rounded-full bg-white animate-rec"></span>
-                <span id="recPromptLabel">Record [M]</span>
-              </button>
             </div>
 
             <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
@@ -865,62 +860,6 @@
               class="blur-target text-sm sm:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-3 transition-all"
             >
               Nhấp vào tình huống để bắt đầu luyện nói.
-            </div>
-
-            <!-- Dual Visual Waveforms Comparison Box -->
-            <div
-              id="waveformComparisonBox"
-              class="mt-6 w-full max-w-xl bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-left"
-            >
-              <div
-                class="flex items-center justify-between text-[11px] font-semibold text-slate-400"
-              >
-                <span class="flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span data-i18n="waveformNative"
-                    >Native Speaker Pitch & Envelope</span
-                  >
-                </span>
-                <span class="flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                  <span data-i18n="waveformLearner">Your Voice Take</span>
-                </span>
-              </div>
-
-              <!-- Waveform Canvas -->
-              <canvas
-                id="dualWaveformCanvas"
-                width="400"
-                height="48"
-                class="w-full max-w-full h-12 rounded bg-slate-900/60 border border-slate-800"
-              ></canvas>
-
-              <!-- Auto A/B Compare Actions -->
-              <div class="flex items-center justify-between gap-2 pt-1">
-                <div class="flex items-center gap-2">
-                  <button
-                    onclick="playNativeSpeakerSnippet()"
-                    class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold transition-colors"
-                  >
-                    🔊 Native
-                  </button>
-                  <button
-                    id="btnPlayUserVoice"
-                    onclick="playLearnerRecordingSnippet()"
-                    class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold transition-colors disabled:opacity-40"
-                    disabled
-                  >
-                    🎙️ My Voice
-                  </button>
-                </div>
-
-                <button
-                  onclick="runAutoAbComparison()"
-                  class="px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 hover:from-emerald-500/30 hover:to-cyan-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all active:scale-95"
-                >
-                  ⚡ Auto A/B Compare
-                </button>
-              </div>
             </div>
           </div>
 
@@ -1108,28 +1047,6 @@
                       stroke-linejoin="round"
                       stroke-width="2"
                       d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-
-                <!-- 1-Tap Mic Record Shadowing Take [M] -->
-                <button
-                  id="btnDockRecord"
-                  onclick="toggleMicRecording()"
-                  class="p-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-red-400 hover:text-red-300 border border-slate-800 transition-all active:scale-95 shrink-0"
-                  title="Record Spoken Take [M]"
-                >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
                     />
                   </svg>
                 </button>
@@ -1583,17 +1500,6 @@
             <kbd
               class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-cyan-400 font-bold"
               >A, D / ←, →</kbd
-            >
-          </div>
-          <div
-            class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
-          >
-            <span class="text-slate-300" data-i18n="hotkeyRecord"
-              >Record Shadowing Attempt</span
-            >
-            <kbd
-              class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-red-400 font-bold"
-              >M</kbd
             >
           </div>
           <div
@@ -2954,7 +2860,7 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         activeScenario: null,
         activeCues: [],
         currentCueIndex: 0,
-        playbackMode: "loop", // "loop" or "continuous"
+        playbackMode: "continuous", // "continuous" (default) or "loop"
         subtitleMask: "both", // "both", "primary", "secondary", "blur"
         playbackRate: 1.0,
         isPlaying: false,
@@ -3081,6 +2987,13 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         loadPracticeStats();
         renderScenarioCards();
         applyI18n();
+
+        const savedMode = localStorage.getItem("shadowing_playback_mode");
+        if (savedMode === "loop" || savedMode === "continuous") {
+          setPlaybackMode(savedMode, false);
+        } else {
+          setPlaybackMode("continuous", false);
+        }
 
         // URL Scenario Deep-Linking on initial page load
         const { scenarioId, cueIndex } = parseScenarioUrl();
@@ -3647,21 +3560,30 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         }
       }
 
-      function setPlaybackMode(mode) {
+      function setPlaybackMode(mode, save = true) {
         state.playbackMode = mode;
+        if (save) {
+          try {
+            localStorage.setItem("shadowing_playback_mode", mode);
+          } catch (e) {}
+        }
         const btnLoop = document.getElementById("modeLoopBtn");
         const btnCont = document.getElementById("modeContinuousBtn");
 
         if (mode === "loop") {
-          btnLoop.className =
-            "px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
-          btnCont.className =
-            "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
+          if (btnLoop)
+            btnLoop.className =
+              "px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
+          if (btnCont)
+            btnCont.className =
+              "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
         } else {
-          btnCont.className =
-            "px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
-          btnLoop.className =
-            "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
+          if (btnCont)
+            btnCont.className =
+              "px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
+          if (btnLoop)
+            btnLoop.className =
+              "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
           hideRepeatPrompt();
         }
       }
@@ -4534,10 +4456,6 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           case "ArrowRight":
             e.preventDefault();
             navigateSentence(1);
-            break;
-          case "KeyM":
-            e.preventDefault();
-            toggleMicRecording();
             break;
           case "BracketLeft":
           case "BracketRight":

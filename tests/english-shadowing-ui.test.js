@@ -150,22 +150,22 @@ async function runTests() {
     "Sentences shadowed tracker element exists"
   );
 
-  // 8. Microphone Recorder & Dual Waveform UI
+  // 8. Recording UI Cleanup (Temporarily Disabled for Ergonomics)
   assert(
-    htmlContent.includes('id="btnDockRecord"'),
-    "Microphone record dock button exists"
+    !htmlContent.includes('id="waveformComparisonBox"'),
+    "waveformComparisonBox is removed from active subtitle stage"
   );
   assert(
-    htmlContent.includes('id="recPromptLabel"'),
-    "Record prompt label exists"
+    !htmlContent.includes('id="btnDockRecord"'),
+    "btnDockRecord is removed from transport dock"
   );
   assert(
-    htmlContent.includes('id="dualWaveformCanvas"'),
-    "Dual waveform canvas element exists"
+    !htmlContent.includes('id="btnRecordPrompt"'),
+    "btnRecordPrompt is removed from repeat prompt"
   );
   assert(
-    htmlContent.includes('id="btnPlayUserVoice"'),
-    "User voice playback button exists"
+    htmlContent.includes('id="repeatPromptContainer"'),
+    "Clean repeat prompt container exists"
   );
 
   // 9. Leitner SRS Due Badges & Flashcards UI
