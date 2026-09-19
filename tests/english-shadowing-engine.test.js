@@ -71,6 +71,11 @@ async function runTests() {
     globalThis.parseSrtTimecode = typeof parseSrtTimecode !== 'undefined' ? parseSrtTimecode : function(){};
     globalThis.formatSecondsToTime = typeof formatSecondsToTime !== 'undefined' ? formatSecondsToTime : function(){};
     globalThis.parseSrt = typeof parseSrt !== 'undefined' ? parseSrt : function(){};
+    globalThis.parseLrcTimecode = typeof parseLrcTimecode !== 'undefined' ? parseLrcTimecode : function(){};
+    globalThis.formatSecondsToLrcTime = typeof formatSecondsToLrcTime !== 'undefined' ? formatSecondsToLrcTime : function(){};
+    globalThis.parseEnhancedLrc = typeof parseEnhancedLrc !== 'undefined' ? parseEnhancedLrc : function(){};
+    globalThis.generateEnhancedLrcString = typeof generateEnhancedLrcString !== 'undefined' ? generateEnhancedLrcString : function(){};
+    globalThis.calculateKaraokeWordIndex = typeof calculateKaraokeWordIndex !== 'undefined' ? calculateKaraokeWordIndex : function(){};
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
@@ -81,6 +86,11 @@ async function runTests() {
     sanitizeSrtLine,
     generateSrtString,
     parseSrt,
+    parseLrcTimecode,
+    formatSecondsToLrcTime,
+    parseEnhancedLrc,
+    generateEnhancedLrcString,
+    calculateKaraokeWordIndex,
     CURATED_SCENARIOS,
     BUILTIN_VOCAB_DB,
   } = sandbox;
@@ -282,6 +292,132 @@ This is sentence number two.
   assert(
     roundtripParsed[1].start === 4.0,
     "Roundtrip preserves start timestamp"
+  );
+
+  // 10. LRC Timecode Parsing
+  assert(
+    typeof parseLrcTimecode === "function",
+    "parseLrcTimecode function exists"
+  );
+  assert(parseLrcTimecode("00:00.00") === 0, "Parses 00:00.00 to 0s");
+  assert(parseLrcTimecode("00:04.50") === 4.5, "Parses 00:04.50 to 4.5s");
+  assert(parseLrcTimecode("01:30.25") === 90.25, "Parses 01:30.25 to 90.25s");
+  assert(
+    parseLrcTimecode("[02:15.80]") === 135.8,
+    "Parses [02:15.80] tag to 135.8s"
+  );
+  assert(
+    parseLrcTimecode("<00:12.34>") === 12.34,
+    "Parses <00:12.34> tag to 12.34s"
+  );
+  assert(parseLrcTimecode("") === 0, "Handles empty LRC timecode safely");
+
+  // 11. Format Seconds to LRC Timecode
+  assert(
+    typeof formatSecondsToLrcTime === "function",
+    "formatSecondsToLrcTime function exists"
+  );
+  assert(formatSecondsToLrcTime(0) === "00:00.00", "Formats 0s to 00:00.00");
+  assert(
+    formatSecondsToLrcTime(4.5) === "00:04.50",
+    "Formats 4.5s to 00:04.50"
+  );
+  assert(
+    formatSecondsToLrcTime(90.25) === "01:30.25",
+    "Formats 90.25s to 01:30.25"
+  );
+  assert(
+    formatSecondsToLrcTime(3665.4) === "61:05.40",
+    "Formats >1hr to MM:SS.xx"
+  );
+
+  // 12. Enhanced LRC Parsing with Intra-Line Word Timestamps
+  assert(
+    typeof parseEnhancedLrc === "function",
+    "parseEnhancedLrc function exists"
+  );
+  const sampleLrc = `[ti:Ordering at a Specialty Coffee Shop]
+[ar:English Shadowing]
+[al:daily]
+[length:00:32.61]
+
+[00:00.00]<00:00.00>Good <00:00.28>morning! <00:00.93>What <00:01.20>can <00:01.41>I <00:01.48>get <00:01.68>started <00:02.16>for <00:02.37>you <00:02.58>today?
+[00:00.00]Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?
+
+[00:03.29]<00:03.29>Hi <00:03.47>there! <00:04.11>I <00:04.20>would <00:04.65>like <00:05.01>a <00:05.10>medium <00:05.64>oat <00:05.91>milk <00:06.27>latte <00:06.72>with <00:07.08>an <00:07.27>extra <00:07.72>shot <00:08.08>of <00:08.26>espresso, <00:09.17>please.
+[00:03.29]Xin chào! Cho tôi một ly latte sữa yến mạch cỡ vừa thêm một shot espresso nhé.`;
+
+  const lrcCues = parseEnhancedLrc(sampleLrc);
+  assert(
+    lrcCues.length === 2,
+    `Parsed 2 Enhanced LRC cues (got ${lrcCues.length})`
+  );
+  assert(lrcCues[0].start === 0.0, "LRC Cue 1 starts at 0.0s");
+  assert(
+    lrcCues[0].en === "Good morning! What can I get started for you today?",
+    "LRC Cue 1 English text matches"
+  );
+  assert(
+    lrcCues[0].vi === "Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?",
+    "LRC Cue 1 Vietnamese translation matches"
+  );
+  assert(
+    Array.isArray(lrcCues[0].words) && lrcCues[0].words.length === 10,
+    "LRC Cue 1 has 10 tokenized words with timing"
+  );
+  assert(
+    lrcCues[0].words[0].w === "Good" && lrcCues[0].words[0].start === 0.0,
+    "LRC Cue 1 Word 0 timing matches"
+  );
+  assert(
+    lrcCues[0].words[1].w === "morning!" && lrcCues[0].words[1].start === 0.28,
+    "LRC Cue 1 Word 1 timing matches"
+  );
+  assert(lrcCues[1].start === 3.29, "LRC Cue 2 starts at 3.29s");
+
+  // 13. Generate Enhanced LRC String
+  assert(
+    typeof generateEnhancedLrcString === "function",
+    "generateEnhancedLrcString function exists"
+  );
+  const serializedLrc = generateEnhancedLrcString(lrcCues);
+  assert(
+    serializedLrc.includes("[00:00.00]<00:00.00>Good <00:00.28>morning!"),
+    "Serialized LRC contains word tags"
+  );
+  assert(
+    serializedLrc.includes(
+      "Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?"
+    ),
+    "Serialized LRC contains translation lines"
+  );
+
+  // 14. Calculate Karaoke Word Index
+  assert(
+    typeof calculateKaraokeWordIndex === "function",
+    "calculateKaraokeWordIndex function exists"
+  );
+  const wordsForKaraoke = lrcCues[0].words;
+  assert(
+    calculateKaraokeWordIndex(wordsForKaraoke, 0.0) === 0,
+    "Current time 0.0s active word index is 0 ('Good')"
+  );
+  assert(
+    calculateKaraokeWordIndex(wordsForKaraoke, 0.5) === 1,
+    "Current time 0.5s active word index is 1 ('morning!')"
+  );
+  assert(
+    calculateKaraokeWordIndex(wordsForKaraoke, 1.3) === 3,
+    "Current time 1.3s active word index is 3 ('can')"
+  );
+  assert(
+    calculateKaraokeWordIndex(wordsForKaraoke, 10.0) ===
+      wordsForKaraoke.length - 1,
+    "Current time past end returns last word index"
+  );
+  assert(
+    calculateKaraokeWordIndex([], 1.0) === 0,
+    "Handles empty words array safely"
   );
 
   console.log(`\n==================================================`);

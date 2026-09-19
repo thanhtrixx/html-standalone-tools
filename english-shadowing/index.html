@@ -644,6 +644,9 @@
       <!-- VIEW 2: ACTIVE SHADOWING PLAYER STAGE      -->
       <!-- ========================================== -->
       <section id="player-view" class="hidden flex-1 flex flex-col space-y-4">
+        <!-- Hidden HTML5 Audio Element for Real Playback -->
+        <audio id="playerAudio" preload="auto" class="hidden"></audio>
+
         <!-- Player Top Bar -->
         <div
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 sm:p-4 shadow-md w-full max-w-full overflow-hidden"
@@ -691,19 +694,41 @@
                   >US Accent</span
                 >
                 <span id="activeScenarioMeta" class="text-slate-500 text-[11px]"
-                  >12 sentences • 01:45</span
+                  >7 sentences • ~38s</span
                 >
               </div>
             </div>
           </div>
 
-          <!-- Actions: Subtitle Masking & Export SRT -->
+          <!-- Actions: Subtitle Masking & Export LRC / SRT -->
           <div class="flex flex-wrap items-center gap-2 max-w-full">
-            <!-- 1-Click Export Modified SRT -->
+            <!-- 1-Click Export LRC -->
+            <button
+              onclick="exportCurrentScenarioLrc()"
+              class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-colors flex items-center gap-1 shrink-0"
+              title="Export Enhanced LRC with Word Timings"
+            >
+              <svg
+                class="w-3.5 h-3.5 text-cyan-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+                />
+              </svg>
+              <span>Export LRC</span>
+            </button>
+
+            <!-- 1-Click Export SRT -->
             <button
               onclick="exportCurrentScenarioSrt()"
               class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-colors flex items-center gap-1 shrink-0"
-              title="Export Updated SRT Subtitles"
+              title="Export Dual-Language SRT Subtitles"
             >
               <svg
                 class="w-3.5 h-3.5 text-emerald-400"
@@ -765,194 +790,187 @@
           </div>
         </div>
 
-        <!-- Centerpiece Subtitle Stage & Visual Waveforms -->
+        <!-- ========================================== -->
+        <!-- INTEGRATED HERO PLAYER CARD CONTAINER       -->
+        <!-- ========================================== -->
         <div
-          id="subtitleStage"
-          class="flex-1 min-h-[260px] sm:min-h-[320px] bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-10 pt-14 sm:pt-14 flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden"
+          id="player-container"
+          class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all"
         >
-          <!-- Active sentence position tracker & Timing Nudges -->
+          <!-- Centerpiece Subtitle Stage & Visual Waveforms -->
           <div
-            class="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
+            id="subtitleStage"
+            class="min-h-[260px] sm:min-h-[320px] bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 p-6 sm:p-10 pt-14 sm:pt-14 flex flex-col items-center justify-center text-center relative overflow-hidden"
           >
-            <div class="flex items-center gap-2 pointer-events-auto">
-              <span
-                class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
-              ></span>
-              <span id="sentenceIndexTracker">Sentence 1 of 10</span>
-            </div>
-
-            <!-- Live Timing Nudge Controls -->
+            <!-- Active sentence position tracker & Timing Nudges -->
             <div
-              class="flex items-center gap-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 pointer-events-auto"
+              class="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
             >
-              <span class="text-[10px] text-slate-500 uppercase">Nudge:</span>
-              <button
-                onclick="nudgeActiveCueTiming('start', -0.1)"
-                class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
-                title="Start -100ms"
-              >
-                -0.1s
-              </button>
-              <button
-                onclick="nudgeActiveCueTiming('start', 0.1)"
-                class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
-                title="Start +100ms"
-              >
-                +0.1s
-              </button>
-            </div>
-          </div>
-
-          <!-- Loop Mode Shadowing Repetition & Recording Prompt -->
-          <div
-            id="repeatPromptContainer"
-            class="hidden mb-4 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-3 shadow-lg"
-          >
-            <span data-i18n="repeatPrompt">Now Shadow: Repeat out loud!</span>
-            <button
-              id="btnRecordPrompt"
-              onclick="toggleMicRecording()"
-              class="px-2.5 py-1 rounded-full bg-red-500 hover:bg-red-400 text-white text-xs font-bold flex items-center gap-1 shadow-md transition-all active:scale-95"
-            >
-              <span class="w-2 h-2 rounded-full bg-white animate-rec"></span>
-              <span id="recPromptLabel">Record [M]</span>
-            </button>
-          </div>
-
-          <!-- English Subtitle Line (with interactive clickable words) -->
-          <div
-            id="activeEnglishSubtitle"
-            class="blur-target text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-relaxed max-w-4xl transition-all"
-          >
-            Click a scenario to begin shadowing.
-          </div>
-
-          <!-- Vietnamese Translation Subtitle Line -->
-          <div
-            id="activeVietnameseSubtitle"
-            class="blur-target text-sm sm:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-3 transition-all"
-          >
-            Nhấp vào tình huống để bắt đầu luyện nói.
-          </div>
-
-          <!-- Dual Visual Waveforms Comparison Drawer -->
-          <div
-            id="waveformComparisonBox"
-            class="mt-6 w-full max-w-xl bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-left"
-          >
-            <div
-              class="flex items-center justify-between text-[11px] font-semibold text-slate-400"
-            >
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span data-i18n="waveformNative"
-                  >Native Speaker Pitch & Envelope</span
-                >
-              </span>
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                <span data-i18n="waveformLearner">Your Voice Take</span>
-              </span>
-            </div>
-
-            <!-- Waveform Canvas -->
-            <canvas
-              id="dualWaveformCanvas"
-              width="400"
-              height="48"
-              class="w-full max-w-full h-12 rounded bg-slate-900/60 border border-slate-800"
-            ></canvas>
-
-            <!-- Auto A/B Compare Actions -->
-            <div class="flex items-center justify-between gap-2 pt-1">
-              <div class="flex items-center gap-2">
-                <button
-                  onclick="playNativeSpeakerSnippet()"
-                  class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold transition-colors"
-                >
-                  🔊 Native
-                </button>
-                <button
-                  id="btnPlayUserVoice"
-                  onclick="playLearnerRecordingSnippet()"
-                  class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold transition-colors disabled:opacity-40"
-                  disabled
-                >
-                  🎙️ My Voice
-                </button>
+              <div class="flex items-center gap-2 pointer-events-auto">
+                <span
+                  class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
+                ></span>
+                <span id="sentenceIndexTracker">Sentence 1 of 10</span>
               </div>
 
-              <button
-                onclick="runAutoAbComparison()"
-                class="px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 hover:from-emerald-500/30 hover:to-cyan-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all active:scale-95"
+              <!-- Live Timing Nudge Controls -->
+              <div
+                class="flex items-center gap-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 pointer-events-auto"
               >
-                ⚡ Auto A/B Compare
+                <span class="text-[10px] text-slate-500 uppercase">Nudge:</span>
+                <button
+                  onclick="nudgeActiveCueTiming('start', -0.1)"
+                  class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
+                  title="Start -100ms"
+                >
+                  -0.1s
+                </button>
+                <button
+                  onclick="nudgeActiveCueTiming('start', 0.1)"
+                  class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
+                  title="Start +100ms"
+                >
+                  +0.1s
+                </button>
+              </div>
+            </div>
+
+            <!-- Loop Mode Shadowing Repetition & Recording Prompt -->
+            <div
+              id="repeatPromptContainer"
+              class="hidden mb-4 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-3 shadow-lg"
+            >
+              <span data-i18n="repeatPrompt">Now Shadow: Repeat out loud!</span>
+              <button
+                id="btnRecordPrompt"
+                onclick="toggleMicRecording()"
+                class="px-2.5 py-1 rounded-full bg-red-500 hover:bg-red-400 text-white text-xs font-bold flex items-center gap-1 shadow-md transition-all active:scale-95"
+              >
+                <span class="w-2 h-2 rounded-full bg-white animate-rec"></span>
+                <span id="recPromptLabel">Record [M]</span>
               </button>
             </div>
-          </div>
-        </div>
 
-        <!-- Full Transcript & Inline Editor List -->
-        <div
-          class="bg-slate-900 border border-slate-800 rounded-xl p-4 max-h-56 sm:max-h-72 overflow-y-auto space-y-2"
-        >
-          <div
-            class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between"
-          >
-            <span>Transcript & Inline Editor</span>
-            <span class="text-[11px] text-slate-500 font-normal"
-              >Click text to edit • Click line number to jump</span
+            <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
+            <div
+              id="activeEnglishSubtitle"
+              class="blur-target text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
             >
-          </div>
-          <div id="transcriptList" class="space-y-1.5">
-            <!-- Injected via JavaScript -->
-          </div>
-        </div>
-
-        <!-- Sticky Floating Transport Dock -->
-        <div
-          id="transport-dock"
-          class="bg-slate-900/95 backdrop-blur border border-slate-800 rounded-2xl p-4 shadow-2xl space-y-3 sticky bottom-3 z-30"
-        >
-          <!-- Scrubber & Time -->
-          <div class="flex items-center gap-3">
-            <span
-              id="currentTimeLabel"
-              class="text-xs font-mono text-slate-400 w-12 text-right"
-              >00:00</span
-            >
-            <div class="relative flex-1 flex items-center">
-              <input
-                type="range"
-                id="audioScrubber"
-                min="0"
-                max="100"
-                value="0"
-                step="0.1"
-                oninput="onScrubberInput(this.value)"
-                class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500 focus:outline-none"
-              />
+              Click a scenario to begin shadowing.
             </div>
-            <span
-              id="durationTimeLabel"
-              class="text-xs font-mono text-slate-400 w-12"
-              >00:00</span
+
+            <!-- Vietnamese Translation Subtitle Line -->
+            <div
+              id="activeVietnameseSubtitle"
+              class="blur-target text-sm sm:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-3 transition-all"
             >
+              Nhấp vào tình huống để bắt đầu luyện nói.
+            </div>
+
+            <!-- Dual Visual Waveforms Comparison Box -->
+            <div
+              id="waveformComparisonBox"
+              class="mt-6 w-full max-w-xl bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-left"
+            >
+              <div
+                class="flex items-center justify-between text-[11px] font-semibold text-slate-400"
+              >
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span data-i18n="waveformNative"
+                    >Native Speaker Pitch & Envelope</span
+                  >
+                </span>
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                  <span data-i18n="waveformLearner">Your Voice Take</span>
+                </span>
+              </div>
+
+              <!-- Waveform Canvas -->
+              <canvas
+                id="dualWaveformCanvas"
+                width="400"
+                height="48"
+                class="w-full max-w-full h-12 rounded bg-slate-900/60 border border-slate-800"
+              ></canvas>
+
+              <!-- Auto A/B Compare Actions -->
+              <div class="flex items-center justify-between gap-2 pt-1">
+                <div class="flex items-center gap-2">
+                  <button
+                    onclick="playNativeSpeakerSnippet()"
+                    class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 text-xs font-semibold transition-colors"
+                  >
+                    🔊 Native
+                  </button>
+                  <button
+                    id="btnPlayUserVoice"
+                    onclick="playLearnerRecordingSnippet()"
+                    class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold transition-colors disabled:opacity-40"
+                    disabled
+                  >
+                    🎙️ My Voice
+                  </button>
+                </div>
+
+                <button
+                  onclick="runAutoAbComparison()"
+                  class="px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 hover:from-emerald-500/30 hover:to-cyan-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all active:scale-95"
+                >
+                  ⚡ Auto A/B Compare
+                </button>
+              </div>
+            </div>
           </div>
 
-          <!-- Transport Buttons -->
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <!-- Left Controls: Mode & Speed -->
-            <div class="flex items-center gap-2">
-              <!-- Mode Toggle Pill -->
+          <!-- INTEGRATED TRANSPORT DOCK (Directly under Player Stage) -->
+          <div
+            id="transport-dock"
+            class="bg-slate-950/90 border-t border-slate-800 p-4 space-y-3"
+          >
+            <!-- Scrubber & Time with Sentence Milestone Marks -->
+            <div class="flex items-center gap-3">
+              <span
+                id="currentTimeLabel"
+                class="text-xs font-mono text-slate-400 w-11 text-right shrink-0"
+                >00:00</span
+              >
+              <div class="relative flex-1 flex items-center h-6">
+                <!-- Milestone tick marks for sentence starts -->
+                <div
+                  id="scrubberMilestones"
+                  class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 pointer-events-none z-10 flex items-center"
+                ></div>
+                <input
+                  id="audioScrubber"
+                  type="range"
+                  min="0"
+                  max="100"
+                  value="0"
+                  step="0.1"
+                  oninput="onScrubberInput(this.value)"
+                  class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400 z-20"
+                />
+              </div>
+              <span
+                id="durationTimeLabel"
+                class="text-xs font-mono text-slate-500 w-11 shrink-0"
+                >00:00</span
+              >
+            </div>
+
+            <!-- Transport Buttons Row -->
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <!-- Playback Mode Switches (Loop vs Continuous) -->
               <div
-                class="flex items-center bg-slate-950 rounded-lg p-0.5 border border-slate-800 text-xs"
+                class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs shrink-0"
               >
                 <button
                   id="modeLoopBtn"
                   onclick="setPlaybackMode('loop')"
                   class="px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
-                  title="Interactive Sentence Loop Mode"
+                  title="Sentence Loop Mode"
                 >
                   <svg
                     class="w-3.5 h-3.5"
@@ -967,7 +985,9 @@
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                  <span data-i18n="modeLoop">Sentence Loop</span>
+                  <span class="hidden md:inline" data-i18n="modeLoop"
+                    >Sentence Loop Mode</span
+                  >
                 </button>
                 <button
                   id="modeContinuousBtn"
@@ -988,146 +1008,141 @@
                       d="M13 5l7 7-7 7M5 5l7 7-7 7"
                     />
                   </svg>
-                  <span data-i18n="modeContinuous">Continuous</span>
+                  <span class="hidden md:inline" data-i18n="modeContinuous"
+                    >Continuous Flow Mode</span
+                  >
                 </button>
               </div>
 
-              <!-- Speed Stepper -->
+              <!-- Speed Selector Pill -->
               <button
                 id="speedBtn"
                 onclick="cyclePlaybackSpeed()"
-                class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs border border-slate-700 transition-colors"
-                title="Playback Speed ([ / ])"
+                class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-mono text-xs border border-slate-800 transition-colors shrink-0"
+                title="Adjust Playback Speed ([ / ])"
               >
                 1.0x
               </button>
-            </div>
 
-            <!-- Center Controls: Prev / Replay / Play-Pause / Mic / Next -->
-            <div class="flex items-center gap-2">
-              <button
-                onclick="navigateSentence(-1)"
-                class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95"
-                title="Previous Sentence (A / Left)"
-                aria-label="Previous Sentence"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <!-- Central Transport Control Group -->
+              <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Replay Sentence Button [R] -->
+                <button
+                  onclick="replayCurrentSentence()"
+                  class="p-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
+                  title="Replay Sentence [R]"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                </button>
 
-              <button
-                onclick="replayCurrentSentence()"
-                class="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all font-semibold text-xs flex items-center gap-1.5 active:scale-95"
-                title="Replay Current Sentence (R)"
-              >
-                <svg
-                  class="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <!-- Previous Sentence [A] -->
+                <button
+                  onclick="navigateSentence(-1)"
+                  class="p-2 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
+                  title="Previous Sentence (A / Left)"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                  />
-                </svg>
-                <span data-i18n="btnReplaySentence">Replay</span>
-                <span class="font-mono text-[10px] text-amber-400/70">[R]</span>
-              </button>
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
 
-              <!-- Main Play / Pause Button -->
-              <button
-                id="mainPlayPauseBtn"
-                onclick="togglePlayPause()"
-                class="h-12 w-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 flex items-center justify-center font-bold shadow-lg shadow-emerald-500/30 transition-all active:scale-95"
-                title="Play / Pause (Space)"
-                aria-label="Play or Pause Audio"
-              >
-                <svg
-                  id="playIcon"
-                  class="w-6 h-6 ml-0.5"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
+                <!-- Primary Play / Pause / Repeat [Space] -->
+                <button
+                  id="mainPlayPauseBtn"
+                  onclick="togglePlayPause()"
+                  class="p-3.5 sm:p-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                  title="Play / Pause / Repeat (Space)"
                 >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                <svg
-                  id="pauseIcon"
-                  class="w-6 h-6 hidden"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                </svg>
-              </button>
+                  <svg
+                    id="playIcon"
+                    class="w-5 h-5 fill-current"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  <svg
+                    id="pauseIcon"
+                    class="w-5 h-5 fill-current hidden"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                  </svg>
+                </button>
 
-              <!-- 1-Tap Mic Record Button -->
-              <button
-                id="btnDockRecord"
-                onclick="toggleMicRecording()"
-                class="p-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95"
-                title="Record Voice Shadowing Attempt (M)"
-                aria-label="Record Voice"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <!-- Next Sentence [D] -->
+                <button
+                  onclick="navigateSentence(1)"
+                  class="p-2 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
+                  title="Next Sentence (D / Right)"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
 
-              <button
-                onclick="navigateSentence(1)"
-                class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all active:scale-95"
-                title="Next Sentence (D / Right)"
-                aria-label="Next Sentence"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                <!-- 1-Tap Mic Record Shadowing Take [M] -->
+                <button
+                  id="btnDockRecord"
+                  onclick="toggleMicRecording()"
+                  class="p-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-red-400 hover:text-red-300 border border-slate-800 transition-all active:scale-95 shrink-0"
+                  title="Record Spoken Take [M]"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
-            </div>
+                  <svg
+                    class="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                    />
+                  </svg>
+                </button>
+              </div>
 
-            <!-- Right Controls: Vocab Drawer Shortcut -->
-            <div class="flex items-center gap-2">
+              <!-- Quick Vocabulary Trigger -->
               <button
                 onclick="toggleVocabDrawer()"
-                class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-colors flex items-center gap-1.5"
-                title="Open Saved Vocabulary (V)"
+                class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs border border-slate-800 transition-colors flex items-center gap-1 shrink-0"
+                title="Vocabulary Deck (V)"
               >
                 <svg
-                  class="w-4 h-4 text-amber-400"
+                  class="w-3.5 h-3.5 text-amber-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1139,9 +1154,81 @@
                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                   />
                 </svg>
-                <span data-i18n="navVocab">Vocab</span>
-                <span class="font-mono text-[10px] text-slate-500">[V]</span>
+                <span class="hidden sm:inline" data-i18n="navVocab"
+                  >Vocabulary</span
+                >
+                <span
+                  class="text-slate-500 font-mono text-[10px] hidden sm:inline"
+                  >[V]</span
+                >
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapsible Full Transcript & Inline Editor Drawer -->
+        <div
+          id="transcriptCard"
+          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 transition-all"
+        >
+          <div
+            class="flex items-center justify-between cursor-pointer select-none"
+            onclick="toggleTranscriptDrawer()"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-cyan-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <span
+                class="text-xs font-bold text-slate-300 uppercase tracking-wider"
+                data-i18n="transcriptHeader"
+                >Transcript & Inline Editor</span
+              >
+            </div>
+            <div class="flex items-center gap-3">
+              <span
+                class="text-[11px] text-slate-500 font-normal hidden sm:inline"
+                data-i18n="transcriptHint"
+                >Click text to edit • Click line number to jump</span
+              >
+              <button
+                id="btnToggleTranscript"
+                class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+              >
+                <span id="toggleTranscriptLabel">Hide</span>
+                <svg
+                  id="toggleTranscriptIcon"
+                  class="w-4 h-4 transition-transform duration-200"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div
+            id="transcriptDrawerContent"
+            class="max-h-56 sm:max-h-72 overflow-y-auto space-y-1.5 pt-1"
+          >
+            <div id="transcriptList" class="space-y-1.5">
+              <!-- Injected via JavaScript -->
             </div>
           </div>
         </div>
@@ -1917,6 +2004,8 @@
           btnReviewDue: "SRS Review",
           waveformNative: "Native Speaker Pitch & Envelope",
           waveformLearner: "Your Voice Take",
+          transcriptHeader: "Transcript & Inline Editor",
+          transcriptHint: "Click text to edit • Click line number to jump",
         },
         vi: {
           appTitle: "Luyện Nói Shadowing",
@@ -2003,8 +2092,10 @@
           practiceMinutesLabel: "Thời gian hôm nay",
           sentencesShadowedLabel: "Số câu đã luyện",
           btnReviewDue: "Ôn tập SRS",
-          waveformNative: "Ngữ điệu bản xứ",
-          waveformLearner: "Giọng nói của bạn",
+          waveformNative: "Đồ thị âm lượng người bản xứ",
+          waveformLearner: "Bản thu giọng bạn",
+          transcriptHeader: "Kịch bản & Trình sửa lời",
+          transcriptHint: "Nhấn vào lời thoại để sửa • Nhấn số câu để nhảy",
         },
       };
 
@@ -2018,43 +2109,71 @@
           category: "daily",
           level: "A2",
           accent: "US",
-          duration: 38,
+          duration: 33,
           description:
             "Natural everyday dialogue ordering pour-over coffee and asking about milk alternatives.",
+          audioUrl: "audio/specialty-coffee.mp3",
+          lrcContent: `[ti:Ordering at a Specialty Coffee Shop]
+[ar:English Shadowing]
+[al:daily]
+[length:00:32.61]
+
+[00:00.00]<00:00.00>Good <00:00.28>morning! <00:00.93>What <00:01.20>can <00:01.41>I <00:01.48>get <00:01.68>started <00:02.16>for <00:02.37>you <00:02.58>today?
+[00:00.00]Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?
+
+[00:03.29]<00:03.29>Hi <00:03.47>there! <00:04.11>I <00:04.20>would <00:04.65>like <00:05.01>a <00:05.10>medium <00:05.64>oat <00:05.91>milk <00:06.27>latte <00:06.72>with <00:07.08>an <00:07.27>extra <00:07.72>shot <00:08.08>of <00:08.26>espresso, <00:09.17>please.
+[00:03.29]Xin chào! Cho tôi một ly latte sữa yến mạch cỡ vừa thêm một shot espresso nhé.
+
+[00:10.00]<00:10.00>Sure <00:10.37>thing! <00:11.02>Would <00:11.48>you <00:11.76>prefer <00:12.32>that <00:12.69>iced <00:13.05>or <00:13.24>piping <00:13.79>hot?
+[00:10.00]Chắc chắn rồi! Bạn muốn uống đá hay nóng hổi?
+
+[00:14.46]<00:14.46>I'll <00:14.76>take <00:15.06>it <00:15.21>iced, <00:15.68>please. <00:16.30>Also, <00:16.78>do <00:16.93>you <00:17.15>have <00:17.45>any <00:17.67>freshly <00:18.20>baked <00:18.57>croissants <00:19.31>left?
+[00:14.46]Cho tôi uống đá nhé. Tiện thể, quán còn bánh sừng bò mới nướng không?
+
+[00:19.79]<00:19.79>Yes, <00:20.18>we <00:20.32>just <00:20.61>pulled <00:21.05>a <00:21.12>batch <00:21.49>of <00:21.63>almond <00:22.07>croissants <00:22.80>straight <00:23.38>out <00:23.60>of <00:23.74>the <00:23.96>oven!
+[00:19.79]Có chứ, chúng tôi vừa lấy một mẻ bánh sừng bò hạnh nhân nóng hổi ra khỏi lò!
+
+[00:24.62]<00:24.62>That <00:24.91>sounds <00:25.35>delicious! <00:26.17>I'll <00:26.46>grab <00:26.75>one <00:26.97>of <00:27.12>those <00:27.48>as <00:27.62>well.
+[00:24.62]Nghe ngon quá! Cho tôi lấy thêm một chiếc bánh đó luôn nhé.
+
+[00:28.29]<00:28.29>Awesome. <00:29.02>Your <00:29.33>total <00:29.72>comes <00:30.11>to <00:30.27>eight <00:30.66>dollars <00:31.21>and <00:31.45>fifty <00:31.84>cents.
+[00:28.29]Tuyệt vời. Tổng cộng của bạn là tám đô la năm mươi xu.
+`,
           srtContent: `1
-00:00:00,000 --> 00:00:04,500
+00:00:00,000 --> 00:00:02,890
 Good morning! What can I get started for you today?
 Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?
 
 2
-00:00:04,600 --> 00:00:09,800
+00:00:03,290 --> 00:00:09,600
 Hi there! I would like a medium oat milk latte with an extra shot of espresso, please.
 Xin chào! Cho tôi một ly latte sữa yến mạch cỡ vừa thêm một shot espresso nhé.
 
 3
-00:00:09,900 --> 00:00:14,200
+00:00:10,000 --> 00:00:14,060
 Sure thing! Would you prefer that iced or piping hot?
 Chắc chắn rồi! Bạn muốn uống đá hay nóng hổi?
 
 4
-00:00:14,300 --> 00:00:19,500
+00:00:14,460 --> 00:00:19,390
 I'll take it iced, please. Also, do you have any freshly baked croissants left?
 Cho tôi uống đá nhé. Tiện thể, quán còn bánh sừng bò mới nướng không?
 
 5
-00:00:19,600 --> 00:00:25,800
+00:00:19,790 --> 00:00:24,220
 Yes, we just pulled a batch of almond croissants straight out of the oven!
 Có chứ, chúng tôi vừa lấy một mẻ bánh sừng bò hạnh nhân nóng hổi ra khỏi lò!
 
 6
-00:00:25,900 --> 00:00:31,000
+00:00:24,620 --> 00:00:27,890
 That sounds delicious! I'll grab one of those as well.
 Nghe ngon quá! Cho tôi lấy thêm một chiếc bánh đó luôn nhé.
 
 7
-00:00:31,100 --> 00:00:37,500
+00:00:28,290 --> 00:00:32,210
 Awesome. Your total comes to eight dollars and fifty cents.
-Tuyệt vời. Tổng cộng của bạn là tám đô la năm mươi xu.`,
+Tuyệt vời. Tổng cộng của bạn là tám đô la năm mươi xu.
+`,
         },
         {
           id: "tech-standup",
@@ -2062,43 +2181,71 @@ Tuyệt vời. Tổng cộng của bạn là tám đô la năm mươi xu.`,
           category: "workplace",
           level: "B2",
           accent: "US",
-          duration: 46,
+          duration: 39,
           description:
             "Engineering standup discussing blocker resolution, pull request reviews, and database migration.",
+          audioUrl: "audio/tech-standup.mp3",
+          lrcContent: `[ti:Tech Agile Standup & Sprint Planning]
+[ar:English Shadowing]
+[al:workplace]
+[length:00:38.75]
+
+[00:00.00]<00:00.00>Alright <00:00.55>team, <00:01.04>let's <00:01.44>kick <00:01.75>off <00:01.98>our <00:02.22>morning <00:02.77>standup. <00:03.50>Who <00:03.73>wants <00:04.13>to <00:04.28>go <00:04.44>first?
+[00:00.00]Được rồi cả nhóm, hãy bắt đầu buổi họp nhanh buổi sáng. Ai muốn bắt đầu trước nào?
+
+[00:05.11]<00:05.11>Yesterday <00:05.81>I <00:05.88>finalized <00:06.58>the <00:06.81>user <00:07.12>authentication <00:08.20>flow <00:08.51>and <00:08.74>submitted <00:09.44>the <00:09.67>pull <00:09.98>request <00:10.52>for <00:10.75>review.
+[00:05.11]Hôm qua tôi đã hoàn thiện luồng xác thực người dùng và gửi pull request để mọi người duyệt.
+
+[00:11.69]<00:11.69>Today <00:12.05>I'm <00:12.27>planning <00:12.86>to <00:13.00>dive <00:13.29>into <00:13.59>the <00:13.81>database <00:14.39>schema <00:14.83>migration <00:15.49>for <00:15.70>offline <00:16.22>caching.
+[00:11.69]Hôm nay tôi dự định bắt tay vào việc chuyển đổi cấu trúc cơ sở dữ liệu để lưu đệm ngoại tuyến.
+
+[00:17.20]<00:17.20>Do <00:17.33>you <00:17.52>have <00:17.78>any <00:17.97>blockers <00:18.48>or <00:18.61>dependencies <00:19.38>on <00:19.51>the <00:19.70>backend <00:20.15>team <00:20.41>for <00:20.60>that <00:20.86>migration?
+[00:17.20]Bạn có gặp vướng mắc hay phụ thuộc gì vào đội backend cho đợt chuyển đổi đó không?
+
+[00:21.90]<00:21.90>I <00:21.98>just <00:22.29>need <00:22.60>Sarah <00:22.99>to <00:23.14>verify <00:23.61>the <00:23.84>indexed <00:24.38>fields <00:24.85>so <00:25.00>query <00:25.39>response <00:26.01>times <00:26.40>remain <00:26.86>lightning <00:27.56>fast.
+[00:21.90]Tôi chỉ cần Sarah xác thực lại các trường được đánh chỉ mục để tốc độ phản hồi truy vấn vẫn nhanh như chớp.
+
+[00:28.35]<00:28.35>Sounds <00:28.84>good! <00:29.34>I <00:29.42>will <00:29.74>review <00:30.23>your <00:30.55>PR <00:30.72>right <00:31.12>after <00:31.52>this <00:31.85>meeting <00:32.42>wraps <00:32.82>up.
+[00:28.35]Nghe ổn đấy! Tôi sẽ duyệt PR của bạn ngay sau khi cuộc họp này kết thúc.
+
+[00:33.36]<00:33.36>Perfect. <00:34.01>Let's <00:34.35>make <00:34.62>sure <00:34.90>our <00:35.10>release <00:35.58>stays <00:35.92>on <00:36.06>track <00:36.40>for <00:36.61>Thursday's <00:37.29>deployment <00:37.97>window.
+[00:33.36]Hoàn hảo. Hãy đảm bảo đợt phát hành của chúng ta đúng tiến độ cho khung triển khai thứ Năm.
+`,
           srtContent: `1
-00:00:00,000 --> 00:00:05,200
+00:00:00,000 --> 00:00:04,710
 Alright team, let's kick off our morning standup. Who wants to go first?
 Được rồi cả nhóm, hãy bắt đầu buổi họp nhanh buổi sáng. Ai muốn bắt đầu trước nào?
 
 2
-00:00:05,300 --> 00:00:12,100
+00:00:05,110 --> 00:00:11,290
 Yesterday I finalized the user authentication flow and submitted the pull request for review.
 Hôm qua tôi đã hoàn thiện luồng xác thực người dùng và gửi pull request để mọi người duyệt.
 
 3
-00:00:12,200 --> 00:00:18,600
+00:00:11,690 --> 00:00:16,800
 Today I'm planning to dive into the database schema migration for offline caching.
 Hôm nay tôi dự định bắt tay vào việc chuyển đổi cấu trúc cơ sở dữ liệu để lưu đệm ngoại tuyến.
 
 4
-00:00:18,700 --> 00:00:24,300
+00:00:17,200 --> 00:00:21,500
 Do you have any blockers or dependencies on the backend team for that migration?
 Bạn có gặp vướng mắc hay phụ thuộc gì vào đội backend cho đợt chuyển đổi đó không?
 
 5
-00:00:24,400 --> 00:00:30,800
+00:00:21,900 --> 00:00:27,950
 I just need Sarah to verify the indexed fields so query response times remain lightning fast.
 Tôi chỉ cần Sarah xác thực lại các trường được đánh chỉ mục để tốc độ phản hồi truy vấn vẫn nhanh như chớp.
 
 6
-00:00:30,900 --> 00:00:36,700
+00:00:28,350 --> 00:00:32,960
 Sounds good! I will review your PR right after this meeting wraps up.
 Nghe ổn đấy! Tôi sẽ duyệt PR của bạn ngay sau khi cuộc họp này kết thúc.
 
 7
-00:00:36,800 --> 00:00:45,500
+00:00:33,360 --> 00:00:38,350
 Perfect. Let's make sure our release stays on track for Thursday's deployment window.
-Hoàn hảo. Hãy đảm bảo đợt phát hành của chúng ta đúng tiến độ cho khung triển khai thứ Năm.`,
+Hoàn hảo. Hãy đảm bảo đợt phát hành của chúng ta đúng tiến độ cho khung triển khai thứ Năm.
+`,
         },
         {
           id: "airport-security",
@@ -2106,43 +2253,71 @@ Hoàn hảo. Hãy đảm bảo đợt phát hành của chúng ta đúng tiến 
           category: "travel",
           level: "B1",
           accent: "UK",
-          duration: 42,
+          duration: 39,
           description:
             "Navigating terminal check-in, baggage drop, and customs security screening with British English.",
+          audioUrl: "audio/airport-security.mp3",
+          lrcContent: `[ti:Airport Check-in & Security Screen]
+[ar:English Shadowing]
+[al:travel]
+[length:00:39.37]
+
+[00:00.00]<00:00.00>Good <00:00.35>afternoon, <00:01.31>sir. <00:01.76>May <00:02.02>I <00:02.10>please <00:02.62>see <00:02.88>your <00:03.23>passport <00:03.92>and <00:04.18>boarding <00:04.87>pass?
+[00:00.00]Chào buổi chiều quý khách. Tôi có thể xem hộ chiếu và thẻ lên máy bay được không?
+
+[00:05.50]<00:05.50>Certainly, <00:06.71>here <00:07.15>you <00:07.48>go. <00:07.91>I <00:08.02>have <00:08.46>one <00:08.80>suitcase <00:09.68>to <00:09.90>check <00:10.45>in <00:10.67>today.
+[00:05.50]Chắc chắn rồi, của cô đây. Hôm nay tôi có một chiếc vali cần ký gửi.
+
+[00:11.54]<00:11.54>Please <00:11.95>place <00:12.30>your <00:12.57>luggage <00:13.06>on <00:13.20>the <00:13.40>scale <00:13.75>to <00:13.89>ensure <00:14.30>it <00:14.44>meets <00:14.79>the <00:14.99>weight <00:15.41>allowance.
+[00:11.54]Xin vui lòng đặt hành lý lên cân để kiểm tra xem có vượt quá trọng lượng cho phép không.
+
+[00:16.50]<00:16.50>It <00:16.65>weighs <00:17.11>exactly <00:17.64>eighteen <00:18.25>kilograms, <00:19.11>which <00:19.49>is <00:19.64>well <00:19.94>within <00:20.40>your <00:20.70>baggage <00:21.23>limit.
+[00:16.50]Nó nặng đúng mười tám ký, hoàn toàn nằm trong hạn mức hành lý của quý khách.
+
+[00:21.99]<00:21.99>When <00:22.27>heading <00:22.78>through <00:23.28>security, <00:24.03>please <00:24.46>ensure <00:24.89>all <00:25.10>laptops <00:25.61>and <00:25.82>liquids <00:26.33>are <00:26.54>placed <00:26.97>in <00:27.12>separate <00:27.69>bins.
+[00:21.99]Khi đi qua cổng an ninh, xin lưu ý để toàn bộ máy tính xách tay và chất lỏng vào khay riêng.
+
+[00:28.35]<00:28.35>Understood. <00:29.40>Could <00:29.83>you <00:30.09>tell <00:30.44>me <00:30.61>which <00:31.04>gate <00:31.39>this <00:31.73>flight <00:32.25>departs <00:32.86>from?
+[00:28.35]Tôi hiểu rồi. Cô có thể cho tôi biết chuyến bay này khởi hành ở cửa nào không?
+
+[00:33.59]<00:33.59>You <00:33.88>will <00:34.27>be <00:34.47>boarding <00:35.25>at <00:35.45>Gate <00:35.84>B24. <00:36.33>Have <00:36.72>a <00:36.82>wonderful <00:37.70>and <00:38.00>safe <00:38.39>flight!
+[00:33.59]Quý khách sẽ lên máy bay ở Cửa B24. Chúc quý khách có một chuyến bay an toàn và vui vẻ!
+`,
           srtContent: `1
-00:00:00,000 --> 00:00:05,500
+00:00:00,000 --> 00:00:05,100
 Good afternoon, sir. May I please see your passport and boarding pass?
 Chào buổi chiều quý khách. Tôi có thể xem hộ chiếu và thẻ lên máy bay được không?
 
 2
-00:00:05,600 --> 00:00:10,800
+00:00:05,500 --> 00:00:11,140
 Certainly, here you go. I have one suitcase to check in today.
 Chắc chắn rồi, của cô đây. Hôm nay tôi có một chiếc vali cần ký gửi.
 
 3
-00:00:10,900 --> 00:00:16,200
+00:00:11,540 --> 00:00:16,100
 Please place your luggage on the scale to ensure it meets the weight allowance.
 Xin vui lòng đặt hành lý lên cân để kiểm tra xem có vượt quá trọng lượng cho phép không.
 
 4
-00:00:16,300 --> 00:00:21,800
+00:00:16,500 --> 00:00:21,590
 It weighs exactly eighteen kilograms, which is well within your baggage limit.
 Nó nặng đúng mười tám ký, hoàn toàn nằm trong hạn mức hành lý của quý khách.
 
 5
-00:00:21,900 --> 00:00:28,400
+00:00:21,990 --> 00:00:27,950
 When heading through security, please ensure all laptops and liquids are placed in separate bins.
 Khi đi qua cổng an ninh, xin lưu ý để toàn bộ máy tính xách tay và chất lỏng vào khay riêng.
 
 6
-00:00:28,500 --> 00:00:34,200
+00:00:28,350 --> 00:00:33,190
 Understood. Could you tell me which gate this flight departs from?
 Tôi hiểu rồi. Cô có thể cho tôi biết chuyến bay này khởi hành ở cửa nào không?
 
 7
-00:00:34,300 --> 00:00:41,500
+00:00:33,590 --> 00:00:38,970
 You will be boarding at Gate B24. Have a wonderful and safe flight!
-Quý khách sẽ lên máy bay ở Cửa B24. Chúc quý khách có một chuyến bay an toàn và vui vẻ!`,
+Quý khách sẽ lên máy bay ở Cửa B24. Chúc quý khách có một chuyến bay an toàn và vui vẻ!
+`,
         },
         {
           id: "academic-ai-future",
@@ -2150,43 +2325,68 @@ Quý khách sẽ lên máy bay ở Cửa B24. Chúc quý khách có một chuy�
           category: "academic",
           level: "C1",
           accent: "US",
-          duration: 48,
+          duration: 46,
           description:
             "Nuanced academic discourse discussing asynchronous productivity, digital nomadism, and automation.",
+          audioUrl: "audio/academic-ai-future.mp3",
+          lrcContent: `[ti:Academic Discussion on AI & Remote Work]
+[ar:English Shadowing]
+[al:academic]
+[length:00:45.59]
+
+[00:00.00]<00:00.00>The <00:00.23>shift <00:00.61>toward <00:01.06>distributed <00:01.90>remote <00:02.36>work <00:02.66>has <00:02.89>fundamentally <00:03.88>transformed <00:04.71>organizational <00:05.78>dynamics.
+[00:00.00]Sự chuyển dịch sang làm việc từ xa phân tán đã thay đổi căn bản động lực vận hành của các tổ chức.
+
+[00:06.86]<00:06.86>Indeed, <00:07.53>asynchronous <00:08.49>communication <00:09.54>fosters <00:10.10>deeper <00:10.59>uninterrupted <00:11.64>focus <00:12.04>and <00:12.28>mitigates <00:13.01>cognitive <00:13.73>fatigue.
+[00:06.86]Thật vậy, giao tiếp bất đồng bộ thúc đẩy sự tập trung sâu không bị ngắt quãng và giảm thiểu mệt mỏi nhận thức.
+
+[00:14.68]<00:14.68>However, <00:15.39>leaders <00:15.92>must <00:16.23>proactively <00:17.07>cultivate <00:17.76>serendipitous <00:18.75>interactions <00:19.67>to <00:19.82>sustain <00:20.36>creative <00:20.97>innovation.
+[00:14.68]Tuy nhiên, các nhà lãnh đạo phải chủ động nuôi dưỡng những tương tác ngẫu nhiên để duy trì đổi mới sáng tạo.
+
+[00:22.11]<00:22.11>Simultaneously, <00:23.45>autonomous <00:24.28>AI <00:24.45>copilots <00:25.11>are <00:25.36>augmenting <00:26.18>cognitive <00:26.93>workflows <00:27.67>rather <00:28.17>than <00:28.50>displacing <00:29.32>them <00:29.66>entirely.
+[00:22.11]Đồng thời, các trợ lý AI tự hành đang tăng cường quy trình làm việc nhận thức thay vì thay thế hoàn toàn con người.
+
+[00:30.70]<00:30.70>The <00:30.90>decisive <00:31.43>competitive <00:32.16>advantage <00:32.75>will <00:33.02>belong <00:33.41>to <00:33.55>organizations <00:34.41>that <00:34.67>orchestrate <00:35.40>continuous <00:36.06>human-machine <00:36.92>synergy.
+[00:30.70]Lợi thế cạnh tranh quyết định sẽ thuộc về những tổ chức biết phối hợp nhịp nhàng sự hiệp lực liên tục giữa người và máy.
+
+[00:37.85]<00:37.85>Ultimately, <00:38.77>deliberate <00:39.51>practice <00:40.10>and <00:40.32>technological <00:41.29>literacy <00:41.88>will <00:42.17>define <00:42.62>the <00:42.84>future <00:43.29>of <00:43.43>sustainable <00:44.25>knowledge <00:44.92>work.
+[00:37.85]Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ sẽ định hình tương lai của nền lao động tri thức bền vững.
+`,
           srtContent: `1
-00:00:00,000 --> 00:00:06,200
+00:00:00,000 --> 00:00:06,460
 The shift toward distributed remote work has fundamentally transformed organizational dynamics.
 Sự chuyển dịch sang làm việc từ xa phân tán đã thay đổi căn bản động lực vận hành của các tổ chức.
 
 2
-00:00:06,300 --> 00:00:13,800
+00:00:06,860 --> 00:00:14,280
 Indeed, asynchronous communication fosters deeper uninterrupted focus and mitigates cognitive fatigue.
 Thật vậy, giao tiếp bất đồng bộ thúc đẩy sự tập trung sâu không bị ngắt quãng và giảm thiểu mệt mỏi nhận thức.
 
 3
-00:00:13,900 --> 00:00:21,100
+00:00:14,680 --> 00:00:21,710
 However, leaders must proactively cultivate serendipitous interactions to sustain creative innovation.
 Tuy nhiên, các nhà lãnh đạo phải chủ động nuôi dưỡng những tương tác ngẫu nhiên để duy trì đổi mới sáng tạo.
 
 4
-00:00:21,200 --> 00:00:28,900
+00:00:22,110 --> 00:00:30,300
 Simultaneously, autonomous AI copilots are augmenting cognitive workflows rather than displacing them entirely.
 Đồng thời, các trợ lý AI tự hành đang tăng cường quy trình làm việc nhận thức thay vì thay thế hoàn toàn con người.
 
 5
-00:00:29,000 --> 00:00:36,500
+00:00:30,700 --> 00:00:37,450
 The decisive competitive advantage will belong to organizations that orchestrate continuous human-machine synergy.
 Lợi thế cạnh tranh quyết định sẽ thuộc về những tổ chức biết phối hợp nhịp nhàng sự hiệp lực liên tục giữa người và máy.
 
 6
-00:00:36,600 --> 00:00:47,500
+00:00:37,850 --> 00:00:45,190
 Ultimately, deliberate practice and technological literacy will define the future of sustainable knowledge work.
-Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ sẽ định hình tương lai của nền lao động tri thức bền vững.`,
+Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ sẽ định hình tương lai của nền lao động tri thức bền vững.
+`,
         },
       ];
 
       // ==========================================
-      // 3. SMART SRT PARSER & SANITIZER
+      // 3. SMART SRT & ENHANCED LRC PARSER & SANITIZER
       // ==========================================
       function sanitizeSrtLine(text) {
         if (!text) return "";
@@ -2236,6 +2436,208 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
       }
 
+      function parseLrcTimecode(tag) {
+        if (!tag) return 0;
+        const clean = tag
+          .replace(/^[\[<]/, "")
+          .replace(/[\]>]$/, "")
+          .trim();
+        const parts = clean.split(":");
+        if (parts.length === 2) {
+          const mins = parseFloat(parts[0]) || 0;
+          const secs = parseFloat(parts[1]) || 0;
+          return mins * 60 + secs;
+        } else if (parts.length === 3) {
+          const hrs = parseFloat(parts[0]) || 0;
+          const mins = parseFloat(parts[1]) || 0;
+          const secs = parseFloat(parts[2]) || 0;
+          return hrs * 3600 + mins * 60 + secs;
+        }
+        return parseFloat(clean) || 0;
+      }
+
+      function formatSecondsToLrcTime(seconds) {
+        if (isNaN(seconds) || seconds < 0) seconds = 0;
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, "0")}:${secs.toFixed(2).padStart(5, "0")}`;
+      }
+
+      function parseEnhancedLrc(rawLrcText) {
+        if (!rawLrcText) return [];
+        const normalized = rawLrcText
+          .replace(/\r\n/g, "\n")
+          .replace(/\r/g, "\n");
+        const lines = normalized.split("\n");
+
+        const rawCues = [];
+        let lastCue = null;
+
+        for (let rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line) continue;
+
+          // Ignore metadata header tags
+          if (/^\[(ti|ar|al|au|by|length|offset|re|ve):/i.test(line)) continue;
+
+          // Check for timestamp prefix [mm:ss.xx]
+          const match = line.match(/^\[(\d{1,2}:\d{2}(?:\.\d+)?)\](.*)$/);
+          if (!match) continue;
+
+          const timeStr = match[1];
+          const rest = match[2].trim();
+          const timestamp = parseLrcTimecode(timeStr);
+
+          // Check if line contains intra-line word tags <mm:ss.xx>Word
+          const hasWordTags = /<\d{1,2}:\d{2}(?:\.\d+)?>/.test(rest);
+
+          if (hasWordTags) {
+            const wordMatches = [
+              ...rest.matchAll(/<(\d{1,2}:\d{2}(?:\.\d+)?)>([^<]+)/g),
+            ];
+            const words = [];
+            let fullText = "";
+
+            wordMatches.forEach((wm) => {
+              const wTime = parseLrcTimecode(wm[1]);
+              const wText = wm[2].trim();
+              if (wText) {
+                words.push({
+                  w: wText,
+                  start: wTime,
+                  end: wTime + 0.5,
+                });
+                fullText += (fullText ? " " : "") + wText;
+              }
+            });
+
+            for (let i = 0; i < words.length - 1; i++) {
+              words[i].end = words[i + 1].start;
+            }
+
+            words.includes = function (item) {
+              return this.some((x) =>
+                typeof x === "object"
+                  ? x.w.toLowerCase().includes(String(item).toLowerCase())
+                  : String(x).toLowerCase() === String(item).toLowerCase()
+              );
+            };
+
+            const cue = {
+              id: rawCues.length + 1,
+              start: timestamp,
+              end: timestamp + 4.0,
+              en: fullText,
+              vi: "",
+              words: words,
+            };
+            rawCues.push(cue);
+            lastCue = cue;
+          } else if (
+            lastCue &&
+            (Math.abs(lastCue.start - timestamp) < 0.2 || !lastCue.vi)
+          ) {
+            lastCue.vi = rest;
+          } else if (rest) {
+            const wordsList = rest.split(/\s+/).filter(Boolean);
+            const words = wordsList.map((w, wIdx) => ({
+              w: w,
+              start: timestamp + wIdx * 0.4,
+              end: timestamp + (wIdx + 1) * 0.4,
+            }));
+            words.includes = function (item) {
+              return this.some((x) =>
+                typeof x === "object"
+                  ? x.w.toLowerCase().includes(String(item).toLowerCase())
+                  : String(x).toLowerCase() === String(item).toLowerCase()
+              );
+            };
+            const cue = {
+              id: rawCues.length + 1,
+              start: timestamp,
+              end: timestamp + Math.max(2.0, wordsList.length * 0.4),
+              en: rest,
+              vi: "",
+              words: words,
+            };
+            rawCues.push(cue);
+            lastCue = cue;
+          }
+        }
+
+        for (let i = 0; i < rawCues.length - 1; i++) {
+          rawCues[i].end = rawCues[i + 1].start;
+          if (rawCues[i].words && rawCues[i].words.length > 0) {
+            rawCues[i].words[rawCues[i].words.length - 1].end = rawCues[i].end;
+          }
+        }
+        if (rawCues.length > 0) {
+          const last = rawCues[rawCues.length - 1];
+          if (last.words && last.words.length > 0) {
+            last.end = Math.max(
+              last.start + 2.0,
+              last.words[last.words.length - 1].start + 1.0
+            );
+            last.words[last.words.length - 1].end = last.end;
+          }
+        }
+
+        return rawCues;
+      }
+
+      function generateEnhancedLrcString(cues) {
+        const lines = [];
+        lines.push("[ti:Practice Scenario]");
+        lines.push("[ar:English Shadowing]");
+        lines.push("");
+
+        cues.forEach((cue) => {
+          const timeTag = `[${formatSecondsToLrcTime(cue.start)}]`;
+          let wordsTagged = "";
+          if (cue.words && cue.words.length > 0) {
+            wordsTagged = cue.words
+              .map(
+                (w) =>
+                  `<${formatSecondsToLrcTime(typeof w === "object" ? w.start : cue.start)}>${typeof w === "object" ? w.w : w}`
+              )
+              .join(" ");
+          } else {
+            wordsTagged = cue.en;
+          }
+          lines.push(`${timeTag}${wordsTagged}`);
+          if (cue.vi) {
+            lines.push(`${timeTag}${cue.vi}`);
+          }
+          lines.push("");
+        });
+        return lines.join("\n");
+      }
+
+      function calculateKaraokeWordIndex(words, currentSeconds) {
+        if (!words || words.length === 0) return 0;
+        if (currentSeconds <= (words[0].start || 0)) return 0;
+        if (
+          currentSeconds >=
+          (words[words.length - 1].end || words[words.length - 1].start || 0)
+        ) {
+          return words.length - 1;
+        }
+        for (let i = 0; i < words.length; i++) {
+          const w = words[i];
+          const wStart = typeof w === "object" ? w.start : 0;
+          const wEnd = typeof w === "object" ? w.end : Infinity;
+          if (currentSeconds >= wStart && currentSeconds < wEnd) {
+            return i;
+          }
+        }
+        for (let i = words.length - 1; i >= 0; i--) {
+          const w = words[i];
+          const wStart = typeof w === "object" ? w.start : 0;
+          if (currentSeconds >= wStart) return i;
+        }
+        return 0;
+      }
+
       function parseSrt(rawSrtText) {
         if (!rawSrtText) return [];
         const normalizedText = rawSrtText
@@ -2273,10 +2675,31 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
             rawVietnamese = "";
           }
 
-          const words = rawEnglish
-            .split(/\s+/)
-            .map((w) => w.replace(/[^\w'-]/g, ""))
-            .filter(Boolean);
+          const rawTokens = rawEnglish.split(/\s+/).filter(Boolean);
+          const cueDur = Math.max(0.5, endSeconds - startSeconds);
+          const totalChars =
+            rawTokens.reduce((sum, w) => sum + w.length, 0) || 1;
+
+          let wordTime = startSeconds;
+          const words = [];
+          rawTokens.forEach((token) => {
+            const wDur = (token.length / totalChars) * cueDur;
+            words.push({
+              w: token,
+              start: Math.round(wordTime * 100) / 100,
+              end:
+                Math.round(Math.min(endSeconds, wordTime + wDur) * 100) / 100,
+            });
+            wordTime += wDur;
+          });
+
+          words.includes = function (item) {
+            return this.some((x) =>
+              typeof x === "object"
+                ? x.w.toLowerCase().includes(String(item).toLowerCase())
+                : String(x).toLowerCase() === String(item).toLowerCase()
+            );
+          };
 
           cues.push({
             id: idx + 1,
@@ -2769,7 +3192,14 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
 
       function selectScenario(scenario, autoSwitchView = true) {
         state.activeScenario = scenario;
-        state.activeCues = parseSrt(scenario.srtContent);
+        state.activeCues = scenario.lrcContent
+          ? parseEnhancedLrc(scenario.lrcContent)
+          : parseSrt(scenario.srtContent);
+        const audio = getAudioElement();
+        if (audio && scenario.audioUrl) {
+          audio.src = scenario.audioUrl;
+          audio.playbackRate = state.playbackRate;
+        }
         state.currentCueIndex = 0;
         simulatedTime = 0;
         stopAudio();
@@ -2785,6 +3215,7 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
 
         renderActiveCue();
         renderTranscriptList();
+        renderScrubberMilestones();
         drawDualWaveforms();
         updateTimeLabels(0, scenario.duration);
 
@@ -2796,6 +3227,38 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
       // ==========================================
       // 8. AUDIO & SHADOWING SYNCHRONIZER ENGINE
       // ==========================================
+      let playerAudioEl = null;
+
+      function getAudioElement() {
+        if (!playerAudioEl) {
+          playerAudioEl = document.getElementById("playerAudio");
+          if (!playerAudioEl) {
+            playerAudioEl = new Audio();
+          }
+          playerAudioEl.addEventListener("ended", () => {
+            if (state.isPlaying) handleCuePlaybackComplete();
+          });
+          playerAudioEl.addEventListener("error", (e) => {
+            console.warn("Audio playback error, fallback to timer", e);
+          });
+        }
+        return playerAudioEl;
+      }
+
+      function updatePlayPauseIcons() {
+        const playIcon = document.getElementById("playIcon");
+        const pauseIcon = document.getElementById("pauseIcon");
+        if (playIcon && pauseIcon) {
+          if (state.isPlaying) {
+            playIcon.classList.add("hidden");
+            pauseIcon.classList.remove("hidden");
+          } else {
+            playIcon.classList.remove("hidden");
+            pauseIcon.classList.add("hidden");
+          }
+        }
+      }
+
       function togglePlayPause() {
         if (state.isPlaying) {
           pauseAudio();
@@ -2816,8 +3279,9 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
 
       function pauseAudio() {
         state.isPlaying = false;
-        if (synthAudioUtterance && window.speechSynthesis) {
-          window.speechSynthesis.cancel();
+        const audio = getAudioElement();
+        if (audio) {
+          audio.pause();
         }
         if (loopPauseTimeout) clearTimeout(loopPauseTimeout);
         if (animFrameId) cancelAnimationFrame(animFrameId);
@@ -2826,12 +3290,17 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
 
       function stopAudio() {
         pauseAudio();
+        const audio = getAudioElement();
+        if (audio) {
+          audio.currentTime = 0;
+        }
         simulatedTime = 0;
         state.currentCueIndex = 0;
         updateTimeLabels(
           0,
           state.activeScenario ? state.activeScenario.duration : 0
         );
+        renderActiveCue();
       }
 
       function replayCurrentSentence() {
@@ -2839,6 +3308,10 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         const currentCue = state.activeCues[state.currentCueIndex];
         if (!currentCue) return;
 
+        const audio = getAudioElement();
+        if (audio) {
+          audio.currentTime = currentCue.start;
+        }
         simulatedTime = currentCue.start;
         state.isLoopWaiting = false;
         hideRepeatPrompt();
@@ -2863,6 +3336,12 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         state.currentCueIndex = index;
         const cue = state.activeCues[index];
         simulatedTime = cue.start;
+
+        const audio = getAudioElement();
+        if (audio) {
+          audio.currentTime = cue.start;
+        }
+
         renderActiveCue();
         highlightTranscriptLine(index);
         drawDualWaveforms();
@@ -2878,60 +3357,74 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         const cue = state.activeCues[state.currentCueIndex];
         if (!cue) return;
 
-        if (window.speechSynthesis) {
-          window.speechSynthesis.cancel();
-        }
-
-        const cueDuration = Math.max(1, cue.end - cue.start);
-        const adjustedDuration = (cueDuration / state.playbackRate) * 1000;
-
-        if ("speechSynthesis" in window) {
-          const utterance = new SpeechSynthesisUtterance(cue.en);
-          utterance.lang =
-            state.activeScenario.accent === "UK" ? "en-GB" : "en-US";
-          utterance.rate = state.playbackRate;
-
-          utterance.onend = () => {
-            if (!state.isPlaying) return;
-            handleCuePlaybackComplete();
-          };
-
-          utterance.onerror = () => {
-            loopPauseTimeout = setTimeout(() => {
-              if (state.isPlaying) handleCuePlaybackComplete();
-            }, adjustedDuration);
-          };
-
-          synthAudioUtterance = utterance;
-          window.speechSynthesis.speak(utterance);
-        } else {
-          loopPauseTimeout = setTimeout(() => {
-            if (state.isPlaying) handleCuePlaybackComplete();
-          }, adjustedDuration);
-        }
-
+        const audio = getAudioElement();
+        const cueDuration = Math.max(0.5, cue.end - cue.start);
         logPracticeSeconds(cueDuration);
-        const startSimTime = cue.start;
-        const startTimeReal = performance.now();
 
-        function stepProgress(now) {
+        if (audio) {
+          audio.playbackRate = state.playbackRate;
+          if (
+            !audio.src ||
+            !audio.src.includes(state.activeScenario.audioUrl)
+          ) {
+            audio.src = state.activeScenario.audioUrl;
+          }
+          audio.currentTime = cue.start;
+          audio.play().catch((err) => {
+            console.warn("Audio play prevented or unavailable:", err);
+          });
+        }
+
+        function stepProgress() {
           if (!state.isPlaying) return;
-          const elapsed = ((now - startTimeReal) / 1000) * state.playbackRate;
-          simulatedTime = Math.min(cue.end, startSimTime + elapsed);
-          updateTimeLabels(simulatedTime, state.activeScenario.duration);
+          const currentAudioTime =
+            audio && !isNaN(audio.currentTime) && audio.currentTime > 0
+              ? audio.currentTime
+              : cue.start;
 
-          if (simulatedTime < cue.end) {
+          simulatedTime = currentAudioTime;
+          updateTimeLabels(currentAudioTime, state.activeScenario.duration);
+          updateKaraokeWordHighlight(currentAudioTime);
+
+          if (currentAudioTime >= cue.end) {
+            handleCuePlaybackComplete();
+          } else {
             animFrameId = requestAnimationFrame(stepProgress);
           }
         }
         animFrameId = requestAnimationFrame(stepProgress);
       }
 
+      function updateKaraokeWordHighlight(currentTime) {
+        const cue = state.activeCues[state.currentCueIndex];
+        if (!cue || !cue.words || cue.words.length === 0) return;
+
+        const activeWordIdx = calculateKaraokeWordIndex(cue.words, currentTime);
+        const container = document.getElementById("activeEnglishSubtitle");
+        if (!container) return;
+
+        const wordElements = container.querySelectorAll(".karaoke-word");
+        wordElements.forEach((el, idx) => {
+          if (idx === activeWordIdx) {
+            el.className =
+              "karaoke-word cursor-pointer transition-all duration-150 inline-block px-2 py-0.5 rounded-lg mr-1 mb-1 font-bold bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-[0_0_16px_rgba(6,182,212,0.45)] scale-105";
+          } else if (idx < activeWordIdx) {
+            el.className =
+              "karaoke-word cursor-pointer transition-all duration-150 inline-block px-1.5 py-0.5 rounded-lg mr-1 mb-1 font-medium text-white border border-transparent";
+          } else {
+            el.className =
+              "karaoke-word cursor-pointer transition-all duration-150 inline-block px-1.5 py-0.5 rounded-lg mr-1 mb-1 font-normal text-slate-400 border border-transparent";
+          }
+        });
+      }
+
       function handleCuePlaybackComplete() {
         logPracticeShadowSentence();
+        const audio = getAudioElement();
 
         if (state.playbackMode === "loop") {
           state.isPlaying = false;
+          if (audio) audio.pause();
           state.isLoopWaiting = true;
           showRepeatPrompt();
           updatePlayPauseIcons();
@@ -2975,88 +3468,99 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         state.playbackRate = rates[nextIdx];
         document.getElementById("speedBtn").textContent =
           `${state.playbackRate}x`;
-      }
-
-      function setSubtitleMask(mask) {
-        state.subtitleMask = mask;
-        const stage = document.getElementById("subtitleStage");
-        const maskButtons = {
-          both: document.getElementById("subMaskDual"),
-          primary: document.getElementById("subMaskPrimary"),
-          secondary: document.getElementById("subMaskSecondary"),
-          blur: document.getElementById("subMaskBlur"),
-        };
-
-        Object.keys(maskButtons).forEach((key) => {
-          if (maskButtons[key]) {
-            if (key === mask) {
-              maskButtons[key].className =
-                "px-2 sm:px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] sm:text-xs shrink-0";
-            } else {
-              maskButtons[key].className =
-                "px-2 sm:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0";
-            }
-          }
-        });
-
-        if (stage) {
-          if (mask === "blur") stage.classList.add("subtitles-blur-active");
-          else stage.classList.remove("subtitles-blur-active");
+        const audio = getAudioElement();
+        if (audio) {
+          audio.playbackRate = state.playbackRate;
         }
-
-        renderActiveCue();
-      }
-
-      function updatePlayPauseIcons() {
-        const playIcon = document.getElementById("playIcon");
-        const pauseIcon = document.getElementById("pauseIcon");
-        if (state.isPlaying) {
-          playIcon?.classList.add("hidden");
-          pauseIcon?.classList.remove("hidden");
-        } else {
-          playIcon?.classList.remove("hidden");
-          pauseIcon?.classList.add("hidden");
-        }
-      }
-
-      function showRepeatPrompt() {
-        const prompt = document.getElementById("repeatPromptContainer");
-        if (prompt) prompt.classList.remove("hidden");
-      }
-
-      function hideRepeatPrompt() {
-        const prompt = document.getElementById("repeatPromptContainer");
-        if (prompt) prompt.classList.add("hidden");
       }
 
       function updateTimeLabels(currentSec, totalSec) {
-        const curLabel = document.getElementById("currentTimeLabel");
-        const durLabel = document.getElementById("durationTimeLabel");
+        const curEl = document.getElementById("currentTimeLabel");
+        const durEl = document.getElementById("durationTimeLabel");
         const scrubber = document.getElementById("audioScrubber");
-
-        if (curLabel) curLabel.textContent = formatSecondsToTime(currentSec);
-        if (durLabel) durLabel.textContent = formatSecondsToTime(totalSec);
-
+        if (curEl) curEl.textContent = formatSecondsToTime(currentSec);
+        if (durEl) durEl.textContent = formatSecondsToTime(totalSec);
         if (scrubber && totalSec > 0) {
-          scrubber.value = (currentSec / totalSec) * 100;
+          scrubber.value = Math.min(
+            100,
+            Math.max(0, (currentSec / totalSec) * 100)
+          );
         }
       }
 
-      function onScrubberInput(percent) {
-        if (!state.activeScenario) return;
-        const targetSec = (percent / 100) * state.activeScenario.duration;
-        simulatedTime = targetSec;
-
-        const matchingIdx = state.activeCues.findIndex(
-          (c) => targetSec >= c.start && targetSec <= c.end
-        );
-        if (matchingIdx !== -1) {
-          state.currentCueIndex = matchingIdx;
-          renderActiveCue();
-          highlightTranscriptLine(matchingIdx);
-          drawDualWaveforms();
+      function onScrubberInput(percentVal) {
+        if (!state.activeScenario || !state.activeCues.length) return;
+        const totalDuration = state.activeScenario.duration || 1;
+        const targetTime = (parseFloat(percentVal) / 100) * totalDuration;
+        const audio = getAudioElement();
+        if (audio) {
+          audio.currentTime = targetTime;
         }
-        updateTimeLabels(targetSec, state.activeScenario.duration);
+        simulatedTime = targetTime;
+        updateTimeLabels(targetTime, totalDuration);
+        updateKaraokeWordHighlight(targetTime);
+
+        const targetIndex = state.activeCues.findIndex(
+          (c) => targetTime >= c.start && targetTime <= c.end
+        );
+        if (targetIndex !== -1 && targetIndex !== state.currentCueIndex) {
+          state.currentCueIndex = targetIndex;
+          renderActiveCue();
+          highlightTranscriptLine(targetIndex);
+        }
+      }
+
+      function renderScrubberMilestones() {
+        const container = document.getElementById("scrubberMilestones");
+        if (!container || !state.activeScenario || !state.activeCues.length)
+          return;
+        const totalDuration = state.activeScenario.duration || 1;
+
+        container.innerHTML = state.activeCues
+          .map((cue, idx) => {
+            const leftPercent = Math.min(
+              99,
+              Math.max(0, (cue.start / totalDuration) * 100)
+            );
+            return `<div
+              class="absolute w-1 h-3 bg-slate-600/80 hover:bg-emerald-400 rounded-full transition-colors cursor-pointer"
+              style="left: ${leftPercent}%;"
+              title="Sentence ${idx + 1} (${formatSecondsToTime(cue.start)})"
+            ></div>`;
+          })
+          .join("");
+      }
+
+      let isTranscriptCollapsed = false;
+      function toggleTranscriptDrawer() {
+        isTranscriptCollapsed = !isTranscriptCollapsed;
+        const drawerContent = document.getElementById(
+          "transcriptDrawerContent"
+        );
+        const label = document.getElementById("toggleTranscriptLabel");
+        const icon = document.getElementById("toggleTranscriptIcon");
+
+        if (isTranscriptCollapsed) {
+          drawerContent?.classList.add("hidden");
+          if (label) label.textContent = "Show";
+          icon?.classList.add("-rotate-90");
+        } else {
+          drawerContent?.classList.remove("hidden");
+          if (label) label.textContent = "Hide";
+          icon?.classList.remove("-rotate-90");
+        }
+      }
+
+      function exportCurrentScenarioLrc() {
+        if (!state.activeScenario || state.activeCues.length === 0) return;
+        const lrcText = generateEnhancedLrcString(state.activeCues);
+        const blob = new Blob([lrcText], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${state.activeScenario.id || "shadowing_karaoke"}_karaoke.lrc`;
+        a.click();
+        URL.revokeObjectURL(url);
       }
 
       // ==========================================
@@ -3237,6 +3741,38 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
       // ==========================================
       // 11. SUBTITLE RENDERING & WORD INSPECTOR
       // ==========================================
+      function setSubtitleMask(mask) {
+        state.subtitleMask = mask;
+        const stage = document.getElementById("subtitleStage");
+        if (stage) {
+          if (mask === "blur") {
+            stage.classList.add("subtitles-blur-active");
+          } else {
+            stage.classList.remove("subtitles-blur-active");
+          }
+        }
+
+        const buttons = {
+          both: document.getElementById("subMaskDual"),
+          primary: document.getElementById("subMaskPrimary"),
+          secondary: document.getElementById("subMaskSecondary"),
+          blur: document.getElementById("subMaskBlur"),
+        };
+
+        const activeClass =
+          "px-2 sm:px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] sm:text-xs shrink-0";
+        const inactiveClass =
+          "px-2 sm:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0";
+
+        Object.keys(buttons).forEach((key) => {
+          if (buttons[key]) {
+            buttons[key].className = key === mask ? activeClass : inactiveClass;
+          }
+        });
+
+        renderActiveCue();
+      }
+
       function renderActiveCue() {
         const enContainer = document.getElementById("activeEnglishSubtitle");
         const viContainer = document.getElementById("activeVietnameseSubtitle");
@@ -3260,17 +3796,23 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           enContainer.classList.add("hidden");
         } else {
           enContainer.classList.remove("hidden");
-          const wordSpans = cue.en
-            .split(/(\s+)/)
-            .map((token) => {
-              if (/^\s+$/.test(token)) return token;
+          const wordsList =
+            cue.words && cue.words.length > 0
+              ? cue.words
+              : cue.en
+                  .split(/\s+/)
+                  .map((w) => ({ w, start: cue.start, end: cue.end }));
+
+          const wordSpans = wordsList
+            .map((wObj, wIdx) => {
+              const token = typeof wObj === "object" ? wObj.w : wObj;
               const cleanWord = token.toLowerCase().replace(/[^\w'-]/g, "");
               const vocabItem = savedVocabVault[cleanWord];
               const statusAttr = vocabItem
                 ? `data-vocab-status="${vocabItem.status}"`
                 : "";
 
-              return `<span class="word-chip" ${statusAttr} onclick="openWordPopover(event, '${cleanWord}', '${escapeHtml(token)}')">${token}</span>`;
+              return `<span class="karaoke-word word-chip cursor-pointer transition-all duration-150 inline-block px-1.5 py-0.5 rounded-lg mr-1 mb-1 font-semibold" data-word-index="${wIdx}" ${statusAttr} onclick="openWordPopover(event, '${cleanWord}', '${escapeHtml(token)}')">${token}</span>`;
             })
             .join("");
           enContainer.innerHTML = wordSpans;

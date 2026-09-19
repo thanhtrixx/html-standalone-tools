@@ -15,6 +15,12 @@ const MIME = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".ico": "image/x-icon",
+  ".mp3": "audio/mpeg",
+  ".lrc": "text/plain; charset=utf-8",
+  ".srt": "text/plain; charset=utf-8",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
+  ".m4a": "audio/mp4",
 };
 
 const server = http.createServer((req, res) => {

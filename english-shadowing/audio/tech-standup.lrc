@@ -1,0 +1,25 @@
+[ti:Tech Agile Standup & Sprint Planning]
+[ar:English Shadowing]
+[al:workplace]
+[length:00:38.75]
+
+[00:00.00]<00:00.00>Alright <00:00.55>team, <00:01.04>let's <00:01.44>kick <00:01.75>off <00:01.98>our <00:02.22>morning <00:02.77>standup. <00:03.50>Who <00:03.73>wants <00:04.13>to <00:04.28>go <00:04.44>first?
+[00:00.00]Được rồi cả nhóm, hãy bắt đầu buổi họp nhanh buổi sáng. Ai muốn bắt đầu trước nào?
+
+[00:05.11]<00:05.11>Yesterday <00:05.81>I <00:05.88>finalized <00:06.58>the <00:06.81>user <00:07.12>authentication <00:08.20>flow <00:08.51>and <00:08.74>submitted <00:09.44>the <00:09.67>pull <00:09.98>request <00:10.52>for <00:10.75>review.
+[00:05.11]Hôm qua tôi đã hoàn thiện luồng xác thực người dùng và gửi pull request để mọi người duyệt.
+
+[00:11.69]<00:11.69>Today <00:12.05>I'm <00:12.27>planning <00:12.86>to <00:13.00>dive <00:13.29>into <00:13.59>the <00:13.81>database <00:14.39>schema <00:14.83>migration <00:15.49>for <00:15.70>offline <00:16.22>caching.
+[00:11.69]Hôm nay tôi dự định bắt tay vào việc chuyển đổi cấu trúc cơ sở dữ liệu để lưu đệm ngoại tuyến.
+
+[00:17.20]<00:17.20>Do <00:17.33>you <00:17.52>have <00:17.78>any <00:17.97>blockers <00:18.48>or <00:18.61>dependencies <00:19.38>on <00:19.51>the <00:19.70>backend <00:20.15>team <00:20.41>for <00:20.60>that <00:20.86>migration?
+[00:17.20]Bạn có gặp vướng mắc hay phụ thuộc gì vào đội backend cho đợt chuyển đổi đó không?
+
+[00:21.90]<00:21.90>I <00:21.98>just <00:22.29>need <00:22.60>Sarah <00:22.99>to <00:23.14>verify <00:23.61>the <00:23.84>indexed <00:24.38>fields <00:24.85>so <00:25.00>query <00:25.39>response <00:26.01>times <00:26.40>remain <00:26.86>lightning <00:27.56>fast.
+[00:21.90]Tôi chỉ cần Sarah xác thực lại các trường được đánh chỉ mục để tốc độ phản hồi truy vấn vẫn nhanh như chớp.
+
+[00:28.35]<00:28.35>Sounds <00:28.84>good! <00:29.34>I <00:29.42>will <00:29.74>review <00:30.23>your <00:30.55>PR <00:30.72>right <00:31.12>after <00:31.52>this <00:31.85>meeting <00:32.42>wraps <00:32.82>up.
+[00:28.35]Nghe ổn đấy! Tôi sẽ duyệt PR của bạn ngay sau khi cuộc họp này kết thúc.
+
+[00:33.36]<00:33.36>Perfect. <00:34.01>Let's <00:34.35>make <00:34.62>sure <00:34.90>our <00:35.10>release <00:35.58>stays <00:35.92>on <00:36.06>track <00:36.40>for <00:36.61>Thursday's <00:37.29>deployment <00:37.97>window.
+[00:33.36]Hoàn hảo. Hãy đảm bảo đợt phát hành của chúng ta đúng tiến độ cho khung triển khai thứ Năm.
