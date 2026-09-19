@@ -81,6 +81,9 @@ async function runTests() {
     globalThis.calculateKaraokeWordIndex = typeof calculateKaraokeWordIndex !== 'undefined' ? calculateKaraokeWordIndex : function(){};
     globalThis.parseScenarioUrl = typeof parseScenarioUrl !== 'undefined' ? parseScenarioUrl : function(){};
     globalThis.buildScenarioUrl = typeof buildScenarioUrl !== 'undefined' ? buildScenarioUrl : function(){};
+    globalThis.calculateLoopEndBoundary = typeof calculateLoopEndBoundary !== 'undefined' ? calculateLoopEndBoundary : function(){};
+    globalThis.calculateLoopStartBoundary = typeof calculateLoopStartBoundary !== 'undefined' ? calculateLoopStartBoundary : function(){};
+    globalThis.SPEED_PRESETS = typeof SPEED_PRESETS !== 'undefined' ? SPEED_PRESETS : [];
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
@@ -98,6 +101,9 @@ async function runTests() {
     calculateKaraokeWordIndex,
     parseScenarioUrl,
     buildScenarioUrl,
+    calculateLoopEndBoundary,
+    calculateLoopStartBoundary,
+    SPEED_PRESETS,
     CURATED_SCENARIOS,
     BUILTIN_VOCAB_DB,
   } = sandbox;
@@ -523,6 +529,56 @@ This is sentence number two.
   assert(
     getActiveCueIndexAtTime(multiCues, 12.0) === 2,
     "Time beyond last cue clamps to last cue index"
+  );
+
+  // 18. Loop Mode Acoustic Padding & Clamping Seams
+  assert(
+    typeof calculateLoopEndBoundary === "function",
+    "calculateLoopEndBoundary function exists"
+  );
+  assert(
+    typeof calculateLoopStartBoundary === "function",
+    "calculateLoopStartBoundary function exists"
+  );
+  assert(
+    Array.isArray(SPEED_PRESETS) && SPEED_PRESETS.length === 7,
+    `SPEED_PRESETS contains 7 standard rate options (found ${SPEED_PRESETS.length})`
+  );
+  assert(
+    SPEED_PRESETS.includes(0.5) &&
+      SPEED_PRESETS.includes(1.0) &&
+      SPEED_PRESETS.includes(1.5),
+    "SPEED_PRESETS contains 0.5x, 1.0x, and 1.5x"
+  );
+
+  // Cue 0: start 0.0, end 3.2, next cue start 3.5
+  assert(
+    calculateLoopEndBoundary(multiCues, 0, 15.0) === 3.35,
+    "Cue 0 end (3.2s) receives +150ms lead-out padding (3.35s < next cue start 3.5s)"
+  );
+  assert(
+    calculateLoopStartBoundary(multiCues, 0) === 0.0,
+    "Cue 0 start (0.0s) clamps to 0.0s (cannot be negative)"
+  );
+
+  // Tight adjacent cues: Cue 1 end 6.8, Cue 2 start 7.0 (gap = 200ms)
+  assert(
+    calculateLoopEndBoundary(multiCues, 1, 15.0) === 6.95,
+    "Cue 1 end (6.8s) + 150ms = 6.95s (clamped before Cue 2 start 7.0s)"
+  );
+  assert(
+    calculateLoopStartBoundary(multiCues, 1) === 3.45,
+    "Cue 1 start (3.5s) - 50ms = 3.45s (micro lead-in after Cue 0 end 3.2s)"
+  );
+
+  // Very tight adjacent cues: Cue A end 5.0, Cue B start 5.08 (gap = 80ms)
+  const tightCues = [
+    { start: 0, end: 5.0, en: "Tight A", vi: "" },
+    { start: 5.08, end: 8.0, en: "Tight B", vi: "" },
+  ];
+  assert(
+    calculateLoopEndBoundary(tightCues, 0, 10.0) === 5.08,
+    "Clamps lead-out padding to exact next cue start (5.08s) when gap < 150ms"
   );
 
   console.log(`\n==================================================`);

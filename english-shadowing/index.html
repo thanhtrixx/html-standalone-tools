@@ -931,15 +931,48 @@
                 </button>
               </div>
 
-              <!-- Speed Selector Pill -->
-              <button
-                id="speedBtn"
-                onclick="cyclePlaybackSpeed()"
-                class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 font-mono text-xs border border-slate-800 transition-colors shrink-0"
-                title="Adjust Playback Speed ([ / ])"
-              >
-                1.0x
-              </button>
+              <!-- Speed Selector Popover Wrapper -->
+              <div class="relative shrink-0">
+                <button
+                  id="speedBtn"
+                  onclick="toggleSpeedPopover(event)"
+                  class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-mono text-xs border border-slate-800 hover:border-slate-700 transition-all flex items-center gap-1.5 active:scale-95"
+                  title="Adjust Playback Speed ([ / ])"
+                  aria-label="Adjust Playback Speed"
+                  aria-haspopup="true"
+                >
+                  <span id="speedBtnText">1.0x</span>
+                  <svg
+                    id="speedBtnIcon"
+                    class="w-3 h-3 text-slate-400 transition-transform duration-150"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                <!-- Speed Selection Popover -->
+                <div
+                  id="speedPopover"
+                  class="hidden absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-36 bg-slate-900 border border-slate-800 rounded-2xl p-1.5 shadow-2xl space-y-0.5 backdrop-blur"
+                >
+                  <div
+                    class="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800/80 mb-1"
+                  >
+                    Speed
+                  </div>
+                  <div id="speedOptionsList" class="space-y-0.5">
+                    <!-- Injected via JavaScript -->
+                  </div>
+                </div>
+              </div>
 
               <!-- Central Transport Control Group -->
               <div class="flex items-center gap-2 sm:gap-3">
@@ -3311,6 +3344,18 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           setPlaybackMode("continuous", false);
         }
 
+        const savedSpeed = parseFloat(
+          localStorage.getItem("shadowing_playback_rate")
+        );
+        if (
+          savedSpeed &&
+          SPEED_PRESETS.some((r) => Math.abs(r - savedSpeed) < 0.01)
+        ) {
+          setPlaybackSpeed(savedSpeed, false);
+        } else {
+          setPlaybackSpeed(1.0, false);
+        }
+
         // URL Scenario Deep-Linking on initial page load
         const { scenarioId, cueIndex } = parseScenarioUrl();
         let loadedFromUrl = false;
@@ -3754,6 +3799,116 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         }
       }
 
+      const SPEED_PRESETS = [0.5, 0.75, 0.85, 1.0, 1.15, 1.25, 1.5];
+
+      function calculateLoopEndBoundary(cues, currentIndex, totalDuration) {
+        if (!cues || !cues[currentIndex]) return 0;
+        const cue = cues[currentIndex];
+        const nextCue = cues[currentIndex + 1];
+        const maxEnd = nextCue
+          ? nextCue.start
+          : totalDuration || cue.end + 0.15;
+        // Add +150ms lead-out padding, but don't bleed into next cue
+        return Math.min(+(cue.end + 0.15).toFixed(3), maxEnd);
+      }
+
+      function calculateLoopStartBoundary(cues, currentIndex) {
+        if (!cues || !cues[currentIndex]) return 0;
+        const cue = cues[currentIndex];
+        const prevCue = cues[currentIndex - 1];
+        const minStart = prevCue ? prevCue.end : 0;
+        // Add -50ms micro lead-in, but don't overlap into previous cue
+        return Math.max(minStart, Math.max(0, +(cue.start - 0.05).toFixed(3)));
+      }
+
+      function toggleSpeedPopover(event) {
+        if (event) event.stopPropagation();
+        const popover = document.getElementById("speedPopover");
+        if (!popover) return;
+        const isHidden = popover.classList.contains("hidden");
+        if (isHidden) {
+          openSpeedPopover();
+        } else {
+          closeSpeedPopover();
+        }
+      }
+
+      function openSpeedPopover() {
+        const popover = document.getElementById("speedPopover");
+        const list = document.getElementById("speedOptionsList");
+        const icon = document.getElementById("speedBtnIcon");
+        if (!popover || !list) return;
+
+        list.innerHTML = SPEED_PRESETS.map((rate) => {
+          const isCurrent = Math.abs(state.playbackRate - rate) < 0.01;
+          const label = rate === 1.0 ? "1.0x (Normal)" : `${rate}x`;
+          const activeClass = isCurrent
+            ? "bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30"
+            : "text-slate-300 hover:bg-slate-800 hover:text-white border border-transparent";
+
+          return `
+            <button
+              onclick="setPlaybackSpeed(${rate})"
+              class="w-full px-2.5 py-1.5 rounded-xl text-left text-xs font-mono transition-all flex items-center justify-between ${activeClass}"
+            >
+              <span>${label}</span>
+              ${isCurrent ? '<svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' : ""}
+            </button>
+          `;
+        }).join("");
+
+        popover.classList.remove("hidden");
+        if (icon) icon.classList.add("rotate-180");
+      }
+
+      function closeSpeedPopover() {
+        const popover = document.getElementById("speedPopover");
+        const icon = document.getElementById("speedBtnIcon");
+        if (popover) popover.classList.add("hidden");
+        if (icon) icon.classList.remove("rotate-180");
+      }
+
+      function setPlaybackSpeed(rate, save = true) {
+        state.playbackRate = rate;
+        if (save) {
+          try {
+            localStorage.setItem("shadowing_playback_rate", String(rate));
+          } catch (e) {}
+        }
+        const speedBtnText = document.getElementById("speedBtnText");
+        const speedBtn = document.getElementById("speedBtn");
+        if (speedBtnText) {
+          speedBtnText.textContent = `${rate}x`;
+        } else if (speedBtn) {
+          speedBtn.textContent = `${rate}x`;
+        }
+        const audio = getAudioElement();
+        if (audio) {
+          audio.playbackRate = rate;
+        }
+        closeSpeedPopover();
+      }
+
+      function stepPlaybackSpeed(direction) {
+        let currentIndex = SPEED_PRESETS.findIndex(
+          (r) => Math.abs(r - state.playbackRate) < 0.01
+        );
+        if (currentIndex === -1) currentIndex = 3; // default 1.0x
+        const nextIndex = Math.max(
+          0,
+          Math.min(SPEED_PRESETS.length - 1, currentIndex + direction)
+        );
+        setPlaybackSpeed(SPEED_PRESETS[nextIndex]);
+      }
+
+      function cyclePlaybackSpeed() {
+        let currentIndex = SPEED_PRESETS.findIndex(
+          (r) => Math.abs(r - state.playbackRate) < 0.01
+        );
+        const nextIndex = (currentIndex + 1) % SPEED_PRESETS.length;
+        setPlaybackSpeed(SPEED_PRESETS[nextIndex]);
+      }
+
       function playCurrentCueAudio() {
         const cue = state.activeCues[state.currentCueIndex];
         if (!cue) return;
@@ -3776,14 +3931,24 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           ) {
             audio.src = state.activeScenario.audioUrl;
           }
-          // Only seek if audio is paused, or if current position is far from current cue window
-          if (
-            audio.paused ||
-            audio.currentTime < cue.start - 0.5 ||
-            audio.currentTime > cue.end + 0.5
-          ) {
-            audio.currentTime = cue.start;
-            startAudioTime = cue.start;
+
+          if (state.playbackMode === "loop") {
+            const loopStart = calculateLoopStartBoundary(
+              state.activeCues,
+              state.currentCueIndex
+            );
+            audio.currentTime = loopStart;
+            startAudioTime = loopStart;
+          } else {
+            // Continuous mode: only seek if paused or far from window
+            if (
+              audio.paused ||
+              audio.currentTime < cue.start - 0.5 ||
+              audio.currentTime > cue.end + 0.5
+            ) {
+              audio.currentTime = cue.start;
+              startAudioTime = cue.start;
+            }
           }
           const playPromise = audio.play();
           if (playPromise !== undefined) {
@@ -3846,9 +4011,14 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
             updateKaraokeWordHighlight(currentAudioTime);
             animFrameId = requestAnimationFrame(stepProgress);
           } else {
-            // Interactive Loop Mode
+            // Interactive Loop Mode with Acoustic Lead-out Padding
             updateKaraokeWordHighlight(currentAudioTime);
-            if (currentAudioTime >= cue.end) {
+            const loopEnd = calculateLoopEndBoundary(
+              state.activeCues,
+              state.currentCueIndex,
+              state.activeScenario?.duration
+            );
+            if (currentAudioTime >= loopEnd) {
               handleCuePlaybackComplete();
             } else {
               animFrameId = requestAnimationFrame(stepProgress);
@@ -3930,18 +4100,6 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
             btnLoop.className =
               "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
           hideRepeatPrompt();
-        }
-      }
-
-      function cyclePlaybackSpeed() {
-        const rates = [0.75, 0.85, 1.0, 1.15, 1.25];
-        let nextIdx = (rates.indexOf(state.playbackRate) + 1) % rates.length;
-        state.playbackRate = rates[nextIdx];
-        document.getElementById("speedBtn").textContent =
-          `${state.playbackRate}x`;
-        const audio = getAudioElement();
-        if (audio) {
-          audio.playbackRate = state.playbackRate;
         }
       }
 
@@ -4818,9 +4976,12 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
             navigateSentence(1);
             break;
           case "BracketLeft":
+            e.preventDefault();
+            stepPlaybackSpeed(-1);
+            break;
           case "BracketRight":
             e.preventDefault();
-            cyclePlaybackSpeed();
+            stepPlaybackSpeed(1);
             break;
           case "Digit1":
             setSubtitleMask("both");
@@ -4842,6 +5003,7 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
             break;
           case "Escape":
             closeWordPopover();
+            closeSpeedPopover();
             closeHotkeyModal();
             closeImportModal();
             closeFlashcardModal();
@@ -4868,6 +5030,17 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           !e.target.classList.contains("word-chip")
         ) {
           closeWordPopover();
+        }
+
+        const speedPop = document.getElementById("speedPopover");
+        const speedBtn = document.getElementById("speedBtn");
+        if (
+          speedPop &&
+          !speedPop.contains(e.target) &&
+          speedBtn &&
+          !speedBtn.contains(e.target)
+        ) {
+          closeSpeedPopover();
         }
       });
 
