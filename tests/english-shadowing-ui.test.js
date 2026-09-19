@@ -136,18 +136,67 @@ async function runTests() {
     "Viewport meta tag exists"
   );
 
-  // 7. Daily Practice Hub & Streak Tracking UI
+  // 7. Practice Insights & Header Indicators (Slice 3)
   assert(
-    htmlContent.includes('id="streakDaysCount"'),
-    "Streak days counter element exists"
+    !htmlContent.includes('id="dailyHubSection"'),
+    "dailyHubSection is removed from main container"
   );
   assert(
-    htmlContent.includes('id="practiceMinutesTracker"'),
-    "Practice minutes tracker element exists"
+    htmlContent.includes('id="navBtnInsights"'),
+    "navBtnInsights button exists in header"
   );
   assert(
-    htmlContent.includes('id="sentencesShadowedTracker"'),
-    "Sentences shadowed tracker element exists"
+    htmlContent.includes('id="headerStreakBadge"'),
+    "Header streak indicator badge exists"
+  );
+  assert(
+    htmlContent.includes('id="headerStreakCount"'),
+    "Header streak count element exists"
+  );
+  assert(
+    htmlContent.includes('id="insightsModal"'),
+    "Practice Insights & Analytics modal container exists"
+  );
+  assert(
+    htmlContent.includes('id="modalStreakDays"'),
+    "Modal streak days element exists"
+  );
+  assert(
+    htmlContent.includes('id="modalPracticeTime"'),
+    "Modal practice time progress tracker exists"
+  );
+  assert(
+    htmlContent.includes('id="modalGoalProgressBar"'),
+    "Modal 15m goal progress bar exists"
+  );
+  assert(
+    htmlContent.includes('id="modalSentencesToday"'),
+    "Modal sentences shadowed today counter exists"
+  );
+  assert(
+    htmlContent.includes('id="modalSentencesTotal"'),
+    "Modal total sentences shadowed counter exists"
+  );
+  assert(
+    htmlContent.includes('id="modalDueWordsCount"'),
+    "Modal due words count exists"
+  );
+  assert(
+    htmlContent.includes('id="modalTotalVocabCount"'),
+    "Modal total vocabulary counter exists"
+  );
+  assert(
+    htmlContent.includes('id="boxCount1"') &&
+      htmlContent.includes('id="boxCount5"'),
+    "5-Box SRS vocabulary mastery distribution exists"
+  );
+  assert(
+    htmlContent.includes('onclick="exportPracticeStatsJson()"'),
+    "Export practice stats JSON action button exists"
+  );
+  assert(
+    htmlContent.includes('onclick="resetPracticeStats()"'),
+    "Reset practice stats action button exists"
   );
 
   // 8. Recording UI Cleanup (Temporarily Disabled for Ergonomics)
