@@ -161,21 +161,21 @@
   >
     <!-- Header Navigation -->
     <header
-      class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30"
+      class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-2 sm:px-6 py-2 sm:py-3 w-full max-w-full overflow-hidden"
     >
       <div
-        class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"
+        class="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-4"
       >
-        <!-- Logo & Title -->
+        <!-- Brand / Title -->
         <div
-          class="flex items-center space-x-3 cursor-pointer select-none"
+          class="flex items-center space-x-2 sm:space-x-3 cursor-pointer select-none shrink-0"
           onclick="switchView('catalog')"
         >
           <div
-            class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0"
+            class="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0"
           >
             <svg
-              class="w-6 h-6 text-slate-950"
+              class="w-5 h-5 sm:w-6 sm:h-6 text-slate-950"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -188,7 +188,7 @@
               />
             </svg>
           </div>
-          <div class="hidden sm:block">
+          <div class="hidden md:block">
             <span
               class="font-bold text-base sm:text-lg tracking-tight text-white block leading-tight"
               data-i18n="appTitle"
@@ -223,7 +223,7 @@
                 d="M4 6h16M4 10h16M4 14h16M4 18h16"
               />
             </svg>
-            <span class="hidden md:inline" data-i18n="navCatalog"
+            <span class="hidden lg:inline" data-i18n="navCatalog"
               >Scenarios</span
             >
           </button>
@@ -253,7 +253,7 @@
                 d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span class="hidden md:inline" data-i18n="navPlayer">Player</span>
+            <span class="hidden lg:inline" data-i18n="navPlayer">Player</span>
           </button>
 
           <button
@@ -275,13 +275,13 @@
                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
               />
             </svg>
-            <span class="hidden md:inline" data-i18n="navInsights"
+            <span class="hidden lg:inline" data-i18n="navInsights"
               >Insights</span
             >
             <!-- Streak Badge -->
             <span
               id="headerStreakBadge"
-              class="ml-0.5 sm:ml-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-0.5"
+              class="hidden sm:inline-flex ml-0.5 sm:ml-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 items-center gap-0.5"
               title="Daily Practice Streak"
               >🔥 <span id="headerStreakCount">1</span></span
             >
@@ -306,11 +306,11 @@
                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
               />
             </svg>
-            <span class="hidden md:inline" data-i18n="navVocab">Vocab</span>
+            <span class="hidden lg:inline" data-i18n="navVocab">Vocab</span>
             <!-- Due Badge -->
             <span
               id="headerDueBadge"
-              class="ml-0.5 sm:ml-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
+              class="hidden sm:inline-block ml-0.5 sm:ml-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30"
               title="Words Due for Review Today"
               >0 Due</span
             >
@@ -378,19 +378,19 @@
 
           <!-- Bilingual Switcher -->
           <div
-            class="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-xs font-semibold shrink-0"
+            class="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-[10px] sm:text-xs font-semibold shrink-0"
           >
             <button
               id="langBtnEn"
               onclick="setLanguage('en')"
-              class="px-2 sm:px-2.5 py-1 rounded transition-all bg-emerald-500 text-slate-950 font-bold"
+              class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded transition-all bg-emerald-500 text-slate-950 font-bold"
             >
               EN
             </button>
             <button
               id="langBtnVi"
               onclick="setLanguage('vi')"
-              class="px-2 sm:px-2.5 py-1 rounded transition-all text-slate-400 hover:text-slate-200"
+              class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded transition-all text-slate-400 hover:text-slate-200"
             >
               VI
             </button>
