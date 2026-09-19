@@ -131,7 +131,7 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
     // Close drawer
     await page
       .locator('#vocabDrawer button[aria-label="Close Vocabulary Drawer"]')
-      .click({ force: true });
+      .click();
     await expect(page.locator("#vocabDrawer")).toHaveClass(/translate-x-full/);
   });
 
@@ -182,6 +182,105 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
     // Expand Transcript Drawer again
     await page.click("#transcriptCard > div:first-child");
     await expect(page.locator("#transcriptDrawerContent")).toBeVisible();
+
+    await assertNoHorizontalOverflow(page);
+  });
+
+  test("7. URL Deep-Linking Navigation & History State Sync", async ({
+    page,
+  }) => {
+    // Navigate directly with scenario and cue parameter
+    await page.goto(`${APP_PATH}?scenario=tech-standup&cue=2`, {
+      waitUntil: "domcontentloaded",
+    });
+    await page.waitForSelector("#player-view:not(.hidden)");
+
+    // Verify Player view opens immediately to targeted scenario
+    await expect(page.locator("#player-view")).toBeVisible();
+    await expect(page.locator("#activeScenarioTitle")).toContainText(
+      "Tech Agile Standup"
+    );
+    await expect(page.locator("#sentenceIndexTracker")).toContainText(
+      "Sentence 3"
+    );
+
+    // Return back to catalog
+    await page.click('button[title*="Back to Catalog"]');
+    await expect(page.locator("#catalog-view")).toBeVisible();
+    expect(page.url()).not.toContain("scenario=tech-standup");
+
+    await assertNoHorizontalOverflow(page);
+  });
+
+  test("8. Practice Insights Modal & Daily Goals Analytics", async ({
+    page,
+  }) => {
+    await setupPage(page);
+
+    // Open Insights Modal from header
+    await page.click("#navBtnInsights");
+    await expect(page.locator("#insightsModal")).toBeVisible();
+
+    // Verify statistics cards are rendered
+    await expect(page.locator("#modalStreakDays")).toBeVisible();
+    await expect(page.locator("#modalPracticeTime")).toBeVisible();
+    await expect(page.locator("#modalGoalProgressBar")).toBeAttached();
+    await expect(page.locator("#modalSentencesToday")).toBeVisible();
+    await expect(page.locator("#modalDueWordsCount")).toBeVisible();
+
+    // Close modal
+    await page
+      .locator('#insightsModal button[aria-label="Close Insights Modal"]')
+      .click();
+    await expect(page.locator("#insightsModal")).toBeHidden();
+
+    await assertNoHorizontalOverflow(page);
+  });
+
+  test("9. Default Continuous Flow Mode & Active Line Auto-Centering", async ({
+    page,
+  }) => {
+    await setupPage(page);
+    await page.locator("#scenarioCardsGrid button").first().click();
+
+    // Verify Continuous Flow Mode is active by default
+    await expect(page.locator("#modeContinuousBtn")).toHaveClass(
+      /bg-emerald-500\/20/
+    );
+
+    // Navigate across sentences and check transcript line styling
+    const firstLine = page.locator("#transcriptItem-0");
+    await expect(firstLine).toHaveClass(/bg-emerald-500\/10/);
+
+    // Step to sentence 2
+    await page.click('button[title*="Next Sentence"]');
+    const secondLine = page.locator("#transcriptItem-1");
+    await expect(secondLine).toHaveClass(/bg-emerald-500\/10/);
+
+    await assertNoHorizontalOverflow(page);
+  });
+
+  test("10. App Shell & Pinned Bottom Dock Reachability", async ({ page }) => {
+    await setupPage(page);
+    await page.locator("#scenarioCardsGrid button").first().click();
+
+    // Verify fixed app shell body
+    await expect(page.locator("body")).toHaveClass(/overflow-hidden/);
+
+    // Verify Hero Subtitle Stage, Transcript Card, and Pinned Dock are all visible within viewport
+    await expect(page.locator("#subtitleStage")).toBeVisible();
+    await expect(page.locator("#transcriptCard")).toBeVisible();
+    await expect(page.locator("#player-container")).toBeVisible();
+
+    const isDockWithinViewport = await page.evaluate(() => {
+      const dock = document.getElementById("player-container");
+      if (!dock) return false;
+      const rect = dock.getBoundingClientRect();
+      return rect.bottom <= window.innerHeight + 2 && rect.top >= 0;
+    });
+    expect(isDockWithinViewport, "Pinned dock must be within viewport").toBe(
+      true
+    );
 
     await assertNoHorizontalOverflow(page);
   });
