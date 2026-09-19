@@ -2,43 +2,40 @@
 
 ## 🎯 Scope & Objectives
 
-Verify the App-Shell layout, URL scenario deep-linking engine, default continuous playback flow, dedicated Insights & Reports modal, and pinned bottom player dock across unit, integration, and multi-device E2E levels.
+Verify the listening-first audio playback engine (zero-seek continuous streaming, loop mode acoustic boundary padding), clean minimalist player top bar, view-only transcript navigation feed, and speed selection popover across unit, integration, and multi-device E2E levels.
 
 ---
 
 ## 🧪 Seam Test Matrix
 
-### 1. Pure Engine Math & URL Routing Seams (`tests/english-shadowing-engine.test.js`)
+### 1. Pure Engine Math, Cues & Boundary Padding Seams (`tests/english-shadowing-engine.test.js`)
 
-- `parseScenarioUrl`: Validates extraction of `scenario` and `cue` query parameters from URL strings and edge-case sanitization.
-- `buildScenarioUrl`: Validates serializing scenario identifiers and optional cue positions to clean URL search parameters.
-- `parseEnhancedLrc`: Validates intra-line word timestamp parsing (`<mm:ss.xx>`), dual-line translation matching, cue start/end extraction.
-- `exportToEnhancedLrc`: Validates serialization back to standard LRC format with intact word tags.
+- `calculateAcousticBoundary`: Validates lead-out grace buffer (+150ms) clamped to next cue start and lead-in margin (-50ms clamped to ≥ 0).
 - `calculateKaraokeWordIndex`: Validates instantaneous resolution of active word token given `audio.currentTime`.
+- `parseEnhancedLrc` & `parseSrt`: Validates subtitle parsing, dual-line translation matching, cue start/end extraction.
+- `parseScenarioUrl` & `buildScenarioUrl`: Validates URL query parameter routing and history state synchronization.
 
-### 2. Audio Engine & Preference Persistence Seams (`tests/english-shadowing-storage.test.js`)
+### 2. Audio Engine, Playback Synchronization & Storage Seams (`tests/english-shadowing-storage.test.js`)
 
-- Continuous mode playback defaults (`continuous` default state) and `localStorage` preference loading (`shadowing_playback_mode`).
-- Practice stats persistence (daily streak, practice minutes, sentences shadowed count).
-- Leitner SRS 5-box deck operations and vocabulary state.
-- Service Worker offline caching for audio assets and scripts.
+- Continuous mode playback flow: verifies uninterrupted audio streaming across sentence transitions without forced seeks.
+- Loop mode auto-pause: verifies clean pause at padded boundary without bleeding into subsequent cues.
+- Playback speed persistence and direct rate preset application (`0.5x` through `1.5x`).
+- Practice statistics tracking (streak, practice minutes, sentences shadowed count).
 
-### 3. UI, App-Shell & Navigation Seams (`tests/english-shadowing-ui.test.js`)
+### 3. UI, Navigation & Ergonomics Seams (`tests/english-shadowing-ui.test.js`)
 
-- URL deep-linking on load: auto-transitions to Player view with matched scenario.
-- Two-way history sync: URL updates on scenario select and catalog return; `popstate` navigation.
-- Pinned bottom player dock: `#player-container` pinned at bottom edge with scrubber, milestone markers, and transport buttons.
-- Central Workspace hierarchy: `#subtitleStage` on top, `#transcriptCard` in middle with auto-scrolling active sentence highlighting.
-- Insights & Reports Modal: Opening modal displays accurate streak, practice minutes progress, sentences shadowed, and SRS distribution.
-- Record UI cleanup: verifies `waveformComparisonBox` and `btnDockRecord` are cleanly hidden/removed.
+- Minimalist Player Top Bar: verifies removal of Export LRC/SRT buttons and existence of clean ghost "Back to Catalog" button.
+- View-Only Transcript Card: verifies replacement of `<input>` elements with static typography and full-row click-to-jump handler.
+- Speed Selection Popover: verifies opening popover, rendering presets (`0.5x`, `0.75x`, `0.85x`, `1.0x`, `1.15x`, `1.25x`, `1.5x`), selecting speed, and keyboard shortcut stepping (`[` / `]`).
+- Subtitle Masking Modes (`Dual`, `EN Only`, `VI Only`, `Blur`) in player top bar.
 
 ### 4. Bilingual i18n Parity (`tests/english-shadowing-i18n.test.js`)
 
-- 100% dictionary parity between `en` and `vi` tables for all new Insights keys (`navInsights`, `insightsTitle`, `streakDays`, etc.).
+- 100% dictionary parity between `en` and `vi` tables for updated navigation and speed labels (`btnBackToCatalog`, `speedNormal`, etc.).
 
 ### 5. Multi-Device Playwright E2E (`tests/e2e/english-shadowing-devices.spec.js`)
 
 - Mobile (iPhone 14 Pro, Android Pixel 7), Tablet (iPad Pro 11), and Desktop Chrome viewports.
-- Deep link direct scenario loading (`/?scenario=daily-routine-01`).
-- Continuous audio playback with auto-scrolling transcript and active word karaoke glow.
-- Pinned bottom transport controls interaction across responsive breakpoints.
+- Click-to-jump navigation from transcript feed across responsive breakpoints.
+- Speed popover interaction on touch and desktop.
+- Uninterrupted continuous audio streaming and loop mode shadowing repetitions.
