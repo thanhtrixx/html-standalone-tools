@@ -92,30 +92,16 @@ if (testProc.status !== 0) {
   process.exit(testProc.status || 1);
 }
 
-// 4. Playwright Multi-Device E2E & Visual Regression Suite
-console.log("\n[4/4] Running Playwright Multi-Device E2E Tests...");
-const playwrightBin = path.join(
-  ROOT_DIR,
-  "node_modules",
-  "@playwright",
-  "test",
-  "cli.js"
+// 4. Playwright Multi-Device E2E & Visual Regression Suite (Token-Efficient Summary Runner)
+console.log(
+  "\n[4/4] Running Playwright Multi-Device E2E Tests (Summary Mode)..."
 );
-let e2eProc;
-if (fs.existsSync(playwrightBin)) {
-  e2eProc = spawnSync(runtime, [playwrightBin, "test"], {
-    cwd: ROOT_DIR,
-    stdio: "inherit",
-    env: { ...process.env, CI: process.env.CI || "1" },
-  });
-} else {
-  const runner = isBun ? "bunx" : "npx";
-  e2eProc = spawnSync(runner, ["playwright", "test"], {
-    cwd: ROOT_DIR,
-    stdio: "inherit",
-    env: { ...process.env, CI: process.env.CI || "1" },
-  });
-}
+const e2eSummaryScript = path.join(ROOT_DIR, "scripts", "e2e-summary.js");
+const e2eProc = spawnSync(runtime, [e2eSummaryScript], {
+  cwd: ROOT_DIR,
+  stdio: "inherit",
+  env: { ...process.env, CI: process.env.CI || "1" },
+});
 
 if (e2eProc.status !== 0) {
   console.error("\n❌ Playwright E2E tests failed.");

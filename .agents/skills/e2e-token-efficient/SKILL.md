@@ -16,7 +16,7 @@ It guides autonomous coding agents and human engineers on running E2E multi-devi
 Standard Playwright CLI runs output hundreds of lines containing progress bars, ANSI terminal codes, worker allocation messages, and DOM dumps. When fed directly into an LLM context, a single test run can consume **30,000 to 50,000 tokens**.
 
 To maximize agent code generation throughput and keep context windows lean:
-1. **Always use compact summary runners** (`scripts/e2e-summary.js` / `npm run test:e2e:summary`).
+1. **Always use compact summary runners** (`scripts/e2e-summary.js` / `bun run test:e2e:summary`).
 2. **Execute tool-scoped tests during inner loops** (`--tool=<name>`).
 3. **Practice lazy trace retrieval** — inspect only the specific ~5-line error snippet on failures, never full execution logs.
 
@@ -29,9 +29,9 @@ Follow the Three-Tier Change Classification and Tool Lifecycle Phase:
 | Change Tier / Tool Phase | E2E Requirement | Command |
 | :--- | :--- | :--- |
 | **Tier 0 (Docs-Only)** | ❌ None | None |
-| **Tier 1 (Active Feature Development)** | ⚪ Optional | `npm run test:e2e:<tool>` |
+| **Tier 1 (Active Feature Development)** | ⚪ Optional | `bun run test:e2e:<tool>` |
 | **Tier 1 (Hardened Stable)** | ✅ Mandatory (Tool-Scoped) | `node scripts/e2e-summary.js --tool=<tool>` |
-| **Tier 2 (Full Ceremony / Release Gate)** | ✅ Mandatory (Full Suite) | `npm run test:e2e:summary` or `npm run verify` |
+| **Tier 2 (Full Ceremony / Release Gate)** | ✅ Mandatory (Full Suite) | `bun run test:e2e:summary` or `bun run verify` |
 
 *Tool Lifecycle reference:* See [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
 
@@ -44,13 +44,13 @@ Follow the Three-Tier Change Classification and Tool Lifecycle Phase:
 Runs Playwright across all projects (`desktop`, `android`, `iphone`, `ipad`) and aggregates output into a single-line pass signal:
 
 ```bash
-npm run test:e2e:summary
+bun run test:e2e:summary
 # or: node scripts/e2e-summary.js
 ```
 
 **Output on Success (~20 tokens):**
 ```text
-✅ 144/144 passed (buy-rent: 28, habit: 28, portal: 32, predictor: 28, tracker: 28)
+✅ 204/204 passed (buy-rent: 28, habit: 48, portal: 32, predictor: 28, shadowing: 40, tracker: 28)
 ```
 
 ### 2. Scoped E2E Runner (Single Tool)
@@ -59,28 +59,28 @@ When modifying a specific tool, restrict execution to that tool's test specifica
 
 ```bash
 # Habit Tracker
-node scripts/e2e-summary.js --tool=habit
+bun run test:e2e:habit
+# or: node scripts/e2e-summary.js --tool=habit
+
+# English Shadowing
+bun run test:e2e:shadowing
+# or: node scripts/e2e-summary.js --tool=shadowing
 
 # Smart Buy-List Price Tracker
-node scripts/e2e-summary.js --tool=tracker
+bun run test:e2e:tracker
+# or: node scripts/e2e-summary.js --tool=tracker
 
 # Buy vs Rent Home Comparison
-node scripts/e2e-summary.js --tool=buy-rent
+bun run test:e2e:buy-rent
+# or: node scripts/e2e-summary.js --tool=buy-rent
 
 # Personal Finance Savings Predictor
-node scripts/e2e-summary.js --tool=predictor
+bun run test:e2e:predictor
+# or: node scripts/e2e-summary.js --tool=predictor
 
 # Portal Catalog Hub
-node scripts/e2e-summary.js --tool=portal
-```
-
-*Direct npm scripts also available:*
-```bash
-npm run test:e2e:habit
-npm run test:e2e:tracker
-npm run test:e2e:buy-rent
-npm run test:e2e:predictor
-npm run test:e2e:portal
+bun run test:e2e:portal
+# or: node scripts/e2e-summary.js --tool=portal
 ```
 
 ---
@@ -114,9 +114,9 @@ For ultra-fast pre-commit and smoke verification without spinning up full Chromi
 
 1. **Lightpanda Smoke Suites**:
    - `tests/smart-buy-list-lightpanda-smoke.test.js` provides sub-second semantic DOM validation.
-   - Run alongside unit tests: `npm run test:tracker:smoke`.
+   - Run alongside unit tests: `bun run test:tracker:smoke`.
 2. **Hybrid Strategy**:
-   - **Inner Loop (Velocity)**: Unit test suite (`npm run test:<tool>`) + Lightpanda DOM smoke tests.
+   - **Inner Loop (Velocity)**: Unit test suite (`bun run test:<tool>`) + Lightpanda DOM smoke tests.
    - **Outer Loop (Fidelity)**: Playwright multi-device matrix via `scripts/e2e-summary.js`.
 
 ---
@@ -127,5 +127,5 @@ When completing an E2E testing task:
 - [ ] Determine tool lifecycle phase from [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md).
 - [ ] For scoped changes on `Hardened Stable` tools, run `node scripts/e2e-summary.js --tool=<name>`.
 - [ ] Verify output is green: `✅ <n>/<n> passed`.
-- [ ] For release/epic gates, run `npm run test:e2e:summary` across the complete repository matrix.
+- [ ] For release/epic gates, run `bun run test:e2e:summary` across the complete repository matrix.
 - [ ] Summarize test results in PR description with exact passed counts.

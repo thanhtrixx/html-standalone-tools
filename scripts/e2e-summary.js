@@ -14,6 +14,7 @@
  */
 
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
@@ -41,6 +42,11 @@ const TOOL_MAP = {
     spec: "tests/e2e/habit-tracker-devices.spec.js",
     label: "habit",
     aliases: ["habit", "habit-tracker", "atomic-habit"],
+  },
+  shadowing: {
+    spec: "tests/e2e/english-shadowing-devices.spec.js",
+    label: "shadowing",
+    aliases: ["shadowing", "english-shadowing"],
   },
   portal: {
     spec: "tests/e2e/portal-devices.spec.js",
@@ -314,8 +320,17 @@ function runE2ESummary(argv = process.argv.slice(2)) {
     "cli.js"
   );
 
+  const tempJsonFile = path.join(
+    os.tmpdir(),
+    `playwright-report-${Date.now()}-${Math.random().toString(36).slice(2)}.json`
+  );
+
   let proc;
-  const env = { ...process.env, CI: process.env.CI || "1" };
+  const env = {
+    ...process.env,
+    CI: process.env.CI || "1",
+    PLAYWRIGHT_JSON_OUTPUT_NAME: tempJsonFile,
+  };
 
   if (fs.existsSync(playwrightBin)) {
     proc = spawnSync(runtime, [playwrightBin, ...playwrightArgs], {
@@ -339,13 +354,21 @@ function runE2ESummary(argv = process.argv.slice(2)) {
 
   let reportJson;
   try {
-    // Playwright with --reporter=json dumps JSON to stdout. Find JSON start if mixed with server logs
-    const jsonStartIdx = rawStdout.indexOf("{");
-    if (jsonStartIdx !== -1) {
-      const trimmedJson = rawStdout.substring(jsonStartIdx);
-      reportJson = JSON.parse(trimmedJson);
+    if (fs.existsSync(tempJsonFile)) {
+      const rawData = fs.readFileSync(tempJsonFile, "utf8");
+      reportJson = JSON.parse(rawData);
+      try {
+        fs.unlinkSync(tempJsonFile);
+      } catch (_) {}
     } else {
-      throw new Error("No JSON payload detected in stdout.");
+      // Fallback to stdout if temp file was not written
+      const jsonStartIdx = rawStdout.indexOf("{");
+      if (jsonStartIdx !== -1) {
+        const trimmedJson = rawStdout.substring(jsonStartIdx);
+        reportJson = JSON.parse(trimmedJson);
+      } else {
+        throw new Error("No JSON payload detected in report file or stdout.");
+      }
     }
   } catch (err) {
     console.error("❌ Failed to parse Playwright JSON output.");
