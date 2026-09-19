@@ -85,3 +85,17 @@ Only after all tool-scoped inner tests pass:
 2. Run format fix: `bun run format`.
 3. Run outer-gate verification **once** before opening PR: `bun run verify`.
 4. Open PR via GitHub Flow.
+
+---
+
+## 📁 Troubleshooting Artifact Locations (Grep-First Inspection)
+
+Summary runners keep console output lean and save LLM tokens. When a build or test fails and you need detailed diagnostics, inspect the persistent structured artifacts in `test-reports/` using targeted tools (`grep_search` or `StartLine`/`EndLine` slices):
+
+| Subsystem | Structured Log / Report Artifact | Contents | Recommended Inspection Pattern |
+| :--- | :--- | :--- | :--- |
+| **Compaction Build Pipeline** | `test-reports/build-summary.json` | Deliverable status, minified sizes, compression %, and exact compilation exceptions | `grep -n "error" test-reports/build-summary.json` |
+| **Unit & Domain Tests** | `test-reports/results.json`<br>`test-reports/index.html` | Fine-grained assertion results, durations, failed test names, and stack traces | `grep -n "failed" test-reports/results.json` |
+| **Playwright Multi-Device E2E** | `test-reports/playwright-results.json` | Full browser run details, failed locator expectations, action steps, and attachments | `grep -n "status\": \"unexpected\"" test-reports/playwright-results.json` |
+
+> ⚠️ **RULE**: Never dump entire `.json` or `.html` report files into the conversation context. Use `grep -n` to locate the failure block, then inspect only the relevant 10–20 line slice.

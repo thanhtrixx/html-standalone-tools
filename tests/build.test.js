@@ -12,6 +12,7 @@ const {
   resolveDestDir,
   syncToolToExternal,
   buildPortal,
+  saveBuildSummary,
 } = require("../scripts/build");
 
 async function runTests() {
@@ -685,6 +686,68 @@ EMPTY_KEY=
     portalRes.minifiedSize < 50 * 1024,
     `Portal hub minified output is under 50 KB budget (${(portalRes.minifiedSize / 1024).toFixed(1)} KB)`
   );
+
+  // Test 21: Structured Build Summary Report Generation
+  const mockBuildResults = [
+    {
+      name: "mock-tool-1",
+      originalSize: 10000,
+      minifiedSize: 7500,
+      savings: "25.0",
+      elapsed: 120,
+      outputFiles: [
+        "mock-tool-1/dist/index.html",
+        "dist/mock-tool-1/index.html",
+      ],
+      syncedFiles: [],
+    },
+    {
+      name: "mock-tool-2",
+      error: "Sample compile error",
+      originalSize: 5000,
+      minifiedSize: 0,
+      savings: "0.0",
+      elapsed: 50,
+      outputFiles: [],
+      syncedFiles: [],
+    },
+  ];
+
+  const tempReportsDir = path.join(__dirname, "temp-test-reports");
+  const writtenReportPath = saveBuildSummary(
+    mockBuildResults,
+    "/tmp/dest",
+    tempReportsDir
+  );
+  assert(
+    fs.existsSync(writtenReportPath),
+    "saveBuildSummary wrote build-summary.json"
+  );
+
+  const parsedReport = JSON.parse(fs.readFileSync(writtenReportPath, "utf8"));
+  assert(
+    parsedReport.summary.totalDeliverables === 2,
+    "Report records total deliverables (2)"
+  );
+  assert(
+    parsedReport.summary.successful === 1,
+    "Report records successful deliverables (1)"
+  );
+  assert(
+    parsedReport.summary.failed === 1,
+    "Report records failed deliverables (1)"
+  );
+  assert(
+    parsedReport.deliverables[1].error === "Sample compile error",
+    "Report captures detailed error message for failed deliverable"
+  );
+  assert(
+    parsedReport.externalDestDir === "/tmp/dest",
+    "Report captures external distribution target"
+  );
+
+  // Clean up temp test reports
+  fs.rmSync(tempReportsDir, { recursive: true, force: true });
 
   console.log(`\n📊 Test Summary: ${passCount} Passed, ${failCount} Failed\n`);
   if (failCount > 0) {

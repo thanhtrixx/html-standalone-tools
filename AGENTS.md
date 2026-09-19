@@ -69,3 +69,7 @@ Compact E2E test execution with summary aggregation (`bun run test:e2e:summary` 
 ### Grep-First Navigation & Silent Bulk Operations
 
 On files $> 500$ lines, agents MUST use `grep -n` or targeted search before reading slices. Bulk CLI commands MUST redirect repetitive stdout to summary or `/dev/null` (`> /dev/null 2>&1`). See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.
+
+### Troubleshooting Artifacts & Lazy Diagnostics
+
+When troubleshooting build or test failures, agents MUST inspect persistent structured artifacts in `test-reports/` (`build-summary.json`, `results.json`, `playwright-results.json`) via `grep -n` or targeted slices. Prohibit dumping whole JSON/HTML files into context.

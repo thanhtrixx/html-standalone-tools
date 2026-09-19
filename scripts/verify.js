@@ -60,11 +60,11 @@ if (lintProc.status !== 0) {
   process.exit(lintProc.status || 1);
 }
 
-// 2. Build Pipeline
-console.log("\n[2/4] Running Compaction Build Pipeline...");
+// 2. Build Pipeline (Summary Mode)
+console.log("\n[2/4] Running Compaction Build Pipeline (Summary Mode)...");
 const buildProc = spawnSync(
   runtime,
-  [path.join(ROOT_DIR, "scripts", "build.js")],
+  [path.join(ROOT_DIR, "scripts", "build.js"), "--summary"],
   {
     cwd: ROOT_DIR,
     stdio: "inherit",
