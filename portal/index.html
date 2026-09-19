@@ -647,6 +647,106 @@
             </a>
           </div>
         </article>
+
+        <!-- Card 5: English Shadowing Player -->
+        <article
+          class="bg-slate-900 border border-slate-800 hover:border-cyan-500/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 hover:shadow-xl hover:shadow-cyan-500/5 group"
+        >
+          <div>
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform text-2xl"
+              >
+                🎙️
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                <span
+                  data-status-badge="active-dev"
+                  class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-700/60 inline-flex items-center gap-1"
+                >
+                  <span
+                    class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"
+                  ></span>
+                  <span data-i18n="statusActiveDev">Active Dev</span>
+                </span>
+                <span
+                  class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/60"
+                  >PWA</span
+                >
+              </div>
+            </div>
+
+            <h3
+              class="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors"
+              data-i18n="tool5Title"
+            >
+              English Shadowing Player
+            </h3>
+            <p
+              class="mt-2 text-xs sm:text-sm text-slate-400 leading-relaxed"
+              data-i18n="tool5Desc"
+            >
+              Mobile-first standalone PWA for deliberate English shadowing,
+              synchronized dual subtitles (.srt), instant hotkey looping, and
+              color-coded vocabulary acquisition.
+            </p>
+
+            <div class="mt-4 flex flex-wrap gap-1.5">
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgePwa"
+                >PWA</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeDualSubtitles"
+                >Dual Subtitles</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeHotkeys"
+                >Hotkey Looping</span
+              >
+              <span
+                class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
+                data-i18n="badgeVocabDeck"
+                >Vocab Deck</span
+              >
+            </div>
+          </div>
+
+          <div
+            class="mt-6 pt-4 border-t border-slate-800/80 flex items-center gap-3"
+          >
+            <a
+              href="./english-shadowing/"
+              class="flex-1 text-center bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-xl transition shadow-sm"
+              data-i18n="launchButton"
+            >
+              Launch Tool
+            </a>
+            <a
+              href="https://github.com/thanhtrixx/html-standalone-tools/releases/latest/download/english-shadowing.html"
+              title="Download standalone HTML"
+              class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+              aria-label="Download standalone HTML"
+            >
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </a>
+          </div>
+        </article>
       </div>
 
       <!-- Feature Highlights -->
@@ -799,7 +899,7 @@
           catalogHeading: "Available Tools",
           catalogSubheading:
             "Select a tool to launch in browser or download the standalone HTML.",
-          totalToolsBadge: "4 Standalone Applications",
+          totalToolsBadge: "5 Standalone Applications",
           tool1Title: "Smart Buy-List & Unit Price Tracker",
           tool1Desc:
             "Mobile-first grocery buy-list with package unit-price normalization ($/kg, $/L, $/ea), purchase ledger, and in-aisle deal intelligence.",
@@ -812,6 +912,9 @@
           tool4Title: "Atomic Habit & Routine Tracker",
           tool4Desc:
             "Mobile-first standalone PWA habit tracker with mathematical streak/consistency models, 52-week calendar heatmaps, and offline IndexedDB persistence.",
+          tool5Title: "English Shadowing Player",
+          tool5Desc:
+            "Mobile-first standalone PWA for deliberate English shadowing, synchronized dual subtitles (.srt), instant hotkey looping, and color-coded vocabulary acquisition.",
           badgePwa: "PWA",
           badgeOffline: "Offline-Ready",
           badgeIntelligence: "Deal Intelligence",
@@ -826,6 +929,9 @@
           badgeMonteCarlo: "Monte Carlo",
           badgeStreaks: "Streaks & Heatmap",
           badgeRoutines: "Routine Clusters",
+          badgeDualSubtitles: "Dual Subtitles",
+          badgeHotkeys: "Hotkey Looping",
+          badgeVocabDeck: "Vocab Deck",
           statusStable: "Stable",
           statusActiveDev: "Active Dev",
           launchButton: "Launch Tool",
@@ -854,7 +960,7 @@
           catalogHeading: "Danh Mục Công Cụ",
           catalogSubheading:
             "Chọn ứng dụng để mở trực tiếp trên trình duyệt hoặc tải về tệp HTML độc lập.",
-          totalToolsBadge: "4 Ứng Dụng Độc Lập",
+          totalToolsBadge: "5 Ứng Dụng Độc Lập",
           tool1Title: "Sổ Mua Sắm & So Sánh Giá Đơn Vị",
           tool1Desc:
             "Sổ tay mua sắm thông minh trên di động, tự động chuẩn hóa đơn giá theo quy cách ($/kg, $/L, $/cái) và gợi ý ưu đãi tại quầy.",
@@ -867,6 +973,9 @@
           tool4Title: "Sổ Theo Dõi Thói Quen Nguyên Tử",
           tool4Desc:
             "Ứng dụng theo dõi thói quen & nhịp sinh hoạt PWA với mô hình tính chuỗi/độ kiên trì, biểu đồ nhiệt 52 tuần và lưu trữ IndexedDB ngoại tuyến.",
+          tool5Title: "Trình Luyện Nói Shadowing Tiếng Anh",
+          tool5Desc:
+            "Ứng dụng PWA luyện nói đuổi (shadowing) trên di động với phụ đề song ngữ (.srt) đồng bộ, lặp câu tức thì bằng phím tắt và ghi nhớ từ vựng theo màu sắc.",
           badgePwa: "PWA",
           badgeOffline: "Ngoại tuyến",
           badgeIntelligence: "Gợi ý ưu đãi",
@@ -881,6 +990,9 @@
           badgeMonteCarlo: "Monte Carlo",
           badgeStreaks: "Chuỗi & Biểu đồ nhiệt",
           badgeRoutines: "Khung giờ sinh hoạt",
+          badgeDualSubtitles: "Phụ đề song ngữ",
+          badgeHotkeys: "Lặp phím tắt",
+          badgeVocabDeck: "Sổ từ vựng",
           statusStable: "Ổn định",
           statusActiveDev: "Đang phát triển",
           launchButton: "Mở ứng dụng",

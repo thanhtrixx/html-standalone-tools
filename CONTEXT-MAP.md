@@ -12,6 +12,7 @@ Each standalone application is assigned an official lifecycle phase governing en
 | **Buy vs. Rent Home Comparison**        | `Hardened Stable`            | Dual-path wealth projection, mortgage amortization modeling, opportunity cost sweep, sensitivity analysis.                   | [`CONTEXT.md`](./buy-vs-rent-home-comparison/CONTEXT.md)        |
 | **Smart Buy-List & Unit Price Tracker** | `Hardened Stable`            | Mobile-first grocery PWA, purchase ledger, package unit price normalization ($/kg, $/L, $/ea), in-aisle deal intelligence.   | [`CONTEXT.md`](./smart-buy-list-price-tracker/CONTEXT.md)       |
 | **Atomic Habit & Routine Tracker**      | `Active Feature Development` | Mobile-first routine PWA, mathematical streaks/consistency models, 52-week heatmaps, offline IndexedDB persistence.          | [`CONTEXT.md`](./habit-tracker/CONTEXT.md)                      |
+| **English Shadowing Player**            | `Active Feature Development` | Mobile-first shadowing PWA, synchronized dual subtitles (.srt), sentence looping, color-coded vocabulary acquisition.        | [`CONTEXT.md`](./english-shadowing/CONTEXT.md)                  |
 | **Central Portal Hub**                  | `Hardened Stable`            | Responsive multi-tool launcher and catalog for GitHub Pages, with bilingual navigation, status badges, and standalone links. | [`CONTEXT.md`](./portal/CONTEXT.md)                             |
 
 ## Relationships & Isolation

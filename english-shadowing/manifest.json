@@ -1,0 +1,19 @@
+{
+  "name": "English Shadowing Player",
+  "short_name": "Shadowing",
+  "description": "Progressive Web Application for deliberate English shadowing, synchronized dual subtitles, hotkey repetition, and vocabulary tracking.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#070c18",
+  "theme_color": "#0f172a",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity", "utilities"]
+}

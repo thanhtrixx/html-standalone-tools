@@ -60,6 +60,11 @@ async function runTests() {
       htmlContent.includes("./habit-tracker/index.html"),
     "Contains relative link to habit-tracker"
   );
+  assert(
+    htmlContent.includes("./english-shadowing/") ||
+      htmlContent.includes("./english-shadowing/index.html"),
+    "Contains relative link to english-shadowing"
+  );
 
   // Test 4: Repository and Release Links
   assert(
