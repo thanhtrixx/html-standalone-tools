@@ -48,6 +48,7 @@ async function runTests() {
         value: "",
         classList: { add() {}, remove() {}, contains: () => false },
         innerHTML: "",
+        style: {},
       }),
       documentElement: { classList: { add() {}, remove() {} } },
       addEventListener: () => {},
@@ -84,6 +85,10 @@ async function runTests() {
     globalThis.logPracticeShadowSentence = typeof logPracticeShadowSentence !== 'undefined' ? logPracticeShadowSentence : function(){};
     globalThis.logPracticeSeconds = typeof logPracticeSeconds !== 'undefined' ? logPracticeSeconds : function(){};
     globalThis.setPlaybackMode = typeof setPlaybackMode !== 'undefined' ? setPlaybackMode : function(){};
+    globalThis.updateHeaderBadges = typeof updateHeaderBadges !== 'undefined' ? updateHeaderBadges : function(){};
+    globalThis.renderInsightsModal = typeof renderInsightsModal !== 'undefined' ? renderInsightsModal : function(){};
+    globalThis.openInsightsModal = typeof openInsightsModal !== 'undefined' ? openInsightsModal : function(){};
+    globalThis.closeInsightsModal = typeof closeInsightsModal !== 'undefined' ? closeInsightsModal : function(){};
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
@@ -107,6 +112,10 @@ async function runTests() {
     logPracticeShadowSentence,
     logPracticeSeconds,
     setPlaybackMode,
+    updateHeaderBadges,
+    renderInsightsModal,
+    openInsightsModal,
+    closeInsightsModal,
     state,
   } = sandbox;
 
@@ -339,6 +348,44 @@ async function runTests() {
   assert(
     state.playbackMode === "continuous",
     "state.playbackMode reverted to 'continuous'"
+  );
+
+  // 16. Practice Stats & Insights Modal State Lifecycle (Slice 3)
+  assert(
+    typeof updateHeaderBadges === "function",
+    "updateHeaderBadges function exists"
+  );
+  assert(
+    typeof renderInsightsModal === "function",
+    "renderInsightsModal function exists"
+  );
+  assert(
+    typeof openInsightsModal === "function",
+    "openInsightsModal function exists"
+  );
+  assert(
+    typeof closeInsightsModal === "function",
+    "closeInsightsModal function exists"
+  );
+
+  // Test sentence shadowing tracking today & total
+  const initialToday = getPracticeStats().sentencesShadowedToday || 0;
+  const initialTotal = getPracticeStats().totalSentencesShadowed || 0;
+  logPracticeShadowSentence();
+  assert(
+    getPracticeStats().sentencesShadowedToday === initialToday + 1,
+    "logPracticeShadowSentence increments sentencesShadowedToday"
+  );
+  assert(
+    getPracticeStats().totalSentencesShadowed === initialTotal + 1,
+    "logPracticeShadowSentence increments totalSentencesShadowed"
+  );
+
+  // Test practice seconds accumulation
+  logPracticeSeconds(120);
+  assert(
+    getPracticeStats().totalSecondsPracticedToday >= 120,
+    "logPracticeSeconds accumulates seconds practiced today"
   );
 
   console.log(`\n==================================================`);
