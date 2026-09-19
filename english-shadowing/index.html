@@ -3764,8 +3764,8 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         const cueDuration = Math.max(0.5, cue.end - cue.start);
         logPracticeSeconds(cueDuration);
 
-        const startTimestamp = performance.now();
-        const startAudioTime = cue.start;
+        let startTimestamp = performance.now();
+        let startAudioTime = cue.start;
         let useFallbackTimer = false;
 
         if (audio && state.activeScenario && state.activeScenario.audioUrl) {
@@ -3776,7 +3776,15 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           ) {
             audio.src = state.activeScenario.audioUrl;
           }
-          audio.currentTime = cue.start;
+          // Only seek if audio is paused, or if current position is far from current cue window
+          if (
+            audio.paused ||
+            audio.currentTime < cue.start - 0.5 ||
+            audio.currentTime > cue.end + 0.5
+          ) {
+            audio.currentTime = cue.start;
+            startAudioTime = cue.start;
+          }
           const playPromise = audio.play();
           if (playPromise !== undefined) {
             playPromise.catch((err) => {
@@ -3811,12 +3819,40 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
             currentAudioTime,
             state.activeScenario ? state.activeScenario.duration : 0
           );
-          updateKaraokeWordHighlight(currentAudioTime);
 
-          if (currentAudioTime >= cue.end) {
-            handleCuePlaybackComplete();
-          } else {
+          if (state.playbackMode === "continuous") {
+            const activeCue = state.activeCues[state.currentCueIndex];
+            if (activeCue && currentAudioTime >= activeCue.end) {
+              logPracticeShadowSentence();
+              if (state.currentCueIndex < state.activeCues.length - 1) {
+                state.currentCueIndex++;
+                renderActiveCue();
+                highlightTranscriptLine(state.currentCueIndex);
+                drawDualWaveforms();
+              } else {
+                const totalDuration =
+                  state.activeScenario?.duration || activeCue.end;
+                if (currentAudioTime >= totalDuration) {
+                  pauseAudio();
+                  state.currentCueIndex = 0;
+                  renderActiveCue();
+                  highlightTranscriptLine(0);
+                  drawDualWaveforms();
+                  updateTimeLabels(0, totalDuration);
+                  return;
+                }
+              }
+            }
+            updateKaraokeWordHighlight(currentAudioTime);
             animFrameId = requestAnimationFrame(stepProgress);
+          } else {
+            // Interactive Loop Mode
+            updateKaraokeWordHighlight(currentAudioTime);
+            if (currentAudioTime >= cue.end) {
+              handleCuePlaybackComplete();
+            } else {
+              animFrameId = requestAnimationFrame(stepProgress);
+            }
           }
         }
         animFrameId = requestAnimationFrame(stepProgress);
@@ -3852,27 +3888,20 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         if (state.playbackMode === "loop") {
           state.isPlaying = false;
           if (audio) audio.pause();
+          if (animFrameId) cancelAnimationFrame(animFrameId);
           state.isLoopWaiting = true;
           showRepeatPrompt();
           updatePlayPauseIcons();
         } else {
-          if (state.currentCueIndex < state.activeCues.length - 1) {
-            state.currentCueIndex++;
-            renderActiveCue();
-            highlightTranscriptLine(state.currentCueIndex);
-            drawDualWaveforms();
-            playAudio();
-          } else {
-            pauseAudio();
-            state.currentCueIndex = 0;
-            renderActiveCue();
-            highlightTranscriptLine(0);
-            drawDualWaveforms();
-            updateTimeLabels(
-              0,
-              state.activeScenario ? state.activeScenario.duration : 0
-            );
-          }
+          pauseAudio();
+          state.currentCueIndex = 0;
+          renderActiveCue();
+          highlightTranscriptLine(0);
+          drawDualWaveforms();
+          updateTimeLabels(
+            0,
+            state.activeScenario ? state.activeScenario.duration : 0
+          );
         }
       }
 
