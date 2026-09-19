@@ -54,6 +54,14 @@ Dual-axis review for Standards + 5 Repository Invariants and Spec Conformance. S
 
 Mechanically audit Acceptance Criteria checkboxes and sign-off on release issues. See `.agents/skills/verify-ac/SKILL.md`.
 
+### Inner-Loop Verification & Token Economics
+
+Sub-second, tool-scoped inner loop verification, grep-first file navigation, and scoped format checks. Strictly prohibits running full `npm run verify` during active code edits. See `.agents/skills/inner-loop-verification/SKILL.md`.
+
 ### Token-Efficient E2E Testing
 
-Compact E2E test execution with summary aggregation, tool-scoped execution, and lazy log retrieval. See `.agents/skills/e2e-token-efficient/SKILL.md`.
+Compact E2E test execution with summary aggregation (`npm run test:e2e:summary` or `npm run test:e2e:<tool>`), tool-scoped execution, and lazy log retrieval. Prohibits un-aggregated `playwright test` CLI runs. See `.agents/skills/e2e-token-efficient/SKILL.md`.
+
+### Grep-First Navigation & Silent Bulk Operations
+
+On files $> 500$ lines, agents MUST use `grep -n` or targeted search before reading slices. Bulk CLI commands MUST redirect repetitive stdout to summary or `/dev/null` (`> /dev/null 2>&1`). See `docs/adr/0003-ways-of-working-token-economics-and-lifecycle-governance.md`.

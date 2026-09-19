@@ -77,6 +77,21 @@ async function runTests() {
     "Resolves 'portal' alias"
   );
 
+  const shadowingResolved = resolveToolSpec("shadowing");
+  assert(
+    shadowingResolved &&
+      shadowingResolved.spec ===
+        "tests/e2e/english-shadowing-devices.spec.js" &&
+      shadowingResolved.label === "shadowing",
+    "Resolves 'shadowing' alias"
+  );
+
+  const englishShadowingResolved = resolveToolSpec("english-shadowing");
+  assert(
+    englishShadowingResolved && englishShadowingResolved.label === "shadowing",
+    "Resolves 'english-shadowing' alias"
+  );
+
   const invalidResolved = resolveToolSpec("non-existent-tool");
   assert(invalidResolved === null, "Returns null for unknown tool alias");
 

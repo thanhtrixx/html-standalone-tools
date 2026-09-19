@@ -42,6 +42,11 @@ const TOOL_MAP = {
     label: "habit",
     aliases: ["habit", "habit-tracker", "atomic-habit"],
   },
+  shadowing: {
+    spec: "tests/e2e/english-shadowing-devices.spec.js",
+    label: "shadowing",
+    aliases: ["shadowing", "english-shadowing"],
+  },
   portal: {
     spec: "tests/e2e/portal-devices.spec.js",
     label: "portal",
