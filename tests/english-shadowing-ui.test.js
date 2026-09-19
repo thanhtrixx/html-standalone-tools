@@ -261,20 +261,24 @@ async function runTests() {
     "Export SRT button exists"
   );
 
-  // 11. Integrated Player Card & Layout Flow
+  // 11. App Shell Layout & DOM Hierarchy (Slice 4)
   assert(
     htmlContent.includes('id="player-container"'),
     "Integrated Player Card container exists"
   );
-  const playerContainerIdx = htmlContent.indexOf('id="player-container"');
-  const subtitleStageIdx = htmlContent.indexOf('id="subtitleStage"');
-  const transportDockIdx = htmlContent.indexOf('id="transport-dock"');
-  const transcriptCardIdx = htmlContent.indexOf('id="transcriptCard"');
   assert(
-    playerContainerIdx < subtitleStageIdx &&
-      subtitleStageIdx < transportDockIdx &&
-      transportDockIdx < transcriptCardIdx,
-    "Layout hierarchy: player-container -> subtitleStage -> transport-dock -> transcriptCard"
+    htmlContent.includes('class="h-screen overflow-hidden'),
+    "App shell fixed viewport container exists on body"
+  );
+  const subtitleStageIdx = htmlContent.indexOf('id="subtitleStage"');
+  const transcriptCardIdx = htmlContent.indexOf('id="transcriptCard"');
+  const playerContainerIdx = htmlContent.indexOf('id="player-container"');
+  const transportDockIdx = htmlContent.indexOf('id="transport-dock"');
+  assert(
+    subtitleStageIdx < transcriptCardIdx &&
+      transcriptCardIdx < playerContainerIdx &&
+      playerContainerIdx < transportDockIdx,
+    "Layout hierarchy: subtitleStage -> transcriptCard -> player-container -> transport-dock"
   );
 
   // 12. Audio Element & Scrubber Milestones
