@@ -157,11 +157,11 @@
     </style>
   </head>
   <body
-    class="min-h-screen bg-slate-950 text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950"
+    class="h-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col antialiased selection:bg-emerald-500 selection:text-slate-950"
   >
     <!-- Header Navigation -->
     <header
-      class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-2 sm:px-6 py-2 sm:py-3 w-full max-w-full overflow-hidden"
+      class="shrink-0 sticky top-0 z-40 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-2 sm:px-6 py-2 sm:py-3 w-full max-w-full overflow-hidden"
     >
       <div
         class="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-4"
@@ -401,12 +401,15 @@
 
     <!-- Main View Container -->
     <main
-      class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 flex flex-col"
+      class="flex-1 min-h-0 max-w-7xl w-full mx-auto p-2 sm:p-4 flex flex-col overflow-hidden"
     >
       <!-- ========================================== -->
       <!-- VIEW 1: SCENARIO CATALOG & FILTER HUB      -->
       <!-- ========================================== -->
-      <section id="catalog-view" class="space-y-6">
+      <section
+        id="catalog-view"
+        class="flex-1 min-h-0 overflow-y-auto space-y-4 sm:space-y-6 pr-1"
+      >
         <!-- Hero Banner & Actions -->
         <div
           class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl"
@@ -596,13 +599,16 @@
       <!-- ========================================== -->
       <!-- VIEW 2: ACTIVE SHADOWING PLAYER STAGE      -->
       <!-- ========================================== -->
-      <section id="player-view" class="hidden flex-1 flex flex-col space-y-4">
+      <section
+        id="player-view"
+        class="hidden flex-1 min-h-0 flex flex-col gap-2.5 sm:gap-3 overflow-hidden"
+      >
         <!-- Hidden HTML5 Audio Element for Real Playback -->
         <audio id="playerAudio" preload="auto" class="hidden"></audio>
 
         <!-- Player Top Bar -->
         <div
-          class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3 sm:p-4 shadow-md w-full max-w-full overflow-hidden"
+          class="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-slate-900 border border-slate-800 rounded-xl p-2.5 sm:p-3.5 shadow-md w-full max-w-full overflow-hidden"
         >
           <div class="flex items-center gap-3">
             <button
@@ -743,86 +749,150 @@
           </div>
         </div>
 
-        <!-- ========================================== -->
-        <!-- INTEGRATED HERO PLAYER CARD CONTAINER       -->
-        <!-- ========================================== -->
+        <!-- Centerpiece Hero Subtitle Stage -->
         <div
-          id="player-container"
-          class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col transition-all"
+          id="subtitleStage"
+          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-8 pt-10 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
         >
-          <!-- Centerpiece Subtitle Stage & Visual Waveforms -->
+          <!-- Active sentence position tracker & Timing Nudges -->
           <div
-            id="subtitleStage"
-            class="min-h-[260px] sm:min-h-[320px] bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 p-6 sm:p-10 pt-14 sm:pt-14 flex flex-col items-center justify-center text-center relative overflow-hidden"
+            class="absolute top-2.5 sm:top-3 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
           >
-            <!-- Active sentence position tracker & Timing Nudges -->
-            <div
-              class="absolute top-3 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
-            >
-              <div class="flex items-center gap-2 pointer-events-auto">
-                <span
-                  class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
-                ></span>
-                <span id="sentenceIndexTracker">Sentence 1 of 10</span>
-              </div>
-
-              <!-- Live Timing Nudge Controls -->
-              <div
-                class="flex items-center gap-1.5 bg-slate-950/80 px-2 py-1 rounded-lg border border-slate-800 pointer-events-auto"
-              >
-                <span class="text-[10px] text-slate-500 uppercase">Nudge:</span>
-                <button
-                  onclick="nudgeActiveCueTiming('start', -0.1)"
-                  class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
-                  title="Start -100ms"
-                >
-                  -0.1s
-                </button>
-                <button
-                  onclick="nudgeActiveCueTiming('start', 0.1)"
-                  class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
-                  title="Start +100ms"
-                >
-                  +0.1s
-                </button>
-              </div>
-            </div>
-
-            <!-- Loop Mode Shadowing Repetition Prompt -->
-            <div
-              id="repeatPromptContainer"
-              class="hidden mb-4 px-4 py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-2 shadow-lg"
-            >
+            <div class="flex items-center gap-2 pointer-events-auto">
               <span
-                class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
+                class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
               ></span>
-              <span data-i18n="repeatPrompt">Now Shadow: Repeat out loud!</span>
+              <span id="sentenceIndexTracker">Sentence 1 of 10</span>
             </div>
 
-            <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
+            <!-- Live Timing Nudge Controls -->
             <div
-              id="activeEnglishSubtitle"
-              class="blur-target text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
+              class="flex items-center gap-1.5 bg-slate-950/80 px-2 py-0.5 sm:py-1 rounded-lg border border-slate-800 pointer-events-auto text-xs"
             >
-              Click a scenario to begin shadowing.
-            </div>
-
-            <!-- Vietnamese Translation Subtitle Line -->
-            <div
-              id="activeVietnameseSubtitle"
-              class="blur-target text-sm sm:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-3 transition-all"
-            >
-              Nhấp vào tình huống để bắt đầu luyện nói.
+              <span class="text-[10px] text-slate-500 uppercase">Nudge:</span>
+              <button
+                onclick="nudgeActiveCueTiming('start', -0.1)"
+                class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
+                title="Start -100ms"
+              >
+                -0.1s
+              </button>
+              <button
+                onclick="nudgeActiveCueTiming('start', 0.1)"
+                class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
+                title="Start +100ms"
+              >
+                +0.1s
+              </button>
             </div>
           </div>
 
-          <!-- INTEGRATED TRANSPORT DOCK (Directly under Player Stage) -->
+          <!-- Loop Mode Shadowing Repetition Prompt -->
+          <div
+            id="repeatPromptContainer"
+            class="hidden mb-2 sm:mb-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-2 shadow-lg"
+          >
+            <span
+              class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
+            ></span>
+            <span data-i18n="repeatPrompt">Now Shadow: Repeat out loud!</span>
+          </div>
+
+          <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
+          <div
+            id="activeEnglishSubtitle"
+            class="blur-target text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
+          >
+            Click a scenario to begin shadowing.
+          </div>
+
+          <!-- Vietnamese Translation Subtitle Line -->
+          <div
+            id="activeVietnameseSubtitle"
+            class="blur-target text-xs sm:text-sm md:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-2 sm:mt-3 transition-all"
+          >
+            Nhấp vào tình huống để bắt đầu luyện nói.
+          </div>
+        </div>
+
+        <!-- Collapsible Full Transcript & Inline Editor Card -->
+        <div
+          id="transcriptCard"
+          class="flex-1 min-h-0 bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col overflow-hidden shadow-lg transition-all"
+        >
+          <div
+            class="shrink-0 flex items-center justify-between cursor-pointer select-none pb-2 border-b border-slate-800/80"
+            onclick="toggleTranscriptDrawer()"
+          >
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-cyan-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <span
+                class="text-xs font-bold text-slate-300 uppercase tracking-wider"
+                data-i18n="transcriptHeader"
+                >Transcript & Inline Editor</span
+              >
+            </div>
+            <div class="flex items-center gap-3">
+              <span
+                class="text-[11px] text-slate-500 font-normal hidden sm:inline"
+                data-i18n="transcriptHint"
+                >Click text to edit • Click line number to jump</span
+              >
+              <button
+                id="btnToggleTranscript"
+                class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+              >
+                <span id="toggleTranscriptLabel">Hide</span>
+                <svg
+                  id="toggleTranscriptIcon"
+                  class="w-4 h-4 transition-transform duration-200"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div
+            id="transcriptDrawerContent"
+            class="flex-1 min-h-0 overflow-y-auto space-y-1.5 pt-2 pr-1"
+          >
+            <div id="transcriptList" class="space-y-1.5">
+              <!-- Injected via JavaScript -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Pinned Bottom Transport Dock Container -->
+        <div
+          id="player-container"
+          class="shrink-0 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl transition-all"
+        >
           <div
             id="transport-dock"
-            class="bg-slate-950/90 border-t border-slate-800 p-4 space-y-3"
+            class="bg-slate-950/90 p-3 sm:p-4 space-y-2.5 sm:space-y-3"
           >
             <!-- Scrubber & Time with Sentence Milestone Marks -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5 sm:gap-3">
               <span
                 id="currentTimeLabel"
                 class="text-xs font-mono text-slate-400 w-11 text-right shrink-0"
@@ -861,7 +931,7 @@
                 <button
                   id="modeLoopBtn"
                   onclick="setPlaybackMode('loop')"
-                  class="px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
+                  class="px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
                   title="Sentence Loop Mode"
                 >
                   <svg
@@ -884,7 +954,7 @@
                 <button
                   id="modeContinuousBtn"
                   onclick="setPlaybackMode('continuous')"
-                  class="px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
+                  class="px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
                   title="Continuous Flow Mode"
                 >
                   <svg
@@ -921,7 +991,7 @@
                 <!-- Replay Sentence Button [R] -->
                 <button
                   onclick="replayCurrentSentence()"
-                  class="p-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
+                  class="p-2 sm:p-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
                   title="Replay Sentence [R]"
                 >
                   <svg
@@ -964,7 +1034,7 @@
                 <button
                   id="mainPlayPauseBtn"
                   onclick="togglePlayPause()"
-                  class="p-3.5 sm:p-4 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                  class="p-3 sm:p-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
                   title="Play / Pause / Repeat (Space)"
                 >
                   <svg
@@ -1032,73 +1102,6 @@
                   >[V]</span
                 >
               </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Collapsible Full Transcript & Inline Editor Drawer -->
-        <div
-          id="transcriptCard"
-          class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 transition-all"
-        >
-          <div
-            class="flex items-center justify-between cursor-pointer select-none"
-            onclick="toggleTranscriptDrawer()"
-          >
-            <div class="flex items-center gap-2">
-              <svg
-                class="w-4 h-4 text-cyan-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span
-                class="text-xs font-bold text-slate-300 uppercase tracking-wider"
-                data-i18n="transcriptHeader"
-                >Transcript & Inline Editor</span
-              >
-            </div>
-            <div class="flex items-center gap-3">
-              <span
-                class="text-[11px] text-slate-500 font-normal hidden sm:inline"
-                data-i18n="transcriptHint"
-                >Click text to edit • Click line number to jump</span
-              >
-              <button
-                id="btnToggleTranscript"
-                class="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
-              >
-                <span id="toggleTranscriptLabel">Hide</span>
-                <svg
-                  id="toggleTranscriptIcon"
-                  class="w-4 h-4 transition-transform duration-200"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div
-            id="transcriptDrawerContent"
-            class="max-h-56 sm:max-h-72 overflow-y-auto space-y-1.5 pt-1"
-          >
-            <div id="transcriptList" class="space-y-1.5">
-              <!-- Injected via JavaScript -->
             </div>
           </div>
         </div>
@@ -4021,15 +4024,20 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         const drawerContent = document.getElementById(
           "transcriptDrawerContent"
         );
+        const transcriptCard = document.getElementById("transcriptCard");
         const label = document.getElementById("toggleTranscriptLabel");
         const icon = document.getElementById("toggleTranscriptIcon");
 
         if (isTranscriptCollapsed) {
           drawerContent?.classList.add("hidden");
+          transcriptCard?.classList.remove("flex-1");
+          transcriptCard?.classList.add("shrink-0");
           if (label) label.textContent = "Show";
           icon?.classList.add("-rotate-90");
         } else {
           drawerContent?.classList.remove("hidden");
+          transcriptCard?.classList.remove("shrink-0");
+          transcriptCard?.classList.add("flex-1");
           if (label) label.textContent = "Hide";
           icon?.classList.remove("-rotate-90");
         }
@@ -4471,7 +4479,7 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
             if (idx === index) {
               item.className =
                 "p-2.5 rounded-lg border bg-emerald-500/10 border-emerald-500/40 text-white transition-all text-xs flex items-start gap-2.5";
-              item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              item.scrollIntoView({ behavior: "smooth", block: "center" });
             } else {
               item.className =
                 "p-2.5 rounded-lg border bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all text-xs flex items-start gap-2.5";
