@@ -11,6 +11,7 @@
 ### Vertical Slices Breakdown
 
 #### Slice 1: Clean Player Top Bar & View-Only Transcript Feed
+
 - **Title**: `feat(shadowing): clean player top bar and view-only transcript card`
 - **Scope**:
   - [ ] Remove Export LRC and Export SRT buttons from player top bar.
@@ -20,6 +21,7 @@
   - [ ] Update bilingual labels and test suites in `tests/english-shadowing-ui.test.js`.
 
 #### Slice 2: Zero-Seek Continuous Playback Engine & Stutter Elimination
+
 - **Title**: `fix(shadowing): zero-seek continuous playback and stutter elimination`
 - **Scope**:
   - [ ] Redesign continuous mode playback loop to stream HTML5 `<audio>` naturally without forced re-seeks or redundant `.play()` invocations at sentence boundaries.
@@ -28,6 +30,7 @@
   - [ ] Add automated unit and playback synchronizer tests in `tests/english-shadowing-engine.test.js`.
 
 #### Slice 3: Speed Selection Popover & Precision Loop Mode Boundaries
+
 - **Title**: `feat(shadowing): speed selection popover and loop mode acoustic boundary padding`
 - **Scope**:
   - [ ] Implement interactive speed selection popover menu triggered from transport dock with direct presets: `0.5x`, `0.75x`, `0.85x`, `1.0x (Normal)`, `1.15x`, `1.25x`, `1.5x`.

@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - ".agents/**"
+      - ".agent/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -26,8 +31,20 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Install Playwright Browsers
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package.json') }}
+
+      - name: Install Playwright Browsers & System Deps
         run: bunx playwright install --with-deps chromium webkit
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+
+      - name: Install Playwright System Deps (Cache Hit)
+        run: bunx playwright install-deps chromium webkit
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
 
       - name: Verify Quality Gate (Lint, Build, Unit Tests & Multi-Device E2E)
         run: bun run verify

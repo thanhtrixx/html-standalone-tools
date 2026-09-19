@@ -2,11 +2,12 @@ name: Build & Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
 
 concurrency:
-  group: release-main
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -16,14 +17,12 @@ permissions:
 
 jobs:
   release:
-    name: Build, Version & Publish Release
+    name: Build, Package & Publish Release
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -33,38 +32,18 @@ jobs:
       - name: Install Dependencies
         run: bun install --frozen-lockfile
 
-      - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps chromium webkit
-
-      - name: Verify Build & Automated Tests
-        run: bun run verify
-
-      - name: Upload Test Report Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-reports-release
-          path: test-reports/
-          retention-days: 30
-
-      - name: Determine Semantic Version & Generate Changelog
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch
-          tag_prefix: v
-          release_branches: main
+      - name: Build Standalone Deliverables
+        run: bun run build
 
       - name: Package Release Assets
-        run: bun scripts/pack-release.js --version=${{ steps.tag_version.outputs.new_tag }}
+        run: bun scripts/pack-release.js --version=${{ github.ref_name }}
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag_version.outputs.new_tag }}
-          name: Release ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          generate_release_notes: true
           files: release-assets/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
