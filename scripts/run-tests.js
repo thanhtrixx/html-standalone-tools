@@ -156,6 +156,26 @@ const TEST_SUITES = [
     category: "Smoke",
   },
   {
+    name: "English Shadowing Engine & SRT Parser",
+    file: "tests/english-shadowing-engine.test.js",
+    category: "Core Math",
+  },
+  {
+    name: "English Shadowing Storage & Persistence",
+    file: "tests/english-shadowing-storage.test.js",
+    category: "Data Integrity",
+  },
+  {
+    name: "English Shadowing i18n Parity & Dictionary",
+    file: "tests/english-shadowing-i18n.test.js",
+    category: "i18n",
+  },
+  {
+    name: "English Shadowing UI Components & Hotkeys",
+    file: "tests/english-shadowing-ui.test.js",
+    category: "UI/UX",
+  },
+  {
     name: "E2E Summary Parser & Token Aggregator",
     file: "tests/e2e-summary.test.js",
     category: "Helpers",
@@ -744,6 +764,9 @@ async function main() {
       toolFilter === "buy-vs-rent-home-comparison"
     ) {
       return f.includes("buy-vs-rent");
+    }
+    if (toolFilter === "shadowing" || toolFilter === "english-shadowing") {
+      return f.includes("english-shadowing");
     }
     if (
       toolFilter === "predictor" ||
