@@ -83,6 +83,7 @@ async function runTests() {
     globalThis.savePracticeStats = typeof savePracticeStats !== 'undefined' ? savePracticeStats : function(){};
     globalThis.logPracticeShadowSentence = typeof logPracticeShadowSentence !== 'undefined' ? logPracticeShadowSentence : function(){};
     globalThis.logPracticeSeconds = typeof logPracticeSeconds !== 'undefined' ? logPracticeSeconds : function(){};
+    globalThis.setPlaybackMode = typeof setPlaybackMode !== 'undefined' ? setPlaybackMode : function(){};
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
@@ -105,6 +106,7 @@ async function runTests() {
     savePracticeStats,
     logPracticeShadowSentence,
     logPracticeSeconds,
+    setPlaybackMode,
     state,
   } = sandbox;
 
@@ -317,6 +319,27 @@ async function runTests() {
       `Scenario audio ${file} exists on disk with non-zero audio bytes (${fs.existsSync(filePath) ? fs.statSync(filePath).size : 0} bytes)`
     );
   });
+
+  // 15. Playback Mode Default & localStorage Persistence
+  assert(
+    state.playbackMode === "continuous",
+    "Default state.playbackMode is initialized to 'continuous'"
+  );
+  setPlaybackMode("loop", true);
+  assert(
+    storageMock.getItem("shadowing_playback_mode") === "loop",
+    "setPlaybackMode('loop') persists 'loop' into localStorage"
+  );
+  assert(state.playbackMode === "loop", "state.playbackMode updated to 'loop'");
+  setPlaybackMode("continuous", true);
+  assert(
+    storageMock.getItem("shadowing_playback_mode") === "continuous",
+    "setPlaybackMode('continuous') persists 'continuous' into localStorage"
+  );
+  assert(
+    state.playbackMode === "continuous",
+    "state.playbackMode reverted to 'continuous'"
+  );
 
   console.log(`\n==================================================`);
   console.log(
