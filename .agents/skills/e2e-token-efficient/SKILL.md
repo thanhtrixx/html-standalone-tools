@@ -22,6 +22,12 @@ To maximize agent code generation throughput and keep context windows lean:
 
 ---
 
+## ⚡ Runtime Preference: Bun for Speed
+
+Always invoke E2E test commands using **`bun`** (`bun run test:e2e:summary`, `bun run test:e2e:<tool>`). Bun starts up instantly and orchestrates test runners with minimal CPU overhead.
+
+---
+
 ## 🚦 When to Run E2E Testing (Phase & Tier Matrix)
 
 Follow the Three-Tier Change Classification and Tool Lifecycle Phase:

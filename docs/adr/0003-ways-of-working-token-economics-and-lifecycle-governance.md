@@ -23,7 +23,7 @@ In multi-agent autonomous engineering environments, uncalibrated ceremonies, ful
 | Tier                            | Scope                                                               | Required Workflow                                                           | Typical Token Budget |
 | :------------------------------ | :------------------------------------------------------------------ | :-------------------------------------------------------------------------- | :------------------- |
 | **Tier 0 — Zero-Ceremony**      | Docs-only (`*.md`, `docs/**`, `AGENTS.md`, `.agents/**`)            | Branch → Commit → PR → CI → Merge                                           | ~2k tokens           |
-| **Tier 1 — Scoped Lightweight** | Single-tool `fix:`, `refactor:`, `perf:`, `test:`, `style:`         | Branch → Scoped Unit Tests (`npm run test:<tool>`) → PR → CI Gate → Merge   | ~15k–25k tokens      |
+| **Tier 1 — Scoped Lightweight** | Single-tool `fix:`, `refactor:`, `perf:`, `test:`, `style:`         | Branch → Scoped Unit Tests (`bun run test:<tool>`) → PR → CI Gate → Merge   | ~15k–25k tokens      |
 | **Tier 2 — Full Ceremony**      | Multi-tool features, `feat:` on stable tools, shared build/CI infra | Branch → Blind Tests → Dual Review → PR → CI Gate → Merge → AC Verification | ~50k–80k tokens      |
 
 ### 2. Two-Tier Delegation Threshold Rule
@@ -45,10 +45,10 @@ In multi-agent autonomous engineering environments, uncalibrated ceremonies, ful
 
 To eliminate context degradation and token burn across all autonomous agent sessions, the following operational invariants are strictly enforced:
 
-1. **Inner-Loop Scoped Runners**: Subagents and orchestrators in the inner loop must strictly execute `npm run test:<tool>` (e.g. `npm run test:habit`). Full `npm run verify` is strictly forbidden in inner loops and reserved solely for orchestrator PR/Release gates.
+1. **Inner-Loop Scoped Runners**: Subagents and orchestrators in the inner loop must strictly execute `bun run test:<tool>` (e.g. `bun run test:habit`). Full `bun run verify` is strictly forbidden in inner loops and reserved solely for orchestrator PR/Release gates.
 2. **Targeted File Inspection & Grep-First**: Prohibit full-file reads on files $> 200$ lines. Use `grep_search` and `find_by_name` first, then inspect specific line ranges with `StartLine`/`EndLine` slices.
 3. **Surgical File Edits**: Mandatory use of `replace_file_content` for code modifications. Overwriting entire files via `write_to_file` for incremental changes is prohibited.
-4. **Compact E2E Test Digests**: Multi-device and browser tests must execute via compact summaries (`node scripts/e2e-summary.js`), outputting ~100 tokens. Detailed failure logs/traces are loaded lazily only when assertions fail.
+4. **Compact E2E Test Digests**: Multi-device and browser tests must execute via compact summaries (`bun run test:e2e:summary` or `scripts/e2e-summary.js`), outputting ~100 tokens. Detailed failure logs/traces are loaded lazily only when assertions fail.
 5. **Living Backlog Lifecycle & History Archiving**: Tool `ITEMS_TO_IMPLEMENT.md` files must remain lean ($\le 120$ lines) containing only active capabilities and current roadmaps. Completed slices must be archived to `docs/deprecated/ITEMS_TO_IMPLEMENT_HISTORY.md`. Sessions must scope context to active issues rather than loading historical backlogs.
 
 ### 6. Repository 5 Quality Invariants
