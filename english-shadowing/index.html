@@ -607,17 +607,19 @@
         <audio id="playerAudio" preload="auto" class="hidden"></audio>
 
         <!-- Player Top Bar -->
+        <!-- Player Top Bar -->
         <div
-          class="shrink-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 bg-slate-900 border border-slate-800 rounded-xl p-2.5 sm:p-3.5 shadow-md w-full max-w-full overflow-hidden"
+          class="shrink-0 flex items-center justify-between gap-2.5 sm:gap-4 bg-slate-900/90 border border-slate-800/80 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-md w-full max-w-full overflow-hidden backdrop-blur"
         >
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
               onclick="switchView('catalog')"
-              class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700 flex items-center gap-1.5 text-xs font-semibold shrink-0"
+              class="px-2.5 py-1.5 rounded-xl bg-slate-800/70 hover:bg-slate-700/80 text-slate-300 hover:text-white transition-all border border-slate-700/60 hover:border-slate-600 flex items-center gap-1.5 text-xs font-semibold shrink-0 group active:scale-95"
               title="Back to Catalog"
+              aria-label="Back to Catalog"
             >
               <svg
-                class="w-4 h-4"
+                class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5 text-emerald-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -629,123 +631,76 @@
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              <span data-i18n="btnBackToCatalog">Back to Scenarios</span>
+              <span data-i18n="btnBackToCatalog" class="hidden xs:inline sm:inline">Back to Scenarios</span>
             </button>
 
-            <div class="min-w-0">
+            <div class="min-w-0 flex items-center gap-2 flex-wrap">
               <h2
                 id="activeScenarioTitle"
-                class="font-bold text-sm sm:text-base text-white leading-tight truncate"
+                class="font-bold text-xs sm:text-sm md:text-base text-white leading-tight truncate"
               >
                 Scenario Title
               </h2>
               <div
-                class="flex items-center gap-2 text-xs text-slate-400 mt-0.5 flex-wrap"
+                class="flex items-center gap-1.5 text-xs text-slate-400 shrink-0"
               >
                 <span
                   id="activeScenarioLevel"
-                  class="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-semibold text-[11px] border border-cyan-500/20"
+                  class="px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-300 font-semibold text-[10px] sm:text-[11px] border border-cyan-500/20"
                   >B2</span
                 >
                 <span
                   id="activeScenarioAccent"
-                  class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px]"
+                  class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 text-[10px] sm:text-[11px]"
                   >US Accent</span
                 >
-                <span id="activeScenarioMeta" class="text-slate-500 text-[11px]"
+                <span id="activeScenarioMeta" class="text-slate-500 text-[10px] sm:text-[11px] hidden sm:inline"
                   >7 sentences • ~38s</span
                 >
               </div>
             </div>
           </div>
 
-          <!-- Actions: Subtitle Masking & Export LRC / SRT -->
-          <div class="flex flex-wrap items-center gap-2 max-w-full">
-            <!-- 1-Click Export LRC -->
+          <!-- Subtitle Masking Control Bar -->
+          <div
+            class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs shrink-0"
+          >
             <button
-              onclick="exportCurrentScenarioLrc()"
-              class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-colors flex items-center gap-1 shrink-0"
-              title="Export Enhanced LRC with Word Timings"
+              id="subMaskDual"
+              onclick="setSubtitleMask('both')"
+              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] sm:text-xs shrink-0"
+              title="Dual Subtitles (1)"
+              data-i18n="subtitlesDual"
             >
-              <svg
-                class="w-3.5 h-3.5 text-cyan-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-                />
-              </svg>
-              <span>Export LRC</span>
+              Dual
             </button>
-
-            <!-- 1-Click Export SRT -->
             <button
-              onclick="exportCurrentScenarioSrt()"
-              class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs border border-slate-700 transition-colors flex items-center gap-1 shrink-0"
-              title="Export Dual-Language SRT Subtitles"
+              id="subMaskPrimary"
+              onclick="setSubtitleMask('primary')"
+              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
+              title="English Only (2)"
+              data-i18n="subtitlesPrimary"
             >
-              <svg
-                class="w-3.5 h-3.5 text-emerald-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                />
-              </svg>
-              <span data-i18n="btnExportSrt">Export SRT</span>
+              EN Only
             </button>
-
-            <!-- Subtitle Masking Control Bar -->
-            <div
-              class="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs overflow-x-auto max-w-full"
+            <button
+              id="subMaskSecondary"
+              onclick="setSubtitleMask('secondary')"
+              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
+              title="Vietnamese Only (3)"
+              data-i18n="subtitlesSecondary"
             >
-              <button
-                id="subMaskDual"
-                onclick="setSubtitleMask('both')"
-                class="px-2 sm:px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] sm:text-xs shrink-0"
-                title="Dual Subtitles (1)"
-                data-i18n="subtitlesDual"
-              >
-                Dual
-              </button>
-              <button
-                id="subMaskPrimary"
-                onclick="setSubtitleMask('primary')"
-                class="px-2 sm:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
-                title="English Only (2)"
-                data-i18n="subtitlesPrimary"
-              >
-                EN Only
-              </button>
-              <button
-                id="subMaskSecondary"
-                onclick="setSubtitleMask('secondary')"
-                class="px-2 sm:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
-                title="Vietnamese Only (3)"
-                data-i18n="subtitlesSecondary"
-              >
-                VI Only
-              </button>
-              <button
-                id="subMaskBlur"
-                onclick="setSubtitleMask('blur')"
-                class="px-2 sm:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
-                title="Blind Listening Mode (4)"
-                data-i18n="subtitlesBlur"
-              >
-                Blur
-              </button>
-            </div>
+              VI Only
+            </button>
+            <button
+              id="subMaskBlur"
+              onclick="setSubtitleMask('blur')"
+              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
+              title="Blind Listening Mode (4)"
+              data-i18n="subtitlesBlur"
+            >
+              Blur
+            </button>
           </div>
         </div>
 
@@ -815,7 +770,7 @@
           </div>
         </div>
 
-        <!-- Collapsible Full Transcript & Inline Editor Card -->
+        <!-- Collapsible Full Transcript Navigation Card (Read-Only) -->
         <div
           id="transcriptCard"
           class="flex-1 min-h-0 bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col overflow-hidden shadow-lg transition-all"
@@ -841,14 +796,14 @@
               <span
                 class="text-xs font-bold text-slate-300 uppercase tracking-wider"
                 data-i18n="transcriptHeader"
-                >Transcript & Inline Editor</span
+                >Transcript</span
               >
             </div>
             <div class="flex items-center gap-3">
               <span
                 class="text-[11px] text-slate-500 font-normal hidden sm:inline"
                 data-i18n="transcriptHint"
-                >Click text to edit • Click line number to jump</span
+                >Click any sentence to jump</span
               >
               <button
                 id="btnToggleTranscript"
@@ -2150,8 +2105,8 @@
           btnReviewDue: "SRS Review",
           waveformNative: "Native Speaker Pitch & Envelope",
           waveformLearner: "Your Voice Take",
-          transcriptHeader: "Transcript & Inline Editor",
-          transcriptHint: "Click text to edit • Click line number to jump",
+          transcriptHeader: "Transcript",
+          transcriptHint: "Click any sentence to jump",
           navInsights: "Insights",
           insightsTitle: "Practice Insights & Analytics",
           sentencesShadowedTotal: "Total Sentences Shadowed",
@@ -2182,7 +2137,7 @@
           accentUK: "Giọng Anh (UK)",
           accentAU: "Giọng Úc (AU)",
           btnPracticeNow: "Luyện tập ngay",
-          btnBackToCatalog: "Về danh sách tình huống",
+          btnBackToCatalog: "Về danh sách",
           btnImportScenario: "Tải lên Audio & SRT riêng",
           btnExportSrt: "Xuất file SRT",
           modeLoop: "Chế độ lặp từng câu",
@@ -2247,8 +2202,8 @@
           btnReviewDue: "Ôn tập SRS",
           waveformNative: "Đồ thị âm lượng người bản xứ",
           waveformLearner: "Bản thu giọng bạn",
-          transcriptHeader: "Kịch bản & Trình sửa lời",
-          transcriptHint: "Nhấn vào lời thoại để sửa • Nhấn số câu để nhảy",
+          transcriptHeader: "Kịch bản hội thoại",
+          transcriptHint: "Nhấp vào câu bất kỳ để nghe",
           navInsights: "Thống kê",
           insightsTitle: "Thống Kê & Phân Tích Luyện Tập",
           sentencesShadowedTotal: "Tổng Số Câu Đã Shadowing",
@@ -4427,7 +4382,7 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
       }
 
       // ==========================================
-      // 12. TRANSCRIPT NAVIGATOR & INLINE EDITOR
+      // 12. TRANSCRIPT NAVIGATOR (READ-ONLY FEED)
       // ==========================================
       function renderTranscriptList() {
         const container = document.getElementById("transcriptList");
@@ -4437,34 +4392,30 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
           .map((cue, idx) => {
             const isActive = idx === state.currentCueIndex;
             const activeClass = isActive
-              ? "bg-emerald-500/10 border-emerald-500/40 text-white"
-              : "bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200";
+              ? "bg-emerald-500/15 border-emerald-500/50 shadow-sm shadow-emerald-500/10 ring-1 ring-emerald-500/30"
+              : "bg-slate-950/50 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700";
 
             return `
             <div
               id="transcriptItem-${idx}"
-              class="p-2.5 rounded-lg border ${activeClass} transition-all text-xs flex items-start gap-2.5"
+              onclick="jumpToSentence(${idx})"
+              class="group p-2.5 rounded-xl border ${activeClass} transition-all text-xs flex items-start gap-2.5 cursor-pointer select-none"
+              title="Sentence ${idx + 1}"
             >
-              <button
-                onclick="jumpToSentence(${idx})"
-                class="font-mono text-[11px] text-emerald-400 font-bold shrink-0 mt-0.5 hover:underline"
-                title="Jump to sentence"
+              <span
+                class="font-mono text-[11px] px-1.5 py-0.5 rounded-md ${isActive ? "bg-emerald-500/20 text-emerald-300 font-bold" : "bg-slate-800 text-slate-400 group-hover:text-slate-200"} shrink-0 mt-0.5 transition-colors"
               >
                 ${idx + 1}
-              </button>
-              <div class="space-y-1 flex-1">
-                <input
-                  type="text"
-                  value="${escapeHtml(cue.en)}"
-                  onchange="updateCueTextInline(${idx}, 'en', this.value)"
-                  class="w-full bg-transparent border-b border-transparent focus:border-emerald-500 focus:bg-slate-900 px-1 py-0.5 font-medium rounded text-slate-200 text-xs focus:outline-none"
-                />
-                <input
-                  type="text"
-                  value="${escapeHtml(cue.vi)}"
-                  onchange="updateCueTextInline(${idx}, 'vi', this.value)"
-                  class="w-full bg-transparent border-b border-transparent focus:border-cyan-500 focus:bg-slate-900 px-1 py-0.5 text-[11px] rounded text-slate-400 focus:outline-none"
-                />
+              </span>
+              <div class="space-y-0.5 flex-1 min-w-0">
+                <p class="font-medium ${isActive ? "text-white font-semibold" : "text-slate-200 group-hover:text-white"} text-xs sm:text-sm leading-relaxed transition-colors">
+                  ${escapeHtml(cue.en)}
+                </p>
+                ${
+                  cue.vi
+                    ? `<p class="text-[11px] sm:text-xs text-slate-400 leading-normal transition-colors">${escapeHtml(cue.vi)}</p>`
+                    : ""
+                }
               </div>
             </div>
           `;
@@ -4476,13 +4427,27 @@ Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ 
         state.activeCues.forEach((_, idx) => {
           const item = document.getElementById(`transcriptItem-${idx}`);
           if (item) {
+            const numBadge = item.querySelector("span");
+            const enText = item.querySelector("p");
             if (idx === index) {
               item.className =
-                "p-2.5 rounded-lg border bg-emerald-500/10 border-emerald-500/40 text-white transition-all text-xs flex items-start gap-2.5";
+                "group p-2.5 rounded-xl border bg-emerald-500/15 border-emerald-500/50 shadow-sm shadow-emerald-500/10 ring-1 ring-emerald-500/30 transition-all text-xs flex items-start gap-2.5 cursor-pointer select-none";
+              if (numBadge)
+                numBadge.className =
+                  "font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold shrink-0 mt-0.5 transition-colors";
+              if (enText)
+                enText.className =
+                  "font-medium text-white font-semibold text-xs sm:text-sm leading-relaxed transition-colors";
               item.scrollIntoView({ behavior: "smooth", block: "center" });
             } else {
               item.className =
-                "p-2.5 rounded-lg border bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all text-xs flex items-start gap-2.5";
+                "group p-2.5 rounded-xl border bg-slate-950/50 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700 transition-all text-xs flex items-start gap-2.5 cursor-pointer select-none";
+              if (numBadge)
+                numBadge.className =
+                  "font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-400 group-hover:text-slate-200 shrink-0 mt-0.5 transition-colors";
+              if (enText)
+                enText.className =
+                  "font-medium text-slate-200 group-hover:text-white text-xs sm:text-sm leading-relaxed transition-colors";
             }
           }
         });

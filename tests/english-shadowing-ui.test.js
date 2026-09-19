@@ -247,7 +247,7 @@ async function runTests() {
     "Anki CSV export button exists"
   );
 
-  // 10. SRT Timing Nudge & Export UI
+  // 10. SRT Timing Nudge UI
   assert(
     htmlContent.includes("onclick=\"nudgeActiveCueTiming('start', -0.1)\""),
     "Start timing nudge backward (-100ms) button exists"
@@ -257,8 +257,16 @@ async function runTests() {
     "Start timing nudge forward (+100ms) button exists"
   );
   assert(
-    htmlContent.includes('onclick="exportCurrentScenarioSrt()"'),
-    "Export SRT button exists"
+    !htmlContent.includes('onclick="exportCurrentScenarioSrt()"'),
+    "Export SRT button is removed from player top bar"
+  );
+  assert(
+    !htmlContent.includes('onclick="exportCurrentScenarioLrc()"'),
+    "Export Enhanced LRC button is removed from player top bar"
+  );
+  assert(
+    htmlContent.includes('data-i18n="btnBackToCatalog"'),
+    "Back to Catalog button exists in player top bar"
   );
 
   // 11. App Shell Layout & DOM Hierarchy (Slice 4)
@@ -291,7 +299,7 @@ async function runTests() {
     "Audio scrubber milestone marks container exists"
   );
 
-  // 13. Collapsible Transcript Drawer
+  // 13. Collapsible Read-Only Transcript Drawer
   assert(
     htmlContent.includes('id="transcriptCard"'),
     "Collapsible transcript card exists"
@@ -304,12 +312,16 @@ async function runTests() {
     htmlContent.includes('id="btnToggleTranscript"'),
     "Transcript drawer toggle button exists"
   );
-
-  // 14. Export Enhanced LRC & Karaoke Visual Tokens
   assert(
-    htmlContent.includes('onclick="exportCurrentScenarioLrc()"'),
-    "Export Enhanced LRC button exists"
+    !htmlContent.includes('onchange="updateCueTextInline'),
+    "Inline text edit inputs are removed from transcript feed"
   );
+  assert(
+    htmlContent.includes('onclick="jumpToSentence(${idx})"'),
+    "Clickable full-row sentence jump handler is present in transcript renderer"
+  );
+
+  // 14. Karaoke Visual Tokens & Repeat Prompt
   assert(
     htmlContent.includes("karaoke-word"),
     "Karaoke word class is referenced in subtitle renderer"

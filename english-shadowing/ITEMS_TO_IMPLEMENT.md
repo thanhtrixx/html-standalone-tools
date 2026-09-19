@@ -1,46 +1,40 @@
 # English Shadowing Player — Backlog & Roadmap
 
-## 🎯 Milestone 3: App-Shell Layout, URL Scenario Deep-Linking, Default Continuous Mode & Insights Modal
+## 🎯 Milestone 4: Listening-First Audio Engine, Clean Navigation & View-Only Transcript
 
-### Epic: Application-First Shadowing Workspace & Deep-Linking Navigation
+### Epic: Listening-First Audio Precision & Streamlined Shadowing Ergonomics
 
-- **Status:** Phase 1 Ready for Implementation ([ADR-0004](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md))
+- **Status:** Phase 1 Ready for Implementation ([ADR-0005](./docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md))
 
 ---
 
 ### Vertical Slices Breakdown
 
-#### Slice 1: URL Scenario Deep-Linking & History State Engine
+#### Slice 1: Clean Player Top Bar & View-Only Transcript Feed
+- **Title**: `feat(shadowing): clean player top bar and view-only transcript card`
+- **Scope**:
+  - [ ] Remove Export LRC and Export SRT buttons from player top bar.
+  - [ ] Restyle "Back to Catalog" into a clean, sleek ghost/breadcrumb navigation button with subtle arrow on top-left of player bar.
+  - [ ] Refactor `transcriptCard` into a pure view & sentence selection feed; remove all `<input>` fields and editing instructions.
+  - [ ] Make entire sentence card/row clickable for instantaneous sentence jumping with hover and active emerald highlight states.
+  - [ ] Update bilingual labels and test suites in `tests/english-shadowing-ui.test.js`.
 
-- [ ] Support `?scenario=<id>` query parameter on initial page load to automatically load scenario and enter Player view.
-- [ ] Implement two-way URL synchronization via `history.pushState` / `replaceState` on scenario selection and catalog return.
-- [ ] Add `popstate` event listener for seamless browser Back/Forward navigation.
-- [ ] Add fallback handling with friendly toast notification when an invalid scenario ID is supplied.
-- [ ] Automated unit & DOM seam tests covering URL parsing, routing transitions, and history events.
+#### Slice 2: Zero-Seek Continuous Playback Engine & Stutter Elimination
+- **Title**: `fix(shadowing): zero-seek continuous playback and stutter elimination`
+- **Scope**:
+  - [ ] Redesign continuous mode playback loop to stream HTML5 `<audio>` naturally without forced re-seeks or redundant `.play()` invocations at sentence boundaries.
+  - [ ] Implement seamless cue boundary tracking in RAF / time update loop to update active sentence index, transcript auto-scrolling, and karaoke word highlights.
+  - [ ] Ensure explicit seek operations (scrubbing, transcript clicking, next/prev navigation) still accurately reposition audio.
+  - [ ] Add automated unit and playback synchronizer tests in `tests/english-shadowing-engine.test.js`.
 
-#### Slice 2: Continuous Flow Default & Recording UI Cleanup
-
-- [ ] Set default `state.playbackMode` to `"continuous"`.
-- [ ] Persist user playback mode selection in `localStorage` (`shadowing_playback_mode`).
-- [ ] Temporarily remove/hide `waveformComparisonBox`, `btnDockRecord`, `btnRecordPrompt`, and `[M]` hotkey from active player stage.
-- [ ] Ensure seamless auto-advancing audio playback between sentence cues without pause in continuous mode.
-- [ ] Automated unit & storage seam tests for playback mode defaults and persistence.
-
-#### Slice 3: Dedicated Insights & Reports Modal & Header Motivation Indicators
-
-- [ ] Remove wide `#dailyHubSection` banner from the main container.
-- [ ] Add `📊 Insights` button to top navigation bar with bilingual labels.
-- [ ] Create dedicated Insights modal displaying Streak counter 🔥, 15m Daily Practice Goal progress, Sentences Shadowed counters, and 5-Box SRS vocabulary mastery distribution.
-- [ ] Add compact header indicator badges (`🔥 Streak`, `📚 Due Count`) for glanceable daily motivation.
-- [ ] 100% bilingual parity across English and Vietnamese translation dictionaries (`I18N.md`).
-
-#### Slice 4: App-Shell Layout, Central Transcript Feed & Pinned Bottom Player Dock
-
-- [ ] Restructure DOM to fixed App Shell layout (`h-screen overflow-hidden flex flex-col`).
-- [ ] Position `#subtitleStage` as prominent centerpiece hero card in upper central stage.
-- [ ] Embed `#transcriptCard` in central workspace with default expanded state, bilingual cues, and smooth auto-scroll to active sentence.
-- [ ] Pin `#player-container` transport dock fixed at the bottom edge with scrubber, milestone markers, primary controls, speed pill, and mode switch.
-- [ ] Multi-device E2E and visual tests verifying desktop, tablet, and mobile responsiveness.
+#### Slice 3: Speed Selection Popover & Precision Loop Mode Boundaries
+- **Title**: `feat(shadowing): speed selection popover and loop mode acoustic boundary padding`
+- **Scope**:
+  - [ ] Implement interactive speed selection popover menu triggered from transport dock with direct presets: `0.5x`, `0.75x`, `0.85x`, `1.0x (Normal)`, `1.15x`, `1.25x`, `1.5x`.
+  - [ ] Retain keyboard shortcuts (`[` and `]`) for stepping playback speed.
+  - [ ] Implement loop mode acoustic lead-out padding (+150ms clamped to next cue start) and micro lead-in (-50ms) to preserve trailing/leading phonemes.
+  - [ ] Ensure clean auto-pause, repeat prompt activation, and instant replay in loop mode without audio bleed.
+  - [ ] Add automated seam tests verifying speed popover presets, boundary margin calculations, and keyboard shortcuts.
 
 ---
 
@@ -48,3 +42,4 @@
 
 - ✅ **Milestone 1**: Standalone PWA Architecture, Leitner SRS & Smart SRT Engine ([ADR-0001](./docs/adr/0001-english-shadowing-pwa-architecture-and-data-model.md), [ADR-0002](./docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md))
 - ✅ **Milestone 2**: Enhanced LRC Karaoke Engine, Neural Audio Pipeline & Integrated Transport Dock ([ADR-0003](./docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md))
+- ✅ **Milestone 3**: App-Shell Layout, URL Scenario Deep-Linking, Default Continuous Mode & Dedicated Insights Modal ([ADR-0004](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md))

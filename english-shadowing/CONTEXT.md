@@ -15,6 +15,7 @@ For architectural decision records, refer to:
 - [`docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md`](./docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md)
 - [`docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md`](./docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md)
 - [`docs/adr/0004-app-shell-url-routing-and-insights-reports.md`](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md)
+- [`docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md`](./docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md)
 
 ---
 
@@ -33,9 +34,9 @@ For architectural decision records, refer to:
   - **Passed Word**: Articulated words in the current sentence rendered with high-contrast sharp white text.
   - **Upcoming Word**: Unspoken words in the current sentence rendered with dimmed slate contrast (`text-slate-400`).
 - **Playback Modes**:
-  - **Continuous Audio Flow Mode (`continuous`)**: The default playback mode streaming audio naturally without auto-pausing, while maintaining millisecond-accurate auto-scrolling and visual focus on the active sentence.
+  - **Continuous Audio Flow Mode (`continuous`)**: The default playback mode streaming audio naturally without auto-pausing or forced boundary seeks, maintaining millisecond-accurate auto-scrolling and visual focus on the active sentence without audio hitching.
     _Avoid_: Auto-stop mode, podcast mode, loop all.
-  - **Interactive Sentence Loop Mode (`loop`)**: The player plays a single sentence cue, reaches the timestamp boundary, and automatically pauses. Provides instantaneous 1-tap/1-key replay (`R` / `Space`) to drill difficult sentences.
+  - **Interactive Sentence Loop Mode (`loop`)**: Plays a single sentence cue with acoustic lead-out padding (+150ms clamped to next cue start) and micro lead-in (-50ms), cleanly auto-pausing at the sentence boundary with a repeat prompt for shadowing repetition.
 - **Subtitle Masking Modes**:
   - **Dual (`both`)**: Primary English subtitle on top with secondary Vietnamese translation below.
   - **English Only (`primary`)**: Hides the translation to focus on target language reading.
@@ -47,16 +48,19 @@ For architectural decision records, refer to:
 
 ### 2. Audio Engine & Precision Transport
 
-- **HTML5 Audio Engine**: Resilient audio playback engine powered by HTML5 `<audio>` and Web Audio API, consuming high-fidelity local bundled or CDN-hosted audio files with sub-millisecond seek accuracy.
-- **Pinned Bottom Transport Dock**: Ergonomic transport deck fixed at the bottom of the viewport containing Scrubber with Sentence Milestone markers, Play/Pause/Replay triggers, Speed selector (`0.75x` to `1.5x`), Loop/Continuous toggle, and Vocab launcher.
+- **HTML5 Audio Engine (Zero-Seek Streaming)**: Resilient audio playback engine powered by HTML5 `<audio>`, streaming continuous audio tracks without forced seeks at contiguous sentence boundaries to prevent audio buffer hitching.
+- **Acoustic Boundary Padding**: Intelligent +150ms lead-out padding (clamped to next cue start) in Loop Mode ensuring complete phonetic resolution of final plosives and consonants without audio bleeding into adjacent sentences.
+- **Speed Selector Popover**: Interactive speed menu offering direct presets (`0.5x`, `0.75x`, `0.85x`, `1.0x`, `1.15x`, `1.25x`, `1.5x`) alongside keyboard stepping hotkeys (`[` and `]`).
+- **Pinned Bottom Transport Dock**: Ergonomic transport deck fixed at the bottom of the viewport containing Scrubber with Sentence Milestone markers, Play/Pause/Replay triggers, Speed selector popover, Loop/Continuous toggle, and Vocab launcher.
 
 ---
 
 ### 3. Application-First Workspace Architecture
 
 - **App Shell Architecture**: Full-viewport responsive application (`h-screen overflow-hidden flex flex-col`) maximizing practice focus.
+- **Minimalist Player Top Bar**: Uncluttered header containing a sleek ghost breadcrumb (`← Back to Catalog`) adjacent to title/CEFR badges, and the Subtitle Mask toggle on the right. (Export LRC/SRT buttons removed).
 - **Centerpiece Subtitle Stage**: The hero visual component featuring large, high-contrast active English sentences with word-by-word karaoke glow, Vietnamese translation line, and live timing nudge controls.
-- **Middle Transcript Feed**: Scrollable bilingual script panel positioned in the central workspace between the Subtitle Stage and the Pinned Bottom Dock, supporting automatic smooth centering to the active sentence and 1-tap seeking.
+- **Read-Only Transcript Navigation Feed (`transcriptCard`)**: Scrollable bilingual script panel positioned in the central workspace for reading and 1-tap sentence jumping. Static typography replaces input fields for pure focus.
 
 ---
 
