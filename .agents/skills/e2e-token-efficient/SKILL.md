@@ -107,10 +107,11 @@ Received: <element(s) not found>
 ```
 
 ### Agent Rules for Failure Diagnostics:
-1. **Inspect ONLY the truncated failure trace** provided in the runner output.
-2. **DO NOT read `playwright-report/index.html`** or raw JSON blobs into context.
-3. If an issue is related to element selectors, inspect the relevant component source file or DOM fixture directly rather than dumping the full browser DOM.
-4. If a test is flaky due to animations, verify CSS transitions or timeouts in `playwright.config.js`.
+1. **Inspect the truncated failure trace** provided in the runner output first.
+2. **Detailed Troubleshooting Artifact**: Full Playwright JSON output is preserved at `test-reports/playwright-results.json`. Use `grep -n` or targeted slice reading on this file if deep locator/action details are needed.
+3. **DO NOT dump whole report files** or large HTML pages into context.
+4. If an issue is related to element selectors, inspect the relevant component source file or DOM fixture directly rather than dumping the full browser DOM.
+5. If a test is flaky due to animations, verify CSS transitions or timeouts in `playwright.config.js`.
 
 ---
 

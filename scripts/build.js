@@ -782,11 +782,78 @@ function formatBytes(bytes) {
 }
 
 /**
+ * Writes a structured build summary JSON report to test-reports/build-summary.json.
+ * @param {Array<object>} results
+ * @param {string|null} destDir
+ * @param {string} reportsDir
+ * @returns {string} File path written
+ */
+function saveBuildSummary(
+  results,
+  destDir = null,
+  reportsDir = path.join(ROOT_DIR, "test-reports")
+) {
+  if (!fs.existsSync(reportsDir)) {
+    fs.mkdirSync(reportsDir, { recursive: true });
+  }
+
+  const totalOriginalSize = results.reduce(
+    (acc, r) => acc + (r.originalSize || 0),
+    0
+  );
+  const totalMinifiedSize = results.reduce(
+    (acc, r) => acc + (r.minifiedSize || 0),
+    0
+  );
+  const totalDuration = results.reduce((acc, r) => acc + (r.elapsed || 0), 0);
+  const overallSavings =
+    totalOriginalSize > 0
+      ? (
+          ((totalOriginalSize - totalMinifiedSize) / totalOriginalSize) *
+          100
+        ).toFixed(1)
+      : "0.0";
+
+  const report = {
+    timestamp: new Date().toISOString(),
+    totalDuration,
+    totalOriginalSize,
+    totalMinifiedSize,
+    overallSavings: `${overallSavings}%`,
+    externalDestDir: destDir || null,
+    summary: {
+      totalDeliverables: results.length,
+      successful: results.filter((r) => !r.error).length,
+      failed: results.filter((r) => r.error).length,
+    },
+    deliverables: results.map((r) => ({
+      name: r.name,
+      status: r.error ? "failed" : "success",
+      error: r.error || null,
+      originalSize: r.originalSize || 0,
+      originalFormatted: formatBytes(r.originalSize || 0),
+      minifiedSize: r.minifiedSize || 0,
+      minifiedFormatted: formatBytes(r.minifiedSize || 0),
+      savings: `${r.savings || 0}%`,
+      elapsedMs: r.elapsed || 0,
+      outputFiles: (r.outputFiles || []).map((f) => path.relative(ROOT_DIR, f)),
+      syncedFiles: (r.syncedFiles || []).map((f) => path.relative(ROOT_DIR, f)),
+    })),
+  };
+
+  const reportPath = path.join(reportsDir, "build-summary.json");
+  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), "utf8");
+  return reportPath;
+}
+
+/**
  * Main execution
  */
 async function main() {
   const args = process.argv.slice(2);
   let targetToolName = null;
+  const isSummaryMode =
+    args.includes("--summary") || args.includes("--compact");
 
   for (let i = 0; i < args.length; i++) {
     if (args[i].startsWith("--tool=")) {
@@ -834,13 +901,15 @@ async function main() {
     .filter(Boolean)
     .join(" + ");
 
-  console.log(
-    `\n📦 Building Compacted Standalone HTML Tools (${summaryLabel})...`
-  );
-  if (destDir) {
-    console.log(`📁 External Distribution Target: ${destDir}\n`);
-  } else {
-    console.log(`\n`);
+  if (!isSummaryMode) {
+    console.log(
+      `\n📦 Building Compacted Standalone HTML Tools (${summaryLabel})...`
+    );
+    if (destDir) {
+      console.log(`📁 External Distribution Target: ${destDir}\n`);
+    } else {
+      console.log(`\n`);
+    }
   }
 
   const results = [];
@@ -850,29 +919,42 @@ async function main() {
     try {
       const res = await buildTool(tool);
       results.push(res);
-      console.log(`✅ [${res.name}]`);
-      console.log(`   Source:   ${formatBytes(res.originalSize)}`);
-      console.log(
-        `   Compact:  ${formatBytes(res.minifiedSize)} (${res.savings}% reduction)`
-      );
-      console.log(
-        `   Outputs:  ${path.relative(ROOT_DIR, res.outputFiles[0])}`
-      );
-      console.log(
-        `             ${path.relative(ROOT_DIR, res.outputFiles[1])}`
-      );
+
+      if (!isSummaryMode) {
+        console.log(`✅ [${res.name}]`);
+        console.log(`   Source:   ${formatBytes(res.originalSize)}`);
+        console.log(
+          `   Compact:  ${formatBytes(res.minifiedSize)} (${res.savings}% reduction)`
+        );
+        console.log(
+          `   Outputs:  ${path.relative(ROOT_DIR, res.outputFiles[0])}`
+        );
+        console.log(
+          `             ${path.relative(ROOT_DIR, res.outputFiles[1])}`
+        );
+      }
 
       // Perform external sync if configured
       if (destDir) {
         const syncRes = syncToolToExternal(tool, destDir);
         syncResults.push(syncRes);
-        console.log(
-          `   Synced:   ${path.relative(ROOT_DIR, syncRes.targetDir)} (${syncRes.syncedFiles.length} file${syncRes.syncedFiles.length > 1 ? "s" : ""})`
-        );
+        if (!isSummaryMode) {
+          console.log(
+            `   Synced:   ${path.relative(ROOT_DIR, syncRes.targetDir)} (${syncRes.syncedFiles.length} file${syncRes.syncedFiles.length > 1 ? "s" : ""})`
+          );
+        }
       }
 
-      console.log(`   Duration: ${res.elapsed}ms\n`);
+      if (!isSummaryMode) {
+        console.log(`   Duration: ${res.elapsed}ms\n`);
+      }
     } catch (err) {
+      results.push({
+        name: tool.name,
+        error: err.message || String(err),
+        elapsed: 0,
+      });
+      saveBuildSummary(results, destDir);
       console.error(`❌ Failed to build [${tool.name}]:`, err);
       process.exit(1);
     }
@@ -884,41 +966,74 @@ async function main() {
       const portalRes = await buildPortal(destDir);
       if (portalRes) {
         results.push(portalRes);
-        console.log(`✅ [${portalRes.name}] (Central Portal Hub)`);
-        console.log(`   Source:   ${formatBytes(portalRes.originalSize)}`);
-        console.log(
-          `   Compact:  ${formatBytes(portalRes.minifiedSize)} (${portalRes.savings}% reduction)`
-        );
-        console.log(
-          `   Outputs:  ${path.relative(ROOT_DIR, portalRes.outputFiles[0])}`
-        );
-        console.log(
-          `             ${path.relative(ROOT_DIR, portalRes.outputFiles[1])}`
-        );
 
-        if (destDir && portalRes.syncedFiles.length > 0) {
+        if (!isSummaryMode) {
+          console.log(`✅ [${portalRes.name}] (Central Portal Hub)`);
+          console.log(`   Source:   ${formatBytes(portalRes.originalSize)}`);
           console.log(
-            `   Synced:   ${path.relative(ROOT_DIR, portalRes.syncedFiles[0])}`
+            `   Compact:  ${formatBytes(portalRes.minifiedSize)} (${portalRes.savings}% reduction)`
           );
-        }
+          console.log(
+            `   Outputs:  ${path.relative(ROOT_DIR, portalRes.outputFiles[0])}`
+          );
+          console.log(
+            `             ${path.relative(ROOT_DIR, portalRes.outputFiles[1])}`
+          );
 
-        console.log(`   Duration: ${portalRes.elapsed}ms\n`);
+          if (destDir && portalRes.syncedFiles.length > 0) {
+            console.log(
+              `   Synced:   ${path.relative(ROOT_DIR, portalRes.syncedFiles[0])}`
+            );
+          }
+
+          console.log(`   Duration: ${portalRes.elapsed}ms\n`);
+        }
       }
     } catch (err) {
+      results.push({
+        name: "portal",
+        error: err.message || String(err),
+        elapsed: 0,
+      });
+      saveBuildSummary(results, destDir);
       console.error(`❌ Failed to build central portal hub:`, err);
       process.exit(1);
     }
   }
 
-  if (destDir) {
+  const reportPath = saveBuildSummary(results, destDir);
+  const totalElapsed = results.reduce((acc, r) => acc + (r.elapsed || 0), 0);
+  const totalOriginal = results.reduce(
+    (acc, r) => acc + (r.originalSize || 0),
+    0
+  );
+  const totalMinified = results.reduce(
+    (acc, r) => acc + (r.minifiedSize || 0),
+    0
+  );
+  const totalSavings =
+    totalOriginal > 0
+      ? (((totalOriginal - totalMinified) / totalOriginal) * 100).toFixed(1)
+      : "0.0";
+
+  if (isSummaryMode) {
     console.log(
-      `✨ Build & external sync completed successfully! (${results.reduce((acc, r) => acc + r.elapsed, 0)}ms total)`
+      `✅ Built ${results.length} deliverables in ${(totalElapsed / 1000).toFixed(1)}s (total reduction: ${totalSavings}%) [report: ${path.relative(ROOT_DIR, reportPath)}]`
     );
-    console.log(`🚀 All deliverables mirrored to: ${destDir}\n`);
   } else {
-    console.log(
-      `✨ Build completed successfully! (${results.reduce((acc, r) => acc + r.elapsed, 0)}ms total)\n`
-    );
+    if (destDir) {
+      console.log(
+        `✨ Build & external sync completed successfully! (${totalElapsed}ms total)`
+      );
+      console.log(`🚀 All deliverables mirrored to: ${destDir}`);
+      console.log(
+        `📝 Build report saved to: ${path.relative(ROOT_DIR, reportPath)}\n`
+      );
+    } else {
+      console.log(
+        `✨ Build completed successfully! (${totalElapsed}ms total) [report: ${path.relative(ROOT_DIR, reportPath)}]\n`
+      );
+    }
   }
 }
 
@@ -943,6 +1058,7 @@ module.exports = {
   loadEnvFiles,
   resolveDestDir,
   syncToolToExternal,
+  saveBuildSummary,
   MINIFY_OPTIONS,
   COMPANION_ASSETS,
 };

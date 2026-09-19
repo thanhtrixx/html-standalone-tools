@@ -352,11 +352,18 @@ function runE2ESummary(argv = process.argv.slice(2)) {
   const rawStdout = proc.stdout || "";
   const rawStderr = proc.stderr || "";
 
+  const reportsDir = path.join(ROOT_DIR, "test-reports");
+  if (!fs.existsSync(reportsDir)) {
+    fs.mkdirSync(reportsDir, { recursive: true });
+  }
+  const persistentReportPath = path.join(reportsDir, "playwright-results.json");
+
   let reportJson;
   try {
     if (fs.existsSync(tempJsonFile)) {
       const rawData = fs.readFileSync(tempJsonFile, "utf8");
       reportJson = JSON.parse(rawData);
+      fs.writeFileSync(persistentReportPath, rawData, "utf8");
       try {
         fs.unlinkSync(tempJsonFile);
       } catch (_) {}
@@ -366,6 +373,11 @@ function runE2ESummary(argv = process.argv.slice(2)) {
       if (jsonStartIdx !== -1) {
         const trimmedJson = rawStdout.substring(jsonStartIdx);
         reportJson = JSON.parse(trimmedJson);
+        fs.writeFileSync(
+          persistentReportPath,
+          JSON.stringify(reportJson, null, 2),
+          "utf8"
+        );
       } else {
         throw new Error("No JSON payload detected in report file or stdout.");
       }
@@ -385,6 +397,11 @@ function runE2ESummary(argv = process.argv.slice(2)) {
   const { summary, exitCode } = formatSummary(parsed);
 
   console.log(summary);
+  if (exitCode !== 0) {
+    console.error(
+      `\n📝 Detailed Playwright JSON report saved to: ${path.relative(ROOT_DIR, persistentReportPath)}`
+    );
+  }
   process.exit(exitCode);
 }
 
