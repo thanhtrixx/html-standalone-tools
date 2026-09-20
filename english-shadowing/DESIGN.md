@@ -80,3 +80,32 @@ The English Shadowing Player employs a focused, high-contrast deliberate practic
    - Rendered using Web Audio API `AnalyserNode` with smooth time-domain decibel decay.
 4. **Accessible Touch Targets**:
    - All interactive buttons maintain a minimum $\ge 44 \times 44\text{px}$ touch target on mobile viewports.
+
+---
+
+## ⌨️ Keyboard-First Ergonomics & Shortcuts Cheat Sheet
+
+The application is structured for complete keyboard navigation without requiring mouse interaction:
+
+| Domain         | Hotkey                        | Action                                                |
+| :------------- | :---------------------------- | :---------------------------------------------------- |
+| **Transport**  | `Space` / `K`                 | Play / Pause playback                                 |
+| **Transport**  | `R` / `↑`                     | Replay current sentence                               |
+| **Transport**  | `A` / `←` / `J`               | Jump to previous sentence                             |
+| **Transport**  | `D` / `→` / `L`               | Jump to next sentence                                 |
+| **Transport**  | `Home` / `0`                  | Jump to first sentence                                |
+| **Transport**  | `End`                         | Jump to last sentence                                 |
+| **Transport**  | `[` / `]`                     | Decrease / Increase playback speed                    |
+| **Practice**   | `P`                           | Cycle Playback Mode (Continuous ➔ Loop ➔ Echoic)      |
+| **Practice**   | `M`                           | Toggle Microphone Recording Take                      |
+| **Practice**   | `C`                           | Play A/B Comparative audio (Native vs My Voice)       |
+| **Practice**   | `B`                           | Toggle scenario bookmark                              |
+| **Subtitles**  | `1`, `2`, `3`, `4`            | Masking modes: 1=Dual, 2=EN only, 3=VI only, 4=Blur   |
+| **Vocabulary** | `V`                           | Open / Close Leitner Vocabulary Drawer                |
+| **Flashcards** | `Space` / `Enter` / `F` / `↑` | Flip flashcard to reveal meaning                      |
+| **Flashcards** | `1`, `2`, `3`                 | Grade: 1=Hard (1d), 2=Good (+1 box), 3=Mastered (30d) |
+| **Flashcards** | `←` / `→`                     | Previous / Next flashcard                             |
+| **Global**     | `/`                           | Focus search input in catalog                         |
+| **Global**     | `I`                           | Open / Close Insights & Analytics Modal               |
+| **Global**     | `?` (`Shift + /`)             | Open Keyboard Shortcuts Cheat Sheet Modal             |
+| **Global**     | `Escape`                      | Dismiss modal/drawer or return to Catalog             |

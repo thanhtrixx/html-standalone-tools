@@ -224,9 +224,45 @@ Complete the speech-production feedback loop, restore the microphone recording d
 #### Slice 4: Offline 3,000-Word IPA/VI Dictionary & Specification Parity ([#691](https://github.com/thanhtrixx/html-standalone-tools/issues/691))
 
 - **Scope**:
-  - [ ] Embed compressed ~3,000-word CEFR A1–C1 offline dictionary database with accurate IPA, parts of speech, and Vietnamese translations.
-  - [ ] Add simple lemmatization for inflections and plural forms.
-  - [ ] Reconcile `PRODUCT.md`, `DESIGN.md`, `CONTEXT.md`, and clean up dead code.
+  - [x] Embed compressed ~3,000-word CEFR A1–C1 offline dictionary database with accurate IPA, parts of speech, and Vietnamese translations.
+  - [x] Add simple lemmatization for inflections and plural forms.
+  - [x] Reconcile `PRODUCT.md`, `DESIGN.md`, `CONTEXT.md`, and clean up dead code.
+
+---
+
+## 🎯 Milestone 9: Monolingual English UI, Permanent Dark Theme & Ergonomic Keyboard Navigation ([#698](https://github.com/thanhtrixx/html-standalone-tools/issues/698), [ADR-0010](./docs/adr/0010-monolingual-english-ui-permanent-dark-theme-and-ergonomic-hotkeys.md))
+
+### 🎯 Objective
+
+Remove client-side UI i18n switcher boilerplate, lock the app permanently into a focused high-contrast dark theme, and implement a full-spectrum keyboard-first interaction engine with multi-layout transport, shadowing workflow controls, SRS flashcard shortcuts, and a redesigned cheatsheet modal.
+
+### 🧩 Vertical Slice Breakdown
+
+#### Slice 1: Monolingual English UI & Permanent Dark Mode ([#699](https://github.com/thanhtrixx/html-standalone-tools/issues/699))
+
+- **Scope**:
+  - [ ] Hardcode all UI labels, navigation buttons, empty states, and modal copy in clean, natural English.
+  - [ ] Remove `#langBtnEn`, `#langBtnVi`, `setLanguage()`, `state.lang`, `TRANSLATIONS` dictionary, and `data-i18n` attributes.
+  - [ ] Remove `#themeToggleBtn`, `#themeIconDark`, `#themeIconLight`, `setTheme()`, `toggleTheme()`, and localStorage theme loading.
+  - [ ] Enforce permanent dark theme styling on `<html>` and clean up unused light theme CSS selectors.
+  - [ ] Retain Vietnamese subtitle lines in `.lrc` and Vietnamese definitions in `BUILTIN_VOCAB_DB`.
+
+#### Slice 2: Full-Spectrum Ergonomic Keyboard Shortcuts Engine ([#700](https://github.com/thanhtrixx/html-standalone-tools/issues/700))
+
+- **Scope**:
+  - [ ] Multi-layout transport navigation: `Space` / `K` (Play/Pause), `R` / `Up` (Replay), `A` / `Left` / `J` (Prev cue), `D` / `Right` / `L` (Next cue), `Home` / `0` (First cue), `End` (Last cue), `[` / `]` (Speed adjustment).
+  - [ ] Shadowing practice triggers: `P` (Cycle Continuous ➔ Loop ➔ Echoic mode), `M` (Toggle Mic Take), `C` (Play A/B Comparative take), `B` (Bookmark current scenario).
+  - [ ] Subtitle masking modes: `1`, `2`, `3`, `4` (Dual, EN only, VI only, Blur).
+  - [ ] Leitner SRS flashcard review controls: `Space` / `Enter` / `F` / `Up` to flip card, `1` (Hard), `2` (Good), `3` (Mastered), `Left` / `Right` to navigate cards.
+  - [ ] Global & catalog navigation: `/` to focus catalog search input, `V` for Vocab Drawer, `I` for Insights, `?` for Cheat Sheet, and `Escape` for dismissal.
+
+#### Slice 3: Redesigned Shortcuts Cheat Sheet Modal & Automated Verification ([#701](https://github.com/thanhtrixx/html-standalone-tools/issues/701))
+
+- **Scope**:
+  - [ ] Redesign `#hotkeyModal` into categorized sections (Transport & Navigation, Shadowing & Mic, Subtitles & Masking, Leitner SRS Flashcards, Global & Search).
+  - [ ] Update `tests/english-shadowing-ui.test.js` to assert all hotkeys, modal structures, and dark theme invariants.
+  - [ ] Update `tests/english-shadowing-engine.test.js` and retire/update `tests/english-shadowing-i18n.test.js`.
+  - [ ] Validate 100% test pass via `bun run test:shadowing`.
 
 ---
 

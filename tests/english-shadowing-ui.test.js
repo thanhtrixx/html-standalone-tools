@@ -281,7 +281,7 @@ async function runTests() {
 
   // 10. FTUX Onboarding & Clean Subtitle Stage (Issue #688)
   assert(
-    htmlContent.includes('data-i18n="howToShadowTitle"'),
+    htmlContent.includes("How Shadowing Works (3 Steps)"),
     "3-Step How to Shadow FTUX onboarding guide exists"
   );
   assert(
@@ -301,7 +301,7 @@ async function runTests() {
     "Export Enhanced LRC button is removed from player top bar"
   );
   assert(
-    htmlContent.includes('data-i18n="btnBackToCatalog"'),
+    htmlContent.includes('id="btnBackToCatalog"'),
     "Back to Catalog button exists in player top bar"
   );
 
@@ -468,8 +468,8 @@ async function runTests() {
     "Scenario cards include bookmark button styling/class"
   );
   assert(
-    htmlContent.includes('data-i18n="noScenariosFound"'),
-    "Catalog empty state has data-i18n='noScenariosFound'"
+    htmlContent.includes("No scenarios match the selected filters."),
+    "Catalog empty state message exists"
   );
 
   // 17. Dynamic Cue Lookup & Scrubber Pointer Event Protection
@@ -534,6 +534,37 @@ async function runTests() {
       '<button\n                    onclick="selectScenarioById'
     ),
     "Standalone practice button is removed from scenario card footer"
+  );
+
+  // 19. Catalog Idle State & Stable Karaoke Typography (Issues Bug 1 & Bug 2)
+  assert(
+    htmlContent.includes(
+      'if (!loadedFromUrl) {\n          state.activeView = "catalog";\n          state.activeScenario = null;'
+    ),
+    "initApp() maintains activeView as catalog and activeScenario as null when no scenario deep-link is in URL"
+  );
+  assert(
+    htmlContent.includes(
+      'if (state.activeView !== "player") {\n          return;\n        }'
+    ),
+    "handleGlobalKeydown strictly gates playback hotkeys to player view only"
+  );
+  assert(
+    htmlContent.includes(
+      "font-semibold bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-[0_0_14px_rgba(6,182,212,0.45)]"
+    ) &&
+      htmlContent.includes(
+        "font-semibold text-white border border-transparent"
+      ) &&
+      htmlContent.includes(
+        "font-semibold text-slate-400 border border-transparent"
+      ),
+    "updateKaraokeWordHighlight maintains identical font-semibold weight, border geometry, and padding across active, past, and future words"
+  );
+  assert(
+    htmlContent.includes('id="activeEnglishSubtitle"') &&
+      htmlContent.includes("font-semibold tracking-tight text-white"),
+    "activeEnglishSubtitle container enforces matching font-semibold tracking"
   );
 
   console.log(`\n==================================================`);

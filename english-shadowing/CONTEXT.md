@@ -20,6 +20,7 @@ For architectural decision records, refer to:
 - [`docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md`](./docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md)
 - [`docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md`](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md)
 - [`docs/adr/0009-voice-recording-echoic-shadowing-and-indexeddb-vault.md`](./docs/adr/0009-voice-recording-echoic-shadowing-and-indexeddb-vault.md)
+- [`docs/adr/0010-monolingual-english-ui-permanent-dark-theme-and-ergonomic-hotkeys.md`](./docs/adr/0010-monolingual-english-ui-permanent-dark-theme-and-ergonomic-hotkeys.md)
 
 ---
 
@@ -116,13 +117,21 @@ For architectural decision records, refer to:
 - **Curated Collections & Thematic Tags**: Systematic curriculum grouping scenarios into structured series (`daily-social`, `workplace`, `travel`, `academic`) and searchable topic tags (`#coffee`, `#standup`, `#interview`, `#ai`).
 - **Retired Legacy Mechanisms**: Ephemeral custom user imports (`#importModal`, `handleCustomScenarioSubmit`) and legacy SRT fallback parsing (`parseSrt`) are permanently retired to maintain a lean, high-fidelity codebase.
 
+### 8. Keyboard-First Interaction & Ergonomic Navigation
+
+- **Unified Multi-Layout Transport**: Seamlessly supports `Left`/`Right`/`Up` arrow keys, `A`/`D`/`R` keys, and `J`/`K`/`L` Vim/media transport keys for sentence navigation and replay, with `Space` for Play/Pause.
+- **Shadowing Workflow Triggers**: `P` to cycle modes (`continuous`/`loop`/`echoic`), `M` to toggle microphone recording, `C` to trigger A/B comparative playback, and `B` to toggle scenario bookmarking.
+- **Leitner SRS Flashcard Review Hotkeys**: `Space`/`Enter` to flip card, `1` (Hard / Reset Box 1), `2` (Good / Advance Box), `3` (Mastered / Box 5), and `Left`/`Right` to navigate cards.
+- **Global Modals & Search Focus**: `/` to focus scenario search input, `?` (`Shift+/`) to display the keyboard cheatsheet, `V` for Vocab Drawer, `I` for Insights, and `Escape` for dismissal.
+
 ---
 
 ## 🔒 Architectural Invariants
 
 1. **Zero-Backend Standalone Execution**: The application runs 100% in the user's browser with zero external server dependencies.
 2. **Authentic Audio Delivery**: All curated scenarios utilize real audio files (MP3/OGG/AAC) with zero synthetic Web Speech API SpeechSynthesis fallbacks for scenario playback.
-3. **100% Bilingual Parity (VI & EN)**: Every label, button, modal, tooltip, and status message exists in both English and Vietnamese with zero missing translation keys.
+3. **Monolingual English Application UI with Bilingual Study Reference**: Application chrome, navigation, buttons, modals, and settings are rendered in clean, native English without client-side i18n switcher bloat. Subtitle cues (`.lrc`) and vocabulary definitions retain bilingual Vietnamese reference for pedagogical clarity.
 4. **Sub-millisecond Audio Reactivity**: Sentence jumping, audio looping, and time-syncing occur instantaneously with zero audible stutter or layout shift.
 5. **PWA Offline-First Integrity**: Works completely offline after initial asset caching via standard Service Worker and local storage engines.
-6. **Accessibility Floor**: WCAG 2.1 AA compliant color contrast, full keyboard navigability across all features, and accessible aria labels.
+6. **Accessibility Floor & Keyboard Ergonomics**: WCAG 2.1 AA compliant color contrast, 100% keyboard navigability across all transport, catalog, modal, and flashcard review features, and accessible aria labels.
+7. **Permanent High-Contrast Dark Theme**: The interface is permanently locked into a high-contrast dark theme (Midnight Slate/Navy) optimized for visual focus, glowing karaoke pill state tracking, and waveform amplitude rendering with zero theme switching latency.
