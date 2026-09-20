@@ -212,12 +212,9 @@
           <div class="hidden md:block">
             <span
               class="font-bold text-base sm:text-lg tracking-tight text-white block leading-tight"
-              data-i18n="appTitle"
               >English Shadowing</span
             >
-            <span
-              class="text-xs text-emerald-400 font-medium tracking-wide"
-              data-i18n="appTagline"
+            <span class="text-xs text-emerald-400 font-medium tracking-wide"
               >Master Natural Spoken English Cadence</span
             >
           </div>
@@ -244,9 +241,7 @@
                 d="M4 6h16M4 10h16M4 14h16M4 18h16"
               />
             </svg>
-            <span class="hidden lg:inline" data-i18n="navCatalog"
-              >Scenarios</span
-            >
+            <span class="hidden lg:inline">Scenarios</span>
           </button>
 
           <button
@@ -274,7 +269,7 @@
                 d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span class="hidden lg:inline" data-i18n="navPlayer">Player</span>
+            <span class="hidden lg:inline">Player</span>
           </button>
 
           <button
@@ -296,9 +291,7 @@
                 d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
               />
             </svg>
-            <span class="hidden lg:inline" data-i18n="navInsights"
-              >Insights</span
-            >
+            <span class="hidden lg:inline">Insights</span>
             <!-- Streak Badge -->
             <span
               id="headerStreakBadge"
@@ -327,7 +320,7 @@
                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
               />
             </svg>
-            <span class="hidden lg:inline" data-i18n="navVocab">Vocab</span>
+            <span class="hidden lg:inline">Vocab</span>
             <!-- Due Badge -->
             <span
               id="headerDueBadge"
@@ -381,64 +374,6 @@
               />
             </svg>
           </button>
-
-          <!-- Theme Toggle -->
-          <button
-            id="themeToggleBtn"
-            onclick="toggleTheme()"
-            class="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700 shrink-0"
-            title="Toggle Dark/Light Mode"
-            aria-label="Toggle Theme"
-          >
-            <svg
-              id="themeIconDark"
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-              />
-            </svg>
-            <svg
-              id="themeIconLight"
-              class="w-4 h-4 hidden"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-              />
-            </svg>
-          </button>
-
-          <!-- Bilingual Switcher -->
-          <div
-            class="flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700 text-[10px] sm:text-xs font-semibold shrink-0"
-          >
-            <button
-              id="langBtnEn"
-              onclick="setLanguage('en')"
-              class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded transition-all bg-emerald-500 text-slate-950 font-bold"
-            >
-              EN
-            </button>
-            <button
-              id="langBtnVi"
-              onclick="setLanguage('vi')"
-              class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded transition-all text-slate-400 hover:text-slate-200"
-            >
-              VI
-            </button>
-          </div>
         </div>
       </div>
     </header>
@@ -469,20 +404,14 @@
                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2"
               >
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span data-i18n="offlineReadyNotice"
-                  >100% Offline Standalone PWA</span
-                >
+                <span>100% Offline Standalone PWA</span>
               </span>
               <h1
                 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight"
-                data-i18n="appTitle"
               >
                 English Shadowing
               </h1>
-              <p
-                class="text-sm sm:text-base text-slate-400 mt-1 max-w-2xl"
-                data-i18n="appTagline"
-              >
+              <p class="text-sm sm:text-base text-slate-400 mt-1 max-w-2xl">
                 Master natural spoken English rhythm, linking, and intonation
                 through deliberate sentence-by-sentence shadowing.
               </p>
@@ -499,11 +428,9 @@
               class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5"
             >
               <span>🎙️</span>
-              <span data-i18n="howToShadowTitle"
-                >How Shadowing Works (3 Steps)</span
-              >
+              <span>How Shadowing Works (3 Steps)</span>
             </span>
-            <span class="text-[11px] text-slate-400" data-i18n="howToShadowSub"
+            <span class="text-[11px] text-slate-400"
               >Master spoken rhythm in 3 minutes a day</span
             >
           </div>
@@ -516,14 +443,11 @@
                 >1</span
               >
               <div>
-                <strong
-                  class="text-slate-200 block text-xs"
-                  data-i18n="step1Title"
+                <strong class="text-slate-200 block text-xs"
                   >🎧 Listen First</strong
                 >
                 <span
                   class="text-slate-400 text-[11px] leading-tight block mt-0.5"
-                  data-i18n="step1Desc"
                   >Follow native rhythm, word linking, and sentence
                   melody.</span
                 >
@@ -537,14 +461,11 @@
                 >2</span
               >
               <div>
-                <strong
-                  class="text-slate-200 block text-xs"
-                  data-i18n="step2Title"
+                <strong class="text-slate-200 block text-xs"
                   >🗣️ Shadow & Repeat</strong
                 >
                 <span
                   class="text-slate-400 text-[11px] leading-tight block mt-0.5"
-                  data-i18n="step2Desc"
                   >Speak along or repeat out loud immediately to build muscle
                   memory.</span
                 >
@@ -558,14 +479,11 @@
                 >3</span
               >
               <div>
-                <strong
-                  class="text-slate-200 block text-xs"
-                  data-i18n="step3Title"
+                <strong class="text-slate-200 block text-xs"
                   >🔍 Inspect & Save</strong
                 >
                 <span
                   class="text-slate-400 text-[11px] leading-tight block mt-0.5"
-                  data-i18n="step3Desc"
                   >Click any word for IPA phonetics, meaning, and Leitner
                   flashcards.</span
                 >
@@ -602,7 +520,6 @@
               id="catalogSearchInput"
               oninput="applyScenarioFilters()"
               placeholder="Search scenarios, keywords, or topics..."
-              data-i18n-placeholder="searchPlaceholder"
               class="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
             />
           </div>
@@ -616,7 +533,6 @@
               class="status-tab active px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0"
               onclick="setFilterStatus('all', this)"
               data-status="all"
-              data-i18n="statusAll"
             >
               All
             </button>
@@ -627,7 +543,7 @@
               data-status="bookmarked"
             >
               <span>⭐</span>
-              <span data-i18n="statusBookmarked">Bookmarked</span>
+              <span>Bookmarked</span>
             </button>
             <button
               id="statusTabInProgress"
@@ -636,7 +552,7 @@
               data-status="in_progress"
             >
               <span>🔄</span>
-              <span data-i18n="statusInProgress">In Progress</span>
+              <span>In Progress</span>
             </button>
             <button
               id="statusTabMastered"
@@ -644,7 +560,7 @@
               onclick="setFilterStatus('mastered', this)"
               data-status="mastered"
             >
-              <span>✅</span> <span data-i18n="statusMastered">Mastered</span>
+              <span>✅</span> <span>Mastered</span>
             </button>
           </div>
 
@@ -656,16 +572,13 @@
             <div
               class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full"
             >
-              <span
-                class="text-slate-400 font-semibold shrink-0"
-                data-i18n="collectionsLabel"
+              <span class="text-slate-400 font-semibold shrink-0"
                 >Collection:</span
               >
               <button
                 class="collection-pill active px-2.5 py-1 rounded-full font-medium transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0"
                 onclick="setFilterCollection('all', this)"
                 data-collection="all"
-                data-i18n="collectionAll"
               >
                 All Collections
               </button>
@@ -673,7 +586,6 @@
                 class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
                 onclick="setFilterCollection('daily-social', this)"
                 data-collection="daily-social"
-                data-i18n="collectionDailySocial"
               >
                 Daily & Social
               </button>
@@ -681,7 +593,6 @@
                 class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
                 onclick="setFilterCollection('workplace', this)"
                 data-collection="workplace"
-                data-i18n="collectionWorkplace"
               >
                 Workplace & Career
               </button>
@@ -689,7 +600,6 @@
                 class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
                 onclick="setFilterCollection('travel', this)"
                 data-collection="travel"
-                data-i18n="collectionTravel"
               >
                 Travel & Exploration
               </button>
@@ -697,7 +607,6 @@
                 class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
                 onclick="setFilterCollection('academic', this)"
                 data-collection="academic"
-                data-i18n="collectionAcademic"
               >
                 Academic & IELTS
               </button>
@@ -710,13 +619,11 @@
                 onchange="applyScenarioFilters()"
                 class="bg-slate-950 border border-slate-700 text-slate-300 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-500"
               >
-                <option value="all" data-i18n="levelAll">All Levels</option>
-                <option value="A2" data-i18n="levelA2">A2 Elementary</option>
-                <option value="B1" data-i18n="levelB1">B1 Intermediate</option>
-                <option value="B2" data-i18n="levelB2">
-                  B2 Upper-Intermediate
-                </option>
-                <option value="C1" data-i18n="levelC1">C1 Advanced</option>
+                <option value="all">All Levels</option>
+                <option value="A2">A2 Elementary</option>
+                <option value="B1">B1 Intermediate</option>
+                <option value="B2">B2 Upper-Intermediate</option>
+                <option value="C1">C1 Advanced</option>
               </select>
 
               <select
@@ -724,10 +631,10 @@
                 onchange="applyScenarioFilters()"
                 class="bg-slate-950 border border-slate-700 text-slate-300 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:border-emerald-500"
               >
-                <option value="all" data-i18n="accentAll">All Accents</option>
-                <option value="US" data-i18n="accentUS">US Accent</option>
-                <option value="UK" data-i18n="accentUK">UK Accent</option>
-                <option value="AU" data-i18n="accentAU">AU Accent</option>
+                <option value="all">All Accents</option>
+                <option value="US">US Accent</option>
+                <option value="UK">UK Accent</option>
+                <option value="AU">AU Accent</option>
               </select>
             </div>
           </div>
@@ -777,11 +684,7 @@
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
-              <span
-                data-i18n="btnBackToCatalog"
-                class="hidden xs:inline sm:inline"
-                >Back to Scenarios</span
-              >
+              <span class="hidden xs:inline sm:inline">Back to Scenarios</span>
             </button>
 
             <div class="min-w-0 flex flex-col justify-center">
@@ -822,7 +725,6 @@
               onclick="setSubtitleMask('both')"
               class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] sm:text-xs shrink-0"
               title="Dual Subtitles (1)"
-              data-i18n="subtitlesDual"
             >
               Dual
             </button>
@@ -831,7 +733,6 @@
               onclick="setSubtitleMask('primary')"
               class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
               title="English Only (2)"
-              data-i18n="subtitlesPrimary"
             >
               EN Only
             </button>
@@ -840,7 +741,6 @@
               onclick="setSubtitleMask('secondary')"
               class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
               title="Vietnamese Only (3)"
-              data-i18n="subtitlesSecondary"
             >
               VI Only
             </button>
@@ -849,7 +749,6 @@
               onclick="setSubtitleMask('blur')"
               class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
               title="Blind Listening Mode (4)"
-              data-i18n="subtitlesBlur"
             >
               Blur
             </button>
@@ -881,13 +780,13 @@
             <span
               class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
             ></span>
-            <span data-i18n="repeatPrompt">Now Shadow: Repeat out loud!</span>
+            <span id="repeatPromptText">Now Shadow: Repeat out loud!</span>
           </div>
 
           <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
           <div
             id="activeEnglishSubtitle"
-            class="blur-target text-sm sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-snug sm:leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
+            class="blur-target text-sm sm:text-2xl lg:text-3xl font-semibold tracking-tight text-white leading-snug sm:leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1 sm:gap-1.5"
           >
             Click a scenario to begin shadowing.
           </div>
@@ -923,7 +822,6 @@
               </svg>
               <span
                 class="text-xs font-bold text-slate-200 uppercase tracking-wider"
-                data-i18n="waveformHeading"
                 >Acoustic Contour & Comparison</span
               >
               <span
@@ -936,11 +834,11 @@
             <div class="flex items-center gap-3 text-[11px]">
               <div class="flex items-center gap-1 text-emerald-400 font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span data-i18n="waveformNative">Native</span>
+                <span>Native</span>
               </div>
               <div class="flex items-center gap-1 text-cyan-400 font-medium">
                 <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-                <span data-i18n="waveformLearner">You</span>
+                <span>You</span>
               </div>
             </div>
           </div>
@@ -970,7 +868,7 @@
                 <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-                <span data-i18n="btnPlayUserTake">Play My Take</span>
+                <span>Play My Take</span>
               </button>
 
               <!-- Auto A/B Compare -->
@@ -993,7 +891,7 @@
                     d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
                   />
                 </svg>
-                <span data-i18n="btnAutoAbCompare">A/B Compare</span>
+                <span>A/B Compare</span>
               </button>
             </div>
 
@@ -1048,14 +946,12 @@
               </svg>
               <span
                 class="text-xs font-bold text-slate-300 uppercase tracking-wider"
-                data-i18n="transcriptHeader"
                 >Transcript</span
               >
             </div>
             <div class="flex items-center gap-3">
               <span
                 class="text-[11px] text-slate-500 font-normal hidden sm:inline"
-                data-i18n="transcriptHint"
                 >Click any sentence to jump</span
               >
               <button
@@ -1160,9 +1056,7 @@
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                  <span class="hidden md:inline" data-i18n="modeLoop"
-                    >Sentence Loop Mode</span
-                  >
+                  <span class="hidden md:inline">Sentence Loop Mode</span>
                 </button>
                 <button
                   id="modeContinuousBtn"
@@ -1183,9 +1077,7 @@
                       d="M13 5l7 7-7 7M5 5l7 7-7 7"
                     />
                   </svg>
-                  <span class="hidden md:inline" data-i18n="modeContinuous"
-                    >Continuous Flow Mode</span
-                  >
+                  <span class="hidden md:inline">Continuous Flow Mode</span>
                 </button>
                 <button
                   id="modeEchoicBtn"
@@ -1206,9 +1098,7 @@
                       d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"
                     />
                   </svg>
-                  <span class="hidden md:inline" data-i18n="modeEchoic"
-                    >Echoic Mode</span
-                  >
+                  <span class="hidden md:inline">Echoic Mode</span>
                 </button>
               </div>
 
@@ -1381,9 +1271,7 @@
                     d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                   />
                 </svg>
-                <span class="hidden sm:inline" data-i18n="navVocab"
-                  >Vocabulary</span
-                >
+                <span class="hidden sm:inline">Vocabulary</span>
                 <span
                   class="text-slate-500 font-mono text-[10px] hidden sm:inline"
                   >[V]</span
@@ -1463,7 +1351,7 @@
               d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
             />
           </svg>
-          <span data-i18n="btnListenPronunciation">Pronounce</span>
+          <span>Pronounce</span>
         </button>
       </div>
 
@@ -1478,21 +1366,18 @@
           <button
             onclick="setWordStatus('new')"
             class="px-2 py-1 rounded text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all text-center"
-            data-i18n="statusNew"
           >
             New
           </button>
           <button
             onclick="setWordStatus('learning')"
             class="px-2 py-1 rounded text-[11px] font-bold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 transition-all text-center"
-            data-i18n="statusLearning"
           >
             Learning
           </button>
           <button
             onclick="setWordStatus('mastered')"
             class="px-2 py-1 rounded text-[11px] font-bold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-all text-center"
-            data-i18n="statusMastered"
           >
             Mastered
           </button>
@@ -1501,7 +1386,6 @@
           onclick="removeCurrentWord()"
           id="popoverRemoveBtn"
           class="w-full mt-2 py-1 text-[11px] text-red-400 hover:text-red-300 transition-colors text-center hidden"
-          data-i18n="btnRemoveWord"
         >
           Remove from Saved
         </button>
@@ -1533,10 +1417,7 @@
               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
             />
           </svg>
-          <h2
-            class="font-bold text-base text-white"
-            data-i18n="vocabDrawerTitle"
-          >
+          <h2 class="font-bold text-base text-white">
             Leitner Vocabulary Deck
           </h2>
         </div>
@@ -1568,7 +1449,6 @@
           id="vocabSearchInput"
           oninput="renderVocabList()"
           placeholder="Search saved words..."
-          data-i18n-placeholder="vocabSearchPlaceholder"
           class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500"
         />
 
@@ -1576,35 +1456,30 @@
           <button
             class="vocab-filter-pill active px-2.5 py-1 rounded-full font-medium transition-all bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0"
             onclick="setVocabFilter('all', this)"
-            data-i18n="vocabFilterAll"
           >
             All
           </button>
           <button
             class="vocab-filter-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
             onclick="setVocabFilter('due', this)"
-            data-i18n="vocabFilterDue"
           >
             ⏰ Due Today
           </button>
           <button
             class="vocab-filter-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
             onclick="setVocabFilter('new', this)"
-            data-i18n="statusNew"
           >
             🟡 New
           </button>
           <button
             class="vocab-filter-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
             onclick="setVocabFilter('learning', this)"
-            data-i18n="statusLearning"
           >
             🔵 Learning
           </button>
           <button
             class="vocab-filter-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
             onclick="setVocabFilter('mastered', this)"
-            data-i18n="statusMastered"
           >
             🟢 Mastered
           </button>
@@ -1638,28 +1513,25 @@
               d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
             />
           </svg>
-          <span data-i18n="btnFlashcards">Leitner SRS Flashcards</span>
+          <span>Leitner SRS Flashcards</span>
         </button>
 
         <div class="grid grid-cols-3 gap-2 text-xs">
           <button
             onclick="exportVocabData()"
             class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium transition-colors text-center"
-            data-i18n="btnExportVocab"
           >
             JSON
           </button>
           <button
             onclick="exportAnkiCsv()"
             class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium transition-colors text-center"
-            data-i18n="btnExportAnki"
           >
             Anki CSV
           </button>
           <button
             onclick="document.getElementById('vocabFileInput').click()"
             class="py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium transition-colors text-center"
-            data-i18n="btnImportVocab"
           >
             Import
           </button>
@@ -1687,7 +1559,7 @@
         <div
           class="flex items-center justify-between border-b border-slate-800 pb-3"
         >
-          <h3 class="font-bold text-lg text-white" data-i18n="hotkeyModalTitle">
+          <h3 class="font-bold text-lg text-white">
             Keyboard Shortcuts Cheat Sheet
           </h3>
           <button
@@ -1715,9 +1587,7 @@
           <div
             class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
           >
-            <span class="text-slate-300" data-i18n="hotkeySpace"
-              >Play / Pause / Repeat</span
-            >
+            <span class="text-slate-300">Play / Pause / Repeat</span>
             <kbd
               class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-emerald-400 font-bold"
               >Space</kbd
@@ -1726,9 +1596,7 @@
           <div
             class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
           >
-            <span class="text-slate-300" data-i18n="hotkeyR"
-              >Replay Sentence</span
-            >
+            <span class="text-slate-300">Replay Sentence</span>
             <kbd
               class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-amber-400 font-bold"
               >R / ↑</kbd
@@ -1737,9 +1605,7 @@
           <div
             class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
           >
-            <span class="text-slate-300" data-i18n="hotkeyPrevNext"
-              >Prev / Next Sentence</span
-            >
+            <span class="text-slate-300">Prev / Next Sentence</span>
             <kbd
               class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-cyan-400 font-bold"
               >A, D / ←, →</kbd
@@ -1748,9 +1614,7 @@
           <div
             class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
           >
-            <span class="text-slate-300" data-i18n="hotkeySpeed"
-              >Adjust Speed</span
-            >
+            <span class="text-slate-300">Adjust Speed</span>
             <kbd
               class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-300 font-bold"
               >[ / ]</kbd
@@ -1759,9 +1623,7 @@
           <div
             class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
           >
-            <span class="text-slate-300" data-i18n="hotkeySubtitles"
-              >Subtitle Masking</span
-            >
+            <span class="text-slate-300">Subtitle Masking</span>
             <kbd
               class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-300 font-bold"
               >1, 2, 3, 4</kbd
@@ -1770,9 +1632,7 @@
           <div
             class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
           >
-            <span class="text-slate-300" data-i18n="hotkeyVocab"
-              >Toggle Vocab Drawer</span
-            >
+            <span class="text-slate-300">Toggle Vocab Drawer</span>
             <kbd
               class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-amber-400 font-bold"
               >V</kbd
@@ -1852,10 +1712,7 @@
             <span id="fcIpa" class="font-ipa text-sm text-cyan-400"
               >/wɜːrd/</span
             >
-            <p
-              class="text-xs text-slate-500 pt-4"
-              data-i18n="flashcardFlipPrompt"
-            >
+            <p class="text-xs text-slate-500 pt-4">
               Click card to reveal meaning & grading
             </p>
           </div>
@@ -1929,16 +1786,10 @@
               📊
             </div>
             <div>
-              <h3
-                class="font-bold text-base sm:text-lg text-white"
-                data-i18n="insightsTitle"
-              >
+              <h3 class="font-bold text-base sm:text-lg text-white">
                 Practice Insights & Analytics
               </h3>
-              <p
-                class="text-[11px] sm:text-xs text-slate-400"
-                data-i18n="offlineReadyNotice"
-              >
+              <p class="text-[11px] sm:text-xs text-slate-400">
                 100% Offline Standalone PWA
               </p>
             </div>
@@ -1984,14 +1835,10 @@
                 >
                 <span
                   class="text-xs font-bold text-amber-400 uppercase tracking-wider"
-                  data-i18n="streakLabel"
                   >Day Streak</span
                 >
               </div>
-              <p
-                class="text-[11px] text-slate-400 leading-tight mt-0.5"
-                data-i18n="streakSubtext"
-              >
+              <p class="text-[11px] text-slate-400 leading-tight mt-0.5">
                 Practice 15 minutes today to maintain your momentum!
               </p>
             </div>
@@ -2002,9 +1849,7 @@
             class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-between"
           >
             <div class="flex items-center justify-between text-xs mb-1">
-              <span class="text-slate-400" data-i18n="practiceMinutesLabel"
-                >Today's Practice</span
-              >
+              <span class="text-slate-400">Today's Practice</span>
               <span
                 id="modalPracticeTime"
                 class="font-bold font-mono text-emerald-400"
@@ -2036,9 +1881,7 @@
           <div
             class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-center"
           >
-            <span
-              class="block text-[11px] text-slate-400 mb-0.5"
-              data-i18n="sentencesShadowedLabel"
+            <span class="block text-[11px] text-slate-400 mb-0.5"
               >Sentences Today</span
             >
             <span
@@ -2050,9 +1893,7 @@
           <div
             class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-center"
           >
-            <span
-              class="block text-[11px] text-slate-400 mb-0.5"
-              data-i18n="sentencesShadowedTotal"
+            <span class="block text-[11px] text-slate-400 mb-0.5"
               >Total Shadowed</span
             >
             <span
@@ -2064,9 +1905,7 @@
           <div
             class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-center col-span-2 sm:col-span-1"
           >
-            <span
-              class="block text-[11px] text-slate-400 mb-0.5"
-              data-i18n="btnReviewDue"
+            <span class="block text-[11px] text-slate-400 mb-0.5"
               >SRS Due Today</span
             >
             <span
@@ -2084,7 +1923,6 @@
           <div class="flex items-center justify-between">
             <h4
               class="text-xs font-bold text-slate-300 uppercase tracking-wider"
-              data-i18n="vocabMastery"
             >
               SRS Vocabulary Mastery
             </h4>
@@ -2149,7 +1987,6 @@
               type="button"
               onclick="resetPracticeStats()"
               class="px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
-              data-i18n="btnResetStats"
             >
               Reset Stats
             </button>
@@ -2158,7 +1995,6 @@
               id="btnClearMediaCache"
               onclick="clearMediaCacheStorage()"
               class="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors flex items-center gap-1"
-              data-i18n="clearMediaCache"
             >
               Clear Media Cache
             </button>
@@ -2181,7 +2017,7 @@
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              <span data-i18n="btnCheckUpdates">Check Updates</span>
+              <span>Check Updates</span>
             </button>
           </div>
           <div class="flex items-center gap-2">
@@ -2203,13 +2039,12 @@
                   d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                 />
               </svg>
-              <span data-i18n="btnExportStats">Export JSON</span>
+              <span>Export JSON</span>
             </button>
             <button
               type="button"
               onclick="closeInsightsModal()"
               class="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-colors"
-              data-i18n="btnGotIt"
             >
               Got it
             </button>
@@ -2229,298 +2064,6 @@
       /**
        * English Shadowing — Core Application Engine
        */
-
-      // ==========================================
-      // 1. BILINGUAL DICTIONARY (100% PARITY)
-      // ==========================================
-      const TRANSLATIONS = {
-        en: {
-          appTitle: "English Shadowing",
-          appTagline: "Master Natural Spoken English Cadence",
-          navCatalog: "Scenarios",
-          navPlayer: "Player",
-          navVocab: "Vocabulary",
-          searchPlaceholder: "Search scenarios, keywords, or topics...",
-          categoryAll: "All Topics",
-          categoryDaily: "Daily Conversations",
-          categoryWorkplace: "Workplace & Business",
-          categoryTravel: "Travel & Real-World",
-          categoryAcademic: "Academic & IELTS",
-          levelAll: "All Levels",
-          levelA2: "A2 Elementary",
-          levelB1: "B1 Intermediate",
-          levelB2: "B2 Upper-Intermediate",
-          levelC1: "C1 Advanced",
-          accentAll: "All Accents",
-          accentUS: "US Accent",
-          accentUK: "UK Accent",
-          accentAU: "AU Accent",
-          btnPracticeNow: "Practice Scenario",
-          btnBackToCatalog: "Back to Scenarios",
-          btnImportScenario: "Import Custom Audio & SRT",
-          btnExportSrt: "Export SRT",
-          modeLoop: "Sentence Loop Mode",
-          modeContinuous: "Continuous Flow Mode",
-          modeEchoic: "Echoic Mode",
-          subtitlesDual: "Dual",
-          subtitlesPrimary: "EN Only",
-          subtitlesSecondary: "VI Only",
-          subtitlesBlur: "Blur",
-          btnReplaySentence: "Replay Sentence",
-          btnPrevSentence: "Previous",
-          btnNextSentence: "Next",
-          btnPlay: "Play",
-          btnPause: "Pause",
-          speedLabel: "Speed",
-          sentenceProgress: "Sentence {current} of {total}",
-          timeRemaining: "Time: {current} / {total}",
-          repeatPrompt: "Now Shadow: Repeat out loud!",
-          pressReplayHint: "Press [R] or [Space] to replay",
-          wordPopoverTitle: "Word Inspector",
-          statusNew: "New",
-          statusLearning: "Learning",
-          statusMastered: "Mastered",
-          btnListenPronunciation: "Pronounce",
-          btnRemoveWord: "Remove from Saved",
-          vocabDrawerTitle: "Leitner Vocabulary Deck",
-          vocabFilterAll: "All Words",
-          vocabFilterDue: "⏰ Due Today",
-          vocabSearchPlaceholder: "Search saved words...",
-          vocabEmptyState:
-            "No saved words yet. Click any word in a sentence to inspect and save!",
-          btnFlashcards: "Leitner SRS Flashcards",
-          btnExportVocab: "Export JSON",
-          btnExportAnki: "Anki CSV",
-          btnImportVocab: "Import Vocab",
-          flashcardFlipPrompt: "Click card to reveal meaning & grading",
-          flashcardNext: "Next Card",
-          flashcardPrev: "Previous Card",
-          hotkeyModalTitle: "Keyboard Shortcuts Cheat Sheet",
-          hotkeySpace: "Play / Pause / Repeat",
-          hotkeyR: "Replay current sentence",
-          hotkeyPrevNext: "Previous / Next sentence",
-          hotkeyRecord: "Record Shadowing Attempt (M)",
-          hotkeySpeed: "Adjust playback speed",
-          hotkeySubtitles: "Cycle subtitle masking mode",
-          hotkeyVocab: "Toggle vocabulary drawer",
-          hotkeyHelp: "Show this shortcuts guide",
-          importModalTitle: "Import Custom Practice Scenario",
-          importAudioLabel: "Select Audio File (.mp3, .wav, .m4a, .ogg)",
-          importSrtLabel:
-            "Select Subtitle File (.lrc or .srt with dual language or English)",
-          importScenarioTitle: "Scenario Title",
-          importCategoryLabel: "Topic Category",
-          importLevelLabel: "CEFR Level",
-          btnSubmitImport: "Load & Start Shadowing",
-          btnCancel: "Cancel",
-          offlineReadyNotice: "100% Offline Standalone PWA",
-          themeToggle: "Toggle Dark / Light Theme",
-          languageToggle: "Switch Language",
-          streakLabel: "Day Streak",
-          streakSubtext: "Practice 15 minutes today to maintain your momentum!",
-          practiceMinutesLabel: "Today's Practice",
-          sentencesShadowedLabel: "Sentences Shadowed",
-          btnReviewDue: "SRS Review",
-          waveformHeading: "Acoustic Contour & Comparison",
-          waveformNative: "Native Speaker Pitch & Envelope",
-          waveformLearner: "Your Voice Take",
-          btnPlayUserTake: "Play My Take",
-          btnAutoAbCompare: "A/B Compare",
-          btnDeleteRecording: "Delete Take",
-          recSavedToast: "Voice take saved to vault!",
-          recDeletedToast: "Voice take deleted.",
-          transcriptHeader: "Transcript",
-          transcriptHint: "Click any sentence to jump",
-          navInsights: "Insights",
-          insightsTitle: "Practice Insights & Analytics",
-          sentencesShadowedTotal: "Total Sentences Shadowed",
-          vocabMastery: "SRS Vocabulary Mastery",
-          btnExportStats: "Export JSON",
-          btnResetStats: "Reset Stats",
-          btnGotIt: "Got it",
-          btnCheckUpdates: "Check Updates",
-          checkUpdatesToast: "Checking for updates and refreshing...",
-          clearMediaCache: "Clear Media Cache",
-          clearMediaCacheConfirm:
-            "Are you sure you want to clear cached audio files? Your vocabulary and study progress will not be affected.",
-          clearMediaCacheSuccess: "Media cache cleared successfully.",
-          offlineScenarioUnavailable:
-            "Offline mode: Connect to the internet to stream this scenario.",
-          mediaStorageLabel: "Audio Storage",
-          statusAll: "All",
-          statusBookmarked: "Bookmarked",
-          statusInProgress: "In Progress",
-          statusCompleted: "Completed",
-          collectionAll: "All Collections",
-          collectionDailySocial: "Daily & Social",
-          collectionWorkplace: "Workplace & Career",
-          collectionTravel: "Travel & Exploration",
-          collectionAcademic: "Academic & IELTS",
-          collectionsLabel: "Collection:",
-          statusLabel: "Status:",
-          bookmarkAdd: "Save to Bookmarks",
-          bookmarkRemove: "Remove from Bookmarks",
-          progressCompleted: "{count} of {total} completed",
-          practiceTimes: "Practiced {count} times",
-          noScenariosFound: "No scenarios match the selected filters.",
-          howToShadowTitle: "How Shadowing Works (3 Steps)",
-          howToShadowSub: "Master spoken rhythm in 3 minutes a day",
-          step1Title: "🎧 Listen First",
-          step1Desc: "Follow native rhythm, word linking, and sentence melody.",
-          step2Title: "🗣️ Shadow & Repeat",
-          step2Desc:
-            "Speak along or repeat out loud immediately to build muscle memory.",
-          step3Title: "🔍 Inspect & Save",
-          step3Desc:
-            "Click any word for IPA phonetics, meaning, and Leitner flashcards.",
-          micNotSupported:
-            "Microphone capture is not supported in this browser.",
-          micDenied: "Microphone permission was denied or unavailable.",
-        },
-        vi: {
-          appTitle: "Luyện Nói Shadowing",
-          appTagline: "Làm chủ ngữ điệu và phát âm tiếng Anh tự nhiên",
-          navCatalog: "Tình huống",
-          navPlayer: "Trình luyện",
-          navVocab: "Từ vựng",
-          searchPlaceholder: "Tìm kiếm tình huống, từ khóa, chủ đề...",
-          categoryAll: "Tất cả chủ đề",
-          categoryDaily: "Giao tiếp hàng ngày",
-          categoryWorkplace: "Công sở & Kinh doanh",
-          categoryTravel: "Du lịch & Đời sống",
-          categoryAcademic: "Học thuật & IELTS",
-          levelAll: "Mọi trình độ",
-          levelA2: "A2 Sơ cấp",
-          levelB1: "B1 Trung cấp",
-          levelB2: "B2 Trung cao cấp",
-          levelC1: "C1 Cao cấp",
-          accentAll: "Mọi ngữ điệu",
-          accentUS: "Giọng Mỹ (US)",
-          accentUK: "Giọng Anh (UK)",
-          accentAU: "Giọng Úc (AU)",
-          btnPracticeNow: "Luyện tập ngay",
-          btnBackToCatalog: "Về danh sách",
-          btnImportScenario: "Tải lên Audio & SRT riêng",
-          btnExportSrt: "Xuất file SRT",
-          modeLoop: "Chế độ lặp từng câu",
-          modeContinuous: "Chế độ phát liên tục",
-          modeEchoic: "Luyện nhắc lại (Echoic)",
-          subtitlesDual: "Song ngữ",
-          subtitlesPrimary: "Chỉ EN",
-          subtitlesSecondary: "Chỉ VI",
-          subtitlesBlur: "Mờ",
-          btnReplaySentence: "Lặp lại câu này",
-          btnPrevSentence: "Câu trước",
-          btnNextSentence: "Câu sau",
-          btnPlay: "Phát",
-          btnPause: "Tạm dừng",
-          speedLabel: "Tốc độ",
-          sentenceProgress: "Câu {current} / {total}",
-          timeRemaining: "Thời gian: {current} / {total}",
-          repeatPrompt: "Đến lượt bạn: Lặp lại thành tiếng!",
-          pressReplayHint: "Nhấn [R] hoặc [Space] để nghe lại",
-          wordPopoverTitle: "Tra từ tương tác",
-          statusNew: "Từ mới",
-          statusLearning: "Đang học",
-          statusMastered: "Đã thuộc",
-          btnListenPronunciation: "Phát âm",
-          btnRemoveWord: "Bỏ lưu từ này",
-          vocabDrawerTitle: "Sổ từ vựng Leitner",
-          vocabFilterAll: "Tất cả từ",
-          vocabFilterDue: "⏰ Cần ôn hôm nay",
-          vocabSearchPlaceholder: "Tìm kiếm từ đã lưu...",
-          vocabEmptyState:
-            "Chưa có từ vựng nào. Hãy nhấp vào từ bất kỳ trong câu để tra cứu và lưu!",
-          btnFlashcards: "Flashcard Leitner SRS",
-          btnExportVocab: "Xuất JSON",
-          btnExportAnki: "Xuất Anki CSV",
-          btnImportVocab: "Nhập từ vựng",
-          flashcardFlipPrompt: "Nhấp thẻ để xem nghĩa và đánh giá",
-          flashcardNext: "Thẻ tiếp theo",
-          flashcardPrev: "Thẻ trước",
-          hotkeyModalTitle: "Bảng phím tắt điều khiển",
-          hotkeySpace: "Phát / Tạm dừng / Lặp lại",
-          hotkeyR: "Lặp lại câu hiện tại",
-          hotkeyPrevNext: "Câu trước / Câu sau",
-          hotkeyRecord: "Ghi âm giọng nói (M)",
-          hotkeySpeed: "Tăng / Giảm tốc độ phát",
-          hotkeySubtitles: "Chuyển chế độ hiển thị phụ đề",
-          hotkeyVocab: "Mở / Đóng sổ từ vựng",
-          hotkeyHelp: "Hiện bảng hướng dẫn phím tắt",
-          importModalTitle: "Tải lên tình huống luyện tập riêng",
-          importAudioLabel: "Chọn tệp âm thanh (.mp3, .wav, .m4a, .ogg)",
-          importSrtLabel:
-            "Chọn tệp phụ đề (.lrc hoặc .srt tiếng Anh hoặc song ngữ)",
-          importScenarioTitle: "Tên tình huống",
-          importCategoryLabel: "Chủ đề",
-          importLevelLabel: "Trình độ CEFR",
-          btnSubmitImport: "Tải vào & Bắt đầu luyện",
-          btnCancel: "Hủy bỏ",
-          offlineReadyNotice: "Ứng dụng PWA Ngoại tuyến 100%",
-          themeToggle: "Chuyển đổi giao diện Sáng / Tối",
-          languageToggle: "Đổi ngôn ngữ",
-          streakLabel: "Ngày liên tiếp",
-          streakSubtext: "Luyện tập 15 phút hôm nay để giữ chuỗi thành tích!",
-          practiceMinutesLabel: "Thời gian hôm nay",
-          sentencesShadowedLabel: "Số câu đã luyện",
-          btnReviewDue: "Ôn tập SRS",
-          waveformHeading: "Biểu đồ âm lượng & So sánh giọng",
-          waveformNative: "Đồ thị âm lượng người bản xứ",
-          waveformLearner: "Bản thu giọng bạn",
-          btnPlayUserTake: "Nghe bản thu của bạn",
-          btnAutoAbCompare: "So sánh A/B",
-          btnDeleteRecording: "Xóa bản thu",
-          recSavedToast: "Đã lưu bản thu vào kho!",
-          recDeletedToast: "Đã xóa bản thu.",
-          transcriptHeader: "Kịch bản hội thoại",
-          transcriptHint: "Nhấp vào câu bất kỳ để nghe",
-          navInsights: "Thống kê",
-          insightsTitle: "Thống Kê & Phân Tích Luyện Tập",
-          sentencesShadowedTotal: "Tổng Số Câu Đã Shadowing",
-          vocabMastery: "Mức Độ Thuộc Từ Vựng (SRS)",
-          btnExportStats: "Xuất JSON",
-          btnResetStats: "Đặt lại thống kê",
-          btnGotIt: "Đã hiểu",
-          btnCheckUpdates: "Kiểm tra cập nhật",
-          checkUpdatesToast: "Đang kiểm tra cập nhật và làm mới...",
-          clearMediaCache: "Xóa Bộ Nhớ Âm Thanh",
-          clearMediaCacheConfirm:
-            "Bạn có chắc muốn xóa các tệp âm thanh đã tải? Từ vựng và tiến độ học tập của bạn sẽ được giữ nguyên.",
-          clearMediaCacheSuccess: "Đã xóa bộ nhớ âm thanh thành công.",
-          offlineScenarioUnavailable:
-            "Đang ngoại tuyến: Hãy kết nối internet để tải kịch bản này.",
-          mediaStorageLabel: "Bộ Nhớ Âm Thanh",
-          statusAll: "Tất cả",
-          statusBookmarked: "Đã lưu",
-          statusInProgress: "Đang luyện",
-          statusCompleted: "Hoàn thành",
-          collectionAll: "Tất cả bộ sưu tập",
-          collectionDailySocial: "Đời sống & Xã hội",
-          collectionWorkplace: "Công sở & Nghề nghiệp",
-          collectionTravel: "Du lịch & Khám phá",
-          collectionAcademic: "Học thuật & IELTS",
-          collectionsLabel: "Bộ sưu tập:",
-          statusLabel: "Trạng thái:",
-          bookmarkAdd: "Lưu vào mục đã lưu",
-          bookmarkRemove: "Xóa khỏi mục đã lưu",
-          progressCompleted: "Đã hoàn thành {count}/{total}",
-          practiceTimes: "Đã luyện {count} lần",
-          noScenariosFound: "Không tìm thấy kịch bản phù hợp với bộ lọc.",
-          howToShadowTitle: "Cách Luyện Shadowing (3 Bước)",
-          howToShadowSub: "Làm chủ ngữ điệu chỉ 3 phút mỗi ngày",
-          step1Title: "🎧 Lắng nghe trước",
-          step1Desc:
-            "Cảm nhận nhịp điệu, nối âm và ngữ điệu tự nhiên của người bản xứ.",
-          step2Title: "🗣️ Nhại & Nói theo",
-          step2Desc:
-            "Nói đuổi theo hoặc lặp lại to rõ ràng để rèn luyện trí nhớ cơ miệng.",
-          step3Title: "🔍 Tra từ & Lưu lại",
-          step3Desc:
-            "Nhấp vào bất kỳ từ nào để tra phiên âm IPA, nghĩa và thêm vào Flashcard.",
-          micNotSupported: "Trình duyệt không hỗ trợ thu âm từ micro.",
-          micDenied: "Quyền truy cập micro bị từ chối hoặc không khả dụng.",
-        },
-      };
 
       // ==========================================
       // 2. CURATED SCENARIOS LIBRARY (PRELOADED)
@@ -18112,19 +17655,12 @@
           `shadowing_insights_${new Date().toISOString().split("T")[0]}.json`
         );
         dlAnchor.click();
-        showToast(
-          state.lang === "vi"
-            ? "Đã xuất báo cáo thống kê dạng JSON!"
-            : "Insights & stats exported to JSON",
-          "success"
-        );
+        showToast("Insights & stats exported to JSON", "success");
       }
 
       function resetPracticeStats() {
         const confirmMsg =
-          state.lang === "vi"
-            ? "Bạn có chắc chắn muốn đặt lại tất cả thống kê luyện tập không? Sổ từ vựng vẫn sẽ được giữ nguyên."
-            : "Are you sure you want to reset all practice stats? Your vocabulary vault will be preserved.";
+          "Are you sure you want to reset all practice stats? Your vocabulary vault will be preserved.";
         if (confirm(confirmMsg)) {
           practiceStats = {
             streakDays: 1,
@@ -18136,19 +17672,12 @@
           savePracticeStats();
           renderInsightsModal();
           updateHeaderBadges();
-          showToast(
-            state.lang === "vi"
-              ? "Đã đặt lại thống kê luyện tập!"
-              : "Practice statistics reset",
-            "info"
-          );
+          showToast("Practice statistics reset", "info");
         }
       }
 
       async function clearMediaCacheStorage() {
-        const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
         const confirmMsg =
-          dict.clearMediaCacheConfirm ||
           "Are you sure you want to clear cached audio files? Your vocabulary and study progress will not be affected.";
         if (confirm(confirmMsg)) {
           if (typeof caches !== "undefined") {
@@ -18165,9 +17694,7 @@
               console.warn("Could not delete media cache:", e);
             }
           }
-          const successMsg =
-            dict.clearMediaCacheSuccess || "Media cache cleared successfully.";
-          showToast(successMsg, "success");
+          showToast("Media cache cleared successfully.", "success");
         }
       }
 
@@ -18188,11 +17715,7 @@
       }
 
       async function forceCheckUpdatesAndReload() {
-        const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
-        showToast(
-          dict.checkUpdatesToast || "Checking for updates and refreshing...",
-          "info"
-        );
+        showToast("Checking for updates and refreshing...", "info");
         if (
           typeof SCENARIO_CUES_CACHE !== "undefined" &&
           SCENARIO_CUES_CACHE.clear
@@ -18358,18 +17881,10 @@
       // 6. INITIALIZATION & VIEW MANAGEMENT
       // ==========================================
       function initApp() {
-        const savedLang = localStorage.getItem("shadowing_app_lang");
-        if (savedLang === "vi" || savedLang === "en") state.lang = savedLang;
-
-        const savedTheme = localStorage.getItem("shadowing_app_theme");
-        if (savedTheme === "light") setTheme("light");
-        else setTheme("dark");
-
         loadVocabVault();
         loadPracticeStats();
         loadScenarioProgress();
         renderScenarioCards();
-        applyI18n();
 
         const savedMode = localStorage.getItem("shadowing_playback_mode");
         if (savedMode === "loop" || savedMode === "continuous") {
@@ -18410,19 +17925,18 @@
             loadedFromUrl = true;
           } else {
             showToast(
-              state.lang === "vi"
-                ? `Không tìm thấy kịch bản "${scenarioId}". Hiển thị danh mục kịch bản.`
-                : `Scenario "${scenarioId}" not found. Showing all scenarios.`,
+              `Scenario "${scenarioId}" not found. Showing all scenarios.`,
               "error"
             );
             updateScenarioUrl(null, false);
           }
         }
 
-        if (!loadedFromUrl && CURATED_SCENARIOS.length > 0) {
-          selectScenario(CURATED_SCENARIOS[0], false, false).then(() => {
-            pauseAudio();
-          });
+        if (!loadedFromUrl) {
+          state.activeView = "catalog";
+          state.activeScenario = null;
+          state.activeCues = [];
+          state.isPlaying = false;
         }
 
         window.addEventListener("keydown", handleGlobalKeydown);
@@ -18488,6 +18002,9 @@
             updateScenarioUrl(null, null, true);
           }
         } else {
+          if (!state.activeScenario && CURATED_SCENARIOS.length > 0) {
+            selectScenario(CURATED_SCENARIOS[0], false, updateUrl);
+          }
           catalogView.classList.add("hidden");
           playerView.classList.remove("hidden");
           navBtnPlayer.className =
@@ -18503,66 +18020,6 @@
           }
         }
         window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-
-      function toggleTheme() {
-        setTheme(state.theme === "dark" ? "light" : "dark");
-      }
-
-      function setTheme(theme) {
-        state.theme = theme;
-        localStorage.setItem("shadowing_app_theme", theme);
-        const html = document.documentElement;
-        const iconDark = document.getElementById("themeIconDark");
-        const iconLight = document.getElementById("themeIconLight");
-
-        if (theme === "light") {
-          html.classList.remove("dark");
-          html.classList.add("light");
-          if (iconDark) iconDark.classList.add("hidden");
-          if (iconLight) iconLight.classList.remove("hidden");
-        } else {
-          html.classList.remove("light");
-          html.classList.add("dark");
-          if (iconDark) iconDark.classList.remove("hidden");
-          if (iconLight) iconLight.classList.add("hidden");
-        }
-      }
-
-      function setLanguage(lang) {
-        state.lang = lang;
-        localStorage.setItem("shadowing_app_lang", lang);
-        applyI18n();
-      }
-
-      function applyI18n() {
-        const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
-        document.querySelectorAll("[data-i18n]").forEach((el) => {
-          const key = el.getAttribute("data-i18n");
-          if (dict[key]) el.textContent = dict[key];
-        });
-        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
-          const key = el.getAttribute("data-i18n-placeholder");
-          if (dict[key]) el.setAttribute("placeholder", dict[key]);
-        });
-
-        const btnEn = document.getElementById("langBtnEn");
-        const btnVi = document.getElementById("langBtnVi");
-        if (state.lang === "en") {
-          btnEn.className =
-            "px-2.5 py-1 rounded transition-all bg-emerald-500 text-slate-950 font-bold";
-          btnVi.className =
-            "px-2.5 py-1 rounded transition-all text-slate-400 hover:text-slate-200";
-        } else {
-          btnVi.className =
-            "px-2.5 py-1 rounded transition-all bg-emerald-500 text-slate-950 font-bold";
-          btnEn.className =
-            "px-2.5 py-1 rounded transition-all text-slate-400 hover:text-slate-200";
-        }
-
-        renderScenarioCards();
-        renderActiveCue();
-        renderTranscriptList();
       }
 
       // ==========================================
@@ -18688,13 +18145,11 @@
               <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <p class="text-sm font-medium" data-i18n="noScenariosFound">No scenarios match the selected filters.</p>
+              <p class="text-sm font-medium">No scenarios match the selected filters.</p>
             </div>
           `;
           return;
         }
-
-        const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
 
         grid.innerHTML = filtered
           .map((sc) => {
@@ -18714,11 +18169,11 @@
 
             let statusBadge = "";
             if (prog.status === "mastered") {
-              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-300 border border-purple-500/20">${dict.statusMastered || "Mastered"}</span>`;
+              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-300 border border-purple-500/20">Mastered</span>`;
             } else if (prog.status === "completed") {
-              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">${dict.statusCompleted || "Completed"}</span>`;
+              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Completed</span>`;
             } else if (prog.status === "in_progress") {
-              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">${dict.statusInProgress || "In Progress"}</span>`;
+              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">In Progress</span>`;
             }
 
             const tagsHtml =
@@ -18739,7 +18194,7 @@
               onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectScenarioById('${sc.id}');}"
               tabindex="0"
               role="button"
-              aria-label="${dict.btnPracticeNow || "Practice"}: ${sc.title}"
+              aria-label="Practice: ${sc.title}"
               class="scenario-card bg-slate-900 border border-slate-800 hover:border-emerald-500/50 focus:border-emerald-500/80 rounded-2xl p-5 flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-emerald-500/10 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400/50 active:scale-[0.99] group relative"
             >
               <div class="space-y-3">
@@ -18752,7 +18207,7 @@
                   <button
                     type="button"
                     onclick="toggleBookmark('${sc.id}', event)"
-                    title="${bookmarked ? dict.bookmarkRemove || "Remove bookmark" : dict.bookmarkAdd || "Add bookmark"}"
+                    title="${bookmarked ? "Remove bookmark" : "Add bookmark"}"
                     class="bookmark-btn p-1.5 rounded-lg transition-colors ${bookmarked ? "text-amber-400 hover:text-amber-300" : "text-slate-500 hover:text-slate-300"}"
                     data-scenario-id="${sc.id}"
                     data-bookmarked="${bookmarked}"
@@ -18804,10 +18259,8 @@
         ) {
           const available = await isScenarioAvailableOffline(scenario);
           if (!available) {
-            const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
             showToast(
-              dict.offlineScenarioUnavailable ||
-                "Offline mode: Connect to the internet to stream this scenario.",
+              "Offline mode: Connect to the internet to stream this scenario.",
               "warning"
             );
             return;
@@ -18842,11 +18295,7 @@
                 scenario.id,
                 err
               );
-              const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
-              showToast(
-                dict.scenarioLoadError || "Failed to load scenario subtitles.",
-                "error"
-              );
+              showToast("Failed to load scenario subtitles.", "error");
               return;
             }
           }
@@ -19380,7 +18829,9 @@
               renderActiveCue();
               highlightTranscriptLine(activeCueIdx);
               drawDualWaveforms();
-              updateScenarioUrl(state.activeScenario.id, activeCueIdx, false);
+              if (state.activeView === "player" && state.activeScenario) {
+                updateScenarioUrl(state.activeScenario.id, activeCueIdx, false);
+              }
             }
 
             updateKaraokeWordHighlight(currentAudioTime);
@@ -19425,13 +18876,13 @@
         wordElements.forEach((el, idx) => {
           if (idx === activeWordIdx) {
             el.className =
-              "karaoke-word word-chip cursor-pointer transition-all duration-150 inline-block px-2 py-0.5 rounded-lg mr-1 mb-1 font-bold bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-[0_0_16px_rgba(6,182,212,0.45)] scale-105";
+              "karaoke-word word-chip cursor-pointer transition-colors duration-150 inline-block px-1.5 py-0.5 rounded-lg font-semibold bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 shadow-[0_0_14px_rgba(6,182,212,0.45)]";
           } else if (idx < activeWordIdx) {
             el.className =
-              "karaoke-word word-chip cursor-pointer transition-all duration-150 inline-block px-1.5 py-0.5 rounded-lg mr-1 mb-1 font-medium text-white border border-transparent";
+              "karaoke-word word-chip cursor-pointer transition-colors duration-150 inline-block px-1.5 py-0.5 rounded-lg font-semibold text-white border border-transparent";
           } else {
             el.className =
-              "karaoke-word word-chip cursor-pointer transition-all duration-150 inline-block px-1.5 py-0.5 rounded-lg mr-1 mb-1 font-normal text-slate-400 border border-transparent";
+              "karaoke-word word-chip cursor-pointer transition-colors duration-150 inline-block px-1.5 py-0.5 rounded-lg font-semibold text-slate-400 border border-transparent";
           }
         });
       }
@@ -19476,9 +18927,7 @@
         const repeatContainer = document.getElementById(
           "repeatPromptContainer"
         );
-        const repeatPromptLabel = document.querySelector(
-          "#repeatPromptContainer [data-i18n='repeatPrompt']"
-        );
+        const repeatPromptLabel = document.getElementById("repeatPromptText");
         if (repeatContainer) {
           repeatContainer.classList.remove("hidden");
           if (repeatPromptLabel) {
@@ -20325,7 +19774,7 @@
                 ? `data-vocab-status="${vocabItem.status}"`
                 : "";
 
-              return `<span class="karaoke-word word-chip cursor-pointer transition-all duration-150 inline-block px-1.5 py-0.5 rounded-lg mr-1 mb-1 font-semibold" data-word-index="${wIdx}" ${statusAttr} onclick="openWordPopover(event, '${cleanWord}', '${escapeHtml(token)}')">${token}</span>`;
+              return `<span class="karaoke-word word-chip cursor-pointer transition-colors duration-150 inline-block px-1.5 py-0.5 rounded-lg font-semibold border border-transparent text-slate-400" data-word-index="${wIdx}" ${statusAttr} onclick="openWordPopover(event, '${cleanWord}', '${escapeHtml(token)}')">${token}</span>`;
             })
             .join("");
           enContainer.innerHTML = wordSpans;
@@ -20578,13 +20027,12 @@
         });
 
         if (filteredKeys.length === 0) {
-          const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
           container.innerHTML = `
             <div class="py-12 text-center text-slate-500">
               <svg class="w-10 h-10 mx-auto mb-2 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
               </svg>
-              <p class="text-xs">${dict.vocabEmptyState || "No saved words yet."}</p>
+              <p class="text-xs">No saved words yet.</p>
             </div>
           `;
           return;
@@ -20798,6 +20246,28 @@
           return;
         }
 
+        // Global modal & drawer dismiss
+        if (e.code === "Escape") {
+          closeWordPopover();
+          closeSpeedPopover();
+          closeHotkeyModal();
+          closeFlashcardModal();
+          closeInsightsModal();
+          toggleVocabDrawer(false);
+          return;
+        }
+
+        // Global hotkey modal open
+        if (e.code === "Slash" && e.shiftKey) {
+          openHotkeyModal();
+          return;
+        }
+
+        // Player-specific hotkeys are strictly active when player view is active
+        if (state.activeView !== "player") {
+          return;
+        }
+
         switch (e.code) {
           case "Space":
             e.preventDefault();
@@ -20844,17 +20314,6 @@
           case "KeyM":
             e.preventDefault();
             toggleMicRecording();
-            break;
-          case "Slash":
-            if (e.shiftKey) openHotkeyModal();
-            break;
-          case "Escape":
-            closeWordPopover();
-            closeSpeedPopover();
-            closeHotkeyModal();
-            closeFlashcardModal();
-            closeInsightsModal();
-            toggleVocabDrawer(false);
             break;
         }
       }

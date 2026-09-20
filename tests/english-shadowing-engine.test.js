@@ -200,6 +200,9 @@ async function runTests() {
     globalThis.SCENARIO_CUES_CACHE = typeof SCENARIO_CUES_CACHE !== 'undefined' ? SCENARIO_CUES_CACHE : null;
     globalThis.selectScenario = typeof selectScenario !== 'undefined' ? selectScenario : null;
     globalThis.proceedSelectScenario = typeof proceedSelectScenario !== 'undefined' ? proceedSelectScenario : null;
+    globalThis.handleGlobalKeydown = typeof handleGlobalKeydown !== 'undefined' ? handleGlobalKeydown : function(){};
+    globalThis.updateKaraokeWordHighlight = typeof updateKaraokeWordHighlight !== 'undefined' ? updateKaraokeWordHighlight : function(){};
+    globalThis.renderActiveCue = typeof renderActiveCue !== 'undefined' ? renderActiveCue : function(){};
     globalThis.state = typeof state !== 'undefined' ? state : {};
     Object.defineProperty(globalThis, 'simulatedTime', {
       get: () => typeof simulatedTime !== 'undefined' ? simulatedTime : 0,
@@ -243,6 +246,9 @@ async function runTests() {
     SCENARIO_CUES_CACHE,
     selectScenario,
     proceedSelectScenario,
+    handleGlobalKeydown,
+    updateKaraokeWordHighlight,
+    renderActiveCue,
     state,
   } = sandbox;
 
@@ -1300,6 +1306,64 @@ async function runTests() {
     assert(
       state.activeCues === cachedCues,
       `State activeCues updated with cached cues for '${sc.id}'`
+    );
+  }
+
+  // 18. Catalog Idle State & Stable Karaoke Layout Invariance (Issues Bug 1 & Bug 2)
+  // 18.1 Catalog idle state verification
+  state.activeView = "catalog";
+  state.activeScenario = null;
+  state.activeCues = [];
+  state.isPlaying = false;
+
+  let spacePrevented = false;
+  handleGlobalKeydown({
+    code: "Space",
+    preventDefault() {
+      spacePrevented = true;
+    },
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.isPlaying === false,
+    "Spacebar keydown on catalog view does NOT start audio playback"
+  );
+
+  let arrowPrevented = false;
+  handleGlobalKeydown({
+    code: "ArrowRight",
+    preventDefault() {
+      arrowPrevented = true;
+    },
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 0 && state.isPlaying === false,
+    "Arrow navigation on catalog view does NOT trigger cue jump or audio"
+  );
+
+  // 18.2 Karaoke Word Highlight Invariant Metrics Test
+  const mockScenario = manifest[0];
+  await proceedSelectScenario(mockScenario, true, false);
+  const subtitleContainer = getOrCreateElement("activeEnglishSubtitle");
+
+  const wordSpanMocks = [
+    { className: "", querySelectorAll: () => [] },
+    { className: "", querySelectorAll: () => [] },
+    { className: "", querySelectorAll: () => [] },
+  ];
+  subtitleContainer.querySelectorAll = (selector) => {
+    if (selector === ".karaoke-word") return wordSpanMocks;
+    return [];
+  };
+
+  // Test active word index highlighting
+  updateKaraokeWordHighlight(mockScenario.cues?.[0]?.start || 1.0);
+  for (const wEl of wordSpanMocks) {
+    assert(
+      wEl.className.includes("font-semibold") &&
+        wEl.className.includes("px-1.5 py-0.5 rounded-lg"),
+      "Karaoke words maintain exact font-semibold weight and px-1.5 py-0.5 padding in all states"
     );
   }
 
