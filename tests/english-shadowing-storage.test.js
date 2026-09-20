@@ -212,10 +212,23 @@ async function runTests() {
   };
 
   vm.createContext(sandbox);
-  const scriptMatches = [
-    ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
-  ];
-  const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
+  // Extract inline scripts with fast index slicing
+  const scriptBlocks = [];
+  let scriptPos = 0;
+  while (true) {
+    const startTag = htmlContent.indexOf("<script", scriptPos);
+    if (startTag === -1) break;
+    const endTag = htmlContent.indexOf(">", startTag);
+    if (endTag === -1) break;
+    const tagHeader = htmlContent.slice(startTag, endTag);
+    const closeTag = htmlContent.indexOf("</script>", endTag);
+    if (closeTag === -1) break;
+    if (!tagHeader.includes("src=")) {
+      scriptBlocks.push(htmlContent.slice(endTag + 1, closeTag));
+    }
+    scriptPos = closeTag + 9;
+  }
+  const combinedScripts = scriptBlocks.join("\n");
   const exportBridge = `
     globalThis.VOCAB_STORAGE_KEY = typeof VOCAB_STORAGE_KEY !== 'undefined' ? VOCAB_STORAGE_KEY : '';
     globalThis.PRACTICE_STATS_KEY = typeof PRACTICE_STATS_KEY !== 'undefined' ? PRACTICE_STATS_KEY : '';

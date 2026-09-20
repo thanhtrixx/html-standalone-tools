@@ -3,6 +3,7 @@ const MEDIA_CACHE_NAME = "shadowing-media-v5";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
+  "./dictionary.json",
   "./icon.svg",
   "./manifest.json",
   "./manifest.webmanifest",
