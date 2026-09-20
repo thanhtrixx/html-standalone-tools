@@ -192,10 +192,10 @@ This is sentence number two.
     "Single line correctly sets English and empty translation"
   );
 
-  // 5. Curated Scenarios Validation
+  // 5. Curated Scenarios Validation (Enhanced LRC Standardized)
   assert(
-    Array.isArray(CURATED_SCENARIOS) && CURATED_SCENARIOS.length >= 4,
-    `Curated scenarios library has at least 4 items (found ${CURATED_SCENARIOS.length})`
+    Array.isArray(CURATED_SCENARIOS) && CURATED_SCENARIOS.length >= 6,
+    `Curated scenarios library has at least 6 extended items (found ${CURATED_SCENARIOS.length})`
   );
 
   CURATED_SCENARIOS.forEach((sc, i) => {
@@ -206,14 +206,17 @@ This is sentence number two.
         sc.category &&
         sc.level &&
         sc.accent &&
-        sc.srtContent
+        sc.duration &&
+        sc.audioUrl &&
+        sc.lrcContent &&
+        !sc.srtContent
       ),
-      `Scenario #${i + 1} (${sc.title}) has all required metadata fields`
+      `Scenario #${i + 1} (${sc.title}) has all required metadata fields with lrcContent only (zero srtContent)`
     );
-    const parsedCues = parseSrt(sc.srtContent);
+    const parsedCues = parseEnhancedLrc(sc.lrcContent);
     assert(
-      parsedCues.length >= 3,
-      `Scenario #${i + 1} (${sc.title}) contains valid cues (found ${parsedCues.length})`
+      parsedCues.length >= 10,
+      `Scenario #${i + 1} (${sc.title}) contains valid extended cues (found ${parsedCues.length} >= 10)`
     );
   });
 
