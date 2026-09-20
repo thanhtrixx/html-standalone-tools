@@ -339,6 +339,65 @@ async function runTests() {
     "logPracticeSeconds increments seconds to 150s"
   );
 
+  // Test streak logic when launching with yesterday's practice vs old practice (Issue #688)
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayDateStr = yesterdayDate.toISOString().split("T")[0];
+
+  storageMock.setItem(
+    PRACTICE_STATS_KEY,
+    JSON.stringify({
+      streakDays: 4,
+      lastPracticedDate: yesterdayDateStr,
+      totalSecondsPracticedToday: 200,
+      sentencesShadowedToday: 8,
+      totalSentencesShadowed: 8,
+    })
+  );
+
+  loadPracticeStats();
+  // Opening app today does NOT pre-award streak before practice
+  assert(
+    getPracticeStats().streakDays === 4,
+    "Opening app next day retains previous streak without pre-awarding"
+  );
+  assert(
+    getPracticeStats().sentencesShadowedToday === 0,
+    "Opening app resets today's sentence counter"
+  );
+
+  // Now practice a sentence today -> streak increments to 5
+  logPracticeShadowSentence();
+  assert(
+    getPracticeStats().streakDays === 5,
+    "Practicing a sentence increments streak from yesterday to 5"
+  );
+
+  // Test expired streak (> 1 day inactivity)
+  const fiveDaysAgo = new Date();
+  fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+  storageMock.setItem(
+    PRACTICE_STATS_KEY,
+    JSON.stringify({
+      streakDays: 10,
+      lastPracticedDate: fiveDaysAgo.toISOString().split("T")[0],
+      totalSecondsPracticedToday: 100,
+      sentencesShadowedToday: 5,
+      totalSentencesShadowed: 50,
+    })
+  );
+  loadPracticeStats();
+  assert(
+    getPracticeStats().streakDays === 0,
+    "Inactive for multiple days resets streak to 0 upon load"
+  );
+
+  logPracticeShadowSentence();
+  assert(
+    getPracticeStats().streakDays === 1,
+    "Practicing after inactive reset starts new streak at 1"
+  );
+
   // 13. Service Worker Asset Cache Verification & PWA Zero-Stale Lifecycle (ADR-0007 / Slice 1)
   const swPath = path.join(__dirname, "..", "english-shadowing", "sw.js");
   assert(fs.existsSync(swPath), "Service Worker file sw.js exists");

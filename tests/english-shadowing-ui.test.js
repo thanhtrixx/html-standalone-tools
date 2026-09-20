@@ -263,14 +263,18 @@ async function runTests() {
     "Anki CSV export button exists"
   );
 
-  // 10. SRT Timing Nudge UI
+  // 10. FTUX Onboarding & Clean Subtitle Stage (Issue #688)
   assert(
-    htmlContent.includes("onclick=\"nudgeActiveCueTiming('start', -0.1)\""),
-    "Start timing nudge backward (-100ms) button exists"
+    htmlContent.includes('data-i18n="howToShadowTitle"'),
+    "3-Step How to Shadow FTUX onboarding guide exists"
   );
   assert(
-    htmlContent.includes("onclick=\"nudgeActiveCueTiming('start', 0.1)\""),
-    "Start timing nudge forward (+100ms) button exists"
+    !htmlContent.includes("onclick=\"nudgeActiveCueTiming('start', -0.1)\""),
+    "Timing nudge backward (-100ms) button is removed from subtitle stage"
+  );
+  assert(
+    !htmlContent.includes("onclick=\"nudgeActiveCueTiming('start', 0.1)\""),
+    "Timing nudge forward (+100ms) button is removed from subtitle stage"
   );
   assert(
     !htmlContent.includes('onclick="exportCurrentScenarioSrt()"'),

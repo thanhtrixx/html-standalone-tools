@@ -117,6 +117,51 @@
 
 ---
 
+---
+
+## 🎯 Milestone 8: Active Voice Shadowing, Hands-Free Echoic Mode, IndexedDB Vault & FTUX Overhaul ([ADR-0009](./docs/adr/0009-voice-recording-echoic-shadowing-and-indexeddb-vault.md))
+
+### 🎯 Objective
+
+Complete the speech-production feedback loop, restore the microphone recording dock, implement hands-free echoic repetition, persist user takes in IndexedDB, expand the offline IPA dictionary to ~3,000 words, and streamline beginner onboarding.
+
+### 🧩 Vertical Slice Breakdown
+
+#### Slice 1: FTUX Scaffolding, Difficulty Sort, Pitch Preservation & Bug Fixes ([#688](https://github.com/thanhtrixx/html-standalone-tools/issues/688))
+
+- **Scope**:
+  - [ ] Reorder curated scenarios in `#catalogCardsGrid` by CEFR difficulty: A2 (`specialty-coffee`) -> B1 -> B2 -> C1.
+  - [ ] Add 3-step "How to Shadow" visual guide in catalog header.
+  - [ ] Remove `-0.1s / +0.1s Nudge` timing controls from `#subtitleStage` (relocate to settings).
+  - [ ] Enforce `audio.preservesPitch = true` on `<audio id="playerAudio">` across all speed rates (`0.5x`–`1.5x`).
+  - [ ] Fix streak pre-award bug in `loadPracticeStats()` and replace blocking `window.alert()` with `showToast()`.
+  - [ ] Clamp mobile `#wordPopover` coordinates inside viewport boundaries.
+  - [ ] Update `tests/e2e/english-shadowing-devices.spec.js` card count assertion (4 -> 6).
+
+#### Slice 2: Voice Recording Dock, Waveform Visualizer & IndexedDB Vault ([#689](https://github.com/thanhtrixx/html-standalone-tools/issues/689))
+
+- **Scope**:
+  - [ ] Mount 1-tap `#btnDockRecord` in pinned transport dock with `KeyM` hotkey and pulsing recording indicator.
+  - [ ] Render dual waveform comparison canvas (Native reference vs learner take) via Web Audio API `AudioContext` and `AnalyserNode`.
+  - [ ] Persist recorded takes as Blobs in IndexedDB (`shadowing_recordings_vault`) keyed by `[scenarioId, cueIndex]`.
+  - [ ] Implement automated A/B comparative playback (`Native` -> `0.4s pause` -> `Learner Take`).
+
+#### Slice 3: Hands-Free Echoic Shadowing Mode with Dynamic Recording Timer ([#690](https://github.com/thanhtrixx/html-standalone-tools/issues/690))
+
+- **Scope**:
+  - [ ] Add `Echoic` (Delay Repeat) mode toggle to the transport bar alongside `Continuous` and `Loop`.
+  - [ ] Compute dynamic pause window: $T_{\text{pause}} = \max(2.0\text{s}, \text{Cue Duration} \times 1.25)$.
+  - [ ] Implement automated turn-taking: Play Cue $N$ -> Visual countdown & auto-record learner take -> Save to IndexedDB -> Auto-advance to Cue $N+1$.
+
+#### Slice 4: Offline 3,000-Word IPA/VI Dictionary & Specification Parity ([#691](https://github.com/thanhtrixx/html-standalone-tools/issues/691))
+
+- **Scope**:
+  - [ ] Embed compressed ~3,000-word CEFR A1–C1 offline dictionary database with accurate IPA, parts of speech, and Vietnamese translations.
+  - [ ] Add simple lemmatization for inflections and plural forms.
+  - [ ] Reconcile `PRODUCT.md`, `DESIGN.md`, `CONTEXT.md`, and clean up dead code.
+
+---
+
 ## 🏁 Completed Milestones
 
 - ✅ **Milestone 1**: Standalone PWA Architecture, Leitner SRS & Smart SRT Engine ([ADR-0001](./docs/adr/0001-english-shadowing-pwa-architecture-and-data-model.md), [ADR-0002](./docs/adr/0002-voice-recorder-leitner-srs-and-smart-srt-engine.md))
@@ -124,3 +169,5 @@
 - ✅ **Milestone 3**: App-Shell Layout, URL Scenario Deep-Linking, Default Continuous Mode & Dedicated Insights Modal ([ADR-0004](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md))
 - ✅ **Milestone 4**: Listening-First Audio Engine, Clean Navigation & View-Only Transcript ([ADR-0005](./docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md))
 - ✅ **Milestone 5**: Markdown Scenario Pipeline, Precision Acoustic Stitching & Full LRC Standardization ([ADR-0006](./docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md))
+- ✅ **Milestone 6**: PWA Zero-Stale Cache Lifecycle & On-Demand Media Streaming ([ADR-0007](./docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md))
+- ✅ **Milestone 7**: Manifest-Driven Scenario Architecture & Curated Content Lifecycle ([ADR-0008](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md))
