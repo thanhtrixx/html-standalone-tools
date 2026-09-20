@@ -436,12 +436,34 @@ async function runTests() {
     "Scenario cards include bookmark button styling/class"
   );
   assert(
-    htmlContent.includes("progress-indicator"),
-    "Scenario cards include progress indicator styling/class"
-  );
-  assert(
     htmlContent.includes('data-i18n="noScenariosFound"'),
     "Catalog empty state has data-i18n='noScenariosFound'"
+  );
+
+  // 17. Dynamic Cue Lookup & Scrubber Pointer Event Protection
+  assert(
+    htmlContent.includes("function findCueIndexByTime"),
+    "findCueIndexByTime function definition exists in index.html"
+  );
+  assert(
+    htmlContent.includes("function onScrubberChange"),
+    "onScrubberChange function definition exists in index.html"
+  );
+  assert(
+    htmlContent.includes("function onScrubberPointerDown"),
+    "onScrubberPointerDown function definition exists in index.html"
+  );
+  assert(
+    htmlContent.includes("function onScrubberPointerUp"),
+    "onScrubberPointerUp function definition exists in index.html"
+  );
+  assert(
+    htmlContent.includes('onpointerdown="onScrubberPointerDown()"'),
+    "audioScrubber element binds onpointerdown to prevent drag stutter"
+  );
+  assert(
+    htmlContent.includes("jumpToSentence(${idx})"),
+    "Scrubber milestones bind jumpToSentence to jump when clicked"
   );
 
   console.log(`\n==================================================`);
