@@ -234,6 +234,8 @@ Complete the speech-production feedback loop, restore the microphone recording d
 
 ### 🎯 Objective
 
+- **Status:** ✅ Milestone Completed & Verified ([ADR-0010](./docs/adr/0010-monolingual-english-ui-permanent-dark-theme-and-ergonomic-hotkeys.md))
+
 Remove client-side UI i18n switcher boilerplate, lock the app permanently into a focused high-contrast dark theme, and implement a full-spectrum keyboard-first interaction engine with multi-layout transport, shadowing workflow controls, SRS flashcard shortcuts, and a redesigned cheatsheet modal.
 
 ### 🧩 Vertical Slice Breakdown
@@ -241,28 +243,28 @@ Remove client-side UI i18n switcher boilerplate, lock the app permanently into a
 #### Slice 1: Monolingual English UI & Permanent Dark Mode ([#699](https://github.com/thanhtrixx/html-standalone-tools/issues/699))
 
 - **Scope**:
-  - [ ] Hardcode all UI labels, navigation buttons, empty states, and modal copy in clean, natural English.
-  - [ ] Remove `#langBtnEn`, `#langBtnVi`, `setLanguage()`, `state.lang`, `TRANSLATIONS` dictionary, and `data-i18n` attributes.
-  - [ ] Remove `#themeToggleBtn`, `#themeIconDark`, `#themeIconLight`, `setTheme()`, `toggleTheme()`, and localStorage theme loading.
-  - [ ] Enforce permanent dark theme styling on `<html>` and clean up unused light theme CSS selectors.
-  - [ ] Retain Vietnamese subtitle lines in `.lrc` and Vietnamese definitions in `BUILTIN_VOCAB_DB`.
+  - [x] Hardcode all UI labels, navigation buttons, empty states, and modal copy in clean, natural English.
+  - [x] Remove `#langBtnEn`, `#langBtnVi`, `setLanguage()`, `state.lang`, `TRANSLATIONS` dictionary, and `data-i18n` attributes.
+  - [x] Remove `#themeToggleBtn`, `#themeIconDark`, `#themeIconLight`, `setTheme()`, `toggleTheme()`, and localStorage theme loading.
+  - [x] Enforce permanent dark theme styling on `<html>` and clean up unused light theme CSS selectors.
+  - [x] Retain Vietnamese subtitle lines in `.lrc` and Vietnamese definitions in `BUILTIN_VOCAB_DB`.
 
 #### Slice 2: Full-Spectrum Ergonomic Keyboard Shortcuts Engine ([#700](https://github.com/thanhtrixx/html-standalone-tools/issues/700))
 
 - **Scope**:
-  - [ ] Multi-layout transport navigation: `Space` / `K` (Play/Pause), `R` / `Up` (Replay), `A` / `Left` / `J` (Prev cue), `D` / `Right` / `L` (Next cue), `Home` / `0` (First cue), `End` (Last cue), `[` / `]` (Speed adjustment).
-  - [ ] Shadowing practice triggers: `P` (Cycle Continuous ➔ Loop ➔ Echoic mode), `M` (Toggle Mic Take), `C` (Play A/B Comparative take), `B` (Bookmark current scenario).
-  - [ ] Subtitle masking modes: `1`, `2`, `3`, `4` (Dual, EN only, VI only, Blur).
-  - [ ] Leitner SRS flashcard review controls: `Space` / `Enter` / `F` / `Up` to flip card, `1` (Hard), `2` (Good), `3` (Mastered), `Left` / `Right` to navigate cards.
-  - [ ] Global & catalog navigation: `/` to focus catalog search input, `V` for Vocab Drawer, `I` for Insights, `?` for Cheat Sheet, and `Escape` for dismissal.
+  - [x] Multi-layout transport navigation: `Space` / `K` (Play/Pause), `R` / `Up` (Replay), `A` / `Left` / `J` (Prev cue), `D` / `Right` / `L` (Next cue), `Home` / `0` (First cue), `End` (Last cue), `[` / `]` (Speed adjustment).
+  - [x] Shadowing practice triggers: `P` (Cycle Continuous ➔ Loop ➔ Echoic mode), `M` (Toggle Mic Take), `C` (Play A/B Comparative take), `B` (Bookmark current scenario).
+  - [x] Subtitle masking modes: `1`, `2`, `3`, `4` (Dual, EN only, VI only, Blur).
+  - [x] Leitner SRS flashcard review controls: `Space` / `Enter` / `F` / `Up` to flip card, `1` (Hard), `2` (Good), `3` (Mastered), `Left` / `Right` to navigate cards.
+  - [x] Global & catalog navigation: `/` to focus catalog search input, `V` for Vocab Drawer, `I` for Insights, `?` for Cheat Sheet, and `Escape` for dismissal.
 
 #### Slice 3: Redesigned Shortcuts Cheat Sheet Modal & Automated Verification ([#701](https://github.com/thanhtrixx/html-standalone-tools/issues/701))
 
 - **Scope**:
-  - [ ] Redesign `#hotkeyModal` into categorized sections (Transport & Navigation, Shadowing & Mic, Subtitles & Masking, Leitner SRS Flashcards, Global & Search).
-  - [ ] Update `tests/english-shadowing-ui.test.js` to assert all hotkeys, modal structures, and dark theme invariants.
-  - [ ] Update `tests/english-shadowing-engine.test.js` and retire/update `tests/english-shadowing-i18n.test.js`.
-  - [ ] Validate 100% test pass via `bun run test:shadowing`.
+  - [x] Redesign `#hotkeyModal` into categorized sections (Transport & Navigation, Shadowing & Mic, Subtitles & Masking, Leitner SRS Flashcards, Global & Search).
+  - [x] Update `tests/english-shadowing-ui.test.js` to assert all hotkeys, modal structures, and dark theme invariants.
+  - [x] Update `tests/english-shadowing-engine.test.js` and retire/update `tests/english-shadowing-i18n.test.js`.
+  - [x] Validate 100% test pass via `bun run test:shadowing`.
 
 ---
 
@@ -275,3 +277,5 @@ Remove client-side UI i18n switcher boilerplate, lock the app permanently into a
 - ✅ **Milestone 5**: Markdown Scenario Pipeline, Precision Acoustic Stitching & Full LRC Standardization ([ADR-0006](./docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md))
 - ✅ **Milestone 6**: PWA Zero-Stale Cache Lifecycle & On-Demand Media Streaming ([ADR-0007](./docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md))
 - ✅ **Milestone 7**: Manifest-Driven Scenario Architecture & Curated Content Lifecycle ([ADR-0008](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md))
+- ✅ **Milestone 8**: Pedagogical Maturity, Echoic Shadowing Mode, Real Waveform Analysis & Offline 3,000-Word Dictionary ([ADR-0009](./docs/adr/0009-voice-recording-echoic-shadowing-and-indexeddb-vault.md))
+- ✅ **Milestone 9**: Monolingual English UI, Permanent Dark Theme & Ergonomic Keyboard Navigation ([ADR-0010](./docs/adr/0010-monolingual-english-ui-permanent-dark-theme-and-ergonomic-hotkeys.md))
