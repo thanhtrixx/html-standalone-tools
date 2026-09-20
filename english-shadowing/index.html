@@ -1551,20 +1551,28 @@
     <!-- ========================================== -->
     <div
       id="hotkeyModal"
-      class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur flex items-center justify-center p-4"
+      class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     >
       <div
-        class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4"
+        class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-5 my-auto max-h-[90vh] overflow-y-auto"
       >
         <div
           class="flex items-center justify-between border-b border-slate-800 pb-3"
         >
-          <h3 class="font-bold text-lg text-white">
-            Keyboard Shortcuts Cheat Sheet
-          </h3>
+          <div class="flex items-center gap-2">
+            <span class="text-lg">⌨️</span>
+            <div>
+              <h3 class="font-bold text-base sm:text-lg text-white">
+                Keyboard Shortcuts Cheat Sheet
+              </h3>
+              <p class="text-xs text-slate-400">
+                Speed up your shadowing and deliberate practice workflow
+              </p>
+            </div>
+          </div>
           <button
             onclick="closeHotkeyModal()"
-            class="p-1 rounded-lg text-slate-400 hover:text-slate-200"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             aria-label="Close Shortcut Modal"
           >
             <svg
@@ -1583,64 +1591,303 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div
-            class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
-          >
-            <span class="text-slate-300">Play / Pause / Repeat</span>
-            <kbd
-              class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-emerald-400 font-bold"
-              >Space</kbd
+        <div class="space-y-4 text-xs">
+          <!-- 1. Playback & Transport -->
+          <div>
+            <h4
+              class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 mb-2 flex items-center gap-1.5"
             >
+              <span>▶️</span>
+              <span>Playback & Transport</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Play / Pause</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-cyan-300 font-bold"
+                    >Space</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-cyan-300 font-bold"
+                    >K</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Replay Sentence</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-amber-300 font-bold"
+                    >R</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-amber-300 font-bold"
+                    >↑</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Previous Sentence</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >A</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >←</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >J</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Next Sentence</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >D</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >→</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >L</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">First / Last Sentence</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >0</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >Home</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >End</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Adjust Speed</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >[</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >]</kbd
+                  >
+                </div>
+              </div>
+            </div>
           </div>
-          <div
-            class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
-          >
-            <span class="text-slate-300">Replay Sentence</span>
-            <kbd
-              class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-amber-400 font-bold"
-              >R / ↑</kbd
+
+          <!-- 2. Shadowing & Takes -->
+          <div>
+            <h4
+              class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 mb-2 flex items-center gap-1.5"
             >
+              <span>🎙️</span>
+              <span>Shadowing & Practice Actions</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Cycle Shadowing Mode</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-cyan-300 font-bold"
+                  >P</kbd
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Record Microphone Take</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-red-400 font-bold"
+                  >M</kbd
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Auto A/B Comparison</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-emerald-400 font-bold"
+                  >C</kbd
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Bookmark Scenario</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-amber-300 font-bold"
+                  >B</kbd
+                >
+              </div>
+            </div>
           </div>
-          <div
-            class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
-          >
-            <span class="text-slate-300">Prev / Next Sentence</span>
-            <kbd
-              class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-cyan-400 font-bold"
-              >A, D / ←, →</kbd
+
+          <!-- 3. Subtitles & Views -->
+          <div>
+            <h4
+              class="text-[11px] font-bold uppercase tracking-wider text-purple-400 mb-2 flex items-center gap-1.5"
             >
+              <span>👁️</span>
+              <span>Subtitles & Navigation</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80 col-span-full sm:col-span-1"
+              >
+                <span class="text-slate-300">Subtitle Masking</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-purple-300 font-bold"
+                    >1</kbd
+                  >
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-purple-300 font-bold"
+                    >2</kbd
+                  >
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-purple-300 font-bold"
+                    >3</kbd
+                  >
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-purple-300 font-bold"
+                    >4</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Search Scenarios</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-cyan-300 font-bold"
+                  >/</kbd
+                >
+              </div>
+            </div>
           </div>
-          <div
-            class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
-          >
-            <span class="text-slate-300">Adjust Speed</span>
-            <kbd
-              class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-300 font-bold"
-              >[ / ]</kbd
+
+          <!-- 4. Vocabulary & Flashcards -->
+          <div>
+            <h4
+              class="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-2 flex items-center gap-1.5"
             >
-          </div>
-          <div
-            class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
-          >
-            <span class="text-slate-300">Subtitle Masking</span>
-            <kbd
-              class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-slate-300 font-bold"
-              >1, 2, 3, 4</kbd
-            >
-          </div>
-          <div
-            class="flex items-center justify-between p-2.5 rounded-lg bg-slate-950 border border-slate-800"
-          >
-            <span class="text-slate-300">Toggle Vocab Drawer</span>
-            <kbd
-              class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-amber-400 font-bold"
-              >V</kbd
-            >
+              <span>🗂️</span>
+              <span>Vocabulary & Flashcards</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Toggle Vocab Drawer</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-amber-300 font-bold"
+                  >V</kbd
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Practice Insights</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-emerald-400 font-bold"
+                  >I</kbd
+                >
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Flip Flashcard</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >Space</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >Enter</kbd
+                  >
+                  <span class="text-slate-500">/</span>
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-300 font-bold"
+                    >F</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80"
+              >
+                <span class="text-slate-300">Grade Flashcard</span>
+                <div class="flex items-center gap-1">
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-red-400 font-bold"
+                    >1</kbd
+                  >
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-amber-300 font-bold"
+                    >2</kbd
+                  >
+                  <kbd
+                    class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-emerald-400 font-bold"
+                    >3</kbd
+                  >
+                </div>
+              </div>
+              <div
+                class="flex items-center justify-between p-2 rounded-lg bg-slate-950/70 border border-slate-800/80 col-span-full"
+              >
+                <span class="text-slate-300">Dismiss Overlays / Modals</span>
+                <kbd
+                  class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-slate-400 font-bold"
+                  >Esc</kbd
+                >
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="pt-2 text-center">
+        <div class="pt-2 text-center border-t border-slate-800">
           <button
             onclick="closeHotkeyModal()"
             class="px-6 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors"

@@ -54,6 +54,19 @@ async function runTests() {
     "Hotkey cheat sheet modal exists"
   );
   assert(
+    htmlContent.includes("Playback & Transport") &&
+      htmlContent.includes("Shadowing & Practice Actions") &&
+      htmlContent.includes("Subtitles & Navigation") &&
+      htmlContent.includes("Vocabulary & Flashcards"),
+    "Hotkey modal contains 4 categorized shortcut sections"
+  );
+  assert(
+    htmlContent.includes(
+      'class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700'
+    ),
+    "Hotkey modal renders high-contrast <kbd> badges"
+  );
+  assert(
     !htmlContent.includes('id="importModal"'),
     "Legacy #importModal is completely excised from index.html"
   );
