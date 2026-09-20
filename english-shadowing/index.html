@@ -3910,13 +3910,24 @@
         const currentCue = state.activeCues[state.currentCueIndex];
         if (!currentCue) return;
 
+        const targetTime =
+          state.playbackMode === "loop"
+            ? calculateLoopStartBoundary(
+                state.activeCues,
+                state.currentCueIndex
+              )
+            : currentCue.start;
+
         const audio = getAudioElement();
         if (audio) {
-          audio.currentTime = currentCue.start;
+          audio.currentTime = targetTime;
         }
-        simulatedTime = currentCue.start;
+        simulatedTime = targetTime;
+        isAudioSeeking = true;
         state.isLoopWaiting = false;
         hideRepeatPrompt();
+        updateTimeLabels(targetTime, state.activeScenario.duration);
+        updateKaraokeWordHighlight(targetTime);
         playAudio();
       }
 
@@ -3928,7 +3939,7 @@
         }
       }
 
-      function jumpToSentence(index) {
+      function jumpToSentence(index, shouldPlay = null) {
         if (
           !state.activeScenario ||
           index < 0 ||
@@ -3959,7 +3970,16 @@
         updateKaraokeWordHighlight(targetTime);
         updateScenarioUrl(state.activeScenario.id, index, false);
 
-        playAudio();
+        if (shouldPlay === false && state.isPlaying) {
+          pauseAudio();
+        } else {
+          const willPlay = shouldPlay !== null ? shouldPlay : state.isPlaying;
+          if (willPlay) {
+            playAudio();
+          } else {
+            updatePlayPauseIcons();
+          }
+        }
       }
 
       function findCueIndexByTime(cues, currentSeconds) {
@@ -3968,6 +3988,9 @@
 
         for (let i = 0; i < cues.length; i++) {
           if (time >= cues[i].start && time <= cues[i].end) {
+            if (i < cues.length - 1 && time === cues[i + 1].start) {
+              return i + 1;
+            }
             return i;
           }
         }
@@ -4122,12 +4145,30 @@
               state.activeCues,
               state.currentCueIndex
             );
-            audio.currentTime = loopStart;
-            startAudioTime = loopStart;
-          } else {
-            // Continuous mode: ensure audio is at cue.start if jumping or starting
             if (
-              audio.paused ||
+              isAudioSeeking ||
+              audio.currentTime < loopStart ||
+              audio.currentTime > cue.end
+            ) {
+              const targetLoopTime =
+                simulatedTime !== null && !isNaN(simulatedTime)
+                  ? simulatedTime
+                  : loopStart;
+              audio.currentTime = targetLoopTime;
+              startAudioTime = targetLoopTime;
+            } else {
+              startAudioTime = audio.currentTime;
+            }
+          } else {
+            // Continuous mode: preserve exact seek time if seeking, otherwise ensure audio is in current cue window
+            if (isAudioSeeking) {
+              const targetTime =
+                simulatedTime !== null && !isNaN(simulatedTime)
+                  ? simulatedTime
+                  : cue.start;
+              audio.currentTime = targetTime;
+              startAudioTime = targetTime;
+            } else if (
               audio.currentTime < cue.start - 0.2 ||
               audio.currentTime > cue.end + 0.2
             ) {
@@ -4334,6 +4375,7 @@
       function onScrubberInput(percentVal) {
         if (!state.activeScenario || !state.activeCues.length) return;
         isScrubbing = true;
+        isAudioSeeking = true;
         const totalDuration = state.activeScenario.duration || 1;
         const targetTime = (parseFloat(percentVal) / 100) * totalDuration;
         const audio = getAudioElement();
@@ -4364,6 +4406,7 @@
           audio.currentTime = targetTime;
         }
         simulatedTime = targetTime;
+        isAudioSeeking = true;
         updateTimeLabels(targetTime, totalDuration);
 
         const targetIndex = findCueIndexByTime(state.activeCues, targetTime);
@@ -4377,6 +4420,8 @@
         updateKaraokeWordHighlight(targetTime);
         if (state.isPlaying) {
           playAudio();
+        } else {
+          updatePlayPauseIcons();
         }
       }
 
