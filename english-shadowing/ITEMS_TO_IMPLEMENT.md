@@ -1,5 +1,20 @@
 # English Shadowing Player — Backlog & Roadmap
 
+## 🎯 Milestone 9: Canonical Scenario Architecture, Dynamic Streaming & Build Fix (#696)
+
+### Epic: Canonical Scenario Directory Architecture, Dynamic Subtitle Streaming & Scoped Build Compilation
+
+- **Status:** ✅ Milestone Completed & Verified ([ADR-0008](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md))
+- **Scope**:
+  - [x] Standardize scenario media in canonical `scenarios/<id>/` (`audio.mp3`, `subtitles.lrc`) and retire flat `audio/` directory.
+  - [x] Update convention-over-configuration routing in `resolveScenarioAudioUrl()` and `resolveScenarioLrcUrl()`.
+  - [x] Stream subtitles dynamically via on-demand `fetch()` without inlining lyrics in the HTML bundle.
+  - [x] Reorder Service Worker `sw.js` fetch handling to give media files (`.mp3`, `.webm`, `.opus`) Cache-First + HTTP 206 byte-range slicing priority.
+  - [x] Scope Tailwind config script regex in `scripts/build.js` to preserve head scripts and compiled stylesheet in `dist/`.
+  - [x] Update all test suites to assert canonical scenario directory structure and build packaging.
+
+---
+
 ## 🎯 Milestone 8: English Shadowing UX & Pedagogical Maturity Overhaul (Epic #687)
 
 ### Epic: Pedagogical Maturity, Echoic Shadowing Mode, Real Waveform Analysis & Offline 3,000-Word Dictionary
@@ -35,7 +50,7 @@
 - **Title**: `feat(shadowing): hands-free echoic shadowing mode, dynamic pause scaling, and mobile height fix`
 - **Scope**:
   - [x] Implement automated Echoic turn-taking with dynamic pause scaling:
-    $$T_{\text{pause}} = \max\left(2.0\text{s}, \, \text{Cue Duration} \times 1.25\right)$$
+        $$T_{\text{pause}} = \max\left(2.0\text{s}, \, \text{Cue Duration} \times 1.25\right)$$
   - [x] Build visual SVG countdown ring (`#echoicCountdownRing`) around the recording dock.
   - [x] Auto-arm microphone on pause, capture learner voice, persist take to IndexedDB vault, and auto-advance to next cue.
   - [x] Optimize mobile viewport layout for iPhone WebKit (`#player-view`, `#subtitleStage`, `#waveformComparisonBox`, `#player-container`) allowing pinned transport dock within viewport.

@@ -196,6 +196,7 @@ async function runTests() {
     globalThis.calculateLoopStartBoundary = typeof calculateLoopStartBoundary !== 'undefined' ? calculateLoopStartBoundary : function(){};
     globalThis.calculateEchoicPauseDuration = typeof calculateEchoicPauseDuration !== 'undefined' ? calculateEchoicPauseDuration : function(){};
     globalThis.SPEED_PRESETS = typeof SPEED_PRESETS !== 'undefined' ? SPEED_PRESETS : [];
+    globalThis.INLINED_SCENARIOS_LRC = typeof INLINED_SCENARIOS_LRC !== 'undefined' ? INLINED_SCENARIOS_LRC : {};
     globalThis.SCENARIO_CUES_CACHE = typeof SCENARIO_CUES_CACHE !== 'undefined' ? SCENARIO_CUES_CACHE : null;
     globalThis.selectScenario = typeof selectScenario !== 'undefined' ? selectScenario : null;
     globalThis.proceedSelectScenario = typeof proceedSelectScenario !== 'undefined' ? proceedSelectScenario : null;
@@ -234,6 +235,7 @@ async function runTests() {
     SPEED_PRESETS,
     SCENARIOS_MANIFEST,
     CURATED_SCENARIOS,
+    INLINED_SCENARIOS_LRC,
     resolveScenarioAudioUrl,
     resolveScenarioLrcUrl,
     BUILTIN_VOCAB_DB,
@@ -310,18 +312,19 @@ async function runTests() {
   // 5.1 Audio URL Resolution by ID string
   assert(
     resolveScenarioAudioUrl("specialty-coffee") ===
-      "audio/specialty-coffee.mp3",
-    "resolveScenarioAudioUrl('specialty-coffee') resolves to 'audio/specialty-coffee.mp3'"
+      "scenarios/specialty-coffee/audio.mp3",
+    "resolveScenarioAudioUrl('specialty-coffee') resolves to 'scenarios/specialty-coffee/audio.mp3'"
   );
   assert(
-    resolveScenarioAudioUrl("tech-standup") === "audio/tech-standup.mp3",
-    "resolveScenarioAudioUrl('tech-standup') resolves to 'audio/tech-standup.mp3'"
+    resolveScenarioAudioUrl("tech-standup") ===
+      "scenarios/tech-standup/audio.mp3",
+    "resolveScenarioAudioUrl('tech-standup') resolves to 'scenarios/tech-standup/audio.mp3'"
   );
 
   // 5.2 Audio URL Resolution by Object without explicit audioUrl
   assert(
     resolveScenarioAudioUrl({ id: "academic-ai-future" }) ===
-      "audio/academic-ai-future.mp3",
+      "scenarios/academic-ai-future/audio.mp3",
     "resolveScenarioAudioUrl({ id }) resolves canonical audio path"
   );
 
@@ -353,19 +356,20 @@ async function runTests() {
 
   // 5.5 LRC URL Resolution by ID string
   assert(
-    resolveScenarioLrcUrl("specialty-coffee") === "audio/specialty-coffee.lrc",
-    "resolveScenarioLrcUrl('specialty-coffee') resolves to 'audio/specialty-coffee.lrc'"
+    resolveScenarioLrcUrl("specialty-coffee") ===
+      "scenarios/specialty-coffee/subtitles.lrc",
+    "resolveScenarioLrcUrl('specialty-coffee') resolves to 'scenarios/specialty-coffee/subtitles.lrc'"
   );
   assert(
     resolveScenarioLrcUrl("doctor-consultation") ===
-      "audio/doctor-consultation.lrc",
-    "resolveScenarioLrcUrl('doctor-consultation') resolves to 'audio/doctor-consultation.lrc'"
+      "scenarios/doctor-consultation/subtitles.lrc",
+    "resolveScenarioLrcUrl('doctor-consultation') resolves to 'scenarios/doctor-consultation/subtitles.lrc'"
   );
 
   // 5.6 LRC URL Resolution by Object without explicit lrcUrl
   assert(
     resolveScenarioLrcUrl({ id: "job-interview" }) ===
-      "audio/job-interview.lrc",
+      "scenarios/job-interview/subtitles.lrc",
     "resolveScenarioLrcUrl({ id }) resolves canonical lrc path"
   );
 
@@ -456,11 +460,18 @@ async function runTests() {
       `Manifest #${i + 1} (${sc.id}): srtContent is NOT inlined`
     );
 
-    // Verify companion .lrc asset exists and has valid cues
-    const lrcFilePath = path.join(audioDir, `${sc.id}.lrc`);
+    // Verify companion .lrc asset exists in scenarios/<id>/ and has valid cues
+    const lrcFilePath = path.join(
+      __dirname,
+      "..",
+      "english-shadowing",
+      "scenarios",
+      sc.id,
+      "subtitles.lrc"
+    );
     assert(
       fs.existsSync(lrcFilePath),
-      `Companion LRC asset exists at english-shadowing/audio/${sc.id}.lrc`
+      `Companion LRC asset exists at english-shadowing/scenarios/${sc.id}/subtitles.lrc`
     );
     if (fs.existsSync(lrcFilePath)) {
       const lrcFileContent = fs.readFileSync(lrcFilePath, "utf8");
@@ -476,6 +487,11 @@ async function runTests() {
   const buildScriptPath = path.join(__dirname, "..", "scripts", "build.js");
   assert(fs.existsSync(buildScriptPath), "scripts/build.js exists");
   const buildScriptContent = fs.readFileSync(buildScriptPath, "utf8");
+  assert(
+    buildScriptContent.includes('"scenarios"') ||
+      buildScriptContent.includes("'scenarios'"),
+    "scripts/build.js COMPANION_ASSETS includes 'scenarios' for dist sync"
+  );
   assert(
     buildScriptContent.includes('"scenarios.json"') ||
       buildScriptContent.includes("'scenarios.json'"),
@@ -553,7 +569,7 @@ async function runTests() {
     `On-demand loading triggers 1 network fetch on cache miss (got ${fetchCallCount})`
   );
   assert(
-    lastFetchedUrl === "audio/dynamic-stream-test.lrc",
+    lastFetchedUrl === "scenarios/dynamic-stream-test/subtitles.lrc",
     `Fetch requested canonical LRC URL: ${lastFetchedUrl}`
   );
   assert(
@@ -608,7 +624,7 @@ async function runTests() {
 
   await sandbox.proceedSelectScenario(testScenario1, false, false);
   assert(
-    audioEl.src === "audio/dynamic-stream-test.mp3",
+    audioEl.src === resolveScenarioAudioUrl(testScenario1),
     `proceedSelectScenario sets audio.src using resolveScenarioAudioUrl (got '${audioEl.src}')`
   );
 
@@ -619,7 +635,7 @@ async function runTests() {
     "playAudio() invokes audio.play() for scenario without explicit audioUrl field"
   );
   assert(
-    audioEl.src === "audio/dynamic-stream-test.mp3",
+    audioEl.src === resolveScenarioAudioUrl(testScenario1),
     "Audio source is preserved during playback initiation"
   );
   assert(
@@ -1254,6 +1270,38 @@ async function runTests() {
     lookupDictionary("") === null,
     "lookupDictionary('') safely returns null"
   );
+
+  // 17. On-Demand Dynamic LRC Streaming & Scenario Selection
+  sandbox.fetch = async (url) => {
+    const cleanUrl = url.replace(/^\//, "").replace(/^english-shadowing\//, "");
+    const fullPath = path.join(__dirname, "..", "english-shadowing", cleanUrl);
+    if (fs.existsSync(fullPath)) {
+      return {
+        ok: true,
+        status: 200,
+        text: async () => fs.readFileSync(fullPath, "utf8"),
+      };
+    }
+    return { ok: false, status: 404, text: async () => "Not Found" };
+  };
+
+  for (const sc of manifest) {
+    SCENARIO_CUES_CACHE.clear();
+    await proceedSelectScenario(sc, false, false);
+    const cachedCues = SCENARIO_CUES_CACHE.get(sc.id);
+    assert(
+      Array.isArray(cachedCues) && cachedCues.length >= 10,
+      `Scenario '${sc.id}' dynamically streams and caches ${cachedCues?.length || 0} subtitle cues`
+    );
+    assert(
+      state.activeScenario && state.activeScenario.id === sc.id,
+      `State activeScenario updated to '${sc.id}'`
+    );
+    assert(
+      state.activeCues === cachedCues,
+      `State activeCues updated with cached cues for '${sc.id}'`
+    );
+  }
 
   console.log(`\n==================================================`);
   console.log(

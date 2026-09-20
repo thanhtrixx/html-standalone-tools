@@ -9,8 +9,29 @@
       content="Progressive Web Application for deliberate English shadowing, synchronized dual-language subtitles (.srt), microphone self-comparison, Leitner SRS vocabulary tracking, and offline practice."
     />
     <meta name="theme-color" content="#0f172a" />
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+
+    <script>
+      (function () {
+        if (
+          typeof window !== "undefined" &&
+          window.location &&
+          window.location.pathname
+        ) {
+          var p = window.location.pathname;
+          if (
+            p.endsWith("/english-shadowing") &&
+            !p.endsWith("/") &&
+            window.location.protocol.indexOf("http") === 0
+          ) {
+            var search = window.location.search || "";
+            var hash = window.location.hash || "";
+            window.location.replace(p + "/" + search + hash);
+          }
+        }
+      })();
+    </script>
 
     <!-- Tailwind CSS with custom theme extension -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -2588,26 +2609,74 @@
 
       function resolveScenarioAudioUrl(scenarioOrId) {
         if (!scenarioOrId) return "";
+        let rawPath = "";
         if (typeof scenarioOrId === "string") {
-          return `audio/${scenarioOrId}.mp3`;
+          rawPath = `scenarios/${scenarioOrId}/audio.mp3`;
+        } else if (typeof scenarioOrId === "object") {
+          if (scenarioOrId.audioUrl) rawPath = scenarioOrId.audioUrl;
+          else if (scenarioOrId.id)
+            rawPath = `scenarios/${scenarioOrId.id}/audio.mp3`;
         }
-        if (typeof scenarioOrId === "object") {
-          if (scenarioOrId.audioUrl) return scenarioOrId.audioUrl;
-          if (scenarioOrId.id) return `audio/${scenarioOrId.id}.mp3`;
+        if (!rawPath) return "";
+        if (
+          rawPath.startsWith("http://") ||
+          rawPath.startsWith("https://") ||
+          rawPath.startsWith("data:") ||
+          rawPath.startsWith("blob:") ||
+          rawPath.startsWith("/")
+        ) {
+          return rawPath;
         }
-        return "";
+        if (
+          typeof window !== "undefined" &&
+          window.location &&
+          window.location.pathname
+        ) {
+          const p = window.location.pathname;
+          if (p.endsWith("/english-shadowing") || p === "english-shadowing") {
+            const cleanRaw = rawPath.startsWith("./")
+              ? rawPath.slice(2)
+              : rawPath;
+            return `/english-shadowing/${cleanRaw}`;
+          }
+        }
+        return rawPath;
       }
 
       function resolveScenarioLrcUrl(scenarioOrId) {
         if (!scenarioOrId) return "";
+        let rawPath = "";
         if (typeof scenarioOrId === "string") {
-          return `audio/${scenarioOrId}.lrc`;
+          rawPath = `scenarios/${scenarioOrId}/subtitles.lrc`;
+        } else if (typeof scenarioOrId === "object") {
+          if (scenarioOrId.lrcUrl) rawPath = scenarioOrId.lrcUrl;
+          else if (scenarioOrId.id)
+            rawPath = `scenarios/${scenarioOrId.id}/subtitles.lrc`;
         }
-        if (typeof scenarioOrId === "object") {
-          if (scenarioOrId.lrcUrl) return scenarioOrId.lrcUrl;
-          if (scenarioOrId.id) return `audio/${scenarioOrId.id}.lrc`;
+        if (!rawPath) return "";
+        if (
+          rawPath.startsWith("http://") ||
+          rawPath.startsWith("https://") ||
+          rawPath.startsWith("data:") ||
+          rawPath.startsWith("blob:") ||
+          rawPath.startsWith("/")
+        ) {
+          return rawPath;
         }
-        return "";
+        if (
+          typeof window !== "undefined" &&
+          window.location &&
+          window.location.pathname
+        ) {
+          const p = window.location.pathname;
+          if (p.endsWith("/english-shadowing") || p === "english-shadowing") {
+            const cleanRaw = rawPath.startsWith("./")
+              ? rawPath.slice(2)
+              : rawPath;
+            return `/english-shadowing/${cleanRaw}`;
+          }
+        }
+        return rawPath;
       }
 
       // ==========================================
@@ -18334,8 +18403,9 @@
                 cueIndex >= 0 &&
                 cueIndex < state.activeCues.length
               ) {
-                jumpToSentence(cueIndex);
+                jumpToSentence(cueIndex, false);
               }
+              pauseAudio();
             });
             loadedFromUrl = true;
           } else {
@@ -18350,7 +18420,9 @@
         }
 
         if (!loadedFromUrl && CURATED_SCENARIOS.length > 0) {
-          selectScenario(CURATED_SCENARIOS[0], false, false);
+          selectScenario(CURATED_SCENARIOS[0], false, false).then(() => {
+            pauseAudio();
+          });
         }
 
         window.addEventListener("keydown", handleGlobalKeydown);
@@ -18366,8 +18438,9 @@
                   popCue >= 0 &&
                   popCue < state.activeCues.length
                 ) {
-                  jumpToSentence(popCue);
+                  jumpToSentence(popCue, false);
                 }
+                pauseAudio();
               });
             } else {
               switchView("catalog", false);
@@ -18404,6 +18477,7 @@
         const navBtnPlayer = document.getElementById("navBtnPlayer");
 
         if (viewName === "catalog") {
+          pauseAudio();
           catalogView.classList.remove("hidden");
           playerView.classList.add("hidden");
           navBtnCatalog.className =
@@ -18660,7 +18734,14 @@
                 : "";
 
             return `
-            <div class="bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-emerald-500/5 group relative">
+            <div
+              onclick="selectScenarioById('${sc.id}')"
+              onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectScenarioById('${sc.id}');}"
+              tabindex="0"
+              role="button"
+              aria-label="${dict.btnPracticeNow || "Practice"}: ${sc.title}"
+              class="scenario-card bg-slate-900 border border-slate-800 hover:border-emerald-500/50 focus:border-emerald-500/80 rounded-2xl p-5 flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-emerald-500/10 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400/50 active:scale-[0.99] group relative"
+            >
               <div class="space-y-3">
                 <div class="flex items-center justify-between gap-2">
                   <div class="flex items-center gap-1.5 flex-wrap">
@@ -18686,27 +18767,13 @@
                 ${tagsHtml}
               </div>
 
-              <div class="space-y-3 pt-4 mt-4 border-t border-slate-800">
-                <div class="space-y-1">
-                  <div class="flex items-center justify-between text-[11px] text-slate-400">
-                    <span class="font-mono">${sentenceCount} sentences • ~${sc.duration}s</span>
-                    <span class="progress-indicator font-mono">${completedCount}/${sentenceCount} (${percent}%)</span>
-                  </div>
-                  <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
-                  </div>
+              <div class="space-y-2 pt-4 mt-4 border-t border-slate-800/80">
+                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                  <span class="font-mono">${sentenceCount} sentences • ~${sc.duration}s</span>
+                  <span class="progress-indicator font-mono">${completedCount}/${sentenceCount} (${percent}%)</span>
                 </div>
-
-                <div class="flex items-center justify-end">
-                  <button
-                    onclick="selectScenarioById('${sc.id}')"
-                    class="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"
-                  >
-                    <span>${dict.btnPracticeNow || "Practice"}</span>
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                    </svg>
-                  </button>
+                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
                 </div>
               </div>
             </div>
@@ -19007,6 +19074,7 @@
           index >= state.activeCues.length
         )
           return;
+        const wasPlaying = state.isPlaying;
         cancelEchoicCycle();
         state.currentCueIndex = index;
         const cue = state.activeCues[index];
@@ -19032,10 +19100,10 @@
         updateKaraokeWordHighlight(targetTime);
         updateScenarioUrl(state.activeScenario.id, index, false);
 
-        if (shouldPlay === false && state.isPlaying) {
+        if (shouldPlay === false) {
           pauseAudio();
         } else {
-          const willPlay = shouldPlay !== null ? shouldPlay : state.isPlaying;
+          const willPlay = shouldPlay !== null ? shouldPlay : wasPlaying;
           if (willPlay) {
             playAudio();
           } else {

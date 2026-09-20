@@ -11,7 +11,7 @@
 In previous iterations of the English Shadowing Player:
 
 1. **Monolithic Inlined Subtitles (`CURATED_SCENARIOS`)**: All curated scenarios—including full Enhanced LRC lyrics, intra-line millisecond word timestamps, and Vietnamese translations—were compiled directly into `const CURATED_SCENARIOS` inside `index.html`. While suitable for 3–6 short scenarios, scaling the library to 20–100+ rich dialogues bloats the initial HTML bundle by multiple megabytes, increasing memory usage and slowing initial render times.
-2. **Redundant Path Redundancy**: Manifest schemas and scenario objects explicitly required `audioUrl` and `lrcUrl` keys even when matching predictable canonical paths (`audio/<id>.mp3` and `audio/<id>.lrc`).
+2. **Redundant Path Redundancy**: Manifest schemas and scenario objects explicitly required `audioUrl` and `lrcUrl` keys even when matching predictable canonical paths (`scenarios/<id>/audio.mp3` and `scenarios/<id>/subtitles.lrc`).
 3. **Ephemeral & Incomplete User Imports**: The legacy Custom Scenario import modal held uploaded `.srt`/`.lrc` files in a temporary in-memory array (`CURATED_SCENARIOS.unshift`) without audio storage or persistence across page reloads. Retaining this incomplete feature added UI complexity and maintained a redundant `parseSrt` fallback parser.
 4. **Unstructured Catalog Navigation**: As the scenario library expands, learners require structured filtering (Categories, CEFR levels, Accents, Duration ranges, Thematic Tags, and Curated Collections/Playlists) along with persistent learner progress tracking (Bookmarking, In Progress, Mastered).
 
@@ -20,11 +20,11 @@ In previous iterations of the English Shadowing Player:
 ## 2. Decision Drivers
 
 - **Zero-Bloat App Shell & Sub-Millisecond Startup**: Keep `index.html` lightweight (< 50KB core payload) regardless of scenario catalog size.
-- **Convention-over-Configuration Media Routing**: Default `audioUrl` and `lrcUrl` resolution to canonical asset paths (`audio/<id>.mp3` and `audio/<id>.lrc`), omitting redundant URL fields from the manifest unless explicitly overridden.
-- **On-Demand Subtitle & Audio Streaming**: Fetch and parse Enhanced LRC subtitle cues (`.lrc`) dynamically only when a scenario is selected for practice, leveraging Service Worker runtime media caching (`shadowing-media-v3`) for 100% offline PWA practice.
+- **Convention-over-Configuration Media Routing**: Default `audioUrl` and `lrcUrl` resolution directly to canonical scenario paths (`scenarios/<id>/audio.mp3` and `scenarios/<id>/subtitles.lrc`), eliminating redundant flat `audio/` directories and omitting explicit URL fields from the manifest unless overridden.
+- **On-Demand Subtitle & Audio Streaming**: Fetch and parse Enhanced LRC subtitle cues (`scenarios/<id>/subtitles.lrc`) dynamically only when a scenario is selected for practice, leveraging Service Worker runtime media caching (`shadowing-media-v5`) for 100% offline PWA practice without inlining LRC lyrics into the HTML bundle.
 - **Curated Quality Focus & Legacy Code Retirement**: Completely retire ephemeral user-import modals and the legacy `parseSrt()` parser, standardizing 100% on Enhanced LRC and high-quality curated curriculum.
 - **Rich Multi-Dimensional Taxonomy & Learner Progress**: Provide categorized collections (`daily-social`, `workplace`, `travel`, `academic`), thematic tags (`#coffee`, `#standup`, `#ai`), and persistent localStorage tracking of scenario practice states (`new`, `in_progress`, `completed`, `mastered`) and favorited bookmarks.
-- **Automated Directory-to-Manifest Build Pipeline**: Enable automated CLI scripts to scan `english-shadowing/scenarios/<id>/scenario.md`, generate audio/LRC assets, produce `scenarios.json`, and synchronize the lightweight manifest array (`SCENARIOS_MANIFEST`) in `index.html`.
+- **Automated Directory-to-Manifest Build Pipeline**: Enable automated CLI scripts to scan `english-shadowing/scenarios/<id>/scenario.md`, generate audio/LRC assets, produce `scenarios.json`, package media into `dist/scenarios/<id>/`, and synchronize the lightweight manifest array (`SCENARIOS_MANIFEST`) in `index.html`.
 
 ---
 
@@ -37,16 +37,17 @@ In previous iterations of the English Shadowing Player:
 - **Option 3 (Chosen - Dual Deliverable: Embedded Lightweight Manifest + On-Demand Dynamic LRC Streaming)**:
   - Embed `const SCENARIOS_MANIFEST = [...]` containing lightweight metadata only (ID, Title, Category, Level, Accent, Duration, Description, Tags, Collection, Sentence Count) in `index.html` (~250 bytes per scenario).
   - Generate external `scenarios.json` during build for standalone integrations.
-  - Fetch `audio/<id>.lrc` dynamically via `fetch()` upon scenario selection, caching parsed cues in memory and in Service Worker CacheStorage (`shadowing-media-v3`).
+  - Fetch `scenarios/<id>/subtitles.lrc` dynamically via `fetch()` upon scenario selection, caching parsed cues in memory (`SCENARIO_CUES_CACHE`) and in Service Worker CacheStorage (`shadowing-media-v5`).
   - _Outcome_: Chosen. Instant boot, zero initial layout shift, full offline reliability, and 85%+ bundle size reduction.
 
 ### B. Media Routing: Convention over Configuration
 
 - **Option 1 (Explicit URLs)**: Mandate explicit `audioUrl` and `lrcUrl` strings in every manifest entry.
-- **Option 2 (Chosen - Convention with Optional Override)**:
-  - By default, `audioUrl` resolves to `audio/${id}.mp3` and `lrcUrl` resolves to `audio/${id}.lrc`.
+- **Option 2 (Chosen - Canonical Scenario Path Convention)**:
+  - By default, `audioUrl` resolves to `scenarios/${id}/audio.mp3` and `lrcUrl` resolves to `scenarios/${id}/subtitles.lrc`.
   - Manifest omits `audioUrl` and `lrcUrl` keys unless an explicit custom or external CDN URL is specified.
-  - _Outcome_: Chosen. Reduces manifest payload bytes by ~30% and enforces strict naming consistency across `scenarios/<id>/` and `audio/`.
+  - Eliminates the duplicate flat `audio/` directory.
+  - _Outcome_: Chosen. Reduces manifest payload bytes, enforces strict 1:1 cohesion within `scenarios/<id>/`, and aligns development and production paths.
 
 ### C. Scope Refinement & Code Retirement
 

@@ -92,48 +92,13 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 2. Scenario subtitles and manifests (.lrc, .md, scenarios.json): Network-First with cache fallback
-  const isSubtitleOrManifest =
-    url.pathname.endsWith(".lrc") ||
-    url.pathname.endsWith(".md") ||
-    url.pathname.endsWith(".json") ||
-    url.pathname.includes("/scenarios/");
-
-  if (isSubtitleOrManifest) {
-    event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-          if (
-            networkResponse &&
-            networkResponse.status === 200 &&
-            (networkResponse.type === "basic" ||
-              networkResponse.type === "cors")
-          ) {
-            const responseToCache = networkResponse.clone();
-            caches.open(MEDIA_CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache).catch(() => {});
-            });
-          }
-          return networkResponse;
-        })
-        .catch(async () => {
-          const cached = await caches.match(request);
-          return (
-            cached ||
-            new Response("Subtitles unavailable offline", {
-              status: 503,
-              statusText: "Service Unavailable",
-              headers: { "Content-Type": "text/plain" },
-            })
-          );
-        })
-    );
-    return;
-  }
-
-  // 3. Heavy audio tracks (.mp3): Cache-First with full HTTP 206 Range support for audio seeking
+  // 2. Heavy audio tracks (.mp3, .webm, .opus): Cache-First with full HTTP 206 Range support for audio seeking
   const isMedia =
-    url.pathname.endsWith(".mp3") || url.pathname.includes("/audio/");
+    url.pathname.endsWith(".mp3") ||
+    url.pathname.endsWith(".webm") ||
+    url.pathname.endsWith(".opus") ||
+    url.pathname.endsWith(".wav") ||
+    url.pathname.endsWith(".m4a");
 
   if (isMedia) {
     const rangeHeader = request.headers.get("range");
@@ -205,6 +170,44 @@ self.addEventListener("fetch", (event) => {
           headers: { "Content-Type": "text/plain" },
         });
       })
+    );
+    return;
+  }
+
+  // 3. Scenario subtitles and manifests (.lrc, .md, scenarios.json): Network-First with cache fallback
+  const isSubtitleOrManifest =
+    url.pathname.endsWith(".lrc") ||
+    url.pathname.endsWith(".md") ||
+    url.pathname.endsWith(".json");
+
+  if (isSubtitleOrManifest) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            (networkResponse.type === "basic" ||
+              networkResponse.type === "cors")
+          ) {
+            const responseToCache = networkResponse.clone();
+            caches.open(MEDIA_CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache).catch(() => {});
+            });
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          return (
+            cached ||
+            new Response("Subtitles unavailable offline", {
+              status: 503,
+              statusText: "Service Unavailable",
+              headers: { "Content-Type": "text/plain" },
+            })
+          );
+        })
     );
     return;
   }

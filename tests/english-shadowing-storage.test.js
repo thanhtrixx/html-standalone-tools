@@ -653,19 +653,27 @@ async function runTests() {
   );
 
   // 14. Audio Assets On Disk
-  const audioDir = path.join(__dirname, "..", "english-shadowing", "audio");
-  assert(fs.existsSync(audioDir), "english-shadowing/audio directory exists");
-  const mp3Files = [
-    "specialty-coffee.mp3",
-    "tech-standup.mp3",
-    "airport-security.mp3",
-    "academic-ai-future.mp3",
+  const scenariosDir = path.join(
+    __dirname,
+    "..",
+    "english-shadowing",
+    "scenarios"
+  );
+  assert(
+    fs.existsSync(scenariosDir),
+    "english-shadowing/scenarios directory exists"
+  );
+  const scenarioIds = [
+    "specialty-coffee",
+    "tech-standup",
+    "airport-security",
+    "academic-ai-future",
   ];
-  mp3Files.forEach((file) => {
-    const filePath = path.join(audioDir, file);
+  scenarioIds.forEach((scId) => {
+    const filePath = path.join(scenariosDir, scId, "audio.mp3");
     assert(
       fs.existsSync(filePath) && fs.statSync(filePath).size > 10000,
-      `Scenario audio ${file} exists on disk with non-zero audio bytes (${fs.existsSync(filePath) ? fs.statSync(filePath).size : 0} bytes)`
+      `Scenario audio ${scId}/audio.mp3 exists on disk with non-zero audio bytes (${fs.existsSync(filePath) ? fs.statSync(filePath).size : 0} bytes)`
     );
   });
 

@@ -508,6 +508,34 @@ async function runTests() {
     "Opening word popover automatically pauses audio for calm study"
   );
 
+  // 18. Scenario Card Clickability & Navigation Audio Lifecycle
+  assert(
+    htmlContent.includes(
+      'if (viewName === "catalog") {\n          pauseAudio();'
+    ),
+    "switchView('catalog') immediately pauses audio when leaving player view"
+  );
+  assert(
+    htmlContent.includes('class="scenario-card') &&
+      htmlContent.includes("cursor-pointer") &&
+      htmlContent.includes("onclick=\"selectScenarioById('${sc.id}')\""),
+    "Full scenario card is clickable with cursor-pointer and onclick handler"
+  );
+  assert(
+    htmlContent.includes('tabindex="0"') &&
+      htmlContent.includes('role="button"') &&
+      htmlContent.includes(
+        "onkeydown=\"if(event.key==='Enter'||event.key===' ')"
+      ),
+    "Scenario cards support keyboard accessibility (Enter/Space)"
+  );
+  assert(
+    !htmlContent.includes(
+      '<button\n                    onclick="selectScenarioById'
+    ),
+    "Standalone practice button is removed from scenario card footer"
+  );
+
   console.log(`\n==================================================`);
   console.log(
     `📊 UI Tests Completed: ${passCount} Passed, ${failCount} Failed`

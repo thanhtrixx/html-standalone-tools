@@ -50,11 +50,11 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
   }) => {
     await setupPage(page);
 
-    // Click Practice on the first scenario card
-    const firstPracticeBtn = page
-      .locator("#scenarioCardsGrid button[onclick*='selectScenarioById']")
+    // Click on the first scenario card
+    const firstScenarioCard = page
+      .locator("#scenarioCardsGrid .scenario-card")
       .first();
-    await firstPracticeBtn.click();
+    await firstScenarioCard.click();
 
     // Verify Player view opens with active subtitles & waveform comparison
     await expect(page.locator("#player-view")).toBeVisible();
@@ -92,10 +92,7 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
 
   test("3. Interactive Word Popover & Vocabulary Drawer", async ({ page }) => {
     await setupPage(page);
-    await page
-      .locator("#scenarioCardsGrid button[onclick*='selectScenarioById']")
-      .first()
-      .click();
+    await page.locator("#scenarioCardsGrid .scenario-card").first().click();
 
     // Click a word chip in the active subtitle
     const wordChip = page.locator("#activeEnglishSubtitle .word-chip").first();
