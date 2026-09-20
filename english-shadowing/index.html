@@ -2504,28 +2504,38 @@
       }
 
       function calculateKaraokeWordIndex(words, currentSeconds) {
-        if (!words || words.length === 0) return 0;
-        if (currentSeconds <= (words[0].start || 0)) return 0;
-        if (
-          currentSeconds >=
-          (words[words.length - 1].end || words[words.length - 1].start || 0)
-        ) {
-          return words.length - 1;
+        if (!words || words.length === 0) return -1;
+        const firstStart = typeof words[0] === "object" ? words[0].start : 0;
+        if (currentSeconds < firstStart - 0.05) return -1;
+
+        const lastWord = words[words.length - 1];
+        const lastEnd =
+          typeof lastWord === "object"
+            ? lastWord.end || lastWord.start + 0.5
+            : Infinity;
+        if (currentSeconds >= lastEnd) {
+          return words.length;
         }
+
         for (let i = 0; i < words.length; i++) {
           const w = words[i];
           const wStart = typeof w === "object" ? w.start : 0;
-          const wEnd = typeof w === "object" ? w.end : Infinity;
+          const wEnd =
+            typeof w === "object"
+              ? w.end || (words[i + 1] ? words[i + 1].start : wStart + 0.5)
+              : Infinity;
           if (currentSeconds >= wStart && currentSeconds < wEnd) {
             return i;
           }
         }
+
         for (let i = words.length - 1; i >= 0; i--) {
           const w = words[i];
           const wStart = typeof w === "object" ? w.start : 0;
           if (currentSeconds >= wStart) return i;
         }
-        return 0;
+
+        return -1;
       }
 
       // ==========================================
@@ -3690,6 +3700,7 @@
       // 8. AUDIO & SHADOWING SYNCHRONIZER ENGINE
       // ==========================================
       let playerAudioEl = null;
+      let isAudioSeeking = false;
 
       function getAudioElement() {
         if (
@@ -3707,6 +3718,9 @@
           if (playerAudioEl && playerAudioEl.addEventListener) {
             playerAudioEl.addEventListener("ended", () => {
               if (state.isPlaying) handleCuePlaybackComplete();
+            });
+            playerAudioEl.addEventListener("seeked", () => {
+              isAudioSeeking = false;
             });
             playerAudioEl.addEventListener("error", (e) => {
               console.warn("Audio playback error, fallback to timer", e);
@@ -3824,19 +3838,16 @@
           return;
         state.currentCueIndex = index;
         const cue = state.activeCues[index];
-        simulatedTime = cue.start;
+        const targetTime =
+          state.playbackMode === "loop"
+            ? calculateLoopStartBoundary(state.activeCues, index)
+            : cue.start;
+        simulatedTime = targetTime;
+        isAudioSeeking = true;
 
         const audio = getAudioElement();
         if (audio) {
-          if (state.playbackMode === "loop") {
-            const loopStart = calculateLoopStartBoundary(
-              state.activeCues,
-              index
-            );
-            audio.currentTime = loopStart;
-          } else {
-            audio.currentTime = cue.start;
-          }
+          audio.currentTime = targetTime;
         }
 
         state.isLoopWaiting = false;
@@ -3845,8 +3856,8 @@
         renderActiveCue();
         highlightTranscriptLine(index);
         drawDualWaveforms();
-        updateTimeLabels(cue.start, state.activeScenario.duration);
-        updateKaraokeWordHighlight(cue.start);
+        updateTimeLabels(targetTime, state.activeScenario.duration);
+        updateKaraokeWordHighlight(targetTime);
         updateScenarioUrl(state.activeScenario.id, index, false);
 
         playAudio();
@@ -4042,10 +4053,18 @@
           if (!state.isPlaying) return;
 
           let currentAudioTime;
+          const isHardwareSeeking = isAudioSeeking || (audio && audio.seeking);
+          const hasStaleTime =
+            audio &&
+            Math.abs(audio.currentTime - startAudioTime) > 2.0 &&
+            isAudioSeeking;
+
           if (
             !useFallbackTimer &&
             audio &&
             !audio.paused &&
+            !isHardwareSeeking &&
+            !hasStaleTime &&
             !isNaN(audio.currentTime)
           ) {
             currentAudioTime = audio.currentTime;
@@ -4578,6 +4597,9 @@
 
       function openWordPopover(event, cleanWord, rawWord) {
         event.stopPropagation();
+        if (state.isPlaying) {
+          pauseAudio();
+        }
         state.activePopoverWord = cleanWord;
 
         const popover = document.getElementById("wordPopover");
