@@ -23,10 +23,10 @@
 
 - **Title**: `feat(shadowing): on-demand dynamic LRC streaming, memory cue cache, and legacy code retirement`
 - **Scope**:
-  - [ ] Refactor `selectScenario` in `english-shadowing/index.html` to dynamically fetch `audio/<id>.lrc` via `fetch()` with an in-memory parsed cue cache `Map<string, ParsedCue[]>`.
-  - [ ] Completely remove `#importModal`, `openImportModal()`, `closeImportModal()`, and `handleCustomScenarioSubmit()`.
-  - [ ] Completely retire `parseSrt()` from runtime and unit tests, standardizing 100% on `parseEnhancedLrc`.
-  - [ ] Add automated unit and integration tests verifying on-demand subtitle loading, error handling, and offline fallback.
+  - [x] Refactor `selectScenario` in `english-shadowing/index.html` to dynamically fetch `audio/<id>.lrc` via `fetch()` with an in-memory parsed cue cache `Map<string, ParsedCue[]>`.
+  - [x] Completely remove `#importModal`, `openImportModal()`, `closeImportModal()`, and `handleCustomScenarioSubmit()`.
+  - [x] Completely retire `parseSrt()` from runtime and unit tests, standardizing 100% on `parseEnhancedLrc`.
+  - [x] Add automated unit and integration tests verifying on-demand subtitle loading, error handling, and offline fallback.
 
 #### Slice 3: Multi-Dimensional Catalog Taxonomy, Progress Tracking & Collection Filtering
 

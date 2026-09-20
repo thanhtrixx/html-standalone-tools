@@ -54,8 +54,8 @@ async function runTests() {
     "Hotkey cheat sheet modal exists"
   );
   assert(
-    htmlContent.includes('id="importModal"'),
-    "Scenario import modal exists"
+    !htmlContent.includes('id="importModal"'),
+    "Legacy #importModal is completely excised from index.html"
   );
   assert(
     htmlContent.includes('id="flashcardModal"'),

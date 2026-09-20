@@ -443,29 +443,6 @@
                 through deliberate sentence-by-sentence shadowing.
               </p>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <button
-                onclick="openImportModal()"
-                class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs sm:text-sm transition-all flex items-center gap-2 shadow-sm"
-              >
-                <svg
-                  class="w-4 h-4 text-cyan-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                  />
-                </svg>
-                <span data-i18n="btnImportScenario"
-                  >Import Custom Audio & SRT</span
-                >
-              </button>
-            </div>
           </div>
         </div>
 
@@ -1500,153 +1477,6 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- VIEW 6: CUSTOM SCENARIO IMPORT MODAL       -->
-    <!-- ========================================== -->
-    <div
-      id="importModal"
-      class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur flex items-center justify-center p-4"
-    >
-      <div
-        class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4"
-      >
-        <div
-          class="flex items-center justify-between border-b border-slate-800 pb-3"
-        >
-          <h3 class="font-bold text-lg text-white" data-i18n="importModalTitle">
-            Import Custom Practice Scenario
-          </h3>
-          <button
-            onclick="closeImportModal()"
-            class="p-1 rounded-lg text-slate-400 hover:text-slate-200"
-            aria-label="Close Import Modal"
-          >
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <form
-          id="importScenarioForm"
-          onsubmit="handleCustomScenarioSubmit(event)"
-          class="space-y-3 text-xs sm:text-sm"
-        >
-          <div>
-            <label
-              class="block font-semibold text-slate-300 mb-1"
-              data-i18n="importScenarioTitle"
-              >Scenario Title</label
-            >
-            <input
-              type="text"
-              id="importTitleInput"
-              required
-              placeholder="e.g. My Job Interview Practice"
-              class="w-full px-3.5 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label
-                class="block font-semibold text-slate-300 mb-1"
-                data-i18n="importCategoryLabel"
-                >Category</label
-              >
-              <select
-                id="importCategorySelect"
-                class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
-              >
-                <option value="daily">Daily Conversations</option>
-                <option value="workplace">Workplace & Business</option>
-                <option value="travel">Travel & Real-World</option>
-                <option value="academic">Academic & IELTS</option>
-              </select>
-            </div>
-            <div>
-              <label
-                class="block font-semibold text-slate-300 mb-1"
-                data-i18n="importLevelLabel"
-                >CEFR Level</label
-              >
-              <select
-                id="importLevelSelect"
-                class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-emerald-500"
-              >
-                <option value="A2">A2 Elementary</option>
-                <option value="B1">B1 Intermediate</option>
-                <option value="B2">B2 Upper-Intermediate</option>
-                <option value="C1">C1 Advanced</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label
-              class="block font-semibold text-slate-300 mb-1"
-              data-i18n="importAudioLabel"
-              >Audio File (.mp3, .wav, .m4a, .ogg)</label
-            >
-            <input
-              type="file"
-              id="importAudioFileInput"
-              accept="audio/*"
-              class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700"
-            />
-            <span class="text-[11px] text-slate-500 mt-0.5 block"
-              >Optional: If omitted, synthesized speech will be used.</span
-            >
-          </div>
-
-          <div>
-            <label
-              class="block font-semibold text-slate-300 mb-1"
-              data-i18n="importSrtLabel"
-              >Subtitle File (.lrc or .srt)</label
-            >
-            <input
-              type="file"
-              id="importSrtFileInput"
-              accept=".lrc,.srt,.txt"
-              required
-              class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700"
-            />
-          </div>
-
-          <div
-            class="flex items-center justify-end gap-2 pt-3 border-t border-slate-800"
-          >
-            <button
-              type="button"
-              onclick="closeImportModal()"
-              class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs"
-              data-i18n="btnCancel"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              class="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-colors"
-              data-i18n="btnSubmitImport"
-            >
-              Load & Start Shadowing
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- ========================================== -->
     <!-- VIEW 7: LEITNER SRS FLASHCARD REVIEW MODAL -->
     <!-- ========================================== -->
     <div
@@ -2411,28 +2241,6 @@
         );
       }
 
-      function parseSrtTimecode(timeString) {
-        if (!timeString) return 0;
-        const normalized = timeString.trim().replace(",", ".");
-        const parts = normalized.split(":");
-        if (parts.length < 3) return 0;
-
-        const hours = parseFloat(parts[0]) || 0;
-        const minutes = parseFloat(parts[1]) || 0;
-        const seconds = parseFloat(parts[2]) || 0;
-        return hours * 3600 + minutes * 60 + seconds;
-      }
-
-      function formatSecondsToSrtTime(seconds) {
-        if (isNaN(seconds) || seconds < 0) seconds = 0;
-        const hrs = Math.floor(seconds / 3600);
-        const mins = Math.floor((seconds % 3600) / 60);
-        const secs = Math.floor(seconds % 60);
-        const ms = Math.floor((seconds % 1) * 1000);
-
-        return `${String(hrs).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")},${String(ms).padStart(3, "0")}`;
-      }
-
       function formatSecondsToTime(seconds) {
         if (isNaN(seconds) || seconds < 0) seconds = 0;
         const mins = Math.floor(seconds / 60);
@@ -2640,92 +2448,6 @@
           if (currentSeconds >= wStart) return i;
         }
         return 0;
-      }
-
-      function parseSrt(rawSrtText) {
-        if (!rawSrtText) return [];
-        const normalizedText = rawSrtText
-          .replace(/\r\n/g, "\n")
-          .replace(/\r/g, "\n");
-        const blocks = normalizedText.split(/\n\n+/);
-        const cues = [];
-
-        blocks.forEach((block, idx) => {
-          const lines = block
-            .trim()
-            .split("\n")
-            .map((l) => l.trim())
-            .filter(Boolean);
-          if (lines.length < 2) return;
-
-          let timeIndex = 0;
-          if (/^\d+$/.test(lines[0])) {
-            timeIndex = 1;
-          }
-
-          const timeLine = lines[timeIndex];
-          if (!timeLine || !timeLine.includes("-->")) return;
-
-          const [startStr, endStr] = timeLine.split("-->").map((s) => s.trim());
-          const startSeconds = parseSrtTimecode(startStr);
-          const endSeconds = parseSrtTimecode(endStr);
-
-          const textLines = lines.slice(timeIndex + 1);
-          let rawEnglish = sanitizeSrtLine(textLines[0] || "");
-          let rawVietnamese = sanitizeSrtLine(textLines[1] || "");
-
-          if (textLines.length === 1) {
-            rawEnglish = sanitizeSrtLine(textLines[0]);
-            rawVietnamese = "";
-          }
-
-          const rawTokens = rawEnglish.split(/\s+/).filter(Boolean);
-          const cueDur = Math.max(0.5, endSeconds - startSeconds);
-          const totalChars =
-            rawTokens.reduce((sum, w) => sum + w.length, 0) || 1;
-
-          let wordTime = startSeconds;
-          const words = [];
-          rawTokens.forEach((token) => {
-            const wDur = (token.length / totalChars) * cueDur;
-            words.push({
-              w: token,
-              start: Math.round(wordTime * 100) / 100,
-              end:
-                Math.round(Math.min(endSeconds, wordTime + wDur) * 100) / 100,
-            });
-            wordTime += wDur;
-          });
-
-          words.includes = function (item) {
-            return this.some((x) =>
-              typeof x === "object"
-                ? x.w.toLowerCase().includes(String(item).toLowerCase())
-                : String(x).toLowerCase() === String(item).toLowerCase()
-            );
-          };
-
-          cues.push({
-            id: idx + 1,
-            start: startSeconds,
-            end: endSeconds,
-            en: rawEnglish,
-            vi: rawVietnamese,
-            words: words,
-          });
-        });
-
-        return cues;
-      }
-
-      function generateSrtString(cues) {
-        return cues
-          .map((cue, idx) => {
-            const timeFormatted = `${formatSecondsToSrtTime(cue.start)} --> ${formatSecondsToSrtTime(cue.end)}`;
-            const textLines = cue.vi ? `${cue.en}\n${cue.vi}` : cue.en;
-            return `${idx + 1}\n${timeFormatted}\n${textLines}`;
-          })
-          .join("\n\n");
       }
 
       // ==========================================
@@ -3451,10 +3173,10 @@
             const matchDesc = sc.description
               .toLowerCase()
               .includes(state.searchQuery);
-            const matchSub = (sc.lrcContent || sc.srtContent || "")
-              .toLowerCase()
-              .includes(state.searchQuery);
-            if (!matchTitle && !matchDesc && !matchSub) return false;
+            const matchTags =
+              Array.isArray(sc.tags) &&
+              sc.tags.some((t) => t.toLowerCase().includes(state.searchQuery));
+            if (!matchTitle && !matchDesc && !matchTags) return false;
           }
           return true;
         });
@@ -3475,9 +3197,9 @@
 
         grid.innerHTML = filtered
           .map((sc) => {
-            const cues = sc.lrcContent
-              ? parseEnhancedLrc(sc.lrcContent)
-              : parseSrt(sc.srtContent || "");
+            const sentenceCount =
+              sc.sentenceCount ||
+              (sc.lrcContent ? parseEnhancedLrc(sc.lrcContent).length : 0);
             return `
             <div class="bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-emerald-500/5 group">
               <div class="space-y-3">
@@ -3490,7 +3212,7 @@
               </div>
 
               <div class="pt-4 mt-4 border-t border-slate-800 flex items-center justify-between">
-                <span class="text-xs text-slate-500 font-mono">${cues.length} sentences • ~${sc.duration}s</span>
+                <span class="text-xs text-slate-500 font-mono">${sentenceCount} sentences • ~${sc.duration}s</span>
                 <button
                   onclick="selectScenarioById('${sc.id}')"
                   class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1"
@@ -3507,51 +3229,82 @@
           .join("");
       }
 
-      function selectScenarioById(id, updateUrl = true) {
+      const SCENARIO_CUES_CACHE = new Map();
+
+      async function selectScenarioById(id, updateUrl = true) {
         const found = CURATED_SCENARIOS.find((sc) => sc.id === id);
-        if (found) selectScenario(found, true, updateUrl);
+        if (found) await selectScenario(found, true, updateUrl);
       }
 
-      function selectScenario(
+      async function selectScenario(
         scenario,
         autoSwitchView = true,
         updateUrl = true
       ) {
+        if (!scenario) return;
+        const audioSrc = resolveScenarioAudioUrl(scenario);
         if (
           typeof navigator !== "undefined" &&
           navigator.onLine === false &&
-          scenario.audioUrl &&
-          scenario.audioUrl.startsWith("http")
+          audioSrc &&
+          audioSrc.startsWith("http")
         ) {
-          isScenarioAvailableOffline(scenario).then((available) => {
-            if (!available) {
-              const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
-              showToast(
-                dict.offlineScenarioUnavailable ||
-                  "Offline mode: Connect to the internet to stream this scenario.",
-                "warning"
-              );
-              return;
-            }
-            proceedSelectScenario(scenario, autoSwitchView, updateUrl);
-          });
-          return;
+          const available = await isScenarioAvailableOffline(scenario);
+          if (!available) {
+            const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
+            showToast(
+              dict.offlineScenarioUnavailable ||
+                "Offline mode: Connect to the internet to stream this scenario.",
+              "warning"
+            );
+            return;
+          }
         }
-        proceedSelectScenario(scenario, autoSwitchView, updateUrl);
+        await proceedSelectScenario(scenario, autoSwitchView, updateUrl);
       }
 
-      function proceedSelectScenario(
+      async function proceedSelectScenario(
         scenario,
         autoSwitchView = true,
         updateUrl = true
       ) {
+        if (!scenario) return;
+
+        let cues = SCENARIO_CUES_CACHE.get(scenario.id);
+        if (!cues) {
+          if (scenario.lrcContent) {
+            cues = parseEnhancedLrc(scenario.lrcContent);
+            SCENARIO_CUES_CACHE.set(scenario.id, cues);
+          } else {
+            const lrcUrl = resolveScenarioLrcUrl(scenario);
+            try {
+              const res = await fetch(lrcUrl);
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              const lrcText = await res.text();
+              cues = parseEnhancedLrc(lrcText);
+              SCENARIO_CUES_CACHE.set(scenario.id, cues);
+            } catch (err) {
+              console.error(
+                "Failed to load subtitles for scenario:",
+                scenario.id,
+                err
+              );
+              const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
+              showToast(
+                dict.scenarioLoadError || "Failed to load scenario subtitles.",
+                "error"
+              );
+              return;
+            }
+          }
+        }
+
         state.activeScenario = scenario;
-        state.activeCues = scenario.lrcContent
-          ? parseEnhancedLrc(scenario.lrcContent)
-          : parseSrt(scenario.srtContent);
+        state.activeCues = cues;
         const audio = getAudioElement();
-        if (audio && scenario.audioUrl) {
-          audio.src = scenario.audioUrl;
+        const audioSrc = resolveScenarioAudioUrl(scenario);
+        if (audio && audioSrc) {
+          audio.src = audioSrc;
           audio.playbackRate = state.playbackRate;
         }
         state.currentCueIndex = 0;
@@ -4157,18 +3910,6 @@
         if (index === state.currentCueIndex) {
           renderActiveCue();
         }
-      }
-
-      function exportCurrentScenarioSrt() {
-        if (!state.activeScenario || state.activeCues.length === 0) return;
-        const srtText = generateSrtString(state.activeCues);
-        const blob = new Blob([srtText], { type: "text/plain;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `${state.activeScenario.id || "shadowing_subtitles"}_updated.srt`;
-        a.click();
-        URL.revokeObjectURL(url);
       }
 
       // ==========================================
@@ -4837,47 +4578,6 @@
       function closeHotkeyModal() {
         document.getElementById("hotkeyModal")?.classList.add("hidden");
       }
-      function openImportModal() {
-        document.getElementById("importModal")?.classList.remove("hidden");
-      }
-      function closeImportModal() {
-        document.getElementById("importModal")?.classList.add("hidden");
-      }
-
-      function handleCustomScenarioSubmit(e) {
-        e.preventDefault();
-        const title = document.getElementById("importTitleInput").value;
-        const category = document.getElementById("importCategorySelect").value;
-        const level = document.getElementById("importLevelSelect").value;
-        const subFile = document.getElementById("importSrtFileInput").files[0];
-
-        if (!subFile) return;
-
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const subText = event.target.result;
-          const isLrc =
-            subFile.name.endsWith(".lrc") || /\[\d{1,2}:\d{2}/.test(subText);
-          const customScenario = {
-            id: "custom-" + Date.now(),
-            title: title || "Custom Scenario",
-            category: category,
-            level: level,
-            accent: "US",
-            duration: 60,
-            description:
-              "Custom user-imported practice audio and subtitle file.",
-            lrcContent: isLrc ? subText : undefined,
-            srtContent: !isLrc ? subText : undefined,
-          };
-
-          CURATED_SCENARIOS.unshift(customScenario);
-          renderScenarioCards();
-          selectScenario(customScenario, true);
-          closeImportModal();
-        };
-        reader.readAsText(subFile);
-      }
 
       function handleGlobalKeydown(e) {
         if (
@@ -4938,7 +4638,6 @@
             closeWordPopover();
             closeSpeedPopover();
             closeHotkeyModal();
-            closeImportModal();
             closeFlashcardModal();
             closeInsightsModal();
             toggleVocabDrawer(false);
