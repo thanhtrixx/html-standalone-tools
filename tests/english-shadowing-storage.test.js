@@ -38,9 +38,139 @@ async function runTests() {
     },
   };
 
+  class FakeIDBStore {
+    constructor() {
+      this.data = new Map();
+      this.indexes = new Map();
+    }
+    createIndex(name, keyPath) {
+      this.indexes.set(name, keyPath);
+    }
+    index(name) {
+      const keyPath = this.indexes.get(name);
+      return {
+        getAll: (range) => {
+          const req = { onsuccess: null, onerror: null, result: null };
+          setTimeout(() => {
+            const matches = [];
+            for (const val of this.data.values()) {
+              if (range && range.targetValue !== undefined) {
+                if (val[keyPath] === range.targetValue) matches.push(val);
+              } else {
+                matches.push(val);
+              }
+            }
+            req.result = matches;
+            if (req.onsuccess) req.onsuccess({ target: req });
+          }, 0);
+          return req;
+        },
+      };
+    }
+  }
+
+  class FakeIDBDatabase {
+    constructor(name, version) {
+      this.name = name;
+      this.version = version;
+      this.objectStoreNames = {
+        _stores: new Set(),
+        contains(s) {
+          return this._stores.has(s);
+        },
+        add(s) {
+          this._stores.add(s);
+        },
+      };
+      this.stores = new Map();
+    }
+    createObjectStore(name, options) {
+      this.objectStoreNames.add(name);
+      const store = new FakeIDBStore();
+      this.stores.set(name, store);
+      return store;
+    }
+    transaction(storeNames, mode) {
+      const storeName = Array.isArray(storeNames) ? storeNames[0] : storeNames;
+      let store = this.stores.get(storeName);
+      if (!store) {
+        store = new FakeIDBStore();
+        this.stores.set(storeName, store);
+      }
+      return {
+        objectStore: () => ({
+          put: (value) => {
+            const req = { onsuccess: null, onerror: null, result: null };
+            setTimeout(() => {
+              const key = value.id;
+              store.data.set(key, value);
+              req.result = key;
+              if (req.onsuccess) req.onsuccess({ target: req });
+            }, 0);
+            return req;
+          },
+          get: (key) => {
+            const req = { onsuccess: null, onerror: null, result: null };
+            setTimeout(() => {
+              req.result = store.data.get(key) || null;
+              if (req.onsuccess) req.onsuccess({ target: req });
+            }, 0);
+            return req;
+          },
+          delete: (key) => {
+            const req = { onsuccess: null, onerror: null, result: null };
+            setTimeout(() => {
+              store.data.delete(key);
+              req.result = undefined;
+              if (req.onsuccess) req.onsuccess({ target: req });
+            }, 0);
+            return req;
+          },
+          index: (name) => store.index(name),
+        }),
+      };
+    }
+  }
+
+  const fakeIdbInstances = new Map();
+  const fakeIdbFactory = {
+    open(name, version) {
+      const req = {
+        onsuccess: null,
+        onerror: null,
+        onupgradeneeded: null,
+        result: null,
+      };
+      setTimeout(() => {
+        let db = fakeIdbInstances.get(name);
+        const isNew = !db;
+        if (isNew) {
+          db = new FakeIDBDatabase(name, version);
+          fakeIdbInstances.set(name, db);
+        }
+        req.result = db;
+        if (isNew && req.onupgradeneeded) {
+          req.onupgradeneeded({
+            target: req,
+            oldVersion: 0,
+            newVersion: version,
+          });
+        }
+        if (req.onsuccess) req.onsuccess({ target: req });
+      }, 0);
+      return req;
+    },
+  };
+
+  const fakeIDBKeyRange = {
+    only: (val) => ({ targetValue: val }),
+  };
+
   const sandbox = {
     console,
     localStorage: storageMock,
+    indexedDB: fakeIdbFactory,
+    IDBKeyRange: fakeIDBKeyRange,
     document: {
       querySelectorAll: () => [],
       getElementById: (id) => ({
@@ -89,6 +219,7 @@ async function runTests() {
   const exportBridge = `
     globalThis.VOCAB_STORAGE_KEY = typeof VOCAB_STORAGE_KEY !== 'undefined' ? VOCAB_STORAGE_KEY : '';
     globalThis.PRACTICE_STATS_KEY = typeof PRACTICE_STATS_KEY !== 'undefined' ? PRACTICE_STATS_KEY : '';
+    globalThis.RECORDINGS_DB_NAME = typeof RECORDINGS_DB_NAME !== 'undefined' ? RECORDINGS_DB_NAME : '';
     globalThis.LEITNER_INTERVALS = typeof LEITNER_INTERVALS !== 'undefined' ? LEITNER_INTERVALS : {};
     globalThis.getSavedVocabVault = () => typeof savedVocabVault !== 'undefined' ? savedVocabVault : {};
     globalThis.setSavedVocabVault = (v) => { savedVocabVault = v; };
@@ -122,12 +253,18 @@ async function runTests() {
     globalThis.markSentenceCompleted = typeof markSentenceCompleted !== 'undefined' ? markSentenceCompleted : function(){};
     globalThis.getScenarioProgressStore = () => typeof scenarioProgress !== 'undefined' ? scenarioProgress : { bookmarkedIds: [], scenarios: {} };
     globalThis.setScenarioProgressStore = (p) => { scenarioProgress = p; };
+    globalThis.openRecordingsDb = typeof openRecordingsDb !== 'undefined' ? openRecordingsDb : function(){};
+    globalThis.saveRecordingToVault = typeof saveRecordingToVault !== 'undefined' ? saveRecordingToVault : function(){};
+    globalThis.getRecordingFromVault = typeof getRecordingFromVault !== 'undefined' ? getRecordingFromVault : function(){};
+    globalThis.deleteRecordingFromVault = typeof deleteRecordingFromVault !== 'undefined' ? deleteRecordingFromVault : function(){};
+    globalThis.getAllRecordingsForScenario = typeof getAllRecordingsForScenario !== 'undefined' ? getAllRecordingsForScenario : function(){};
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
   const {
     VOCAB_STORAGE_KEY,
     PRACTICE_STATS_KEY,
+    RECORDINGS_DB_NAME,
     SCENARIO_PROGRESS_KEY,
     LEITNER_INTERVALS,
     getSavedVocabVault,
@@ -160,6 +297,11 @@ async function runTests() {
     markSentenceCompleted,
     getScenarioProgressStore,
     setScenarioProgressStore,
+    openRecordingsDb,
+    saveRecordingToVault,
+    getRecordingFromVault,
+    deleteRecordingFromVault,
+    getAllRecordingsForScenario,
     state,
   } = sandbox;
 
@@ -741,6 +883,100 @@ async function runTests() {
     Array.isArray(progressStore.bookmarkedIds) &&
       typeof progressStore.scenarios === "object",
     "Handles malformed JSON gracefully with default store fallback"
+  );
+
+  // ==========================================
+  // 20. INDEXEDDB AUDIO VAULT (ADR-0009 / Slice 2)
+  // ==========================================
+  console.log(
+    "\n--- Section 20: IndexedDB Audio Vault (shadowing_recordings_vault) ---"
+  );
+
+  assert(
+    RECORDINGS_DB_NAME === "shadowing_recordings_vault",
+    "RECORDINGS_DB_NAME constant equals 'shadowing_recordings_vault'"
+  );
+
+  // 20.1 DB Initialization
+  const dbInstance = await openRecordingsDb();
+  assert(
+    dbInstance && dbInstance.objectStoreNames.contains("recordings"),
+    "openRecordingsDb initializes 'recordings' object store"
+  );
+
+  // 20.2 Save Recording
+  const dummyBlob = { size: 1024, type: "audio/webm;codecs=opus" };
+  const savedRecord = await saveRecordingToVault(
+    "specialty-coffee",
+    0,
+    dummyBlob,
+    3.2,
+    "Welcome to the specialty coffee shop."
+  );
+  assert(
+    savedRecord &&
+      savedRecord.id === "specialty-coffee_cue_0" &&
+      savedRecord.scenarioId === "specialty-coffee" &&
+      savedRecord.cueIndex === 0 &&
+      savedRecord.duration === 3.2,
+    "saveRecordingToVault stores take with compound ID and metadata"
+  );
+
+  // 20.3 Fetch Recording
+  const fetchedRecord = await getRecordingFromVault("specialty-coffee", 0);
+  assert(
+    fetchedRecord &&
+      fetchedRecord.id === "specialty-coffee_cue_0" &&
+      fetchedRecord.blob === dummyBlob &&
+      fetchedRecord.cueText === "Welcome to the specialty coffee shop.",
+    "getRecordingFromVault retrieves stored audio Blob and transcript"
+  );
+
+  // 20.4 Save Multiple Cues & Fetch All for Scenario
+  await saveRecordingToVault(
+    "specialty-coffee",
+    1,
+    dummyBlob,
+    2.8,
+    "Would you like an espresso or a pour over?"
+  );
+  const scenarioTakes = await getAllRecordingsForScenario("specialty-coffee");
+  assert(
+    Array.isArray(scenarioTakes) && scenarioTakes.length === 2,
+    "getAllRecordingsForScenario retrieves all takes for active scenario"
+  );
+
+  // 20.5 Delete Recording
+  const deleteResult = await deleteRecordingFromVault("specialty-coffee", 0);
+  assert(
+    deleteResult === true,
+    "deleteRecordingFromVault returns true on successful deletion"
+  );
+  const remainingRecord = await getRecordingFromVault("specialty-coffee", 0);
+  assert(remainingRecord === null, "Deleted take returns null from vault");
+
+  // 20.6 Edge Cases & Input Validation
+  const nullScenarioResult = await saveRecordingToVault(null, 0, dummyBlob);
+  assert(
+    nullScenarioResult === null,
+    "saveRecordingToVault safely returns null on null scenarioId"
+  );
+  const nanCueResult = await saveRecordingToVault(
+    "specialty-coffee",
+    NaN,
+    dummyBlob
+  );
+  assert(
+    nanCueResult === null,
+    "saveRecordingToVault safely returns null on NaN cueIndex"
+  );
+  const nonExistentResult = await getRecordingFromVault(
+    "non-existent-scenario",
+    99
+  );
+  assert(
+    nonExistentResult === null,
+    "getRecordingFromVault returns null for non-existent record"
   );
 
   console.log(`\n==================================================`);
