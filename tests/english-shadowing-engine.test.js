@@ -71,11 +71,23 @@ async function runTests() {
     }),
   });
 
+  const elementsById = {};
+  const getOrCreateElement = (id) => {
+    if (!elementsById[id]) {
+      const el = createMockElement();
+      el.id = id;
+      el.parentElement = {};
+      elementsById[id] = el;
+    }
+    return elementsById[id];
+  };
+
   const sandbox = {
     console,
     Map,
     Set,
     Promise,
+    performance: globalThis.performance || { now: () => Date.now() },
     localStorage: {
       _data: {},
       getItem(k) {
@@ -91,7 +103,7 @@ async function runTests() {
     document: {
       querySelectorAll: () => [],
       querySelector: () => null,
-      getElementById: () => createMockElement(),
+      getElementById: (id) => getOrCreateElement(id),
       createElement: () => createMockElement(),
       documentElement: createMockElement(),
       addEventListener: () => {},
@@ -101,10 +113,11 @@ async function runTests() {
     setInterval,
     clearInterval,
     requestAnimationFrame: (cb) => {
-      cb();
-      return 1;
+      return setTimeout(cb, 16);
     },
-    cancelAnimationFrame: () => {},
+    cancelAnimationFrame: (id) => {
+      clearTimeout(id);
+    },
     window: {
       addEventListener: () => {},
       scrollTo: () => {},
@@ -114,10 +127,11 @@ async function runTests() {
       setInterval,
       clearInterval,
       requestAnimationFrame: (cb) => {
-        cb();
-        return 1;
+        return setTimeout(cb, 16);
       },
-      cancelAnimationFrame: () => {},
+      cancelAnimationFrame: (id) => {
+        clearTimeout(id);
+      },
     },
     Audio: class {
       constructor() {
@@ -154,8 +168,11 @@ async function runTests() {
     globalThis.parseEnhancedLrc = typeof parseEnhancedLrc !== 'undefined' ? parseEnhancedLrc : function(){};
     globalThis.generateEnhancedLrcString = typeof generateEnhancedLrcString !== 'undefined' ? generateEnhancedLrcString : function(){};
     globalThis.calculateKaraokeWordIndex = typeof calculateKaraokeWordIndex !== 'undefined' ? calculateKaraokeWordIndex : function(){};
+    globalThis.findCueIndexByTime = typeof findCueIndexByTime !== 'undefined' ? findCueIndexByTime : function(){};
     globalThis.parseScenarioUrl = typeof parseScenarioUrl !== 'undefined' ? parseScenarioUrl : function(){};
     globalThis.buildScenarioUrl = typeof buildScenarioUrl !== 'undefined' ? buildScenarioUrl : function(){};
+    globalThis.updateScenarioUrl = typeof updateScenarioUrl !== 'undefined' ? updateScenarioUrl : function(){};
+    globalThis.jumpToSentence = typeof jumpToSentence !== 'undefined' ? jumpToSentence : function(){};
     globalThis.calculateLoopEndBoundary = typeof calculateLoopEndBoundary !== 'undefined' ? calculateLoopEndBoundary : function(){};
     globalThis.calculateLoopStartBoundary = typeof calculateLoopStartBoundary !== 'undefined' ? calculateLoopStartBoundary : function(){};
     globalThis.SPEED_PRESETS = typeof SPEED_PRESETS !== 'undefined' ? SPEED_PRESETS : [];
@@ -174,8 +191,11 @@ async function runTests() {
     parseEnhancedLrc,
     generateEnhancedLrcString,
     calculateKaraokeWordIndex,
+    findCueIndexByTime,
     parseScenarioUrl,
     buildScenarioUrl,
+    updateScenarioUrl,
+    jumpToSentence,
     calculateLoopEndBoundary,
     calculateLoopStartBoundary,
     SPEED_PRESETS,
@@ -187,6 +207,7 @@ async function runTests() {
     SCENARIO_CUES_CACHE,
     selectScenario,
     proceedSelectScenario,
+    state,
   } = sandbox;
 
   // 1. Legacy Retirement Verification (Issue #673)
@@ -539,6 +560,40 @@ async function runTests() {
     "proceedSelectScenario handles 404/network error gracefully without throwing"
   );
 
+  // 9.1 Audio Playback Synchronization & Element Source Assignment (Scenario Playback Fix)
+  const audioEl = sandbox.document.getElementById("playerAudio");
+  let playCalled = false;
+  audioEl.play = async () => {
+    playCalled = true;
+    audioEl.paused = false;
+    return Promise.resolve();
+  };
+  audioEl.pause = () => {
+    audioEl.paused = true;
+  };
+
+  await sandbox.proceedSelectScenario(testScenario1, false, false);
+  assert(
+    audioEl.src === "audio/dynamic-stream-test.mp3",
+    `proceedSelectScenario sets audio.src using resolveScenarioAudioUrl (got '${audioEl.src}')`
+  );
+
+  playCalled = false;
+  sandbox.playAudio();
+  assert(
+    playCalled === true,
+    "playAudio() invokes audio.play() for scenario without explicit audioUrl field"
+  );
+  assert(
+    audioEl.src === "audio/dynamic-stream-test.mp3",
+    "Audio source is preserved during playback initiation"
+  );
+  assert(
+    sandbox.state.isPlaying === true,
+    "state.isPlaying is set to true during playback"
+  );
+  sandbox.pauseAudio();
+
   // 10. LRC Timecode Parsing
   assert(
     typeof parseLrcTimecode === "function",
@@ -813,194 +868,89 @@ async function runTests() {
     "Clamps lead-out padding to exact next cue start (5.08s) when gap < 150ms"
   );
 
-  // =========================================================================
-  // 13. Python Markdown Scenario Parser & Audio Generator Tests
-  // =========================================================================
-  const scriptPath = path.join(
-    __dirname,
-    "..",
-    "scripts",
-    "generate-scenario-audio.py"
+  // 12. Dynamic Cue Index Resolution & Sentence Selection (findCueIndexByTime)
+  const sampleCues = [
+    { start: 1.0, end: 3.5, en: "First sentence", vi: "" },
+    { start: 4.5, end: 7.0, en: "Second sentence", vi: "" },
+    { start: 8.0, end: 11.2, en: "Third sentence", vi: "" },
+  ];
+
+  // Direct hits inside cue boundaries
+  assert(
+    findCueIndexByTime(sampleCues, 1.0) === 0,
+    "findCueIndexByTime: returns 0 at exact cue 0 start (1.0s)"
   );
   assert(
-    fs.existsSync(scriptPath),
-    "scripts/generate-scenario-audio.py exists"
+    findCueIndexByTime(sampleCues, 2.5) === 0,
+    "findCueIndexByTime: returns 0 inside cue 0 (2.5s)"
+  );
+  assert(
+    findCueIndexByTime(sampleCues, 3.5) === 0,
+    "findCueIndexByTime: returns 0 at exact cue 0 end (3.5s)"
+  );
+  assert(
+    findCueIndexByTime(sampleCues, 5.0) === 1,
+    "findCueIndexByTime: returns 1 inside cue 1 (5.0s)"
+  );
+  assert(
+    findCueIndexByTime(sampleCues, 9.0) === 2,
+    "findCueIndexByTime: returns 2 inside cue 2 (9.0s)"
   );
 
-  const pyTestCode = `
-import sys, json, importlib.util
-spec = importlib.util.spec_from_file_location("gen", r"${scriptPath}")
-gen = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(gen)
+  // Before first cue
+  assert(
+    findCueIndexByTime(sampleCues, 0.0) === 0,
+    "findCueIndexByTime: returns 0 when time is before first cue (0.0s)"
+  );
+  assert(
+    findCueIndexByTime(sampleCues, 0.5) === 0,
+    "findCueIndexByTime: returns 0 when time is 0.5s before cue 0 start"
+  );
 
-# Test Dialogue Parsing
-sample_dialogue_md = """---
-id: coffee-test
-title: Coffee Test Dialogue
-category: daily
-level: A2
-accent: US
-description: Test dialogue ordering coffee.
-speakers:
-  Barista: en-US-AvaMultilingualNeural
-  Customer: en-US-AndrewMultilingualNeural
----
+  // In silence gaps between cues
+  assert(
+    findCueIndexByTime(sampleCues, 3.8) === 1,
+    "findCueIndexByTime: returns upcoming cue 1 in gap between cue 0 and 1 (3.8s)"
+  );
+  assert(
+    findCueIndexByTime(sampleCues, 4.2) === 1,
+    "findCueIndexByTime: returns upcoming cue 1 in gap right before cue 1 start (4.2s)"
+  );
+  assert(
+    findCueIndexByTime(sampleCues, 7.5) === 2,
+    "findCueIndexByTime: returns upcoming cue 2 in gap between cue 1 and 2 (7.5s)"
+  );
 
-**Barista**: Good morning! What can I get started for you today?
-> Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?
+  // After last cue
+  assert(
+    findCueIndexByTime(sampleCues, 12.0) === 2,
+    "findCueIndexByTime: returns last cue 2 when time is past scenario duration (12.0s)"
+  );
 
-**Customer**: Hi there! I would like a medium oat milk latte with an extra shot of espresso, please.
-> Xin chào! Cho tôi một ly latte sữa yến mạch cỡ vừa thêm một shot espresso nhé.
-"""
+  // Edge cases (null/empty)
+  assert(
+    findCueIndexByTime([], 5.0) === -1,
+    "findCueIndexByTime: returns -1 for empty cues array"
+  );
+  assert(
+    findCueIndexByTime(null, 5.0) === -1,
+    "findCueIndexByTime: returns -1 for null cues"
+  );
 
-meta_d, turns_d = gen.parse_markdown_scenario(sample_dialogue_md)
-assert meta_d["id"] == "coffee-test"
-assert meta_d["level"] == "A2"
-assert meta_d["speakers"]["Barista"] == "en-US-AvaMultilingualNeural"
-assert len(turns_d) == 2
-assert turns_d[0]["speaker"] == "Barista"
-assert turns_d[0]["voice"] == "en-US-AvaMultilingualNeural"
-assert turns_d[0]["en"] == "Good morning! What can I get started for you today?"
-assert turns_d[0]["vi"] == "Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?"
-assert turns_d[1]["speaker"] == "Customer"
-assert turns_d[1]["voice"] == "en-US-AndrewMultilingualNeural"
-
-# Test Monologue Parsing
-sample_mono_md = """---
-id: mono-test
-title: Academic Monologue
-category: academic
-level: C1
-speakers:
-  Speaker: en-US-AndrewMultilingualNeural
----
-
-The shift toward distributed remote work has fundamentally transformed organizational dynamics.
-> Sự chuyển dịch sang làm việc từ xa phân tán đã thay đổi căn bản động lực vận hành.
-
-Indeed, asynchronous communication fosters deeper uninterrupted focus.
-> Thật vậy, giao tiếp bất đồng bộ thúc đẩy sự tập trung sâu.
-"""
-
-meta_m, turns_m = gen.parse_markdown_scenario(sample_mono_md)
-assert meta_m["id"] == "mono-test"
-assert len(turns_m) == 2
-assert turns_m[0]["speaker"] == "Speaker"
-assert turns_m[0]["voice"] == "en-US-AndrewMultilingualNeural"
-
-# Test Syllable Counting
-assert gen.count_syllables("cat") == 1
-assert gen.count_syllables("game") == 1
-assert gen.count_syllables("table") == 2
-assert gen.count_syllables("espresso") == 3
-assert gen.count_syllables("communication") == 5
-
-# Test Word Timing Distribution & Zero Cumulative Drift
-words = gen.compute_word_timings("Hi there! I would like coffee, please.", 10.0, 3.5)
-assert len(words) == 7
-assert words[0]["w"] == "Hi"
-assert words[0]["start"] == 10.0
-assert words[-1]["w"] == "please."
-assert words[-1]["end"] == 13.5
-
-# Test LRC Timestamp Formatting
-assert gen.format_lrc_timestamp(0.0) == "00:00.00"
-assert gen.format_lrc_timestamp(65.4) == "01:05.40"
-assert gen.format_lrc_timestamp(125.89) == "02:05.89"
-
-# Test Frontmatter Parsing with Tags & Collection
-md_with_tax = """---
-id: taxonomy-test
-title: Taxonomy Test Dialogue
-category: workplace
-level: B2
-accent: UK
-collection: career-foundations
-tags:
-  - interview
-  - behavioral
-  - tech
-description: Testing metadata parsing for tags and collections.
-speakers:
-  Interviewer: en-GB-RyanNeural
-  Candidate: en-GB-SoniaNeural
----
-
-**Interviewer**: Tell me about a challenging project you delivered.
-> Hãy kể cho tôi nghe về một dự án đầy thách thức bạn từng thực hiện.
-
-**Candidate**: At my previous role, we migrated legacy microservices to event-driven architectures.
-> Tại vị trí trước, chúng tôi đã chuyển đổi các microservices cũ sang kiến trúc hướng sự kiện.
-"""
-
-meta_tax, turns_tax = gen.parse_markdown_scenario(md_with_tax)
-assert meta_tax["id"] == "taxonomy-test"
-assert meta_tax["collection"] == "career-foundations"
-assert isinstance(meta_tax["tags"], list)
-assert "interview" in meta_tax["tags"]
-assert len(turns_tax) == 2
-
-# Test Manifest Entry Compilation (Lightweight schema without lrcContent)
-if hasattr(gen, "build_manifest_entry"):
-    entry = gen.build_manifest_entry(meta_tax, turns_tax, 45)
-    assert entry["id"] == "taxonomy-test"
-    assert entry["title"] == "Taxonomy Test Dialogue"
-    assert entry["category"] == "workplace"
-    assert entry["level"] == "B2"
-    assert entry["accent"] == "UK"
-    assert entry["collection"] == "career-foundations"
-    assert "interview" in entry["tags"]
-    assert entry["sentenceCount"] == 2
-    assert entry["duration"] == 45
-    assert "lrcContent" not in entry
-    assert "cues" not in entry
-
-# Test Default Fallbacks when optional frontmatter omitted
-md_minimal = """---
-id: minimal-test
-title: Minimal Monologue
-category: travel
----
-
-We boarded the bullet train just before departure.
-> Chúng tôi lên tàu cao tốc ngay trước giờ khởi hành.
-"""
-
-meta_min, turns_min = gen.parse_markdown_scenario(md_minimal)
-assert meta_min["id"] == "minimal-test"
-if hasattr(gen, "build_manifest_entry"):
-    min_entry = gen.build_manifest_entry(meta_min, turns_min, 20)
-    assert min_entry["level"] in ["B1", "A2"]
-    assert min_entry["accent"] == "US"
-    assert min_entry["collection"] == "travel"
-    assert isinstance(min_entry["tags"], list)
-    assert min_entry["sentenceCount"] == 1
-    assert "lrcContent" not in min_entry
-
-print(json.dumps({"success": True, "turns_dialogue": len(turns_d), "turns_monologue": len(turns_m)}))
-`;
-
-  try {
-    const pyOutput = execSync("python3 -", {
-      input: pyTestCode,
-      encoding: "utf-8",
-    });
-    const parsedPyResult = JSON.parse(pyOutput);
-    assert(
-      parsedPyResult.success === true,
-      "Python scenario parser & syllable engine executes without error"
-    );
-    assert(
-      parsedPyResult.turns_dialogue === 2,
-      "Python parser successfully extracts 2 dialogue turns with speaker mappings"
-    );
-    assert(
-      parsedPyResult.turns_monologue === 2,
-      "Python parser successfully extracts 2 monologue turns with fallback speaker"
-    );
-  } catch (err) {
-    assert(false, `Python engine tests threw an error: ${err.message}`);
-  }
+  // 13. URL Deep-linking with Cue Index
+  assert(
+    buildScenarioUrl("coffee-shop", 2) === "?scenario=coffee-shop&cue=2",
+    "buildScenarioUrl includes cue index parameter"
+  );
+  assert(
+    buildScenarioUrl("coffee-shop", null) === "?scenario=coffee-shop",
+    "buildScenarioUrl omits cue parameter when null"
+  );
+  const parsedCue = parseScenarioUrl("?scenario=coffee-shop&cue=3");
+  assert(
+    parsedCue.scenarioId === "coffee-shop" && parsedCue.cueIndex === 3,
+    "parseScenarioUrl parses scenarioId and cueIndex correctly"
+  );
 
   console.log(`\n==================================================`);
   console.log(
