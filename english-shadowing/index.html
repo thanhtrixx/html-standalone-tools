@@ -20227,6 +20227,26 @@
         }
       }
 
+      function stepFlashcard(delta) {
+        if (!state.flashcardList || state.flashcardList.length === 0) return;
+        const newIndex = state.flashcardIndex + delta;
+        if (newIndex >= 0 && newIndex < state.flashcardList.length) {
+          state.flashcardIndex = newIndex;
+          renderCurrentFlashcard();
+        }
+      }
+
+      function cyclePlaybackMode() {
+        const modes = ["continuous", "loop", "echoic"];
+        const currentIdx = modes.indexOf(state.playbackMode);
+        const nextMode = modes[(currentIdx + 1) % modes.length];
+        setPlaybackMode(nextMode);
+        showToast(
+          `Mode: ${nextMode.charAt(0).toUpperCase() + nextMode.slice(1)}`,
+          "info"
+        );
+      }
+
       // ==========================================
       // 14. MODAL & HOTKEY HANDLERS
       // ==========================================
@@ -20241,8 +20261,12 @@
         if (
           e.target.tagName === "INPUT" ||
           e.target.tagName === "TEXTAREA" ||
-          e.target.tagName === "SELECT"
+          e.target.tagName === "SELECT" ||
+          e.target.isContentEditable
         ) {
+          if (e.code === "Escape") {
+            e.target.blur();
+          }
           return;
         }
 
@@ -20257,9 +20281,83 @@
           return;
         }
 
-        // Global hotkey modal open
-        if (e.code === "Slash" && e.shiftKey) {
+        // Global hotkey modal open (? or Shift+/)
+        if (e.key === "?" || (e.code === "Slash" && e.shiftKey)) {
+          e.preventDefault();
           openHotkeyModal();
+          return;
+        }
+
+        // Quick Catalog search focus (/ without shift)
+        if (e.key === "/" || (e.code === "Slash" && !e.shiftKey)) {
+          e.preventDefault();
+          if (state.activeView !== "catalog") {
+            switchView("catalog");
+          }
+          const searchInput = document.getElementById("catalogSearchInput");
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+          return;
+        }
+
+        // Global drawer toggles
+        if (e.code === "KeyV" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          e.preventDefault();
+          toggleVocabDrawer();
+          return;
+        }
+        if (e.code === "KeyI" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          e.preventDefault();
+          const modal = document.getElementById("insightsModal");
+          if (modal && !modal.classList.contains("hidden")) {
+            closeInsightsModal();
+          } else {
+            openInsightsModal();
+          }
+          return;
+        }
+
+        // Flashcard Modal context-specific hotkeys
+        const flashcardModal = document.getElementById("flashcardModal");
+        if (flashcardModal && !flashcardModal.classList.contains("hidden")) {
+          switch (e.code) {
+            case "Space":
+            case "Enter":
+            case "KeyF":
+            case "ArrowUp":
+              e.preventDefault();
+              flipFlashcard();
+              break;
+            case "Digit1":
+            case "Numpad1":
+              e.preventDefault();
+              gradeFlashcard("hard");
+              break;
+            case "Digit2":
+            case "Numpad2":
+              e.preventDefault();
+              gradeFlashcard("good");
+              break;
+            case "Digit3":
+            case "Numpad3":
+              e.preventDefault();
+              gradeFlashcard("mastered");
+              break;
+            case "ArrowLeft":
+            case "KeyA":
+            case "KeyJ":
+              e.preventDefault();
+              stepFlashcard(-1);
+              break;
+            case "ArrowRight":
+            case "KeyD":
+            case "KeyL":
+              e.preventDefault();
+              stepFlashcard(1);
+              break;
+          }
           return;
         }
 
@@ -20269,25 +20367,53 @@
         }
 
         switch (e.code) {
+          // Play/Pause transport (Space / K)
           case "Space":
+          case "KeyK":
             e.preventDefault();
             togglePlayPause();
             break;
+
+          // Replay current sentence (R / Up)
           case "KeyR":
           case "ArrowUp":
             e.preventDefault();
             replayCurrentSentence();
             break;
+
+          // Previous sentence (A / Left / J)
           case "KeyA":
           case "ArrowLeft":
+          case "KeyJ":
             e.preventDefault();
             navigateSentence(-1);
             break;
+
+          // Next sentence (D / Right / L)
           case "KeyD":
           case "ArrowRight":
+          case "KeyL":
             e.preventDefault();
             navigateSentence(1);
             break;
+
+          // First sentence (0 / Home)
+          case "Digit0":
+          case "Numpad0":
+          case "Home":
+            e.preventDefault();
+            jumpToSentence(0);
+            break;
+
+          // Last sentence (End)
+          case "End":
+            e.preventDefault();
+            if (state.activeCues && state.activeCues.length > 0) {
+              jumpToSentence(state.activeCues.length - 1);
+            }
+            break;
+
+          // Playback speed ([ / ])
           case "BracketLeft":
             e.preventDefault();
             stepPlaybackSpeed(-1);
@@ -20296,24 +20422,49 @@
             e.preventDefault();
             stepPlaybackSpeed(1);
             break;
-          case "Digit1":
-            setSubtitleMask("both");
+
+          // Shadowing mode cycle (P)
+          case "KeyP":
+            e.preventDefault();
+            cyclePlaybackMode();
             break;
-          case "Digit2":
-            setSubtitleMask("primary");
-            break;
-          case "Digit3":
-            setSubtitleMask("secondary");
-            break;
-          case "Digit4":
-            setSubtitleMask("blur");
-            break;
-          case "KeyV":
-            toggleVocabDrawer();
-            break;
+
+          // Mic recording take (M)
           case "KeyM":
             e.preventDefault();
             toggleMicRecording();
+            break;
+
+          // A/B comparison (C)
+          case "KeyC":
+            e.preventDefault();
+            runAutoAbComparison();
+            break;
+
+          // Bookmark scenario (B)
+          case "KeyB":
+            e.preventDefault();
+            if (state.activeScenario) {
+              toggleBookmark(state.activeScenario.id);
+            }
+            break;
+
+          // Subtitle masking (1: Dual, 2: EN, 3: VI, 4: Blur)
+          case "Digit1":
+          case "Numpad1":
+            setSubtitleMask("both");
+            break;
+          case "Digit2":
+          case "Numpad2":
+            setSubtitleMask("primary");
+            break;
+          case "Digit3":
+          case "Numpad3":
+            setSubtitleMask("secondary");
+            break;
+          case "Digit4":
+          case "Numpad4":
+            setSubtitleMask("blur");
             break;
         }
       }

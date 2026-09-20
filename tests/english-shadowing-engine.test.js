@@ -29,47 +29,69 @@ async function runTests() {
 
   const htmlContent = fs.readFileSync(htmlPath, "utf8");
 
-  const createMockElement = () => ({
-    textContent: "",
-    innerHTML: "",
-    value: "",
-    src: "",
-    playbackRate: 1,
-    play: () => Promise.resolve(),
-    pause: () => {},
-    classList: {
-      add() {},
-      remove() {},
-      toggle() {},
-      contains() {
-        return false;
+  const createMockElement = () => {
+    const classes = new Set();
+    return {
+      textContent: "",
+      innerHTML: "",
+      value: "",
+      src: "",
+      playbackRate: 1,
+      play: () => Promise.resolve(),
+      pause: () => {},
+      classList: {
+        add(...cls) {
+          cls.forEach((c) => classes.add(c));
+        },
+        remove(...cls) {
+          cls.forEach((c) => classes.delete(c));
+        },
+        toggle(c, force) {
+          if (force === true) {
+            classes.add(c);
+            return true;
+          }
+          if (force === false) {
+            classes.delete(c);
+            return false;
+          }
+          if (classes.has(c)) {
+            classes.delete(c);
+            return false;
+          }
+          classes.add(c);
+          return true;
+        },
+        contains(c) {
+          return classes.has(c);
+        },
       },
-    },
-    style: {},
-    appendChild() {},
-    removeChild() {},
-    remove() {},
-    setAttribute() {},
-    getAttribute() {
-      return null;
-    },
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    querySelectorAll: () => [],
-    querySelector: () => null,
-    contains: () => false,
-    scrollIntoView: () => {},
-    getContext: () => ({
-      clearRect() {},
-      fillRect() {},
-      beginPath() {},
-      arc() {},
-      stroke() {},
-      fill() {},
-      moveTo() {},
-      lineTo() {},
-    }),
-  });
+      style: {},
+      appendChild() {},
+      removeChild() {},
+      remove() {},
+      setAttribute() {},
+      getAttribute() {
+        return null;
+      },
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      querySelectorAll: () => [],
+      querySelector: () => null,
+      contains: () => false,
+      scrollIntoView: () => {},
+      getContext: () => ({
+        clearRect() {},
+        fillRect() {},
+        beginPath() {},
+        arc() {},
+        stroke() {},
+        fill() {},
+        moveTo() {},
+        lineTo() {},
+      }),
+    };
+  };
 
   const elementsById = {};
   const getOrCreateElement = (id) => {
@@ -203,6 +225,12 @@ async function runTests() {
     globalThis.handleGlobalKeydown = typeof handleGlobalKeydown !== 'undefined' ? handleGlobalKeydown : function(){};
     globalThis.updateKaraokeWordHighlight = typeof updateKaraokeWordHighlight !== 'undefined' ? updateKaraokeWordHighlight : function(){};
     globalThis.renderActiveCue = typeof renderActiveCue !== 'undefined' ? renderActiveCue : function(){};
+    globalThis.cyclePlaybackMode = typeof cyclePlaybackMode !== 'undefined' ? cyclePlaybackMode : function(){};
+    globalThis.stepFlashcard = typeof stepFlashcard !== 'undefined' ? stepFlashcard : function(){};
+    globalThis.flipFlashcard = typeof flipFlashcard !== 'undefined' ? flipFlashcard : function(){};
+    globalThis.gradeFlashcard = typeof gradeFlashcard !== 'undefined' ? gradeFlashcard : function(){};
+    globalThis.stepPlaybackSpeed = typeof stepPlaybackSpeed !== 'undefined' ? stepPlaybackSpeed : function(){};
+    globalThis.setSubtitleMask = typeof setSubtitleMask !== 'undefined' ? setSubtitleMask : function(){};
     globalThis.state = typeof state !== 'undefined' ? state : {};
     Object.defineProperty(globalThis, 'simulatedTime', {
       get: () => typeof simulatedTime !== 'undefined' ? simulatedTime : 0,
@@ -249,6 +277,12 @@ async function runTests() {
     handleGlobalKeydown,
     updateKaraokeWordHighlight,
     renderActiveCue,
+    cyclePlaybackMode,
+    stepFlashcard,
+    flipFlashcard,
+    gradeFlashcard,
+    stepPlaybackSpeed,
+    setSubtitleMask,
     state,
   } = sandbox;
 
@@ -1366,6 +1400,338 @@ async function runTests() {
       "Karaoke words maintain exact font-semibold weight and px-1.5 py-0.5 padding in all states"
     );
   }
+
+  // 19. FULL-SPECTRUM ERGONOMIC KEYBOARD SHORTCUTS ENGINE (ADR-0010 / Issue #700)
+  console.log("\n--- Section 19: Full-Spectrum Ergonomic Hotkeys Engine ---");
+
+  // Ensure flashcard modal is hidden for player tests
+  const fcModal = getOrCreateElement("flashcardModal");
+  fcModal.classList.add("hidden");
+
+  // Switch to player view and load scenario for playback hotkey validation
+  await proceedSelectScenario(mockScenario, false, false);
+  state.activeView = "player";
+  state.currentCueIndex = 0;
+  state.isPlaying = false;
+  state.playbackRate = 1.0;
+  state.playbackMode = "continuous";
+
+  // 19.1 Multi-Layout Play/Pause Transport (Space / KeyK)
+  handleGlobalKeydown({
+    code: "KeyK",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(state.isPlaying === true, "KeyK starts playback in player view");
+  handleGlobalKeydown({
+    code: "Space",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(state.isPlaying === false, "Space pauses playback in player view");
+
+  // 19.2 Multi-Layout Sentence Stepping (A / Left / J / D / Right / L)
+  handleGlobalKeydown({
+    code: "KeyD",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 1,
+    "KeyD navigates to next sentence (index 1)"
+  );
+  handleGlobalKeydown({
+    code: "KeyL",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 2,
+    "KeyL navigates to next sentence (index 2)"
+  );
+  handleGlobalKeydown({
+    code: "ArrowRight",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 3,
+    "ArrowRight navigates to next sentence (index 3)"
+  );
+
+  handleGlobalKeydown({
+    code: "KeyA",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 2,
+    "KeyA navigates to previous sentence (index 2)"
+  );
+  handleGlobalKeydown({
+    code: "KeyJ",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 1,
+    "KeyJ navigates to previous sentence (index 1)"
+  );
+  handleGlobalKeydown({
+    code: "ArrowLeft",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 0,
+    "ArrowLeft navigates to previous sentence (index 0)"
+  );
+
+  // 19.3 Quick Jumps: First (0 / Home) and Last (End)
+  handleGlobalKeydown({
+    code: "End",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === state.activeCues.length - 1,
+    `End key jumps to last sentence index (${state.activeCues.length - 1})`
+  );
+  handleGlobalKeydown({
+    code: "Home",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 0,
+    "Home key jumps to first sentence (index 0)"
+  );
+  handleGlobalKeydown({
+    code: "Digit0",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.currentCueIndex === 0,
+    "Digit0 key jumps to first sentence (index 0)"
+  );
+
+  // 19.4 Replay Current Sentence (KeyR / ArrowUp)
+  handleGlobalKeydown({
+    code: "KeyD",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  state.isPlaying = false;
+  handleGlobalKeydown({
+    code: "KeyR",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.isPlaying === true,
+    "KeyR triggers sentence replay and resumes playback"
+  );
+  state.isPlaying = false;
+  handleGlobalKeydown({
+    code: "ArrowUp",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.isPlaying === true,
+    "ArrowUp triggers sentence replay and resumes playback"
+  );
+  state.isPlaying = false;
+
+  // 19.5 Speed Adjustment Hotkeys ([ / ])
+  handleGlobalKeydown({
+    code: "BracketRight",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.playbackRate === 1.15,
+    `BracketRight steps playback speed up to 1.15x (got ${state.playbackRate})`
+  );
+  handleGlobalKeydown({
+    code: "BracketLeft",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.playbackRate === 1.0,
+    `BracketLeft steps playback speed down to 1.0x (got ${state.playbackRate})`
+  );
+
+  // 19.6 Shadowing Mode Cycle (KeyP)
+  assert(state.playbackMode === "continuous", "Initial mode is continuous");
+  handleGlobalKeydown({
+    code: "KeyP",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.playbackMode === "loop",
+    "KeyP cycles mode from continuous to loop"
+  );
+  handleGlobalKeydown({
+    code: "KeyP",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.playbackMode === "echoic",
+    "KeyP cycles mode from loop to echoic"
+  );
+  handleGlobalKeydown({
+    code: "KeyP",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.playbackMode === "continuous",
+    "KeyP cycles mode from echoic back to continuous"
+  );
+
+  // 19.7 Subtitle Masking Hotkeys (Digit1: both, Digit2: primary, Digit3: secondary, Digit4: blur)
+  handleGlobalKeydown({
+    code: "Digit2",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.subtitleMask === "primary",
+    "Digit2 sets subtitle mask to 'primary' (English only)"
+  );
+  handleGlobalKeydown({
+    code: "Digit3",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.subtitleMask === "secondary",
+    "Digit3 sets subtitle mask to 'secondary' (Vietnamese only)"
+  );
+  handleGlobalKeydown({
+    code: "Digit4",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.subtitleMask === "blur",
+    "Digit4 sets subtitle mask to 'blur' (Blind listening)"
+  );
+  handleGlobalKeydown({
+    code: "Digit1",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.subtitleMask === "both",
+    "Digit1 sets subtitle mask to 'both' (Dual subtitles)"
+  );
+
+  // 19.8 Flashcard Modal Specific Hotkeys
+  fcModal.classList.remove("hidden");
+  state.flashcardList = [
+    {
+      word: "espresso",
+      ipa: "/eˈspres.oʊ/",
+      vi: "cà phê espresso",
+      box: 1,
+      status: "new",
+    },
+    {
+      word: "cappuccino",
+      ipa: "/ˌkæp.əˈtʃiː.noʊ/",
+      vi: "cà phê cappuccino",
+      box: 2,
+      status: "learning",
+    },
+  ];
+  state.flashcardIndex = 0;
+  const fcFront = getOrCreateElement("flashcardFront");
+  const fcBack = getOrCreateElement("flashcardBack");
+  fcFront.classList.remove("hidden");
+  fcBack.classList.add("hidden");
+
+  handleGlobalKeydown({
+    code: "Space",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    fcFront.classList.contains("hidden") &&
+      !fcBack.classList.contains("hidden"),
+    "Space flips active flashcard to back when flashcardModal is open"
+  );
+
+  handleGlobalKeydown({
+    code: "Digit2",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.flashcardIndex === 1,
+    "Digit2 grades flashcard 'good' and advances to next card"
+  );
+
+  handleGlobalKeydown({
+    code: "ArrowLeft",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.flashcardIndex === 0,
+    "ArrowLeft navigates back to previous card in review stack"
+  );
+
+  handleGlobalKeydown({
+    code: "ArrowRight",
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.flashcardIndex === 1,
+    "ArrowRight navigates forward to next card in review stack"
+  );
+  fcModal.classList.add("hidden");
+
+  // 19.9 Global Search Focus Hotkey (Slash /)
+  let searchInputFocused = false;
+  const searchInput = getOrCreateElement("catalogSearchInput");
+  searchInput.focus = () => {
+    searchInputFocused = true;
+  };
+  searchInput.select = () => {};
+
+  handleGlobalKeydown({
+    key: "/",
+    code: "Slash",
+    shiftKey: false,
+    preventDefault() {},
+    target: { tagName: "BODY" },
+  });
+  assert(
+    state.activeView === "catalog",
+    "Slash key triggers catalog view navigation"
+  );
+  assert(searchInputFocused === true, "Slash key focuses catalog search input");
+
+  // 19.10 Form Input Typing Exclusion
+  let searchSpaceTriggered = false;
+  handleGlobalKeydown({
+    code: "Space",
+    preventDefault() {
+      searchSpaceTriggered = true;
+    },
+    target: { tagName: "INPUT", isContentEditable: false },
+  });
+  assert(
+    searchSpaceTriggered === false,
+    "Typing in INPUT elements ignores hotkey interception"
+  );
 
   console.log(`\n==================================================`);
   console.log(
