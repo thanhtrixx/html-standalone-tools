@@ -19,6 +19,7 @@ For architectural decision records, refer to:
 - [`docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md`](./docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md)
 - [`docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md`](./docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md)
 - [`docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md`](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md)
+- [`docs/adr/0009-voice-recording-echoic-shadowing-and-indexeddb-vault.md`](./docs/adr/0009-voice-recording-echoic-shadowing-and-indexeddb-vault.md)
 
 ---
 
@@ -38,25 +39,31 @@ For architectural decision records, refer to:
   - **Active Word**: Currently articulated word token rendered with a glowing accent pill and micro-scale animation.
   - **Passed Word**: Articulated words in the current sentence rendered with high-contrast sharp white text.
   - **Upcoming Word**: Unspoken words in the current sentence rendered with dimmed slate contrast (`text-slate-400`).
-- **Playback Modes**:
+- **Playback & Shadowing Modes**:
   - **Continuous Audio Flow Mode (`continuous`)**: The default playback mode streaming audio naturally without auto-pausing or forced boundary seeks, maintaining millisecond-accurate auto-scrolling and visual focus on the active sentence without audio hitching.
     _Avoid_: Auto-stop mode, podcast mode, loop all.
   - **Interactive Sentence Loop Mode (`loop`)**: Plays a single sentence cue with acoustic lead-out padding (+150ms clamped to next cue start) and micro lead-in (-50ms), cleanly auto-pausing at the sentence boundary with a repeat prompt for shadowing repetition.
+  - **Hands-Free Echoic Shadowing Mode (`echoic`)**: An automated SLA turn-taking mode that plays Cue $N$, calculates a dynamic silence pause ($T_{\text{pause}} = \max(2.0\text{s}, \text{duration}\times 1.25)$) with visual countdown while auto-recording the learner's voice, saves the take to IndexedDB, and auto-advances to Cue $N+1$.
 - **Subtitle Masking Modes**:
   - **Dual (`both`)**: Primary English subtitle on top with secondary Vietnamese translation below.
   - **English Only (`primary`)**: Hides the translation to focus on target language reading.
   - **Translation Only (`secondary`)**: Displays only the Vietnamese translation to test English recall.
   - **Blind Listening / Blur (`blur`)**: Subtitles remain blurred until hovered or tapped, training pure phonetic recognition before visual confirmation.
     _Avoid_: Subtitle hide button, cc switcher.
+- **How to Shadow FTUX Guide**: 3-step beginner-friendly visual on-ramp (1. 🎧 Listen $\to$ 2. 🗣️ Shadow $\to$ 3. 🔍 Inspect) anchored in the catalog header.
 
 ---
 
 ### 2. Audio Engine & Precision Transport
 
 - **HTML5 Audio Engine (Zero-Seek Streaming)**: Resilient audio playback engine powered by HTML5 `<audio>`, streaming continuous audio tracks without forced seeks at contiguous sentence boundaries to prevent audio buffer hitching.
+- **Audio Pitch Preservation (`preservesPitch`)**: Explicit enforcement of `preservesPitch = true` on `<audio id="playerAudio">` across all playback speeds (`0.5x`–`1.5x`), preventing pitch shift artifacts on Safari and iOS WebKit.
 - **Acoustic Boundary Padding**: Intelligent +150ms lead-out padding (clamped to next cue start) in Loop Mode ensuring complete phonetic resolution of final plosives and consonants without audio bleeding into adjacent sentences.
 - **Speed Selector Popover**: Interactive speed menu offering direct presets (`0.5x`, `0.75x`, `0.85x`, `1.0x`, `1.15x`, `1.25x`, `1.5x`) alongside keyboard stepping hotkeys (`[` and `]`).
-- **Pinned Bottom Transport Dock**: Ergonomic transport deck fixed at the bottom of the viewport containing Scrubber with Sentence Milestone markers, Play/Pause/Replay triggers, Speed selector popover, Loop/Continuous toggle, and Vocab launcher.
+- **Pinned Bottom Transport Dock**: Ergonomic transport deck fixed at the bottom of the viewport containing Scrubber with Sentence Milestone markers, Play/Pause/Replay triggers, 1-tap Mic recording button (`#btnDockRecord`), Speed selector popover, Mode toggle (`continuous`/`loop`/`echoic`), and Vocab launcher.
+- **IndexedDB Audio Recording Vault (`shadowing_recordings_vault`)**: Zero-backend persistent local database storing learner audio takes as Blobs mapped by compound key `[scenarioId, cueIndex]`.
+- **Real-Time Web Audio Waveform Envelope**: Dual visual amplitude canvas powered by `AudioContext` and `AnalyserNode` comparing native speaker cadence against the learner's recorded take.
+- **A/B Dynamic Comparative Playback**: Automated playback sequence playing native speaker reference audio followed by a 400ms pause and the learner's recorded take.
 
 ---
 

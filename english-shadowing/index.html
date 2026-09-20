@@ -469,6 +469,90 @@
           </div>
         </div>
 
+        <!-- 3-Step "How to Shadow" FTUX Onboarding Scaffolding -->
+        <div
+          class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800/90 rounded-xl p-3.5 sm:p-4 shadow-sm"
+        >
+          <div class="flex items-center justify-between gap-2 mb-2.5">
+            <span
+              class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5"
+            >
+              <span>🎙️</span>
+              <span data-i18n="howToShadowTitle"
+                >How Shadowing Works (3 Steps)</span
+              >
+            </span>
+            <span class="text-[11px] text-slate-400" data-i18n="howToShadowSub"
+              >Master spoken rhythm in 3 minutes a day</span
+            >
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 text-xs">
+            <div
+              class="flex items-start gap-2.5 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/70"
+            >
+              <span
+                class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-xs border border-emerald-500/30"
+                >1</span
+              >
+              <div>
+                <strong
+                  class="text-slate-200 block text-xs"
+                  data-i18n="step1Title"
+                  >🎧 Listen First</strong
+                >
+                <span
+                  class="text-slate-400 text-[11px] leading-tight block mt-0.5"
+                  data-i18n="step1Desc"
+                  >Follow native rhythm, word linking, and sentence
+                  melody.</span
+                >
+              </div>
+            </div>
+            <div
+              class="flex items-start gap-2.5 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/70"
+            >
+              <span
+                class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center shrink-0 text-xs border border-cyan-500/30"
+                >2</span
+              >
+              <div>
+                <strong
+                  class="text-slate-200 block text-xs"
+                  data-i18n="step2Title"
+                  >🗣️ Shadow & Repeat</strong
+                >
+                <span
+                  class="text-slate-400 text-[11px] leading-tight block mt-0.5"
+                  data-i18n="step2Desc"
+                  >Speak along or repeat out loud immediately to build muscle
+                  memory.</span
+                >
+              </div>
+            </div>
+            <div
+              class="flex items-start gap-2.5 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800/70"
+            >
+              <span
+                class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center shrink-0 text-xs border border-indigo-500/30"
+                >3</span
+              >
+              <div>
+                <strong
+                  class="text-slate-200 block text-xs"
+                  data-i18n="step3Title"
+                  >🔍 Inspect & Save</strong
+                >
+                <span
+                  class="text-slate-400 text-[11px] leading-tight block mt-0.5"
+                  data-i18n="step3Desc"
+                  >Click any word for IPA phonetics, meaning, and Leitner
+                  flashcards.</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Multi-Facet Filter Bar -->
         <div
           class="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 shadow-md"
@@ -757,7 +841,7 @@
           id="subtitleStage"
           class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-8 pt-10 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
         >
-          <!-- Active sentence position tracker & Timing Nudges -->
+          <!-- Active sentence position tracker -->
           <div
             class="absolute top-2.5 sm:top-3 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
           >
@@ -766,27 +850,6 @@
                 class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
               ></span>
               <span id="sentenceIndexTracker">Sentence 1 of 10</span>
-            </div>
-
-            <!-- Live Timing Nudge Controls -->
-            <div
-              class="flex items-center gap-1.5 bg-slate-950/80 px-2 py-0.5 sm:py-1 rounded-lg border border-slate-800 pointer-events-auto text-xs"
-            >
-              <span class="text-[10px] text-slate-500 uppercase">Nudge:</span>
-              <button
-                onclick="nudgeActiveCueTiming('start', -0.1)"
-                class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
-                title="Start -100ms"
-              >
-                -0.1s
-              </button>
-              <button
-                onclick="nudgeActiveCueTiming('start', 0.1)"
-                class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px]"
-                title="Start +100ms"
-              >
-                +0.1s
-              </button>
             </div>
           </div>
 
@@ -2110,6 +2173,19 @@
           progressCompleted: "{count} of {total} completed",
           practiceTimes: "Practiced {count} times",
           noScenariosFound: "No scenarios match the selected filters.",
+          howToShadowTitle: "How Shadowing Works (3 Steps)",
+          howToShadowSub: "Master spoken rhythm in 3 minutes a day",
+          step1Title: "🎧 Listen First",
+          step1Desc: "Follow native rhythm, word linking, and sentence melody.",
+          step2Title: "🗣️ Shadow & Repeat",
+          step2Desc:
+            "Speak along or repeat out loud immediately to build muscle memory.",
+          step3Title: "🔍 Inspect & Save",
+          step3Desc:
+            "Click any word for IPA phonetics, meaning, and Leitner flashcards.",
+          micNotSupported:
+            "Microphone capture is not supported in this browser.",
+          micDenied: "Microphone permission was denied or unavailable.",
         },
         vi: {
           appTitle: "Luyện Nói Shadowing",
@@ -2233,6 +2309,19 @@
           progressCompleted: "Đã hoàn thành {count}/{total}",
           practiceTimes: "Đã luyện {count} lần",
           noScenariosFound: "Không tìm thấy kịch bản phù hợp với bộ lọc.",
+          howToShadowTitle: "Cách Luyện Shadowing (3 Bước)",
+          howToShadowSub: "Làm chủ ngữ điệu chỉ 3 phút mỗi ngày",
+          step1Title: "🎧 Lắng nghe trước",
+          step1Desc:
+            "Cảm nhận nhịp điệu, nối âm và ngữ điệu tự nhiên của người bản xứ.",
+          step2Title: "🗣️ Nhại & Nói theo",
+          step2Desc:
+            "Nói đuổi theo hoặc lặp lại to rõ ràng để rèn luyện trí nhớ cơ miệng.",
+          step3Title: "🔍 Tra từ & Lưu lại",
+          step3Desc:
+            "Nhấp vào bất kỳ từ nào để tra phiên âm IPA, nghĩa và thêm vào Flashcard.",
+          micNotSupported: "Trình duyệt không hỗ trợ thu âm từ micro.",
+          micDenied: "Quyền truy cập micro bị từ chối hoặc không khả dụng.",
         },
       };
 
@@ -2241,17 +2330,17 @@
       // ==========================================
       const SCENARIOS_MANIFEST = [
         {
-          id: "academic-ai-future",
-          title: "Academic Discussion on AI & Remote Work",
-          category: "academic",
-          level: "C1",
+          id: "specialty-coffee",
+          title: "Ordering at a Specialty Coffee Shop",
+          category: "daily",
+          level: "A2",
           accent: "US",
-          duration: 152,
+          duration: 93,
           description:
-            "Nuanced academic discourse discussing asynchronous productivity, cognitive automation, digital nomadism, and human-machine synergy.",
-          tags: ["ai", "future-of-work", "higher-education", "synthesis"],
-          collection: "academic",
-          sentenceCount: 16,
+            "Natural everyday dialogue ordering pour-over coffee, inquiring about roast profiles, and customizing milk alternatives.",
+          tags: ["coffee", "ordering", "cafe", "daily-conversation"],
+          collection: "daily-social",
+          sentenceCount: 17,
         },
         {
           id: "airport-security",
@@ -2280,6 +2369,19 @@
           sentenceCount: 18,
         },
         {
+          id: "tech-standup",
+          title: "Tech Agile Standup & Sprint Planning",
+          category: "workplace",
+          level: "B2",
+          accent: "US",
+          duration: 122,
+          description:
+            "Engineering standup discussing blocker resolution, pull request reviews, database schema migration, and CI/CD pipelines.",
+          tags: ["standup", "engineering", "sprint", "blockers"],
+          collection: "workplace",
+          sentenceCount: 18,
+        },
+        {
           id: "job-interview",
           title: "Software Engineering Behavioral Interview",
           category: "workplace",
@@ -2293,30 +2395,17 @@
           sentenceCount: 18,
         },
         {
-          id: "specialty-coffee",
-          title: "Ordering at a Specialty Coffee Shop",
-          category: "daily",
-          level: "A2",
+          id: "academic-ai-future",
+          title: "Academic Discussion on AI & Remote Work",
+          category: "academic",
+          level: "C1",
           accent: "US",
-          duration: 93,
+          duration: 152,
           description:
-            "Natural everyday dialogue ordering pour-over coffee, inquiring about roast profiles, and customizing milk alternatives.",
-          tags: ["coffee", "ordering", "cafe", "daily-conversation"],
-          collection: "daily-social",
-          sentenceCount: 17,
-        },
-        {
-          id: "tech-standup",
-          title: "Tech Agile Standup & Sprint Planning",
-          category: "workplace",
-          level: "B2",
-          accent: "US",
-          duration: 122,
-          description:
-            "Engineering standup discussing blocker resolution, pull request reviews, database schema migration, and CI/CD pipelines.",
-          tags: ["standup", "engineering", "sprint", "blockers"],
-          collection: "workplace",
-          sentenceCount: 18,
+            "Nuanced academic discourse discussing asynchronous productivity, cognitive automation, digital nomadism, and human-machine synergy.",
+          tags: ["ai", "future-of-work", "higher-education", "synthesis"],
+          collection: "academic",
+          sentenceCount: 16,
         },
       ];
       const CURATED_SCENARIOS = SCENARIOS_MANIFEST;
@@ -2677,8 +2766,8 @@
 
       let savedVocabVault = {};
       let practiceStats = {
-        streakDays: 1,
-        lastPracticedDate: new Date().toISOString().split("T")[0],
+        streakDays: 0,
+        lastPracticedDate: null,
         totalSecondsPracticedToday: 0,
         sentencesShadowedToday: 0,
         totalSentencesShadowed: 0,
@@ -2853,14 +2942,11 @@
               yesterday.setDate(yesterday.getDate() - 1);
               const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-              if (loaded.lastPracticedDate === yesterdayStr) {
-                loaded.streakDays = (loaded.streakDays || 1) + 1;
-              } else {
-                loaded.streakDays = 1;
+              if (loaded.lastPracticedDate !== yesterdayStr) {
+                loaded.streakDays = 0;
               }
               loaded.totalSecondsPracticedToday = 0;
               loaded.sentencesShadowedToday = 0;
-              loaded.lastPracticedDate = todayStr;
             }
             if (loaded.totalSentencesShadowed === undefined) {
               loaded.totalSentencesShadowed =
@@ -2885,6 +2971,20 @@
       }
 
       function logPracticeShadowSentence() {
+        const todayStr = new Date().toISOString().split("T")[0];
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+        if (practiceStats.lastPracticedDate !== todayStr) {
+          if (practiceStats.lastPracticedDate === yesterdayStr) {
+            practiceStats.streakDays = (practiceStats.streakDays || 0) + 1;
+          } else {
+            practiceStats.streakDays = 1;
+          }
+          practiceStats.lastPracticedDate = todayStr;
+        }
+
         practiceStats.sentencesShadowedToday =
           (practiceStats.sentencesShadowedToday || 0) + 1;
         practiceStats.totalSentencesShadowed =
@@ -2921,7 +3021,7 @@
       function updateHeaderBadges() {
         const streakCountEl = document.getElementById("headerStreakCount");
         if (streakCountEl) {
-          streakCountEl.textContent = practiceStats.streakDays || 1;
+          streakCountEl.textContent = practiceStats.streakDays || 0;
         }
 
         const dueCount = getDueVocabList().length;
@@ -2958,7 +3058,7 @@
         const dueEl = document.getElementById("modalDueWordsCount");
         const totalVocabEl = document.getElementById("modalTotalVocabCount");
 
-        const streak = practiceStats.streakDays || 1;
+        const streak = practiceStats.streakDays || 0;
         if (streakEl) streakEl.textContent = streak;
 
         const totalSec = practiceStats.totalSecondsPracticedToday || 0;
@@ -3310,14 +3410,15 @@
         if (scenarioId) {
           const found = CURATED_SCENARIOS.find((sc) => sc.id === scenarioId);
           if (found) {
-            selectScenario(found, true, false);
-            if (
-              cueIndex !== null &&
-              cueIndex >= 0 &&
-              cueIndex < state.activeCues.length
-            ) {
-              jumpToSentence(cueIndex);
-            }
+            selectScenario(found, true, false).then(() => {
+              if (
+                cueIndex !== null &&
+                cueIndex >= 0 &&
+                cueIndex < state.activeCues.length
+              ) {
+                jumpToSentence(cueIndex);
+              }
+            });
             loadedFromUrl = true;
           } else {
             showToast(
@@ -3341,14 +3442,15 @@
           if (popId) {
             const matched = CURATED_SCENARIOS.find((sc) => sc.id === popId);
             if (matched) {
-              selectScenario(matched, true, false);
-              if (
-                popCue !== null &&
-                popCue >= 0 &&
-                popCue < state.activeCues.length
-              ) {
-                jumpToSentence(popCue);
-              }
+              selectScenario(matched, true, false).then(() => {
+                if (
+                  popCue !== null &&
+                  popCue >= 0 &&
+                  popCue < state.activeCues.length
+                ) {
+                  jumpToSentence(popCue);
+                }
+              });
             } else {
               switchView("catalog", false);
             }
@@ -3771,7 +3873,7 @@
         const audioSrc = resolveScenarioAudioUrl(scenario);
         if (audio && audioSrc) {
           audio.src = audioSrc;
-          audio.playbackRate = state.playbackRate;
+          applyAudioPlaybackRate(audio, state.playbackRate);
         }
         state.currentCueIndex = 0;
         simulatedTime = 0;
@@ -3803,6 +3905,14 @@
       let playerAudioEl = null;
       let isAudioSeeking = false;
 
+      function applyAudioPlaybackRate(audio, rate) {
+        if (!audio) return;
+        audio.playbackRate = rate;
+        audio.preservesPitch = true;
+        if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = true;
+        if ("mozPreservesPitch" in audio) audio.mozPreservesPitch = true;
+      }
+
       function getAudioElement() {
         if (
           !playerAudioEl ||
@@ -3815,6 +3925,9 @@
           playerAudioEl = document.getElementById("playerAudio");
           if (!playerAudioEl) {
             playerAudioEl = typeof Audio !== "undefined" ? new Audio() : null;
+          }
+          if (playerAudioEl) {
+            applyAudioPlaybackRate(playerAudioEl, state.playbackRate || 1.0);
           }
           if (playerAudioEl && playerAudioEl.addEventListener) {
             playerAudioEl.addEventListener("ended", () => {
@@ -4096,7 +4209,7 @@
         }
         const audio = getAudioElement();
         if (audio) {
-          audio.playbackRate = rate;
+          applyAudioPlaybackRate(audio, rate);
         }
         closeSpeedPopover();
       }
@@ -4137,7 +4250,7 @@
 
         const audioSrc = resolveScenarioAudioUrl(state.activeScenario);
         if (audio && state.activeScenario && audioSrc) {
-          audio.playbackRate = state.playbackRate;
+          applyAudioPlaybackRate(audio, state.playbackRate);
           if (!audio.src || !audio.src.includes(audioSrc)) {
             audio.src = audioSrc;
           }
@@ -4531,7 +4644,7 @@
 
       async function startMicRecording() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          alert("Microphone capture is not supported in this browser.");
+          showToast(t("micNotSupported"), "error");
           return;
         }
 
@@ -4579,7 +4692,7 @@
             btnDock.className =
               "p-2.5 rounded-xl bg-red-600 text-white animate-pulse border border-red-400";
         } catch (err) {
-          alert("Microphone permission was denied or unavailable.");
+          showToast(t("micDenied"), "error");
         }
       }
 
@@ -4777,7 +4890,7 @@
         const rect = event.target.getBoundingClientRect();
         popover.classList.remove("hidden");
 
-        const popWidth = 280;
+        const popWidth = Math.min(280, Math.max(200, window.innerWidth - 32));
         let leftPos = rect.left + rect.width / 2 - popWidth / 2;
         let topPos = rect.bottom + 8;
 
@@ -4786,9 +4899,10 @@
         }
         if (leftPos < 16) leftPos = 16;
         if (topPos + 220 > window.innerHeight) {
-          topPos = rect.top - 210;
+          topPos = Math.max(16, rect.top - 210);
         }
 
+        popover.style.maxWidth = `${popWidth}px`;
         popover.style.left = `${leftPos}px`;
         popover.style.top = `${topPos}px`;
       }

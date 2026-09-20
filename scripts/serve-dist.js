@@ -25,10 +25,33 @@ const MIME = {
 
 const server = http.createServer((req, res) => {
   const urlPath = (req.url || "/").split("?")[0];
+  const ROOT_DIR = path.join(__dirname, "..");
   let filePath = path.join(DIST, urlPath);
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, "index.html");
+  }
+
+  // Fallback to source root if not in dist or if source is fresher
+  const sourcePath = path.join(ROOT_DIR, urlPath);
+  let resolvedSource = sourcePath;
+  if (
+    fs.existsSync(resolvedSource) &&
+    fs.statSync(resolvedSource).isDirectory()
+  ) {
+    resolvedSource = path.join(resolvedSource, "index.html");
+  }
+
+  if (
+    fs.existsSync(resolvedSource) &&
+    !fs.statSync(resolvedSource).isDirectory()
+  ) {
+    if (
+      !fs.existsSync(filePath) ||
+      fs.statSync(resolvedSource).mtimeMs > fs.statSync(filePath).mtimeMs
+    ) {
+      filePath = resolvedSource;
+    }
   }
 
   if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {

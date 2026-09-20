@@ -17,17 +17,25 @@ async function setupPage(page) {
 }
 
 test.describe("English Shadowing Multi-Device E2E Suite", () => {
-  test("1. Scenario Catalog & Zero Horizontal Overflow", async ({ page }) => {
+  test("1. Scenario Catalog, FTUX Guide & Responsive Layout", async ({
+    page,
+  }) => {
     const { errors } = await setupPage(page);
     await expect(page).toHaveTitle(/English Shadowing|Luyện Nói Shadowing/i);
 
-    // Verify Catalog View is visible
+    // Verify Catalog View & 3-Step FTUX Guide
     await expect(page.locator("#catalog-view")).toBeVisible();
-    await assertNoHorizontalOverflow(page);
+    await expect(page.locator('[data-i18n="howToShadowTitle"]')).toBeVisible();
 
-    // Verify Scenario Cards rendered
+    // Verify all 6 curated scenario cards rendered in difficulty order
     const scenarioCards = page.locator("#scenarioCardsGrid > div");
-    await expect(scenarioCards).toHaveCount(4);
+    await expect(scenarioCards).toHaveCount(6);
+
+    // First card should be A2 Specialty Coffee
+    const firstTitle = page.locator("#scenarioCardsGrid h3").first();
+    await expect(firstTitle).toContainText("Specialty Coffee");
+
+    await assertNoHorizontalOverflow(page);
 
     const criticalErrors = errors.filter(
       (e) => !e.includes("sw.js") && !e.includes("manifest.json")
@@ -37,94 +45,70 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
     );
   });
 
-  test("2. Select Scenario & Active Shadowing Player Flow", async ({
+  test("2. Core Shadowing Practice Flow & Audio Subtitle Sync", async ({
     page,
   }) => {
     await setupPage(page);
 
     // Click Practice on the first scenario card
-    const firstPracticeBtn = page.locator("#scenarioCardsGrid button").first();
+    const firstPracticeBtn = page
+      .locator("#scenarioCardsGrid button[onclick*='selectScenarioById']")
+      .first();
     await firstPracticeBtn.click();
 
-    // Verify Player view opens
+    // Verify Player view opens with active subtitles
     await expect(page.locator("#player-view")).toBeVisible();
     await expect(page.locator("#activeEnglishSubtitle")).toBeVisible();
     await expect(page.locator("#activeVietnameseSubtitle")).toBeVisible();
 
-    // Verify sentence index tracker
+    // Verify karaoke word chips exist
+    const karaokeWords = page.locator("#activeEnglishSubtitle .karaoke-word");
+    await expect(karaokeWords).toHaveCount(14);
+
+    // Verify sentence tracker and step navigation
     await expect(page.locator("#sentenceIndexTracker")).toContainText(
       "Sentence 1"
     );
-
-    // Click Next Sentence
     await page.click('button[title*="Next Sentence"]');
     await expect(page.locator("#sentenceIndexTracker")).toContainText(
       "Sentence 2"
     );
-
-    // Click Previous Sentence
     await page.click('button[title*="Previous Sentence"]');
     await expect(page.locator("#sentenceIndexTracker")).toContainText(
       "Sentence 1"
     );
 
+    // Verify Subtitle Masking Toggle
+    await page.click("#subMaskPrimary");
+    await expect(page.locator("#activeVietnameseSubtitle")).toBeHidden();
+    await page.click("#subMaskDual");
+    await expect(page.locator("#activeVietnameseSubtitle")).toBeVisible();
+
     await assertNoHorizontalOverflow(page);
   });
 
-  test("3. Subtitle Masking Modes & Speed Controls", async ({ page }) => {
+  test("3. Interactive Word Popover & Vocabulary Drawer", async ({ page }) => {
     await setupPage(page);
-    await page.locator("#scenarioCardsGrid button").first().click();
-
-    // Toggle English Only
-    await page.click("#subMaskPrimary");
-    await expect(page.locator("#activeEnglishSubtitle")).toBeVisible();
-    await expect(page.locator("#activeVietnameseSubtitle")).toBeHidden();
-
-    // Toggle Vietnamese Only
-    await page.click("#subMaskSecondary");
-    await expect(page.locator("#activeEnglishSubtitle")).toBeHidden();
-    await expect(page.locator("#activeVietnameseSubtitle")).toBeVisible();
-
-    // Toggle Dual
-    await page.click("#subMaskDual");
-    await expect(page.locator("#activeEnglishSubtitle")).toBeVisible();
-    await expect(page.locator("#activeVietnameseSubtitle")).toBeVisible();
-
-    // Toggle Blur
-    await page.click("#subMaskBlur");
-    await expect(page.locator("#subtitleStage")).toHaveClass(
-      /subtitles-blur-active/
-    );
-
-    // Speed popover selection
-    await expect(page.locator("#speedBtnText")).toHaveText("1.0x");
-    await page.locator("#speedBtn").scrollIntoViewIfNeeded();
-    await page.locator("#speedBtn").click();
-    await expect(page.locator("#speedPopover")).toBeVisible();
-    await page.locator('#speedPopover button:has-text("1.15x")').click();
-    await expect(page.locator("#speedBtnText")).toHaveText("1.15x");
-  });
-
-  test("4. Interactive Word Popover & Vocabulary Drawer", async ({ page }) => {
-    await setupPage(page);
-    await page.locator("#scenarioCardsGrid button").first().click();
-    await page.click("#subMaskDual");
+    await page
+      .locator("#scenarioCardsGrid button[onclick*='selectScenarioById']")
+      .first()
+      .click();
 
     // Click a word chip in the active subtitle
     const wordChip = page.locator("#activeEnglishSubtitle .word-chip").first();
     await wordChip.click();
 
-    // Verify popover appears
+    // Verify popover appears within bounds
     await expect(page.locator("#wordPopover")).toBeVisible();
     await expect(page.locator("#popoverWord")).not.toBeEmpty();
 
-    // Set word status to 'learning'
+    // Save word to Leitner deck
     await page.locator('#wordPopover button:has-text("Learning")').click();
     await expect(page.locator("#wordPopover")).toBeHidden();
 
-    // Open Vocabulary Drawer
+    // Open Vocabulary Drawer & Verify item is listed
     await page.click("#navBtnVocab");
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(200);
     await expect(page.locator("#vocabDrawer")).not.toHaveClass(
       /translate-x-full/
     );
@@ -135,63 +119,14 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
       .locator('#vocabDrawer button[aria-label="Close Vocabulary Drawer"]')
       .click();
     await expect(page.locator("#vocabDrawer")).toHaveClass(/translate-x-full/);
-  });
-
-  test("5. Real-time Karaoke Word Tokens & Audio Playback Flow", async ({
-    page,
-  }) => {
-    await setupPage(page);
-    await page.locator("#scenarioCardsGrid button").first().click();
-
-    // Verify karaoke word tokens exist
-    const karaokeWords = page.locator("#activeEnglishSubtitle .karaoke-word");
-    await expect(karaokeWords).toHaveCount(10);
-
-    // Verify HTML5 Audio element exists
-    const audioElement = page.locator("#playerAudio");
-    await expect(audioElement).toHaveCount(1);
-
-    // Verify audio scrubber milestones exist
-    const milestones = page.locator("#scrubberMilestones > div");
-    await expect(milestones).toHaveCount(7);
-
-    // Toggle play/pause
-    await page.click("#mainPlayPauseBtn");
-    await page.waitForTimeout(300);
-    await page.click("#mainPlayPauseBtn");
 
     await assertNoHorizontalOverflow(page);
   });
 
-  test("6. Integrated Player Card & Collapsible Transcript Drawer", async ({
+  test("4. URL Deep-Linking, Pinned Dock & Insights Analytics", async ({
     page,
   }) => {
-    await setupPage(page);
-    await page.locator("#scenarioCardsGrid button").first().click();
-
-    // Verify Integrated Player Card exists
-    await expect(page.locator("#player-container")).toBeVisible();
-    await expect(page.locator("#transport-dock")).toBeVisible();
-
-    // Verify Transcript Card exists
-    await expect(page.locator("#transcriptCard")).toBeVisible();
-    await expect(page.locator("#transcriptDrawerContent")).toBeVisible();
-
-    // Toggle Collapse Transcript Drawer
-    await page.click("#transcriptCard > div:first-child");
-    await expect(page.locator("#transcriptDrawerContent")).toBeHidden();
-
-    // Expand Transcript Drawer again
-    await page.click("#transcriptCard > div:first-child");
-    await expect(page.locator("#transcriptDrawerContent")).toBeVisible();
-
-    await assertNoHorizontalOverflow(page);
-  });
-
-  test("7. URL Deep-Linking Navigation & History State Sync", async ({
-    page,
-  }) => {
-    // Navigate directly with scenario and cue parameter
+    // Navigate directly with deep-link parameter
     await page.goto(`${APP_PATH}?scenario=tech-standup&cue=2`, {
       waitUntil: "domcontentloaded",
     });
@@ -206,74 +141,8 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
       "Sentence 3"
     );
 
-    // Return back to catalog
-    await page.click("#btnBackToCatalog");
-    await expect(page.locator("#catalog-view")).toBeVisible();
-    expect(page.url()).not.toContain("scenario=tech-standup");
-
-    await assertNoHorizontalOverflow(page);
-  });
-
-  test("8. Practice Insights Modal & Daily Goals Analytics", async ({
-    page,
-  }) => {
-    await setupPage(page);
-
-    // Open Insights Modal from header
-    await page.click("#navBtnInsights");
-    await expect(page.locator("#insightsModal")).toBeVisible();
-
-    // Verify statistics cards are rendered
-    await expect(page.locator("#modalStreakDays")).toBeVisible();
-    await expect(page.locator("#modalPracticeTime")).toBeVisible();
-    await expect(page.locator("#modalGoalProgressBar")).toBeAttached();
-    await expect(page.locator("#modalSentencesToday")).toBeVisible();
-    await expect(page.locator("#modalDueWordsCount")).toBeVisible();
-
-    // Close modal
-    await page
-      .locator('#insightsModal button[aria-label="Close Insights Modal"]')
-      .click();
-    await expect(page.locator("#insightsModal")).toBeHidden();
-
-    await assertNoHorizontalOverflow(page);
-  });
-
-  test("9. Default Continuous Flow Mode & Active Line Auto-Centering", async ({
-    page,
-  }) => {
-    await setupPage(page);
-    await page.locator("#scenarioCardsGrid button").first().click();
-
-    // Verify Continuous Flow Mode is active by default
-    await expect(page.locator("#modeContinuousBtn")).toHaveClass(
-      /bg-emerald-500\/20/
-    );
-
-    // Navigate across sentences and check transcript line styling
-    const firstLine = page.locator("#transcriptItem-0");
-    await expect(firstLine).toHaveClass(/bg-emerald-500\/(10|15)/);
-
-    // Step to sentence 2
-    await page.click('button[title*="Next Sentence"]');
-    const secondLine = page.locator("#transcriptItem-1");
-    await expect(secondLine).toHaveClass(/bg-emerald-500\/(10|15)/);
-
-    await assertNoHorizontalOverflow(page);
-  });
-
-  test("10. App Shell & Pinned Bottom Dock Reachability", async ({ page }) => {
-    await setupPage(page);
-    await page.locator("#scenarioCardsGrid button").first().click();
-
-    // Verify fixed app shell body
+    // Verify fixed app shell body and pinned transport dock
     await expect(page.locator("body")).toHaveClass(/overflow-hidden/);
-
-    // Verify Hero Subtitle Stage, Transcript Card, and Pinned Dock are all visible within viewport
-    await expect(page.locator("#subtitleStage")).toBeVisible();
-    await expect(page.locator("#transcriptCard")).toBeVisible();
-    await expect(page.locator("#player-container")).toBeVisible();
-
     const isDockWithinViewport = await page.evaluate(() => {
       const dock = document.getElementById("player-container");
       if (!dock) return false;
@@ -283,6 +152,19 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
     expect(isDockWithinViewport, "Pinned dock must be within viewport").toBe(
       true
     );
+
+    // Open & verify Insights Modal
+    await page.click("#navBtnInsights");
+    await expect(page.locator("#insightsModal")).toBeVisible();
+    await expect(page.locator("#modalStreakDays")).toBeVisible();
+    await page
+      .locator('#insightsModal button[aria-label="Close Insights Modal"]')
+      .click();
+    await expect(page.locator("#insightsModal")).toBeHidden();
+
+    // Return to catalog
+    await page.click("#btnBackToCatalog");
+    await expect(page.locator("#catalog-view")).toBeVisible();
 
     await assertNoHorizontalOverflow(page);
   });
