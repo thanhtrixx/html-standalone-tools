@@ -465,6 +465,16 @@ async function runTests() {
     htmlContent.includes("jumpToSentence(${idx})"),
     "Scrubber milestones bind jumpToSentence to jump when clicked"
   );
+  assert(
+    htmlContent.includes("isAudioSeeking = true") &&
+      htmlContent.includes("isAudioSeeking = false"),
+    "Audio seek lock state is tracked during sentence jumps to prevent audio-karaoke desync"
+  );
+  assert(
+    htmlContent.includes("function openWordPopover") &&
+      htmlContent.includes("if (state.isPlaying) {\n          pauseAudio();"),
+    "Opening word popover automatically pauses audio for calm study"
+  );
 
   console.log(`\n==================================================`);
   console.log(

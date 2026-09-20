@@ -699,6 +699,10 @@ async function runTests() {
   );
   const wordsForKaraoke = lrcCues[0].words;
   assert(
+    calculateKaraokeWordIndex(wordsForKaraoke, -0.2) === -1,
+    "Current time before speech start returns -1 (no active glow)"
+  );
+  assert(
     calculateKaraokeWordIndex(wordsForKaraoke, 0.0) === 0,
     "Current time 0.0s active word index is 0 ('Good')"
   );
@@ -711,13 +715,12 @@ async function runTests() {
     "Current time 1.3s active word index is 3 ('can')"
   );
   assert(
-    calculateKaraokeWordIndex(wordsForKaraoke, 10.0) ===
-      wordsForKaraoke.length - 1,
-    "Current time past end returns last word index"
+    calculateKaraokeWordIndex(wordsForKaraoke, 10.0) === wordsForKaraoke.length,
+    "Current time past speech end returns words.length (all words passed)"
   );
   assert(
-    calculateKaraokeWordIndex([], 1.0) === 0,
-    "Handles empty words array safely"
+    calculateKaraokeWordIndex([], 1.0) === -1,
+    "Handles empty words array safely with -1"
   );
 
   // 15. URL Scenario Deep-Linking Parser
