@@ -2283,7 +2283,7 @@
       // ==========================================
       // 2. CURATED SCENARIOS LIBRARY (PRELOADED)
       // ==========================================
-      const CURATED_SCENARIOS = [
+      const SCENARIOS_MANIFEST = [
         {
           id: "academic-ai-future",
           title: "Academic Discussion on AI & Remote Work",
@@ -2293,60 +2293,9 @@
           duration: 152,
           description:
             "Nuanced academic discourse discussing asynchronous productivity, cognitive automation, digital nomadism, and human-machine synergy.",
-          audioUrl: "audio/academic-ai-future.mp3",
-          lrcContent: `[ti:Academic Discussion on AI & Remote Work]
-[ar:English Shadowing]
-[al:academic]
-[length:02:32.06]
-
-[00:00.00]<00:00.00>The <00:00.14>rapid <00:00.54>transition <00:01.13>toward <00:01.53>distributed <00:02.33>knowledge <00:02.72>work <00:02.92>has <00:03.06>fundamentally <00:04.05>reconfigured <00:05.05>institutional <00:06.04>dynamics <00:06.64>and <00:06.78>cognitive <00:07.37>collaboration.
-[00:00.00]Sự chuyển dịch nhanh chóng sang lao động tri thức phân tán đã tái định hình căn bản động lực tổ chức và sự cộng tác nhận thức.
-
-[00:08.99]<00:08.99>Indeed, <00:09.50>empirical <00:10.36>studies <00:10.79>suggest <00:11.22>that <00:11.43>asynchronous <00:12.29>workflows <00:12.71>foster <00:13.14>deeper <00:13.57>periods <00:14.00>of <00:14.15>uninterrupted <00:15.22>focus <00:15.65>and <00:15.80>significantly <00:16.87>mitigate <00:17.51>mental <00:17.94>fatigue.
-[00:08.99]Thật vậy, các nghiên cứu thực nghiệm chỉ ra rằng quy trình làm việc bất đồng bộ thúc đẩy những khoảng thời gian tập trung sâu không bị ngắt quãng và giảm thiểu đáng kể sự mệt mỏi tinh thần.
-
-[00:19.21]<00:19.21>However, <00:19.94>organizational <00:21.24>theorists <00:21.67>caution <00:22.10>that <00:22.31>completely <00:23.17>eliminating <00:24.25>spontaneous <00:24.89>physical <00:25.54>proximity <00:26.40>risks <00:26.62>diminishing <00:27.48>serendipitous <00:28.55>innovation <00:29.41>across <00:29.84>cross-functional <00:30.71>teams.
-[00:19.21]Tuy nhiên, các nhà lý thuyết tổ chức cảnh báo rằng việc loại bỏ hoàn toàn sự tương tác trực tiếp tự phát có nguy cơ làm suy giảm những đổi mới sáng tạo ngẫu nhiên giữa các nhóm liên chức năng.
-
-[00:31.55]<00:31.55>That <00:31.75>is <00:31.89>a <00:32.03>critical <00:32.63>observation. <00:33.56>Many <00:33.96>leading <00:34.36>institutions <00:35.16>are <00:35.30>adopting <00:35.90>hybrid <00:36.30>models <00:36.70>that <00:36.90>explicitly <00:37.71>curate <00:38.11>intentional <00:38.91>gatherings <00:39.51>rather <00:39.91>than <00:40.11>enforcing <00:40.71>mandatory <00:41.52>co-presence.
-[00:31.55]Đó là một quan sát rất sắc sảo. Nhiều tổ chức hàng đầu đang áp dụng mô hình lai, chủ động tổ chức các buổi gặp mặt có chủ đích thay vì ép buộc hiện diện trực tiếp.
-
-[00:42.74]<00:42.74>Concurrently, <00:43.67>autonomous <00:44.52>generative <00:45.37>intelligence <00:46.22>and <00:46.37>cognitive <00:47.01>copilots <00:47.65>are <00:47.80>augmenting <00:48.44>analytical <00:49.50>workflows <00:49.92>at <00:50.07>an <00:50.22>unprecedented <00:51.28>velocity.
-[00:42.74]Đồng thời, trí tuệ nhân tạo tạo sinh tự hành và các trợ lý nhận thức đang tăng cường các quy trình phân tích với tốc độ chưa từng có.
-
-[00:52.76]<00:52.76>The <00:52.90>emerging <00:53.51>consensus <00:54.11>indicates <00:54.92>that <00:55.12>AI <00:55.32>is <00:55.46>transforming <00:56.07>task <00:56.27>composition <00:57.07>rather <00:57.48>than <00:57.68>wholesale <00:58.48>job <00:58.69>displacement <00:59.49>across <00:59.90>professional <01:00.70>sectors.
-[00:52.76]Sự đồng thuận mới nổi cho thấy AI đang tái cấu trúc thành phần công việc thay vì thay thế hoàn toàn việc làm trên diện rộng trong các lĩnh vực chuyên môn.
-
-[01:01.72]<01:01.72>Precisely. <01:02.69>The <01:02.83>decisive <01:03.46>competitive <01:04.30>advantage <01:04.93>will <01:05.14>increasingly <01:05.97>belong <01:06.39>to <01:06.54>individuals <01:07.38>and <01:07.52>organizations <01:08.57>that <01:08.78>cultivate <01:09.41>continuous <01:10.03>human-machine <01:10.87>synergy.
-[01:01.72]Chính xác. Lợi thế cạnh tranh mang tính quyết định sẽ ngày càng thuộc về những cá nhân và tổ chức biết nuôi dưỡng sự phối hợp nhịp nhàng liên tục giữa người và máy.
-
-[01:12.12]<01:12.12>This <01:12.32>paradigm <01:12.91>necessitates <01:13.90>a <01:14.04>profound <01:14.43>evolution <01:15.22>in <01:15.35>pedagogical <01:16.34>frameworks <01:16.93>and <01:17.07>higher <01:17.46>education <01:18.25>curricula <01:19.04>worldwide.
-[01:12.12]Mô hình này đòi hỏi một sự chuyển biến sâu sắc trong các khung sư phạm và chương trình giáo dục đại học trên toàn thế giới.
-
-[01:20.05]<01:20.05>We <01:20.20>must <01:20.42>transition <01:21.08>from <01:21.29>rote <01:21.51>knowledge <01:21.95>memorization <01:23.04>toward <01:23.47>high-order <01:24.13>critical <01:24.78>synthesis, <01:25.52>meta-cognition, <01:26.70>and <01:26.85>algorithmic <01:27.73>reasoning.
-[01:20.05]Chúng ta phải chuyển dịch từ việc ghi nhớ kiến thức học vẹt sang khả năng tổng hợp tư duy phản biện bậc cao, siêu nhận thức và tư duy thuật toán.
-
-[01:29.01]<01:29.01>Furthermore, <01:29.73>digital <01:30.36>nomadism <01:30.99>is <01:31.14>decoupling <01:31.77>geographic <01:32.41>location <01:33.04>from <01:33.25>economic <01:34.09>productivity, <01:35.23>reshaping <01:35.87>global <01:36.29>labor <01:36.71>mobility <01:37.55>patterns.
-[01:29.01]Hơn nữa, lối sống du mục kỹ thuật số đang tách rời vị trí địa lý khỏi năng suất kinh tế, tái định hình các mô hình dịch chuyển lao động toàn cầu.
-
-[01:38.40]<01:38.40>Emerging <01:38.96>economies <01:39.72>with <01:39.91>robust <01:40.28>digital <01:40.85>infrastructure <01:41.60>are <01:41.73>positioning <01:42.48>themselves <01:43.05>as <01:43.18>attractive <01:43.75>hubs <01:43.93>for <01:44.07>international <01:45.01>intellectual <01:45.76>capital.
-[01:38.40]Các nền kinh tế mới nổi có cơ sở hạ tầng số vững chắc đang tự định vị mình thành các trung tâm thu hút vốn tri thức quốc tế đầy hấp dẫn.
-
-[01:46.94]<01:46.94>Yet <01:47.15>policymakers <01:48.22>must <01:48.43>address <01:48.86>the <01:49.00>digital <01:49.64>divide <01:50.07>to <01:50.22>ensure <01:50.65>that <01:50.86>technological <01:51.92>advancements <01:52.78>do <01:52.93>not <01:53.08>exacerbate <01:53.93>socioeconomic <01:54.99>polarization.
-[01:46.94]Dẫu vậy, các nhà hoạch định chính sách phải giải quyết khoảng cách số để đảm bảo các tiến bộ công nghệ không làm trầm trọng thêm sự phân hóa kinh tế xã hội.
-
-[01:56.69]<01:56.69>Universal <01:57.43>access <01:57.80>to <01:57.93>high-speed <01:58.31>broadband <01:58.68>and <01:58.81>equitable <01:59.55>AI <01:59.74>literacy <02:00.48>initiatives <02:01.41>will <02:01.60>be <02:01.73>pivotal <02:02.29>determinants <02:03.03>of <02:03.16>sustainable <02:03.91>development.
-[01:56.69]Việc tiếp cận internet băng thông rộng phổ cập và các sáng kiến nâng cao năng lực AI bình đẳng sẽ là những yếu tố quyết định cho sự phát triển bền vững.
-
-[02:05.26]<02:05.26>In <02:05.42>essence, <02:05.96>the <02:06.12>future <02:06.58>of <02:06.74>work <02:06.96>is <02:07.12>not <02:07.28>predetermined <02:08.41>by <02:08.57>technological <02:09.70>momentum, <02:10.47>but <02:10.63>actively <02:11.54>shaped <02:11.99>by <02:12.15>our <02:12.38>collective <02:13.06>governance <02:13.74>choices.
-[02:05.26]Về bản chất, tương lai của lao động không bị định sẵn bởi quán tính công nghệ, mà được định hình chủ động bởi những lựa chọn quản trị tập thể của chúng ta.
-
-[02:14.82]<02:14.82>Deliberate <02:15.62>practice, <02:16.10>ethical <02:16.70>vigilance, <02:17.38>and <02:17.52>continuous <02:18.12>adaptive <02:18.72>learning <02:19.12>will <02:19.32>define <02:19.72>professional <02:20.52>longevity <02:21.32>in <02:21.46>the <02:21.60>computational <02:22.60>era.
-[02:14.82]Sự luyện tập có chủ đích, sự thận trọng về đạo đức và việc học tập thích ứng liên tục sẽ định hình sự nghiệp bền vững trong kỷ nguyên tính toán.
-
-[02:23.42]<02:23.42>That <02:23.65>summarizes <02:24.56>our <02:24.79>thesis <02:25.25>eloquently. <02:26.30>Let <02:26.52>us <02:26.75>synthesize <02:27.44>these <02:27.66>qualitative <02:28.58>insights <02:29.03>into <02:29.49>the <02:29.65>upcoming <02:30.33>research <02:30.79>symposium <02:31.47>paper.
-[02:23.42]Điều đó đã tóm lược luận điểm của chúng ta một cách rất thuyết phục. Hãy tổng hợp những góc nhìn định tính này vào bài báo cáo hội thảo sắp tới.
-`,
+          tags: ["ai", "future-of-work", "higher-education", "synthesis"],
+          collection: "academic",
+          sentenceCount: 16,
         },
         {
           id: "airport-security",
@@ -2357,66 +2306,9 @@
           duration: 125,
           description:
             "Navigating terminal check-in, baggage drop allowances, customs security screening, and boarding gate directions in British English.",
-          audioUrl: "audio/airport-security.mp3",
-          lrcContent: `[ti:Airport Check-in & Security Screen]
-[ar:English Shadowing]
-[al:travel]
-[length:02:05.25]
-
-[00:00.00]<00:00.00>Good <00:00.28>afternoon, <00:01.24>sir. <00:01.69>Welcome <00:02.26>to <00:02.45>Terminal <00:03.30>3. <00:03.75>May <00:04.03>I <00:04.23>please <00:04.51>inspect <00:05.08>your <00:05.36>passport <00:05.92>and <00:06.12>electronic <00:07.25>boarding <00:07.81>pass?
-[00:00.00]Chào buổi chiều quý khách. Chào mừng quý khách đến Nhà ga số 3. Tôi có thể kiểm tra hộ chiếu và thẻ lên máy bay điện tử được không?
-
-[00:08.76]<00:08.76>Certainly, <00:09.73>here <00:10.01>you <00:10.21>are. <00:10.58>I'm <00:10.86>booked <00:11.43>on <00:11.63>the <00:11.83>four-thirty <00:12.68>flight <00:12.96>to <00:13.16>Edinburgh <00:14.01>today.
-[00:08.76]Chắc chắn rồi, của cô đây. Hôm nay tôi đã đặt chuyến bay lúc bốn giờ ba mươi đi Edinburgh.
-
-[00:15.25]<00:15.25>Thank <00:15.52>you. <00:15.88>I <00:16.07>see <00:16.34>your <00:16.61>booking <00:17.15>confirmation <00:18.24>here. <00:18.68>Are <00:18.87>you <00:19.06>checking <00:19.60>any <00:19.87>luggage <00:20.42>into <00:20.96>the <00:21.15>aircraft <00:21.70>hold <00:21.97>today?
-[00:15.25]Cảm ơn quý khách. Tôi đã thấy thông tin xác nhận đặt chỗ. Hôm nay quý khách có ký gửi hành lý vào khoang máy bay không?
-
-[00:23.18]<00:23.18>Yes, <00:23.58>I <00:23.78>have <00:23.98>one <00:24.27>medium-sized <00:25.41>rolling <00:25.99>suitcase <00:26.56>that <00:26.85>I <00:27.05>would <00:27.34>like <00:27.62>to <00:27.83>check <00:28.11>in, <00:28.43>please.
-[00:23.18]Vâng, tôi có một chiếc vali kéo cỡ vừa muốn làm thủ tục ký gửi.
-
-[00:29.39]<00:29.39>Please <00:29.62>place <00:29.86>your <00:30.09>suitcase <00:30.56>directly <00:31.27>onto <00:31.74>the <00:31.90>luggage <00:32.37>scale <00:32.84>so <00:33.01>we <00:33.17>can <00:33.40>verify <00:34.11>the <00:34.27>weight.
-[00:29.39]Xin vui lòng đặt vali trực tiếp lên cân hành lý để chúng tôi kiểm tra trọng lượng.
-
-[00:34.95]<00:34.95>It <00:35.12>registers <00:35.84>at <00:36.01>eighteen <00:36.49>point <00:36.73>five <00:36.97>kilograms, <00:37.78>which <00:38.02>is <00:38.19>well <00:38.43>within <00:38.91>your <00:39.15>standard <00:39.63>twenty-three <00:40.35>kilogram <00:41.07>allowance.
-[00:34.95]Vali nặng mười tám phẩy năm ký, hoàn toàn nằm trong hạn mức tiêu chuẩn hai mươi ba ký của quý khách.
-
-[00:42.44]<00:42.44>Wonderful! <00:43.61>Here <00:43.93>is <00:44.16>my <00:44.38>baggage <00:45.03>claim <00:45.36>tag. <00:45.88>Do <00:46.10>I <00:46.33>need <00:46.65>to <00:46.88>re-check <00:47.53>my <00:47.76>bag <00:48.08>during <00:48.73>the <00:48.96>connecting <00:49.93>transit?
-[00:42.44]Tuyệt vời! Đây là thẻ nhận hành lý của tôi. Tôi có cần làm lại thủ tục gửi hành lý trong lúc quá cảnh không?
-
-[00:51.27]<00:51.27>No, <00:51.62>your <00:51.87>luggage <00:52.36>is <00:52.53>checked <00:53.02>straight <00:53.27>through <00:53.51>to <00:53.68>your <00:53.93>final <00:54.42>destination <00:55.41>in <00:55.58>Edinburgh.
-[00:51.27]Không đâu ạ, hành lý của quý khách sẽ được chuyển thẳng đến điểm đến cuối cùng tại Edinburgh.
-
-[00:56.76]<00:56.76>Here <00:57.07>are <00:57.28>your <00:57.58>printed <00:58.19>boarding <00:58.80>documents. <00:59.89>You <01:00.10>will <01:00.41>be <01:00.62>departing <01:01.53>from <01:01.84>Gate <01:02.14>B24.
-[00:56.76]Đây là các giấy tờ lên máy bay đã in của quý khách. Chuyến bay sẽ khởi hành tại Cửa B24.
-
-[01:03.12]<01:03.12>Thank <01:03.39>you <01:03.58>kindly. <01:04.27>Could <01:04.53>you <01:04.72>point <01:04.99>me <01:05.25>in <01:05.44>the <01:05.62>direction <01:06.42>of <01:06.61>the <01:06.79>fast-track <01:07.33>security <01:08.39>screening <01:08.92>area?
-[01:03.12]Cảm ơn cô rất nhiều. Cô có thể chỉ giúp tôi hướng đi đến khu vực kiểm tra an ninh ưu tiên không?
-
-[01:10.11]<01:10.11>Certainly. <01:11.00>Take <01:11.24>the <01:11.42>escalator <01:12.40>up <01:12.57>to <01:12.75>the <01:12.92>first <01:13.17>floor <01:13.41>and <01:13.58>follow <01:14.08>the <01:14.25>purple <01:14.74>signs <01:14.99>towards <01:15.48>Security <01:16.46>Checkpoint <01:16.96>B.
-[01:10.11]Chắc chắn rồi. Quý khách đi thang cuốn lên tầng một và đi theo biển chỉ dẫn màu tím hướng về Trạm an ninh B.
-
-[01:17.65]<01:17.65>Please <01:17.91>remember <01:18.67>to <01:18.85>remove <01:19.36>all <01:19.62>laptops, <01:20.23>tablets, <01:20.84>and <01:21.02>liquids <01:21.53>from <01:21.79>your <01:22.04>hand <01:22.30>luggage <01:22.81>before <01:23.32>approaching <01:24.08>the <01:24.26>x-ray <01:24.52>trays.
-[01:17.65]Xin lưu ý lấy toàn bộ máy tính xách tay, máy tính bảng và chất lỏng ra khỏi hành lý xách tay trước khi vào khay quét tia X.
-
-[01:25.42]<01:25.42>Are <01:25.59>liquids <01:26.05>still <01:26.29>restricted <01:26.98>to <01:27.15>containers <01:27.84>of <01:28.01>one <01:28.24>hundred <01:28.70>milliliters <01:29.63>or <01:29.80>less <01:30.03>inside <01:30.49>a <01:30.66>transparent <01:31.35>bag?
-[01:25.42]Chất lỏng có còn bị giới hạn trong các lọ dung tích từ một trăm mili-lít trở xuống đựng trong túi trong suốt không?
-
-[01:32.22]<01:32.22>That <01:32.47>is <01:32.64>correct. <01:33.29>All <01:33.53>liquid <01:34.03>containers <01:34.77>must <01:35.01>fit <01:35.26>comfortably <01:36.24>within <01:36.74>a <01:36.91>single <01:37.40>resealable <01:38.39>clear <01:38.64>plastic <01:39.13>pouch.
-[01:32.22]Hoàn toàn chính xác ạ. Toàn bộ các lọ chất lỏng phải nằm vừa vặn trong một túi nhựa trong suốt có khóa kéo.
-
-[01:40.02]<01:40.02>Understood. <01:41.05>And <01:41.25>what <01:41.53>time <01:41.81>does <01:42.10>the <01:42.30>boarding <01:42.86>gate <01:43.15>open <01:43.72>for <01:43.91>priority <01:44.77>passengers?
-[01:40.02]Tôi hiểu rồi. Và cửa lên máy bay sẽ mở lúc mấy giờ cho hành khách ưu tiên vậy cô?
-
-[01:46.29]<01:46.29>Boarding <01:46.71>commences <01:47.35>approximately <01:48.62>forty-five <01:49.25>minutes <01:49.89>prior <01:50.10>to <01:50.25>scheduled <01:50.88>departure, <01:51.60>around <01:52.03>three-forty-five.
-[01:46.29]Việc lên máy bay sẽ bắt đầu khoảng bốn mươi lăm phút trước giờ khởi hành dự kiến, vào khoảng ba giờ bốn mươi lăm.
-
-[01:53.50]<01:53.50>Perfect. <01:54.34>Thank <01:54.66>you <01:54.88>very <01:55.53>much <01:55.85>for <01:56.08>your <01:56.40>clear <01:56.72>assistance <01:57.69>and <01:57.91>guidance.
-[01:53.50]Hoàn hảo. Cảm ơn cô rất nhiều vì sự hướng dẫn rõ ràng và tận tình.
-
-[01:59.25]<01:59.25>It <01:59.45>was <01:59.64>my <01:59.84>absolute <02:00.67>pleasure, <02:01.34>sir. <02:01.79>Have <02:01.98>a <02:02.18>safe <02:02.46>journey <02:03.02>and <02:03.21>enjoy <02:03.77>your <02:04.05>stay <02:04.33>in <02:04.52>Scotland!
-[01:59.25]Đó là niềm vinh hạnh của tôi, thưa quý khách. Chúc quý khách có một chuyến đi an toàn và có những trải nghiệm tuyệt vời tại Scotland!
-`,
+          tags: ["airport", "security", "customs", "boarding", "flight"],
+          collection: "travel",
+          sentenceCount: 18,
         },
         {
           id: "doctor-consultation",
@@ -2424,69 +2316,12 @@
           category: "daily",
           level: "B1",
           accent: "AU",
-          duration: 129,
+          duration: 128,
           description:
             "Visiting a medical clinic to discuss seasonal allergies, persistent coughing, prescription dosage, and lifestyle advice in Australian English.",
-          audioUrl: "audio/doctor-consultation.mp3",
-          lrcContent: `[ti:General Practice Medical Consultation]
-[ar:English Shadowing]
-[al:daily]
-[length:02:08.71]
-
-[00:00.00]<00:00.00>Good <00:00.36>morning, <00:01.22>William! <00:02.16>Please <00:02.52>come <00:02.88>in <00:03.13>and <00:03.38>take <00:03.74>a <00:03.99>seat. <00:04.57>How <00:04.93>can <00:05.29>I <00:05.54>help <00:05.90>you <00:06.15>today?
-[00:00.00]Chào buổi sáng, William! Mời bạn vào và ngồi xuống nhé. Hôm nay tôi có thể giúp gì cho bạn?
-
-[00:07.59]<00:07.59>Good <00:07.83>morning, <00:08.40>Doctor. <00:09.02>I've <00:09.26>been <00:09.50>experiencing <00:10.45>a <00:10.62>persistent <00:11.34>dry <00:11.57>cough <00:11.81>and <00:11.98>itchy <00:12.46>eyes <00:12.70>over <00:13.17>the <00:13.34>past <00:13.58>two <00:13.82>weeks.
-[00:07.59]Chào bác sĩ. Khoảng hai tuần trở lại đây tôi bị ho khan kéo dài và mắt thường xuyên bị ngứa.
-
-[00:14.70]<00:14.70>I <00:14.88>see. <00:15.30>Has <00:15.48>the <00:15.66>cough <00:15.92>been <00:16.18>keeping <00:16.70>you <00:16.88>awake <00:17.40>during <00:17.92>the <00:18.10>night, <00:18.47>or <00:18.65>is <00:18.83>it <00:19.01>primarily <00:20.05>triggered <00:20.83>by <00:21.01>physical <00:21.79>exertion?
-[00:14.70]Tôi hiểu rồi. Cơn ho có làm bạn mất ngủ vào ban đêm không, hay chủ yếu xuất hiện khi bạn vận động thể chất?
-
-[00:23.23]<00:23.23>It <00:23.38>seems <00:23.61>to <00:23.77>worsen <00:24.22>at <00:24.38>night, <00:24.69>especially <00:25.59>when <00:25.82>I <00:25.98>lie <00:26.20>down, <00:26.52>and <00:26.68>early <00:27.13>in <00:27.29>the <00:27.45>morning <00:27.90>when <00:28.12>I <00:28.28>wake <00:28.51>up.
-[00:23.23]Nó có vẻ nặng hơn vào ban đêm, đặc biệt là khi tôi nằm xuống, và vào sáng sớm lúc tôi vừa thức dậy.
-
-[00:29.30]<00:29.30>Have <00:29.49>you <00:29.68>had <00:29.88>any <00:30.15>fever, <00:30.81>shortness <00:31.36>of <00:31.55>breath, <00:31.93>or <00:32.13>noticeable <00:33.22>chest <00:33.50>tightness <00:34.05>along <00:34.60>with <00:34.87>the <00:35.06>coughing?
-[00:29.30]Bạn có bị sốt, khó thở hay cảm giác tức ngực đáng kể đi kèm với các cơn ho không?
-
-[00:36.27]<00:36.27>No <00:36.53>fever <00:37.03>at <00:37.21>all, <00:37.56>just <00:37.81>a <00:37.99>scratchy <00:38.49>throat, <00:38.85>frequent <00:39.35>sneezing, <00:39.96>and <00:40.13>feeling <00:40.64>slightly <00:41.14>fatigued.
-[00:36.27]Hoàn toàn không sốt, chỉ là cổ họng hơi ngứa rát, hắt hơi liên tục và cảm thấy hơi uể oải.
-
-[00:42.55]<00:42.55>Let's <00:42.84>take <00:43.14>a <00:43.34>quick <00:43.63>look <00:43.93>at <00:44.13>your <00:44.42>throat <00:44.72>and <00:44.92>listen <00:45.51>to <00:45.71>your <00:46.01>lungs <00:46.30>with <00:46.59>the <00:46.80>stethoscope. <00:47.85>Please <00:48.14>take <00:48.44>a <00:48.64>deep <00:48.94>breath <00:49.23>in <00:49.43>through <00:49.73>your <00:50.02>mouth.
-[00:42.55]Hãy để tôi kiểm tra nhanh cổ họng và nghe phổi của bạn bằng ống nghe nhé. Xin vui lòng hít một hơi thật sâu bằng miệng.
-
-[00:50.79]<00:50.79>Your <00:51.06>lungs <00:51.33>sound <00:51.60>completely <00:52.68>clear <00:52.95>with <00:53.22>no <00:53.49>wheezing <00:54.03>or <00:54.22>congestion, <00:55.14>which <00:55.41>is <00:55.60>very <00:56.14>reassuring <00:56.95>news.
-[00:50.79]Phổi của bạn nghe rất trong trẻo, không có tiếng khò khè hay tắc nghẽn, đây là một dấu hiệu rất yên tâm.
-
-[00:57.69]<00:57.69>Your <00:57.93>symptoms <00:58.41>are <00:58.58>highly <00:59.06>consistent <00:59.78>with <01:00.03>seasonal <01:00.75>allergic <01:01.47>rhinitis, <01:02.29>commonly <01:03.01>triggered <01:03.74>by <01:03.91>high <01:04.15>pollen <01:04.63>counts <01:04.87>in <01:05.04>spring.
-[00:57.69]Các triệu chứng của bạn rất điển hình của bệnh viêm mũi dị ứng theo mùa, thường bùng phát do lượng phấn hoa cao vào mùa xuân.
-
-[01:05.92]<01:05.92>That <01:06.13>makes <01:06.55>a <01:06.69>lot <01:06.90>of <01:07.04>sense. <01:07.37>The <01:07.52>pollen <01:07.93>levels <01:08.35>have <01:08.49>been <01:08.70>exceptionally <01:09.73>high <01:09.94>across <01:10.35>Melbourne <01:10.77>lately.
-[01:05.92]Nghe rất hợp lý ạ. Mức độ phấn hoa ở Melbourne dạo gần đây đang ở mức rất cao.
-
-[01:12.01]<01:12.01>I'm <01:12.25>going <01:12.50>to <01:12.66>recommend <01:13.39>a <01:13.56>non-drowsy <01:14.28>antihistamine <01:15.49>tablet <01:15.98>once <01:16.22>daily <01:16.70>in <01:16.87>the <01:17.04>morning, <01:17.62>along <01:18.10>with <01:18.34>a <01:18.51>soothing <01:19.00>saline <01:19.48>nasal <01:19.96>spray.
-[01:12.01]Tôi sẽ kê cho bạn một loại thuốc kháng histamine không gây buồn ngủ uống một viên mỗi sáng, kèm theo bình xịt mũi nước muối sinh lý làm dịu.
-
-[01:20.85]<01:20.85>Should <01:21.09>I <01:21.26>use <01:21.50>the <01:21.66>nasal <01:22.14>spray <01:22.38>before <01:22.86>or <01:23.03>after <01:23.51>going <01:23.75>outside <01:24.23>for <01:24.40>my <01:24.56>morning <01:25.04>run?
-[01:20.85]Tôi nên dùng bình xịt mũi trước hay sau khi ra ngoài chạy bộ buổi sáng vậy bác sĩ?
-
-[01:25.93]<01:25.93>Use <01:26.17>the <01:26.35>saline <01:26.84>spray <01:27.09>right <01:27.34>after <01:27.83>returning <01:28.58>indoors <01:29.07>to <01:29.25>rinse <01:29.50>away <01:29.99>any <01:30.24>trapped <01:30.73>pollen <01:31.23>particles <01:31.97>effectively.
-[01:25.93]Hãy dùng bình xịt nước muối ngay sau khi vào nhà để rửa trôi phấn hoa bám lại một cách hiệu quả nhất.
-
-[01:33.86]<01:33.86>Are <01:34.01>there <01:34.23>any <01:34.44>potential <01:35.09>side <01:35.30>effects <01:35.73>I <01:35.88>should <01:36.09>watch <01:36.31>out <01:36.46>for <01:36.61>with <01:36.82>the <01:36.97>antihistamine?
-[01:33.86]Có tác dụng phụ nào tôi cần lưu ý khi dùng thuốc kháng histamine không bác sĩ?
-
-[01:38.68]<01:38.68>Modern <01:39.14>non-drowsy <01:39.83>antihistamines <01:41.22>are <01:41.39>generally <01:42.31>very <01:42.78>gentle, <01:43.33>though <01:43.56>a <01:43.72>small <01:43.96>percentage <01:44.65>of <01:44.81>patients <01:45.28>may <01:45.51>experience <01:46.20>mild <01:46.44>dry <01:46.67>mouth.
-[01:38.68]Thuốc kháng histamine thế hệ mới thường rất êm dịu, mặc dù một tỷ lệ nhỏ người dùng có thể thấy khô miệng nhẹ.
-
-[01:47.34]<01:47.34>Drink <01:47.62>plenty <01:48.18>of <01:48.38>water <01:48.94>throughout <01:49.50>the <01:49.69>day <01:49.97>and <01:50.17>try <01:50.45>to <01:50.65>keep <01:50.93>bedroom <01:51.49>windows <01:52.05>closed <01:52.61>during <01:53.17>peak <01:53.45>morning <01:54.01>pollen <01:54.58>hours.
-[01:47.34]Hãy uống nhiều nước trong ngày và cố gắng đóng cửa sổ phòng ngủ trong những khung giờ phấn hoa cao điểm buổi sáng.
-
-[01:55.53]<01:55.53>Thank <01:55.77>you <01:55.95>so <01:56.12>much <01:56.37>for <01:56.54>the <01:56.71>thorough <01:57.21>checkup <01:57.71>and <01:57.88>practical <01:58.62>advice, <01:59.22>Doctor!
-[01:55.53]Cảm ơn bác sĩ rất nhiều vì đã kiểm tra kỹ lưỡng và cho tôi những lời khuyên rất thiết thực!
-
-[02:00.36]<02:00.36>You're <02:00.65>very <02:01.22>welcome! <02:01.97>If <02:02.17>the <02:02.37>symptoms <02:02.94>persist <02:03.52>after <02:04.09>two <02:04.38>weeks, <02:04.78>please <02:05.07>book <02:05.36>a <02:05.56>follow-up <02:06.42>appointment <02:07.28>so <02:07.48>we <02:07.68>can <02:07.97>reassess.
-[02:00.36]Không có chi đâu! Nếu các triệu chứng vẫn kéo dài sau hai tuần, bạn hãy đặt lịch tái khám để chúng ta đánh giá lại nhé.
-`,
+          tags: ["health", "doctor", "symptoms", "medical"],
+          collection: "daily-social",
+          sentenceCount: 18,
         },
         {
           id: "job-interview",
@@ -2497,66 +2332,9 @@
           duration: 143,
           description:
             "Job interview discussing past technical challenges, handling cross-team conflicts, system scalability, and career growth.",
-          audioUrl: "audio/job-interview.mp3",
-          lrcContent: `[ti:Software Engineering Behavioral Interview]
-[ar:English Shadowing]
-[al:workplace]
-[length:02:23.03]
-
-[00:00.00]<00:00.00>Hello <00:00.40>Alex, <00:00.89>thank <00:01.09>you <00:01.23>for <00:01.37>joining <00:01.78>us <00:01.98>today. <00:02.50>We're <00:02.64>very <00:03.05>excited <00:03.65>to <00:03.79>dive <00:04.00>into <00:04.40>your <00:04.60>technical <00:05.21>background <00:05.61>and <00:05.75>engineering <00:06.56>philosophy.
-[00:00.00]Xin chào Alex, cảm ơn bạn đã tham gia buổi phỏng vấn hôm nay. Chúng tôi rất hào hứng muốn tìm hiểu về kinh nghiệm kỹ thuật và triết lý kỹ thuật của bạn.
-
-[00:07.99]<00:07.99>Thank <00:08.22>you <00:08.38>for <00:08.54>having <00:09.00>me! <00:09.37>It's <00:09.60>a <00:09.76>genuine <00:10.22>pleasure <00:10.68>to <00:10.84>speak <00:11.07>with <00:11.30>the <00:11.46>engineering <00:12.38>leadership <00:13.07>team <00:13.29>here.
-[00:07.99]Cảm ơn bạn đã mời tôi! Thật sự là một vinh hạnh lớn khi được trao đổi với đội ngũ lãnh đạo kỹ thuật tại đây.
-
-[00:14.16]<00:14.16>To <00:14.30>start <00:14.49>off, <00:14.77>could <00:14.96>you <00:15.10>walk <00:15.29>me <00:15.49>through <00:15.68>a <00:15.82>challenging <00:16.40>production <00:16.98>incident <00:17.57>you <00:17.70>resolved <00:18.29>in <00:18.42>your <00:18.62>previous <00:19.01>role?
-[00:14.16]Để bắt đầu, bạn có thể chia sẻ về một sự cố vận hành thực tế đầy thách thức mà bạn từng xử lý ở vị trí trước không?
-
-[00:20.01]<00:20.01>Certainly. <00:20.92>During <00:21.42>a <00:21.60>major <00:22.10>product <00:22.61>launch, <00:22.96>our <00:23.21>API <00:23.46>gateway <00:24.22>began <00:24.72>experiencing <00:25.73>severe <00:26.23>memory <00:26.99>pressure <00:27.49>and <00:27.67>intermittent <00:28.67>fifty-four <00:29.43>gateway <00:30.18>timeouts.
-[00:20.01]Chắc chắn rồi. Trong một đợt ra mắt sản phẩm lớn, cổng API của chúng tôi bắt đầu bị quá tải bộ nhớ nghiêm trọng và xuất hiện các lỗi quá thời gian phản hồi ngắt quãng.
-
-[00:31.14]<00:31.14>I <00:31.30>immediately <00:32.44>mobilized <00:33.35>the <00:33.51>incident <00:34.19>response <00:34.65>team, <00:34.97>enabled <00:35.65>detailed <00:36.34>distributed <00:37.25>tracing, <00:37.80>and <00:37.96>analyzed <00:38.87>our <00:39.10>memory <00:39.78>heap <00:40.01>snapshots.
-[00:31.14]Tôi đã ngay lập tức triệu tập đội phản ứng sự cố, kích hoạt hệ thống truy vết phân tán chi tiết và phân tích các bản chụp bộ nhớ heap.
-
-[00:40.90]<00:40.90>We <00:41.04>discovered <00:41.82>an <00:41.96>unindexed <00:42.75>database <00:43.34>query <00:43.73>combined <00:44.32>with <00:44.52>uncollected <00:45.30>WebSocket <00:45.89>connection <00:46.48>listeners <00:47.07>in <00:47.21>our <00:47.41>event <00:47.80>loop.
-[00:40.90]Chúng tôi phát hiện ra một câu truy vấn cơ sở dữ liệu chưa được đánh chỉ mục kết hợp với các kết nối WebSocket không được giải phóng trong event loop.
-
-[00:48.61]<00:48.61>How <00:48.80>did <00:48.94>you <00:49.07>balance <00:49.46>delivering <00:50.22>an <00:50.36>immediate <00:50.93>hotfix <00:51.32>while <00:51.70>ensuring <00:52.28>long-term <00:52.66>architectural <00:53.62>stability?
-[00:48.61]Bạn đã cân bằng như thế nào giữa việc triển khai bản vá khẩn cấp và đảm bảo sự ổn định kiến trúc lâu dài?
-
-[00:55.00]<00:55.00>We <00:55.17>first <00:55.40>deployed <00:55.88>a <00:56.04>targeted <00:56.75>rate-limiting <00:57.93>rule <00:58.41>to <00:58.57>protect <00:59.05>our <00:59.28>database <00:59.99>nodes <01:00.47>and <01:00.63>rolled <01:01.10>out <01:01.27>a <01:01.44>patch <01:01.67>to <01:01.84>cleanly <01:02.31>dispose <01:02.78>of <01:02.95>stale <01:03.42>connections.
-[00:55.00]Đầu tiên chúng tôi triển khai quy tắc giới hạn tần suất truy cập để bảo vệ cơ sở dữ liệu và tung ra bản vá giải phóng triệt để các kết nối rác.
-
-[01:04.58]<01:04.58>Afterwards, <01:05.31>I <01:05.46>authored <01:06.10>a <01:06.25>comprehensive <01:07.11>post-mortem <01:07.75>report <01:08.18>and <01:08.34>led <01:08.55>the <01:08.70>implementation <01:09.77>of <01:09.93>automated <01:10.78>load-testing <01:11.43>suites <01:11.86>in <01:12.01>our <01:12.22>CI <01:12.44>pipeline.
-[01:04.58]Sau đó, tôi viết báo cáo phân tích nguyên nhân sự cố chi tiết và chủ trì xây dựng bộ kiểm thử tải tự động trong quy trình CI.
-
-[01:13.71]<01:13.71>That <01:13.93>demonstrates <01:14.81>strong <01:15.03>systemic <01:15.69>thinking. <01:16.26>How <01:16.48>do <01:16.63>you <01:16.79>approach <01:17.23>technical <01:17.89>disagreements <01:18.76>with <01:18.98>product <01:19.42>managers <01:20.08>or <01:20.24>peers?
-[01:13.71]Điều đó thể hiện tư duy hệ thống rất vững vàng. Bạn tiếp cận các bất đồng kỹ thuật với quản lý sản phẩm hoặc đồng nghiệp như thế nào?
-
-[01:21.09]<01:21.09>I <01:21.23>always <01:21.63>anchor <01:22.02>technical <01:22.62>discussions <01:23.22>in <01:23.36>objective <01:23.95>user <01:24.35>metrics, <01:24.83>business <01:25.43>trade-offs, <01:25.91>and <01:26.05>measurable <01:26.84>outcomes <01:27.44>rather <01:27.84>than <01:28.04>personal <01:28.63>preferences.
-[01:21.09]Tôi luôn neo các cuộc thảo luận kỹ thuật dựa trên số liệu người dùng khách quan, sự cân bằng kinh doanh và kết quả đo lường được thay vì sở thích cá nhân.
-
-[01:29.85]<01:29.85>I <01:29.99>find <01:30.19>that <01:30.38>creating <01:30.78>interactive <01:31.57>prototypes <01:32.36>or <01:32.50>data <01:32.89>simulations <01:33.68>helps <01:33.88>all <01:34.08>stakeholders <01:34.87>visualize <01:35.46>the <01:35.60>cost <01:35.80>of <01:35.93>architectural <01:36.92>trade-offs <01:37.32>clearly.
-[01:29.85]Tôi nhận thấy rằng việc xây dựng các bản mẫu tương tác hoặc mô phỏng dữ liệu sẽ giúp các bên liên quan hình dung rõ ràng về cái giá của các đánh đổi kiến trúc.
-
-[01:38.33]<01:38.33>Where <01:38.54>do <01:38.69>you <01:38.83>see <01:39.04>your <01:39.25>technical <01:39.88>leadership <01:40.51>trajectory <01:41.35>evolving <01:41.98>over <01:42.40>the <01:42.54>next <01:42.75>two <01:42.96>to <01:43.11>three <01:43.32>years?
-[01:38.33]Bạn nhìn nhận lộ trình phát triển năng lực lãnh đạo kỹ thuật của mình trong hai đến ba năm tới như thế nào?
-
-[01:44.16]<01:44.16>I <01:44.31>aim <01:44.53>to <01:44.68>continue <01:45.34>deepening <01:46.00>my <01:46.15>expertise <01:46.81>in <01:46.96>distributed <01:47.84>systems <01:48.28>and <01:48.43>cloud <01:48.65>architecture <01:49.53>while <01:49.97>actively <01:50.84>mentoring <01:51.50>junior <01:51.94>and <01:52.09>mid-level <01:52.75>engineers.
-[01:44.16]Tôi hướng tới việc tiếp tục đào sâu chuyên môn về hệ thống phân tán và kiến trúc đám mây, đồng thời tích cực cố vấn cho các kỹ sư mới và tầm trung.
-
-[01:54.04]<01:54.04>Do <01:54.18>you <01:54.33>have <01:54.47>any <01:54.67>questions <01:55.08>for <01:55.22>us <01:55.42>regarding <01:56.03>our <01:56.23>engineering <01:57.05>culture <01:57.45>or <01:57.59>technical <01:58.20>roadmap?
-[01:54.04]Bạn có câu hỏi nào cho chúng tôi về văn hóa kỹ thuật hay định hướng công nghệ sắp tới không?
-
-[01:59.23]<01:59.23>Yes, <01:59.52>I <01:59.67>would <01:59.88>love <02:00.08>to <02:00.23>learn <02:00.44>more <02:00.65>about <02:01.06>how <02:01.27>your <02:01.48>team <02:01.69>approaches <02:02.32>technical <02:02.94>debt <02:03.15>management <02:03.98>during <02:04.40>high-velocity <02:05.44>growth <02:05.65>phases.
-[01:59.23]Vâng, tôi rất muốn tìm hiểu thêm về cách nhóm của bạn quản lý nợ kỹ thuật trong các giai đoạn tăng trưởng với tốc độ cao.
-
-[02:06.69]<02:06.69>That <02:06.90>is <02:07.05>a <02:07.20>fantastic <02:07.83>question. <02:08.38>We <02:08.53>dedicate <02:09.17>twenty <02:09.59>percent <02:10.01>of <02:10.16>every <02:10.79>development <02:11.64>sprint <02:11.85>strictly <02:12.27>to <02:12.42>refactoring <02:13.27>and <02:13.41>infrastructure <02:14.26>modernization.
-[02:06.69]Đó là một câu hỏi rất tuyệt vời. Chúng tôi dành riêng hai mươi phần trăm thời lượng của mỗi chu kỳ sprint cho việc tái cấu trúc và hiện đại hóa hạ tầng.
-
-[02:15.94]<02:15.94>That <02:16.16>dedication <02:17.05>to <02:17.20>engineering <02:18.08>quality <02:18.75>is <02:18.90>exactly <02:19.56>why <02:19.78>I <02:19.94>am <02:20.09>so <02:20.25>enthusiastic <02:21.13>about <02:21.57>this <02:21.79>opportunity.
-[02:15.94]Sự tận tâm với chất lượng kỹ thuật đó chính là lý do khiến tôi vô cùng hào hứng với cơ hội này.
-`,
+          tags: ["interview", "career", "experience", "hiring"],
+          collection: "workplace",
+          sentenceCount: 18,
         },
         {
           id: "specialty-coffee",
@@ -2564,66 +2342,12 @@
           category: "daily",
           level: "A2",
           accent: "US",
-          duration: 94,
+          duration: 93,
           description:
             "Natural everyday dialogue ordering pour-over coffee, inquiring about roast profiles, and customizing milk alternatives.",
-          audioUrl: "audio/specialty-coffee.mp3",
-          lrcContent: `[ti:Ordering at a Specialty Coffee Shop]
-[ar:English Shadowing]
-[al:daily]
-[length:01:33.64]
-
-[00:00.00]<00:00.00>Good <00:00.24>morning! <00:00.87>Welcome <00:01.36>to <00:01.53>Artisanal <00:02.50>Roasters. <00:03.13>What <00:03.37>can <00:03.61>I <00:03.78>get <00:04.02>started <00:04.51>for <00:04.68>you <00:04.85>today?
-[00:00.00]Chào buổi sáng! Chào mừng bạn đến với Artisanal Roasters. Tôi có thể chuẩn bị gì cho bạn hôm nay?
-
-[00:05.97]<00:05.97>Hi <00:06.23>there! <00:06.63>I'm <00:06.88>looking <00:07.39>for <00:07.56>something <00:08.32>smooth <00:08.57>and <00:08.75>aromatic. <00:09.91>What <00:10.16>single-origin <00:11.16>beans <00:11.42>do <00:11.59>you <00:11.77>have <00:11.95>on <00:12.12>bar?
-[00:05.97]Xin chào! Tôi đang tìm loại cà phê êm dịu và thơm ngát. Hôm nay quán có những loại hạt đơn nguồn gốc nào?
-
-[00:13.02]<00:13.02>We <00:13.18>currently <00:13.82>have <00:13.97>a <00:14.12>washed <00:14.55>Ethiopian <00:15.20>Yirgacheffe <00:15.84>with <00:16.06>floral <00:16.49>notes, <00:17.01>and <00:17.16>a <00:17.31>natural <00:17.95>Colombian <00:18.60>with <00:18.81>sweet <00:19.03>caramel <00:19.67>undertones.
-[00:13.02]Hiện tại chúng tôi có hạt Yirgacheffe của Ethiopia sơ chế ướt với hương hoa cỏ, và hạt Colombia sơ chế tự nhiên với vị ngọt nhẹ caramel.
-
-[00:21.16]<00:21.16>The <00:21.33>Ethiopian <00:22.07>pour-over <00:22.81>sounds <00:23.05>wonderful. <00:23.94>I'd <00:24.19>love <00:24.43>a <00:24.60>medium <00:25.09>cup <00:25.34>of <00:25.51>that, <00:25.86>please.
-[00:21.16]Cà phê pour-over Ethiopia nghe tuyệt quá. Cho tôi một ly cỡ vừa nhé.
-
-[00:26.75]<00:26.75>Excellent <00:27.49>choice! <00:27.88>Would <00:28.13>you <00:28.30>like <00:28.54>that <00:28.79>brewed <00:29.28>hot, <00:29.63>or <00:29.80>poured <00:30.29>over <00:30.78>ice?
-[00:26.75]Lựa chọn tuyệt vời! Bạn muốn pha nóng hay thưởng thức cùng đá lạnh?
-
-[00:31.68]<00:31.68>I'll <00:31.90>take <00:32.12>it <00:32.28>piping <00:32.72>hot. <00:33.08>I <00:33.23>really <00:33.68>enjoy <00:34.12>savoring <00:34.79>the <00:34.95>complex <00:35.39>aromas <00:36.06>as <00:36.22>it <00:36.37>cools <00:36.59>down.
-[00:31.68]Cho tôi uống nóng hổi nhé. Tôi rất thích thưởng thức trọn vẹn các tầng hương phức hợp khi cà phê nguội dần.
-
-[00:37.45]<00:37.45>Perfect. <00:38.11>And <00:38.28>are <00:38.46>you <00:38.64>interested <00:39.65>in <00:39.82>any <00:40.08>pastries <00:40.58>or <00:40.76>breakfast <00:41.26>treats <00:41.52>this <00:41.77>morning?
-[00:37.45]Hoàn hảo. Tiện thể sáng nay bạn có muốn dùng thêm chút bánh ngọt hay món điểm tâm nào không?
-
-[00:42.93]<00:42.93>Do <00:43.09>you <00:43.25>have <00:43.41>any <00:43.65>freshly <00:44.11>baked <00:44.57>croissants <00:45.04>left <00:45.27>in <00:45.43>the <00:45.60>display?
-[00:42.93]Quán mình còn chiếc bánh sừng bò mới nướng nào trong tủ kính không?
-
-[00:46.70]<00:46.70>Yes, <00:47.06>we <00:47.23>just <00:47.49>pulled <00:47.99>a <00:48.17>fresh <00:48.43>batch <00:48.68>of <00:48.86>almond <00:49.37>croissants <00:49.87>straight <00:50.13>from <00:50.38>the <00:50.56>oven <00:51.07>ten <00:51.32>minutes <00:52.08>ago!
-[00:46.70]Có chứ, chúng tôi vừa lấy một mẻ bánh sừng bò hạnh nhân nóng hổi ra khỏi lò cách đây mười phút!
-
-[00:52.99]<00:52.99>That <00:53.25>sounds <00:53.52>irresistible. <00:55.02>I'll <00:55.28>take <00:55.55>one <00:55.82>almond <00:56.35>croissant <00:56.89>as <00:57.07>well, <00:57.45>please.
-[00:52.99]Nghe hấp dẫn không thể chối từ. Cho tôi lấy thêm một chiếc bánh sừng bò hạnh nhân đó luôn nhé.
-
-[00:58.38]<00:58.38>Would <00:58.60>you <00:58.76>like <00:58.98>me <00:59.21>to <00:59.37>warm <00:59.59>that <00:59.82>up <00:59.97>for <01:00.13>you, <01:00.38>or <01:00.54>serve <01:00.76>it <01:00.92>at <01:01.08>room <01:01.30>temperature?
-[00:58.38]Bạn có muốn tôi hâm nóng lại bánh không, hay dùng ở nhiệt độ phòng?
-
-[01:02.84]<01:02.84>Please <01:03.09>warm <01:03.35>it <01:03.53>up <01:03.71>slightly. <01:04.37>A <01:04.55>warm <01:04.81>croissant <01:05.32>pairs <01:05.58>perfectly <01:06.35>with <01:06.60>pour-over <01:07.37>coffee.
-[01:02.84]Xin hãy hâm nóng nhẹ giúp tôi. Bánh sừng bò ấm nóng kết hợp hoàn hảo với cà phê pour-over.
-
-[01:08.54]<01:08.54>Absolutely. <01:09.82>Your <01:10.04>total <01:10.50>comes <01:10.96>to <01:11.12>nine <01:11.34>dollars <01:11.80>and <01:11.96>seventy-five <01:12.87>cents.
-[01:08.54]Chắc chắn rồi. Tổng cộng của bạn là chín đô la bảy mươi lăm xu.
-
-[01:13.74]<01:13.74>Here <01:14.00>is <01:14.18>my <01:14.36>card. <01:14.78>Do <01:14.97>you <01:15.15>offer <01:15.67>digital <01:16.46>receipts <01:16.98>via <01:17.24>email <01:17.76>or <01:17.95>text <01:18.21>message?
-[01:13.74]Đây là thẻ của tôi. Quán có gửi hóa đơn điện tử qua email hoặc tin nhắn không?
-
-[01:19.39]<01:19.39>Yes, <01:19.71>you <01:19.87>can <01:20.11>tap <01:20.34>your <01:20.57>phone <01:20.80>right <01:21.03>on <01:21.19>the <01:21.36>reader <01:21.82>and <01:21.98>select <01:22.45>your <01:22.68>receipt <01:23.14>preference.
-[01:19.39]Có chứ, bạn có thể chạm điện thoại ngay trên máy đọc thẻ và chọn cách nhận hóa đơn mong muốn.
-
-[01:24.48]<01:24.48>Done! <01:24.88>Thank <01:25.13>you <01:25.30>so <01:25.48>much <01:25.73>for <01:25.91>the <01:26.08>recommendations.
-[01:24.48]Xong rồi! Cảm ơn bạn rất nhiều vì những lời gợi ý tuyệt vời.
-
-[01:27.99]<01:27.99>You're <01:28.22>very <01:28.67>welcome! <01:29.27>Please <01:29.50>take <01:29.73>a <01:29.89>seat, <01:30.21>and <01:30.37>I'll <01:30.60>bring <01:30.82>your <01:31.05>pour-over <01:31.74>over <01:32.20>to <01:32.36>your <01:32.59>table <01:33.04>shortly.
-[01:27.99]Không có gì đâu! Xin mời bạn tìm chỗ ngồi, tôi sẽ mang cà phê pour-over qua bàn cho bạn ngay.
-`,
+          tags: ["coffee", "ordering", "cafe", "daily-conversation"],
+          collection: "daily-social",
+          sentenceCount: 17,
         },
         {
           id: "tech-standup",
@@ -2631,71 +2355,39 @@
           category: "workplace",
           level: "B2",
           accent: "US",
-          duration: 123,
+          duration: 122,
           description:
             "Engineering standup discussing blocker resolution, pull request reviews, database schema migration, and CI/CD pipelines.",
-          audioUrl: "audio/tech-standup.mp3",
-          lrcContent: `[ti:Tech Agile Standup & Sprint Planning]
-[ar:English Shadowing]
-[al:workplace]
-[length:02:02.88]
-
-[00:00.00]<00:00.00>Good <00:00.24>morning <00:00.71>everyone! <00:01.57>Let's <00:01.80>kick <00:02.04>off <00:02.28>our <00:02.51>morning <00:02.99>agile <00:03.70>standup. <00:04.32>Alex, <00:04.89>do <00:05.05>you <00:05.22>want <00:05.46>to <00:05.62>start <00:05.86>us <00:06.10>off?
-[00:00.00]Chào buổi sáng cả nhóm! Hãy bắt đầu buổi họp nhanh buổi sáng của chúng ta. Alex, bạn có muốn bắt đầu trước không?
-
-[00:06.97]<00:06.97>Sure <00:07.22>thing. <00:07.61>Yesterday <00:08.34>I <00:08.51>finalized <00:09.48>the <00:09.65>OAuth2 <00:09.90>session <00:10.38>management <00:11.36>flow <00:11.60>and <00:11.77>resolved <00:12.50>the <00:12.67>token <00:13.16>expiration <00:14.14>edge <00:14.38>cases.
-[00:06.97]Chắc chắn rồi. Hôm qua tôi đã hoàn thiện luồng quản lý phiên đăng nhập OAuth2 và xử lý xong các trường hợp hết hạn token.
-
-[00:15.31]<00:15.31>All <00:15.56>automated <00:16.56>integration <00:17.55>tests <00:17.80>are <00:17.98>passing <00:18.48>in <00:18.65>CI, <00:19.00>and <00:19.17>I <00:19.35>submitted <00:20.09>the <00:20.27>pull <00:20.52>request <00:21.02>for <00:21.19>team <00:21.44>review.
-[00:15.31]Toàn bộ các bài kiểm thử tích hợp tự động đều đã vượt qua trên CI, và tôi đã gửi pull request để nhóm duyệt.
-
-[00:22.59]<00:22.59>Great <00:22.85>progress! <00:23.54>Are <00:23.73>there <00:23.99>any <00:24.26>architectural <00:25.58>blockers <00:26.11>or <00:26.30>dependencies <00:27.36>on <00:27.54>the <00:27.73>core <00:28.00>platform <00:28.53>team?
-[00:22.59]Tiến độ rất tốt! Bạn có gặp vướng mắc về kiến trúc hay phụ thuộc gì vào đội ngũ nền tảng cốt lõi không?
-
-[00:29.45]<00:29.45>Today <00:29.91>I'm <00:30.14>transitioning <00:31.06>over <00:31.52>to <00:31.68>the <00:31.84>database <00:32.53>schema <00:32.99>migration <00:33.69>for <00:33.85>offline <00:34.31>caching <00:34.77>and <00:34.93>indexed <00:35.62>search.
-[00:29.45]Hôm nay tôi đang chuyển sang phần di chuyển cấu trúc cơ sở dữ liệu để phục vụ lưu đệm ngoại tuyến và tìm kiếm có đánh chỉ mục.
-
-[00:36.29]<00:36.29>I <00:36.44>just <00:36.67>need <00:36.89>a <00:37.05>quick <00:37.27>sign-off <00:37.72>from <00:37.94>Sarah <00:38.39>on <00:38.55>the <00:38.71>composite <00:39.38>indexes <00:40.05>so <00:40.21>our <00:40.43>query <00:40.88>latency <00:41.55>stays <00:41.77>under <00:42.22>fifty <00:42.67>milliseconds.
-[00:36.29]Tôi chỉ cần Sarah duyệt nhanh phần chỉ mục kết hợp để độ trễ truy vấn của chúng ta luôn dưới năm mươi mili-giây.
-
-[00:44.20]<00:44.20>Perfect. <00:44.79>I <00:44.95>will <00:45.18>follow <00:45.64>up <00:45.80>with <00:46.03>Sarah <00:46.48>right <00:46.71>after <00:47.17>our <00:47.40>sync. <00:47.76>Maya, <00:48.08>how <00:48.31>are <00:48.47>things <00:48.70>looking <00:49.16>on <00:49.32>your <00:49.55>end?
-[00:44.20]Hoàn hảo. Tôi sẽ trao đổi với Sarah ngay sau buổi họp này. Maya, tình hình công việc bên bạn thế nào?
-
-[00:50.41]<00:50.41>Yesterday <00:51.06>I <00:51.21>addressed <00:51.85>the <00:52.00>responsive <00:52.65>layout <00:52.86>regressions <00:53.51>on <00:53.66>mobile <00:54.30>viewports <00:54.73>and <00:54.88>audited <00:55.53>color <00:55.96>contrast <00:56.39>for <00:56.54>accessibility <00:57.83>compliance.
-[00:50.41]Hôm qua tôi đã khắc phục các lỗi giao diện đáp ứng trên màn hình di động và kiểm toán độ tương phản màu sắc để đạt chuẩn tiếp cận.
-
-[00:58.69]<00:58.69>I <00:58.84>also <00:59.27>refactored <01:00.13>the <01:00.28>audio <01:00.71>transport <01:01.14>scrubber <01:01.58>component <01:02.22>to <01:02.37>support <01:02.80>smooth <01:03.02>continuous <01:03.67>dragging <01:04.10>without <01:04.53>hitching.
-[00:58.69]Tôi cũng đã tái cấu trúc thành phần thanh trượt âm thanh để hỗ trợ thao tác kéo mượt mà liên tục mà không bị giật.
-
-[01:05.59]<01:05.59>That's <01:05.84>fantastic. <01:06.77>How <01:07.02>is <01:07.20>the <01:07.38>test <01:07.64>coverage <01:08.41>looking <01:08.92>for <01:09.10>the <01:09.28>touch <01:09.53>gesture <01:10.05>interactions?
-[01:05.59]Tuyệt vời quá. Độ bao phủ kiểm thử cho các tương tác cử chỉ cảm ứng đang thế nào rồi?
-
-[01:11.72]<01:11.72>We're <01:11.87>currently <01:12.48>sitting <01:12.90>at <01:13.04>ninety-two <01:13.86>percent <01:14.27>branch <01:14.48>coverage <01:15.09>with <01:15.30>new <01:15.50>end-to-end <01:15.91>device <01:16.32>specs <01:16.53>added.
-[01:11.72]Hiện tại chúng ta đang đạt mức chín mươi hai phần trăm độ bao phủ nhánh với các kịch bản kiểm thử E2E mới trên thiết bị.
-
-[01:17.36]<01:17.36>My <01:17.51>primary <01:18.12>goal <01:18.32>today <01:18.73>is <01:18.87>completing <01:19.48>the <01:19.63>localized <01:20.44>dictionary <01:21.26>lookup <01:21.67>caching <01:22.07>in <01:22.22>IndexedDB.
-[01:17.36]Mục tiêu chính của tôi hôm nay là hoàn thành việc lưu đệm tra cứu từ điển đa ngôn ngữ vào IndexedDB.
-
-[01:23.45]<01:23.45>Do <01:23.59>you <01:23.74>foresee <01:24.36>any <01:24.56>bottlenecks <01:25.18>with <01:25.39>concurrent <01:26.01>storage <01:26.42>transactions <01:27.04>or <01:27.18>memory <01:27.80>footprints <01:28.21>on <01:28.36>low-end <01:28.77>devices?
-[01:23.45]Bạn có lường trước rủi ro nào về nghẽn giao dịch bộ nhớ đồng thời hay dung lượng RAM trên các thiết bị cấu hình thấp không?
-
-[01:30.01]<01:30.01>I'm <01:30.21>implementing <01:31.01>an <01:31.14>LRU <01:31.34>eviction <01:31.94>policy <01:32.54>with <01:32.73>a <01:32.87>memory <01:33.47>cap <01:33.67>of <01:33.81>twenty <01:34.20>megabytes <01:35.00>to <01:35.14>keep <01:35.34>things <01:35.53>ultra-lean.
-[01:30.01]Tôi đang triển khai cơ chế dọn dẹp LRU với giới hạn bộ nhớ hai mươi megabyte để giữ mọi thứ luôn siêu nhẹ nhàng.
-
-[01:36.75]<01:36.75>That <01:36.96>sounds <01:37.17>like <01:37.37>a <01:37.52>very <01:37.93>solid <01:38.35>approach. <01:38.89>I <01:39.04>can <01:39.24>help <01:39.45>test <01:39.66>the <01:39.80>concurrent <01:40.43>writes <01:40.84>during <01:41.26>staging <01:41.67>verification.
-[01:36.75]Nghe như một giải pháp rất vững chắc đấy. Tôi có thể hỗ trợ kiểm thử việc ghi dữ liệu đồng thời trong đợt kiểm thử staging.
-
-[01:43.34]<01:43.34>Excellent <01:43.96>cross-collaboration, <01:45.30>team. <01:45.63>Let's <01:45.84>make <01:46.05>sure <01:46.26>all <01:46.47>pull <01:46.68>requests <01:47.09>are <01:47.24>reviewed <01:47.86>before <01:48.28>two <01:48.49>o'clock <01:48.91>today.
-[01:43.34]Sự phối hợp chéo rất tuyệt vời, cả nhóm. Hãy đảm bảo toàn bộ các pull request được duyệt trước hai giờ chiều nay nhé.
-
-[01:49.75]<01:49.75>Our <01:50.00>release <01:50.51>cut <01:50.77>is <01:50.95>scheduled <01:51.71>for <01:51.89>Thursday <01:52.40>morning, <01:53.01>so <01:53.19>let's <01:53.44>keep <01:53.70>our <01:53.95>deployment <01:54.72>window <01:55.23>clear <01:55.48>and <01:55.66>reliable.
-[01:49.75]Đợt chốt phát hành dự kiến vào sáng thứ Năm, vì vậy hãy giữ khung triển khai thật thông suốt và đáng tin cậy.
-
-[01:57.08]<01:57.08>Sounds <01:57.32>like <01:57.56>a <01:57.72>plan! <01:58.11>I'll <01:58.35>ping <01:58.59>the <01:58.76>channel <01:59.24>as <01:59.41>soon <01:59.65>as <01:59.82>the <01:59.99>PR <02:00.23>is <02:00.40>ready <02:00.88>for <02:01.05>final <02:01.53>verification.
-[01:57.08]Thống nhất kế hoạch nhé! Tôi sẽ thông báo lên kênh chung ngay khi PR sẵn sàng cho đợt kiểm thử cuối cùng.
-`,
+          tags: ["standup", "engineering", "sprint", "blockers"],
+          collection: "workplace",
+          sentenceCount: 18,
         },
       ];
+      const CURATED_SCENARIOS = SCENARIOS_MANIFEST;
+
+      function resolveScenarioAudioUrl(scenarioOrId) {
+        if (!scenarioOrId) return "";
+        if (typeof scenarioOrId === "string") {
+          return `audio/${scenarioOrId}.mp3`;
+        }
+        if (typeof scenarioOrId === "object") {
+          if (scenarioOrId.audioUrl) return scenarioOrId.audioUrl;
+          if (scenarioOrId.id) return `audio/${scenarioOrId.id}.mp3`;
+        }
+        return "";
+      }
+
+      function resolveScenarioLrcUrl(scenarioOrId) {
+        if (!scenarioOrId) return "";
+        if (typeof scenarioOrId === "string") {
+          return `audio/${scenarioOrId}.lrc`;
+        }
+        if (typeof scenarioOrId === "object") {
+          if (scenarioOrId.lrcUrl) return scenarioOrId.lrcUrl;
+          if (scenarioOrId.id) return `audio/${scenarioOrId.id}.lrc`;
+        }
+        return "";
+      }
 
       // ==========================================
       // 3. SMART SRT & ENHANCED LRC PARSER & SANITIZER

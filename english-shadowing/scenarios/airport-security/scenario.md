@@ -4,6 +4,13 @@ title: Airport Check-in & Security Screen
 category: travel
 level: B1
 accent: UK
+collection: travel
+tags:
+  - airport
+  - security
+  - customs
+  - boarding
+  - flight
 description: Navigating terminal check-in, baggage drop allowances, customs security screening, and boarding gate directions in British English.
 speakers:
   Officer: en-GB-SoniaNeural

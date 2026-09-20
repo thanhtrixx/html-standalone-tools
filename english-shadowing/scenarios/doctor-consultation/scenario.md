@@ -4,6 +4,12 @@ title: General Practice Medical Consultation
 category: daily
 level: B1
 accent: AU
+collection: daily-social
+tags:
+  - health
+  - doctor
+  - symptoms
+  - medical
 description: Visiting a medical clinic to discuss seasonal allergies, persistent coughing, prescription dosage, and lifestyle advice in Australian English.
 speakers:
   Doctor: en-AU-NatashaNeural

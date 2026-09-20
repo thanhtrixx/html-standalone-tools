@@ -4,6 +4,12 @@ title: Academic Discussion on AI & Remote Work
 category: academic
 level: C1
 accent: US
+collection: academic
+tags:
+  - ai
+  - future-of-work
+  - higher-education
+  - synthesis
 description: Nuanced academic discourse discussing asynchronous productivity, cognitive automation, digital nomadism, and human-machine synergy.
 speakers:
   Professor: en-US-AndrewMultilingualNeural

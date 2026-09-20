@@ -1,5 +1,46 @@
 # English Shadowing Player — Backlog & Roadmap
 
+## 🎯 Milestone 7: Manifest-Driven Scenario Architecture, On-Demand LRC Streaming & Curated Content Lifecycle
+
+### Epic: Scalable Scenario Management, On-Demand Subtitle Streaming & Progress Tracking
+
+- **Status:** 🟡 Ready for Implementation ([ADR-0008](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md))
+
+---
+
+### Vertical Slices Breakdown
+
+#### Slice 1: Manifest Compiler, Convention Media Routing & Compact Build Pipeline
+
+- **Title**: `feat(shadowing): manifest compiler, convention media routing, and compact build sync`
+- **Scope**:
+  - [x] Update `scripts/generate-scenario-audio.py` to scan `scenarios/<id>/scenario.md` and export `scenarios.json` and sync lightweight `const SCENARIOS_MANIFEST = [...]` into `index.html` (metadata only, omitting default `audioUrl` and `lrcUrl`).
+  - [x] Enforce convention-over-configuration routing (`audio/<id>.mp3` and `audio/<id>.lrc`).
+  - [x] Update `scripts/build.js` to package `scenarios.json` into `dist/`.
+  - [x] Add automated unit tests verifying manifest schema validation and compact sync.
+
+#### Slice 2: On-Demand Dynamic LRC Streaming & Legacy Import Retirement
+
+- **Title**: `feat(shadowing): on-demand dynamic LRC streaming, memory cue cache, and legacy code retirement`
+- **Scope**:
+  - [ ] Refactor `selectScenario` in `english-shadowing/index.html` to dynamically fetch `audio/<id>.lrc` via `fetch()` with an in-memory parsed cue cache `Map<string, ParsedCue[]>`.
+  - [ ] Completely remove `#importModal`, `openImportModal()`, `closeImportModal()`, and `handleCustomScenarioSubmit()`.
+  - [ ] Completely retire `parseSrt()` from runtime and unit tests, standardizing 100% on `parseEnhancedLrc`.
+  - [ ] Add automated unit and integration tests verifying on-demand subtitle loading, error handling, and offline fallback.
+
+#### Slice 3: Multi-Dimensional Catalog Taxonomy, Progress Tracking & Collection Filtering
+
+- **Title**: `feat(shadowing): multi-dimensional catalog taxonomy, scenario progress store, and collection filters`
+- **Scope**:
+  - [ ] Implement `shadowing_scenario_progress_v1` in `localStorage` tracking bookmarks (`bookmarkedIds`) and scenario completion status (`new`, `in_progress`, `completed`, `mastered`).
+  - [ ] Update Catalog UI with status tabs (`[ All ]`, `[ ⭐ Bookmarked ]`, `[ 🔄 In Progress ]`, `[ ✅ Mastered ]`).
+  - [ ] Add Curated Collections (`daily-social`, `workplace`, `travel`, `academic`) and Thematic Tag filtering.
+  - [ ] Add completion progress ring/bars on scenario cards.
+  - [ ] Ensure 100% bilingual parity for all new filter labels and status badges in `I18N.md` and `index.html`.
+  - [ ] Add automated unit and UI tests for catalog filtering and progress persistence.
+
+---
+
 ## 🎯 Milestone 6: PWA Zero-Stale Cache Lifecycle, Network-Only Navigation & On-Demand Media Streaming
 
 ### Epic: Zero-Stale App Refreshes, Silent Upgrades & On-Demand Media PWA Cache

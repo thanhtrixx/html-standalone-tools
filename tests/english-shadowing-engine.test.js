@@ -67,7 +67,10 @@ async function runTests() {
   ];
   const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
   const exportBridge = `
+    globalThis.SCENARIOS_MANIFEST = typeof SCENARIOS_MANIFEST !== 'undefined' ? SCENARIOS_MANIFEST : [];
     globalThis.CURATED_SCENARIOS = typeof CURATED_SCENARIOS !== 'undefined' ? CURATED_SCENARIOS : [];
+    globalThis.resolveScenarioAudioUrl = typeof resolveScenarioAudioUrl !== 'undefined' ? resolveScenarioAudioUrl : function(){};
+    globalThis.resolveScenarioLrcUrl = typeof resolveScenarioLrcUrl !== 'undefined' ? resolveScenarioLrcUrl : function(){};
     globalThis.BUILTIN_VOCAB_DB = typeof BUILTIN_VOCAB_DB !== 'undefined' ? BUILTIN_VOCAB_DB : {};
     globalThis.sanitizeSrtLine = typeof sanitizeSrtLine !== 'undefined' ? sanitizeSrtLine : function(){};
     globalThis.formatSecondsToSrtTime = typeof formatSecondsToSrtTime !== 'undefined' ? formatSecondsToSrtTime : function(){};
@@ -105,7 +108,10 @@ async function runTests() {
     calculateLoopEndBoundary,
     calculateLoopStartBoundary,
     SPEED_PRESETS,
+    SCENARIOS_MANIFEST,
     CURATED_SCENARIOS,
+    resolveScenarioAudioUrl,
+    resolveScenarioLrcUrl,
     BUILTIN_VOCAB_DB,
   } = sandbox;
 
@@ -192,33 +198,190 @@ This is sentence number two.
     "Single line correctly sets English and empty translation"
   );
 
-  // 5. Curated Scenarios Validation (Enhanced LRC Standardized)
+  // 5. Convention-over-Configuration Media Routing Helper Seams
   assert(
-    Array.isArray(CURATED_SCENARIOS) && CURATED_SCENARIOS.length >= 6,
-    `Curated scenarios library has at least 6 extended items (found ${CURATED_SCENARIOS.length})`
+    typeof resolveScenarioAudioUrl === "function",
+    "resolveScenarioAudioUrl function exists"
+  );
+  assert(
+    typeof resolveScenarioLrcUrl === "function",
+    "resolveScenarioLrcUrl function exists"
   );
 
-  CURATED_SCENARIOS.forEach((sc, i) => {
+  // 5.1 Audio URL Resolution by ID string
+  assert(
+    resolveScenarioAudioUrl("specialty-coffee") ===
+      "audio/specialty-coffee.mp3",
+    "resolveScenarioAudioUrl('specialty-coffee') resolves to 'audio/specialty-coffee.mp3'"
+  );
+  assert(
+    resolveScenarioAudioUrl("tech-standup") === "audio/tech-standup.mp3",
+    "resolveScenarioAudioUrl('tech-standup') resolves to 'audio/tech-standup.mp3'"
+  );
+
+  // 5.2 Audio URL Resolution by Object without explicit audioUrl
+  assert(
+    resolveScenarioAudioUrl({ id: "academic-ai-future" }) ===
+      "audio/academic-ai-future.mp3",
+    "resolveScenarioAudioUrl({ id }) resolves canonical audio path"
+  );
+
+  // 5.3 Audio URL Preservation of Explicit / Custom CDN Override
+  assert(
+    resolveScenarioAudioUrl({
+      id: "custom-cdn",
+      audioUrl: "https://cdn.example.com/tracks/custom-cdn.mp3",
+    }) === "https://cdn.example.com/tracks/custom-cdn.mp3",
+    "resolveScenarioAudioUrl preserves explicit external audioUrl"
+  );
+  assert(
+    resolveScenarioAudioUrl({
+      id: "custom-local",
+      audioUrl: "custom/path/sound.ogg",
+    }) === "custom/path/sound.ogg",
+    "resolveScenarioAudioUrl preserves explicit relative audioUrl"
+  );
+
+  // 5.4 Audio URL Edge Cases & Resilience
+  assert(
+    resolveScenarioAudioUrl(null) === "",
+    "resolveScenarioAudioUrl handles null safely without throwing"
+  );
+  assert(
+    resolveScenarioAudioUrl({}) === "",
+    "resolveScenarioAudioUrl handles empty object safely without throwing"
+  );
+
+  // 5.5 LRC URL Resolution by ID string
+  assert(
+    resolveScenarioLrcUrl("specialty-coffee") === "audio/specialty-coffee.lrc",
+    "resolveScenarioLrcUrl('specialty-coffee') resolves to 'audio/specialty-coffee.lrc'"
+  );
+  assert(
+    resolveScenarioLrcUrl("doctor-consultation") ===
+      "audio/doctor-consultation.lrc",
+    "resolveScenarioLrcUrl('doctor-consultation') resolves to 'audio/doctor-consultation.lrc'"
+  );
+
+  // 5.6 LRC URL Resolution by Object without explicit lrcUrl
+  assert(
+    resolveScenarioLrcUrl({ id: "job-interview" }) ===
+      "audio/job-interview.lrc",
+    "resolveScenarioLrcUrl({ id }) resolves canonical lrc path"
+  );
+
+  // 5.7 LRC URL Preservation of Explicit Override
+  assert(
+    resolveScenarioLrcUrl({
+      id: "custom-lrc",
+      lrcUrl: "https://cdn.example.com/subs/custom-lrc.lrc",
+    }) === "https://cdn.example.com/subs/custom-lrc.lrc",
+    "resolveScenarioLrcUrl preserves explicit external lrcUrl"
+  );
+
+  // 5.8 LRC URL Edge Cases & Resilience
+  assert(
+    resolveScenarioLrcUrl(null) === "",
+    "resolveScenarioLrcUrl handles null safely without throwing"
+  );
+  assert(
+    resolveScenarioLrcUrl({}) === "",
+    "resolveScenarioLrcUrl handles empty object safely without throwing"
+  );
+
+  // 6. Scenario Manifest Schema & Anti-Bloat Invariant Verification
+  const manifest =
+    typeof SCENARIOS_MANIFEST !== "undefined" && SCENARIOS_MANIFEST.length > 0
+      ? SCENARIOS_MANIFEST
+      : CURATED_SCENARIOS;
+
+  assert(
+    Array.isArray(manifest) && manifest.length >= 6,
+    `SCENARIOS_MANIFEST has at least 6 curated items (found ${manifest.length})`
+  );
+
+  const validCategories = new Set(["daily", "workplace", "travel", "academic"]);
+  const validLevels = new Set(["A2", "B1", "B2", "C1"]);
+  const validAccents = new Set(["US", "UK", "AU"]);
+  const audioDir = path.join(__dirname, "..", "english-shadowing", "audio");
+
+  manifest.forEach((sc, i) => {
     assert(
-      Boolean(
-        sc.id &&
-        sc.title &&
-        sc.category &&
-        sc.level &&
-        sc.accent &&
-        sc.duration &&
-        sc.audioUrl &&
-        sc.lrcContent &&
-        !sc.srtContent
-      ),
-      `Scenario #${i + 1} (${sc.title}) has all required metadata fields with lrcContent only (zero srtContent)`
+      typeof sc.id === "string" && sc.id.length > 0,
+      `Manifest #${i + 1} (${sc.id}): 'id' is a non-empty string`
     );
-    const parsedCues = parseEnhancedLrc(sc.lrcContent);
     assert(
-      parsedCues.length >= 10,
-      `Scenario #${i + 1} (${sc.title}) contains valid extended cues (found ${parsedCues.length} >= 10)`
+      typeof sc.title === "string" && sc.title.length > 0,
+      `Manifest #${i + 1} (${sc.id}): 'title' is a non-empty string`
     );
+    assert(
+      validCategories.has(sc.category),
+      `Manifest #${i + 1} (${sc.id}): 'category' is valid (${sc.category})`
+    );
+    assert(
+      validLevels.has(sc.level),
+      `Manifest #${i + 1} (${sc.id}): 'level' is valid CEFR (${sc.level})`
+    );
+    assert(
+      validAccents.has(sc.accent),
+      `Manifest #${i + 1} (${sc.id}): 'accent' is valid (${sc.accent})`
+    );
+    assert(
+      typeof sc.duration === "number" && sc.duration > 0,
+      `Manifest #${i + 1} (${sc.id}): 'duration' is a positive number (${sc.duration}s)`
+    );
+    assert(
+      typeof sc.description === "string" && sc.description.length > 0,
+      `Manifest #${i + 1} (${sc.id}): 'description' is a non-empty string`
+    );
+    assert(
+      Array.isArray(sc.tags) && sc.tags.length > 0,
+      `Manifest #${i + 1} (${sc.id}): 'tags' is a non-empty array (${JSON.stringify(sc.tags)})`
+    );
+    assert(
+      typeof sc.collection === "string" && sc.collection.length > 0,
+      `Manifest #${i + 1} (${sc.id}): 'collection' is a non-empty string (${sc.collection})`
+    );
+    assert(
+      typeof sc.sentenceCount === "number" && sc.sentenceCount >= 10,
+      `Manifest #${i + 1} (${sc.id}): 'sentenceCount' is >= 10 (${sc.sentenceCount})`
+    );
+
+    // Anti-Bloat Invariant: lrcContent should NOT be inlined in lightweight manifest
+    assert(
+      sc.lrcContent === undefined,
+      `Manifest #${i + 1} (${sc.id}): lrcContent is NOT inlined in lightweight manifest (prevents bundle bloat)`
+    );
+    assert(
+      sc.srtContent === undefined,
+      `Manifest #${i + 1} (${sc.id}): srtContent is NOT inlined`
+    );
+
+    // Verify companion .lrc asset exists and has valid cues
+    const lrcFilePath = path.join(audioDir, `${sc.id}.lrc`);
+    assert(
+      fs.existsSync(lrcFilePath),
+      `Companion LRC asset exists at english-shadowing/audio/${sc.id}.lrc`
+    );
+    if (fs.existsSync(lrcFilePath)) {
+      const lrcFileContent = fs.readFileSync(lrcFilePath, "utf8");
+      const parsedCues = parseEnhancedLrc(lrcFileContent);
+      assert(
+        parsedCues.length >= 10,
+        `Scenario #${i + 1} (${sc.id}) companion LRC contains valid cues (${parsedCues.length} >= 10)`
+      );
+    }
   });
+
+  // 6.1 Build Script Companion Asset Packaging Verification (scripts/build.js)
+  const buildScriptPath = path.join(__dirname, "..", "scripts", "build.js");
+  assert(fs.existsSync(buildScriptPath), "scripts/build.js exists");
+  const buildScriptContent = fs.readFileSync(buildScriptPath, "utf8");
+  assert(
+    buildScriptContent.includes('"scenarios.json"') ||
+      buildScriptContent.includes("'scenarios.json'"),
+    "scripts/build.js COMPANION_ASSETS includes 'scenarios.json' for dist sync"
+  );
 
   // 7. SRT Sanitization Tests
   assert(
@@ -679,6 +842,75 @@ assert words[-1]["end"] == 13.5
 assert gen.format_lrc_timestamp(0.0) == "00:00.00"
 assert gen.format_lrc_timestamp(65.4) == "01:05.40"
 assert gen.format_lrc_timestamp(125.89) == "02:05.89"
+
+# Test Frontmatter Parsing with Tags & Collection
+md_with_tax = """---
+id: taxonomy-test
+title: Taxonomy Test Dialogue
+category: workplace
+level: B2
+accent: UK
+collection: career-foundations
+tags:
+  - interview
+  - behavioral
+  - tech
+description: Testing metadata parsing for tags and collections.
+speakers:
+  Interviewer: en-GB-RyanNeural
+  Candidate: en-GB-SoniaNeural
+---
+
+**Interviewer**: Tell me about a challenging project you delivered.
+> Hãy kể cho tôi nghe về một dự án đầy thách thức bạn từng thực hiện.
+
+**Candidate**: At my previous role, we migrated legacy microservices to event-driven architectures.
+> Tại vị trí trước, chúng tôi đã chuyển đổi các microservices cũ sang kiến trúc hướng sự kiện.
+"""
+
+meta_tax, turns_tax = gen.parse_markdown_scenario(md_with_tax)
+assert meta_tax["id"] == "taxonomy-test"
+assert meta_tax["collection"] == "career-foundations"
+assert isinstance(meta_tax["tags"], list)
+assert "interview" in meta_tax["tags"]
+assert len(turns_tax) == 2
+
+# Test Manifest Entry Compilation (Lightweight schema without lrcContent)
+if hasattr(gen, "build_manifest_entry"):
+    entry = gen.build_manifest_entry(meta_tax, turns_tax, 45)
+    assert entry["id"] == "taxonomy-test"
+    assert entry["title"] == "Taxonomy Test Dialogue"
+    assert entry["category"] == "workplace"
+    assert entry["level"] == "B2"
+    assert entry["accent"] == "UK"
+    assert entry["collection"] == "career-foundations"
+    assert "interview" in entry["tags"]
+    assert entry["sentenceCount"] == 2
+    assert entry["duration"] == 45
+    assert "lrcContent" not in entry
+    assert "cues" not in entry
+
+# Test Default Fallbacks when optional frontmatter omitted
+md_minimal = """---
+id: minimal-test
+title: Minimal Monologue
+category: travel
+---
+
+We boarded the bullet train just before departure.
+> Chúng tôi lên tàu cao tốc ngay trước giờ khởi hành.
+"""
+
+meta_min, turns_min = gen.parse_markdown_scenario(md_minimal)
+assert meta_min["id"] == "minimal-test"
+if hasattr(gen, "build_manifest_entry"):
+    min_entry = gen.build_manifest_entry(meta_min, turns_min, 20)
+    assert min_entry["level"] in ["B1", "A2"]
+    assert min_entry["accent"] == "US"
+    assert min_entry["collection"] == "travel"
+    assert isinstance(min_entry["tags"], list)
+    assert min_entry["sentenceCount"] == 1
+    assert "lrcContent" not in min_entry
 
 print(json.dumps({"success": True, "turns_dialogue": len(turns_d), "turns_monologue": len(turns_m)}))
 `;
