@@ -1612,12 +1612,12 @@
             <label
               class="block font-semibold text-slate-300 mb-1"
               data-i18n="importSrtLabel"
-              >Subtitle File (.srt)</label
+              >Subtitle File (.lrc or .srt)</label
             >
             <input
               type="file"
               id="importSrtFileInput"
-              accept=".srt,.txt"
+              accept=".lrc,.srt,.txt"
               required
               class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700"
             />
@@ -2129,7 +2129,7 @@
           importModalTitle: "Import Custom Practice Scenario",
           importAudioLabel: "Select Audio File (.mp3, .wav, .m4a, .ogg)",
           importSrtLabel:
-            "Select Subtitle File (.srt with dual language or English)",
+            "Select Subtitle File (.lrc or .srt with dual language or English)",
           importScenarioTitle: "Scenario Title",
           importCategoryLabel: "Topic Category",
           importLevelLabel: "CEFR Level",
@@ -2226,7 +2226,8 @@
           hotkeyHelp: "Hiện bảng hướng dẫn phím tắt",
           importModalTitle: "Tải lên tình huống luyện tập riêng",
           importAudioLabel: "Chọn tệp âm thanh (.mp3, .wav, .m4a, .ogg)",
-          importSrtLabel: "Chọn tệp phụ đề (.srt tiếng Anh hoặc song ngữ)",
+          importSrtLabel:
+            "Chọn tệp phụ đề (.lrc hoặc .srt tiếng Anh hoặc song ngữ)",
           importScenarioTitle: "Tên tình huống",
           importCategoryLabel: "Chủ đề",
           importLevelLabel: "Trình độ CEFR",
@@ -5060,13 +5061,15 @@
         const title = document.getElementById("importTitleInput").value;
         const category = document.getElementById("importCategorySelect").value;
         const level = document.getElementById("importLevelSelect").value;
-        const srtFile = document.getElementById("importSrtFileInput").files[0];
+        const subFile = document.getElementById("importSrtFileInput").files[0];
 
-        if (!srtFile) return;
+        if (!subFile) return;
 
         const reader = new FileReader();
         reader.onload = (event) => {
-          const srtText = event.target.result;
+          const subText = event.target.result;
+          const isLrc =
+            subFile.name.endsWith(".lrc") || /\[\d{1,2}:\d{2}/.test(subText);
           const customScenario = {
             id: "custom-" + Date.now(),
             title: title || "Custom Scenario",
@@ -5076,7 +5079,8 @@
             duration: 60,
             description:
               "Custom user-imported practice audio and subtitle file.",
-            srtContent: srtText,
+            lrcContent: isLrc ? subText : undefined,
+            srtContent: !isLrc ? subText : undefined,
           };
 
           CURATED_SCENARIOS.unshift(customScenario);
@@ -5084,7 +5088,7 @@
           selectScenario(customScenario, true);
           closeImportModal();
         };
-        reader.readAsText(srtFile);
+        reader.readAsText(subFile);
       }
 
       function handleGlobalKeydown(e) {
