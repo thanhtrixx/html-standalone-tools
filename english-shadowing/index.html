@@ -726,15 +726,14 @@
       <!-- ========================================== -->
       <section
         id="player-view"
-        class="hidden flex-1 min-h-0 flex flex-col gap-2.5 sm:gap-3 overflow-hidden"
+        class="hidden flex-1 min-h-0 flex flex-col gap-1.5 sm:gap-3 overflow-hidden"
       >
         <!-- Hidden HTML5 Audio Element for Real Playback -->
         <audio id="playerAudio" preload="auto" class="hidden"></audio>
 
         <!-- Player Top Bar -->
-        <!-- Player Top Bar -->
         <div
-          class="shrink-0 flex items-center justify-between gap-2 sm:gap-4 bg-slate-900/90 border border-slate-800/80 rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-md w-full max-w-full overflow-hidden backdrop-blur"
+          class="shrink-0 flex items-center justify-between gap-2 sm:gap-4 bg-slate-900/90 border border-slate-800/80 rounded-2xl px-2.5 sm:px-4 py-1.5 sm:py-2.5 shadow-md w-full max-w-full overflow-hidden backdrop-blur"
         >
           <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
@@ -795,12 +794,12 @@
 
           <!-- Subtitle Masking Control Bar -->
           <div
-            class="flex items-center bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-xs shrink-0"
+            class="flex items-center bg-slate-950/80 p-0.5 sm:p-1 rounded-xl border border-slate-800 text-xs shrink-0"
           >
             <button
               id="subMaskDual"
               onclick="setSubtitleMask('both')"
-              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] sm:text-xs shrink-0"
+              class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] sm:text-xs shrink-0"
               title="Dual Subtitles (1)"
               data-i18n="subtitlesDual"
             >
@@ -809,7 +808,7 @@
             <button
               id="subMaskPrimary"
               onclick="setSubtitleMask('primary')"
-              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
+              class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
               title="English Only (2)"
               data-i18n="subtitlesPrimary"
             >
@@ -818,7 +817,7 @@
             <button
               id="subMaskSecondary"
               onclick="setSubtitleMask('secondary')"
-              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
+              class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
               title="Vietnamese Only (3)"
               data-i18n="subtitlesSecondary"
             >
@@ -827,7 +826,7 @@
             <button
               id="subMaskBlur"
               onclick="setSubtitleMask('blur')"
-              class="px-2 sm:px-2.5 py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
+              class="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg font-medium transition-all text-slate-400 hover:text-slate-200 text-[11px] sm:text-xs shrink-0"
               title="Blind Listening Mode (4)"
               data-i18n="subtitlesBlur"
             >
@@ -839,11 +838,11 @@
         <!-- Centerpiece Hero Subtitle Stage -->
         <div
           id="subtitleStage"
-          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-8 pt-7 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
+          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-8 pt-5 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
         >
           <!-- Active sentence position tracker -->
           <div
-            class="absolute top-2 sm:top-3 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
+            class="absolute top-1.5 sm:top-3 left-2.5 sm:left-4 right-2.5 sm:right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
           >
             <div class="flex items-center gap-2 pointer-events-auto">
               <span
@@ -856,7 +855,7 @@
           <!-- Loop Mode Shadowing Repetition Prompt -->
           <div
             id="repeatPromptContainer"
-            class="hidden mb-2 sm:mb-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-2 shadow-lg"
+            class="hidden mb-1.5 sm:mb-3 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-2 shadow-lg"
           >
             <span
               class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
@@ -867,7 +866,7 @@
           <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
           <div
             id="activeEnglishSubtitle"
-            class="blur-target text-base sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
+            class="blur-target text-sm sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-snug sm:leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
           >
             Click a scenario to begin shadowing.
           </div>
@@ -875,7 +874,7 @@
           <!-- Vietnamese Translation Subtitle Line -->
           <div
             id="activeVietnameseSubtitle"
-            class="blur-target text-xs sm:text-sm md:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-1.5 sm:mt-3 transition-all"
+            class="blur-target text-[11px] sm:text-sm md:text-base text-slate-400 font-normal leading-tight sm:leading-normal max-w-3xl mt-1 sm:mt-3 transition-all"
           >
             Nhấp vào tình huống để bắt đầu luyện nói.
           </div>
@@ -884,7 +883,7 @@
         <!-- Waveform & Voice Comparison Panel -->
         <div
           id="waveformComparisonBox"
-          class="shrink-0 bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-4 space-y-1.5 sm:space-y-2.5 shadow-lg backdrop-blur"
+          class="shrink-0 bg-slate-900/90 border border-slate-800 rounded-2xl p-2 sm:p-4 space-y-1 sm:space-y-2.5 shadow-lg backdrop-blur"
         >
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2">
@@ -933,7 +932,7 @@
               id="dualWaveformCanvas"
               width="540"
               height="52"
-              class="w-full h-10 sm:h-14 block"
+              class="w-full h-8 sm:h-14 block"
             ></canvas>
           </div>
 
@@ -1077,7 +1076,7 @@
         >
           <div
             id="transport-dock"
-            class="bg-slate-950/90 p-3 sm:p-4 space-y-2.5 sm:space-y-3 rounded-2xl overflow-visible"
+            class="bg-slate-950/90 p-2 sm:p-4 space-y-1.5 sm:space-y-3 rounded-2xl overflow-visible"
           >
             <!-- Scrubber & Time with Sentence Milestone Marks -->
             <div class="flex items-center gap-2.5 sm:gap-3">
@@ -1165,6 +1164,29 @@
                   </svg>
                   <span class="hidden md:inline" data-i18n="modeContinuous"
                     >Continuous Flow Mode</span
+                  >
+                </button>
+                <button
+                  id="modeEchoicBtn"
+                  onclick="setPlaybackMode('echoic')"
+                  class="px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
+                  title="Hands-Free Echoic Repeat Mode"
+                >
+                  <svg
+                    class="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"
+                    />
+                  </svg>
+                  <span class="hidden md:inline" data-i18n="modeEchoic"
+                    >Echoic Mode</span
                   >
                 </button>
               </div>
@@ -2218,6 +2240,7 @@
           btnExportSrt: "Export SRT",
           modeLoop: "Sentence Loop Mode",
           modeContinuous: "Continuous Flow Mode",
+          modeEchoic: "Echoic Mode",
           subtitlesDual: "Dual",
           subtitlesPrimary: "EN Only",
           subtitlesSecondary: "VI Only",
@@ -2360,6 +2383,7 @@
           btnExportSrt: "Xuất file SRT",
           modeLoop: "Chế độ lặp từng câu",
           modeContinuous: "Chế độ phát liên tục",
+          modeEchoic: "Luyện nhắc lại (Echoic)",
           subtitlesDual: "Song ngữ",
           subtitlesPrimary: "Chỉ EN",
           subtitlesSecondary: "Chỉ VI",
@@ -4142,8 +4166,33 @@
         playCurrentCueAudio();
       }
 
+      let echoicCycleTimeout = null;
+      let echoicCountdownInterval = null;
+
+      function calculateEchoicPauseDuration(cue) {
+        if (!cue) return 2.0;
+        const duration = Math.max(0.5, cue.end - cue.start);
+        return Math.max(2.0, +(duration * 1.25).toFixed(2));
+      }
+
+      function cancelEchoicCycle() {
+        if (echoicCycleTimeout) {
+          clearTimeout(echoicCycleTimeout);
+          echoicCycleTimeout = null;
+        }
+        if (echoicCountdownInterval) {
+          clearInterval(echoicCountdownInterval);
+          echoicCountdownInterval = null;
+        }
+        if (state.isRecording) {
+          stopMicRecording();
+        }
+        hideRepeatPrompt();
+      }
+
       function pauseAudio() {
         state.isPlaying = false;
+        cancelEchoicCycle();
         const audio = getAudioElement();
         if (audio) {
           audio.pause();
@@ -4154,6 +4203,7 @@
       }
 
       function stopAudio() {
+        cancelEchoicCycle();
         pauseAudio();
         const audio = getAudioElement();
         if (audio) {
@@ -4174,6 +4224,7 @@
 
       function replayCurrentSentence() {
         if (!state.activeScenario || state.activeCues.length === 0) return;
+        cancelEchoicCycle();
         const currentCue = state.activeCues[state.currentCueIndex];
         if (!currentCue) return;
 
@@ -4200,6 +4251,7 @@
 
       function navigateSentence(direction) {
         if (!state.activeScenario || state.activeCues.length === 0) return;
+        cancelEchoicCycle();
         const newIndex = state.currentCueIndex + direction;
         if (newIndex >= 0 && newIndex < state.activeCues.length) {
           jumpToSentence(newIndex);
@@ -4213,6 +4265,7 @@
           index >= state.activeCues.length
         )
           return;
+        cancelEchoicCycle();
         state.currentCueIndex = index;
         const cue = state.activeCues[index];
         const targetTime =
@@ -4522,6 +4575,16 @@
 
             updateKaraokeWordHighlight(currentAudioTime);
             animFrameId = requestAnimationFrame(stepProgress);
+          } else if (state.playbackMode === "echoic") {
+            // Hands-Free Echoic Mode
+            updateKaraokeWordHighlight(currentAudioTime);
+            const cue = state.activeCues[state.currentCueIndex];
+            const cueEnd = cue ? cue.end : state.activeScenario?.duration || 0;
+            if (currentAudioTime >= cueEnd) {
+              handleEchoicCueComplete();
+            } else {
+              animFrameId = requestAnimationFrame(stepProgress);
+            }
           } else {
             // Interactive Loop Mode with Acoustic Lead-out Padding
             updateKaraokeWordHighlight(currentAudioTime);
@@ -4587,6 +4650,82 @@
         }
       }
 
+      async function handleEchoicCueComplete() {
+        logPracticeShadowSentence();
+        const audio = getAudioElement();
+        if (audio) audio.pause();
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        state.isPlaying = false;
+        updatePlayPauseIcons();
+
+        const cue = state.activeCues[state.currentCueIndex];
+        const pauseDurationSec = calculateEchoicPauseDuration(cue);
+        let remainingSeconds = Math.ceil(pauseDurationSec);
+
+        // Show repeat prompt with countdown
+        const repeatContainer = document.getElementById(
+          "repeatPromptContainer"
+        );
+        const repeatPromptLabel = document.querySelector(
+          "#repeatPromptContainer [data-i18n='repeatPrompt']"
+        );
+        if (repeatContainer) {
+          repeatContainer.classList.remove("hidden");
+          if (repeatPromptLabel) {
+            repeatPromptLabel.textContent = `Now Shadow: Speak (${remainingSeconds}s)`;
+          }
+        }
+
+        // Arm microphone and start recording
+        await startMicRecording();
+
+        if (echoicCountdownInterval) clearInterval(echoicCountdownInterval);
+        echoicCountdownInterval = setInterval(() => {
+          remainingSeconds--;
+          if (repeatPromptLabel) {
+            repeatPromptLabel.textContent = `Now Shadow: Speak (${Math.max(0, remainingSeconds)}s)`;
+          }
+          if (remainingSeconds <= 0) {
+            clearInterval(echoicCountdownInterval);
+            echoicCountdownInterval = null;
+          }
+        }, 1000);
+
+        if (echoicCycleTimeout) clearTimeout(echoicCycleTimeout);
+        echoicCycleTimeout = setTimeout(async () => {
+          if (echoicCountdownInterval) {
+            clearInterval(echoicCountdownInterval);
+            echoicCountdownInterval = null;
+          }
+          stopMicRecording();
+          hideRepeatPrompt();
+
+          if (state.playbackMode === "echoic") {
+            if (state.currentCueIndex < state.activeCues.length - 1) {
+              state.currentCueIndex++;
+              renderActiveCue();
+              highlightTranscriptLine(state.currentCueIndex);
+              updateScenarioUrl(
+                state.activeScenario.id,
+                state.currentCueIndex,
+                false
+              );
+              setTimeout(() => {
+                if (state.playbackMode === "echoic") {
+                  state.isPlaying = true;
+                  updatePlayPauseIcons();
+                  playAudio();
+                }
+              }, 400);
+            } else {
+              state.isPlaying = false;
+              updatePlayPauseIcons();
+              showToast("Scenario practice completed!", "success");
+            }
+          }
+        }, pauseDurationSec * 1000);
+      }
+
       function setPlaybackMode(mode, save = true) {
         state.playbackMode = mode;
         if (save) {
@@ -4596,21 +4735,22 @@
         }
         const btnLoop = document.getElementById("modeLoopBtn");
         const btnCont = document.getElementById("modeContinuousBtn");
+        const btnEchoic = document.getElementById("modeEchoicBtn");
 
-        if (mode === "loop") {
-          if (btnLoop)
-            btnLoop.className =
-              "px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
-          if (btnCont)
-            btnCont.className =
-              "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
-        } else {
-          if (btnCont)
-            btnCont.className =
-              "px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
-          if (btnLoop)
-            btnLoop.className =
-              "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
+        const activeClass =
+          "px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
+        const inactiveClass =
+          "px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
+
+        if (btnLoop)
+          btnLoop.className = mode === "loop" ? activeClass : inactiveClass;
+        if (btnCont)
+          btnCont.className =
+            mode === "continuous" ? activeClass : inactiveClass;
+        if (btnEchoic)
+          btnEchoic.className = mode === "echoic" ? activeClass : inactiveClass;
+
+        if (mode !== "loop" && mode !== "echoic") {
           hideRepeatPrompt();
         }
       }

@@ -104,6 +104,10 @@ async function runTests() {
     htmlContent.includes('id="modeContinuousBtn"'),
     "Continuous flow mode button exists"
   );
+  assert(
+    htmlContent.includes('id="modeEchoicBtn"'),
+    "Hands-Free Echoic mode button exists"
+  );
 
   // 3. Subtitle Masking Modes
   assert(
