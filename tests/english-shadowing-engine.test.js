@@ -181,6 +181,7 @@ async function runTests() {
     globalThis.onScrubberInput = typeof onScrubberInput !== 'undefined' ? onScrubberInput : function(){};
     globalThis.calculateLoopEndBoundary = typeof calculateLoopEndBoundary !== 'undefined' ? calculateLoopEndBoundary : function(){};
     globalThis.calculateLoopStartBoundary = typeof calculateLoopStartBoundary !== 'undefined' ? calculateLoopStartBoundary : function(){};
+    globalThis.calculateEchoicPauseDuration = typeof calculateEchoicPauseDuration !== 'undefined' ? calculateEchoicPauseDuration : function(){};
     globalThis.SPEED_PRESETS = typeof SPEED_PRESETS !== 'undefined' ? SPEED_PRESETS : [];
     globalThis.SCENARIO_CUES_CACHE = typeof SCENARIO_CUES_CACHE !== 'undefined' ? SCENARIO_CUES_CACHE : null;
     globalThis.selectScenario = typeof selectScenario !== 'undefined' ? selectScenario : null;
@@ -216,6 +217,7 @@ async function runTests() {
     onScrubberInput,
     calculateLoopEndBoundary,
     calculateLoopStartBoundary,
+    calculateEchoicPauseDuration,
     SPEED_PRESETS,
     SCENARIOS_MANIFEST,
     CURATED_SCENARIOS,
@@ -1101,7 +1103,54 @@ async function runTests() {
     state.currentCueIndex === 2 && state.isPlaying === true,
     "navigateSentence(1) while playing advances to sentence 2 and keeps playing"
   );
-  pauseAudio();
+  // ==========================================
+  // 15. HANDS-FREE ECHOIC SHADOWING PAUSE DURATION (ADR-0009 / Slice 3)
+  // ==========================================
+  console.log("\n--- Section 15: Echoic Mode Pause & Record Window ---");
+
+  assert(
+    typeof calculateEchoicPauseDuration === "function",
+    "calculateEchoicPauseDuration function exists"
+  );
+
+  // 15.1 Minimum 2.0s floor for short cues
+  const shortCue = { start: 0, end: 1.0, en: "Short cue." };
+  const shortPause = calculateEchoicPauseDuration(shortCue);
+  assert(
+    shortPause === 2.0,
+    `Short cue (1.0s) clamps to 2.0s floor (got ${shortPause}s)`
+  );
+
+  // 15.2 1.25x scaling for medium cues
+  const mediumCue = {
+    start: 10.0,
+    end: 14.0,
+    en: "This is a medium length sentence.",
+  };
+  const mediumPause = calculateEchoicPauseDuration(mediumCue);
+  assert(
+    mediumPause === 5.0,
+    `Medium cue (4.0s) scales to 5.0s (4.0 * 1.25) (got ${mediumPause}s)`
+  );
+
+  // 15.3 1.25x scaling for long complex cues
+  const longCue = {
+    start: 0,
+    end: 8.0,
+    en: "A long complex academic discourse sentence.",
+  };
+  const longPause = calculateEchoicPauseDuration(longCue);
+  assert(
+    longPause === 10.0,
+    `Long cue (8.0s) scales to 10.0s (8.0 * 1.25) (got ${longPause}s)`
+  );
+
+  // 15.4 Null / empty cue fallback
+  const nullPause = calculateEchoicPauseDuration(null);
+  assert(
+    nullPause === 2.0,
+    `Null cue fallback returns safe 2.0s floor (got ${nullPause}s)`
+  );
 
   console.log(`\n==================================================`);
   console.log(
