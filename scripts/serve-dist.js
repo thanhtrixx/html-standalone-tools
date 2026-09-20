@@ -24,21 +24,35 @@ const MIME = {
 };
 
 const server = http.createServer((req, res) => {
-  const urlPath = (req.url || "/").split("?")[0];
+  const urlParts = (req.url || "/").split("?");
+  const urlPath = urlParts[0];
+  const queryString =
+    urlParts.length > 1 ? `?${urlParts.slice(1).join("?")}` : "";
   const ROOT_DIR = path.join(__dirname, "..");
   let filePath = path.join(DIST, urlPath);
+  const sourcePath = path.join(ROOT_DIR, urlPath);
 
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+  const isDistDir =
+    fs.existsSync(filePath) && fs.statSync(filePath).isDirectory();
+  const isSourceDir =
+    fs.existsSync(sourcePath) && fs.statSync(sourcePath).isDirectory();
+
+  // Redirect directories without trailing slash to maintain standard relative URL resolution
+  if ((isDistDir || isSourceDir) && !urlPath.endsWith("/")) {
+    res.writeHead(301, {
+      Location: `${urlPath}/${queryString}`,
+    });
+    res.end();
+    return;
+  }
+
+  if (isDistDir) {
     filePath = path.join(filePath, "index.html");
   }
 
   // Fallback to source root if not in dist or if source is fresher
-  const sourcePath = path.join(ROOT_DIR, urlPath);
   let resolvedSource = sourcePath;
-  if (
-    fs.existsSync(resolvedSource) &&
-    fs.statSync(resolvedSource).isDirectory()
-  ) {
+  if (isSourceDir) {
     resolvedSource = path.join(resolvedSource, "index.html");
   }
 

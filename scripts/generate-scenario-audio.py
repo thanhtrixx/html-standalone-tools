@@ -279,10 +279,10 @@ def stitch_audio_with_ffmpeg(sentence_files, silence_durations, output_path, aud
 
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-async def render_scenario(scenario_meta, turns, scenario_dir, public_audio_dir, audio_format="mp3", dry_run=False):
+async def render_scenario(scenario_meta, turns, scenario_dir, audio_format="mp3", dry_run=False):
     """
     Renders a single scenario: synthesizes audio turns, inserts acoustic silence gaps,
-    computes Enhanced LRC cues, writes output files, and returns compiled metadata.
+    computes Enhanced LRC cues, writes output files directly to scenario_dir, and returns compiled metadata.
     """
     sc_id = scenario_meta.get("id", "scenario")
     title = scenario_meta.get("title", sc_id)
@@ -292,14 +292,11 @@ async def render_scenario(scenario_meta, turns, scenario_dir, public_audio_dir, 
     description = scenario_meta.get("description", "")
 
     os.makedirs(scenario_dir, exist_ok=True)
-    os.makedirs(public_audio_dir, exist_ok=True)
 
     ext = "webm" if audio_format == "opus" else "mp3"
-    audio_filename = f"{sc_id}.{ext}"
-    scenario_audio_path = os.path.join(scenario_dir, f"audio.{ext}")
-    public_audio_path = os.path.join(public_audio_dir, audio_filename)
+    audio_filename = f"audio.{ext}"
+    scenario_audio_path = os.path.join(scenario_dir, audio_filename)
     lrc_path = os.path.join(scenario_dir, "subtitles.lrc")
-    public_lrc_path = os.path.join(public_audio_dir, f"{sc_id}.lrc")
 
     print(f"🎙️ Processing scenario [{sc_id}]: '{title}' ({len(turns)} turns, level {level}, accent {accent})")
 
@@ -350,9 +347,6 @@ async def render_scenario(scenario_meta, turns, scenario_dir, public_audio_dir, 
 
         if not dry_run and temp_files:
             stitch_audio_with_ffmpeg(temp_files, silence_gaps, scenario_audio_path, audio_format)
-            # Copy to public audio dir as well
-            with open(scenario_audio_path, "rb") as src, open(public_audio_path, "wb") as dst:
-                dst.write(src.read())
 
     # Build Enhanced LRC text
     lrc_lines = [
@@ -378,8 +372,6 @@ async def render_scenario(scenario_meta, turns, scenario_dir, public_audio_dir, 
     if not dry_run:
         with open(lrc_path, "w", encoding="utf-8") as f:
             f.write(lrc_content)
-        with open(public_lrc_path, "w", encoding="utf-8") as f:
-            f.write(lrc_content)
         print(f"  ✅ Saved audio and Enhanced LRC (~{current_time:.1f}s)")
     else:
         print(f"  🔍 Dry-run complete: ~{current_time:.1f}s, {len(cues)} cues")
@@ -392,7 +384,7 @@ async def render_scenario(scenario_meta, turns, scenario_dir, public_audio_dir, 
         "accent": accent,
         "duration": round(current_time),
         "description": description,
-        "audioUrl": f"audio/{audio_filename}",
+        "audioUrl": f"scenarios/{sc_id}/{audio_filename}",
         "lrcContent": lrc_content,
         "cues": cues
     }
@@ -447,7 +439,7 @@ def export_scenarios_manifest(manifest_entries, json_path):
 def sync_scenarios_to_html(manifest_entries, html_path):
     """
     Fast, atomic synchronization of lightweight SCENARIOS_MANIFEST array in index.html
-    (conforming to ADR-0008, metadata only without lrcContent).
+    (conforming to ADR-0008, metadata only without inlined lrcContent).
     """
     if not os.path.exists(html_path):
         print(f"❌ index.html not found at: {html_path}")
@@ -488,12 +480,12 @@ def sync_scenarios_to_html(manifest_entries, html_path):
         + ",\n      ];\n      const CURATED_SCENARIOS = SCENARIOS_MANIFEST;"
     )
 
-    pattern = r"const (?:SCENARIOS_MANIFEST|CURATED_SCENARIOS)\s*=\s*\[[\s\S]*?\];(?:[\s\n]*const CURATED_SCENARIOS\s*=\s*SCENARIOS_MANIFEST;)?"
+    pattern = r"const (?:SCENARIOS_MANIFEST|CURATED_SCENARIOS)\s*=\s*\[[\s\S]*?\];(?:[\s\n]*const CURATED_SCENARIOS\s*=\s*SCENARIOS_MANIFEST;)?(?:[\s\n]*const INLINED_SCENARIOS_LRC\s*=\s*\{[\s\S]*?\};)?"
     if not re.search(pattern, html_content):
         print("❌ Could not find const SCENARIOS_MANIFEST or CURATED_SCENARIOS array in index.html")
         return False
 
-    updated_html = re.sub(pattern, scenarios_array_code, html_content, count=1)
+    updated_html = re.sub(pattern, lambda m: scenarios_array_code, html_content, count=1)
 
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(updated_html)
@@ -513,16 +505,26 @@ async def main_async():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     base_shadowing_dir = os.path.join(repo_root, "english-shadowing")
     scenarios_dir = os.path.join(base_shadowing_dir, "scenarios")
-    public_audio_dir = os.path.join(base_shadowing_dir, "audio")
     html_path = os.path.join(base_shadowing_dir, "index.html")
 
     os.makedirs(scenarios_dir, exist_ok=True)
-    os.makedirs(public_audio_dir, exist_ok=True)
 
-    # Discover scenario directories with scenario.md
+    CURATED_ORDER = [
+        "specialty-coffee",
+        "airport-security",
+        "doctor-consultation",
+        "tech-standup",
+        "job-interview",
+        "academic-ai-future",
+    ]
+
+    def get_sort_key(entry):
+        return (CURATED_ORDER.index(entry) if entry in CURATED_ORDER else 999, entry)
+
+    # Discover scenario directories with scenario.md in curated progression order
     scenario_folders = []
     if os.path.exists(scenarios_dir):
-        for entry in sorted(os.listdir(scenarios_dir)):
+        for entry in sorted(os.listdir(scenarios_dir), key=get_sort_key):
             full_path = os.path.join(scenarios_dir, entry)
             md_path = os.path.join(full_path, "scenario.md")
             if os.path.isdir(full_path) and os.path.exists(md_path):
@@ -550,20 +552,15 @@ async def main_async():
 
         src_lrc = os.path.join(sc_dir, "subtitles.lrc")
         src_mp3 = os.path.join(sc_dir, "audio.mp3")
-        dest_lrc = os.path.join(public_audio_dir, f"{sc_id}.lrc")
-        dest_mp3 = os.path.join(public_audio_dir, f"{sc_id}.mp3")
 
         duration = 0
         if args.sync_only:
             if os.path.exists(src_lrc):
-                shutil.copyfile(src_lrc, dest_lrc)
                 with open(src_lrc, "r", encoding="utf-8") as lf:
                     lrc_text = lf.read()
                     len_match = re.search(r"\[length:(\d+):(\d+(?:\.\d+)?)\]", lrc_text)
                     if len_match:
                         duration = int(len_match.group(1)) * 60 + float(len_match.group(2))
-            if os.path.exists(src_mp3):
-                shutil.copyfile(src_mp3, dest_mp3)
 
             entry = build_manifest_entry(meta, turns, duration=duration)
             manifest_entries.append(entry)
@@ -572,7 +569,6 @@ async def main_async():
                 meta,
                 turns,
                 sc_dir,
-                public_audio_dir,
                 audio_format=args.format,
                 dry_run=args.dry_run
             )

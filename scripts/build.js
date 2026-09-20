@@ -55,8 +55,10 @@ const COMPANION_ASSETS = [
   "og-image.webp",
   "icons",
   "splash",
+  "scenarios",
   "audio",
   "scenarios.json",
+  "dictionary.json",
 ];
 
 const MINIFY_OPTIONS = {
@@ -81,10 +83,10 @@ const TAILWIND_CDN_RE =
   /<script\s+src=["']https:\/\/cdn\.tailwindcss\.com["']\s*><\/script>/gi;
 
 // Regex to match the inline tailwind.config assignment script block.
-// Captures the full <script>...</script> containing "tailwind.config ="
+// Captures the single <script>...</script> tag containing "tailwind.config ="
 // (possibly wrapped in if (typeof tailwind !== "undefined") { ... } guard).
 const TAILWIND_CONFIG_SCRIPT_RE =
-  /<script>[\s\S]*?tailwind\.config\s*=[\s\S]*?<\/script>/gi;
+  /<script[^>]*>(?:(?!<\/script>)[\s\S])*?tailwind\.config\s*=[\s\S]*?<\/script>/gi;
 
 /**
  * Extract the raw JS object literal string assigned to tailwind.config from the HTML.
@@ -410,6 +412,35 @@ function extractToolVersion(toolDir) {
 }
 
 /**
+ * Recursively copy scenario media (.mp3, .webm, .opus) and subtitles (.lrc),
+ * omitting authoring source markdown (.md) for production distribution.
+ */
+function copyScenarioAssets(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return [];
+  const copied = [];
+  fs.mkdirSync(destDir, { recursive: true });
+  const entries = fs.readdirSync(srcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    const srcPath = path.join(srcDir, entry.name);
+    const destPath = path.join(destDir, entry.name);
+    if (entry.isDirectory()) {
+      copied.push(...copyScenarioAssets(srcPath, destPath));
+    } else if (
+      entry.name === "audio.mp3" ||
+      entry.name === "subtitles.lrc" ||
+      entry.name.endsWith(".mp3") ||
+      entry.name.endsWith(".lrc") ||
+      entry.name.endsWith(".webm") ||
+      entry.name.endsWith(".opus")
+    ) {
+      fs.copyFileSync(srcPath, destPath);
+      copied.push(destPath);
+    }
+  }
+  return copied;
+}
+
+/**
  * Process and compact companion assets (service workers, web manifests, icons)
  */
 async function buildCompanionAssets(
@@ -430,8 +461,14 @@ async function buildCompanionAssets(
 
     const isDir = fs.statSync(srcAsset).isDirectory();
     if (isDir) {
-      fs.cpSync(srcAsset, toolDistAsset, { recursive: true });
-      fs.cpSync(srcAsset, rootDistAsset, { recursive: true });
+      if (assetName === "scenarios") {
+        // Production-optimized copy: include only media and subtitles, excluding scenario.md
+        copyScenarioAssets(srcAsset, toolDistAsset);
+        copyScenarioAssets(srcAsset, rootDistAsset);
+      } else {
+        fs.cpSync(srcAsset, toolDistAsset, { recursive: true });
+        fs.cpSync(srcAsset, rootDistAsset, { recursive: true });
+      }
       processedFiles.push(toolDistAsset, rootDistAsset);
       continue;
     }
