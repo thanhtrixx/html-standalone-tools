@@ -40,6 +40,14 @@
         tailwind.config = {
           darkMode: "class",
           theme: {
+            screens: {
+              xs: "480px",
+              sm: "640px",
+              md: "768px",
+              lg: "1024px",
+              xl: "1280px",
+              "2xl": "1536px",
+            },
             extend: {
               colors: {
                 brand: {
@@ -391,7 +399,7 @@
       >
         <!-- Hero Banner & Actions -->
         <div
-          class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-xl"
+          class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800 p-3 xs:p-5 sm:p-8 shadow-xl"
         >
           <div
             class="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"
@@ -407,11 +415,13 @@
                 <span>100% Offline Standalone PWA</span>
               </span>
               <h1
-                class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight"
+                class="text-xl xs:text-2xl sm:text-3xl font-extrabold text-white tracking-tight"
               >
                 English Shadowing
               </h1>
-              <p class="text-sm sm:text-base text-slate-400 mt-1 max-w-2xl">
+              <p
+                class="hidden xs:block text-sm sm:text-base text-slate-400 mt-1 max-w-2xl"
+              >
                 Master natural spoken English rhythm, linking, and intonation
                 through deliberate sentence-by-sentence shadowing.
               </p>
@@ -421,7 +431,7 @@
 
         <!-- 3-Step "How to Shadow" FTUX Onboarding Scaffolding -->
         <div
-          class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800/90 rounded-xl p-3.5 sm:p-4 shadow-sm"
+          class="hidden xs:block bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-slate-800/90 rounded-xl p-3.5 sm:p-4 shadow-sm"
         >
           <div class="flex items-center justify-between gap-2 mb-2.5">
             <span
@@ -643,7 +653,7 @@
         <!-- Scenario Cards Grid -->
         <div
           id="scenarioCardsGrid"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
         >
           <!-- Injected via JavaScript -->
         </div>
@@ -699,12 +709,12 @@
               >
                 <span
                   id="activeScenarioLevel"
-                  class="px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-300 font-semibold text-[10px] sm:text-[11px] border border-cyan-500/20"
+                  class="hidden xs:inline px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-300 font-semibold text-[10px] sm:text-[11px] border border-cyan-500/20"
                   >B2</span
                 >
                 <span
                   id="activeScenarioAccent"
-                  class="px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 text-[10px] sm:text-[11px]"
+                  class="hidden xs:inline px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 text-[10px] sm:text-[11px]"
                   >US Accent</span
                 >
                 <span
@@ -758,7 +768,7 @@
         <!-- Centerpiece Hero Subtitle Stage -->
         <div
           id="subtitleStage"
-          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-2.5 sm:p-8 pt-5 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
+          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-2 xs:p-3 sm:p-8 pt-4 xs:pt-5 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
         >
           <!-- Active sentence position tracker -->
           <div
@@ -786,7 +796,7 @@
           <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
           <div
             id="activeEnglishSubtitle"
-            class="blur-target text-sm sm:text-2xl lg:text-3xl font-semibold tracking-tight text-white leading-snug sm:leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1 sm:gap-1.5"
+            class="blur-target text-sm xs:text-base sm:text-2xl lg:text-3xl font-semibold tracking-tight text-white leading-snug sm:leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1 sm:gap-1.5"
           >
             Click a scenario to begin shadowing.
           </div>
@@ -794,7 +804,7 @@
           <!-- Vietnamese Translation Subtitle Line -->
           <div
             id="activeVietnameseSubtitle"
-            class="blur-target text-[11px] sm:text-sm md:text-base text-slate-400 font-normal leading-tight sm:leading-normal max-w-3xl mt-1 sm:mt-3 transition-all"
+            class="blur-target text-[11px] xs:text-xs sm:text-sm md:text-base text-slate-400 font-normal leading-tight sm:leading-normal max-w-3xl mt-0.5 xs:mt-1 sm:mt-3 transition-all"
           >
             Nhấp vào tình huống để bắt đầu luyện nói.
           </div>
@@ -924,7 +934,7 @@
         <!-- Collapsible Full Transcript Navigation Card (Read-Only) -->
         <div
           id="transcriptCard"
-          class="flex-1 min-h-0 bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col overflow-hidden shadow-lg transition-all"
+          class="flex-1 min-h-[35%] bg-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 flex flex-col overflow-hidden shadow-lg transition-all"
         >
           <div
             class="shrink-0 flex items-center justify-between cursor-pointer select-none pb-2 border-b border-slate-800/80"
@@ -993,7 +1003,7 @@
         >
           <div
             id="transport-dock"
-            class="bg-slate-950/90 p-2 sm:p-4 space-y-1.5 sm:space-y-3 rounded-2xl overflow-visible"
+            class="bg-slate-950/90 p-1.5 xs:p-2 sm:p-4 space-y-1 xs:space-y-1.5 sm:space-y-3 rounded-2xl overflow-visible"
           >
             <!-- Scrubber & Time with Sentence Milestone Marks -->
             <div class="flex items-center gap-2.5 sm:gap-3">
@@ -1032,7 +1042,7 @@
             </div>
 
             <!-- Transport Buttons Row -->
-            <div class="flex items-center justify-between gap-2 flex-wrap">
+            <div class="flex items-center justify-between gap-1.5 xs:gap-2">
               <!-- Playback Mode Switches (Loop vs Continuous) -->
               <div
                 class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs shrink-0"
@@ -1040,7 +1050,7 @@
                 <button
                   id="modeLoopBtn"
                   onclick="setPlaybackMode('loop')"
-                  class="px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
+                  class="px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
                   title="Sentence Loop Mode"
                 >
                   <svg
@@ -1061,7 +1071,7 @@
                 <button
                   id="modeContinuousBtn"
                   onclick="setPlaybackMode('continuous')"
-                  class="px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
+                  class="px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
                   title="Continuous Flow Mode"
                 >
                   <svg
@@ -1082,7 +1092,7 @@
                 <button
                   id="modeEchoicBtn"
                   onclick="setPlaybackMode('echoic')"
-                  class="px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
+                  class="px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
                   title="Hands-Free Echoic Repeat Mode"
                 >
                   <svg
@@ -1146,7 +1156,7 @@
               </div>
 
               <!-- Central Transport Control Group -->
-              <div class="flex items-center gap-2 sm:gap-3">
+              <div class="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
                 <!-- Replay Sentence Button [R] -->
                 <button
                   onclick="replayCurrentSentence()"
@@ -1216,7 +1226,7 @@
                 <button
                   id="btnDockRecord"
                   onclick="toggleMicRecording()"
-                  class="p-2.5 sm:p-3 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95 flex items-center justify-center shrink-0"
+                  class="p-2 xs:p-2.5 sm:p-3 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95 flex items-center justify-center shrink-0"
                   title="Record Voice Attempt (M)"
                   aria-label="Record Voice Attempt"
                 >
@@ -1255,7 +1265,7 @@
               <!-- Quick Vocabulary Trigger -->
               <button
                 onclick="toggleVocabDrawer()"
-                class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs border border-slate-800 transition-colors flex items-center gap-1 shrink-0"
+                class="p-1.5 xs:px-2.5 xs:py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs border border-slate-800 transition-colors flex items-center gap-1 shrink-0"
                 title="Vocabulary Deck (V)"
               >
                 <svg
