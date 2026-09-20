@@ -186,18 +186,21 @@
 
       /* Waveform panel echoic-mode slide */
       #waveformComparisonBox {
-        max-height: 0;
-        overflow: hidden;
-        opacity: 0;
-        transition:
-          max-height 0.3s ease,
-          opacity 0.25s ease,
-          margin 0.3s ease;
-        margin-top: 0;
+        display: none;
       }
       #waveformComparisonBox.waveform-visible {
-        max-height: 200px;
-        opacity: 1;
+        display: block;
+        animation: fadeInDown 0.25s ease;
+      }
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
     </style>
   </head>
@@ -781,11 +784,11 @@
         <!-- Centerpiece Hero Subtitle Stage -->
         <div
           id="subtitleStage"
-          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-2 xs:p-3 sm:p-8 pt-4 xs:pt-5 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
+          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-4 pt-3 sm:pt-4 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
         >
-          <!-- Active sentence position tracker -->
+          <!-- Active sentence position tracker + Mode buttons row -->
           <div
-            class="absolute top-1.5 sm:top-3 left-2.5 sm:left-4 right-2.5 sm:right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
+            class="absolute top-1.5 sm:top-2 left-2.5 sm:left-3 right-2.5 sm:right-3 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
           >
             <div class="flex items-center gap-2 pointer-events-auto">
               <span
@@ -793,12 +796,77 @@
               ></span>
               <span id="sentenceIndexTracker">Sentence 1 of 10</span>
             </div>
+            <!-- Mode buttons: icon-only pill group in top-right of subtitleStage -->
+            <div
+              class="flex items-center bg-slate-900/80 p-0.5 rounded-lg border border-slate-700/60 pointer-events-auto gap-0.5"
+            >
+              <button
+                id="modeLoopBtn"
+                onclick="setPlaybackMode('loop')"
+                class="p-1 rounded-md font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700/60"
+                title="Sentence Loop Mode"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
+              <button
+                id="modeContinuousBtn"
+                onclick="setPlaybackMode('continuous')"
+                class="p-1 rounded-md font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                title="Continuous Flow Mode"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 5l7 7-7 7M5 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+              <button
+                id="modeEchoicBtn"
+                onclick="setPlaybackMode('echoic')"
+                class="p-1 rounded-md font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700/60"
+                title="Hands-Free Echoic Repeat Mode"
+              >
+                <svg
+                  class="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <!-- Loop Mode Shadowing Repetition Prompt -->
           <div
             id="repeatPromptContainer"
-            class="hidden mb-1.5 sm:mb-3 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-semibold animate-repeat-pulse flex items-center gap-2 shadow-lg"
+            class="hidden mb-1.5 sm:mb-2 px-2.5 sm:px-4 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-semibold animate-repeat-pulse flex items-center gap-2 shadow-lg"
           >
             <span
               class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
@@ -809,7 +877,7 @@
           <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
           <div
             id="activeEnglishSubtitle"
-            class="blur-target text-sm xs:text-base sm:text-2xl lg:text-3xl font-semibold tracking-tight text-white leading-snug sm:leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1 sm:gap-1.5"
+            class="blur-target text-sm xs:text-base sm:text-xl lg:text-2xl font-semibold tracking-tight text-white leading-snug sm:leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1 sm:gap-1.5"
           >
             Click a scenario to begin shadowing.
           </div>
@@ -817,7 +885,7 @@
           <!-- Vietnamese Translation Subtitle Line -->
           <div
             id="activeVietnameseSubtitle"
-            class="blur-target text-[11px] xs:text-xs sm:text-sm md:text-base text-slate-400 font-normal leading-tight sm:leading-normal max-w-3xl mt-0.5 xs:mt-1 sm:mt-3 transition-all"
+            class="blur-target text-[11px] xs:text-xs sm:text-sm text-slate-400 font-normal leading-tight sm:leading-normal max-w-3xl mt-0.5 xs:mt-1 sm:mt-2 transition-all"
           >
             Nhấp vào tình huống để bắt đầu luyện nói.
           </div>
@@ -1016,16 +1084,17 @@
         >
           <div
             id="transport-dock"
-            class="bg-slate-950/90 p-1.5 xs:p-2 sm:p-4 space-y-1 xs:space-y-1.5 sm:space-y-3 rounded-2xl overflow-visible"
+            class="bg-slate-950/90 p-1.5 xs:p-2 sm:p-3 rounded-2xl overflow-visible"
           >
-            <!-- Scrubber & Time with Sentence Milestone Marks -->
-            <div class="flex items-center gap-2.5 sm:gap-3">
+            <!-- Single-row Transport Dock: [time][scrubber][time] [replay][prev][play][record][next] [speed] -->
+            <div class="flex items-center gap-2 xs:gap-2.5">
+              <!-- Seek Bar + Time Labels (flex-1) -->
               <span
                 id="currentTimeLabel"
-                class="text-xs font-mono text-slate-400 w-11 text-right shrink-0"
+                class="text-xs font-mono text-slate-400 w-10 text-right shrink-0"
                 >00:00</span
               >
-              <div class="relative flex-1 flex items-center h-6">
+              <div class="relative flex-1 flex items-center h-5">
                 <!-- Milestone tick marks for sentence starts -->
                 <div
                   id="scrubberMilestones"
@@ -1049,88 +1118,123 @@
               </div>
               <span
                 id="durationTimeLabel"
-                class="text-xs font-mono text-slate-500 w-11 shrink-0"
+                class="text-xs font-mono text-slate-500 w-10 shrink-0"
                 >00:00</span
               >
-            </div>
 
-            <!-- Transport Buttons Row -->
-            <div class="flex items-center justify-between gap-1.5 xs:gap-2">
-              <!-- Playback Mode Switches (Loop vs Continuous) -->
-              <div
-                class="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs shrink-0"
+              <!-- Divider -->
+              <div class="w-px h-5 bg-slate-700/60 shrink-0"></div>
+
+              <!-- Replay Sentence [R] -->
+              <button
+                onclick="replayCurrentSentence()"
+                class="p-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95 shrink-0"
+                title="Replay Sentence [R]"
               >
-                <button
-                  id="modeLoopBtn"
-                  onclick="setPlaybackMode('loop')"
-                  class="px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
-                  title="Sentence Loop Mode"
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    class="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                  <span class="hidden md:inline">Sentence Loop Mode</span>
-                </button>
-                <button
-                  id="modeContinuousBtn"
-                  onclick="setPlaybackMode('continuous')"
-                  class="px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1"
-                  title="Continuous Flow Mode"
-                >
-                  <svg
-                    class="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                    />
-                  </svg>
-                  <span class="hidden md:inline">Continuous Flow Mode</span>
-                </button>
-                <button
-                  id="modeEchoicBtn"
-                  onclick="setPlaybackMode('echoic')"
-                  class="px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1"
-                  title="Hands-Free Echoic Repeat Mode"
-                >
-                  <svg
-                    class="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"
-                    />
-                  </svg>
-                  <span class="hidden md:inline">Echoic Mode</span>
-                </button>
-              </div>
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
 
-              <!-- Speed Selector Popover Wrapper -->
+              <!-- Previous Sentence [A] -->
+              <button
+                onclick="navigateSentence(-1)"
+                class="p-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95 shrink-0"
+                title="Previous Sentence (A / Left)"
+              >
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+
+              <!-- Primary Play / Pause [Space] -->
+              <button
+                id="mainPlayPauseBtn"
+                onclick="togglePlayPause()"
+                class="p-2 sm:p-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/20 active:scale-95 shrink-0"
+                title="Play / Pause / Repeat (Space)"
+              >
+                <svg
+                  id="playIcon"
+                  class="w-4 h-4 fill-current"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <svg
+                  id="pauseIcon"
+                  class="w-4 h-4 fill-current hidden"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                </svg>
+              </button>
+
+              <!-- Voice Recording [M] -->
+              <button
+                id="btnDockRecord"
+                onclick="toggleMicRecording()"
+                class="p-1.5 sm:p-2 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95 flex items-center justify-center shrink-0"
+                title="Record Voice Attempt (M)"
+                aria-label="Record Voice Attempt"
+              >
+                <svg
+                  class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"
+                  />
+                </svg>
+              </button>
+
+              <!-- Next Sentence [D] -->
+              <button
+                onclick="navigateSentence(1)"
+                class="p-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95 shrink-0"
+                title="Next Sentence (D / Right)"
+              >
+                <svg
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
+
+              <!-- Speed Selector Popover -->
               <div class="relative shrink-0">
                 <button
                   id="speedBtn"
                   onclick="toggleSpeedPopover(event)"
-                  class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-mono text-xs border border-slate-800 hover:border-slate-700 transition-all flex items-center gap-1.5 active:scale-95"
+                  class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-mono text-xs border border-slate-800 hover:border-slate-700 transition-all flex items-center gap-1 active:scale-95"
                   title="Adjust Playback Speed ([ / ])"
                   aria-label="Adjust Playback Speed"
                   aria-haspopup="true"
@@ -1138,7 +1242,7 @@
                   <span id="speedBtnText">1.0x</span>
                   <svg
                     id="speedBtnIcon"
-                    class="w-3 h-3 text-slate-400 transition-transform duration-150"
+                    class="w-2.5 h-2.5 text-slate-400 transition-transform duration-150"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1155,7 +1259,7 @@
                 <!-- Speed Selection Popover -->
                 <div
                   id="speedPopover"
-                  class="hidden absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-50 w-36 bg-slate-900 border border-slate-800 rounded-2xl p-1.5 shadow-2xl space-y-0.5 backdrop-blur"
+                  class="hidden absolute bottom-full mb-2 right-0 z-50 w-36 bg-slate-900 border border-slate-800 rounded-2xl p-1.5 shadow-2xl space-y-0.5 backdrop-blur"
                 >
                   <div
                     class="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800/80 mb-1"
@@ -1167,139 +1271,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Central Transport Control Group -->
-              <div class="flex items-center gap-1.5 xs:gap-2 sm:gap-3">
-                <!-- Replay Sentence Button [R] -->
-                <button
-                  onclick="replayCurrentSentence()"
-                  class="p-2 sm:p-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
-                  title="Replay Sentence [R]"
-                >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
-                </button>
-
-                <!-- Previous Sentence [A] -->
-                <button
-                  onclick="navigateSentence(-1)"
-                  class="p-2 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
-                  title="Previous Sentence (A / Left)"
-                >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-
-                <!-- Primary Play / Pause / Repeat [Space] -->
-                <button
-                  id="mainPlayPauseBtn"
-                  onclick="togglePlayPause()"
-                  class="p-3 sm:p-3.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
-                  title="Play / Pause / Repeat (Space)"
-                >
-                  <svg
-                    id="playIcon"
-                    class="w-5 h-5 fill-current"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                  <svg
-                    id="pauseIcon"
-                    class="w-5 h-5 fill-current hidden"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                  </svg>
-                </button>
-
-                <!-- Voice Recording Dock Button [M] -->
-                <button
-                  id="btnDockRecord"
-                  onclick="toggleMicRecording()"
-                  class="p-2 xs:p-2.5 sm:p-3 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95 flex items-center justify-center shrink-0"
-                  title="Record Voice Attempt (M)"
-                  aria-label="Record Voice Attempt"
-                >
-                  <svg
-                    class="w-4 h-4 sm:w-5 sm:h-5 fill-current"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"
-                    />
-                  </svg>
-                </button>
-
-                <!-- Next Sentence [D] -->
-                <button
-                  onclick="navigateSentence(1)"
-                  class="p-2 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white transition-all border border-slate-800 active:scale-95"
-                  title="Next Sentence (D / Right)"
-                >
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Quick Vocabulary Trigger -->
-              <button
-                onclick="toggleVocabDrawer()"
-                class="p-1.5 xs:px-2.5 xs:py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs border border-slate-800 transition-colors flex items-center gap-1 shrink-0"
-                title="Vocabulary Deck (V)"
-              >
-                <svg
-                  class="w-3.5 h-3.5 text-amber-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-                <span class="hidden sm:inline">Vocabulary</span>
-                <span
-                  class="text-slate-500 font-mono text-[10px] hidden sm:inline"
-                  >[V]</span
-                >
-              </button>
             </div>
           </div>
         </div>
@@ -2345,7 +2316,7 @@
           category: "daily",
           level: "A2",
           accent: "US",
-          duration: 93,
+          duration: 109,
           description:
             "Natural everyday dialogue ordering pour-over coffee, inquiring about roast profiles, and customizing milk alternatives.",
           tags: ["coffee", "ordering", "cafe", "daily-conversation"],
@@ -2358,7 +2329,7 @@
           category: "travel",
           level: "B1",
           accent: "UK",
-          duration: 125,
+          duration: 131,
           description:
             "Navigating terminal check-in, baggage drop allowances, customs security screening, and boarding gate directions in British English.",
           tags: ["airport", "security", "customs", "boarding", "flight"],
@@ -2371,7 +2342,7 @@
           category: "daily",
           level: "B1",
           accent: "AU",
-          duration: 128,
+          duration: 135,
           description:
             "Visiting a medical clinic to discuss seasonal allergies, persistent coughing, prescription dosage, and lifestyle advice in Australian English.",
           tags: ["health", "doctor", "symptoms", "medical"],
@@ -2384,7 +2355,7 @@
           category: "workplace",
           level: "B2",
           accent: "US",
-          duration: 122,
+          duration: 123,
           description:
             "Engineering standup discussing blocker resolution, pull request reviews, database schema migration, and CI/CD pipelines.",
           tags: ["standup", "engineering", "sprint", "blockers"],
@@ -2397,7 +2368,7 @@
           category: "workplace",
           level: "B2",
           accent: "US",
-          duration: 143,
+          duration: 144,
           description:
             "Job interview discussing past technical challenges, handling cross-team conflicts, system scalability, and career growth.",
           tags: ["interview", "career", "experience", "hiring"],
@@ -2410,11 +2381,24 @@
           category: "academic",
           level: "C1",
           accent: "US",
-          duration: 152,
+          duration: 142,
           description:
             "Nuanced academic discourse discussing asynchronous productivity, cognitive automation, digital nomadism, and human-machine synergy.",
           tags: ["ai", "future-of-work", "higher-education", "synthesis"],
           collection: "academic",
+          sentenceCount: 16,
+        },
+        {
+          id: "a1-asking-directions",
+          title: "Finding the Central Subway Station",
+          category: "travel",
+          level: "A1",
+          accent: "US",
+          duration: 74,
+          description:
+            "A visitor asks a local pedestrian for directions to the nearest subway entrance.",
+          tags: ["travel"],
+          collection: "travel",
           sentenceCount: 16,
         },
       ];
@@ -2431,6 +2415,17 @@
             rawPath = `scenarios/${scenarioOrId.id}/audio.mp3`;
         }
         if (!rawPath) return "";
+        if (rawPath.endsWith(".webm") && typeof Audio !== "undefined") {
+          try {
+            const probe = new Audio();
+            const canPlay =
+              probe.canPlayType &&
+              probe.canPlayType('audio/webm; codecs="opus"');
+            if (!canPlay || canPlay === "no") {
+              rawPath = rawPath.replace(/\.webm$/, ".mp3");
+            }
+          } catch (_) {}
+        }
         if (
           rawPath.startsWith("http://") ||
           rawPath.startsWith("https://") ||
@@ -18576,6 +18571,7 @@
         const audio = getAudioElement();
         const audioSrc = resolveScenarioAudioUrl(scenario);
         if (audio && audioSrc) {
+          audio._hasFallenBackFormat = false;
           audio.src = audioSrc;
           applyAudioPlaybackRate(audio, state.playbackRate);
         }
@@ -18641,6 +18637,24 @@
               isAudioSeeking = false;
             });
             playerAudioEl.addEventListener("error", (e) => {
+              if (playerAudioEl.src && !playerAudioEl._hasFallenBackFormat) {
+                playerAudioEl._hasFallenBackFormat = true;
+                if (playerAudioEl.src.endsWith(".mp3")) {
+                  playerAudioEl.src = playerAudioEl.src.replace(
+                    /\.mp3$/,
+                    ".webm"
+                  );
+                  if (state.isPlaying) playerAudioEl.play().catch(() => {});
+                  return;
+                } else if (playerAudioEl.src.endsWith(".webm")) {
+                  playerAudioEl.src = playerAudioEl.src.replace(
+                    /\.webm$/,
+                    ".mp3"
+                  );
+                  if (state.isPlaying) playerAudioEl.play().catch(() => {});
+                  return;
+                }
+              }
               console.warn("Audio playback error, fallback to timer", e);
             });
           }
@@ -19267,9 +19281,9 @@
         const btnEchoic = document.getElementById("modeEchoicBtn");
 
         const activeClass =
-          "px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1";
+          "p-1 rounded-md font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
         const inactiveClass =
-          "px-1.5 xs:px-2.5 py-1 rounded font-medium transition-all text-slate-400 hover:text-slate-200 flex items-center gap-1";
+          "p-1 rounded-md font-medium transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700/60";
 
         if (btnLoop)
           btnLoop.className = mode === "loop" ? activeClass : inactiveClass;
@@ -20217,23 +20231,23 @@
             const enText = item.querySelector("p");
             if (idx === index) {
               item.className =
-                "group p-2.5 rounded-xl border bg-emerald-500/15 border-emerald-500/50 shadow-sm shadow-emerald-500/10 ring-1 ring-emerald-500/30 transition-all text-xs flex items-start gap-2.5 cursor-pointer select-none";
+                "group p-1.5 rounded-lg border bg-emerald-500/15 border-emerald-500/50 shadow-sm shadow-emerald-500/10 ring-1 ring-emerald-500/30 transition-all text-xs flex items-center gap-2 cursor-pointer select-none";
               if (numBadge)
                 numBadge.className =
-                  "font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold shrink-0 mt-0.5 transition-colors";
+                  "font-mono text-[10px] px-1 rounded bg-emerald-500/20 text-emerald-300 font-bold shrink-0 transition-colors";
               if (enText)
                 enText.className =
-                  "font-medium text-white font-semibold text-xs sm:text-sm leading-relaxed transition-colors";
+                  "font-medium text-white font-semibold text-xs leading-snug transition-colors min-w-0 truncate";
               item.scrollIntoView({ behavior: "smooth", block: "nearest" });
             } else {
               item.className =
-                "group p-2.5 rounded-xl border bg-slate-950/50 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700 transition-all text-xs flex items-start gap-2.5 cursor-pointer select-none";
+                "group p-1.5 rounded-lg border bg-slate-950/50 border-slate-800/80 hover:bg-slate-850 hover:border-slate-700 transition-all text-xs flex items-center gap-2 cursor-pointer select-none";
               if (numBadge)
                 numBadge.className =
-                  "font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-slate-800 text-slate-400 group-hover:text-slate-200 shrink-0 mt-0.5 transition-colors";
+                  "font-mono text-[10px] px-1 rounded bg-slate-800 text-slate-400 group-hover:text-slate-200 shrink-0 transition-colors";
               if (enText)
                 enText.className =
-                  "font-medium text-slate-200 group-hover:text-white text-xs sm:text-sm leading-relaxed transition-colors";
+                  "font-medium text-slate-300 group-hover:text-white text-xs leading-snug transition-colors min-w-0 truncate";
             }
           }
         });

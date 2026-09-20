@@ -10,6 +10,12 @@ coverage
 playwright-report
 test-results
 
+# English Shadowing generated media and subtitles (stored in dist/ only)
+english-shadowing/scenarios/**/*.mp3
+english-shadowing/scenarios/**/*.webm
+english-shadowing/scenarios/**/*.opus
+english-shadowing/scenarios/**/*.lrc
+
 # Local environment & secrets
 .env
 .env.local

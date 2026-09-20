@@ -16,6 +16,8 @@ const MIME = {
   ".jpg": "image/jpeg",
   ".ico": "image/x-icon",
   ".mp3": "audio/mpeg",
+  ".webm": "audio/webm",
+  ".opus": "audio/ogg",
   ".lrc": "text/plain; charset=utf-8",
   ".srt": "text/plain; charset=utf-8",
   ".wav": "audio/wav",

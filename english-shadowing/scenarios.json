@@ -5,11 +5,12 @@
     "category": "daily",
     "level": "A2",
     "accent": "US",
-    "duration": 93,
+    "duration": 124,
     "description": "Natural everyday dialogue ordering pour-over coffee, inquiring about roast profiles, and customizing milk alternatives.",
     "tags": ["coffee", "ordering", "cafe", "daily-conversation"],
     "collection": "daily-social",
-    "sentenceCount": 17
+    "sentenceCount": 17,
+    "audioUrl": "scenarios/specialty-coffee/audio.webm"
   },
   {
     "id": "airport-security",
@@ -17,11 +18,12 @@
     "category": "travel",
     "level": "B1",
     "accent": "UK",
-    "duration": 125,
+    "duration": 128,
     "description": "Navigating terminal check-in, baggage drop allowances, customs security screening, and boarding gate directions in British English.",
     "tags": ["airport", "security", "customs", "boarding", "flight"],
     "collection": "travel",
-    "sentenceCount": 18
+    "sentenceCount": 18,
+    "audioUrl": "scenarios/airport-security/audio.webm"
   },
   {
     "id": "doctor-consultation",
@@ -29,11 +31,12 @@
     "category": "daily",
     "level": "B1",
     "accent": "AU",
-    "duration": 128,
+    "duration": 145,
     "description": "Visiting a medical clinic to discuss seasonal allergies, persistent coughing, prescription dosage, and lifestyle advice in Australian English.",
     "tags": ["health", "doctor", "symptoms", "medical"],
     "collection": "daily-social",
-    "sentenceCount": 18
+    "sentenceCount": 18,
+    "audioUrl": "scenarios/doctor-consultation/audio.webm"
   },
   {
     "id": "tech-standup",
@@ -41,11 +44,12 @@
     "category": "workplace",
     "level": "B2",
     "accent": "US",
-    "duration": 122,
+    "duration": 130,
     "description": "Engineering standup discussing blocker resolution, pull request reviews, database schema migration, and CI/CD pipelines.",
     "tags": ["standup", "engineering", "sprint", "blockers"],
     "collection": "workplace",
-    "sentenceCount": 18
+    "sentenceCount": 18,
+    "audioUrl": "scenarios/tech-standup/audio.webm"
   },
   {
     "id": "job-interview",
@@ -53,11 +57,12 @@
     "category": "workplace",
     "level": "B2",
     "accent": "US",
-    "duration": 143,
+    "duration": 141,
     "description": "Job interview discussing past technical challenges, handling cross-team conflicts, system scalability, and career growth.",
     "tags": ["interview", "career", "experience", "hiring"],
     "collection": "workplace",
-    "sentenceCount": 18
+    "sentenceCount": 18,
+    "audioUrl": "scenarios/job-interview/audio.webm"
   },
   {
     "id": "academic-ai-future",
@@ -65,10 +70,24 @@
     "category": "academic",
     "level": "C1",
     "accent": "US",
-    "duration": 152,
+    "duration": 112,
     "description": "Nuanced academic discourse discussing asynchronous productivity, cognitive automation, digital nomadism, and human-machine synergy.",
     "tags": ["ai", "future-of-work", "higher-education", "synthesis"],
     "collection": "academic",
-    "sentenceCount": 16
+    "sentenceCount": 16,
+    "audioUrl": "scenarios/academic-ai-future/audio.webm"
+  },
+  {
+    "id": "a1-asking-directions",
+    "title": "Finding the Central Subway Station",
+    "category": "travel",
+    "level": "A1",
+    "accent": "US",
+    "duration": 88,
+    "description": "A visitor asks a local pedestrian for directions to the nearest subway entrance.",
+    "tags": ["travel"],
+    "collection": "travel",
+    "sentenceCount": 16,
+    "audioUrl": "scenarios/a1-asking-directions/audio.webm"
   }
 ]

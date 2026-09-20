@@ -1,6 +1,6 @@
 {
   "name": "html-standalone-tools",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A set of html standalone tools",
   "main": "index.js",
   "directories": {
@@ -52,7 +52,7 @@
     "test:shadowing:ui": "./scripts/run.sh tests/english-shadowing-ui.test.js",
     "test:shadowing:gen": "./scripts/run.sh tests/english-shadowing-audio-gen.test.js",
     "audio:shadowing": "python3 scripts/generate-scenario-audio.py --all",
-    "audio:shadowing:sync": "python3 scripts/generate-scenario-audio.py --sync-only",
+    "audio:shadowing:dry": "python3 scripts/generate-scenario-audio.py --all --dry-run",
     "test:helpers": "./scripts/run.sh tests/helpers.test.js",
     "test:ui": "./scripts/run.sh tests/ui-ux.test.js",
     "test:e2e": "./scripts/run.sh scripts/e2e-summary.js",

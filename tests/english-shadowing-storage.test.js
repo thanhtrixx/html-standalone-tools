@@ -176,7 +176,12 @@ async function runTests() {
       getElementById: (id) => ({
         textContent: "",
         value: "",
-        classList: { add() {}, remove() {}, contains: () => false },
+        classList: {
+          add() {},
+          remove() {},
+          toggle() {},
+          contains: () => false,
+        },
         innerHTML: "",
         style: {},
         appendChild: () => {},
@@ -186,7 +191,12 @@ async function runTests() {
         innerHTML: "",
         className: "",
         style: {},
-        classList: { add() {}, remove() {}, contains: () => false },
+        classList: {
+          add() {},
+          remove() {},
+          toggle() {},
+          contains: () => false,
+        },
         setAttribute: () => {},
         appendChild: () => {},
         click: () => {},
@@ -652,16 +662,23 @@ async function runTests() {
     "index.html provides forceCheckUpdatesAndReload function"
   );
 
-  // 14. Audio Assets On Disk
-  const scenariosDir = path.join(
+  // 14. Audio Assets On Disk (dist/english-shadowing/scenarios with source fallback)
+  const distScenariosDir = path.join(
+    __dirname,
+    "..",
+    "dist",
+    "english-shadowing",
+    "scenarios"
+  );
+  const srcScenariosDir = path.join(
     __dirname,
     "..",
     "english-shadowing",
     "scenarios"
   );
   assert(
-    fs.existsSync(scenariosDir),
-    "english-shadowing/scenarios directory exists"
+    fs.existsSync(distScenariosDir) || fs.existsSync(srcScenariosDir),
+    "english-shadowing scenarios directory exists (dist or source)"
   );
   const scenarioIds = [
     "specialty-coffee",
@@ -670,10 +687,16 @@ async function runTests() {
     "academic-ai-future",
   ];
   scenarioIds.forEach((scId) => {
-    const filePath = path.join(scenariosDir, scId, "audio.mp3");
+    let filePath = path.join(distScenariosDir, scId, "audio.mp3");
+    if (!fs.existsSync(filePath)) {
+      filePath = path.join(distScenariosDir, scId, "audio.webm");
+    }
+    if (!fs.existsSync(filePath)) {
+      filePath = path.join(srcScenariosDir, scId, "audio.mp3");
+    }
     assert(
       fs.existsSync(filePath) && fs.statSync(filePath).size > 10000,
-      `Scenario audio ${scId}/audio.mp3 exists on disk with non-zero audio bytes (${fs.existsSync(filePath) ? fs.statSync(filePath).size : 0} bytes)`
+      `Scenario audio for ${scId} exists on disk with non-zero audio bytes (${fs.existsSync(filePath) ? fs.statSync(filePath).size : 0} bytes)`
     );
   });
 

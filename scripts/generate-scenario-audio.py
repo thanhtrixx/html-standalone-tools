@@ -2,7 +2,8 @@
 """
 Generate high-fidelity audio (MP3/Opus) and Enhanced LRC subtitles (.lrc)
 from Token-Efficient Markdown Scenarios using Microsoft Edge TTS with
-Precision Acoustic Silence Stitching and Syllable-Weighted Word Timing.
+CEFR Natural Speaking Rate Calibration, Precision Acoustic Silence Stitching,
+and Syllable-Weighted Word Timing.
 """
 
 import argparse
@@ -10,7 +11,6 @@ import asyncio
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -30,6 +30,25 @@ COLLECTION_DEFAULTS = {
     "travel": "travel",
     "academic": "academic",
 }
+
+# CEFR benchmark natural speaking rates mapped to Edge TTS rate offsets
+LEVEL_SPEECH_RATES = {
+    "A1": "-25%",   # ~40-55 WPM (Phoneme clarity, deliberate pacing)
+    "A2": "-15%",   # ~65-85 WPM (Slightly relaxed conversational pace)
+    "B1": "-5%",    # ~95-120 WPM (Standard clear speech)
+    "B2": "+0%",    # ~120-145 WPM (Baseline native delivery)
+    "C1": "+8%",    # ~140-170 WPM (Connected fast speech with elisions)
+    "C2": "+15%",   # ~160-185 WPM (Rapid, idiomatic native delivery)
+}
+
+def parse_rate_factor(rate_str):
+    """Parses Edge TTS rate string (e.g., '-25%', '+10%') to duration speed multiplier."""
+    try:
+        clean = rate_str.strip().rstrip("%")
+        val = float(clean)
+        return max(0.4, 1.0 + (val / 100.0))
+    except (ValueError, TypeError, AttributeError):
+        return 1.0
 
 def parse_frontmatter(text):
     """
@@ -214,12 +233,12 @@ def format_lrc_timestamp(seconds):
     secs = seconds % 60
     return f"{mins:02d}:{secs:05.2f}"
 
-async def synthesize_turn_edge_tts(text, voice, voice_format="audio-24khz-48kbitrate-mono-mp3"):
+async def synthesize_turn_edge_tts(text, voice, rate="+0%", voice_format="audio-24khz-48kbitrate-mono-mp3"):
     """
-    Synthesizes a single dialogue turn using Microsoft Edge TTS,
+    Synthesizes a single dialogue turn using Microsoft Edge TTS with dynamic rate control,
     returning raw audio bytes and measured sentence duration from boundaries.
     """
-    communicate = edge_tts.Communicate(text, voice)
+    communicate = edge_tts.Communicate(text, voice, rate=rate)
     audio_bytes = bytearray()
     sentence_boundaries = []
 
@@ -233,9 +252,10 @@ async def synthesize_turn_edge_tts(text, voice, voice_format="audio-24khz-48kbit
         last_sb = sentence_boundaries[-1]
         measured_dur = (last_sb["offset"] + last_sb["duration"]) / 10000000.0
     else:
-        # Fallback estimation based on word count (~140 wpm)
+        # Fallback estimation scaled by speech rate multiplier
+        speed_factor = parse_rate_factor(rate)
         words_count = len(text.split())
-        measured_dur = max(1.5, words_count * 0.42)
+        measured_dur = max(1.5, (words_count * 0.42) / speed_factor)
 
     return bytes(audio_bytes), measured_dur
 
@@ -244,7 +264,6 @@ def stitch_audio_with_ffmpeg(sentence_files, silence_durations, output_path, aud
     Stitches individual sentence audio files with sample-accurate synthetic silence gaps
     using the ffmpeg concat filter to guarantee zero cumulative drift across 1-5 minute tracks.
     """
-    # Build filter complex: [0:a][silence1][1:a][silence2]...concat
     inputs = []
     filter_parts = []
     filter_idx = 0
@@ -273,32 +292,41 @@ def stitch_audio_with_ffmpeg(sentence_files, silence_durations, output_path, aud
     ]
 
     if audio_format == "opus":
-        cmd.extend(["-c:a", "libopus", "-b:a", "32k", output_path])
+        mp3_fallback_path = os.path.join(os.path.dirname(output_path), "audio.mp3")
+        cmd.extend([
+            "-c:a", "libopus", "-b:a", "32k", output_path,
+            "-map", "[outa]",
+            "-c:a", "libmp3lame", "-b:a", "48k", mp3_fallback_path,
+        ])
     else:
         cmd.extend(["-c:a", "libmp3lame", "-b:a", "48k", output_path])
 
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-async def render_scenario(scenario_meta, turns, scenario_dir, audio_format="mp3", dry_run=False):
+async def render_scenario(scenario_meta, turns, dest_dir, audio_format="mp3", dry_run=False, mirror_dirs=None):
     """
-    Renders a single scenario: synthesizes audio turns, inserts acoustic silence gaps,
-    computes Enhanced LRC cues, writes output files directly to scenario_dir, and returns compiled metadata.
+    Renders a single scenario: synthesizes audio turns with CEFR-calibrated speaking rate,
+    inserts acoustic silence gaps, computes Enhanced LRC cues, and writes output files
+    directly to dist/english-shadowing/scenarios/<id>/ (with optional mirror directories).
     """
     sc_id = scenario_meta.get("id", "scenario")
     title = scenario_meta.get("title", sc_id)
     category = scenario_meta.get("category", "general")
-    level = scenario_meta.get("level", "B1")
+    level = str(scenario_meta.get("level", "B1")).upper()
     accent = scenario_meta.get("accent", "US")
     description = scenario_meta.get("description", "")
 
-    os.makedirs(scenario_dir, exist_ok=True)
+    # Frontmatter rate overrides level-based defaults if explicitly set
+    rate = scenario_meta.get("rate") or LEVEL_SPEECH_RATES.get(level, "+0%")
+
+    os.makedirs(dest_dir, exist_ok=True)
 
     ext = "webm" if audio_format == "opus" else "mp3"
     audio_filename = f"audio.{ext}"
-    scenario_audio_path = os.path.join(scenario_dir, audio_filename)
-    lrc_path = os.path.join(scenario_dir, "subtitles.lrc")
+    scenario_audio_path = os.path.join(dest_dir, audio_filename)
+    lrc_path = os.path.join(dest_dir, "subtitles.lrc")
 
-    print(f"🎙️ Processing scenario [{sc_id}]: '{title}' ({len(turns)} turns, level {level}, accent {accent})")
+    print(f"🎙️ Processing scenario [{sc_id}]: '{title}' ({len(turns)} turns, level {level}, rate {rate}, accent {accent})")
 
     cues = []
     current_time = 0.0
@@ -312,11 +340,11 @@ async def render_scenario(scenario_meta, turns, scenario_dir, audio_format="mp3"
             voice = turn["voice"]
 
             if dry_run:
-                # Approximate duration for dry runs
+                speed_factor = parse_rate_factor(rate)
                 word_count = len(text.split())
-                dur = max(1.8, word_count * 0.42)
+                dur = max(1.8, (word_count * 0.42) / speed_factor)
             else:
-                audio_bytes, dur = await synthesize_turn_edge_tts(text, voice)
+                audio_bytes, dur = await synthesize_turn_edge_tts(text, voice, rate=rate)
                 t_file = os.path.join(tmp_dir, f"turn_{idx:03d}.mp3")
                 with open(t_file, "wb") as f:
                     f.write(audio_bytes)
@@ -372,7 +400,16 @@ async def render_scenario(scenario_meta, turns, scenario_dir, audio_format="mp3"
     if not dry_run:
         with open(lrc_path, "w", encoding="utf-8") as f:
             f.write(lrc_content)
-        print(f"  ✅ Saved audio and Enhanced LRC (~{current_time:.1f}s)")
+        if mirror_dirs:
+            import shutil as _sh
+            for mdir in mirror_dirs:
+                os.makedirs(mdir, exist_ok=True)
+                for a_name in ["audio.mp3", "audio.webm"]:
+                    src_a = os.path.join(dest_dir, a_name)
+                    if os.path.exists(src_a):
+                        _sh.copy2(src_a, os.path.join(mdir, a_name))
+                _sh.copy2(lrc_path, os.path.join(mdir, "subtitles.lrc"))
+        print(f"  ✅ Saved audio and Enhanced LRC to dist (~{current_time:.1f}s)")
     else:
         print(f"  🔍 Dry-run complete: ~{current_time:.1f}s, {len(cues)} cues")
 
@@ -382,6 +419,7 @@ async def render_scenario(scenario_meta, turns, scenario_dir, audio_format="mp3"
         "category": category,
         "level": level,
         "accent": accent,
+        "rate": rate,
         "duration": round(current_time),
         "description": description,
         "audioUrl": f"scenarios/{sc_id}/{audio_filename}",
@@ -389,7 +427,7 @@ async def render_scenario(scenario_meta, turns, scenario_dir, audio_format="mp3"
         "cues": cues
     }
 
-def build_manifest_entry(meta, turns, duration=0):
+def build_manifest_entry(meta, turns, duration=0, audio_url=None):
     """
     Constructs a lightweight manifest dictionary conforming to ADR-0008 schema.
     Omits raw lrcContent/srtContent/cues to prevent bundle bloat.
@@ -397,6 +435,7 @@ def build_manifest_entry(meta, turns, duration=0):
     sc_id = meta.get("id", "scenario")
     category = meta.get("category", "daily")
     collection = meta.get("collection") or COLLECTION_DEFAULTS.get(category, category)
+    level = str(meta.get("level", "B1")).upper()
 
     tags = meta.get("tags")
     if isinstance(tags, str):
@@ -411,7 +450,7 @@ def build_manifest_entry(meta, turns, duration=0):
         "id": sc_id,
         "title": meta.get("title", sc_id),
         "category": category,
-        "level": meta.get("level", "B1"),
+        "level": level,
         "accent": meta.get("accent", "US"),
         "duration": dur,
         "description": meta.get("description", ""),
@@ -420,8 +459,9 @@ def build_manifest_entry(meta, turns, duration=0):
         "sentenceCount": sentence_count,
     }
 
-    # Convention-over-configuration: only include audioUrl/lrcUrl if explicitly overridden
-    if "audioUrl" in meta and meta["audioUrl"]:
+    if audio_url:
+        entry["audioUrl"] = audio_url
+    elif "audioUrl" in meta and meta["audioUrl"]:
         entry["audioUrl"] = meta["audioUrl"]
     if "lrcUrl" in meta and meta["lrcUrl"]:
         entry["lrcUrl"] = meta["lrcUrl"]
@@ -429,9 +469,7 @@ def build_manifest_entry(meta, turns, duration=0):
     return entry
 
 def export_scenarios_manifest(manifest_entries, json_path):
-    """
-    Exports clean JSON manifest file for external distribution & PWA checks.
-    """
+    """Exports clean JSON manifest file for external distribution & PWA checks."""
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(manifest_entries, f, indent=2, ensure_ascii=False)
     print(f"📄 Exported {len(manifest_entries)} scenario manifest items to {os.path.basename(json_path)}")
@@ -494,12 +532,15 @@ def sync_scenarios_to_html(manifest_entries, html_path):
     return True
 
 async def main_async():
-    parser = argparse.ArgumentParser(description="English Shadowing Audio & LRC Generator")
+    parser = argparse.ArgumentParser(description="English Shadowing Audio & LRC Generator with Level Pacing")
     parser.add_argument("--scenario", help="Generate specific scenario ID (e.g. specialty-coffee)")
     parser.add_argument("--all", action="store_true", help="Generate all scenarios in scenarios/ directory")
     parser.add_argument("--dry-run", action="store_true", help="Validate scenarios without network TTS calls")
-    parser.add_argument("--sync-only", action="store_true", help="Sync existing scenario files into index.html")
     parser.add_argument("--format", default="mp3", choices=["mp3", "opus"], help="Audio encoding format")
+    parser.add_argument(
+        "--input-dir",
+        help="Flat directory of *.md scenario files to copy into english-shadowing/scenarios/",
+    )
     args = parser.parse_args()
 
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -507,7 +548,32 @@ async def main_async():
     scenarios_dir = os.path.join(base_shadowing_dir, "scenarios")
     html_path = os.path.join(base_shadowing_dir, "index.html")
 
-    os.makedirs(scenarios_dir, exist_ok=True)
+    # Direct output target in dist (clean source tree)
+    dist_scenarios_dir = os.path.join(repo_root, "dist", "english-shadowing", "scenarios")
+    tool_dist_scenarios_dir = os.path.join(base_shadowing_dir, "dist", "scenarios")
+    os.makedirs(dist_scenarios_dir, exist_ok=True)
+    os.makedirs(tool_dist_scenarios_dir, exist_ok=True)
+
+    # ── Flat input-dir ingestion ──────────────────────────────────────────────
+    # Copies *.md files from external --input-dir into english-shadowing/scenarios/
+    if args.input_dir:
+        import shutil
+        input_dir = os.path.abspath(args.input_dir)
+        if not os.path.isdir(input_dir):
+            print(f"❌ --input-dir '{input_dir}' does not exist or is not a directory.")
+            sys.exit(1)
+
+        md_files = sorted(f for f in os.listdir(input_dir) if f.endswith(".md"))
+        if not md_files:
+            print(f"ℹ️ No .md files found in {input_dir}")
+        else:
+            print(f"📂 Ingesting {len(md_files)} flat .md files from {input_dir}")
+            for md_file in md_files:
+                src = os.path.join(input_dir, md_file)
+                dest = os.path.join(scenarios_dir, md_file)
+                shutil.copy2(src, dest)
+                print(f"  → {md_file}  →  english-shadowing/scenarios/{md_file}")
+    # ─────────────────────────────────────────────────────────────────────────
 
     CURATED_ORDER = [
         "specialty-coffee",
@@ -521,28 +587,45 @@ async def main_async():
     def get_sort_key(entry):
         return (CURATED_ORDER.index(entry) if entry in CURATED_ORDER else 999, entry)
 
-    # Discover scenario directories with scenario.md in curated progression order
-    scenario_folders = []
+    # ── Discover scenario sources (.md files or folders with scenario.md) ────
+    scenario_sources = {}
     if os.path.exists(scenarios_dir):
-        for entry in sorted(os.listdir(scenarios_dir), key=get_sort_key):
+        # 1. Directory-based (<id>/scenario.md)
+        for entry in os.listdir(scenarios_dir):
             full_path = os.path.join(scenarios_dir, entry)
             md_path = os.path.join(full_path, "scenario.md")
             if os.path.isdir(full_path) and os.path.exists(md_path):
-                scenario_folders.append((entry, full_path, md_path))
+                with open(md_path, "r", encoding="utf-8") as f:
+                    meta, _ = parse_frontmatter(f.read())
+                sc_id = meta.get("id") or entry
+                scenario_sources[sc_id] = md_path
 
-    if not scenario_folders:
-        print(f"ℹ️ No scenario folders found in {scenarios_dir}")
+        # 2. Flat *.md files in scenarios_dir
+        for entry in os.listdir(scenarios_dir):
+            if entry.endswith(".md"):
+                md_path = os.path.join(scenarios_dir, entry)
+                with open(md_path, "r", encoding="utf-8") as f:
+                    meta, _ = parse_frontmatter(f.read())
+                sc_id = meta.get("id") or os.path.splitext(entry)[0]
+                if sc_id not in scenario_sources:
+                    scenario_sources[sc_id] = md_path
+
+    if not scenario_sources:
+        print(f"ℹ️ No scenario files found in {scenarios_dir}")
         return
 
+    sorted_sc_ids = sorted(scenario_sources.keys(), key=get_sort_key)
+
     if args.scenario:
-        scenario_folders = [f for f in scenario_folders if f[0] == args.scenario]
-        if not scenario_folders:
+        if args.scenario not in scenario_sources:
             print(f"❌ Scenario '{args.scenario}' not found in {scenarios_dir}")
             sys.exit(1)
+        sorted_sc_ids = [args.scenario]
 
     manifest_entries = []
 
-    for sc_id, sc_dir, md_path in scenario_folders:
+    for sc_id in sorted_sc_ids:
+        md_path = scenario_sources[sc_id]
         with open(md_path, "r", encoding="utf-8") as f:
             content = f.read()
 
@@ -550,38 +633,37 @@ async def main_async():
         if "id" not in meta:
             meta["id"] = sc_id
 
-        src_lrc = os.path.join(sc_dir, "subtitles.lrc")
-        src_mp3 = os.path.join(sc_dir, "audio.mp3")
+        dest_sc_dir = os.path.join(dist_scenarios_dir, sc_id)
+        mirror_sc_dirs = [os.path.join(tool_dist_scenarios_dir, sc_id)]
 
-        duration = 0
-        if args.sync_only:
-            if os.path.exists(src_lrc):
-                with open(src_lrc, "r", encoding="utf-8") as lf:
-                    lrc_text = lf.read()
-                    len_match = re.search(r"\[length:(\d+):(\d+(?:\.\d+)?)\]", lrc_text)
-                    if len_match:
-                        duration = int(len_match.group(1)) * 60 + float(len_match.group(2))
-
-            entry = build_manifest_entry(meta, turns, duration=duration)
-            manifest_entries.append(entry)
-        else:
-            result = await render_scenario(
-                meta,
-                turns,
-                sc_dir,
-                audio_format=args.format,
-                dry_run=args.dry_run
-            )
-            entry = build_manifest_entry(meta, turns, duration=result["duration"])
-            manifest_entries.append(entry)
+        result = await render_scenario(
+            meta,
+            turns,
+            dest_sc_dir,
+            audio_format=args.format,
+            dry_run=args.dry_run,
+            mirror_dirs=mirror_sc_dirs,
+        )
+        audio_url = None
+        if args.format == "opus":
+            audio_url = f"scenarios/{sc_id}/audio.webm"
+        elif args.format != "mp3":
+            audio_url = f"scenarios/{sc_id}/audio.{args.format}"
+        entry = build_manifest_entry(meta, turns, duration=result["duration"], audio_url=audio_url)
+        manifest_entries.append(entry)
 
     manifest_json_path = os.path.join(base_shadowing_dir, "scenarios.json")
     export_scenarios_manifest(manifest_entries, manifest_json_path)
 
+    # Also mirror scenarios.json to dist directories
+    for dist_dir in [os.path.join(repo_root, "dist", "english-shadowing"), os.path.join(base_shadowing_dir, "dist")]:
+        if os.path.exists(dist_dir):
+            export_scenarios_manifest(manifest_entries, os.path.join(dist_dir, "scenarios.json"))
+
     if not args.dry_run:
         sync_scenarios_to_html(manifest_entries, html_path)
 
-    print(f"\n🎉 Finished processing {len(manifest_entries)} scenarios.")
+    print(f"\n🎉 Finished processing {len(manifest_entries)} scenarios directly to dist.")
 
 def main():
     asyncio.run(main_async())

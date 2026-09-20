@@ -444,7 +444,7 @@ async function runTests() {
   );
 
   const validCategories = new Set(["daily", "workplace", "travel", "academic"]);
-  const validLevels = new Set(["A2", "B1", "B2", "C1"]);
+  const validLevels = new Set(["A1", "A2", "B1", "B2", "C1", "C2"]);
   const validAccents = new Set(["US", "UK", "AU"]);
   const audioDir = path.join(__dirname, "..", "english-shadowing", "audio");
 
@@ -500,18 +500,29 @@ async function runTests() {
       `Manifest #${i + 1} (${sc.id}): srtContent is NOT inlined`
     );
 
-    // Verify companion .lrc asset exists in scenarios/<id>/ and has valid cues
-    const lrcFilePath = path.join(
+    // Verify companion .lrc asset exists in dist/english-shadowing/scenarios/<id>/ (or source fallback) and has valid cues
+    let lrcFilePath = path.join(
       __dirname,
       "..",
+      "dist",
       "english-shadowing",
       "scenarios",
       sc.id,
       "subtitles.lrc"
     );
+    if (!fs.existsSync(lrcFilePath)) {
+      lrcFilePath = path.join(
+        __dirname,
+        "..",
+        "english-shadowing",
+        "scenarios",
+        sc.id,
+        "subtitles.lrc"
+      );
+    }
     assert(
       fs.existsSync(lrcFilePath),
-      `Companion LRC asset exists at english-shadowing/scenarios/${sc.id}/subtitles.lrc`
+      `Companion LRC asset exists at ${path.relative(path.join(__dirname, ".."), lrcFilePath)}`
     );
     if (fs.existsSync(lrcFilePath)) {
       const lrcFileContent = fs.readFileSync(lrcFilePath, "utf8");
@@ -1314,7 +1325,16 @@ async function runTests() {
   // 17. On-Demand Dynamic LRC Streaming & Scenario Selection
   sandbox.fetch = async (url) => {
     const cleanUrl = url.replace(/^\//, "").replace(/^english-shadowing\//, "");
-    const fullPath = path.join(__dirname, "..", "english-shadowing", cleanUrl);
+    let fullPath = path.join(
+      __dirname,
+      "..",
+      "dist",
+      "english-shadowing",
+      cleanUrl
+    );
+    if (!fs.existsSync(fullPath)) {
+      fullPath = path.join(__dirname, "..", "english-shadowing", cleanUrl);
+    }
     if (fs.existsSync(fullPath)) {
       return {
         ok: true,

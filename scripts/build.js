@@ -465,6 +465,10 @@ async function buildCompanionAssets(
         // Production-optimized copy: include only media and subtitles, excluding scenario.md
         copyScenarioAssets(srcAsset, toolDistAsset);
         copyScenarioAssets(srcAsset, rootDistAsset);
+        // If media was generated directly to rootDistAsset, ensure toolDistAsset is synced
+        if (fs.existsSync(rootDistAsset)) {
+          copyScenarioAssets(rootDistAsset, toolDistAsset);
+        }
       } else {
         fs.cpSync(srcAsset, toolDistAsset, { recursive: true });
         fs.cpSync(srcAsset, rootDistAsset, { recursive: true });
