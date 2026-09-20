@@ -56,10 +56,13 @@ test.describe("English Shadowing Multi-Device E2E Suite", () => {
       .first();
     await firstPracticeBtn.click();
 
-    // Verify Player view opens with active subtitles
+    // Verify Player view opens with active subtitles & waveform comparison
     await expect(page.locator("#player-view")).toBeVisible();
     await expect(page.locator("#activeEnglishSubtitle")).toBeVisible();
     await expect(page.locator("#activeVietnameseSubtitle")).toBeVisible();
+    await expect(page.locator("#waveformComparisonBox")).toBeVisible();
+    await expect(page.locator("#dualWaveformCanvas")).toBeVisible();
+    await expect(page.locator("#btnDockRecord")).toBeVisible();
 
     // Verify karaoke word chips exist
     const karaokeWords = page.locator("#activeEnglishSubtitle .karaoke-word");

@@ -215,18 +215,30 @@ async function runTests() {
     "Reset practice stats action button exists"
   );
 
-  // 8. Recording UI Cleanup (Temporarily Disabled for Ergonomics)
+  // 8. Recording Dock & Waveform Comparison UI
   assert(
-    !htmlContent.includes('id="waveformComparisonBox"'),
-    "waveformComparisonBox is removed from active subtitle stage"
+    htmlContent.includes('id="waveformComparisonBox"'),
+    "waveformComparisonBox is rendered in player stage"
   );
   assert(
-    !htmlContent.includes('id="btnDockRecord"'),
-    "btnDockRecord is removed from transport dock"
+    htmlContent.includes('id="dualWaveformCanvas"'),
+    "dualWaveformCanvas is rendered in player stage"
   );
   assert(
-    !htmlContent.includes('id="btnRecordPrompt"'),
-    "btnRecordPrompt is removed from repeat prompt"
+    htmlContent.includes('id="btnDockRecord"'),
+    "btnDockRecord is rendered in transport dock"
+  );
+  assert(
+    htmlContent.includes('id="btnPlayUserVoice"'),
+    "btnPlayUserVoice button exists"
+  );
+  assert(
+    htmlContent.includes('id="btnAutoAbCompare"'),
+    "btnAutoAbCompare button exists"
+  );
+  assert(
+    htmlContent.includes('id="btnDeleteRecording"'),
+    "btnDeleteRecording button exists"
   );
   assert(
     htmlContent.includes('id="repeatPromptContainer"'),

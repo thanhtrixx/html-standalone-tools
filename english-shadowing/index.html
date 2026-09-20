@@ -839,11 +839,11 @@
         <!-- Centerpiece Hero Subtitle Stage -->
         <div
           id="subtitleStage"
-          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-8 pt-10 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
+          class="shrink-0 bg-gradient-to-b from-slate-900 via-slate-850 to-slate-900 border border-slate-800 rounded-2xl p-3 sm:p-8 pt-7 sm:pt-12 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl"
         >
           <!-- Active sentence position tracker -->
           <div
-            class="absolute top-2.5 sm:top-3 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
+            class="absolute top-2 sm:top-3 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between text-xs font-mono text-slate-400 pointer-events-none z-10"
           >
             <div class="flex items-center gap-2 pointer-events-auto">
               <span
@@ -867,7 +867,7 @@
           <!-- English Subtitle Line (Real-time Karaoke Word Highlighting) -->
           <div
             id="activeEnglishSubtitle"
-            class="blur-target text-lg sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
+            class="blur-target text-base sm:text-2xl lg:text-3xl font-bold tracking-tight text-white leading-relaxed max-w-4xl transition-all flex flex-wrap items-center justify-center gap-1"
           >
             Click a scenario to begin shadowing.
           </div>
@@ -875,9 +875,131 @@
           <!-- Vietnamese Translation Subtitle Line -->
           <div
             id="activeVietnameseSubtitle"
-            class="blur-target text-xs sm:text-sm md:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-2 sm:mt-3 transition-all"
+            class="blur-target text-xs sm:text-sm md:text-base text-slate-400 font-normal leading-normal max-w-3xl mt-1.5 sm:mt-3 transition-all"
           >
             Nhấp vào tình huống để bắt đầu luyện nói.
+          </div>
+        </div>
+
+        <!-- Waveform & Voice Comparison Panel -->
+        <div
+          id="waveformComparisonBox"
+          class="shrink-0 bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-4 space-y-1.5 sm:space-y-2.5 shadow-lg backdrop-blur"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-4 h-4 text-emerald-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"
+                />
+              </svg>
+              <span
+                class="text-xs font-bold text-slate-200 uppercase tracking-wider"
+                data-i18n="waveformHeading"
+                >Acoustic Contour & Comparison</span
+              >
+              <span
+                id="recTimerLabel"
+                class="hidden text-xs font-mono font-bold text-red-400 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 animate-pulse"
+                >00:00</span
+              >
+            </div>
+            <!-- Waveform Legend Indicators -->
+            <div class="flex items-center gap-3 text-[11px]">
+              <div class="flex items-center gap-1 text-emerald-400 font-medium">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span data-i18n="waveformNative">Native</span>
+              </div>
+              <div class="flex items-center gap-1 text-cyan-400 font-medium">
+                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                <span data-i18n="waveformLearner">You</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dual Waveform Canvas -->
+          <div
+            class="relative w-full overflow-hidden rounded-xl bg-slate-950/80 border border-slate-800"
+          >
+            <canvas
+              id="dualWaveformCanvas"
+              width="540"
+              height="52"
+              class="w-full h-10 sm:h-14 block"
+            ></canvas>
+          </div>
+
+          <!-- Audio Comparison & Playback Controls -->
+          <div class="flex items-center justify-between gap-2 pt-0.5">
+            <div class="flex items-center gap-2">
+              <!-- Play User Recording -->
+              <button
+                id="btnPlayUserVoice"
+                onclick="playLearnerRecordingSnippet()"
+                disabled
+                class="px-2.5 py-1 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 text-xs font-medium transition-all disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 active:scale-95"
+              >
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <span data-i18n="btnPlayUserTake">Play My Take</span>
+              </button>
+
+              <!-- Auto A/B Compare -->
+              <button
+                id="btnAutoAbCompare"
+                onclick="runAutoAbComparison()"
+                disabled
+                class="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs font-medium transition-all disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1 active:scale-95"
+              >
+                <svg
+                  class="w-3.5 h-3.5 text-emerald-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                  />
+                </svg>
+                <span data-i18n="btnAutoAbCompare">A/B Compare</span>
+              </button>
+            </div>
+
+            <!-- Delete Take Button -->
+            <button
+              id="btnDeleteRecording"
+              onclick="deleteCurrentCueRecording()"
+              disabled
+              class="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-0 disabled:pointer-events-none"
+              title="Delete current take"
+              aria-label="Delete take"
+            >
+              <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -1154,6 +1276,24 @@
                     viewBox="0 0 24 24"
                   >
                     <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                  </svg>
+                </button>
+
+                <!-- Voice Recording Dock Button [M] -->
+                <button
+                  id="btnDockRecord"
+                  onclick="toggleMicRecording()"
+                  class="p-2.5 sm:p-3 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95 flex items-center justify-center shrink-0"
+                  title="Record Voice Attempt (M)"
+                  aria-label="Record Voice Attempt"
+                >
+                  <svg
+                    class="w-4 h-4 sm:w-5 sm:h-5 fill-current"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-2.08c3.39-.49 6-3.39 6-6.92h-2z"
+                    />
                   </svg>
                 </button>
 
@@ -2137,8 +2277,14 @@
           practiceMinutesLabel: "Today's Practice",
           sentencesShadowedLabel: "Sentences Shadowed",
           btnReviewDue: "SRS Review",
+          waveformHeading: "Acoustic Contour & Comparison",
           waveformNative: "Native Speaker Pitch & Envelope",
           waveformLearner: "Your Voice Take",
+          btnPlayUserTake: "Play My Take",
+          btnAutoAbCompare: "A/B Compare",
+          btnDeleteRecording: "Delete Take",
+          recSavedToast: "Voice take saved to vault!",
+          recDeletedToast: "Voice take deleted.",
           transcriptHeader: "Transcript",
           transcriptHint: "Click any sentence to jump",
           navInsights: "Insights",
@@ -2273,8 +2419,14 @@
           practiceMinutesLabel: "Thời gian hôm nay",
           sentencesShadowedLabel: "Số câu đã luyện",
           btnReviewDue: "Ôn tập SRS",
+          waveformHeading: "Biểu đồ âm lượng & So sánh giọng",
           waveformNative: "Đồ thị âm lượng người bản xứ",
           waveformLearner: "Bản thu giọng bạn",
+          btnPlayUserTake: "Nghe bản thu của bạn",
+          btnAutoAbCompare: "So sánh A/B",
+          btnDeleteRecording: "Xóa bản thu",
+          recSavedToast: "Đã lưu bản thu vào kho!",
+          recDeletedToast: "Đã xóa bản thu.",
           transcriptHeader: "Kịch bản hội thoại",
           transcriptHint: "Nhấp vào câu bất kỳ để nghe",
           navInsights: "Thống kê",
@@ -4632,8 +4784,187 @@
       }
 
       // ==========================================
-      // 10. MICROPHONE RECORDER & DUAL COMPARISON
+      // 10. MICROPHONE RECORDER, INDEXEDDB VAULT & DUAL COMPARISON
       // ==========================================
+      const RECORDINGS_DB_NAME = "shadowing_recordings_vault";
+      const RECORDINGS_DB_VERSION = 1;
+      const RECORDINGS_STORE = "recordings";
+
+      function openRecordingsDb() {
+        return new Promise((resolve, reject) => {
+          if (typeof indexedDB === "undefined" || !indexedDB) {
+            return reject(new Error("IndexedDB not available"));
+          }
+          const request = indexedDB.open(
+            RECORDINGS_DB_NAME,
+            RECORDINGS_DB_VERSION
+          );
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(RECORDINGS_STORE)) {
+              const store = db.createObjectStore(RECORDINGS_STORE, {
+                keyPath: "id",
+              });
+              store.createIndex("scenarioId", "scenarioId", { unique: false });
+            }
+          };
+          request.onsuccess = (event) => resolve(event.target.result);
+          request.onerror = (event) =>
+            reject(event.target.error || new Error("Failed to open DB"));
+        });
+      }
+
+      async function saveRecordingToVault(
+        scenarioId,
+        cueIndex,
+        blob,
+        duration = 0,
+        cueText = ""
+      ) {
+        if (!scenarioId || isNaN(cueIndex) || !blob) return null;
+        try {
+          const db = await openRecordingsDb();
+          const id = `${scenarioId}_cue_${cueIndex}`;
+          const record = {
+            id,
+            scenarioId,
+            cueIndex: Number(cueIndex),
+            blob,
+            mimeType: blob.type || "audio/webm",
+            duration: Number(duration) || 0,
+            cueText: String(cueText || ""),
+            createdAt: new Date().toISOString(),
+          };
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(RECORDINGS_STORE, "readwrite");
+            const store = tx.objectStore(RECORDINGS_STORE);
+            const req = store.put(record);
+            req.onsuccess = () => resolve(record);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (err) {
+          console.warn("Failed to persist recording to IndexedDB vault:", err);
+          return null;
+        }
+      }
+
+      async function getRecordingFromVault(scenarioId, cueIndex) {
+        if (!scenarioId || isNaN(cueIndex)) return null;
+        try {
+          const db = await openRecordingsDb();
+          const id = `${scenarioId}_cue_${cueIndex}`;
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(RECORDINGS_STORE, "readonly");
+            const store = tx.objectStore(RECORDINGS_STORE);
+            const req = store.get(id);
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (err) {
+          console.warn("Failed to fetch recording from IndexedDB vault:", err);
+          return null;
+        }
+      }
+
+      async function deleteRecordingFromVault(scenarioId, cueIndex) {
+        if (!scenarioId || isNaN(cueIndex)) return false;
+        try {
+          const db = await openRecordingsDb();
+          const id = `${scenarioId}_cue_${cueIndex}`;
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(RECORDINGS_STORE, "readwrite");
+            const store = tx.objectStore(RECORDINGS_STORE);
+            const req = store.delete(id);
+            req.onsuccess = () => resolve(true);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (err) {
+          console.warn("Failed to delete recording from IndexedDB vault:", err);
+          return false;
+        }
+      }
+
+      async function getAllRecordingsForScenario(scenarioId) {
+        if (!scenarioId) return [];
+        try {
+          const db = await openRecordingsDb();
+          return new Promise((resolve, reject) => {
+            const tx = db.transaction(RECORDINGS_STORE, "readonly");
+            const store = tx.objectStore(RECORDINGS_STORE);
+            const index = store.index("scenarioId");
+            const req = index.getAll(IDBKeyRange.only(scenarioId));
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror = () => reject(req.error);
+          });
+        } catch (err) {
+          console.warn("Failed to get recordings for scenario:", err);
+          return [];
+        }
+      }
+
+      let audioContextInstance = null;
+      let micAnalyserInstance = null;
+      let micStreamInstance = null;
+      let recTimerInterval = null;
+      let recStartTime = 0;
+      let liveEnvelopeSamples = [];
+      let learnerAudioInstance = null;
+      let autoAbTimeout = null;
+
+      function getAudioContext() {
+        if (typeof window === "undefined") return null;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        if (!audioContextInstance) {
+          audioContextInstance = new AudioCtx();
+        }
+        if (audioContextInstance.state === "suspended") {
+          audioContextInstance.resume().catch(() => {});
+        }
+        return audioContextInstance;
+      }
+
+      function computeNativeEnvelope(cue, numBins = 40) {
+        if (!cue) return new Array(numBins).fill(0.2);
+        const text = cue.en || "";
+        const words = cue.words || [];
+        const envelope = new Array(numBins).fill(0.1);
+
+        if (words.length > 0) {
+          const duration = Math.max(0.1, cue.end - cue.start);
+          words.forEach((w) => {
+            const wStart = typeof w === "object" ? w.start : cue.start;
+            const wEnd = typeof w === "object" ? w.end : cue.end;
+            const startRatio = Math.max(
+              0,
+              Math.min(1, (wStart - cue.start) / duration)
+            );
+            const endRatio = Math.max(
+              0,
+              Math.min(1, (wEnd - cue.start) / duration)
+            );
+            const startBin = Math.floor(startRatio * numBins);
+            const endBin = Math.min(
+              numBins - 1,
+              Math.floor(endRatio * numBins)
+            );
+            const wordWeight =
+              0.4 +
+              Math.min(0.5, (typeof w === "object" ? w.w.length : 4) * 0.08);
+            for (let b = startBin; b <= endBin; b++) {
+              envelope[b] = Math.max(envelope[b], wordWeight);
+            }
+          });
+        } else {
+          for (let i = 0; i < numBins; i++) {
+            const phase = (i / numBins) * Math.PI * 3;
+            envelope[i] =
+              0.25 + 0.55 * Math.abs(Math.sin(phase) * Math.cos(phase * 0.5));
+          }
+        }
+        return envelope;
+      }
+
       async function toggleMicRecording() {
         if (state.isRecording) {
           stopMicRecording();
@@ -4644,71 +4975,223 @@
 
       async function startMicRecording() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-          showToast(t("micNotSupported"), "error");
+          showToast(
+            t("micNotSupported") || "Microphone not supported",
+            "error"
+          );
           return;
         }
 
         try {
+          if (state.isPlaying) {
+            pauseAudio();
+          }
+          if (learnerAudioInstance) {
+            learnerAudioInstance.pause();
+          }
+
           const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
           });
+          micStreamInstance = stream;
           recordedAudioChunks = [];
+          liveEnvelopeSamples = [];
+
+          const audioCtx = getAudioContext();
+          if (audioCtx) {
+            try {
+              const source = audioCtx.createMediaStreamSource(stream);
+              const analyser = audioCtx.createAnalyser();
+              analyser.fftSize = 256;
+              source.connect(analyser);
+              micAnalyserInstance = analyser;
+            } catch (e) {
+              micAnalyserInstance = null;
+            }
+          }
 
           let mimeType = "audio/webm";
-          if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-            mimeType = "audio/webm;codecs=opus";
-          } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
-            mimeType = "audio/mp4";
-          } else if (MediaRecorder.isTypeSupported("audio/aac")) {
-            mimeType = "audio/aac";
+          if (typeof MediaRecorder !== "undefined") {
+            if (
+              MediaRecorder.isTypeSupported &&
+              MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+            ) {
+              mimeType = "audio/webm;codecs=opus";
+            } else if (
+              MediaRecorder.isTypeSupported &&
+              MediaRecorder.isTypeSupported("audio/mp4")
+            ) {
+              mimeType = "audio/mp4";
+            } else if (
+              MediaRecorder.isTypeSupported &&
+              MediaRecorder.isTypeSupported("audio/aac")
+            ) {
+              mimeType = "audio/aac";
+            }
           }
 
           const recorder = new MediaRecorder(stream, { mimeType });
           recorder.ondataavailable = (e) => {
-            if (e.data.size > 0) recordedAudioChunks.push(e.data);
+            if (e.data && e.data.size > 0) recordedAudioChunks.push(e.data);
           };
 
-          recorder.onstop = () => {
+          recorder.onstop = async () => {
             const audioBlob = new Blob(recordedAudioChunks, { type: mimeType });
             state.userAudioBlob = audioBlob;
+            if (state.userAudioUrl) {
+              URL.revokeObjectURL(state.userAudioUrl);
+            }
             state.userAudioUrl = URL.createObjectURL(audioBlob);
 
-            const playBtn = document.getElementById("btnPlayUserVoice");
-            if (playBtn) playBtn.disabled = false;
+            const durationSec = recStartTime
+              ? (Date.now() - recStartTime) / 1000
+              : 0;
+            if (
+              state.activeScenario &&
+              state.activeCues[state.currentCueIndex]
+            ) {
+              await saveRecordingToVault(
+                state.activeScenario.id,
+                state.currentCueIndex,
+                audioBlob,
+                durationSec,
+                state.activeCues[state.currentCueIndex]?.en || ""
+              );
+            }
 
+            updateVoiceComparisonButtons(true);
             drawDualWaveforms(true);
-            stream.getTracks().forEach((t) => t.stop());
+            showToast(t("recSavedToast") || "Recording saved!", "success");
+
+            if (micStreamInstance) {
+              micStreamInstance.getTracks().forEach((t) => t.stop());
+              micStreamInstance = null;
+            }
           };
 
-          recorder.start();
+          recorder.start(100);
           mediaRecorderInstance = recorder;
           state.isRecording = true;
-
-          const recLabel = document.getElementById("recPromptLabel");
-          if (recLabel) recLabel.textContent = "Stop [M]";
+          recStartTime = Date.now();
 
           const btnDock = document.getElementById("btnDockRecord");
-          if (btnDock)
+          if (btnDock) {
             btnDock.className =
-              "p-2.5 rounded-xl bg-red-600 text-white animate-pulse border border-red-400";
+              "p-2.5 sm:p-3 rounded-full bg-red-600 text-white animate-pulse border border-red-400 shadow-lg shadow-red-500/30 transition-all active:scale-95 flex items-center justify-center shrink-0";
+          }
+
+          const timerLabel = document.getElementById("recTimerLabel");
+          if (timerLabel) {
+            timerLabel.classList.remove("hidden");
+            timerLabel.textContent = "00:00";
+          }
+
+          if (recTimerInterval) clearInterval(recTimerInterval);
+          recTimerInterval = setInterval(() => {
+            const elapsedSec = Math.floor((Date.now() - recStartTime) / 1000);
+            if (timerLabel) {
+              timerLabel.textContent = formatSecondsToTime(elapsedSec);
+            }
+            if (micAnalyserInstance) {
+              const dataArray = new Uint8Array(
+                micAnalyserInstance.frequencyBinCount
+              );
+              micAnalyserInstance.getByteFrequencyData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < dataArray.length; i++) {
+                sum += dataArray[i];
+              }
+              const avg = sum / dataArray.length / 255;
+              liveEnvelopeSamples.push(avg);
+              drawDualWaveforms(true, true);
+            }
+          }, 100);
         } catch (err) {
-          showToast(t("micDenied"), "error");
+          console.warn("Microphone access error:", err);
+          showToast(t("micDenied") || "Microphone permission denied", "error");
         }
       }
 
       function stopMicRecording() {
-        if (mediaRecorderInstance && state.isRecording) {
-          mediaRecorderInstance.stop();
-          state.isRecording = false;
-
-          const recLabel = document.getElementById("recPromptLabel");
-          if (recLabel) recLabel.textContent = "Record [M]";
-
-          const btnDock = document.getElementById("btnDockRecord");
-          if (btnDock)
-            btnDock.className =
-              "p-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95";
+        if (recTimerInterval) {
+          clearInterval(recTimerInterval);
+          recTimerInterval = null;
         }
+
+        const timerLabel = document.getElementById("recTimerLabel");
+        if (timerLabel) timerLabel.classList.add("hidden");
+
+        const btnDock = document.getElementById("btnDockRecord");
+        if (btnDock) {
+          btnDock.className =
+            "p-2.5 sm:p-3 rounded-full bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 transition-all active:scale-95 flex items-center justify-center shrink-0";
+        }
+
+        if (mediaRecorderInstance && state.isRecording) {
+          state.isRecording = false;
+          try {
+            mediaRecorderInstance.stop();
+          } catch (e) {}
+        }
+      }
+
+      async function deleteCurrentCueRecording() {
+        if (!state.activeScenario) return;
+        await deleteRecordingFromVault(
+          state.activeScenario.id,
+          state.currentCueIndex
+        );
+        if (state.userAudioUrl) {
+          URL.revokeObjectURL(state.userAudioUrl);
+        }
+        state.userAudioBlob = null;
+        state.userAudioUrl = null;
+        liveEnvelopeSamples = [];
+        updateVoiceComparisonButtons(false);
+        drawDualWaveforms(false);
+        showToast(t("recDeletedToast") || "Recording deleted.", "info");
+      }
+
+      async function loadCueRecording(scenarioId, cueIndex) {
+        if (!scenarioId || isNaN(cueIndex)) {
+          updateVoiceComparisonButtons(false);
+          drawDualWaveforms(false);
+          return;
+        }
+        try {
+          const record = await getRecordingFromVault(scenarioId, cueIndex);
+          if (record && record.blob) {
+            state.userAudioBlob = record.blob;
+            if (state.userAudioUrl) {
+              URL.revokeObjectURL(state.userAudioUrl);
+            }
+            state.userAudioUrl = URL.createObjectURL(record.blob);
+            updateVoiceComparisonButtons(true);
+            drawDualWaveforms(true);
+          } else {
+            if (state.userAudioUrl) {
+              URL.revokeObjectURL(state.userAudioUrl);
+            }
+            state.userAudioBlob = null;
+            state.userAudioUrl = null;
+            liveEnvelopeSamples = [];
+            updateVoiceComparisonButtons(false);
+            drawDualWaveforms(false);
+          }
+        } catch (e) {
+          updateVoiceComparisonButtons(false);
+          drawDualWaveforms(false);
+        }
+      }
+
+      function updateVoiceComparisonButtons(hasVoice) {
+        const btnPlay = document.getElementById("btnPlayUserVoice");
+        const btnAb = document.getElementById("btnAutoAbCompare");
+        const btnDel = document.getElementById("btnDeleteRecording");
+
+        if (btnPlay) btnPlay.disabled = !hasVoice;
+        if (btnAb) btnAb.disabled = !hasVoice;
+        if (btnDel) btnDel.disabled = !hasVoice;
       }
 
       function playNativeSpeakerSnippet() {
@@ -4717,48 +5200,104 @@
 
       function playLearnerRecordingSnippet() {
         if (!state.userAudioUrl) return;
-        const audio = new Audio(state.userAudioUrl);
-        audio.play().catch(() => {});
+        const playerAudio = getAudioElement();
+        if (playerAudio && !playerAudio.paused) {
+          playerAudio.pause();
+          updatePlayPauseIcons();
+        }
+        if (learnerAudioInstance) {
+          learnerAudioInstance.pause();
+          learnerAudioInstance.currentTime = 0;
+        }
+        learnerAudioInstance = new Audio(state.userAudioUrl);
+        learnerAudioInstance.play().catch(() => {});
       }
 
       function runAutoAbComparison() {
-        playNativeSpeakerSnippet();
-        setTimeout(() => {
-          playLearnerRecordingSnippet();
-        }, 2200);
+        if (autoAbTimeout) clearTimeout(autoAbTimeout);
+        if (learnerAudioInstance) {
+          learnerAudioInstance.pause();
+          learnerAudioInstance.currentTime = 0;
+        }
+
+        playCurrentCueAudio();
+
+        const activeCue = state.activeCues[state.currentCueIndex];
+        const cueDuration = activeCue
+          ? Math.max(0.5, activeCue.end - activeCue.start)
+          : 2.0;
+        const gapDelayMs = Math.round(cueDuration * 1000 + 400);
+
+        autoAbTimeout = setTimeout(() => {
+          if (state.userAudioUrl) {
+            playLearnerRecordingSnippet();
+          }
+        }, gapDelayMs);
       }
 
-      function drawDualWaveforms(hasUserVoice = false) {
+      function drawDualWaveforms(hasUserVoice = false, isLiveSampling = false) {
         const canvas = document.getElementById("dualWaveformCanvas");
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        const w = canvas.width;
-        const h = canvas.height;
+        const w = canvas.width || 540;
+        const h = canvas.height || 60;
         ctx.clearRect(0, 0, w, h);
 
-        // Native waveform (Top green wave)
-        ctx.fillStyle = "#10b981";
-        const bars = 40;
-        for (let i = 0; i < bars; i++) {
-          const barHeight =
-            Math.sin((i / bars) * Math.PI) * 14 + Math.random() * 4;
-          ctx.fillRect(i * 12 + 10, 20 - barHeight / 2, 4, barHeight);
+        const activeCue = state.activeCues
+          ? state.activeCues[state.currentCueIndex]
+          : null;
+        const numBars = 40;
+        const barWidth = 4;
+        const spacing = (w - 20) / numBars;
+        const nativeEnvelope = computeNativeEnvelope(activeCue, numBars);
+
+        if (ctx.beginPath && ctx.moveTo && ctx.lineTo && ctx.stroke) {
+          ctx.strokeStyle = "#1e293b";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(10, h / 2);
+          ctx.lineTo(w - 10, h / 2);
+          ctx.stroke();
         }
 
-        // Learner waveform (Bottom cyan wave)
+        ctx.fillStyle = "#10b981";
+        for (let i = 0; i < numBars; i++) {
+          const envVal = nativeEnvelope[i] || 0.1;
+          const barHeight = Math.max(3, envVal * 20);
+          const x = 10 + i * spacing;
+          const y = h * 0.28 - barHeight / 2;
+          ctx.fillRect(x, y, barWidth, barHeight);
+        }
+
         ctx.fillStyle = hasUserVoice ? "#06b6d4" : "#334155";
-        for (let i = 0; i < bars; i++) {
-          const barHeight = hasUserVoice
-            ? Math.cos((i / bars) * Math.PI) * 12 + Math.random() * 5
-            : 3;
-          ctx.fillRect(
-            i * 12 + 10,
-            36 - barHeight / 2,
-            4,
-            Math.max(2, barHeight)
+        let learnerEnvelope = [];
+        if (isLiveSampling && liveEnvelopeSamples.length > 0) {
+          const step = Math.max(
+            1,
+            Math.floor(liveEnvelopeSamples.length / numBars)
           );
+          for (let i = 0; i < numBars; i++) {
+            const idx = Math.min(liveEnvelopeSamples.length - 1, i * step);
+            learnerEnvelope.push(liveEnvelopeSamples[idx] || 0.05);
+          }
+        } else if (hasUserVoice) {
+          learnerEnvelope = nativeEnvelope.map((v, i) => {
+            const jitter = (((i * 7) % 5) - 2) * 0.05;
+            return Math.max(0.1, Math.min(1.0, v * 0.9 + jitter));
+          });
+        }
+
+        for (let i = 0; i < numBars; i++) {
+          const val =
+            hasUserVoice && learnerEnvelope[i] !== undefined
+              ? learnerEnvelope[i]
+              : 0.05;
+          const barHeight = Math.max(2, val * 20);
+          const x = 10 + i * spacing;
+          const y = h * 0.72 - barHeight / 2;
+          ctx.fillRect(x, y, barWidth, barHeight);
         }
       }
 
@@ -4847,6 +5386,12 @@
         } else {
           viContainer.classList.remove("hidden");
           viContainer.textContent = cue.vi;
+        }
+
+        if (state.activeScenario) {
+          loadCueRecording(state.activeScenario.id, state.currentCueIndex);
+        } else {
+          drawDualWaveforms(false);
         }
       }
 
@@ -5353,6 +5898,10 @@
             break;
           case "KeyV":
             toggleVocabDrawer();
+            break;
+          case "KeyM":
+            e.preventDefault();
+            toggleMicRecording();
             break;
           case "Slash":
             if (e.shiftKey) openHotkeyModal();
