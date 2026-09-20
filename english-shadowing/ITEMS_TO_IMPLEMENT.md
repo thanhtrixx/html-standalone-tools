@@ -1,5 +1,37 @@
 # English Shadowing Player — Backlog & Roadmap
 
+## 🎯 Milestone 6: PWA Zero-Stale Cache Lifecycle, Network-Only Navigation & On-Demand Media Streaming
+
+### Epic: Zero-Stale App Refreshes, Silent Upgrades & On-Demand Media PWA Cache
+
+- **Status:** ✅ Milestone Completed & Verified ([ADR-0007](./docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md))
+
+---
+
+### Vertical Slices Breakdown
+
+#### Slice 1: Zero-Stale Service Worker Engine & Lightweight Shell Precache (#668)
+
+- **Title**: `feat(shadowing): network-only navigation, lightweight shell precache, and controllerchange auto-reload`
+- **Scope**:
+  - [x] Rewrite `english-shadowing/sw.js` with Network-Only strategy for navigation requests (`request.mode === 'navigate'`), fetching fresh HTML online and updating cache, falling back to cache when offline.
+  - [x] Prune legacy `.srt` files and heavy audio files from `ASSETS_TO_CACHE` install precache list, keeping only core app shell assets (`./`, `./index.html`, `./manifest.json`, `./manifest.webmanifest`, `./icon.svg`).
+  - [x] Implement `self.skipWaiting()` on install, cache version migration/cleanup on activate, and `self.clients.claim()`.
+  - [x] Register `controllerchange` listener in `english-shadowing/index.html` to automatically reload active tabs when an updated service worker activates.
+  - [x] Add automated unit tests verifying navigation fetch strategy, cache pruning, and service worker update cycle.
+
+#### Slice 2: On-Demand Runtime Media Caching & In-App Storage Maintenance (#669)
+
+- **Title**: `feat(shadowing): on-demand runtime media caching and safe clear media cache action`
+- **Scope**:
+  - [x] Implement on-demand runtime caching for media assets (`.mp3`, `.lrc`, `.md`) in `sw.js` into dedicated `shadowing-media-v3` Cache Storage on first playback.
+  - [x] Add "Clear Media Cache" action inside the Insights / Settings modal in `english-shadowing/index.html` with bilingual confirmation dialog.
+  - [x] Guarantee 100% isolation of user learning data (SRS Leitner boxes, vocabulary notes, streaks, recordings in IndexedDB) during media cache clearing.
+  - [x] Add bilingual translation keys in `I18N.md` and `index.html` for storage status, clear media cache buttons, and confirmation toasts.
+  - [x] Add automated test assertions verifying on-demand media caching and data persistence isolation.
+
+---
+
 ## 🎯 Milestone 5: Markdown Scenario Pipeline, Precision Acoustic Stitching & Full LRC Standardization
 
 ### Epic: Extended 1–5 Minute Scenarios & Enhanced LRC Single Source of Truth

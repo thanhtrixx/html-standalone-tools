@@ -17,6 +17,7 @@ For architectural decision records, refer to:
 - [`docs/adr/0004-app-shell-url-routing-and-insights-reports.md`](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md)
 - [`docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md`](./docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md)
 - [`docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md`](./docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md)
+- [`docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md`](./docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md)
 
 ---
 
@@ -90,6 +91,13 @@ For architectural decision records, refer to:
   - 🗣️ **Sentences Shadowed Count**: Total count of unique sentences repeated.
   - 📦 **SRS Vocabulary Mastery Distribution**: Box 1 through Box 5 inventory.
 - **Header Motivation Indicators**: Compact glanceable badges in the header bar (`🔥 Streak`, `📚 Due Count`) maintaining daily motivation without viewport clutter.
+
+### 6. PWA Zero-Stale Lifecycle & Storage Management
+
+- **Network-Only Navigation Strategy**: HTML navigation requests always fetch live application code from the network when online (updating the offline cache copy in the background), eliminating stale cached app code on page refresh while preserving full offline PWA fallback when disconnected.
+- **On-Demand Runtime Media Caching**: Audio (`.mp3`) and subtitle (`.lrc`) files are dynamically stored in dedicated Cache Storage (`shadowing-media-v3`) upon playback, drastically shrinking initial PWA installation payload (< 100KB) while ensuring played scenarios are available offline.
+- **Silent Controllerchange Reload**: Upgrades to `sw.js` trigger `skipWaiting()` and auto-reload active tabs on `controllerchange` to deliver instant updates without manual cache clearing.
+- **Storage Isolation & Safe Maintenance**: User learning progress (SRS Leitner boxes, vocabulary notes, practice streaks, custom voice recordings in IndexedDB) is strictly isolated from HTTP caches. An in-app "Clear Media Cache" action in Insights allows learners to reclaim device audio storage safely.
 
 ---
 

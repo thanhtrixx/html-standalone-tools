@@ -381,6 +381,24 @@ async function runTests() {
     "popstate history event listener registered"
   );
 
+  // 16. In-App Storage Maintenance & Offline Error Handling UI (ADR-0007 / Slice 2)
+  assert(
+    htmlContent.includes('id="btnClearMediaCache"'),
+    "Clear Media Cache button exists in Insights Modal"
+  );
+  assert(
+    htmlContent.includes('onclick="clearMediaCacheStorage()"'),
+    "Clear Media Cache button triggers clearMediaCacheStorage()"
+  );
+  assert(
+    htmlContent.includes("function clearMediaCacheStorage"),
+    "clearMediaCacheStorage function definition exists"
+  );
+  assert(
+    htmlContent.includes("function isScenarioAvailableOffline"),
+    "isScenarioAvailableOffline function definition exists"
+  );
+
   console.log(`\n==================================================`);
   console.log(
     `📊 UI Tests Completed: ${passCount} Passed, ${failCount} Failed`

@@ -48,3 +48,11 @@ Verify the Markdown scenario authoring schema, precision acoustic stitching pipe
 - Click-to-jump navigation from transcript feed across responsive breakpoints on 1–3 minute scenarios.
 - Speed popover interaction on touch and desktop.
 - Uninterrupted continuous audio streaming and loop mode shadowing repetitions.
+
+### 7. PWA Zero-Stale Cache & Lifecycle Verification (`tests/english-shadowing-storage.test.js`)
+
+- Navigation Request Network-Only Strategy: verifies that HTML navigation requests fetch live code over the network when online, update the cached app shell, and fall back to cache when offline.
+- Lightweight Shell Precache: verifies that `install` precache contains only core app shell assets (`./`, `./index.html`, `./manifest.json`, `./manifest.webmanifest`, `./icon.svg`) and excludes legacy `.srt` or heavy media files.
+- On-Demand Runtime Media Caching: verifies that requests to `.mp3`, `.lrc`, and `.md` scenario assets are dynamically cached into `shadowing-media-v3` Cache Storage on first playback.
+- Service Worker Activation & Cache Migration: verifies that older cache stores (e.g. `shadowing-player-v2`) are pruned upon activation of a new version.
+- User Data Isolation & Cache Reset: verifies that triggering "Clear Media Cache" empties media response caches while leaving IndexedDB SRS vocabulary, streaks, and recording blobs 100% intact.

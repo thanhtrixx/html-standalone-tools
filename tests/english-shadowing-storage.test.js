@@ -49,6 +49,18 @@ async function runTests() {
         classList: { add() {}, remove() {}, contains: () => false },
         innerHTML: "",
         style: {},
+        appendChild: () => {},
+      }),
+      createElement: (tag) => ({
+        textContent: "",
+        innerHTML: "",
+        className: "",
+        style: {},
+        classList: { add() {}, remove() {}, contains: () => false },
+        setAttribute: () => {},
+        appendChild: () => {},
+        click: () => {},
+        remove: () => {},
       }),
       documentElement: { classList: { add() {}, remove() {} } },
       addEventListener: () => {},
@@ -56,7 +68,17 @@ async function runTests() {
     window: {
       addEventListener: () => {},
       scrollTo: () => {},
+      requestAnimationFrame: (cb) => setTimeout(cb, 0),
+      cancelAnimationFrame: (id) => clearTimeout(id),
     },
+    requestAnimationFrame: (cb) => setTimeout(cb, 0),
+    cancelAnimationFrame: (id) => clearTimeout(id),
+    setTimeout: (fn, ms) => {
+      const timer = setTimeout(fn, Math.min(ms || 0, 10));
+      if (timer && typeof timer.unref === "function") timer.unref();
+      return timer;
+    },
+    clearTimeout,
   };
 
   vm.createContext(sandbox);
@@ -89,6 +111,8 @@ async function runTests() {
     globalThis.renderInsightsModal = typeof renderInsightsModal !== 'undefined' ? renderInsightsModal : function(){};
     globalThis.openInsightsModal = typeof openInsightsModal !== 'undefined' ? openInsightsModal : function(){};
     globalThis.closeInsightsModal = typeof closeInsightsModal !== 'undefined' ? closeInsightsModal : function(){};
+    globalThis.clearMediaCacheStorage = typeof clearMediaCacheStorage !== 'undefined' ? clearMediaCacheStorage : function(){};
+    globalThis.isScenarioAvailableOffline = typeof isScenarioAvailableOffline !== 'undefined' ? isScenarioAvailableOffline : function(){};
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
@@ -116,6 +140,8 @@ async function runTests() {
     renderInsightsModal,
     openInsightsModal,
     closeInsightsModal,
+    clearMediaCacheStorage,
+    isScenarioAvailableOffline,
     state,
   } = sandbox;
 
@@ -295,21 +321,69 @@ async function runTests() {
     "logPracticeSeconds increments seconds to 150s"
   );
 
-  // 13. Service Worker Asset Cache Verification
+  // 13. Service Worker Asset Cache Verification & PWA Zero-Stale Lifecycle (ADR-0007 / Slice 1)
   const swPath = path.join(__dirname, "..", "english-shadowing", "sw.js");
   assert(fs.existsSync(swPath), "Service Worker file sw.js exists");
   const swContent = fs.readFileSync(swPath, "utf8");
+
+  // Shell & media cache bucket naming
   assert(
-    swContent.includes("./audio/specialty-coffee.mp3") &&
-      swContent.includes("./audio/tech-standup.mp3") &&
-      swContent.includes("./audio/airport-security.mp3") &&
-      swContent.includes("./audio/academic-ai-future.mp3"),
-    "Service Worker caches all 4 curated scenario MP3 audio assets"
+    swContent.includes('const CACHE_NAME = "shadowing-shell-v3"') ||
+      swContent.includes("shadowing-shell-v3"),
+    "sw.js defines shell cache bucket shadowing-shell-v3"
   );
   assert(
-    swContent.includes("./audio/specialty-coffee.lrc") &&
-      swContent.includes("./audio/tech-standup.lrc"),
-    "Service Worker caches Enhanced LRC subtitle files"
+    swContent.includes('const MEDIA_CACHE_NAME = "shadowing-media-v3"') ||
+      swContent.includes("shadowing-media-v3"),
+    "sw.js defines media cache bucket shadowing-media-v3"
+  );
+
+  // Shell precache is lightweight and does not precache .srt or audio tracks
+  assert(
+    !swContent.includes(".srt"),
+    "sw.js precache does not include deprecated .srt subtitle files"
+  );
+  assert(
+    !swContent.includes("./audio/specialty-coffee.mp3"),
+    "sw.js install precache avoids bulky hardcoded audio tracks (on-demand streaming)"
+  );
+  assert(
+    swContent.includes("./index.html") &&
+      swContent.includes("./icon.svg") &&
+      swContent.includes("./manifest.json"),
+    "sw.js precaches essential app shell assets (< 100KB payload)"
+  );
+
+  // Navigation requests: Network-Only with offline fallback
+  assert(
+    swContent.includes("isNavigation") ||
+      swContent.includes('request.mode === "navigate"'),
+    "sw.js intercepts navigation requests specifically"
+  );
+  assert(
+    swContent.includes("fetch(request)") && swContent.includes("caches.match"),
+    "sw.js uses Network-Only strategy with cache fallback for navigation"
+  );
+
+  // On-demand media runtime caching
+  assert(
+    swContent.includes("isMedia") ||
+      (swContent.includes(".mp3") && swContent.includes(".lrc")),
+    "sw.js identifies audio and subtitle requests for on-demand caching"
+  );
+
+  // Activation cache pruning
+  assert(
+    /caches\s*\.\s*keys\(\)/.test(swContent) &&
+      /caches\s*\.\s*delete/.test(swContent),
+    "sw.js activate event prunes legacy cache versions"
+  );
+
+  // Client controllerchange listener
+  assert(
+    htmlContent.includes("controllerchange") &&
+      htmlContent.includes("window.location.reload()"),
+    "index.html attaches controllerchange listener for seamless automatic reload on SW upgrade"
   );
 
   // 14. Audio Assets On Disk
@@ -386,6 +460,56 @@ async function runTests() {
   assert(
     getPracticeStats().totalSecondsPracticedToday >= 120,
     "logPracticeSeconds accumulates seconds practiced today"
+  );
+
+  // 18. Media Cache Storage Clearing & User Data Isolation (ADR-0007 / Slice 2)
+  assert(
+    typeof clearMediaCacheStorage === "function",
+    "clearMediaCacheStorage function exists in index.html"
+  );
+  assert(
+    typeof isScenarioAvailableOffline === "function",
+    "isScenarioAvailableOffline function exists in index.html"
+  );
+
+  // Setup sample vocab and practice stats
+  setSavedVocabVault({
+    testword: {
+      word: "testword",
+      box: 2,
+      savedAt: new Date().toISOString(),
+      lastReviewed: null,
+      nextReviewDate: new Date().toISOString(),
+    },
+  });
+  saveVocabVault();
+
+  // Mock confirm and caches
+  let deletedCaches = [];
+  sandbox.confirm = () => true;
+  sandbox.caches = {
+    delete: async (cacheName) => {
+      deletedCaches.push(cacheName);
+      return true;
+    },
+    open: async (name) => ({
+      match: async () => null,
+      put: async () => {},
+    }),
+  };
+
+  await clearMediaCacheStorage();
+  assert(
+    deletedCaches.includes("shadowing-media-v3"),
+    "clearMediaCacheStorage deletes shadowing-media-v3 cache bucket"
+  );
+  assert(
+    Object.keys(getSavedVocabVault()).includes("testword"),
+    "User SRS vocabulary vault is 100% preserved after clearMediaCacheStorage"
+  );
+  assert(
+    getPracticeStats().totalSentencesShadowed > 0,
+    "User practice stats are 100% preserved after clearMediaCacheStorage"
   );
 
   console.log(`\n==================================================`);
