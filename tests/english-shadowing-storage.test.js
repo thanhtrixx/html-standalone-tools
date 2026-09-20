@@ -346,14 +346,14 @@ async function runTests() {
 
   // Shell & media cache bucket naming
   assert(
-    swContent.includes('const CACHE_NAME = "shadowing-shell-v3"') ||
-      swContent.includes("shadowing-shell-v3"),
-    "sw.js defines shell cache bucket shadowing-shell-v3"
+    swContent.includes('const CACHE_NAME = "shadowing-shell-v4"') ||
+      swContent.includes("shadowing-shell-v4"),
+    "sw.js defines shell cache bucket shadowing-shell-v4"
   );
   assert(
-    swContent.includes('const MEDIA_CACHE_NAME = "shadowing-media-v3"') ||
-      swContent.includes("shadowing-media-v3"),
-    "sw.js defines media cache bucket shadowing-media-v3"
+    swContent.includes('const MEDIA_CACHE_NAME = "shadowing-media-v4"') ||
+      swContent.includes("shadowing-media-v4"),
+    "sw.js defines media cache bucket shadowing-media-v4"
   );
 
   // Shell precache is lightweight and does not precache .srt or audio tracks
@@ -383,11 +383,30 @@ async function runTests() {
     "sw.js uses Network-Only strategy with cache fallback for navigation"
   );
 
-  // On-demand media runtime caching
+  // Scenario subtitles & metadata requests: Network-First with cache fallback
   assert(
-    swContent.includes("isMedia") ||
-      (swContent.includes(".mp3") && swContent.includes(".lrc")),
-    "sw.js identifies audio and subtitle requests for on-demand caching"
+    swContent.includes("isSubtitleOrManifest") ||
+      (swContent.includes(".lrc") && swContent.includes("fetch(request)")),
+    "sw.js routes subtitle (.lrc) and manifest files with Network-First strategy"
+  );
+
+  // On-demand heavy audio media runtime caching
+  assert(
+    swContent.includes("isMedia") || swContent.includes(".mp3"),
+    "sw.js identifies audio requests (.mp3) for on-demand caching"
+  );
+
+  // Safe fallback Response instances (never resolves undefined to prevent net::ERR_FAILED)
+  assert(
+    swContent.includes("status: 503") && swContent.includes("status: 404"),
+    "sw.js returns safe HTTP error Response objects instead of undefined on network/cache misses"
+  );
+
+  // SW message listener for client update signals
+  assert(
+    swContent.includes("SKIP_WAITING") &&
+      swContent.includes("CLEAR_ALL_CACHES"),
+    "sw.js message listener supports SKIP_WAITING and CLEAR_ALL_CACHES signals"
   );
 
   // Activation cache pruning
@@ -397,11 +416,19 @@ async function runTests() {
     "sw.js activate event prunes legacy cache versions"
   );
 
-  // Client controllerchange listener
+  // Client controllerchange listener & registration options
   assert(
     htmlContent.includes("controllerchange") &&
       htmlContent.includes("window.location.reload()"),
     "index.html attaches controllerchange listener for seamless automatic reload on SW upgrade"
+  );
+  assert(
+    htmlContent.includes('updateViaCache: "none"'),
+    "index.html registers Service Worker with updateViaCache: 'none'"
+  );
+  assert(
+    htmlContent.includes("function forceCheckUpdatesAndReload"),
+    "index.html provides forceCheckUpdatesAndReload function"
   );
 
   // 14. Audio Assets On Disk
