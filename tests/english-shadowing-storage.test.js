@@ -346,14 +346,14 @@ async function runTests() {
 
   // Shell & media cache bucket naming
   assert(
-    swContent.includes('const CACHE_NAME = "shadowing-shell-v4"') ||
-      swContent.includes("shadowing-shell-v4"),
-    "sw.js defines shell cache bucket shadowing-shell-v4"
+    swContent.includes('const CACHE_NAME = "shadowing-shell-v5"') ||
+      swContent.includes("shadowing-shell-v5"),
+    "sw.js defines shell cache bucket shadowing-shell-v5"
   );
   assert(
-    swContent.includes('const MEDIA_CACHE_NAME = "shadowing-media-v4"') ||
-      swContent.includes("shadowing-media-v4"),
-    "sw.js defines media cache bucket shadowing-media-v4"
+    swContent.includes('const MEDIA_CACHE_NAME = "shadowing-media-v5"') ||
+      swContent.includes("shadowing-media-v5"),
+    "sw.js defines media cache bucket shadowing-media-v5"
   );
 
   // Shell precache is lightweight and does not precache .srt or audio tracks
@@ -394,6 +394,13 @@ async function runTests() {
   assert(
     swContent.includes("isMedia") || swContent.includes(".mp3"),
     "sw.js identifies audio requests (.mp3) for on-demand caching"
+  );
+  // HTTP 206 Range request support for audio seeking (prevents currentTime reset to 0)
+  assert(
+    swContent.includes("status: 206") &&
+      swContent.includes("Partial Content") &&
+      swContent.includes("Content-Range"),
+    "sw.js returns HTTP 206 Partial Content with Content-Range for audio Range requests"
   );
 
   // Safe fallback Response instances (never resolves undefined to prevent net::ERR_FAILED)
