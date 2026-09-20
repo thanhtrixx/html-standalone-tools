@@ -56,6 +56,7 @@ const COMPANION_ASSETS = [
   "icons",
   "splash",
   "audio",
+  "scenarios.json",
 ];
 
 const MINIFY_OPTIONS = {

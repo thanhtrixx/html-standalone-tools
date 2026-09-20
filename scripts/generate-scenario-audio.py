@@ -10,6 +10,7 @@ import asyncio
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -23,10 +24,17 @@ FAST_WORDS = {
     "am", "are", "was", "were", "has", "had", "have"
 }
 
+COLLECTION_DEFAULTS = {
+    "daily": "daily-social",
+    "workplace": "workplace",
+    "travel": "travel",
+    "academic": "academic",
+}
+
 def parse_frontmatter(text):
     """
     Zero-dependency YAML frontmatter parser for scenario markdown files.
-    Extracts scalar metadata and nested speaker voice dictionaries.
+    Extracts scalar metadata, inline/multiline lists, and nested speaker voice dictionaries.
     """
     if not text.startswith("---"):
         return {}, text
@@ -37,25 +45,33 @@ def parse_frontmatter(text):
     body = parts[2].strip()
 
     meta = {}
-    current_dict = None
-    dict_name = None
+    current_key = None
 
     for line in frontmatter_str.split("\n"):
         line_clean = line.split("#")[0].rstrip()
         if not line_clean.strip():
             continue
 
-        # Indented key-value line (nested dictionary entry, e.g. under speakers:)
-        if line_clean.startswith(("  ", "\t")) and current_dict is not None:
-            indent_match = re.match(r"^\s+([^:]+):\s*(.*)$", line_clean)
-            if indent_match:
-                k = indent_match.group(1).strip()
-                v = indent_match.group(2).strip().strip("\"'")
-                meta[dict_name][k] = v
-            continue
+        # Indented line
+        if line_clean.startswith(("  ", "\t", " -", "- ")):
+            stripped = line_clean.strip()
+            if stripped.startswith("- "):
+                val = stripped[2:].strip().strip("\"'")
+                if current_key is not None:
+                    if not isinstance(meta.get(current_key), list):
+                        meta[current_key] = []
+                    meta[current_key].append(val)
+                continue
+            dict_match = re.match(r"^([^:]+):\s*(.*)$", stripped)
+            if dict_match and current_key is not None:
+                dk = dict_match.group(1).strip()
+                dv = dict_match.group(2).strip().strip("\"'")
+                if not isinstance(meta.get(current_key), dict):
+                    meta[current_key] = {}
+                meta[current_key][dk] = dv
+                continue
 
-        current_dict = None
-        dict_name = None
+        current_key = None
 
         match = re.match(r"^([^:]+):\s*(.*)$", line_clean)
         if match:
@@ -63,10 +79,16 @@ def parse_frontmatter(text):
             v = match.group(2).strip()
             if not v:
                 meta[k] = {}
-                current_dict = meta[k]
-                dict_name = k
+                current_key = k
+            elif v.startswith("[") and v.endswith("]"):
+                items = [x.strip().strip("\"'") for x in v[1:-1].split(",") if x.strip()]
+                meta[k] = items
             else:
-                meta[k] = v.strip("\"'")
+                raw_val = v.strip("\"'")
+                if raw_val.isdigit():
+                    meta[k] = int(raw_val)
+                else:
+                    meta[k] = raw_val
 
     return meta, body
 
@@ -375,10 +397,57 @@ async def render_scenario(scenario_meta, turns, scenario_dir, public_audio_dir, 
         "cues": cues
     }
 
-def sync_scenarios_to_html(scenarios_data, html_path):
+def build_manifest_entry(meta, turns, duration=0):
     """
-    Fast, atomic synchronization of CURATED_SCENARIOS array in index.html
-    with Enhanced LRC single-source-of-truth definitions (no srtContent).
+    Constructs a lightweight manifest dictionary conforming to ADR-0008 schema.
+    Omits raw lrcContent/srtContent/cues to prevent bundle bloat.
+    """
+    sc_id = meta.get("id", "scenario")
+    category = meta.get("category", "daily")
+    collection = meta.get("collection") or COLLECTION_DEFAULTS.get(category, category)
+
+    tags = meta.get("tags")
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",") if t.strip()]
+    elif not isinstance(tags, list) or not tags:
+        tags = [category]
+
+    dur = int(duration) if duration else int(meta.get("duration", 60))
+    sentence_count = len(turns) if turns else int(meta.get("sentenceCount", 0))
+
+    entry = {
+        "id": sc_id,
+        "title": meta.get("title", sc_id),
+        "category": category,
+        "level": meta.get("level", "B1"),
+        "accent": meta.get("accent", "US"),
+        "duration": dur,
+        "description": meta.get("description", ""),
+        "tags": tags,
+        "collection": collection,
+        "sentenceCount": sentence_count,
+    }
+
+    # Convention-over-configuration: only include audioUrl/lrcUrl if explicitly overridden
+    if "audioUrl" in meta and meta["audioUrl"]:
+        entry["audioUrl"] = meta["audioUrl"]
+    if "lrcUrl" in meta and meta["lrcUrl"]:
+        entry["lrcUrl"] = meta["lrcUrl"]
+
+    return entry
+
+def export_scenarios_manifest(manifest_entries, json_path):
+    """
+    Exports clean JSON manifest file for external distribution & PWA checks.
+    """
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(manifest_entries, f, indent=2, ensure_ascii=False)
+    print(f"📄 Exported {len(manifest_entries)} scenario manifest items to {os.path.basename(json_path)}")
+
+def sync_scenarios_to_html(manifest_entries, html_path):
+    """
+    Fast, atomic synchronization of lightweight SCENARIOS_MANIFEST array in index.html
+    (conforming to ADR-0008, metadata only without lrcContent).
     """
     if not os.path.exists(html_path):
         print(f"❌ index.html not found at: {html_path}")
@@ -388,28 +457,40 @@ def sync_scenarios_to_html(scenarios_data, html_path):
         html_content = f.read()
 
     js_scenarios = []
-    for sc in scenarios_data:
-        escaped_lrc = sc["lrcContent"].replace("`", "\\`").replace("${", "\\${")
+    for sc in manifest_entries:
         escaped_desc = sc["description"].replace('"', '\\"')
         escaped_title = sc["title"].replace('"', '\\"')
+        tags_json = json.dumps(sc.get("tags", []))
+
+        extra_urls = ""
+        if "audioUrl" in sc and sc["audioUrl"]:
+            extra_urls += f'\n          audioUrl: "{sc["audioUrl"]}",'
+        if "lrcUrl" in sc and sc["lrcUrl"]:
+            extra_urls += f'\n          lrcUrl: "{sc["lrcUrl"]}",'
+
         js_scenarios.append(f"""        {{
           id: "{sc['id']}",
           title: "{escaped_title}",
           category: "{sc['category']}",
           level: "{sc['level']}",
           accent: "{sc['accent']}",
-          duration: {sc['duration']},
+          duration: {sc['duration']},{extra_urls}
           description:
             "{escaped_desc}",
-          audioUrl: "{sc['audioUrl']}",
-          lrcContent: `{escaped_lrc}`,
+          tags: {tags_json},
+          collection: "{sc.get('collection', sc['category'])}",
+          sentenceCount: {sc.get('sentenceCount', 0)},
         }}""")
 
-    scenarios_array_code = "const CURATED_SCENARIOS = [\n" + ",\n".join(js_scenarios) + ",\n      ];"
+    scenarios_array_code = (
+        "const SCENARIOS_MANIFEST = [\n"
+        + ",\n".join(js_scenarios)
+        + ",\n      ];\n      const CURATED_SCENARIOS = SCENARIOS_MANIFEST;"
+    )
 
-    pattern = r"const CURATED_SCENARIOS\s*=\s*\[[\s\S]*?\];"
+    pattern = r"const (?:SCENARIOS_MANIFEST|CURATED_SCENARIOS)\s*=\s*\[[\s\S]*?\];(?:[\s\n]*const CURATED_SCENARIOS\s*=\s*SCENARIOS_MANIFEST;)?"
     if not re.search(pattern, html_content):
-        print("❌ Could not find const CURATED_SCENARIOS array in index.html")
+        print("❌ Could not find const SCENARIOS_MANIFEST or CURATED_SCENARIOS array in index.html")
         return False
 
     updated_html = re.sub(pattern, scenarios_array_code, html_content, count=1)
@@ -417,7 +498,7 @@ def sync_scenarios_to_html(scenarios_data, html_path):
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(updated_html)
 
-    print(f"✨ Successfully synced {len(scenarios_data)} scenarios into {os.path.basename(html_path)}")
+    print(f"✨ Successfully synced {len(manifest_entries)} scenario manifests into {os.path.basename(html_path)}")
     return True
 
 async def main_async():
@@ -457,7 +538,7 @@ async def main_async():
             print(f"❌ Scenario '{args.scenario}' not found in {scenarios_dir}")
             sys.exit(1)
 
-    compiled_scenarios = []
+    manifest_entries = []
 
     for sc_id, sc_dir, md_path in scenario_folders:
         with open(md_path, "r", encoding="utf-8") as f:
@@ -467,28 +548,25 @@ async def main_async():
         if "id" not in meta:
             meta["id"] = sc_id
 
-        if args.sync_only:
-            # Read existing subtitles.lrc if available
-            lrc_path = os.path.join(sc_dir, "subtitles.lrc")
-            if os.path.exists(lrc_path):
-                with open(lrc_path, "r", encoding="utf-8") as f:
-                    lrc_content = f.read()
-            else:
-                lrc_content = ""
+        src_lrc = os.path.join(sc_dir, "subtitles.lrc")
+        src_mp3 = os.path.join(sc_dir, "audio.mp3")
+        dest_lrc = os.path.join(public_audio_dir, f"{sc_id}.lrc")
+        dest_mp3 = os.path.join(public_audio_dir, f"{sc_id}.mp3")
 
-            ext = "webm" if args.format == "opus" else "mp3"
-            compiled_scenarios.append({
-                "id": meta["id"],
-                "title": meta.get("title", sc_id),
-                "category": meta.get("category", "daily"),
-                "level": meta.get("level", "B1"),
-                "accent": meta.get("accent", "US"),
-                "duration": int(meta.get("duration", 60)),
-                "description": meta.get("description", ""),
-                "audioUrl": f"audio/{sc_id}.{ext}",
-                "lrcContent": lrc_content,
-                "cues": []
-            })
+        duration = 0
+        if args.sync_only:
+            if os.path.exists(src_lrc):
+                shutil.copyfile(src_lrc, dest_lrc)
+                with open(src_lrc, "r", encoding="utf-8") as lf:
+                    lrc_text = lf.read()
+                    len_match = re.search(r"\[length:(\d+):(\d+(?:\.\d+)?)\]", lrc_text)
+                    if len_match:
+                        duration = int(len_match.group(1)) * 60 + float(len_match.group(2))
+            if os.path.exists(src_mp3):
+                shutil.copyfile(src_mp3, dest_mp3)
+
+            entry = build_manifest_entry(meta, turns, duration=duration)
+            manifest_entries.append(entry)
         else:
             result = await render_scenario(
                 meta,
@@ -498,12 +576,16 @@ async def main_async():
                 audio_format=args.format,
                 dry_run=args.dry_run
             )
-            compiled_scenarios.append(result)
+            entry = build_manifest_entry(meta, turns, duration=result["duration"])
+            manifest_entries.append(entry)
+
+    manifest_json_path = os.path.join(base_shadowing_dir, "scenarios.json")
+    export_scenarios_manifest(manifest_entries, manifest_json_path)
 
     if not args.dry_run:
-        sync_scenarios_to_html(compiled_scenarios, html_path)
+        sync_scenarios_to_html(manifest_entries, html_path)
 
-    print(f"\n🎉 Finished processing {len(compiled_scenarios)} scenarios.")
+    print(f"\n🎉 Finished processing {len(manifest_entries)} scenarios.")
 
 def main():
     asyncio.run(main_async())

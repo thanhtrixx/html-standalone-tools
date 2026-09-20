@@ -4,6 +4,12 @@ title: Software Engineering Behavioral Interview
 category: workplace
 level: B2
 accent: US
+collection: workplace
+tags:
+  - interview
+  - career
+  - experience
+  - hiring
 description: Job interview discussing past technical challenges, handling cross-team conflicts, system scalability, and career growth.
 speakers:
   Interviewer: en-US-AvaMultilingualNeural

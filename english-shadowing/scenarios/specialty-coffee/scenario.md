@@ -4,6 +4,12 @@ title: Ordering at a Specialty Coffee Shop
 category: daily
 level: A2
 accent: US
+collection: daily-social
+tags:
+  - coffee
+  - ordering
+  - cafe
+  - daily-conversation
 description: Natural everyday dialogue ordering pour-over coffee, inquiring about roast profiles, and customizing milk alternatives.
 speakers:
   Barista: en-US-AvaMultilingualNeural

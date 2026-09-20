@@ -8,20 +8,20 @@ Verify the Markdown scenario authoring schema, precision acoustic stitching pipe
 
 ## 🧪 Seam Test Matrix
 
-### 1. Markdown Scenario Parser & Audio Sync Seams (`tests/english-shadowing-engine.test.js`)
+### 1. Manifest Compiler & Markdown Scenario Seams (`tests/english-shadowing-engine.test.js`)
 
-- `parseMarkdownScenario`: Validates YAML frontmatter extraction (`id`, `title`, `category`, `level`, `accent`, `speakers`) and dialogue/monologue line parsing (`**Speaker**: text \n > translation`).
+- `parseMarkdownScenario`: Validates YAML frontmatter extraction (`id`, `title`, `category`, `level`, `accent`, `tags`, `collection`, `speakers`) and dialogue/monologue line parsing (`**Speaker**: text \n > translation`).
 - `generateSyllableWeightedWords`: Validates syllable calculation, short function word compression, and punctuation pause distribution.
-- `calculateAudioSilenceFrames`: Validates exact synthetic MP3 frame generation matching configured silence gaps (500ms between turns, 300ms intra-speaker).
+- `compileScenariosManifest`: Validates manifest generation (`scenarios.json`), convention-over-configuration URL resolution, schema invariants, and synchronization into `index.html`.
 - `calculateKaraokeWordIndex`: Validates instantaneous resolution of active word token given `audio.currentTime`.
-- `parseEnhancedLrc`: Validates Enhanced LRC parsing with intra-line `<mm:ss.xx>` word tags, dual-language pairing, and cue start/end bounds.
-- `parseSrt`: Validates backward-compatible fallback parsing for custom user uploads.
+- `parseEnhancedLrc`: Validates Enhanced LRC parsing with intra-line `<mm:ss.xx>` word tags, dual-language pairing, and cue start/end bounds. (Legacy `parseSrt` permanently retired).
 
-### 2. Scenario Catalog & Enhanced LRC Standardization (`tests/english-shadowing-engine.test.js`)
+### 2. Scenario Manifest, On-Demand Streaming & Storage Seams (`tests/english-shadowing-storage.test.js`)
 
-- `CURATED_SCENARIOS` Integrity: Verifies all 6 curated scenarios exist, contain valid `lrcContent`, valid `audioUrl`, valid metadata, and zero legacy `srtContent` keys.
-- Cumulative Drift Invariant: Verifies that sum of turn durations + silence gaps equals total audio length within ±0.05s tolerance.
-- Absence of bundled `.srt` files in `english-shadowing/audio/`.
+- `SCENARIOS_MANIFEST` Schema Integrity: Verifies all scenarios contain valid metadata (id, title, category, level, accent, duration, tags, collection, sentenceCount) and lightweight payload size.
+- On-Demand Dynamic LRC Streaming: Verifies asynchronous fetching of `audio/<id>.lrc`, in-memory cue caching, and offline Service Worker caching.
+- Scenario Progress Store (`shadowing_scenario_progress_v1`): Verifies bookmarks (`bookmarkedIds`), scenario progress state transitions (`new` -> `in_progress` -> `completed` -> `mastered`), completed sentences set, and persistence.
+- Data Isolation: Verifies that clearing media cache leaves scenario progress, SRS flashcards, and practice streaks 100% intact.
 
 ### 3. Audio Engine, Playback Synchronization & Storage Seams (`tests/english-shadowing-storage.test.js`)
 

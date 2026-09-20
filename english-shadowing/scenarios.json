@@ -1,0 +1,74 @@
+[
+  {
+    "id": "academic-ai-future",
+    "title": "Academic Discussion on AI & Remote Work",
+    "category": "academic",
+    "level": "C1",
+    "accent": "US",
+    "duration": 152,
+    "description": "Nuanced academic discourse discussing asynchronous productivity, cognitive automation, digital nomadism, and human-machine synergy.",
+    "tags": ["ai", "future-of-work", "higher-education", "synthesis"],
+    "collection": "academic",
+    "sentenceCount": 16
+  },
+  {
+    "id": "airport-security",
+    "title": "Airport Check-in & Security Screen",
+    "category": "travel",
+    "level": "B1",
+    "accent": "UK",
+    "duration": 125,
+    "description": "Navigating terminal check-in, baggage drop allowances, customs security screening, and boarding gate directions in British English.",
+    "tags": ["airport", "security", "customs", "boarding", "flight"],
+    "collection": "travel",
+    "sentenceCount": 18
+  },
+  {
+    "id": "doctor-consultation",
+    "title": "General Practice Medical Consultation",
+    "category": "daily",
+    "level": "B1",
+    "accent": "AU",
+    "duration": 128,
+    "description": "Visiting a medical clinic to discuss seasonal allergies, persistent coughing, prescription dosage, and lifestyle advice in Australian English.",
+    "tags": ["health", "doctor", "symptoms", "medical"],
+    "collection": "daily-social",
+    "sentenceCount": 18
+  },
+  {
+    "id": "job-interview",
+    "title": "Software Engineering Behavioral Interview",
+    "category": "workplace",
+    "level": "B2",
+    "accent": "US",
+    "duration": 143,
+    "description": "Job interview discussing past technical challenges, handling cross-team conflicts, system scalability, and career growth.",
+    "tags": ["interview", "career", "experience", "hiring"],
+    "collection": "workplace",
+    "sentenceCount": 18
+  },
+  {
+    "id": "specialty-coffee",
+    "title": "Ordering at a Specialty Coffee Shop",
+    "category": "daily",
+    "level": "A2",
+    "accent": "US",
+    "duration": 93,
+    "description": "Natural everyday dialogue ordering pour-over coffee, inquiring about roast profiles, and customizing milk alternatives.",
+    "tags": ["coffee", "ordering", "cafe", "daily-conversation"],
+    "collection": "daily-social",
+    "sentenceCount": 17
+  },
+  {
+    "id": "tech-standup",
+    "title": "Tech Agile Standup & Sprint Planning",
+    "category": "workplace",
+    "level": "B2",
+    "accent": "US",
+    "duration": 122,
+    "description": "Engineering standup discussing blocker resolution, pull request reviews, database schema migration, and CI/CD pipelines.",
+    "tags": ["standup", "engineering", "sprint", "blockers"],
+    "collection": "workplace",
+    "sentenceCount": 18
+  }
+]

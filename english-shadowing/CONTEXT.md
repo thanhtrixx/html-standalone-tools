@@ -18,6 +18,7 @@ For architectural decision records, refer to:
 - [`docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md`](./docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md)
 - [`docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md`](./docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md)
 - [`docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md`](./docs/adr/0007-pwa-zero-stale-cache-lifecycle-and-on-demand-media-streaming.md)
+- [`docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md`](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md)
 
 ---
 
@@ -27,11 +28,12 @@ For architectural decision records, refer to:
 
 - **Shadowing**: A deliberate language learning technique where the learner listens to natural spoken audio and repeats (shadows) the speaker in real-time or sentence-by-sentence with minimal delay, mirroring pronunciation, cadence, connected speech, and intonation.
   _Avoid_: Dictation, transcription, lecturing.
-- **Scenario**: A curated or user-imported dialogue/monologue consisting of an authentic audio track (`audioUrl` or uploaded media), metadata (title, category, CEFR level, accent, duration), and synchronized bilingual subtitle cues (`.lrc`). Authored in token-efficient Markdown (`scenario.md` with frontmatter) inside `scenarios/<id>/`.
+- **Scenario**: A curated dialogue or monologue consisting of an authentic audio track (`audio/<id>.mp3`), metadata (title, category, CEFR level, accent, duration, tags, collection), and synchronized bilingual subtitle cues (`audio/<id>.lrc`). Authored in token-efficient Markdown (`scenario.md` with YAML frontmatter) inside `scenarios/<id>/`.
   _Avoid_: Lesson, course, track, playlist item.
 - **Scenario Deep Route**: Direct URL query link (`?scenario=<id>`) allowing instantaneous scenario loading and bookmarking with two-way browser history synchronization (`pushState`/`replaceState`/`popstate`).
+- **Convention-over-Configuration Media Routing**: Standardizes audio and subtitle paths to `audio/${id}.mp3` and `audio/${id}.lrc` without requiring explicit redundant URLs in the manifest.
 - **Precision Acoustic Stitching**: Neural voice audio generation engine injecting exact synthetic MP3 silence frame bytes (500ms between turns, 300ms intra-speaker) matching LRC pause offsets, eliminating cumulative audio/subtitle drift across 1–5 minute tracks.
-- **Enhanced LRC Single Source of Truth**: Standardized subtitle format containing millisecond line timecodes, bilingual translations, and intra-line word timestamp tags (`<mm:ss.xx>`), rendering active word-by-word visual highlight effects in sync with audio timecode. (Bundled `.srt` files deprecated).
+- **Enhanced LRC Single Source of Truth**: Standardized subtitle format containing millisecond line timecodes, bilingual translations, and intra-line word timestamp tags (`<mm:ss.xx>`), rendering active word-by-word visual highlight effects in sync with audio timecode. (Legacy `.srt` format completely retired).
 - **Karaoke Word State**:
   - **Active Word**: Currently articulated word token rendered with a glowing accent pill and micro-scale animation.
   - **Passed Word**: Articulated words in the current sentence rendered with high-contrast sharp white text.
@@ -98,6 +100,14 @@ For architectural decision records, refer to:
 - **On-Demand Runtime Media Caching**: Audio (`.mp3`) and subtitle (`.lrc`) files are dynamically stored in dedicated Cache Storage (`shadowing-media-v3`) upon playback, drastically shrinking initial PWA installation payload (< 100KB) while ensuring played scenarios are available offline.
 - **Silent Controllerchange Reload**: Upgrades to `sw.js` trigger `skipWaiting()` and auto-reload active tabs on `controllerchange` to deliver instant updates without manual cache clearing.
 - **Storage Isolation & Safe Maintenance**: User learning progress (SRS Leitner boxes, vocabulary notes, practice streaks, custom voice recordings in IndexedDB) is strictly isolated from HTTP caches. An in-app "Clear Media Cache" action in Insights allows learners to reclaim device audio storage safely.
+
+### 7. Manifest-Driven Scenario Architecture & Curated Lifecycle
+
+- **Embedded Scenario Manifest (`SCENARIOS_MANIFEST`)**: Compact array of lightweight scenario metadata objects (ID, Title, Category, Level, Accent, Duration, Description, Tags, Collection, Sentence Count) embedded in `index.html` (~250 bytes per scenario), guaranteeing sub-millisecond initial UI boot without full LRC text inlining.
+- **On-Demand Dynamic Subtitle Streaming**: The application fetches `audio/<id>.lrc` via `fetch()` upon scenario selection, caching parsed cues in-memory and dynamically via Service Worker Cache Storage (`shadowing-media-v3`) for offline practice.
+- **Scenario Progress Store (`shadowing_scenario_progress_v1`)**: Persistent localStorage registry tracking user bookmarks (`bookmarkedIds`) and per-scenario completion metrics (`new`, `in_progress`, `completed`, `mastered`, completed sentences set, practice counts, timestamps).
+- **Curated Collections & Thematic Tags**: Systematic curriculum grouping scenarios into structured series (`daily-social`, `workplace`, `travel`, `academic`) and searchable topic tags (`#coffee`, `#standup`, `#interview`, `#ai`).
+- **Retired Legacy Mechanisms**: Ephemeral custom user imports (`#importModal`, `handleCustomScenarioSubmit`) and legacy SRT fallback parsing (`parseSrt`) are permanently retired to maintain a lean, high-fidelity codebase.
 
 ---
 

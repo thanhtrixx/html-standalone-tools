@@ -4,6 +4,12 @@ title: Tech Agile Standup & Sprint Planning
 category: workplace
 level: B2
 accent: US
+collection: workplace
+tags:
+  - standup
+  - engineering
+  - sprint
+  - blockers
 description: Engineering standup discussing blocker resolution, pull request reviews, database schema migration, and CI/CD pipelines.
 speakers:
   Lead: en-US-AvaMultilingualNeural
