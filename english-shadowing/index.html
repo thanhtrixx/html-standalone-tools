@@ -3066,6 +3066,8 @@
         if (confirm(confirmMsg)) {
           if (typeof caches !== "undefined") {
             try {
+              await caches.delete("shadowing-media-v5");
+              await caches.delete("shadowing-shell-v5");
               await caches.delete("shadowing-media-v4");
               await caches.delete("shadowing-shell-v4");
               await caches.delete("shadowing-media-v3");
@@ -3087,10 +3089,10 @@
         if (typeof caches === "undefined") return true;
         try {
           const audioUrl = resolveScenarioAudioUrl(scenario);
-          const mediaCache = await caches.open("shadowing-media-v4");
+          const mediaCache = await caches.open("shadowing-media-v5");
           const cachedMedia = await mediaCache.match(audioUrl);
           if (cachedMedia) return true;
-          const shellCache = await caches.open("shadowing-shell-v4");
+          const shellCache = await caches.open("shadowing-shell-v5");
           const cachedShell = await shellCache.match(audioUrl);
           return !!cachedShell;
         } catch (e) {

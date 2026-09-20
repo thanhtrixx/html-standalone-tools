@@ -1,5 +1,5 @@
-const CACHE_NAME = "shadowing-shell-v4";
-const MEDIA_CACHE_NAME = "shadowing-media-v4";
+const CACHE_NAME = "shadowing-shell-v5";
+const MEDIA_CACHE_NAME = "shadowing-media-v5";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -130,40 +130,78 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // 3. Heavy audio tracks (.mp3): Cache-First on-demand
+  // 3. Heavy audio tracks (.mp3): Cache-First with full HTTP 206 Range support for audio seeking
   const isMedia =
     url.pathname.endsWith(".mp3") || url.pathname.includes("/audio/");
 
   if (isMedia) {
+    const rangeHeader = request.headers.get("range");
+
     event.respondWith(
-      caches.open(MEDIA_CACHE_NAME).then((mediaCache) => {
-        return mediaCache.match(request).then((cachedMedia) => {
-          if (cachedMedia) {
-            return cachedMedia;
-          }
-          return fetch(request)
-            .then((networkResponse) => {
-              if (
-                networkResponse &&
-                networkResponse.status === 200 &&
-                (networkResponse.type === "basic" ||
-                  networkResponse.type === "cors")
-              ) {
-                const responseToCache = networkResponse.clone();
-                mediaCache.put(request, responseToCache).catch(() => {});
-              }
-              return networkResponse;
-            })
-            .catch(() => {
-              return (
-                cachedMedia ||
-                new Response("Audio media unavailable offline", {
-                  status: 503,
-                  statusText: "Service Unavailable",
-                  headers: { "Content-Type": "text/plain" },
-                })
-              );
+      caches.open(MEDIA_CACHE_NAME).then(async (mediaCache) => {
+        let cachedMedia = await mediaCache.match(request, {
+          ignoreSearch: true,
+        });
+
+        // If not in cache, fetch the full audio without Range header to store in cache
+        if (!cachedMedia) {
+          try {
+            const fullRequest = new Request(request.url, {
+              method: "GET",
+              headers: new Headers(request.headers),
+              mode: request.mode === "navigate" ? "same-origin" : request.mode,
+              credentials: request.credentials,
             });
+            fullRequest.headers.delete("range");
+            const networkResponse = await fetch(fullRequest);
+            if (
+              networkResponse &&
+              networkResponse.status === 200 &&
+              (networkResponse.type === "basic" ||
+                networkResponse.type === "cors")
+            ) {
+              await mediaCache.put(request.url, networkResponse.clone());
+              cachedMedia = networkResponse;
+            } else {
+              cachedMedia = networkResponse;
+            }
+          } catch (e) {
+            // Fetch error
+          }
+        }
+
+        if (cachedMedia) {
+          // If the audio element issued a Range request (when seeking to any timestamp)
+          if (rangeHeader) {
+            const arrayBuffer = await cachedMedia.clone().arrayBuffer();
+            const bytesMatch = rangeHeader.match(/bytes=(\d+)-(\d+)?/);
+            if (bytesMatch) {
+              const start = parseInt(bytesMatch[1], 10);
+              const end = bytesMatch[2]
+                ? parseInt(bytesMatch[2], 10)
+                : arrayBuffer.byteLength - 1;
+              const slicedBuffer = arrayBuffer.slice(start, end + 1);
+
+              return new Response(slicedBuffer, {
+                status: 206,
+                statusText: "Partial Content",
+                headers: {
+                  "Content-Type":
+                    cachedMedia.headers.get("Content-Type") || "audio/mpeg",
+                  "Content-Range": `bytes ${start}-${end}/${arrayBuffer.byteLength}`,
+                  "Content-Length": String(slicedBuffer.byteLength),
+                  "Accept-Ranges": "bytes",
+                },
+              });
+            }
+          }
+          return cachedMedia;
+        }
+
+        return new Response("Audio media unavailable offline", {
+          status: 503,
+          statusText: "Service Unavailable",
+          headers: { "Content-Type": "text/plain" },
         });
       })
     );
