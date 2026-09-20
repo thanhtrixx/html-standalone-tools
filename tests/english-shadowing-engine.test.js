@@ -29,9 +29,53 @@ async function runTests() {
 
   const htmlContent = fs.readFileSync(htmlPath, "utf8");
 
-  // Create isolated VM sandbox with mock DOM and window
+  const createMockElement = () => ({
+    textContent: "",
+    innerHTML: "",
+    value: "",
+    src: "",
+    playbackRate: 1,
+    play: () => Promise.resolve(),
+    pause: () => {},
+    classList: {
+      add() {},
+      remove() {},
+      toggle() {},
+      contains() {
+        return false;
+      },
+    },
+    style: {},
+    appendChild() {},
+    removeChild() {},
+    remove() {},
+    setAttribute() {},
+    getAttribute() {
+      return null;
+    },
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    querySelectorAll: () => [],
+    querySelector: () => null,
+    contains: () => false,
+    scrollIntoView: () => {},
+    getContext: () => ({
+      clearRect() {},
+      fillRect() {},
+      beginPath() {},
+      arc() {},
+      stroke() {},
+      fill() {},
+      moveTo() {},
+      lineTo() {},
+    }),
+  });
+
   const sandbox = {
     console,
+    Map,
+    Set,
+    Promise,
     localStorage: {
       _data: {},
       getItem(k) {
@@ -46,14 +90,45 @@ async function runTests() {
     },
     document: {
       querySelectorAll: () => [],
-      getElementById: () => null,
-      documentElement: { classList: { add() {}, remove() {} } },
+      querySelector: () => null,
+      getElementById: () => createMockElement(),
+      createElement: () => createMockElement(),
+      documentElement: createMockElement(),
       addEventListener: () => {},
     },
+    setTimeout,
+    clearTimeout,
+    setInterval,
+    clearInterval,
+    requestAnimationFrame: (cb) => {
+      cb();
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
     window: {
       addEventListener: () => {},
       scrollTo: () => {},
       location: { search: "", pathname: "/app/" },
+      setTimeout,
+      clearTimeout,
+      setInterval,
+      clearInterval,
+      requestAnimationFrame: (cb) => {
+        cb();
+        return 1;
+      },
+      cancelAnimationFrame: () => {},
+    },
+    Audio: class {
+      constructor() {
+        this.src = "";
+        this.playbackRate = 1;
+      }
+      addEventListener() {}
+      play() {
+        return Promise.resolve();
+      }
+      pause() {}
     },
     URLSearchParams,
     URL,
@@ -73,11 +148,7 @@ async function runTests() {
     globalThis.resolveScenarioLrcUrl = typeof resolveScenarioLrcUrl !== 'undefined' ? resolveScenarioLrcUrl : function(){};
     globalThis.BUILTIN_VOCAB_DB = typeof BUILTIN_VOCAB_DB !== 'undefined' ? BUILTIN_VOCAB_DB : {};
     globalThis.sanitizeSrtLine = typeof sanitizeSrtLine !== 'undefined' ? sanitizeSrtLine : function(){};
-    globalThis.formatSecondsToSrtTime = typeof formatSecondsToSrtTime !== 'undefined' ? formatSecondsToSrtTime : function(){};
-    globalThis.generateSrtString = typeof generateSrtString !== 'undefined' ? generateSrtString : function(){};
-    globalThis.parseSrtTimecode = typeof parseSrtTimecode !== 'undefined' ? parseSrtTimecode : function(){};
     globalThis.formatSecondsToTime = typeof formatSecondsToTime !== 'undefined' ? formatSecondsToTime : function(){};
-    globalThis.parseSrt = typeof parseSrt !== 'undefined' ? parseSrt : function(){};
     globalThis.parseLrcTimecode = typeof parseLrcTimecode !== 'undefined' ? parseLrcTimecode : function(){};
     globalThis.formatSecondsToLrcTime = typeof formatSecondsToLrcTime !== 'undefined' ? formatSecondsToLrcTime : function(){};
     globalThis.parseEnhancedLrc = typeof parseEnhancedLrc !== 'undefined' ? parseEnhancedLrc : function(){};
@@ -88,16 +159,16 @@ async function runTests() {
     globalThis.calculateLoopEndBoundary = typeof calculateLoopEndBoundary !== 'undefined' ? calculateLoopEndBoundary : function(){};
     globalThis.calculateLoopStartBoundary = typeof calculateLoopStartBoundary !== 'undefined' ? calculateLoopStartBoundary : function(){};
     globalThis.SPEED_PRESETS = typeof SPEED_PRESETS !== 'undefined' ? SPEED_PRESETS : [];
+    globalThis.SCENARIO_CUES_CACHE = typeof SCENARIO_CUES_CACHE !== 'undefined' ? SCENARIO_CUES_CACHE : null;
+    globalThis.selectScenario = typeof selectScenario !== 'undefined' ? selectScenario : null;
+    globalThis.proceedSelectScenario = typeof proceedSelectScenario !== 'undefined' ? proceedSelectScenario : null;
+    globalThis.state = typeof state !== 'undefined' ? state : {};
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
   const {
-    parseSrtTimecode,
     formatSecondsToTime,
-    formatSecondsToSrtTime,
     sanitizeSrtLine,
-    generateSrtString,
-    parseSrt,
     parseLrcTimecode,
     formatSecondsToLrcTime,
     parseEnhancedLrc,
@@ -113,24 +184,44 @@ async function runTests() {
     resolveScenarioAudioUrl,
     resolveScenarioLrcUrl,
     BUILTIN_VOCAB_DB,
+    SCENARIO_CUES_CACHE,
+    selectScenario,
+    proceedSelectScenario,
   } = sandbox;
 
-  // 1. Timecode Parsing Tests
+  // 1. Legacy Retirement Verification (Issue #673)
   assert(
-    typeof parseSrtTimecode === "function",
-    "parseSrtTimecode function exists"
-  );
-  assert(parseSrtTimecode("00:00:00,000") === 0, "Parses 00:00:00,000 to 0s");
-  assert(
-    parseSrtTimecode("00:00:04,500") === 4.5,
-    "Parses 00:00:04,500 to 4.5s"
+    typeof sandbox.parseSrt === "undefined",
+    "Legacy parseSrt function is completely retired"
   );
   assert(
-    parseSrtTimecode("00:01:30.250") === 90.25,
-    "Parses dot timecode 00:01:30.250 to 90.25s"
+    typeof sandbox.parseSrtTimecode === "undefined",
+    "Legacy parseSrtTimecode function is completely retired"
   );
-  assert(parseSrtTimecode("01:00:00,000") === 3600, "Parses 1 hour to 3600s");
-  assert(parseSrtTimecode("") === 0, "Handles empty timecode string safely");
+  assert(
+    typeof sandbox.generateSrtString === "undefined",
+    "Legacy generateSrtString function is completely retired"
+  );
+  assert(
+    typeof sandbox.formatSecondsToSrtTime === "undefined",
+    "Legacy formatSecondsToSrtTime function is completely retired"
+  );
+  assert(
+    !htmlContent.includes('id="importModal"'),
+    "Legacy #importModal DOM element is completely removed"
+  );
+  assert(
+    !htmlContent.includes("openImportModal"),
+    "Legacy openImportModal function is completely removed"
+  );
+  assert(
+    !htmlContent.includes("closeImportModal"),
+    "Legacy closeImportModal function is completely removed"
+  );
+  assert(
+    !htmlContent.includes("handleCustomScenarioSubmit"),
+    "Legacy handleCustomScenarioSubmit function is completely removed"
+  );
 
   // 2. Format Seconds to Time String
   assert(
@@ -145,57 +236,10 @@ async function runTests() {
     "Formats >1hr to 61:05 (MM:SS format)"
   );
 
-  // 3. SRT Parsing
-  assert(typeof parseSrt === "function", "parseSrt function exists");
-
-  const sampleSrt = `1
-00:00:01,000 --> 00:00:04,000
-Hello world, welcome to shadowing!
-Xin chào thế giới, chào mừng bạn đến với luyện nói!
-
-2
-00:00:04,500 --> 00:00:08,200
-This is sentence number two.
-Đây là câu số hai.`;
-
-  const cues = parseSrt(sampleSrt);
+  // 3. In-Memory Cue Cache Structure
   assert(
-    cues.length === 2,
-    `Parsed exactly 2 subtitle cues (got ${cues.length})`
-  );
-  assert(
-    cues[0].start === 1.0 && cues[0].end === 4.0,
-    "Cue 1 start/end timestamps are accurate"
-  );
-  assert(
-    cues[0].en === "Hello world, welcome to shadowing!",
-    "Cue 1 English text matches"
-  );
-  assert(
-    cues[0].vi === "Xin chào thế giới, chào mừng bạn đến với luyện nói!",
-    "Cue 1 Vietnamese text matches"
-  );
-  assert(
-    Array.isArray(cues[0].words) && cues[0].words.length >= 4,
-    "Cue 1 tokenizes words into array"
-  );
-  assert(
-    cues[0].words.includes("shadowing"),
-    "Tokenized words include 'shadowing'"
-  );
-
-  assert(
-    cues[1].start === 4.5 && cues[1].end === 8.2,
-    "Cue 2 timestamps are accurate"
-  );
-
-  // 4. Resilience to single line & variable line breaks
-  const singleLineSrt = `1\n00:00:00.500 --> 00:00:02.500\nOnly English line here`;
-  const singleCues = parseSrt(singleLineSrt);
-  assert(singleCues.length === 1, "Parsed single-language subtitle cue");
-  assert(
-    singleCues[0].en === "Only English line here" && singleCues[0].vi === "",
-    "Single line correctly sets English and empty translation"
+    SCENARIO_CUES_CACHE instanceof Map,
+    "SCENARIO_CUES_CACHE is instantiated as an in-memory Map"
   );
 
   // 5. Convention-over-Configuration Media Routing Helper Seams
@@ -409,69 +453,90 @@ This is sentence number two.
   );
   assert(sanitizeSrtLine("") === "", "Handles empty input safely");
 
-  // 8. Format Seconds to SRT Timecode
+  // 8. On-Demand Dynamic LRC Streaming & Cache Verification (Issue #673)
+  const sampleLrcText = `[00:00.00]Hello world, welcome to on-demand shadowing!
+[00:00.00]>Xin chào thế giới, chào mừng bạn đến với luyện nói theo yêu cầu!
+[00:04.50]This is fetched dynamically on demand.
+[00:04.50]>Nội dung này được tải động theo yêu cầu.`;
+
+  let fetchCallCount = 0;
+  let lastFetchedUrl = "";
+  sandbox.fetch = async (url) => {
+    fetchCallCount++;
+    lastFetchedUrl = url;
+    if (url.includes("not-found")) {
+      return { ok: false, status: 404, text: async () => "Not Found" };
+    }
+    return {
+      ok: true,
+      status: 200,
+      text: async () => sampleLrcText,
+    };
+  };
+
+  const testScenario1 = {
+    id: "dynamic-stream-test",
+    title: "Dynamic Stream Test",
+    category: "workplace",
+    level: "B2",
+    accent: "US",
+    duration: 10,
+  };
+
+  // Ensure cache is initially empty for this scenario
+  sandbox.SCENARIO_CUES_CACHE.delete(testScenario1.id);
   assert(
-    typeof formatSecondsToSrtTime === "function",
-    "formatSecondsToSrtTime function exists"
-  );
-  assert(
-    formatSecondsToSrtTime(0) === "00:00:00,000",
-    "Formats 0s to 00:00:00,000"
-  );
-  assert(
-    formatSecondsToSrtTime(4.5) === "00:00:04,500",
-    "Formats 4.5s to 00:00:04,500"
-  );
-  assert(
-    formatSecondsToSrtTime(65.123) === "00:01:05,123",
-    "Formats 65.123s to 00:01:05,123"
-  );
-  assert(
-    formatSecondsToSrtTime(3665.045) === "01:01:05,045",
-    "Formats 3665.045s to 01:01:05,045"
-  );
-  assert(
-    formatSecondsToSrtTime(-10) === "00:00:00,000",
-    "Handles negative input gracefully"
+    !sandbox.SCENARIO_CUES_CACHE.has(testScenario1.id),
+    "SCENARIO_CUES_CACHE initially does not contain dynamic scenario"
   );
 
-  // 9. Generate SRT String from Cues
+  // Call proceedSelectScenario on cache miss
+  await sandbox.proceedSelectScenario(testScenario1, false, false);
+
   assert(
-    typeof generateSrtString === "function",
-    "generateSrtString function exists"
-  );
-  const testCues = [
-    { start: 0, end: 3.5, en: "First sentence", vi: "Câu đầu tiên" },
-    { start: 4.0, end: 7.2, en: "Second sentence", vi: "Câu thứ hai" },
-  ];
-  const generatedSrt = generateSrtString(testCues);
-  assert(
-    generatedSrt.includes(
-      "1\n00:00:00,000 --> 00:00:03,500\nFirst sentence\nCâu đầu tiên"
-    ),
-    "Generates valid Cue 1 block"
+    fetchCallCount === 1,
+    `On-demand loading triggers 1 network fetch on cache miss (got ${fetchCallCount})`
   );
   assert(
-    generatedSrt.includes(
-      "2\n00:00:04,000 --> 00:00:07,200\nSecond sentence\nCâu thứ hai"
-    ),
-    "Generates valid Cue 2 block"
+    lastFetchedUrl === "audio/dynamic-stream-test.lrc",
+    `Fetch requested canonical LRC URL: ${lastFetchedUrl}`
+  );
+  assert(
+    sandbox.SCENARIO_CUES_CACHE.has(testScenario1.id),
+    "Parsed cues are cached in SCENARIO_CUES_CACHE"
+  );
+  const cachedCues = sandbox.SCENARIO_CUES_CACHE.get(testScenario1.id);
+  assert(
+    Array.isArray(cachedCues) && cachedCues.length === 2,
+    `Cached cues contains 2 parsed subtitle cues (got ${cachedCues?.length})`
+  );
+  assert(
+    sandbox.state.activeCues === cachedCues,
+    "state.activeCues is populated with cached cues"
   );
 
-  // Roundtrip parse and generate verification
-  const roundtripParsed = parseSrt(generatedSrt);
-  assert(roundtripParsed.length === 2, "Roundtrip parsing parses both cues");
+  // Call proceedSelectScenario again (Cache Hit)
+  await sandbox.proceedSelectScenario(testScenario1, false, false);
   assert(
-    roundtripParsed[0].en === "First sentence",
-    "Roundtrip preserves English text"
+    fetchCallCount === 1,
+    "Second load uses memory cache without triggering network fetch"
   );
+
+  // 9. Graceful Error Handling on 404 / Network Fetch Failure
+  const failingScenario = {
+    id: "not-found-scenario",
+    title: "Failing Scenario",
+    duration: 5,
+  };
+  let errorCaught = false;
+  try {
+    await sandbox.proceedSelectScenario(failingScenario, false, false);
+  } catch (err) {
+    errorCaught = true;
+  }
   assert(
-    roundtripParsed[0].vi === "Câu đầu tiên",
-    "Roundtrip preserves Vietnamese text"
-  );
-  assert(
-    roundtripParsed[1].start === 4.0,
-    "Roundtrip preserves start timestamp"
+    errorCaught === false,
+    "proceedSelectScenario handles 404/network error gracefully without throwing"
   );
 
   // 10. LRC Timecode Parsing
