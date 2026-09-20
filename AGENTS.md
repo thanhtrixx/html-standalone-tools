@@ -10,8 +10,8 @@ Every agent MUST classify changes using `git status` before executing ANY test c
 
 | Tier                            | File Scope                                                                 | Permitted Local Verification                            | Strictly Prohibited Actions                                                           | Flow                                                     |
 | :------------------------------ | :------------------------------------------------------------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------ | :------------------------------------------------------- |
-| **Tier 0 — Zero Ceremony**      | All files match `*.md`, `docs/**`, `AGENTS.md`, `.agents/**`               | `bun run format:check` (or `npm run format:check`)      | ❌ **STRICTLY PROHIBITED**: Running `bun run verify`, unit test suites, or E2E tests. | Format $\to$ Branch $\to$ Commit $\to$ PR $\to$ CI Gate. |
-| **Tier 1 — Scoped Lightweight** | Changes isolated to single `<tool>/`                                       | `bun run test:<tool>` only (e.g. `bun run test:habit`)  | ❌ **PROHIBITED**: Running full `bun run verify` in inner loops.                      | Scoped Tests $\to$ PR $\to$ CI Gate.                     |
+| **Tier 0 — Zero Ceremony**      | All files match `*.md`, `docs/**`, `AGENTS.md`, `.agents/**`               | `bun run format:quiet` (zero-output on success)         | ❌ **STRICTLY PROHIBITED**: Running `bun run verify`, unit test suites, or E2E tests. | Format $\to$ Branch $\to$ Commit $\to$ PR $\to$ CI Gate. |
+| **Tier 1 — Scoped Lightweight** | Changes isolated to single `<tool>/`                                       | `bun run test:<tool> -- --quiet` only                   | ❌ **PROHIBITED**: Running full `bun run verify` in inner loops.                      | `bun run slice:ship` (automated gate) $\to$ CI Gate.     |
 | **Tier 2 — Full Ceremony**      | Cross-cutting features, `scripts/`, CI workflows, final production release | Scoped inner loop + `bun run verify` at PR/release gate | ❌ **PROHIBITED**: Skipping dual review or AC matrix.                                 | Full WoW ceremony.                                       |
 
 ---
@@ -60,7 +60,9 @@ Mechanically audit Acceptance Criteria checkboxes and sign-off on release issues
 
 ### Inner-Loop Verification & Token Economics
 
-Sub-second, tool-scoped inner loop verification, grep-first file navigation, and scoped format checks. Strictly prohibits running full `bun run verify` during active code edits. Prefer `bun run test:<tool>` for sub-second feedback. See `.agents/skills/inner-loop-verification/SKILL.md`.
+Sub-second, tool-scoped inner loop verification, grep-first file navigation, and scoped format checks. Strictly prohibits running full `bun run verify` during active code edits. Prefer `bun run test:<tool> -- --quiet` for sub-second feedback. See `.agents/skills/inner-loop-verification/SKILL.md`.
+
+For the **4 token hotspot elimination rules** (`format:quiet`, test noise suppression, `slice-inspect`, `slice-ship` delivery gate), see `.agents/skills/token-economics/SKILL.md`.
 
 ### Token-Efficient E2E Testing
 

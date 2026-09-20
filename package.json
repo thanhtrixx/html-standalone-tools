@@ -69,8 +69,11 @@
     "test:e2e-summary": "./scripts/run.sh tests/e2e-summary.test.js",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "format:quiet": "node scripts/format-quiet.js",
     "check:docs": "prettier --check .",
     "lint:check": "prettier --check .",
+    "slice:inspect": "node scripts/slice-inspect.js",
+    "slice:ship": "node scripts/slice-ship.js",
     "pack:release": "./scripts/run.sh scripts/pack-release.js"
   },
   "repository": {

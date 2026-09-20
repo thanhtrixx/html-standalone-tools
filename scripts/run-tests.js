@@ -272,14 +272,21 @@ function runSuite(suite) {
   };
 }
 
-function runSuiteAsync(suite) {
+function runSuiteAsync(suite, opts = {}) {
   return new Promise((resolve) => {
     const filePath = path.join(ROOT_DIR, suite.file);
     const startTime = Date.now();
 
+    const childEnv = {
+      ...process.env,
+      CI: process.env.CI || "false",
+      // Pass quiet mode to child so test files can suppress their own warns
+      ...(opts.quiet ? { AGENT_QUIET: "1" } : {}),
+    };
+
     const child = spawn(process.execPath, [filePath], {
       cwd: ROOT_DIR,
-      env: { ...process.env, CI: process.env.CI || "false" },
+      env: childEnv,
     });
 
     let stdout = "";
@@ -317,7 +324,41 @@ function runSuiteAsync(suite) {
       );
 
       if (!success && stderr.trim()) {
-        console.error(stderr.trim());
+        let displayStderr = stderr.trim();
+        if (opts.quiet) {
+          // Strip console.warn noise lines (IndexedDB not available, etc.)
+          const stderrLines = displayStderr.split("\n");
+          const errorLines = stderrLines.filter((line) => {
+            const t = line.trim();
+            if (!t) return false;
+            // Drop lines that look like warn-level noise
+            if (t.toLowerCase().startsWith("indexeddb not available"))
+              return false;
+            if (t.startsWith("(node:") && t.includes("Warning:")) return false;
+            if (t.includes("console.warn")) return false;
+            return true;
+          });
+          // Limit stack traces: keep at most 3 "  at " lines per error block
+          const compacted = [];
+          let atLineCount = 0;
+          for (const line of errorLines) {
+            if (line.trim().startsWith("at ")) {
+              atLineCount++;
+              if (atLineCount <= 3) compacted.push(line);
+              else if (atLineCount === 4)
+                compacted.push(
+                  "    ... (stack truncated — grep test-reports/results.json for full trace)"
+                );
+            } else {
+              atLineCount = 0;
+              compacted.push(line);
+            }
+          }
+          displayStderr = compacted.join("\n");
+        }
+        if (displayStderr.trim()) {
+          console.error(displayStderr);
+        }
       }
 
       resolve({
@@ -693,12 +734,16 @@ function appendGithubStepSummary(reportData) {
 async function main() {
   const args = process.argv.slice(2);
   let toolFilter = null;
+  // --quiet: suppress console.warn lines and limit stack traces in child output
+  let quietMode = process.env.AGENT_QUIET === "1" || args.includes("--quiet");
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--tool" && args[i + 1]) {
       toolFilter = args[i + 1].toLowerCase();
       i++;
     } else if (args[i].startsWith("--tool=")) {
       toolFilter = args[i].split("=")[1].toLowerCase();
+    } else if (args[i] === "--quiet") {
+      quietMode = true;
     }
   }
 
@@ -773,7 +818,7 @@ async function main() {
     while (currentIndex < suitesToRun.length) {
       const idx = currentIndex++;
       const suite = suitesToRun[idx];
-      suitesResults[idx] = await runSuiteAsync(suite);
+      suitesResults[idx] = await runSuiteAsync(suite, { quiet: quietMode });
     }
   }
 

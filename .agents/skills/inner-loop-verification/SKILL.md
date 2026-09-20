@@ -9,6 +9,8 @@ This skill operationalizes the **Token Economics & Subagent Strategy** defined i
 
 It guides autonomous agents and human engineers on conducting ultra-fast, high-throughput inner development loops while eliminating context-window bloat and token waste.
 
+> 📎 **Token hotspot rules** (format stdout, test noise, monolithic file, multi-turn ceremony) and the `format:quiet` / `slice:inspect` / `slice:ship` scripts are documented in the **[token-economics skill](../token-economics/SKILL.md)**. Read it before any inner-loop work on this repo.
+
 ---
 
 ## ⚡ Runtime Preference: Bun for Speed
