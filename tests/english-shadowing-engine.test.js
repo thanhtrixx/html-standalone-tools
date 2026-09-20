@@ -150,17 +150,30 @@ async function runTests() {
 
   vm.createContext(sandbox);
 
-  // Extract inline scripts
-  const scriptMatches = [
-    ...htmlContent.matchAll(/<script(?![^>]*src=)>([\s\S]*?)<\/script>/gi),
-  ];
-  const combinedScripts = scriptMatches.map((m) => m[1]).join("\n");
+  // Extract inline scripts with fast index slicing
+  const scriptBlocks = [];
+  let scriptPos = 0;
+  while (true) {
+    const startTag = htmlContent.indexOf("<script", scriptPos);
+    if (startTag === -1) break;
+    const endTag = htmlContent.indexOf(">", startTag);
+    if (endTag === -1) break;
+    const tagHeader = htmlContent.slice(startTag, endTag);
+    const closeTag = htmlContent.indexOf("</script>", endTag);
+    if (closeTag === -1) break;
+    if (!tagHeader.includes("src=")) {
+      scriptBlocks.push(htmlContent.slice(endTag + 1, closeTag));
+    }
+    scriptPos = closeTag + 9;
+  }
+  const combinedScripts = scriptBlocks.join("\n");
   const exportBridge = `
     globalThis.SCENARIOS_MANIFEST = typeof SCENARIOS_MANIFEST !== 'undefined' ? SCENARIOS_MANIFEST : [];
     globalThis.CURATED_SCENARIOS = typeof CURATED_SCENARIOS !== 'undefined' ? CURATED_SCENARIOS : [];
     globalThis.resolveScenarioAudioUrl = typeof resolveScenarioAudioUrl !== 'undefined' ? resolveScenarioAudioUrl : function(){};
     globalThis.resolveScenarioLrcUrl = typeof resolveScenarioLrcUrl !== 'undefined' ? resolveScenarioLrcUrl : function(){};
     globalThis.BUILTIN_VOCAB_DB = typeof BUILTIN_VOCAB_DB !== 'undefined' ? BUILTIN_VOCAB_DB : {};
+    globalThis.lookupDictionary = typeof lookupDictionary !== 'undefined' ? lookupDictionary : function(){};
     globalThis.sanitizeSrtLine = typeof sanitizeSrtLine !== 'undefined' ? sanitizeSrtLine : function(){};
     globalThis.formatSecondsToTime = typeof formatSecondsToTime !== 'undefined' ? formatSecondsToTime : function(){};
     globalThis.parseLrcTimecode = typeof parseLrcTimecode !== 'undefined' ? parseLrcTimecode : function(){};
@@ -224,6 +237,7 @@ async function runTests() {
     resolveScenarioAudioUrl,
     resolveScenarioLrcUrl,
     BUILTIN_VOCAB_DB,
+    lookupDictionary,
     SCENARIO_CUES_CACHE,
     selectScenario,
     proceedSelectScenario,
@@ -1150,6 +1164,95 @@ async function runTests() {
   assert(
     nullPause === 2.0,
     `Null cue fallback returns safe 2.0s floor (got ${nullPause}s)`
+  );
+
+  // 16. Offline IPA/Vietnamese Dictionary & Lemmatizer (Issue #691)
+  console.log(
+    "\n--- Testing Offline IPA/Vietnamese Dictionary & Lemmatizer ---"
+  );
+  const vocabCount = Object.keys(BUILTIN_VOCAB_DB).length;
+  assert(
+    vocabCount >= 2900,
+    `BUILTIN_VOCAB_DB contains >= 2,900 curated entries (got ${vocabCount})`
+  );
+
+  // 16.1 Exact scenario domain vocabulary lookup
+  const sampleDomainWords = [
+    { word: "latte", expectedIpa: "/ˈlɑː.teɪ/", expectedPos: "noun" },
+    { word: "espresso", expectedIpa: "/eˈspres.oʊ/", expectedPos: "noun" },
+    { word: "croissants", expectedIpa: "/kwɑːˈsɑ̃ːz/", expectedPos: "noun" },
+    {
+      word: "authentication",
+      expectedIpa: "/ɔːˌθen.tɪˈkeɪ.ʃən/",
+      expectedPos: "noun",
+    },
+    {
+      word: "asynchronous",
+      expectedIpa: "/eɪˈsɪŋ.krə.nəs/",
+      expectedPos: "adj",
+    },
+    { word: "mitigates", expectedIpa: "/ˈmɪt.ɪ.ɡeɪts/", expectedPos: "verb" },
+    {
+      word: "serendipitous",
+      expectedIpa: "/ˌser.ənˈdɪp.ə.təs/",
+      expectedPos: "adj",
+    },
+    { word: "synergy", expectedIpa: "/ˈsɪn.ɚ.dʒi/", expectedPos: "noun" },
+    {
+      word: "stethoscope",
+      expectedIpa: "/ˈsteθ.ə.skoʊp/",
+      expectedPos: "noun",
+    },
+    { word: "rhinitis", expectedIpa: "/raɪˈnaɪ.t̬ɪs/", expectedPos: "noun" },
+  ];
+
+  for (const { word, expectedIpa, expectedPos } of sampleDomainWords) {
+    const res = lookupDictionary(word);
+    assert(
+      res && res.ipa === expectedIpa && res.pos === expectedPos,
+      `Exact lookup for '${word}' returned ${res?.ipa} (${res?.pos})`
+    );
+  }
+
+  // 16.2 Lemmatizer tests for contractions, plurals, past tense, gerunds, and adverbs
+  const lemmaCases = [
+    { word: "it's", base: "it" },
+    { word: "don't", base: "do" },
+    { word: "we're", base: "we" },
+    { word: "let's", base: "let" },
+    { word: "running", base: "run" },
+    { word: "making", base: "make" },
+    { word: "features", base: "feature" },
+    { word: "companies", base: "company" },
+    { word: "easily", base: "easy" },
+  ];
+
+  for (const { word, base } of lemmaCases) {
+    const res = lookupDictionary(word);
+    assert(
+      res && res.ipa && res.vi && !res.vi.startsWith("Từ vựng tiếng Anh:"),
+      `Lemmatized '${word}' correctly resolved via dictionary root for '${base}'`
+    );
+  }
+
+  // 16.3 Fallback for completely novel / unknown words
+  const unknownRes = lookupDictionary("supercalifragilistic123");
+  assert(
+    unknownRes &&
+      unknownRes.ipa === "/supercalifragilistic123/" &&
+      unknownRes.vi === "Từ vựng tiếng Anh: supercalifragilistic123" &&
+      unknownRes.pos === "word",
+    "Novel word returns safe structured fallback without throwing"
+  );
+
+  // 16.4 Null / empty input handling
+  assert(
+    lookupDictionary(null) === null,
+    "lookupDictionary(null) safely returns null"
+  );
+  assert(
+    lookupDictionary("") === null,
+    "lookupDictionary('') safely returns null"
   );
 
   console.log(`\n==================================================`);

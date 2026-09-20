@@ -1,5 +1,58 @@
 # English Shadowing Player — Backlog & Roadmap
 
+## 🎯 Milestone 8: English Shadowing UX & Pedagogical Maturity Overhaul (Epic #687)
+
+### Epic: Pedagogical Maturity, Echoic Shadowing Mode, Real Waveform Analysis & Offline 3,000-Word Dictionary
+
+- **Status:** ✅ Milestone Completed & Verified ([ADR-0009](./docs/adr/0009-voice-recording-echoic-shadowing-and-indexeddb-vault.md))
+
+---
+
+### Vertical Slices Breakdown
+
+#### Slice 1: Tri-Modal Engine Controls, Guided Mode Tooltips & Keyboard-Centric Workflow (#688)
+
+- **Title**: `feat(shadowing): tri-modal engine controls, guided mode tooltips, and keyboard workflow`
+- **Scope**:
+  - [x] Implement Tri-Modal Engine switcher (`continuous`, `loop`, `echoic`) in `#player-container` with distinct badge indicators and tooltips.
+  - [x] Wire up dedicated hotkeys (`Space` for play/pause, `R` for replay sentence, `←` / `→` for sentence navigation, `M` for mic recording, `L` for loop toggle, `E` for echoic toggle, `1`–`5` for SRS box grading).
+  - [x] Add 3-step beginner onboarding modal / visual banner ("1. Listen", "2. Shadow", "3. Master") with CEFR A2 on-ramp.
+  - [x] Clean up developer timing buttons from primary stage to reduce beginner cognitive overload.
+  - [x] Add automated unit and UI tests for tri-modal switching and hotkey bindings.
+
+#### Slice 2: Web Audio Real Amplitude Envelopes, Waveform Rendering & Mic Gate Resiliency (#689)
+
+- **Title**: `feat(shadowing): real Web Audio amplitude envelopes, dual waveform canvas, and mic gate resiliency`
+- **Scope**:
+  - [x] Replace mock Math.sin waveform rendering with true Web Audio API `AudioContext` and `AnalyserNode` amplitude envelopes (30 bins).
+  - [x] Render dual visualizer canvas (`#dualWaveformCanvas`) comparing Emerald Green (Native Reference) vs Cyan (Learner Voice).
+  - [x] Add resilient mic permission handling with non-blocking toast notifications and visual status indicators.
+  - [x] Enable `preservesPitch` on `audio` element across all playback speeds (`0.5x`–`1.5x`) on WebKit, Gecko, and Blink.
+  - [x] Add automated unit and UI tests for Web Audio envelope extraction and permission state handling.
+
+#### Slice 3: Hands-Free Echoic Shadowing Mode, Dynamic Pause Scaling & WebKit Mobile Layout Height (#690)
+
+- **Title**: `feat(shadowing): hands-free echoic shadowing mode, dynamic pause scaling, and mobile height fix`
+- **Scope**:
+  - [x] Implement automated Echoic turn-taking with dynamic pause scaling:
+    $$T_{\text{pause}} = \max\left(2.0\text{s}, \, \text{Cue Duration} \times 1.25\right)$$
+  - [x] Build visual SVG countdown ring (`#echoicCountdownRing`) around the recording dock.
+  - [x] Auto-arm microphone on pause, capture learner voice, persist take to IndexedDB vault, and auto-advance to next cue.
+  - [x] Optimize mobile viewport layout for iPhone WebKit (`#player-view`, `#subtitleStage`, `#waveformComparisonBox`, `#player-container`) allowing pinned transport dock within viewport.
+  - [x] Add multi-device E2E tests verifying echoic turn-taking and responsive layout across desktop, iPhone, iPad, and Android.
+
+#### Slice 4: Offline 3,000-Word Essential IPA/Vietnamese Dictionary & Morphological Lemmatizer (#691)
+
+- **Title**: `feat(shadowing): offline 3,000-word IPA/VI dictionary and morphological lemmatizer`
+- **Scope**:
+  - [x] Compile curated 2,942-entry offline dictionary (`BUILTIN_VOCAB_DB` and `dictionary.json`) covering 100% of scenario vocabulary and essential CEFR A1–C1 words with IPA, part-of-speech, and Vietnamese definitions.
+  - [x] Implement smart morphological lemmatizer (`lookupDictionary`) resolving contractions (`it's`, `let's`, `don't`), plurals (`-s`, `-es`, `-ies`), past tense (`-ed`, `-d`, `-ied`), gerunds (`-ing`), and adverbs (`-ly`, `-ily`).
+  - [x] Update `#wordPopover`, `setWordStatus()`, and CSV export to use rich offline dictionary lookups.
+  - [x] Update Service Worker `sw.js` to cache `dictionary.json` in PWA shell cache for 100% offline access.
+  - [x] Add automated unit tests verifying dictionary coverage, exact domain lookups, and lemmatizer edge cases.
+
+---
+
 ## 🎯 Milestone 7: Manifest-Driven Scenario Architecture, On-Demand LRC Streaming & Curated Content Lifecycle
 
 ### Epic: Scalable Scenario Management, On-Demand Subtitle Streaming & Progress Tracking
