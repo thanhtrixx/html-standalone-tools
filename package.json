@@ -50,6 +50,8 @@
     "test:shadowing:storage": "./scripts/run.sh tests/english-shadowing-storage.test.js",
     "test:shadowing:i18n": "./scripts/run.sh tests/english-shadowing-i18n.test.js",
     "test:shadowing:ui": "./scripts/run.sh tests/english-shadowing-ui.test.js",
+    "audio:shadowing": "python3 scripts/generate-scenario-audio.py --all",
+    "audio:shadowing:sync": "python3 scripts/generate-scenario-audio.py --sync-only",
     "test:helpers": "./scripts/run.sh tests/helpers.test.js",
     "test:ui": "./scripts/run.sh tests/ui-ux.test.js",
     "test:e2e": "./scripts/run.sh scripts/e2e-summary.js",

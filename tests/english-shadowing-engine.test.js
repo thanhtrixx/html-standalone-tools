@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
+const { execSync } = require("child_process");
 
 async function runTests() {
   console.log("🧪 Running English Shadowing Engine & SRT Parser Tests...\n");
@@ -580,6 +581,126 @@ This is sentence number two.
     calculateLoopEndBoundary(tightCues, 0, 10.0) === 5.08,
     "Clamps lead-out padding to exact next cue start (5.08s) when gap < 150ms"
   );
+
+  // =========================================================================
+  // 13. Python Markdown Scenario Parser & Audio Generator Tests
+  // =========================================================================
+  const scriptPath = path.join(
+    __dirname,
+    "..",
+    "scripts",
+    "generate-scenario-audio.py"
+  );
+  assert(
+    fs.existsSync(scriptPath),
+    "scripts/generate-scenario-audio.py exists"
+  );
+
+  const pyTestCode = `
+import sys, json, importlib.util
+spec = importlib.util.spec_from_file_location("gen", r"${scriptPath}")
+gen = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(gen)
+
+# Test Dialogue Parsing
+sample_dialogue_md = """---
+id: coffee-test
+title: Coffee Test Dialogue
+category: daily
+level: A2
+accent: US
+description: Test dialogue ordering coffee.
+speakers:
+  Barista: en-US-AvaMultilingualNeural
+  Customer: en-US-AndrewMultilingualNeural
+---
+
+**Barista**: Good morning! What can I get started for you today?
+> Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?
+
+**Customer**: Hi there! I would like a medium oat milk latte with an extra shot of espresso, please.
+> Xin chào! Cho tôi một ly latte sữa yến mạch cỡ vừa thêm một shot espresso nhé.
+"""
+
+meta_d, turns_d = gen.parse_markdown_scenario(sample_dialogue_md)
+assert meta_d["id"] == "coffee-test"
+assert meta_d["level"] == "A2"
+assert meta_d["speakers"]["Barista"] == "en-US-AvaMultilingualNeural"
+assert len(turns_d) == 2
+assert turns_d[0]["speaker"] == "Barista"
+assert turns_d[0]["voice"] == "en-US-AvaMultilingualNeural"
+assert turns_d[0]["en"] == "Good morning! What can I get started for you today?"
+assert turns_d[0]["vi"] == "Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?"
+assert turns_d[1]["speaker"] == "Customer"
+assert turns_d[1]["voice"] == "en-US-AndrewMultilingualNeural"
+
+# Test Monologue Parsing
+sample_mono_md = """---
+id: mono-test
+title: Academic Monologue
+category: academic
+level: C1
+speakers:
+  Speaker: en-US-AndrewMultilingualNeural
+---
+
+The shift toward distributed remote work has fundamentally transformed organizational dynamics.
+> Sự chuyển dịch sang làm việc từ xa phân tán đã thay đổi căn bản động lực vận hành.
+
+Indeed, asynchronous communication fosters deeper uninterrupted focus.
+> Thật vậy, giao tiếp bất đồng bộ thúc đẩy sự tập trung sâu.
+"""
+
+meta_m, turns_m = gen.parse_markdown_scenario(sample_mono_md)
+assert meta_m["id"] == "mono-test"
+assert len(turns_m) == 2
+assert turns_m[0]["speaker"] == "Speaker"
+assert turns_m[0]["voice"] == "en-US-AndrewMultilingualNeural"
+
+# Test Syllable Counting
+assert gen.count_syllables("cat") == 1
+assert gen.count_syllables("game") == 1
+assert gen.count_syllables("table") == 2
+assert gen.count_syllables("espresso") == 3
+assert gen.count_syllables("communication") == 5
+
+# Test Word Timing Distribution & Zero Cumulative Drift
+words = gen.compute_word_timings("Hi there! I would like coffee, please.", 10.0, 3.5)
+assert len(words) == 7
+assert words[0]["w"] == "Hi"
+assert words[0]["start"] == 10.0
+assert words[-1]["w"] == "please."
+assert words[-1]["end"] == 13.5
+
+# Test LRC Timestamp Formatting
+assert gen.format_lrc_timestamp(0.0) == "00:00.00"
+assert gen.format_lrc_timestamp(65.4) == "01:05.40"
+assert gen.format_lrc_timestamp(125.89) == "02:05.89"
+
+print(json.dumps({"success": True, "turns_dialogue": len(turns_d), "turns_monologue": len(turns_m)}))
+`;
+
+  try {
+    const pyOutput = execSync("python3 -", {
+      input: pyTestCode,
+      encoding: "utf-8",
+    });
+    const parsedPyResult = JSON.parse(pyOutput);
+    assert(
+      parsedPyResult.success === true,
+      "Python scenario parser & syllable engine executes without error"
+    );
+    assert(
+      parsedPyResult.turns_dialogue === 2,
+      "Python parser successfully extracts 2 dialogue turns with speaker mappings"
+    );
+    assert(
+      parsedPyResult.turns_monologue === 2,
+      "Python parser successfully extracts 2 monologue turns with fallback speaker"
+    );
+  } catch (err) {
+    assert(false, `Python engine tests threw an error: ${err.message}`);
+  }
 
   console.log(`\n==================================================`);
   console.log(

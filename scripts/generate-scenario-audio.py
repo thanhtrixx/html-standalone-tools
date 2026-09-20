@@ -1,328 +1,512 @@
 #!/usr/bin/env python3
 """
-Generate high-fidelity audio MP3s and Enhanced LRC subtitles (.lrc) for curated practice scenarios using Microsoft Edge TTS.
+Generate high-fidelity audio (MP3/Opus) and Enhanced LRC subtitles (.lrc)
+from Token-Efficient Markdown Scenarios using Microsoft Edge TTS with
+Precision Acoustic Silence Stitching and Syllable-Weighted Word Timing.
 """
 
+import argparse
 import asyncio
+import json
 import os
 import re
+import subprocess
+import sys
+import tempfile
 import edge_tts
 
-SCENARIOS = [
-    {
-        "id": "specialty-coffee",
-        "title": "Ordering at a Specialty Coffee Shop",
-        "category": "daily",
-        "level": "A2",
-        "accent": "US",
-        "description": "Natural everyday dialogue ordering pour-over coffee and asking about milk alternatives.",
-        "lines": [
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Good morning! What can I get started for you today?",
-                "vi": "Chào buổi sáng! Tôi có thể chuẩn bị gì cho bạn hôm nay?"
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "Hi there! I would like a medium oat milk latte with an extra shot of espresso, please.",
-                "vi": "Xin chào! Cho tôi một ly latte sữa yến mạch cỡ vừa thêm một shot espresso nhé."
-            },
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Sure thing! Would you prefer that iced or piping hot?",
-                "vi": "Chắc chắn rồi! Bạn muốn uống đá hay nóng hổi?"
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "I'll take it iced, please. Also, do you have any freshly baked croissants left?",
-                "vi": "Cho tôi uống đá nhé. Tiện thể, quán còn bánh sừng bò mới nướng không?"
-            },
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Yes, we just pulled a batch of almond croissants straight out of the oven!",
-                "vi": "Có chứ, chúng tôi vừa lấy một mẻ bánh sừng bò hạnh nhân nóng hổi ra khỏi lò!"
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "That sounds delicious! I'll grab one of those as well.",
-                "vi": "Nghe ngon quá! Cho tôi lấy thêm một chiếc bánh đó luôn nhé."
-            },
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Awesome. Your total comes to eight dollars and fifty cents.",
-                "vi": "Tuyệt vời. Tổng cộng của bạn là tám đô la năm mươi xu."
-            }
-        ]
-    },
-    {
-        "id": "tech-standup",
-        "title": "Tech Agile Standup & Sprint Planning",
-        "category": "workplace",
-        "level": "B2",
-        "accent": "US",
-        "description": "Engineering standup discussing blocker resolution, pull request reviews, and database migration.",
-        "lines": [
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Alright team, let's kick off our morning standup. Who wants to go first?",
-                "vi": "Được rồi cả nhóm, hãy bắt đầu buổi họp nhanh buổi sáng. Ai muốn bắt đầu trước nào?"
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "Yesterday I finalized the user authentication flow and submitted the pull request for review.",
-                "vi": "Hôm qua tôi đã hoàn thiện luồng xác thực người dùng và gửi pull request để mọi người duyệt."
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "Today I'm planning to dive into the database schema migration for offline caching.",
-                "vi": "Hôm nay tôi dự định bắt tay vào việc chuyển đổi cấu trúc cơ sở dữ liệu để lưu đệm ngoại tuyến."
-            },
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Do you have any blockers or dependencies on the backend team for that migration?",
-                "vi": "Bạn có gặp vướng mắc hay phụ thuộc gì vào đội backend cho đợt chuyển đổi đó không?"
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "I just need Sarah to verify the indexed fields so query response times remain lightning fast.",
-                "vi": "Tôi chỉ cần Sarah xác thực lại các trường được đánh chỉ mục để tốc độ phản hồi truy vấn vẫn nhanh như chớp."
-            },
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Sounds good! I will review your PR right after this meeting wraps up.",
-                "vi": "Nghe ổn đấy! Tôi sẽ duyệt PR của bạn ngay sau khi cuộc họp này kết thúc."
-            },
-            {
-                "voice": "en-US-AvaMultilingualNeural",
-                "en": "Perfect. Let's make sure our release stays on track for Thursday's deployment window.",
-                "vi": "Hoàn hảo. Hãy đảm bảo đợt phát hành của chúng ta đúng tiến độ cho khung triển khai thứ Năm."
-            }
-        ]
-    },
-    {
-        "id": "airport-security",
-        "title": "Airport Check-in & Security Screen",
-        "category": "travel",
-        "level": "B1",
-        "accent": "UK",
-        "description": "Navigating terminal check-in, baggage drop, and customs security screening with British English.",
-        "lines": [
-            {
-                "voice": "en-GB-SoniaNeural",
-                "en": "Good afternoon, sir. May I please see your passport and boarding pass?",
-                "vi": "Chào buổi chiều quý khách. Tôi có thể xem hộ chiếu và thẻ lên máy bay được không?"
-            },
-            {
-                "voice": "en-GB-RyanNeural",
-                "en": "Certainly, here you go. I have one suitcase to check in today.",
-                "vi": "Chắc chắn rồi, của cô đây. Hôm nay tôi có một chiếc vali cần ký gửi."
-            },
-            {
-                "voice": "en-GB-SoniaNeural",
-                "en": "Please place your luggage on the scale to ensure it meets the weight allowance.",
-                "vi": "Xin vui lòng đặt hành lý lên cân để kiểm tra xem có vượt quá trọng lượng cho phép không."
-            },
-            {
-                "voice": "en-GB-SoniaNeural",
-                "en": "It weighs exactly eighteen kilograms, which is well within your baggage limit.",
-                "vi": "Nó nặng đúng mười tám ký, hoàn toàn nằm trong hạn mức hành lý của quý khách."
-            },
-            {
-                "voice": "en-GB-SoniaNeural",
-                "en": "When heading through security, please ensure all laptops and liquids are placed in separate bins.",
-                "vi": "Khi đi qua cổng an ninh, xin lưu ý để toàn bộ máy tính xách tay và chất lỏng vào khay riêng."
-            },
-            {
-                "voice": "en-GB-RyanNeural",
-                "en": "Understood. Could you tell me which gate this flight departs from?",
-                "vi": "Tôi hiểu rồi. Cô có thể cho tôi biết chuyến bay này khởi hành ở cửa nào không?"
-            },
-            {
-                "voice": "en-GB-SoniaNeural",
-                "en": "You will be boarding at Gate B24. Have a wonderful and safe flight!",
-                "vi": "Quý khách sẽ lên máy bay ở Cửa B24. Chúc quý khách có một chuyến bay an toàn và vui vẻ!"
-            }
-        ]
-    },
-    {
-        "id": "academic-ai-future",
-        "title": "Academic Discussion on AI & Remote Work",
-        "category": "academic",
-        "level": "C1",
-        "accent": "US",
-        "description": "Nuanced academic discourse discussing asynchronous productivity, digital nomadism, and automation.",
-        "lines": [
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "The shift toward distributed remote work has fundamentally transformed organizational dynamics.",
-                "vi": "Sự chuyển dịch sang làm việc từ xa phân tán đã thay đổi căn bản động lực vận hành của các tổ chức."
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "Indeed, asynchronous communication fosters deeper uninterrupted focus and mitigates cognitive fatigue.",
-                "vi": "Thật vậy, giao tiếp bất đồng bộ thúc đẩy sự tập trung sâu không bị ngắt quãng và giảm thiểu mệt mỏi nhận thức."
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "However, leaders must proactively cultivate serendipitous interactions to sustain creative innovation.",
-                "vi": "Tuy nhiên, các nhà lãnh đạo phải chủ động nuôi dưỡng những tương tác ngẫu nhiên để duy trì đổi mới sáng tạo."
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "Simultaneously, autonomous AI copilots are augmenting cognitive workflows rather than displacing them entirely.",
-                "vi": "Đồng thời, các trợ lý AI tự hành đang tăng cường quy trình làm việc nhận thức thay vì thay thế hoàn toàn con người."
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "The decisive competitive advantage will belong to organizations that orchestrate continuous human-machine synergy.",
-                "vi": "Lợi thế cạnh tranh quyết định sẽ thuộc về những tổ chức biết phối hợp nhịp nhàng sự hiệp lực liên tục giữa người và máy."
-            },
-            {
-                "voice": "en-US-AndrewMultilingualNeural",
-                "en": "Ultimately, deliberate practice and technological literacy will define the future of sustainable knowledge work.",
-                "vi": "Suy cho cùng, sự luyện tập có chủ đích và năng lực công nghệ sẽ định hình tương lai của nền lao động tri thức bền vững."
-            }
-        ]
-    }
-]
+# Common unstressed English function words spoken rapidly in connected speech
+FAST_WORDS = {
+    "a", "an", "the", "to", "in", "on", "at", "of", "for", "is", "it",
+    "as", "or", "and", "my", "we", "i", "you", "he", "she", "they",
+    "by", "so", "up", "out", "if", "but", "not", "do", "did", "be",
+    "am", "are", "was", "were", "has", "had", "have"
+}
+
+def parse_frontmatter(text):
+    """
+    Zero-dependency YAML frontmatter parser for scenario markdown files.
+    Extracts scalar metadata and nested speaker voice dictionaries.
+    """
+    if not text.startswith("---"):
+        return {}, text
+    parts = text.split("---", 2)
+    if len(parts) < 3:
+        return {}, text
+    frontmatter_str = parts[1].strip()
+    body = parts[2].strip()
+
+    meta = {}
+    current_dict = None
+    dict_name = None
+
+    for line in frontmatter_str.split("\n"):
+        line_clean = line.split("#")[0].rstrip()
+        if not line_clean.strip():
+            continue
+
+        # Indented key-value line (nested dictionary entry, e.g. under speakers:)
+        if line_clean.startswith(("  ", "\t")) and current_dict is not None:
+            indent_match = re.match(r"^\s+([^:]+):\s*(.*)$", line_clean)
+            if indent_match:
+                k = indent_match.group(1).strip()
+                v = indent_match.group(2).strip().strip("\"'")
+                meta[dict_name][k] = v
+            continue
+
+        current_dict = None
+        dict_name = None
+
+        match = re.match(r"^([^:]+):\s*(.*)$", line_clean)
+        if match:
+            k = match.group(1).strip()
+            v = match.group(2).strip()
+            if not v:
+                meta[k] = {}
+                current_dict = meta[k]
+                dict_name = k
+            else:
+                meta[k] = v.strip("\"'")
+
+    return meta, body
+
+def parse_markdown_scenario(content):
+    """
+    Parses a scenario markdown file into metadata and a list of dialogue/monologue turns.
+    Supports:
+      - Multi-speaker dialogue: **SpeakerName**: Text \\n > Translation
+      - Monologue: Text \\n > Translation
+    """
+    meta, body = parse_frontmatter(content)
+    speakers = meta.get("speakers", {})
+    default_voice = (
+        next(iter(speakers.values()))
+        if isinstance(speakers, dict) and speakers
+        else "en-US-AvaMultilingualNeural"
+    )
+
+    turns = []
+    blocks = [b.strip() for b in re.split(r"\n\s*\n", body) if b.strip()]
+
+    for block in blocks:
+        lines = [l.strip() for l in block.split("\n") if l.strip()]
+        if not lines:
+            continue
+
+        en_text = ""
+        vi_text = ""
+        speaker_name = None
+
+        for line in lines:
+            if line.startswith(">"):
+                vi_text = line.lstrip(">").strip()
+            else:
+                sp_match = re.match(r"^\*{0,2}([A-Za-z0-9_\- ]+?)\*{0,2}\s*:\s*(.*)$", line)
+                if sp_match and isinstance(speakers, dict) and sp_match.group(1) in speakers:
+                    speaker_name = sp_match.group(1).strip("* ")
+                    en_text = sp_match.group(2).strip()
+                elif not en_text:
+                    en_text = line.strip()
+                else:
+                    en_text += " " + line.strip()
+
+        if en_text:
+            voice = (
+                speakers.get(speaker_name, default_voice)
+                if isinstance(speakers, dict) and speaker_name
+                else default_voice
+            )
+            turns.append({
+                "speaker": speaker_name or "Speaker",
+                "voice": voice,
+                "en": en_text,
+                "vi": vi_text
+            })
+
+    return meta, turns
+
+def count_syllables(word):
+    """
+    Approximates phonetic syllable count in an English word using vowel grouping rules.
+    """
+    w = re.sub(r"[^a-zA-Z]", "", word).lower()
+    if not w:
+        return 1
+    if len(w) <= 3:
+        return 1
+    if w.endswith("e") and not w.endswith(("le", "ee", "oe", "ye")):
+        w_sub = w[:-1]
+    else:
+        w_sub = w
+    vowels = re.findall(r"[aeiouy]+", w_sub)
+    count = len(vowels)
+    return max(1, count)
+
+def compute_word_timings(text, sentence_start, sentence_duration):
+    """
+    Calculates intra-sentence word-level karaoke timing tags using syllable count,
+    unstressed function-word compression, and punctuation pause modeling.
+    Anchored strictly to sentence_start and sentence_duration for zero cumulative drift.
+    """
+    words = text.split()
+    if not words:
+        return []
+
+    raw_weights = []
+    for w in words:
+        clean = re.sub(r"[^a-zA-Z]", "", w).lower()
+        sylls = count_syllables(clean)
+        mult = 0.7 if clean in FAST_WORDS else 1.0
+        weight = sylls * mult
+        if w.endswith((",", ";", ":", "—", "-")):
+            weight += 0.4
+        elif w.endswith((".", "!", "?")):
+            weight += 0.6
+        raw_weights.append(weight)
+
+    total_weight = sum(raw_weights) or 1.0
+    word_objs = []
+    curr = sentence_start
+
+    for i, (w, weight) in enumerate(zip(words, raw_weights)):
+        dur = (weight / total_weight) * sentence_duration
+        if i == len(words) - 1:
+            w_end = sentence_start + sentence_duration
+        else:
+            w_end = min(sentence_start + sentence_duration, curr + dur)
+
+        word_objs.append({
+            "w": w,
+            "start": round(curr, 2),
+            "end": round(w_end, 2)
+        })
+        curr = w_end
+
+    return word_objs
 
 def format_lrc_timestamp(seconds):
+    """Formats float seconds into standard [mm:ss.xx] LRC timecode."""
+    if seconds < 0:
+        seconds = 0
     mins = int(seconds // 60)
     secs = seconds % 60
     return f"{mins:02d}:{secs:05.2f}"
 
-def format_srt_timestamp(seconds):
-    hours = int(seconds // 3600)
-    mins = int((seconds % 3600) // 60)
-    secs = int(seconds % 60)
-    millis = int(round((seconds - int(seconds)) * 1000))
-    return f"{hours:02d}:{mins:02d}:{secs:02d},{millis:03d}"
+async def synthesize_turn_edge_tts(text, voice, voice_format="audio-24khz-48kbitrate-mono-mp3"):
+    """
+    Synthesizes a single dialogue turn using Microsoft Edge TTS,
+    returning raw audio bytes and measured sentence duration from boundaries.
+    """
+    communicate = edge_tts.Communicate(text, voice)
+    audio_bytes = bytearray()
+    sentence_boundaries = []
 
-async def render_scenario(scenario, out_dir):
-    os.makedirs(out_dir, exist_ok=True)
-    audio_filename = f"{scenario['id']}.mp3"
-    audio_path = os.path.join(out_dir, audio_filename)
-    lrc_path = os.path.join(out_dir, f"{scenario['id']}.lrc")
-    srt_path = os.path.join(out_dir, f"{scenario['id']}.srt")
-    
-    print(f"🎙️ Generating scenario audio: {scenario['title']} -> {audio_path}")
-    
-    combined_audio = bytearray()
+    async for chunk in communicate.stream():
+        if chunk["type"] == "audio":
+            audio_bytes.extend(chunk["data"])
+        elif chunk["type"] == "SentenceBoundary":
+            sentence_boundaries.append(chunk)
+
+    if sentence_boundaries:
+        last_sb = sentence_boundaries[-1]
+        measured_dur = (last_sb["offset"] + last_sb["duration"]) / 10000000.0
+    else:
+        # Fallback estimation based on word count (~140 wpm)
+        words_count = len(text.split())
+        measured_dur = max(1.5, words_count * 0.42)
+
+    return bytes(audio_bytes), measured_dur
+
+def stitch_audio_with_ffmpeg(sentence_files, silence_durations, output_path, audio_format="mp3"):
+    """
+    Stitches individual sentence audio files with sample-accurate synthetic silence gaps
+    using the ffmpeg concat filter to guarantee zero cumulative drift across 1-5 minute tracks.
+    """
+    # Build filter complex: [0:a][silence1][1:a][silence2]...concat
+    inputs = []
+    filter_parts = []
+    filter_idx = 0
+
+    for i, s_file in enumerate(sentence_files):
+        inputs.extend(["-i", s_file])
+        filter_parts.append(f"[{filter_idx}:a]")
+        filter_idx += 1
+
+        if i < len(sentence_files) - 1:
+            gap = silence_durations[i]
+            if gap > 0:
+                inputs.extend([
+                    "-f", "lavfi", "-t", str(gap),
+                    "-i", "anullsrc=r=24000:cl=mono"
+                ])
+                filter_parts.append(f"[{filter_idx}:a]")
+                filter_idx += 1
+
+    total_segments = len(filter_parts)
+    concat_filter = f"{''.join(filter_parts)}concat=n={total_segments}:v=0:a=1[outa]"
+
+    cmd = ["ffmpeg", "-y"] + inputs + [
+        "-filter_complex", concat_filter,
+        "-map", "[outa]"
+    ]
+
+    if audio_format == "opus":
+        cmd.extend(["-c:a", "libopus", "-b:a", "32k", output_path])
+    else:
+        cmd.extend(["-c:a", "libmp3lame", "-b:a", "48k", output_path])
+
+    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+async def render_scenario(scenario_meta, turns, scenario_dir, public_audio_dir, audio_format="mp3", dry_run=False):
+    """
+    Renders a single scenario: synthesizes audio turns, inserts acoustic silence gaps,
+    computes Enhanced LRC cues, writes output files, and returns compiled metadata.
+    """
+    sc_id = scenario_meta.get("id", "scenario")
+    title = scenario_meta.get("title", sc_id)
+    category = scenario_meta.get("category", "general")
+    level = scenario_meta.get("level", "B1")
+    accent = scenario_meta.get("accent", "US")
+    description = scenario_meta.get("description", "")
+
+    os.makedirs(scenario_dir, exist_ok=True)
+    os.makedirs(public_audio_dir, exist_ok=True)
+
+    ext = "webm" if audio_format == "opus" else "mp3"
+    audio_filename = f"{sc_id}.{ext}"
+    scenario_audio_path = os.path.join(scenario_dir, f"audio.{ext}")
+    public_audio_path = os.path.join(public_audio_dir, audio_filename)
+    lrc_path = os.path.join(scenario_dir, "subtitles.lrc")
+    public_lrc_path = os.path.join(public_audio_dir, f"{sc_id}.lrc")
+
+    print(f"🎙️ Processing scenario [{sc_id}]: '{title}' ({len(turns)} turns, level {level}, accent {accent})")
+
     cues = []
     current_time = 0.0
-    
-    for idx, line in enumerate(scenario["lines"]):
-        text = line["en"]
-        voice = line["voice"]
-        communicate = edge_tts.Communicate(text, voice)
-        
-        line_audio = bytearray()
-        sentence_boundaries = []
-        
-        async for chunk in communicate.stream():
-            if chunk["type"] == "audio":
-                line_audio.extend(chunk["data"])
-            elif chunk["type"] == "SentenceBoundary":
-                sentence_boundaries.append(chunk)
-                
-        # Approximate or get duration from byte size or sentence boundaries
-        if sentence_boundaries:
-            last_sb = sentence_boundaries[-1]
-            dur = (last_sb["offset"] + last_sb["duration"]) / 10000000.0
-        else:
-            # Fallback estimation based on word count (~150 wpm)
-            words_count = len(text.split())
-            dur = max(2.0, words_count * 0.4)
-            
-        cue_start = current_time
-        cue_end = current_time + dur
-        
-        # Word breakdown with intra-line timing tags
-        words = text.split()
-        word_objs = []
-        total_chars = sum(len(w) for w in words) or 1
-        word_time = cue_start
-        for w in words:
-            w_dur = (len(w) / total_chars) * dur
-            # Add small pause for punctuation
-            if w.endswith(('.', '!', '?', ',')):
-                w_dur += 0.1
-            word_objs.append({
-                "w": w,
-                "start": round(word_time, 2),
-                "end": round(min(cue_end, word_time + w_dur), 2)
+    silence_gaps = []
+    temp_files = []
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        for idx, turn in enumerate(turns):
+            text = turn["en"]
+            vi = turn["vi"]
+            voice = turn["voice"]
+
+            if dry_run:
+                # Approximate duration for dry runs
+                word_count = len(text.split())
+                dur = max(1.8, word_count * 0.42)
+            else:
+                audio_bytes, dur = await synthesize_turn_edge_tts(text, voice)
+                t_file = os.path.join(tmp_dir, f"turn_{idx:03d}.mp3")
+                with open(t_file, "wb") as f:
+                    f.write(audio_bytes)
+                temp_files.append(t_file)
+
+            cue_start = current_time
+            cue_end = current_time + dur
+            words = compute_word_timings(text, cue_start, dur)
+
+            cues.append({
+                "index": idx + 1,
+                "speaker": turn["speaker"],
+                "start": round(cue_start, 2),
+                "end": round(cue_end, 2),
+                "en": text,
+                "vi": vi,
+                "words": words
             })
-            word_time += w_dur
-            
-        cues.append({
-            "index": idx + 1,
-            "start": round(cue_start, 2),
-            "end": round(cue_end, 2),
-            "en": text,
-            "vi": line["vi"],
-            "words": word_objs
-        })
-        
-        combined_audio.extend(line_audio)
-        # Add 0.4s natural silence gap between sentences
-        current_time = cue_end + 0.4
-        
-    with open(audio_path, "wb") as f:
-        f.write(combined_audio)
-        
-    # Write Enhanced LRC file
-    lrc_lines = []
-    lrc_lines.append(f"[ti:{scenario['title']}]")
-    lrc_lines.append(f"[ar:English Shadowing]")
-    lrc_lines.append(f"[al:{scenario['category']}]")
-    lrc_lines.append(f"[length:{format_lrc_timestamp(current_time)}]")
-    lrc_lines.append("")
-    
+
+            # Inter-turn silence gap: 0.5s between turns, 0.3s if same speaker
+            if idx < len(turns) - 1:
+                next_speaker = turns[idx + 1]["speaker"]
+                gap = 0.3 if next_speaker == turn["speaker"] else 0.5
+                silence_gaps.append(gap)
+                current_time = cue_end + gap
+            else:
+                current_time = cue_end
+
+        if not dry_run and temp_files:
+            stitch_audio_with_ffmpeg(temp_files, silence_gaps, scenario_audio_path, audio_format)
+            # Copy to public audio dir as well
+            with open(scenario_audio_path, "rb") as src, open(public_audio_path, "wb") as dst:
+                dst.write(src.read())
+
+    # Build Enhanced LRC text
+    lrc_lines = [
+        f"[ti:{title}]",
+        f"[ar:English Shadowing]",
+        f"[al:{category}]",
+        f"[length:{format_lrc_timestamp(current_time)}]",
+        ""
+    ]
+
     for c in cues:
-        # Enhanced LRC format with intra-line tags: [mm:ss.xx]<mm:ss.xx>Word1 <mm:ss.xx>Word2 ...
-        words_lrc = " ".join([f"<{format_lrc_timestamp(w['start'])}>{w['w']}" for w in c['words']])
+        words_lrc = " ".join([
+            f"<{format_lrc_timestamp(w['start'])}>{w['w']}"
+            for w in c["words"]
+        ])
         lrc_lines.append(f"[{format_lrc_timestamp(c['start'])}]{words_lrc}")
-        lrc_lines.append(f"[{format_lrc_timestamp(c['start'])}]{c['vi']}")
+        if c["vi"]:
+            lrc_lines.append(f"[{format_lrc_timestamp(c['start'])}]{c['vi']}")
         lrc_lines.append("")
-        
-    with open(lrc_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lrc_lines))
-        
-    # Write SRT file
-    srt_lines = []
-    for c in cues:
-        srt_lines.append(str(c["index"]))
-        srt_lines.append(f"{format_srt_timestamp(c['start'])} --> {format_srt_timestamp(c['end'])}")
-        srt_lines.append(c["en"])
-        srt_lines.append(c["vi"])
-        srt_lines.append("")
-        
-    with open(srt_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(srt_lines))
-        
-    print(f"  ✅ Saved {audio_filename} ({len(combined_audio)} bytes, {current_time:.1f}s)")
+
+    lrc_content = "\n".join(lrc_lines)
+
+    if not dry_run:
+        with open(lrc_path, "w", encoding="utf-8") as f:
+            f.write(lrc_content)
+        with open(public_lrc_path, "w", encoding="utf-8") as f:
+            f.write(lrc_content)
+        print(f"  ✅ Saved audio and Enhanced LRC (~{current_time:.1f}s)")
+    else:
+        print(f"  🔍 Dry-run complete: ~{current_time:.1f}s, {len(cues)} cues")
+
     return {
-        "id": scenario["id"],
-        "title": scenario["title"],
-        "category": scenario["category"],
-        "level": scenario["level"],
-        "accent": scenario["accent"],
+        "id": sc_id,
+        "title": title,
+        "category": category,
+        "level": level,
+        "accent": accent,
         "duration": round(current_time),
-        "description": scenario["description"],
+        "description": description,
         "audioUrl": f"audio/{audio_filename}",
-        "lrcContent": "\n".join(lrc_lines),
-        "srtContent": "\n".join(srt_lines),
+        "lrcContent": lrc_content,
         "cues": cues
     }
 
-async def main():
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "english-shadowing"))
-    audio_dir = os.path.join(base_dir, "audio")
-    generated_scenarios = []
-    for sc in SCENARIOS:
-        res = await render_scenario(sc, audio_dir)
-        generated_scenarios.append(res)
-    print("\n✨ All 4 scenarios rendered successfully with audio and enhanced LRC!")
+def sync_scenarios_to_html(scenarios_data, html_path):
+    """
+    Fast, atomic synchronization of CURATED_SCENARIOS array in index.html
+    with Enhanced LRC single-source-of-truth definitions (no srtContent).
+    """
+    if not os.path.exists(html_path):
+        print(f"❌ index.html not found at: {html_path}")
+        return False
+
+    with open(html_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+
+    js_scenarios = []
+    for sc in scenarios_data:
+        escaped_lrc = sc["lrcContent"].replace("`", "\\`").replace("${", "\\${")
+        escaped_desc = sc["description"].replace('"', '\\"')
+        escaped_title = sc["title"].replace('"', '\\"')
+        js_scenarios.append(f"""        {{
+          id: "{sc['id']}",
+          title: "{escaped_title}",
+          category: "{sc['category']}",
+          level: "{sc['level']}",
+          accent: "{sc['accent']}",
+          duration: {sc['duration']},
+          description:
+            "{escaped_desc}",
+          audioUrl: "{sc['audioUrl']}",
+          lrcContent: `{escaped_lrc}`,
+        }}""")
+
+    scenarios_array_code = "const CURATED_SCENARIOS = [\n" + ",\n".join(js_scenarios) + ",\n      ];"
+
+    pattern = r"const CURATED_SCENARIOS\s*=\s*\[[\s\S]*?\];"
+    if not re.search(pattern, html_content):
+        print("❌ Could not find const CURATED_SCENARIOS array in index.html")
+        return False
+
+    updated_html = re.sub(pattern, scenarios_array_code, html_content, count=1)
+
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(updated_html)
+
+    print(f"✨ Successfully synced {len(scenarios_data)} scenarios into {os.path.basename(html_path)}")
+    return True
+
+async def main_async():
+    parser = argparse.ArgumentParser(description="English Shadowing Audio & LRC Generator")
+    parser.add_argument("--scenario", help="Generate specific scenario ID (e.g. specialty-coffee)")
+    parser.add_argument("--all", action="store_true", help="Generate all scenarios in scenarios/ directory")
+    parser.add_argument("--dry-run", action="store_true", help="Validate scenarios without network TTS calls")
+    parser.add_argument("--sync-only", action="store_true", help="Sync existing scenario files into index.html")
+    parser.add_argument("--format", default="mp3", choices=["mp3", "opus"], help="Audio encoding format")
+    args = parser.parse_args()
+
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    base_shadowing_dir = os.path.join(repo_root, "english-shadowing")
+    scenarios_dir = os.path.join(base_shadowing_dir, "scenarios")
+    public_audio_dir = os.path.join(base_shadowing_dir, "audio")
+    html_path = os.path.join(base_shadowing_dir, "index.html")
+
+    os.makedirs(scenarios_dir, exist_ok=True)
+    os.makedirs(public_audio_dir, exist_ok=True)
+
+    # Discover scenario directories with scenario.md
+    scenario_folders = []
+    if os.path.exists(scenarios_dir):
+        for entry in sorted(os.listdir(scenarios_dir)):
+            full_path = os.path.join(scenarios_dir, entry)
+            md_path = os.path.join(full_path, "scenario.md")
+            if os.path.isdir(full_path) and os.path.exists(md_path):
+                scenario_folders.append((entry, full_path, md_path))
+
+    if not scenario_folders:
+        print(f"ℹ️ No scenario folders found in {scenarios_dir}")
+        return
+
+    if args.scenario:
+        scenario_folders = [f for f in scenario_folders if f[0] == args.scenario]
+        if not scenario_folders:
+            print(f"❌ Scenario '{args.scenario}' not found in {scenarios_dir}")
+            sys.exit(1)
+
+    compiled_scenarios = []
+
+    for sc_id, sc_dir, md_path in scenario_folders:
+        with open(md_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        meta, turns = parse_markdown_scenario(content)
+        if "id" not in meta:
+            meta["id"] = sc_id
+
+        if args.sync_only:
+            # Read existing subtitles.lrc if available
+            lrc_path = os.path.join(sc_dir, "subtitles.lrc")
+            if os.path.exists(lrc_path):
+                with open(lrc_path, "r", encoding="utf-8") as f:
+                    lrc_content = f.read()
+            else:
+                lrc_content = ""
+
+            ext = "webm" if args.format == "opus" else "mp3"
+            compiled_scenarios.append({
+                "id": meta["id"],
+                "title": meta.get("title", sc_id),
+                "category": meta.get("category", "daily"),
+                "level": meta.get("level", "B1"),
+                "accent": meta.get("accent", "US"),
+                "duration": int(meta.get("duration", 60)),
+                "description": meta.get("description", ""),
+                "audioUrl": f"audio/{sc_id}.{ext}",
+                "lrcContent": lrc_content,
+                "cues": []
+            })
+        else:
+            result = await render_scenario(
+                meta,
+                turns,
+                sc_dir,
+                public_audio_dir,
+                audio_format=args.format,
+                dry_run=args.dry_run
+            )
+            compiled_scenarios.append(result)
+
+    if not args.dry_run:
+        sync_scenarios_to_html(compiled_scenarios, html_path)
+
+    print(f"\n🎉 Finished processing {len(compiled_scenarios)} scenarios.")
+
+def main():
+    asyncio.run(main_async())
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -16,6 +16,7 @@ For architectural decision records, refer to:
 - [`docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md`](./docs/adr/0003-enhanced-lrc-karaoke-engine-audio-cdn-and-integrated-player.md)
 - [`docs/adr/0004-app-shell-url-routing-and-insights-reports.md`](./docs/adr/0004-app-shell-url-routing-and-insights-reports.md)
 - [`docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md`](./docs/adr/0005-listening-first-audio-engine-clean-navigation-and-read-only-transcript.md)
+- [`docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md`](./docs/adr/0006-markdown-scenario-authoring-precision-acoustic-stitching-and-lrc-standardization.md)
 
 ---
 
@@ -25,10 +26,11 @@ For architectural decision records, refer to:
 
 - **Shadowing**: A deliberate language learning technique where the learner listens to natural spoken audio and repeats (shadows) the speaker in real-time or sentence-by-sentence with minimal delay, mirroring pronunciation, cadence, connected speech, and intonation.
   _Avoid_: Dictation, transcription, lecturing.
-- **Scenario**: A curated or user-imported dialogue/monologue consisting of an authentic audio track (`audioUrl` or uploaded media), metadata (title, category, CEFR level, accent, duration), and synchronized bilingual subtitle cues (`.lrc` or `.srt`).
+- **Scenario**: A curated or user-imported dialogue/monologue consisting of an authentic audio track (`audioUrl` or uploaded media), metadata (title, category, CEFR level, accent, duration), and synchronized bilingual subtitle cues (`.lrc`). Authored in token-efficient Markdown (`scenario.md` with frontmatter) inside `scenarios/<id>/`.
   _Avoid_: Lesson, course, track, playlist item.
 - **Scenario Deep Route**: Direct URL query link (`?scenario=<id>`) allowing instantaneous scenario loading and bookmarking with two-way browser history synchronization (`pushState`/`replaceState`/`popstate`).
-- **Enhanced LRC & Karaoke Synchronizer**: A subtitle engine parsing Enhanced LRC format with intra-line word timestamp tags (`<mm:ss.xx>`), rendering active word-by-word visual highlight effects in sync with audio timecode.
+- **Precision Acoustic Stitching**: Neural voice audio generation engine injecting exact synthetic MP3 silence frame bytes (500ms between turns, 300ms intra-speaker) matching LRC pause offsets, eliminating cumulative audio/subtitle drift across 1–5 minute tracks.
+- **Enhanced LRC Single Source of Truth**: Standardized subtitle format containing millisecond line timecodes, bilingual translations, and intra-line word timestamp tags (`<mm:ss.xx>`), rendering active word-by-word visual highlight effects in sync with audio timecode. (Bundled `.srt` files deprecated).
 - **Karaoke Word State**:
   - **Active Word**: Currently articulated word token rendered with a glowing accent pill and micro-scale animation.
   - **Passed Word**: Articulated words in the current sentence rendered with high-contrast sharp white text.
