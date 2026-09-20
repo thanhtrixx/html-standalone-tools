@@ -4,7 +4,7 @@
 
 ### Epic: Scalable Scenario Management, On-Demand Subtitle Streaming & Progress Tracking
 
-- **Status:** 🟡 Ready for Implementation ([ADR-0008](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md))
+- **Status:** ✅ Milestone Completed & Verified ([ADR-0008](./docs/adr/0008-manifest-driven-scenario-architecture-on-demand-lrc-streaming-and-curated-content-lifecycle.md))
 
 ---
 
@@ -32,12 +32,12 @@
 
 - **Title**: `feat(shadowing): multi-dimensional catalog taxonomy, scenario progress store, and collection filters`
 - **Scope**:
-  - [ ] Implement `shadowing_scenario_progress_v1` in `localStorage` tracking bookmarks (`bookmarkedIds`) and scenario completion status (`new`, `in_progress`, `completed`, `mastered`).
-  - [ ] Update Catalog UI with status tabs (`[ All ]`, `[ ⭐ Bookmarked ]`, `[ 🔄 In Progress ]`, `[ ✅ Mastered ]`).
-  - [ ] Add Curated Collections (`daily-social`, `workplace`, `travel`, `academic`) and Thematic Tag filtering.
-  - [ ] Add completion progress ring/bars on scenario cards.
-  - [ ] Ensure 100% bilingual parity for all new filter labels and status badges in `I18N.md` and `index.html`.
-  - [ ] Add automated unit and UI tests for catalog filtering and progress persistence.
+  - [x] Implement `shadowing_scenario_progress_v1` in `localStorage` tracking bookmarks (`bookmarkedIds`) and scenario completion status (`new`, `in_progress`, `completed`, `mastered`).
+  - [x] Update Catalog UI with status tabs (`[ All ]`, `[ ⭐ Bookmarked ]`, `[ 🔄 In Progress ]`, `[ ✅ Mastered ]`).
+  - [x] Add Curated Collections (`daily-social`, `workplace`, `travel`, `academic`) and Thematic Tag filtering.
+  - [x] Add completion progress ring/bars on scenario cards.
+  - [x] Ensure 100% bilingual parity for all new filter labels and status badges in `I18N.md` and `index.html`.
+  - [x] Add automated unit and UI tests for catalog filtering and progress persistence.
 
 ---
 

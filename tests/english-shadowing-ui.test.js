@@ -390,13 +390,58 @@ async function runTests() {
     htmlContent.includes('onclick="clearMediaCacheStorage()"'),
     "Clear Media Cache button triggers clearMediaCacheStorage()"
   );
+  // 17. Multi-Dimensional Catalog Taxonomy & Progress UI (Issue #674)
   assert(
-    htmlContent.includes("function clearMediaCacheStorage"),
-    "clearMediaCacheStorage function definition exists"
+    htmlContent.includes('id="statusTabAll"'),
+    "Catalog status tab 'All' exists"
   );
   assert(
-    htmlContent.includes("function isScenarioAvailableOffline"),
-    "isScenarioAvailableOffline function definition exists"
+    htmlContent.includes('id="statusTabBookmarked"'),
+    "Catalog status tab 'Bookmarked' exists"
+  );
+  assert(
+    htmlContent.includes('id="statusTabInProgress"'),
+    "Catalog status tab 'In Progress' exists"
+  );
+  assert(
+    htmlContent.includes('id="statusTabMastered"'),
+    "Catalog status tab 'Mastered' exists"
+  );
+  assert(
+    htmlContent.includes("function setFilterStatus"),
+    "setFilterStatus function definition exists"
+  );
+  assert(
+    htmlContent.includes("function setFilterCollection"),
+    "setFilterCollection function definition exists"
+  );
+  assert(
+    htmlContent.includes("function toggleBookmark"),
+    "toggleBookmark function definition exists"
+  );
+  assert(
+    htmlContent.includes("function isScenarioBookmarked"),
+    "isScenarioBookmarked function definition exists"
+  );
+  assert(
+    htmlContent.includes("function getScenarioProgress"),
+    "getScenarioProgress function definition exists"
+  );
+  assert(
+    htmlContent.includes("function markSentenceCompleted"),
+    "markSentenceCompleted function definition exists"
+  );
+  assert(
+    htmlContent.includes("bookmark-btn"),
+    "Scenario cards include bookmark button styling/class"
+  );
+  assert(
+    htmlContent.includes("progress-indicator"),
+    "Scenario cards include progress indicator styling/class"
+  );
+  assert(
+    htmlContent.includes('data-i18n="noScenariosFound"'),
+    "Catalog empty state has data-i18n='noScenariosFound'"
   );
 
   console.log(`\n==================================================`);

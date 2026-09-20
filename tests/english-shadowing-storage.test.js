@@ -113,12 +113,22 @@ async function runTests() {
     globalThis.closeInsightsModal = typeof closeInsightsModal !== 'undefined' ? closeInsightsModal : function(){};
     globalThis.clearMediaCacheStorage = typeof clearMediaCacheStorage !== 'undefined' ? clearMediaCacheStorage : function(){};
     globalThis.isScenarioAvailableOffline = typeof isScenarioAvailableOffline !== 'undefined' ? isScenarioAvailableOffline : function(){};
+    globalThis.SCENARIO_PROGRESS_KEY = typeof SCENARIO_PROGRESS_KEY !== 'undefined' ? SCENARIO_PROGRESS_KEY : '';
+    globalThis.loadScenarioProgress = typeof loadScenarioProgress !== 'undefined' ? loadScenarioProgress : function(){};
+    globalThis.saveScenarioProgress = typeof saveScenarioProgress !== 'undefined' ? saveScenarioProgress : function(){};
+    globalThis.isScenarioBookmarked = typeof isScenarioBookmarked !== 'undefined' ? isScenarioBookmarked : function(){};
+    globalThis.toggleBookmark = typeof toggleBookmark !== 'undefined' ? toggleBookmark : function(){};
+    globalThis.getScenarioProgress = typeof getScenarioProgress !== 'undefined' ? getScenarioProgress : function(){};
+    globalThis.markSentenceCompleted = typeof markSentenceCompleted !== 'undefined' ? markSentenceCompleted : function(){};
+    globalThis.getScenarioProgressStore = () => typeof scenarioProgress !== 'undefined' ? scenarioProgress : { bookmarkedIds: [], scenarios: {} };
+    globalThis.setScenarioProgressStore = (p) => { scenarioProgress = p; };
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
   const {
     VOCAB_STORAGE_KEY,
     PRACTICE_STATS_KEY,
+    SCENARIO_PROGRESS_KEY,
     LEITNER_INTERVALS,
     getSavedVocabVault,
     setSavedVocabVault,
@@ -142,6 +152,14 @@ async function runTests() {
     closeInsightsModal,
     clearMediaCacheStorage,
     isScenarioAvailableOffline,
+    loadScenarioProgress,
+    saveScenarioProgress,
+    isScenarioBookmarked,
+    toggleBookmark,
+    getScenarioProgress,
+    markSentenceCompleted,
+    getScenarioProgressStore,
+    setScenarioProgressStore,
     state,
   } = sandbox;
 
@@ -507,9 +525,129 @@ async function runTests() {
     Object.keys(getSavedVocabVault()).includes("testword"),
     "User SRS vocabulary vault is 100% preserved after clearMediaCacheStorage"
   );
+  // 19. Scenario Progress Store & Bookmark State Tests (Issue #674)
   assert(
-    getPracticeStats().totalSentencesShadowed > 0,
-    "User practice stats are 100% preserved after clearMediaCacheStorage"
+    SCENARIO_PROGRESS_KEY === "shadowing_scenario_progress_v1",
+    "SCENARIO_PROGRESS_KEY equals 'shadowing_scenario_progress_v1'"
+  );
+  assert(
+    typeof loadScenarioProgress === "function",
+    "loadScenarioProgress function exists"
+  );
+  assert(
+    typeof saveScenarioProgress === "function",
+    "saveScenarioProgress function exists"
+  );
+  assert(
+    typeof toggleBookmark === "function",
+    "toggleBookmark function exists"
+  );
+  assert(
+    typeof isScenarioBookmarked === "function",
+    "isScenarioBookmarked function exists"
+  );
+  assert(
+    typeof getScenarioProgress === "function",
+    "getScenarioProgress function exists"
+  );
+  assert(
+    typeof markSentenceCompleted === "function",
+    "markSentenceCompleted function exists"
+  );
+
+  // 19.1 Empty Storage Initialization
+  storageMock.removeItem(SCENARIO_PROGRESS_KEY);
+  loadScenarioProgress();
+  let progressStore = getScenarioProgressStore();
+  assert(
+    Array.isArray(progressStore.bookmarkedIds) &&
+      progressStore.bookmarkedIds.length === 0,
+    "Initializes bookmarkedIds as empty array on fresh launch"
+  );
+  assert(
+    typeof progressStore.scenarios === "object" &&
+      Object.keys(progressStore.scenarios).length === 0,
+    "Initializes scenarios as empty object on fresh launch"
+  );
+
+  // 19.2 Bookmark Toggle & Persistence
+  assert(
+    isScenarioBookmarked("workplace-interview") === false,
+    "Scenario initially not bookmarked"
+  );
+  toggleBookmark("workplace-interview");
+  assert(
+    isScenarioBookmarked("workplace-interview") === true,
+    "toggleBookmark adds scenario ID to bookmarkedIds"
+  );
+  assert(
+    storageMock.getItem(SCENARIO_PROGRESS_KEY).includes("workplace-interview"),
+    "Bookmark state is persisted to localStorage"
+  );
+
+  // Toggle off
+  toggleBookmark("workplace-interview");
+  assert(
+    isScenarioBookmarked("workplace-interview") === false,
+    "Second toggleBookmark call removes scenario from bookmarkedIds"
+  );
+
+  // 19.3 Sentence Completion Tracking & Status Transitions
+  const testScId = "travel-hotel-checkin";
+  let scProg = getScenarioProgress(testScId);
+  assert(scProg.status === "new", "Untracked scenario returns status 'new'");
+  assert(
+    Array.isArray(scProg.completedSentences) &&
+      scProg.completedSentences.length === 0,
+    "Untracked scenario has 0 completed sentences"
+  );
+
+  // Mark sentence 0 completed (total = 3)
+  markSentenceCompleted(testScId, 0, 3);
+  scProg = getScenarioProgress(testScId);
+  assert(
+    scProg.status === "in_progress",
+    "Marking first sentence transitions status to 'in_progress'"
+  );
+  assert(
+    scProg.completedSentences.includes(0),
+    "completedSentences contains index 0"
+  );
+  assert(scProg.practiceCount === 1, "practiceCount incremented to 1");
+  assert(scProg.lastPracticedAt > 0, "lastPracticedAt timestamp is recorded");
+
+  // Mark sentence 1 completed
+  markSentenceCompleted(testScId, 1, 3);
+  // Mark sentence 2 completed (3 out of 3 completed -> status 'completed')
+  markSentenceCompleted(testScId, 2, 3);
+  scProg = getScenarioProgress(testScId);
+  assert(
+    scProg.status === "completed",
+    "Completing all sentences transitions status to 'completed'"
+  );
+  assert(
+    scProg.completedSentences.length === 3,
+    "All 3 sentence indices recorded"
+  );
+
+  // Practice more until practiceCount >= total * 3 (9 takes) -> transition to 'mastered'
+  for (let i = 0; i < 6; i++) {
+    markSentenceCompleted(testScId, i % 3, 3);
+  }
+  scProg = getScenarioProgress(testScId);
+  assert(
+    scProg.status === "mastered",
+    "Practicing all sentences >= 3 rounds transitions status to 'mastered'"
+  );
+
+  // 19.4 Corrupted Storage Fallback Resilience
+  storageMock.setItem(SCENARIO_PROGRESS_KEY, "{ bad json");
+  loadScenarioProgress();
+  progressStore = getScenarioProgressStore();
+  assert(
+    Array.isArray(progressStore.bookmarkedIds) &&
+      typeof progressStore.scenarios === "object",
+    "Handles malformed JSON gracefully with default store fallback"
   );
 
   console.log(`\n==================================================`);

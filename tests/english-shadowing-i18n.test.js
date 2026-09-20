@@ -103,6 +103,40 @@ async function runTests() {
     `All data-i18n tags have defined translations (undefined: ${undefinedDomKeys.join(", ")})`
   );
 
+  // Issue #674 Taxonomy & Progress Key Assertions
+  const requiredIssue674Keys = [
+    "statusAll",
+    "statusBookmarked",
+    "statusInProgress",
+    "statusMastered",
+    "statusCompleted",
+    "collectionAll",
+    "collectionDailySocial",
+    "collectionWorkplace",
+    "collectionTravel",
+    "collectionAcademic",
+    "collectionsLabel",
+    "statusLabel",
+    "bookmarkAdd",
+    "bookmarkRemove",
+    "progressCompleted",
+    "practiceTimes",
+    "noScenariosFound",
+  ];
+
+  requiredIssue674Keys.forEach((k) => {
+    assert(
+      typeof translations.en[k] === "string" &&
+        translations.en[k].trim().length > 0,
+      `Issue #674 EN translation exists: '${k}'`
+    );
+    assert(
+      typeof translations.vi[k] === "string" &&
+        translations.vi[k].trim().length > 0,
+      `Issue #674 VI translation exists: '${k}'`
+    );
+  });
+
   console.log(`\n==================================================`);
   console.log(
     `📊 i18n Tests Completed: ${passCount} Passed, ${failCount} Failed`

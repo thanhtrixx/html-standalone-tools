@@ -479,58 +479,95 @@
             />
           </div>
 
-          <!-- Filter Pills Row -->
+          <!-- Status Tabs Row (Issue #674) -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+            <button
+              id="statusTabAll"
+              class="status-tab active px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0"
+              onclick="setFilterStatus('all', this)"
+              data-status="all"
+              data-i18n="statusAll"
+            >
+              All
+            </button>
+            <button
+              id="statusTabBookmarked"
+              class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 shrink-0 flex items-center gap-1"
+              onclick="setFilterStatus('bookmarked', this)"
+              data-status="bookmarked"
+            >
+              <span>⭐</span> <span data-i18n="statusBookmarked">Bookmarked</span>
+            </button>
+            <button
+              id="statusTabInProgress"
+              class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 shrink-0 flex items-center gap-1"
+              onclick="setFilterStatus('in_progress', this)"
+              data-status="in_progress"
+            >
+              <span>🔄</span> <span data-i18n="statusInProgress">In Progress</span>
+            </button>
+            <button
+              id="statusTabMastered"
+              class="status-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 shrink-0 flex items-center gap-1"
+              onclick="setFilterStatus('mastered', this)"
+              data-status="mastered"
+            >
+              <span>✅</span> <span data-i18n="statusMastered">Mastered</span>
+            </button>
+          </div>
+
+          <!-- Collections & Filters Row -->
           <div
-            class="flex flex-wrap items-center justify-between gap-3 text-xs"
+            class="flex flex-wrap items-center justify-between gap-3 text-xs pt-2 border-t border-slate-800/60"
           >
-            <!-- Category Filter -->
+            <!-- Collections Filter -->
             <div
               class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full"
             >
               <span
                 class="text-slate-400 font-semibold shrink-0"
-                data-i18n="importCategoryLabel"
-                >Category:</span
+                data-i18n="collectionsLabel"
+                >Collection:</span
               >
               <button
-                class="category-pill active px-3 py-1 rounded-full font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0"
-                onclick="setFilterCategory('all', this)"
-                data-category="all"
-                data-i18n="categoryAll"
+                class="collection-pill active px-2.5 py-1 rounded-full font-medium transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0"
+                onclick="setFilterCollection('all', this)"
+                data-collection="all"
+                data-i18n="collectionAll"
               >
-                All Topics
+                All Collections
               </button>
               <button
-                class="category-pill px-3 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
-                onclick="setFilterCategory('daily', this)"
-                data-category="daily"
-                data-i18n="categoryDaily"
+                class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
+                onclick="setFilterCollection('daily-social', this)"
+                data-collection="daily-social"
+                data-i18n="collectionDailySocial"
               >
-                Daily
+                Daily & Social
               </button>
               <button
-                class="category-pill px-3 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
-                onclick="setFilterCategory('workplace', this)"
-                data-category="workplace"
-                data-i18n="categoryWorkplace"
+                class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
+                onclick="setFilterCollection('workplace', this)"
+                data-collection="workplace"
+                data-i18n="collectionWorkplace"
               >
-                Workplace
+                Workplace & Career
               </button>
               <button
-                class="category-pill px-3 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
-                onclick="setFilterCategory('travel', this)"
-                data-category="travel"
-                data-i18n="categoryTravel"
+                class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
+                onclick="setFilterCollection('travel', this)"
+                data-collection="travel"
+                data-i18n="collectionTravel"
               >
-                Travel
+                Travel & Exploration
               </button>
               <button
-                class="category-pill px-3 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
-                onclick="setFilterCategory('academic', this)"
-                data-category="academic"
-                data-i18n="categoryAcademic"
+                class="collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0"
+                onclick="setFilterCollection('academic', this)"
+                data-collection="academic"
+                data-i18n="collectionAcademic"
               >
-                Academic/IELTS
+                Academic & IELTS
               </button>
             </div>
 
@@ -2002,6 +2039,22 @@
           offlineScenarioUnavailable:
             "Offline mode: Connect to the internet to stream this scenario.",
           mediaStorageLabel: "Audio Storage",
+          statusAll: "All",
+          statusBookmarked: "Bookmarked",
+          statusInProgress: "In Progress",
+          statusCompleted: "Completed",
+          collectionAll: "All Collections",
+          collectionDailySocial: "Daily & Social",
+          collectionWorkplace: "Workplace & Career",
+          collectionTravel: "Travel & Exploration",
+          collectionAcademic: "Academic & IELTS",
+          collectionsLabel: "Collection:",
+          statusLabel: "Status:",
+          bookmarkAdd: "Save to Bookmarks",
+          bookmarkRemove: "Remove from Bookmarks",
+          progressCompleted: "{count} of {total} completed",
+          practiceTimes: "Practiced {count} times",
+          noScenariosFound: "No scenarios match the selected filters.",
         },
         vi: {
           appTitle: "Luyện Nói Shadowing",
@@ -2107,6 +2160,22 @@
           offlineScenarioUnavailable:
             "Đang ngoại tuyến: Hãy kết nối internet để tải kịch bản này.",
           mediaStorageLabel: "Bộ Nhớ Âm Thanh",
+          statusAll: "Tất cả",
+          statusBookmarked: "Đã lưu",
+          statusInProgress: "Đang luyện",
+          statusCompleted: "Hoàn thành",
+          collectionAll: "Tất cả bộ sưu tập",
+          collectionDailySocial: "Đời sống & Xã hội",
+          collectionWorkplace: "Công sở & Nghề nghiệp",
+          collectionTravel: "Du lịch & Khám phá",
+          collectionAcademic: "Học thuật & IELTS",
+          collectionsLabel: "Bộ sưu tập:",
+          statusLabel: "Trạng thái:",
+          bookmarkAdd: "Lưu vào mục đã lưu",
+          bookmarkRemove: "Xóa khỏi mục đã lưu",
+          progressCompleted: "Đã hoàn thành {count}/{total}",
+          practiceTimes: "Đã luyện {count} lần",
+          noScenariosFound: "Không tìm thấy kịch bản phù hợp với bộ lọc.",
         },
       };
 
@@ -2537,6 +2606,7 @@
 
       const VOCAB_STORAGE_KEY = "shadowing_player_vocab_vault";
       const PRACTICE_STATS_KEY = "shadowing_practice_stats_vault";
+      const SCENARIO_PROGRESS_KEY = "shadowing_scenario_progress_v1";
 
       let savedVocabVault = {};
       let practiceStats = {
@@ -2546,6 +2616,142 @@
         sentencesShadowedToday: 0,
         totalSentencesShadowed: 0,
       };
+      let scenarioProgress = {
+        bookmarkedIds: [],
+        scenarios: {},
+      };
+
+      function loadScenarioProgress() {
+        try {
+          const raw = localStorage.getItem(SCENARIO_PROGRESS_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === "object") {
+              scenarioProgress = {
+                bookmarkedIds: Array.isArray(parsed.bookmarkedIds)
+                  ? parsed.bookmarkedIds.filter((id) => typeof id === "string")
+                  : [],
+                scenarios:
+                  parsed.scenarios && typeof parsed.scenarios === "object"
+                    ? parsed.scenarios
+                    : {},
+              };
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to load scenario progress, reset to default", e);
+          scenarioProgress = { bookmarkedIds: [], scenarios: {} };
+        }
+      }
+
+      function saveScenarioProgress() {
+        try {
+          localStorage.setItem(
+            SCENARIO_PROGRESS_KEY,
+            JSON.stringify(scenarioProgress)
+          );
+        } catch (e) {
+          console.warn("Failed to save scenario progress", e);
+        }
+      }
+
+      function isScenarioBookmarked(id) {
+        if (!id || typeof id !== "string") return false;
+        return (
+          Array.isArray(scenarioProgress.bookmarkedIds) &&
+          scenarioProgress.bookmarkedIds.includes(id)
+        );
+      }
+
+      function toggleBookmark(id, event) {
+        if (event && typeof event.stopPropagation === "function") {
+          event.stopPropagation();
+        }
+        if (!id || typeof id !== "string") return false;
+        if (!Array.isArray(scenarioProgress.bookmarkedIds)) {
+          scenarioProgress.bookmarkedIds = [];
+        }
+        const idx = scenarioProgress.bookmarkedIds.indexOf(id);
+        if (idx >= 0) {
+          scenarioProgress.bookmarkedIds.splice(idx, 1);
+        } else {
+          scenarioProgress.bookmarkedIds.push(id);
+        }
+        saveScenarioProgress();
+        renderScenarioCards();
+        return isScenarioBookmarked(id);
+      }
+
+      function getScenarioProgress(id) {
+        if (
+          !id ||
+          typeof id !== "string" ||
+          !scenarioProgress.scenarios ||
+          !scenarioProgress.scenarios[id]
+        ) {
+          return {
+            status: "new",
+            completedSentences: [],
+            practiceCount: 0,
+            lastPracticedAt: 0,
+          };
+        }
+        const record = scenarioProgress.scenarios[id];
+        return {
+          status: record.status || "new",
+          completedSentences: Array.isArray(record.completedSentences)
+            ? record.completedSentences
+            : [],
+          practiceCount: record.practiceCount || 0,
+          lastPracticedAt: record.lastPracticedAt || 0,
+        };
+      }
+
+      function markSentenceCompleted(scenarioId, sentenceIdx, totalSentences) {
+        if (
+          !scenarioId ||
+          typeof scenarioId !== "string" ||
+          sentenceIdx === undefined ||
+          sentenceIdx === null
+        )
+          return;
+        if (!scenarioProgress.scenarios) {
+          scenarioProgress.scenarios = {};
+        }
+        if (!scenarioProgress.scenarios[scenarioId]) {
+          scenarioProgress.scenarios[scenarioId] = {
+            status: "in_progress",
+            completedSentences: [],
+            practiceCount: 0,
+            lastPracticedAt: Date.now(),
+          };
+        }
+        const record = scenarioProgress.scenarios[scenarioId];
+        if (!Array.isArray(record.completedSentences)) {
+          record.completedSentences = [];
+        }
+        const numIdx = Number(sentenceIdx);
+        if (!record.completedSentences.includes(numIdx)) {
+          record.completedSentences.push(numIdx);
+          record.completedSentences.sort((a, b) => a - b);
+        }
+        record.practiceCount = (record.practiceCount || 0) + 1;
+        record.lastPracticedAt = Date.now();
+
+        const scenarioMeta = CURATED_SCENARIOS.find((s) => s.id === scenarioId);
+        const total = totalSentences || scenarioMeta?.sentenceCount || 1;
+        if (record.completedSentences.length >= total) {
+          if (record.practiceCount >= total * 3) {
+            record.status = "mastered";
+          } else {
+            record.status = "completed";
+          }
+        } else {
+          record.status = "in_progress";
+        }
+
+        saveScenarioProgress();
+      }
 
       function loadVocabVault() {
         try {
@@ -2617,6 +2823,14 @@
         practiceStats.totalSentencesShadowed =
           (practiceStats.totalSentencesShadowed || 0) + 1;
         savePracticeStats();
+
+        if (state.activeScenario && state.currentCueIndex !== undefined) {
+          markSentenceCompleted(
+            state.activeScenario.id,
+            state.currentCueIndex,
+            state.activeCues ? state.activeCues.length : 0
+          );
+        }
       }
 
       function logPracticeSeconds(sec) {
@@ -2832,6 +3046,8 @@
         activePopoverWord: null,
         flashcardIndex: 0,
         flashcardList: [],
+        filterStatus: "all",
+        filterCollection: "all",
         filterCategory: "all",
         filterLevel: "all",
         filterAccent: "all",
@@ -2948,6 +3164,7 @@
 
         loadVocabVault();
         loadPracticeStats();
+        loadScenarioProgress();
         renderScenarioCards();
         applyI18n();
 
@@ -3130,14 +3347,42 @@
       // ==========================================
       // 7. SCENARIO CATALOG & FILTER LOGIC
       // ==========================================
+      function setFilterStatus(status, btnEl) {
+        state.filterStatus = status;
+        document.querySelectorAll(".status-tab").forEach((tab) => {
+          tab.className =
+            "status-tab px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800 shrink-0 flex items-center gap-1";
+        });
+        if (btnEl) {
+          btnEl.className =
+            "status-tab active px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0 flex items-center gap-1";
+        }
+        renderScenarioCards();
+      }
+
+      function setFilterCollection(collection, btnEl) {
+        state.filterCollection = collection;
+        document.querySelectorAll(".collection-pill").forEach((pill) => {
+          pill.className =
+            "collection-pill px-2.5 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0";
+        });
+        if (btnEl) {
+          btnEl.className =
+            "collection-pill active px-2.5 py-1 rounded-full font-medium transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0";
+        }
+        renderScenarioCards();
+      }
+
       function setFilterCategory(category, btnEl) {
         state.filterCategory = category;
         document.querySelectorAll(".category-pill").forEach((pill) => {
           pill.className =
             "category-pill px-3 py-1 rounded-full font-medium transition-all bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 shrink-0";
         });
-        btnEl.className =
-          "category-pill active px-3 py-1 rounded-full font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0";
+        if (btnEl) {
+          btnEl.className =
+            "category-pill active px-3 py-1 rounded-full font-medium transition-all bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0";
+        }
         renderScenarioCards();
       }
 
@@ -3157,26 +3402,61 @@
         if (!grid) return;
 
         const filtered = CURATED_SCENARIOS.filter((sc) => {
+          const prog = getScenarioProgress(sc.id);
+          const bookmarked = isScenarioBookmarked(sc.id);
+
+          // Status tab filter
+          if (state.filterStatus === "bookmarked" && !bookmarked) return false;
+          if (
+            state.filterStatus === "in_progress" &&
+            prog.status !== "in_progress"
+          )
+            return false;
+          if (
+            state.filterStatus === "mastered" &&
+            prog.status !== "mastered" &&
+            prog.status !== "completed"
+          )
+            return false;
+
+          // Collection filter
+          if (
+            state.filterCollection !== "all" &&
+            sc.collection !== state.filterCollection
+          )
+            return false;
+
+          // Category filter
           if (
             state.filterCategory !== "all" &&
             sc.category !== state.filterCategory
           )
             return false;
+
+          // Level & Accent
           if (state.filterLevel !== "all" && sc.level !== state.filterLevel)
             return false;
           if (state.filterAccent !== "all" && sc.accent !== state.filterAccent)
             return false;
+
+          // Search query
           if (state.searchQuery) {
-            const matchTitle = sc.title
-              .toLowerCase()
-              .includes(state.searchQuery);
-            const matchDesc = sc.description
-              .toLowerCase()
-              .includes(state.searchQuery);
+            const q = state.searchQuery.toLowerCase();
+            const matchTitle = (sc.title || "").toLowerCase().includes(q);
+            const matchDesc = (sc.description || "").toLowerCase().includes(q);
+            const matchColl = (sc.collection || "").toLowerCase().includes(q);
+            const matchCat = (sc.category || "").toLowerCase().includes(q);
             const matchTags =
               Array.isArray(sc.tags) &&
-              sc.tags.some((t) => t.toLowerCase().includes(state.searchQuery));
-            if (!matchTitle && !matchDesc && !matchTags) return false;
+              sc.tags.some((t) => (t || "").toLowerCase().includes(q));
+            if (
+              !matchTitle &&
+              !matchDesc &&
+              !matchColl &&
+              !matchCat &&
+              !matchTags
+            )
+              return false;
           }
           return true;
         });
@@ -3187,7 +3467,7 @@
               <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              <p class="text-sm font-medium">No scenarios match the selected filters.</p>
+              <p class="text-sm font-medium" data-i18n="noScenariosFound">No scenarios match the selected filters.</p>
             </div>
           `;
           return;
@@ -3199,29 +3479,88 @@
           .map((sc) => {
             const sentenceCount =
               sc.sentenceCount ||
-              (sc.lrcContent ? parseEnhancedLrc(sc.lrcContent).length : 0);
+              (sc.lrcContent ? parseEnhancedLrc(sc.lrcContent).length : 0) ||
+              1;
+            const prog = getScenarioProgress(sc.id);
+            const bookmarked = isScenarioBookmarked(sc.id);
+            const completedCount = Array.isArray(prog.completedSentences)
+              ? prog.completedSentences.length
+              : 0;
+            const percent = Math.min(
+              100,
+              Math.round((completedCount / sentenceCount) * 100)
+            );
+
+            let statusBadge = "";
+            if (prog.status === "mastered") {
+              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-300 border border-purple-500/20">${dict.statusMastered || "Mastered"}</span>`;
+            } else if (prog.status === "completed") {
+              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">${dict.statusCompleted || "Completed"}</span>`;
+            } else if (prog.status === "in_progress") {
+              statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">${dict.statusInProgress || "In Progress"}</span>`;
+            }
+
+            const tagsHtml =
+              Array.isArray(sc.tags) && sc.tags.length > 0
+                ? `<div class="flex flex-wrap gap-1 pt-1">
+                    ${sc.tags
+                      .map(
+                        (t) =>
+                          `<span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800/80 text-slate-400 border border-slate-700/50">#${t}</span>`
+                      )
+                      .join("")}
+                  </div>`
+                : "";
+
             return `
-            <div class="bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-emerald-500/5 group">
+            <div class="bg-slate-900 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-5 flex flex-col justify-between transition-all hover:shadow-xl hover:shadow-emerald-500/5 group relative">
               <div class="space-y-3">
                 <div class="flex items-center justify-between gap-2">
-                  <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">${sc.level}</span>
-                  <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800 text-slate-400">${sc.accent} Accent</span>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">${sc.level}</span>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-800 text-slate-400">${sc.accent} Accent</span>
+                    ${statusBadge}
+                  </div>
+                  <button
+                    type="button"
+                    onclick="toggleBookmark('${sc.id}', event)"
+                    title="${bookmarked ? (dict.bookmarkRemove || 'Remove bookmark') : (dict.bookmarkAdd || 'Add bookmark')}"
+                    class="bookmark-btn p-1.5 rounded-lg transition-colors ${bookmarked ? 'text-amber-400 hover:text-amber-300' : 'text-slate-500 hover:text-slate-300'}"
+                    data-scenario-id="${sc.id}"
+                    data-bookmarked="${bookmarked}"
+                  >
+                    <svg class="w-4 h-4 ${bookmarked ? 'fill-current' : 'fill-none'}" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                    </svg>
+                  </button>
                 </div>
                 <h3 class="font-bold text-base sm:text-lg text-white group-hover:text-emerald-400 transition-colors leading-snug">${sc.title}</h3>
                 <p class="text-xs sm:text-sm text-slate-400 line-clamp-2">${sc.description}</p>
+                ${tagsHtml}
               </div>
 
-              <div class="pt-4 mt-4 border-t border-slate-800 flex items-center justify-between">
-                <span class="text-xs text-slate-500 font-mono">${sentenceCount} sentences • ~${sc.duration}s</span>
-                <button
-                  onclick="selectScenarioById('${sc.id}')"
-                  class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1"
-                >
-                  <span>${dict.btnPracticeNow || "Practice"}</span>
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                  </svg>
-                </button>
+              <div class="space-y-3 pt-4 mt-4 border-t border-slate-800">
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between text-[11px] text-slate-400">
+                    <span class="font-mono">${sentenceCount} sentences • ~${sc.duration}s</span>
+                    <span class="progress-indicator font-mono">${completedCount}/${sentenceCount} (${percent}%)</span>
+                  </div>
+                  <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-end">
+                  <button
+                    onclick="selectScenarioById('${sc.id}')"
+                    class="w-full sm:w-auto px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <span>${dict.btnPracticeNow || "Practice"}</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           `;
