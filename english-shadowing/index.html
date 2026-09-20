@@ -1995,18 +1995,29 @@
           </div>
         </div>
 
-        <!-- Actions: Export & Reset -->
+        <!-- Actions: Export, Clear Media Cache & Reset -->
         <div
-          class="flex items-center justify-between pt-2 border-t border-slate-800"
+          class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800"
         >
-          <button
-            type="button"
-            onclick="resetPracticeStats()"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
-            data-i18n="btnResetStats"
-          >
-            Reset Stats
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              onclick="resetPracticeStats()"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
+              data-i18n="btnResetStats"
+            >
+              Reset Stats
+            </button>
+            <button
+              type="button"
+              id="btnClearMediaCache"
+              onclick="clearMediaCacheStorage()"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors flex items-center gap-1"
+              data-i18n="clearMediaCache"
+            >
+              Clear Media Cache
+            </button>
+          </div>
           <div class="flex items-center gap-2">
             <button
               type="button"
@@ -2154,6 +2165,13 @@
           btnExportStats: "Export JSON",
           btnResetStats: "Reset Stats",
           btnGotIt: "Got it",
+          clearMediaCache: "Clear Media Cache",
+          clearMediaCacheConfirm:
+            "Are you sure you want to clear cached audio files? Your vocabulary and study progress will not be affected.",
+          clearMediaCacheSuccess: "Media cache cleared successfully.",
+          offlineScenarioUnavailable:
+            "Offline mode: Connect to the internet to stream this scenario.",
+          mediaStorageLabel: "Audio Storage",
         },
         vi: {
           appTitle: "Luyện Nói Shadowing",
@@ -2252,6 +2270,13 @@
           btnExportStats: "Xuất JSON",
           btnResetStats: "Đặt lại thống kê",
           btnGotIt: "Đã hiểu",
+          clearMediaCache: "Xóa Bộ Nhớ Âm Thanh",
+          clearMediaCacheConfirm:
+            "Bạn có chắc muốn xóa các tệp âm thanh đã tải? Từ vựng và tiến độ học tập của bạn sẽ được giữ nguyên.",
+          clearMediaCacheSuccess: "Đã xóa bộ nhớ âm thanh thành công.",
+          offlineScenarioUnavailable:
+            "Đang ngoại tuyến: Hãy kết nối internet để tải kịch bản này.",
+          mediaStorageLabel: "Bộ Nhớ Âm Thanh",
         },
       };
 
@@ -3338,6 +3363,42 @@
         }
       }
 
+      async function clearMediaCacheStorage() {
+        const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
+        const confirmMsg =
+          dict.clearMediaCacheConfirm ||
+          "Are you sure you want to clear cached audio files? Your vocabulary and study progress will not be affected.";
+        if (confirm(confirmMsg)) {
+          if (typeof caches !== "undefined") {
+            try {
+              await caches.delete("shadowing-media-v3");
+              await caches.delete("shadowing-player-v2");
+              await caches.delete("shadowing-player-v1");
+            } catch (e) {
+              console.warn("Could not delete media cache:", e);
+            }
+          }
+          const successMsg =
+            dict.clearMediaCacheSuccess || "Media cache cleared successfully.";
+          showToast(successMsg, "success");
+        }
+      }
+
+      async function isScenarioAvailableOffline(scenario) {
+        if (typeof navigator !== "undefined" && navigator.onLine) return true;
+        if (typeof caches === "undefined") return true;
+        try {
+          const mediaCache = await caches.open("shadowing-media-v3");
+          const cachedMedia = await mediaCache.match(scenario.audioUrl);
+          if (cachedMedia) return true;
+          const shellCache = await caches.open("shadowing-shell-v3");
+          const cachedShell = await shellCache.match(scenario.audioUrl);
+          return !!cachedShell;
+        } catch (e) {
+          return true;
+        }
+      }
+
       // ==========================================
       // 5. APPLICATION STATE
       // ==========================================
@@ -3551,6 +3612,13 @@
 
         if ("serviceWorker" in navigator) {
           navigator.serviceWorker.register("./sw.js").catch(() => {});
+          let isRefreshing = false;
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (!isRefreshing) {
+              isRefreshing = true;
+              window.location.reload();
+            }
+          });
         }
       }
 
@@ -3753,6 +3821,34 @@
       }
 
       function selectScenario(
+        scenario,
+        autoSwitchView = true,
+        updateUrl = true
+      ) {
+        if (
+          typeof navigator !== "undefined" &&
+          navigator.onLine === false &&
+          scenario.audioUrl &&
+          scenario.audioUrl.startsWith("http")
+        ) {
+          isScenarioAvailableOffline(scenario).then((available) => {
+            if (!available) {
+              const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
+              showToast(
+                dict.offlineScenarioUnavailable ||
+                  "Offline mode: Connect to the internet to stream this scenario.",
+                "warning"
+              );
+              return;
+            }
+            proceedSelectScenario(scenario, autoSwitchView, updateUrl);
+          });
+          return;
+        }
+        proceedSelectScenario(scenario, autoSwitchView, updateUrl);
+      }
+
+      function proceedSelectScenario(
         scenario,
         autoSwitchView = true,
         updateUrl = true
