@@ -173,6 +173,12 @@ async function runTests() {
     globalThis.buildScenarioUrl = typeof buildScenarioUrl !== 'undefined' ? buildScenarioUrl : function(){};
     globalThis.updateScenarioUrl = typeof updateScenarioUrl !== 'undefined' ? updateScenarioUrl : function(){};
     globalThis.jumpToSentence = typeof jumpToSentence !== 'undefined' ? jumpToSentence : function(){};
+    globalThis.playAudio = typeof playAudio !== 'undefined' ? playAudio : function(){};
+    globalThis.pauseAudio = typeof pauseAudio !== 'undefined' ? pauseAudio : function(){};
+    globalThis.replayCurrentSentence = typeof replayCurrentSentence !== 'undefined' ? replayCurrentSentence : function(){};
+    globalThis.navigateSentence = typeof navigateSentence !== 'undefined' ? navigateSentence : function(){};
+    globalThis.onScrubberChange = typeof onScrubberChange !== 'undefined' ? onScrubberChange : function(){};
+    globalThis.onScrubberInput = typeof onScrubberInput !== 'undefined' ? onScrubberInput : function(){};
     globalThis.calculateLoopEndBoundary = typeof calculateLoopEndBoundary !== 'undefined' ? calculateLoopEndBoundary : function(){};
     globalThis.calculateLoopStartBoundary = typeof calculateLoopStartBoundary !== 'undefined' ? calculateLoopStartBoundary : function(){};
     globalThis.SPEED_PRESETS = typeof SPEED_PRESETS !== 'undefined' ? SPEED_PRESETS : [];
@@ -180,6 +186,12 @@ async function runTests() {
     globalThis.selectScenario = typeof selectScenario !== 'undefined' ? selectScenario : null;
     globalThis.proceedSelectScenario = typeof proceedSelectScenario !== 'undefined' ? proceedSelectScenario : null;
     globalThis.state = typeof state !== 'undefined' ? state : {};
+    Object.defineProperty(globalThis, 'simulatedTime', {
+      get: () => typeof simulatedTime !== 'undefined' ? simulatedTime : 0,
+      set: (v) => { if (typeof simulatedTime !== 'undefined') simulatedTime = v; },
+      configurable: true,
+      enumerable: true
+    });
   `;
   vm.runInContext(combinedScripts + "\n" + exportBridge, sandbox);
 
@@ -196,6 +208,12 @@ async function runTests() {
     buildScenarioUrl,
     updateScenarioUrl,
     jumpToSentence,
+    playAudio,
+    pauseAudio,
+    replayCurrentSentence,
+    navigateSentence,
+    onScrubberChange,
+    onScrubberInput,
     calculateLoopEndBoundary,
     calculateLoopStartBoundary,
     SPEED_PRESETS,
@@ -954,6 +972,136 @@ async function runTests() {
     parsedCue.scenarioId === "coffee-shop" && parsedCue.cueIndex === 3,
     "parseScenarioUrl parses scenarioId and cueIndex correctly"
   );
+
+  // 14. User-Initiated Playback & Play-State Preserving Seeking (Issue #684)
+  // 14.1 Scenario Selection starts in clean paused state at sentence 0 (0:00)
+  const mockScenarioA = {
+    id: "test-playback-lifecycle",
+    title: "Playback Lifecycle Test",
+    duration: 30,
+    lrcContent: `[00:00.00]First sentence starts here <00:00.00>First <00:01.00>sentence <00:02.00>starts <00:03.00>here
+[00:05.00]Second sentence starts here <00:05.00>Second <00:06.00>sentence <00:07.00>starts <00:08.00>here
+[00:15.00]Third sentence starts here <00:15.00>Third <00:16.00>sentence <00:17.00>starts <00:18.00>here`,
+  };
+
+  await proceedSelectScenario(mockScenarioA, false, false);
+  assert(
+    state.isPlaying === false,
+    "proceedSelectScenario initializes in paused state (state.isPlaying === false)"
+  );
+  assert(
+    state.currentCueIndex === 0,
+    "proceedSelectScenario initializes at sentence index 0"
+  );
+  assert(
+    sandbox.simulatedTime === 0,
+    "proceedSelectScenario sets simulatedTime to 0:00"
+  );
+
+  // 14.2 jumpToSentence while PAUSED cues sentence and remains paused
+  jumpToSentence(1);
+  assert(
+    state.currentCueIndex === 1,
+    "jumpToSentence(1) updates state.currentCueIndex to 1"
+  );
+  assert(
+    state.isPlaying === false,
+    "jumpToSentence(1) while paused maintains paused state without auto-starting"
+  );
+  assert(
+    sandbox.simulatedTime === 5.0,
+    "jumpToSentence(1) sets target timestamp to cue 1 start (5.0s)"
+  );
+
+  // 14.3 jumpToSentence while PLAYING cues sentence and continues playing
+  playAudio();
+  assert(state.isPlaying === true, "playAudio() transitions state to playing");
+  jumpToSentence(2);
+  assert(
+    state.currentCueIndex === 2,
+    "jumpToSentence(2) updates state.currentCueIndex to 2"
+  );
+  assert(
+    state.isPlaying === true,
+    "jumpToSentence(2) while playing maintains playing state"
+  );
+  assert(
+    sandbox.simulatedTime === 15.0,
+    "jumpToSentence(2) sets target timestamp to cue 2 start (15.0s)"
+  );
+
+  // 14.4 Explicit override parameters on jumpToSentence
+  jumpToSentence(0, false);
+  assert(
+    state.currentCueIndex === 0 && state.isPlaying === false,
+    "jumpToSentence(0, false) forces paused state"
+  );
+  jumpToSentence(1, true);
+  assert(
+    state.currentCueIndex === 1 && state.isPlaying === true,
+    "jumpToSentence(1, true) forces playing state"
+  );
+  pauseAudio();
+
+  // 14.5 Scrubber Change while PAUSED preserves target timestamp and stays paused
+  onScrubberChange(50); // 50% of 30s = 15s (Sentence 2)
+  assert(
+    sandbox.simulatedTime === 15.0,
+    "onScrubberChange(50) updates simulatedTime to exactly 15.0s"
+  );
+  assert(
+    state.currentCueIndex === 2,
+    "onScrubberChange(50) resolves cue index 2"
+  );
+  assert(
+    state.isPlaying === false,
+    "onScrubberChange while paused remains paused without auto-starting"
+  );
+
+  // 14.6 Scrubber Change while PLAYING preserves target timestamp and continues playing
+  playAudio();
+  onScrubberChange(20); // 20% of 30s = 6.0s (Inside Sentence 1)
+  assert(
+    sandbox.simulatedTime === 6.0,
+    "onScrubberChange(20) sets exact target timestamp to 6.0s (not snapped to cue start)"
+  );
+  assert(
+    state.currentCueIndex === 1,
+    "onScrubberChange(20) resolves cue index 1"
+  );
+  assert(
+    state.isPlaying === true,
+    "onScrubberChange while playing continues playback"
+  );
+  pauseAudio();
+
+  // 14.7 Replay Current Sentence explicitly triggers playback from sentence start
+  replayCurrentSentence();
+  assert(
+    state.isPlaying === true,
+    "replayCurrentSentence() initiates playback"
+  );
+  assert(
+    sandbox.simulatedTime === 5.0,
+    "replayCurrentSentence() seeks to start of current sentence (5.0s)"
+  );
+  pauseAudio();
+
+  // 14.8 navigateSentence preserves play/pause state
+  jumpToSentence(0);
+  assert(state.isPlaying === false, "Reset to sentence 0 in paused state");
+  navigateSentence(1);
+  assert(
+    state.currentCueIndex === 1 && state.isPlaying === false,
+    "navigateSentence(1) while paused advances to sentence 1 and stays paused"
+  );
+  playAudio();
+  navigateSentence(1);
+  assert(
+    state.currentCueIndex === 2 && state.isPlaying === true,
+    "navigateSentence(1) while playing advances to sentence 2 and keeps playing"
+  );
+  pauseAudio();
 
   console.log(`\n==================================================`);
   console.log(
