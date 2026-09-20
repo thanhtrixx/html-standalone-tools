@@ -338,6 +338,29 @@
             </svg>
           </button>
 
+          <!-- Check Updates / Refresh Button -->
+          <button
+            id="navBtnRefresh"
+            onclick="forceCheckUpdatesAndReload()"
+            class="p-1.5 sm:p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-emerald-400 transition-colors border border-slate-700 shrink-0"
+            title="Check Updates & Force Refresh"
+            aria-label="Check Updates & Force Refresh"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+          </button>
+
           <!-- Theme Toggle -->
           <button
             id="themeToggleBtn"
@@ -1893,6 +1916,27 @@
             >
               Clear Media Cache
             </button>
+            <button
+              type="button"
+              id="btnCheckUpdatesModal"
+              onclick="forceCheckUpdatesAndReload()"
+              class="px-3 py-1.5 rounded-lg text-xs font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 transition-colors flex items-center gap-1"
+            >
+              <svg
+                class="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              <span data-i18n="btnCheckUpdates">Check Updates</span>
+            </button>
           </div>
           <div class="flex items-center gap-2">
             <button
@@ -2041,6 +2085,8 @@
           btnExportStats: "Export JSON",
           btnResetStats: "Reset Stats",
           btnGotIt: "Got it",
+          btnCheckUpdates: "Check Updates",
+          checkUpdatesToast: "Checking for updates and refreshing...",
           clearMediaCache: "Clear Media Cache",
           clearMediaCacheConfirm:
             "Are you sure you want to clear cached audio files? Your vocabulary and study progress will not be affected.",
@@ -2162,6 +2208,8 @@
           btnExportStats: "Xuất JSON",
           btnResetStats: "Đặt lại thống kê",
           btnGotIt: "Đã hiểu",
+          btnCheckUpdates: "Kiểm tra cập nhật",
+          checkUpdatesToast: "Đang kiểm tra cập nhật và làm mới...",
           clearMediaCache: "Xóa Bộ Nhớ Âm Thanh",
           clearMediaCacheConfirm:
             "Bạn có chắc muốn xóa các tệp âm thanh đã tải? Từ vựng và tiến độ học tập của bạn sẽ được giữ nguyên.",
@@ -3018,7 +3066,10 @@
         if (confirm(confirmMsg)) {
           if (typeof caches !== "undefined") {
             try {
+              await caches.delete("shadowing-media-v4");
+              await caches.delete("shadowing-shell-v4");
               await caches.delete("shadowing-media-v3");
+              await caches.delete("shadowing-shell-v3");
               await caches.delete("shadowing-player-v2");
               await caches.delete("shadowing-player-v1");
             } catch (e) {
@@ -3036,15 +3087,56 @@
         if (typeof caches === "undefined") return true;
         try {
           const audioUrl = resolveScenarioAudioUrl(scenario);
-          const mediaCache = await caches.open("shadowing-media-v3");
+          const mediaCache = await caches.open("shadowing-media-v4");
           const cachedMedia = await mediaCache.match(audioUrl);
           if (cachedMedia) return true;
-          const shellCache = await caches.open("shadowing-shell-v3");
+          const shellCache = await caches.open("shadowing-shell-v4");
           const cachedShell = await shellCache.match(audioUrl);
           return !!cachedShell;
         } catch (e) {
           return true;
         }
+      }
+
+      async function forceCheckUpdatesAndReload() {
+        const dict = TRANSLATIONS[state.lang] || TRANSLATIONS.en;
+        showToast(
+          dict.checkUpdatesToast || "Checking for updates and refreshing...",
+          "info"
+        );
+        if (
+          typeof SCENARIO_CUES_CACHE !== "undefined" &&
+          SCENARIO_CUES_CACHE.clear
+        ) {
+          SCENARIO_CUES_CACHE.clear();
+        }
+        if (typeof caches !== "undefined") {
+          try {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+          } catch (e) {
+            console.warn("Could not clear caches:", e);
+          }
+        }
+        if ("serviceWorker" in navigator) {
+          try {
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (reg) {
+              if (reg.waiting) {
+                reg.waiting.postMessage("SKIP_WAITING");
+              }
+              if (reg.active) {
+                reg.active.postMessage("CLEAR_ALL_CACHES");
+              }
+              await reg.update();
+            }
+          } catch (e) {
+            console.warn("Could not update service worker:", e);
+          }
+        }
+        setTimeout(() => {
+          window.location.reload();
+        }, 300);
       }
 
       // ==========================================
@@ -3264,7 +3356,14 @@
         });
 
         if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("./sw.js").catch(() => {});
+          navigator.serviceWorker
+            .register("./sw.js", { updateViaCache: "none" })
+            .then((reg) => {
+              if (reg) {
+                reg.update().catch(() => {});
+              }
+            })
+            .catch(() => {});
           let isRefreshing = false;
           navigator.serviceWorker.addEventListener("controllerchange", () => {
             if (!isRefreshing) {

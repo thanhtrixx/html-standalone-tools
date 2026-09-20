@@ -390,6 +390,18 @@ async function runTests() {
     htmlContent.includes('onclick="clearMediaCacheStorage()"'),
     "Clear Media Cache button triggers clearMediaCacheStorage()"
   );
+  assert(
+    htmlContent.includes('id="navBtnRefresh"'),
+    "Force check updates & reload button exists in Header"
+  );
+  assert(
+    htmlContent.includes('id="btnCheckUpdatesModal"'),
+    "Check updates button exists in Insights Modal"
+  );
+  assert(
+    htmlContent.includes('onclick="forceCheckUpdatesAndReload()"'),
+    "Check updates buttons trigger forceCheckUpdatesAndReload()"
+  );
   // 17. Multi-Dimensional Catalog Taxonomy & Progress UI (Issue #674)
   assert(
     htmlContent.includes('id="statusTabAll"'),
